@@ -1,0 +1,177 @@
+#include <stdio.h>
+#include <string.h>
+
+struct state_chart
+{
+	int cs;
+};
+
+
+
+static const char  _state_chart_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 ,  };
+static const char  _state_chart_trans_keys [] = { 1, 0, 9, 9, 3, 6, 4, 5, 0, 7, 0, 8, 0, 8, 9, 9, 3, 6, 5, 5, 9, 9, 3, 6, 4, 4, 0, 8, 0 ,  };
+static const char  _state_chart_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 0 ,  };
+static const char  _state_chart_index_offsets [] = { 0, 0, 1, 5, 7, 15, 24, 33, 34, 38, 39, 40, 44, 45, 0 ,  };
+static const char  _state_chart_indicies [] = { 0, 0, 1, 1, 2, 3, 4, 5, 1, 6, 7, 1, 1, 1, 8, 5, 1, 6, 9, 1, 1, 1, 8, 10, 5, 1, 6, 11, 1, 1, 1, 1, 10, 12, 12, 1, 1, 13, 4, 14, 14, 1, 1, 15, 3, 5, 1, 1, 9, 1, 1, 1, 8, 10, 0 ,  };
+static const char  _state_chart_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _state_chart_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _state_chart_cond_targs [] = { 2, 0, 3, 4, 6, 13, 5, 10, 4, 1, 6, 7, 8, 9, 11, 12, 0 ,  };
+static const char  _state_chart_cond_actions [] = { 0, 0, 0, 5, 7, 0, 0, 0, 1, 0, 3, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_chart_nfa_targs [] = { 0, 0 ,  };
+static const char  _state_chart_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_chart_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _state_chart_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  state_chart_start  = 13;
+static const int  state_chart_first_final  = 13;
+static const int  state_chart_error  = 0;
+static const int  state_chart_en_main  = 13;
+void state_chart_init( struct state_chart *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) state_chart_start;
+	}
+}
+
+void state_chart_execute( struct state_chart *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+		int _trans = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _state_chart_trans_keys + ((fsm->cs)<<1);
+		_inds = _state_chart_indicies + _state_chart_index_offsets[(fsm->cs)];
+		if ( ((*( p  ))
+		)<= 120 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _state_chart_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _state_chart_index_defaults[(fsm->cs)];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _state_chart_index_defaults[(fsm->cs)];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		(fsm->cs) = ( int ) _state_chart_cond_targs[_trans];
+		if ( _state_chart_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		_acts = _state_chart_actions + _state_chart_cond_actions[_trans];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					printf("a"); 
+				}
+				
+				break;
+				case 1 :
+				{
+					printf("b"); 
+				}
+				
+				break;
+				case 2 :
+				{
+					printf("a"); 
+				}
+				
+				break;
+				case 3 :
+				{
+					printf("b"); 
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+int state_chart_finish( struct state_chart *fsm )
+{
+	if ( fsm->cs == state_chart_error )
+	return -1;
+	if ( fsm->cs >= state_chart_first_final )
+	return 1;
+	return 0;
+}
+
+struct state_chart sc;
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	state_chart_init( &sc );
+	state_chart_execute( &sc, buf, len );
+	state_chart_finish( &sc );
+	printf("\n");
+}
+
+int main()
+{
+	test(
+	"aa0x0061aa b\n"
+	"bbb0x62b 0x61 0x000062\n"
+	);
+	
+	return 0;
+}
+

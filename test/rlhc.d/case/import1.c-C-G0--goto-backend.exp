@@ -1,0 +1,287 @@
+#include <stdio.h>
+
+char *foo = "foo";
+
+char b = 98;
+char a = 97;
+char r = 114;
+
+#define SP 32
+#define NL '\n'
+
+
+
+static const char  _tmp_actions [] = { 0, 1, 0, 1, 1, 0 ,  };
+static const char  _tmp_nfa_targs [] = { 0, 0 ,  };
+static const char  _tmp_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _tmp_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _tmp_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  tmp_start  = 12;
+static const int  tmp_first_final  = 12;
+static const int  tmp_error  = 0;
+static const int  tmp_en_main  = 12;
+int cs;
+
+void exec_str( char *p, int len )
+{
+	char *pe = p + len;
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 12:
+			switch ( ((*( p  ))
+			) ) {
+				case 98:
+				{
+					goto ctr13;
+				}
+				case 102:
+				{
+					goto ctr14;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 2:
+			if ( ((*( p  ))
+			)== 114  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 32  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch ( ((*( p  ))
+			) ) {
+				case 98:
+				{
+					goto ctr4;
+				}
+				case 102:
+				{
+					goto ctr5;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ((*( p  ))
+			)== 114  )
+			{
+				goto ctr7;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr8;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr10;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr11;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr12;
+			}
+			
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr13: cs = 1;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		ctr2: cs = 3;
+		goto f0;
+		ctr12: cs = 3;
+		goto f1;
+		ctr3: cs = 4;
+		goto _again;
+		ctr4: cs = 5;
+		goto _again;
+		ctr6: cs = 6;
+		goto _again;
+		ctr7: cs = 7;
+		goto f0;
+		ctr10: cs = 7;
+		goto f1;
+		ctr5: cs = 8;
+		goto _again;
+		ctr9: cs = 9;
+		goto _again;
+		ctr14: cs = 10;
+		goto _again;
+		ctr11: cs = 11;
+		goto _again;
+		ctr8: cs = 12;
+		goto _again;
+		
+		f1: _acts = _tmp_actions + 1 ;
+		goto execFuncs;
+		f0: _acts = _tmp_actions + 3 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					printf("foo\n"); 
+				}
+				
+				break;
+				case 1:
+				{
+					printf("bar\n");
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+void exec_c( char c )
+{
+	exec_str( &c, 1 );
+}
+
+int main()
+{
+
+	{
+		cs = ( int ) tmp_start;
+	}
+	exec_str( foo, 3 );
+	exec_c( SP );
+	exec_c( b );
+	exec_c( a );
+	exec_c( r );
+	exec_c( NL );
+	
+	exec_c( b );
+	exec_c( a );
+	exec_c( r );
+	exec_c( SP );
+	exec_str( foo, 3 );
+	exec_c( NL );
+	
+	if ( cs < tmp_first_final )
+	printf("FAIL\n");
+	else
+	printf("ACCEPT\n");
+	
+	return 0;
+}
+

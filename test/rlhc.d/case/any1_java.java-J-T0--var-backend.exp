@@ -1,0 +1,241 @@
+class any1_java
+{
+
+
+
+
+
+
+
+	private static byte  _any1_key_offsets [] = { 0, 0, 0, 0 ,  };
+	private static char  _any1_trans_keys [] = { 0,  };
+	private static byte  _any1_single_lengths [] = { 0, 0, 0, 0 ,  };
+	private static byte  _any1_range_lengths [] = { 0, 0, 0, 0 ,  };
+	private static byte  _any1_index_offsets [] = { 0, 0, 1, 0 ,  };
+	private static byte  _any1_trans_cond_spaces [] = { -1, -1, 0 ,  };
+	private static byte  _any1_trans_offsets [] = { 0, 1, 0 ,  };
+	private static byte  _any1_trans_lengths [] = { 1, 1, 0 ,  };
+	private static byte  _any1_cond_keys [] = { 0, 0, 0 ,  };
+	private static byte  _any1_cond_targs [] = { 2, 0, 0 ,  };
+	private static byte  _any1_cond_actions [] = { 0, 0, 0 ,  };
+	private static byte  _any1_nfa_targs [] = { 0, 0 ,  };
+	private static byte  _any1_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+	private static byte  _any1_nfa_push_actions [] = { 0, 0 ,  };
+	private static byte  _any1_nfa_pop_trans [] = { 0, 0 ,  };
+	private static int  any1_start  = 1;
+	private static int  any1_first_final  = 2;
+	private static int  any1_error  = 0;
+	private static int  any1_en_main  = 1;
+	int cs;
+	
+	void init()
+	{
+		{
+			cs = (int)any1_start;
+			
+		}
+	}
+	
+	void exec( char data[], int len )
+	{
+		char buffer [] = new char[1024];
+		int blen = 0;
+		int p = 0;
+		int pe = len;
+		
+		String _s;
+		{
+			int _klen;
+			int _trans = 0;
+			int _cond = 0;
+			int _have = 0;
+			int _cont = 1;
+			int _keys;
+			int _ckeys;
+			int _cpc;
+			while ( _cont == 1  )
+			{
+				if ( cs == 0  )
+				_cont = 0;
+				
+				_have = 0;
+				if ( p == pe  )
+				{
+					if ( _have == 0  )
+					_cont = 0;
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					if ( _have == 0  )
+					{
+						_keys = _any1_key_offsets[cs] ;
+						_trans = (int )_any1_index_offsets[cs];
+						_have = 0;
+						_klen = (int)_any1_single_lengths[cs];
+						if ( _klen > 0  )
+						{
+							int _lower;
+							int _mid;
+							int _upper;
+							_lower = _keys;
+							_upper = _keys + _klen - 1;
+							while ( _upper >= _lower && _have == 0  )
+							{
+								_mid = _lower + ((_upper-_lower) >> 1);
+								if ( ( data[p ]) < _any1_trans_keys[_mid ] )
+								_upper = _mid - 1;
+								
+								else if ( ( data[p ]) > _any1_trans_keys[_mid ] )
+								_lower = _mid + 1;
+								
+								else
+								{
+									_trans += (int )(_mid - _keys);
+									_have = 1;
+									
+								}
+								
+								
+							}
+							
+							if ( _have == 0  )
+							{
+								_keys += _klen;
+								_trans += (int )_klen;
+								
+							}
+							
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_klen = (int)_any1_range_lengths[cs];
+							if ( _klen > 0  )
+							{
+								int _lower;
+								int _mid;
+								int _upper;
+								_lower = _keys;
+								_upper = _keys + (_klen<<1) - 2;
+								while ( _have == 0 && _lower <= _upper  )
+								{
+									_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+									if ( ( data[p ]) < _any1_trans_keys[_mid ] )
+									_upper = _mid - 2;
+									
+									else if ( ( data[p ]) > _any1_trans_keys[_mid + 1 ] )
+									_lower = _mid + 2;
+									
+									else
+									{
+										_trans += (int )((_mid - _keys)>>1);
+										_have = 1;
+										
+									}
+									
+									
+								}
+								
+								if ( _have == 0  )
+								_trans += (int )_klen;
+								
+								
+							}
+							
+							
+						}
+						
+						_ckeys = _any1_trans_offsets[_trans] ;
+						_klen = (int)_any1_trans_lengths[_trans];
+						_cond = (int )_any1_trans_offsets[_trans];
+						_have = 0;
+						_cpc = 0;
+						{
+							int _lower;
+							int _mid;
+							int _upper;
+							_lower = _ckeys;
+							_upper = _ckeys + _klen - 1;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + ((_upper-_lower) >> 1);
+								if ( _cpc < (int)_any1_cond_keys[_mid ] )
+								_upper = _mid - 1;
+								
+								else if ( _cpc > (int)_any1_cond_keys[_mid ] )
+								_lower = _mid + 1;
+								
+								else
+								{
+									_cond += (int )(_mid - _ckeys);
+									_have = 1;
+									
+								}
+								
+								
+							}
+							
+							if ( _have == 0  )
+							{
+								cs = 0;
+								_cont = 0;
+								
+							}
+							
+							
+						}
+						
+					}
+					
+					if ( _cont == 1  )
+					{
+						cs = (int)_any1_cond_targs[_cond];
+						if ( cs == 0  )
+						_cont = 0;
+						
+						if ( _cont == 1  )
+						p += 1;
+						
+						
+					}
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= any1_first_final )
+		System.out.println( "ACCEPT" );
+		else
+		System.out.println( "FAIL" );
+	}
+	
+	static final String inp[] = {
+		"",
+		"x",
+		"xx",
+	};
+	
+	static final int inplen = 3;
+	
+	public static void main (String[] args)
+	{
+		any1_java machine = new any1_java();
+		for ( int i = 0; i < inplen; i++ ) {
+			machine.init();
+			machine.exec( inp[i].toCharArray(), inp[i].length() );
+			machine.finish();
+		}
+	}
+}

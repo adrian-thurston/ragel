@@ -1,0 +1,863 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		char comm;
+		int top;
+		int [] stack = new int [32];
+		int ts;
+		int te;
+		int act;
+		int value;
+		
+		
+		
+		
+		static readonly sbyte  []_patact_to_state_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 9, 0,  };
+		static readonly sbyte  []_patact_from_state_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 10, 0, 0, 0, 10, 0,  };
+		static readonly sbyte  []_patact_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_patact_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_patact_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_patact_nfa_pop_trans = { 0, 0,  };
+		static readonly int  patact_start  = 17;
+		static readonly int  patact_first_final  = 17;
+		static readonly int  patact_error  = 0;
+		static readonly int  patact_en_other  = 21;
+		static readonly int  patact_en_exec_test  = 24;
+		static readonly int  patact_en_semi  = 28;
+		static readonly int  patact_en_main  = 17;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)patact_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( _patact_from_state_actions[cs]  ) {
+					case 10:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				switch ( cs  ) {
+					case 17:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr36;
+						}
+						case '\u0020':
+						{
+							goto ctr36;
+						}
+						case '\u0021':
+						{
+							goto ctr38;
+						}
+						case '\u0032':
+						{
+							goto ctr40;
+						}
+						case '\u003b':
+						{
+							goto ctr41;
+						}
+						
+					}
+					if ( ( data[p ]) > '\u0039' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr42;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0030' )
+					{
+						goto ctr39;
+					}
+					
+					{
+						goto ctr37;
+					}
+					case 0:
+					goto _out;
+					case 18:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr44;
+					}
+					
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr39;
+					}
+					
+					{
+						goto ctr43;
+					}
+					case 1:
+					if ( ( data[p ]) == '\u0066' )
+					{
+						goto ctr2;
+					}
+					
+					{
+						goto ctr43;
+					}
+					case 2:
+					if ( ( data[p ]) == '\u006f' )
+					{
+						goto ctr4;
+					}
+					
+					{
+						goto ctr43;
+					}
+					case 3:
+					if ( ( data[p ]) == '\u0069' )
+					{
+						goto ctr6;
+					}
+					
+					{
+						goto ctr43;
+					}
+					case 4:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr8;
+					}
+					
+					{
+						goto ctr43;
+					}
+					case 19:
+					switch ( ( data[p ])  ) {
+						case '\u0020':
+						{
+							goto ctr44;
+						}
+						case '\u0032':
+						{
+							goto ctr47;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr39;
+					}
+					
+					{
+						goto ctr46;
+					}
+					case 20:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr50;
+					}
+					
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr42;
+					}
+					
+					{
+						goto ctr49;
+					}
+					case 5:
+					if ( ( data[p ]) == '\u0066' )
+					{
+						goto ctr11;
+					}
+					
+					{
+						goto ctr16;
+					}
+					case 6:
+					if ( ( data[p ]) == '\u006f' )
+					{
+						goto ctr13;
+					}
+					
+					{
+						goto ctr16;
+					}
+					case 7:
+					if ( ( data[p ]) == '\u0069' )
+					{
+						goto ctr15;
+					}
+					
+					{
+						goto ctr16;
+					}
+					case 8:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr17;
+					}
+					
+					{
+						goto ctr16;
+					}
+					case 21:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr51;
+						}
+						case '\u0020':
+						{
+							goto ctr51;
+						}
+						
+					}
+					if ( ( data[p ]) > '\u0039' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr53;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0030' )
+					{
+						goto ctr52;
+					}
+					
+					{
+						goto ctr37;
+					}
+					case 22:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr52;
+					}
+					
+					{
+						goto ctr55;
+					}
+					case 23:
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr53;
+					}
+					
+					{
+						goto ctr57;
+					}
+					case 24:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr58;
+						}
+						case '\u0020':
+						{
+							goto ctr58;
+						}
+						case '\u0021':
+						{
+							goto ctr59;
+						}
+						case '\u0032':
+						{
+							goto ctr61;
+						}
+						
+					}
+					if ( ( data[p ]) > '\u0039' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr62;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0030' )
+					{
+						goto ctr60;
+					}
+					
+					{
+						goto ctr37;
+					}
+					case 25:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr64;
+					}
+					
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr60;
+					}
+					
+					{
+						goto ctr63;
+					}
+					case 9:
+					if ( ( data[p ]) == '\u0066' )
+					{
+						goto ctr20;
+					}
+					
+					{
+						goto ctr63;
+					}
+					case 10:
+					if ( ( data[p ]) == '\u006f' )
+					{
+						goto ctr22;
+					}
+					
+					{
+						goto ctr63;
+					}
+					case 11:
+					if ( ( data[p ]) == '\u0069' )
+					{
+						goto ctr24;
+					}
+					
+					{
+						goto ctr63;
+					}
+					case 12:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr26;
+					}
+					
+					{
+						goto ctr63;
+					}
+					case 26:
+					switch ( ( data[p ])  ) {
+						case '\u0020':
+						{
+							goto ctr64;
+						}
+						case '\u0032':
+						{
+							goto ctr67;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr60;
+					}
+					
+					{
+						goto ctr66;
+					}
+					case 27:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr70;
+					}
+					
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr62;
+					}
+					
+					{
+						goto ctr69;
+					}
+					case 13:
+					if ( ( data[p ]) == '\u0066' )
+					{
+						goto ctr29;
+					}
+					
+					{
+						goto ctr34;
+					}
+					case 14:
+					if ( ( data[p ]) == '\u006f' )
+					{
+						goto ctr31;
+					}
+					
+					{
+						goto ctr34;
+					}
+					case 15:
+					if ( ( data[p ]) == '\u0069' )
+					{
+						goto ctr33;
+					}
+					
+					{
+						goto ctr34;
+					}
+					case 16:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr35;
+					}
+					
+					{
+						goto ctr34;
+					}
+					case 28:
+					if ( ( data[p ]) == '\u003b' )
+					{
+						goto ctr71;
+					}
+					
+					{
+						goto ctr37;
+					}
+					
+				}
+				ctr37: cs = 0;
+				goto _again;
+				ctr44: cs = 1;
+				goto _again;
+				ctr2: cs = 2;
+				goto _again;
+				ctr4: cs = 3;
+				goto _again;
+				ctr6: cs = 4;
+				goto _again;
+				ctr50: cs = 5;
+				goto _again;
+				ctr11: cs = 6;
+				goto _again;
+				ctr13: cs = 7;
+				goto _again;
+				ctr15: cs = 8;
+				goto _again;
+				ctr64: cs = 9;
+				goto _again;
+				ctr20: cs = 10;
+				goto _again;
+				ctr22: cs = 11;
+				goto _again;
+				ctr24: cs = 12;
+				goto _again;
+				ctr70: cs = 13;
+				goto _again;
+				ctr29: cs = 14;
+				goto _again;
+				ctr31: cs = 15;
+				goto _again;
+				ctr33: cs = 16;
+				goto _again;
+				ctr43: cs = 17;
+				goto f0;
+				ctr8: cs = 17;
+				goto f1;
+				ctr16: cs = 17;
+				goto f2;
+				ctr17: cs = 17;
+				goto f3;
+				ctr36: cs = 17;
+				goto f10;
+				ctr38: cs = 17;
+				goto f11;
+				ctr41: cs = 17;
+				goto f13;
+				ctr46: cs = 17;
+				goto f15;
+				ctr49: cs = 17;
+				goto f17;
+				ctr39: cs = 18;
+				goto f12;
+				ctr47: cs = 18;
+				goto f16;
+				ctr40: cs = 19;
+				goto f12;
+				ctr42: cs = 20;
+				goto f14;
+				ctr51: cs = 21;
+				goto f18;
+				ctr55: cs = 21;
+				goto f19;
+				ctr57: cs = 21;
+				goto f20;
+				ctr52: cs = 22;
+				goto _again;
+				ctr53: cs = 23;
+				goto _again;
+				ctr63: cs = 24;
+				goto f4;
+				ctr26: cs = 24;
+				goto f5;
+				ctr34: cs = 24;
+				goto f6;
+				ctr35: cs = 24;
+				goto f7;
+				ctr58: cs = 24;
+				goto f21;
+				ctr59: cs = 24;
+				goto f22;
+				ctr66: cs = 24;
+				goto f24;
+				ctr69: cs = 24;
+				goto f26;
+				ctr60: cs = 25;
+				goto f23;
+				ctr67: cs = 25;
+				goto f25;
+				ctr61: cs = 26;
+				goto f23;
+				ctr62: cs = 27;
+				goto f14;
+				ctr71: cs = 28;
+				goto f27;
+				
+				f14:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f18:
+				{{te = p+1;
+						{Console.Write( "space\n" );}
+					}}
+				
+				goto _again;
+				f20:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "word\n" );}
+					}}
+				
+				goto _again;
+				f19:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "num\n" );}
+					}}
+				
+				goto _again;
+				f7:
+				{{te = p+1;
+						{Console.Write( "word (c/lbh)\n" );}
+					}}
+				
+				goto _again;
+				f21:
+				{{te = p+1;
+						{Console.Write( "space\n" );}
+					}}
+				
+				goto _again;
+				f5:
+				{{te = p+1;
+						{Console.Write( "num (c/switch)\n" );}
+					}}
+				
+				goto _again;
+				f22:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f26:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "word (w/lbh)\n" );{p = (( te-1))-1;
+							}
+							{cs = 21;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f24:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "num (w/switch)\n" );{p = (( te-1))-1;
+							}
+							{cs = 21;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f6:
+				{{p = ((te))-1;
+						{Console.Write( "word (w/lbh)\n" );{p = (( te-1))-1;
+							}
+							{cs = 21;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f4:
+				{{switch ( act  ) {
+							case 7:
+							p = ((te))-1;
+							{Console.Write( "num (w/switch)\n" );}
+							
+							break;
+							case 8:
+							p = ((te))-1;
+							{Console.Write( "num (w/switch)\n" );{p = (( te-1))-1;
+								}
+								{cs = 21;
+									goto _again;}}
+							
+							break;
+							
+						}
+					}
+				}
+				
+				goto _again;
+				f27:
+				{{te = p+1;
+						{Console.Write( "in semi\n" );{cs = 17;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f3:
+				{{te = p+1;
+						{Console.Write( "word (c/lbh)\n" );}
+					}}
+				
+				goto _again;
+				f10:
+				{{te = p+1;
+						{Console.Write( "space\n" );}
+					}}
+				
+				goto _again;
+				f1:
+				{{te = p+1;
+						{Console.Write( "num (c/switch)\n" );}
+					}}
+				
+				goto _again;
+				f13:
+				{{te = p+1;
+						{Console.Write( "going to semi\n" );{p = p - 1;
+							}{cs = 28;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f11:
+				{{te = p+1;
+						{Console.Write( "immdiate\n" );{cs = 24;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f17:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "word (w/lbh)\n" );{p = p - 1;
+							}{cs = 21;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f15:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "num (w/switch)\n" );{p = p - 1;
+							}{cs = 21;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f2:
+				{{p = ((te))-1;
+						{Console.Write( "word (w/lbh)\n" );{p = p - 1;
+							}{cs = 21;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f0:
+				{{switch ( act  ) {
+							case 15:
+							p = ((te))-1;
+							{Console.Write( "num (w/switch)\n" );}
+							
+							break;
+							case 16:
+							p = ((te))-1;
+							{Console.Write( "num (w/switch)\n" );{p = p - 1;
+								}{cs = 21;
+									goto _again;}}
+							
+							break;
+							
+						}
+					}
+				}
+				
+				goto _again;
+				f25:
+				{{te = p+1;
+					}}
+				{{act = 7;
+					}}
+				
+				goto _again;
+				f23:
+				{{te = p+1;
+					}}
+				{{act = 8;
+					}}
+				
+				goto _again;
+				f16:
+				{{te = p+1;
+					}}
+				{{act = 15;
+					}}
+				
+				goto _again;
+				f12:
+				{{te = p+1;
+					}}
+				{{act = 16;
+					}}
+				
+				goto _again;
+				
+				_again:
+				switch ( _patact_to_state_actions[cs]  ) {
+					case 9:
+					{{ts = 0;
+						}}
+					
+					break;
+					
+				}
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( cs  ) {
+						case 18:
+						goto ctr43;
+						case 1:
+						goto ctr43;
+						case 2:
+						goto ctr43;
+						case 3:
+						goto ctr43;
+						case 4:
+						goto ctr43;
+						case 19:
+						goto ctr46;
+						case 20:
+						goto ctr49;
+						case 5:
+						goto ctr16;
+						case 6:
+						goto ctr16;
+						case 7:
+						goto ctr16;
+						case 8:
+						goto ctr16;
+						case 22:
+						goto ctr55;
+						case 23:
+						goto ctr57;
+						case 25:
+						goto ctr63;
+						case 9:
+						goto ctr63;
+						case 10:
+						goto ctr63;
+						case 11:
+						goto ctr63;
+						case 12:
+						goto ctr63;
+						case 26:
+						goto ctr66;
+						case 27:
+						goto ctr69;
+						case 13:
+						goto ctr34;
+						case 14:
+						goto ctr34;
+						case 15:
+						goto ctr34;
+						case 16:
+						goto ctr34;
+						
+					}
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= patact_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"abcd foix\n",
+			"abcd\nanother\n",
+			"123 foix\n",
+			"!abcd foix\n",
+			"!abcd\nanother\n",
+			"!123 foix\n",
+			";",
+		};
+		
+		
+		static readonly int inplen = 7;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

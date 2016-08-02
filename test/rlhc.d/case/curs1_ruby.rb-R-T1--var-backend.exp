@@ -1,0 +1,442 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+class << self
+	attr_accessor :_curs1_key_offsets 
+	private :_curs1_key_offsets, :_curs1_key_offsets=
+end
+self._curs1_key_offsets = [
+0, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_trans_keys 
+	private :_curs1_trans_keys, :_curs1_trans_keys=
+end
+self._curs1_trans_keys = [
+10, 49, 50, 117, 110, 117, 115, 101, 100, 111, 110, 101, 116, 119, 111, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_single_lengths 
+	private :_curs1_single_lengths, :_curs1_single_lengths=
+end
+self._curs1_single_lengths = [
+0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_range_lengths 
+	private :_curs1_range_lengths, :_curs1_range_lengths=
+end
+self._curs1_range_lengths = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_index_offsets 
+	private :_curs1_index_offsets, :_curs1_index_offsets=
+end
+self._curs1_index_offsets = [
+0, 0, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 29, 30, 31, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_trans_cond_spaces 
+	private :_curs1_trans_cond_spaces, :_curs1_trans_cond_spaces=
+end
+self._curs1_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_trans_offsets 
+	private :_curs1_trans_offsets, :_curs1_trans_offsets=
+end
+self._curs1_trans_offsets = [
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_trans_lengths 
+	private :_curs1_trans_lengths, :_curs1_trans_lengths=
+end
+self._curs1_trans_lengths = [
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_cond_keys 
+	private :_curs1_cond_keys, :_curs1_cond_keys=
+end
+self._curs1_cond_keys = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_cond_targs 
+	private :_curs1_cond_targs, :_curs1_cond_targs=
+end
+self._curs1_cond_targs = [
+14, 14, 14, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 15, 0, 9, 0, 10, 0, 16, 0, 12, 0, 13, 0, 17, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_cond_actions 
+	private :_curs1_cond_actions, :_curs1_cond_actions=
+end
+self._curs1_cond_actions = [
+0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_nfa_targs 
+	private :_curs1_nfa_targs, :_curs1_nfa_targs=
+end
+self._curs1_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_nfa_offsets 
+	private :_curs1_nfa_offsets, :_curs1_nfa_offsets=
+end
+self._curs1_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_nfa_push_actions 
+	private :_curs1_nfa_push_actions, :_curs1_nfa_push_actions=
+end
+self._curs1_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_curs1_nfa_pop_trans 
+	private :_curs1_nfa_pop_trans, :_curs1_nfa_pop_trans=
+end
+self._curs1_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :curs1_start 
+end
+self.curs1_start  = 1;
+
+class << self
+	attr_accessor :curs1_first_final 
+end
+self.curs1_first_final  = 14;
+
+class << self
+	attr_accessor :curs1_error 
+end
+self.curs1_error  = 0;
+
+class << self
+	attr_accessor :curs1_en_unused 
+end
+self.curs1_en_unused  = 2;
+
+class << self
+	attr_accessor :curs1_en_one 
+end
+self.curs1_en_one  = 8;
+
+class << self
+	attr_accessor :curs1_en_two 
+end
+self.curs1_en_two  = 11;
+
+class << self
+	attr_accessor :curs1_en_main 
+end
+self.curs1_en_main  = 1;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	return_to = 1
+	begin
+		cs = curs1_start;
+		
+	end
+	begin
+		_klen= 0
+		;
+		_ps= 0
+		;
+		_keys = 0;
+		_ckeys = 0;
+		_cpc= 0
+		;
+		_trans= 0
+		;
+		_cond = 0;
+		_have = 0;
+		_cont = 1;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_keys = _curs1_key_offsets[cs] ;
+								_trans = _curs1_index_offsets[cs];
+								_have = 0;
+								_klen = _curs1_single_lengths[cs];
+								if ( _klen > 0  )
+									begin
+										_lower = 0;
+										_mid = 0;
+										_upper = 0;
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										while ( _upper >= _lower && _have == 0  )
+											begin
+												_mid = _lower + ((_upper-_lower) >> 1);
+												if ( ( data[p ].ord) < _curs1_trans_keys[_mid ] )
+													_upper = _mid - 1;
+													
+													elsif ( ( data[p ].ord) > _curs1_trans_keys[_mid ] )
+													_lower = _mid + 1;
+													
+													else
+													begin
+														_trans += (_mid - _keys);
+														_have = 1;
+														
+													end
+													
+												end
+												
+											end
+											
+										end
+										if ( _have == 0  )
+											begin
+												_keys += _klen;
+												_trans += _klen;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+										_klen = _curs1_range_lengths[cs];
+										if ( _klen > 0  )
+											begin
+												_lower = 0;
+												_mid = 0;
+												_upper = 0;
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												while ( _have == 0 && _lower <= _upper  )
+													begin
+														_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+														if ( ( data[p ].ord) < _curs1_trans_keys[_mid ] )
+															_upper = _mid - 2;
+															
+															elsif ( ( data[p ].ord) > _curs1_trans_keys[_mid + 1 ] )
+															_lower = _mid + 2;
+															
+															else
+															begin
+																_trans += ((_mid - _keys)>>1);
+																_have = 1;
+																
+															end
+															
+														end
+														
+													end
+													
+												end
+												if ( _have == 0  )
+													_trans += _klen;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								_ckeys = _curs1_trans_offsets[_trans] ;
+								_klen = _curs1_trans_lengths[_trans];
+								_cond = _curs1_trans_offsets[_trans];
+								_have = 0;
+								_cpc = 0;
+								begin
+									_lower = 0;
+									_mid = 0;
+									_upper = 0;
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									while ( _have == 0 && _lower <= _upper  )
+										begin
+											_mid = _lower + ((_upper-_lower) >> 1);
+											if ( _cpc < _curs1_cond_keys[_mid ] )
+												_upper = _mid - 1;
+												
+												elsif ( _cpc > _curs1_cond_keys[_mid ] )
+												_lower = _mid + 1;
+												
+												else
+												begin
+													_cond += (_mid - _ckeys);
+													_have = 1;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									if ( _have == 0  )
+										begin
+											cs = 0;
+											_cont = 0;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _cont == 1  )
+							begin
+								_ps = cs;
+								cs = _curs1_cond_targs[_cond];
+								case  _curs1_cond_actions[_cond]  
+								when -2 then
+								begin
+								end
+								when 3  then
+								begin
+									begin
+										print( "one\n" );
+										begin
+											cs = (return_to);
+											
+										end
+										
+									end
+									
+								end
+								when 4  then
+								begin
+									begin
+										print( "two\n" );
+										begin
+											cs = (return_to);
+											
+										end
+										
+									end
+									
+								end
+								when 1  then
+								begin
+									begin
+										return_to = _ps;
+										begin
+											cs = 8;
+											
+										end
+										
+									end
+									
+								end
+								when 2  then
+								begin
+									begin
+										return_to = _ps;
+										begin
+											cs = 11;
+											
+										end
+										
+									end
+									
+									
+								end
+							end
+							if ( cs == 0  )
+								_cont = 0;
+								
+							end
+							if ( _cont == 1  )
+								p += 1;
+								
+							end
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+if cs >= curs1_first_final
+	puts "ACCEPT"
+	else
+	puts "FAIL"
+end
+end
+	
+	inp = [
+	"1one2two1one\n",
+	]
+	
+	inplen = 1
+	
+	inp.each { |str| run_machine(str) }
+	

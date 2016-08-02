@@ -1,0 +1,303 @@
+host( "working/cond10.rl", 1 ) @{/*
+	* @@LANG: c++
+	*
+	* This test case exercises repetition of a machine that accepts zero-length
+	* string. It is very ambiguous and not useful as a pattern. 
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	
+	using std::cout;
+	using std::endl;
+	
+	
+	
+}@
+array s8 _foo_key_offsets( 0, 33 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 17, 25, 33, 0 };
+
+array char _foo_trans_keys( 0, 122 ) = { 60, 47, 115, 116, 121, 108, 101, 62, 60, 32, 95, 48, 57, 65, 90, 97, 122, 32, 95, 48, 57, 65, 90, 97, 122, 32, 95, 48, 57, 65, 90, 97, 122, 0 };
+
+array s8 _foo_single_lengths( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 0, 0 };
+
+array s8 _foo_range_lengths( 0, 3 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 3, 0, 0 };
+
+array s8 _foo_index_offsets( 0, 36 ) = { 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 24, 30, 36, 0 };
+
+array s8 _foo_trans_cond_spaces( -1, 14 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 14, 13, 13, 13, 13, 8, 14, 13, 13, 13, 13, 8, 14, 13, 13, 13, 13, 8, -1, 0 };
+
+array s16 _foo_trans_offsets( 0, 200 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 25, 36, 47, 58, 69, 70, 88, 95, 102, 109, 116, 117, 127, 145, 163, 181, 199, 200, 0 };
+
+array s8 _foo_trans_lengths( 0, 18 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 11, 11, 11, 11, 1, 18, 7, 7, 7, 7, 1, 10, 18, 18, 18, 18, 1, 1, 0 };
+
+array s8 _foo_cond_keys( 0, 31 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 15, 21, 23, 27, 29, 31, 13, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 13, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 13, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 13, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 7, 4, 5, 6, 7, 11, 12, 13, 14, 15, 20, 21, 22, 23, 27, 28, 29, 30, 31, 13, 15, 22, 23, 29, 30, 31, 13, 15, 22, 23, 29, 30, 31, 13, 15, 22, 23, 29, 30, 31, 13, 15, 22, 23, 29, 30, 31, 7, 5, 7, 11, 13, 15, 21, 23, 27, 29, 31, 2, 3, 6, 7, 10, 11, 13, 14, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 2, 3, 6, 7, 10, 11, 13, 14, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 2, 3, 6, 7, 10, 11, 13, 14, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 2, 3, 6, 7, 10, 11, 13, 14, 15, 18, 19, 22, 23, 26, 27, 29, 30, 31, 7, 0, 0 };
+
+array s8 _foo_cond_targs( 0, 13 ) = { 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0, 10, 0, 13, 13, 11, 11, 13, 11, 11, 13, 13, 12, 12, 12, 12, 12, 12, 13, 12, 12, 13, 13, 12, 12, 12, 12, 12, 12, 13, 12, 12, 13, 13, 12, 12, 12, 12, 12, 12, 13, 12, 12, 13, 13, 12, 12, 12, 12, 12, 12, 13, 12, 12, 13, 11, 11, 11, 11, 13, 11, 11, 11, 11, 11, 11, 11, 11, 13, 11, 11, 11, 11, 13, 13, 12, 12, 13, 12, 13, 13, 13, 12, 12, 13, 12, 13, 13, 13, 12, 12, 13, 12, 13, 13, 13, 12, 12, 13, 12, 13, 13, 11, 11, 13, 11, 11, 11, 11, 13, 11, 11, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 13, 12, 12, 13, 0, 0 };
+
+array s8 _foo_cond_actions( 0, 7 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 3, 3, 2, 3, 3, 2, 2, 4, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 2, 4, 4, 2, 2, 4, 4, 4, 4, 4, 4, 2, 4, 4, 2, 6, 6, 6, 6, 2, 6, 6, 6, 6, 6, 6, 6, 6, 2, 6, 6, 6, 6, 2, 2, 4, 4, 2, 4, 2, 2, 2, 4, 4, 2, 4, 2, 2, 2, 4, 4, 2, 4, 2, 2, 2, 4, 4, 2, 4, 2, 2, 6, 6, 2, 6, 6, 6, 6, 2, 6, 6, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 7, 7, 7, 7, 7, 7, 2, 7, 7, 2, 0, 0 };
+
+array s8 _foo_from_state_actions( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 13;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/cond10.rl", 55 ) @{
+	
+	void test( const char *str )
+	{
+		int cs = foo_start;
+		const char *p = str;
+		const char *pe = str + strlen( str );
+		int match = 0;
+		
+		long q_4 = 0, q_5 = 0, q_6 = 0;
+		
+		cout << "run:" << endl;
+	}@
+	{
+		int _klen;
+		index char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans = 0;
+		uint _cond = 0;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume { 
+				switch ( _foo_from_state_actions[cs] ) {
+					case 5 {
+						host( "working/cond10.rl", 28 ) ${ q_4 = 0; }$
+						host( "working/cond10.rl", 34 ) ${ q_5 = 0; }$
+					}
+					case 1 {
+						host( "working/cond10.rl", 28 ) ${ q_4 = 0; }$
+						host( "working/cond10.rl", 34 ) ${ q_5 = 0; }$
+						host( "working/cond10.rl", 40 ) ${ q_6 = 0; }$
+					}
+				}
+				
+				_keys = offset( _foo_trans_keys, _foo_key_offsets[cs] );
+				_trans = cast(uint)_foo_index_offsets[cs];
+				
+				_klen = cast(int)_foo_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _foo_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _foo_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_foo_range_lengths[cs];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( deref( data, p )) < deref( _foo_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( ( deref( data, p )) > deref( _foo_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _foo_cond_keys, _foo_trans_offsets[_trans] );
+				_klen = cast(int)_foo_trans_lengths[_trans];
+				_cond = cast(uint)_foo_trans_offsets[_trans];
+				
+				_cpc = 0;
+				switch ( _foo_trans_cond_spaces[_trans] ) {
+					
+					case 0 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+					}
+					case 1 {
+						if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) _cpc += 1;
+					}
+					case 2 {
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 1;
+					}
+					case 3 {
+						if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) _cpc += 1;
+					}
+					case 4 {
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 1;
+					}
+					case 5 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 2;
+					}
+					case 6 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) _cpc += 2;
+					}
+					case 7 {
+						if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 2;
+					}
+					case 8 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) _cpc += 4;
+					}
+					case 9 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 4;
+					}
+					case 10 {
+						if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 4;
+					}
+					case 11 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 4;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 8;
+					}
+					case 12 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) _cpc += 4;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 8;
+					}
+					case 13 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 4;
+						if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) _cpc += 8;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 16;
+					}
+					case 14 {
+						if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) _cpc += 1;
+						if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) _cpc += 2;
+						if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) _cpc += 4;
+						if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) _cpc += 8;
+						if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) _cpc += 16;
+					}
+				}
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _foo_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _foo_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					cs = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				cs = cast(int)_foo_cond_targs[_cond];
+				
+				if ( _foo_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				switch ( _foo_cond_actions[_cond] ) {
+					case 7 {
+						host( "working/cond10.rl", 29 ) ${ q_4++; }$
+					}
+					case 6 {
+						host( "working/cond10.rl", 35 ) ${ q_5++; }$
+					}
+					case 4 {
+						host( "working/cond10.rl", 29 ) ${ q_4++; }$
+						host( "working/cond10.rl", 41 ) ${ q_6++; }$
+					}
+					case 3 {
+						host( "working/cond10.rl", 41 ) ${ q_6++; }$
+						host( "working/cond10.rl", 35 ) ${ q_5++; }$
+					}
+					case 2 {
+						host( "working/cond10.rl", 41 ) ${ q_6++; }$
+						host( "working/cond10.rl", 49 ) ${ match = 1; }$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/cond10.rl", 67 ) @{
+		if ( match )
+		cout << "  success" << endl;
+		else
+		cout << "  failure" << endl;
+		cout << endl;
+	}
+	
+	int main()
+	{
+		return 0;
+	}
+	
+}@

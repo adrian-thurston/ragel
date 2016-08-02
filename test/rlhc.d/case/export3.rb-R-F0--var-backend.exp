@@ -1,0 +1,300 @@
+#
+# @LANG: ruby
+#
+
+
+
+class << self
+	attr_accessor :test_ex_c1 
+end
+self.test_ex_c1  = 99;
+
+class << self
+	attr_accessor :test_ex_c2 
+end
+self.test_ex_c2  = 122;
+
+class << self
+	attr_accessor :test_ex_c3 
+end
+self.test_ex_c3  = 116;
+
+class << self
+	attr_accessor :_test_actions 
+	private :_test_actions, :_test_actions=
+end
+self._test_actions = [
+0, 1, 0, 1, 1, 1, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_test_trans_keys 
+	private :_test_trans_keys, :_test_trans_keys=
+end
+self._test_trans_keys = [
+1, 0, 0, 3, 0, 2, 0, 7, 1, 0, 5, 7, 0 , 
+]
+
+class << self
+	attr_accessor :_test_char_class 
+	private :_test_char_class, :_test_char_class=
+end
+self._test_char_class = [
+0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 7, 0 , 
+]
+
+class << self
+	attr_accessor :_test_index_offsets 
+	private :_test_index_offsets, :_test_index_offsets=
+end
+self._test_index_offsets = [
+0, 0, 4, 7, 15, 15, 0 , 
+]
+
+class << self
+	attr_accessor :_test_indicies 
+	private :_test_indicies, :_test_indicies=
+end
+self._test_indicies = [
+0, 1, 1, 2, 3, 1, 4, 5, 1, 1, 1, 6, 6, 6, 6, 2, 4, 6, 0 , 
+]
+
+class << self
+	attr_accessor :_test_index_defaults 
+	private :_test_index_defaults, :_test_index_defaults=
+end
+self._test_index_defaults = [
+0, 1, 1, 1, 7, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_test_trans_cond_spaces 
+	private :_test_trans_cond_spaces, :_test_trans_cond_spaces=
+end
+self._test_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_test_cond_targs 
+	private :_test_cond_targs, :_test_cond_targs=
+end
+self._test_cond_targs = [
+5, 0, 1, 5, 2, 5, 3, 4, 0 , 
+]
+
+class << self
+	attr_accessor :_test_cond_actions 
+	private :_test_cond_actions, :_test_cond_actions=
+end
+self._test_cond_actions = [
+1, 0, 0, 5, 0, 3, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_targs 
+	private :_test_nfa_targs, :_test_nfa_targs=
+end
+self._test_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_offsets 
+	private :_test_nfa_offsets, :_test_nfa_offsets=
+end
+self._test_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_push_actions 
+	private :_test_nfa_push_actions, :_test_nfa_push_actions=
+end
+self._test_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_pop_trans 
+	private :_test_nfa_pop_trans, :_test_nfa_pop_trans=
+end
+self._test_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :test_start 
+end
+self.test_start  = 4;
+
+class << self
+	attr_accessor :test_first_final 
+end
+self.test_first_final  = 4;
+
+class << self
+	attr_accessor :test_error 
+end
+self.test_error  = 0;
+
+class << self
+	attr_accessor :test_en_commands 
+end
+self.test_en_commands  = 5;
+
+class << self
+	attr_accessor :test_en_other 
+end
+self.test_en_other  = 4;
+
+def run_machine( data )
+	p = 0;
+	pe = data.length
+	cs = test_en_commands
+	val = 0;
+	neg = false;
+	
+	begin
+	
+	end
+	begin
+		_trans = 0;
+		_have = 0;
+		_cont = 1;
+		_acts = 0;
+		_nacts= 0
+		;
+		_keys = 0;
+		_inds = 0;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_keys = (cs<<1) ;
+								_inds = _test_index_offsets[cs] ;
+								if ( ( data[p ].ord) <= 122 && ( data[p ].ord) >= 10  )
+									begin
+										_ic = _test_char_class[( data[p ].ord) - 10];
+										if ( _ic <= _test_trans_keys[_keys+1 ]&& _ic >= _test_trans_keys[_keys ] )
+											_trans = _test_indicies[_inds + ( _ic - _test_trans_keys[_keys ])  ];
+											
+											else
+											_trans = _test_index_defaults[cs];
+											
+										end
+										
+									end
+									
+									else
+									begin
+										_trans = _test_index_defaults[cs];
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _cont == 1  )
+							begin
+								cs = _test_cond_targs[_trans];
+								if ( _test_cond_actions[_trans] != 0  )
+									begin
+										_acts = _test_cond_actions[_trans] ;
+										_nacts = _test_actions[_acts ];
+										_acts += 1;
+										while ( _nacts > 0  )
+											begin
+												case  _test_actions[_acts ] 
+												when -2 then
+												begin
+												end
+												when 0  then
+												begin
+													begin
+														puts "c1"; 
+													end
+													
+												end
+												when 1  then
+												begin
+													begin
+														puts "c2"; 
+													end
+													
+												end
+												when 2  then
+												begin
+													begin
+														puts "c3"; 
+													end
+													
+													
+												end
+											end
+											_nacts -= 1;
+											_acts += 1;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							if ( cs == 0  )
+								_cont = 0;
+								
+							end
+							if ( _cont == 1  )
+								p += 1;
+								
+							end
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+if  cs >= test_first_final
+	puts "ACCEPT"
+	else
+	puts "FAIL"
+end
+end
+	
+	inp = [
+	test_ex_c1, ?1, ?2, ?\n, 
+	test_ex_c2, ?a, ?b, ?\n, 
+	test_ex_c3, ?., ?., ?\n
+	]
+	
+	run_machine( inp );
+	

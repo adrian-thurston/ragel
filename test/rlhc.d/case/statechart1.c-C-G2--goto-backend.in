@@ -1,0 +1,367 @@
+host( "working/statechart1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Test in and out state actions.
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct state_chart
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+value int state_chart_start = 13;
+value int state_chart_first_final = 13;
+value int state_chart_error = 0;
+
+value int state_chart_en_main = 13;
+
+array s8 _state_chart_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/statechart1.rl", 54 ) @{
+	
+	void state_chart_init( struct state_chart *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)state_chart_start;
+	}
+	host( "working/statechart1.rl", 58 ) @{
+	}
+	
+	void state_chart_execute( struct state_chart *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( host( "-", 1 ) ={ fsm->cs}= )
+		{
+			case 13:
+			goto st_case_13;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+		}
+		goto st_out;
+		st13:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof13;
+		st_case_13:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st13;
+			}
+			case 48: {
+				goto st1;
+			}
+			case 97: {
+				goto ctr8;
+			}
+			case 98: {
+				goto ctr10;
+			}
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		host( "-", 1 ) ={ fsm->cs}= = 0;
+		goto _out;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 120 ) {
+			goto st2;
+		}
+		{
+			goto st0;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		switch( ( deref( data, p )) ) {
+			case 48: {
+				goto st2;
+			}
+			case 54: {
+				goto st3;
+			}
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		switch( ( deref( data, p )) ) {
+			case 49: {
+				goto ctr3;
+			}
+			case 50: {
+				goto ctr4;
+			}
+		}
+		{
+			goto st0;
+		}
+		ctr3:
+		host( "working/statechart1.rl", 23 ) ${ printf("a"); }$
+		
+		goto st4;
+		ctr8:
+		host( "working/statechart1.rl", 21 ) ${ printf("a"); }$
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st13;
+			}
+			case 32: {
+				goto st5;
+			}
+			case 48: {
+				goto st10;
+			}
+			case 97: {
+				goto ctr8;
+			}
+		}
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st13;
+			}
+			case 32: {
+				goto st5;
+			}
+			case 48: {
+				goto st1;
+			}
+			case 97: {
+				goto ctr8;
+			}
+			case 98: {
+				goto ctr10;
+			}
+		}
+		{
+			goto st0;
+		}
+		ctr4:
+		host( "working/statechart1.rl", 24 ) ${ printf("b"); }$
+		
+		goto st6;
+		ctr10:
+		host( "working/statechart1.rl", 22 ) ${ printf("b"); }$
+		
+		goto st6;
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st13;
+			}
+			case 32: {
+				goto st5;
+			}
+			case 48: {
+				goto st7;
+			}
+			case 98: {
+				goto ctr10;
+			}
+		}
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		if ( ( deref( data, p )) == 120 ) {
+			goto st8;
+		}
+		{
+			goto st0;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof8;
+		st_case_8:
+		switch( ( deref( data, p )) ) {
+			case 48: {
+				goto st8;
+			}
+			case 54: {
+				goto st9;
+			}
+		}
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof9;
+		st_case_9:
+		if ( ( deref( data, p )) == 50 ) {
+			goto ctr4;
+		}
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof10;
+		st_case_10:
+		if ( ( deref( data, p )) == 120 ) {
+			goto st11;
+		}
+		{
+			goto st0;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof11;
+		st_case_11:
+		switch( ( deref( data, p )) ) {
+			case 48: {
+				goto st11;
+			}
+			case 54: {
+				goto st12;
+			}
+		}
+		{
+			goto st0;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof12;
+		st_case_12:
+		if ( ( deref( data, p )) == 49 ) {
+			goto ctr3;
+		}
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof13: host( "-", 1 ) ={ fsm->cs}= = 13; goto _test_eof; 
+		_test_eof1: host( "-", 1 ) ={ fsm->cs}= = 1; goto _test_eof; 
+		_test_eof2: host( "-", 1 ) ={ fsm->cs}= = 2; goto _test_eof; 
+		_test_eof3: host( "-", 1 ) ={ fsm->cs}= = 3; goto _test_eof; 
+		_test_eof4: host( "-", 1 ) ={ fsm->cs}= = 4; goto _test_eof; 
+		_test_eof5: host( "-", 1 ) ={ fsm->cs}= = 5; goto _test_eof; 
+		_test_eof6: host( "-", 1 ) ={ fsm->cs}= = 6; goto _test_eof; 
+		_test_eof7: host( "-", 1 ) ={ fsm->cs}= = 7; goto _test_eof; 
+		_test_eof8: host( "-", 1 ) ={ fsm->cs}= = 8; goto _test_eof; 
+		_test_eof9: host( "-", 1 ) ={ fsm->cs}= = 9; goto _test_eof; 
+		_test_eof10: host( "-", 1 ) ={ fsm->cs}= = 10; goto _test_eof; 
+		_test_eof11: host( "-", 1 ) ={ fsm->cs}= = 11; goto _test_eof; 
+		_test_eof12: host( "-", 1 ) ={ fsm->cs}= = 12; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/statechart1.rl", 66 ) @{
+	}
+	
+	int state_chart_finish( struct state_chart *fsm )
+	{
+		if ( fsm->cs == state_chart_error )
+		return -1;
+		if ( fsm->cs >= state_chart_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct state_chart sc;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		state_chart_init( &sc );
+		state_chart_execute( &sc, buf, len );
+		state_chart_finish( &sc );
+		printf("\n");
+	}
+	
+	int main()
+	{
+		test(
+		"aa0x0061aa b\n"
+		"bbb0x62b 0x61 0x000062\n"
+		);
+		
+		return 0;
+	}
+	
+}@

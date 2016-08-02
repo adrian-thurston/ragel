@@ -1,0 +1,1462 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int ts;
+		int te;
+		int act;
+		int token;
+		
+		
+		
+		
+		static readonly sbyte  []_scanner_to_state_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_from_state_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_pop_trans = { 0, 0,  };
+		static readonly int  scanner_start  = 12;
+		static readonly int  scanner_first_final  = 12;
+		static readonly int  scanner_error  = 0;
+		static readonly int  scanner_en_main  = 12;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)scanner_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( _scanner_from_state_actions[cs]  ) {
+					case 10:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				switch ( cs  ) {
+					case 12:
+					switch ( ( data[p ])  ) {
+						case '\u0021':
+						{
+							goto ctr30;
+						}
+						case '\u0022':
+						{
+							goto ctr2;
+						}
+						case '\u0025':
+						{
+							goto ctr32;
+						}
+						case '\u0026':
+						{
+							goto ctr33;
+						}
+						case '\u0027':
+						{
+							goto ctr7;
+						}
+						case '\u002a':
+						{
+							goto ctr34;
+						}
+						case '\u002b':
+						{
+							goto ctr35;
+						}
+						case '\u002d':
+						{
+							goto ctr36;
+						}
+						case '\u002e':
+						{
+							goto ctr37;
+						}
+						case '\u002f':
+						{
+							goto ctr38;
+						}
+						case '\u0030':
+						{
+							goto ctr39;
+						}
+						case '\u003a':
+						{
+							goto ctr41;
+						}
+						case '\u003d':
+						{
+							goto ctr42;
+						}
+						case '\u004c':
+						{
+							goto ctr44;
+						}
+						case '\u005e':
+						{
+							goto ctr45;
+						}
+						case '\u005f':
+						{
+							goto ctr43;
+						}
+						case '\u007c':
+						{
+							goto ctr46;
+						}
+						
+					}
+					if ( ( data[p ]) < '\u0041' )
+					{
+						if ( ( data[p ]) < '\u0031' )
+						{
+							if ( '\u0023'<= ( data[p ]) && ( data[p ]) <= '\u002c' )
+							{
+								goto ctr31;
+							}
+							
+						} 
+						else if ( ( data[p ]) > '\u0039' )
+						{
+							if ( '\u003b'<= ( data[p ])  )
+							{
+								goto ctr31;
+							}
+							
+						} 
+						else
+						{
+							goto ctr40;
+						}
+						
+					} 
+					else if ( ( data[p ]) > '\u005a' )
+					{
+						if ( ( data[p ]) < '\u0061' )
+						{
+							{
+								goto ctr31;
+							}
+						} 
+						else if ( ( data[p ]) > '\u007a' )
+						{
+							if ( ( data[p ]) <= '\u007e' )
+							{
+								goto ctr31;
+							}
+							
+						} 
+						else
+						{
+							goto ctr43;
+						}
+						
+					} 
+					else
+					{
+						goto ctr43;
+					}
+					
+					{
+						goto ctr29;
+					}
+					case 13:
+					if ( '\u0021'<= ( data[p ]) && ( data[p ]) <= '\u007e' )
+					{
+						goto ctr48;
+					}
+					
+					{
+						goto ctr29;
+					}
+					case 14:
+					if ( ( data[p ]) == '\u003d' )
+					{
+						goto ctr51;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 1:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr17;
+						}
+						case '\u0022':
+						{
+							goto ctr3;
+						}
+						case '\u005c':
+						{
+							goto ctr4;
+						}
+						
+					}
+					{
+						goto ctr2;
+					}
+					case 2:
+					{
+						goto ctr2;
+					}
+					case 15:
+					if ( ( data[p ]) == '\u003d' )
+					{
+						goto ctr53;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 16:
+					switch ( ( data[p ])  ) {
+						case '\u0026':
+						{
+							goto ctr55;
+						}
+						case '\u003d':
+						{
+							goto ctr56;
+						}
+						
+					}
+					{
+						goto ctr101;
+					}
+					case 3:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr17;
+						}
+						case '\u0027':
+						{
+							goto ctr8;
+						}
+						case '\u005c':
+						{
+							goto ctr9;
+						}
+						
+					}
+					{
+						goto ctr7;
+					}
+					case 4:
+					{
+						goto ctr7;
+					}
+					case 17:
+					if ( ( data[p ]) == '\u003d' )
+					{
+						goto ctr58;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 18:
+					switch ( ( data[p ])  ) {
+						case '\u002b':
+						{
+							goto ctr60;
+						}
+						case '\u003d':
+						{
+							goto ctr61;
+						}
+						
+					}
+					{
+						goto ctr101;
+					}
+					case 19:
+					switch ( ( data[p ])  ) {
+						case '\u002d':
+						{
+							goto ctr63;
+						}
+						case '\u003d':
+						{
+							goto ctr64;
+						}
+						case '\u003e':
+						{
+							goto ctr65;
+						}
+						
+					}
+					{
+						goto ctr101;
+					}
+					case 20:
+					if ( ( data[p ]) == '\u002a' )
+					{
+						goto ctr68;
+					}
+					
+					{
+						goto ctr67;
+					}
+					case 21:
+					switch ( ( data[p ])  ) {
+						case '\u002a':
+						{
+							goto ctr70;
+						}
+						case '\u002e':
+						{
+							goto ctr71;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr72;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 5:
+					if ( ( data[p ]) == '\u002e' )
+					{
+						goto ctr13;
+					}
+					
+					{
+						goto ctr23;
+					}
+					case 22:
+					switch ( ( data[p ])  ) {
+						case '\u0045':
+						{
+							goto ctr75;
+						}
+						case '\u0046':
+						{
+							goto ctr76;
+						}
+						case '\u004c':
+						{
+							goto ctr76;
+						}
+						case '\u0065':
+						{
+							goto ctr75;
+						}
+						case '\u0066':
+						{
+							goto ctr76;
+						}
+						case '\u006c':
+						{
+							goto ctr76;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr72;
+					}
+					
+					{
+						goto ctr77;
+					}
+					case 6:
+					switch ( ( data[p ])  ) {
+						case '\u002b':
+						{
+							goto ctr15;
+						}
+						case '\u002d':
+						{
+							goto ctr15;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr16;
+					}
+					
+					{
+						goto ctr17;
+					}
+					case 7:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr16;
+					}
+					
+					{
+						goto ctr17;
+					}
+					case 23:
+					switch ( ( data[p ])  ) {
+						case '\u0046':
+						{
+							goto ctr76;
+						}
+						case '\u004c':
+						{
+							goto ctr76;
+						}
+						case '\u0066':
+						{
+							goto ctr76;
+						}
+						case '\u006c':
+						{
+							goto ctr76;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr16;
+					}
+					
+					{
+						goto ctr77;
+					}
+					case 24:
+					switch ( ( data[p ])  ) {
+						case '\u0021':
+						{
+							goto ctr19;
+						}
+						case '\u002f':
+						{
+							goto ctr24;
+						}
+						case '\u003d':
+						{
+							goto ctr79;
+						}
+						
+					}
+					{
+						goto ctr101;
+					}
+					case 8:
+					if ( ( data[p ]) == '\u0021' )
+					{
+						goto ctr20;
+					}
+					
+					{
+						goto ctr19;
+					}
+					case 9:
+					switch ( ( data[p ])  ) {
+						case '\u0021':
+						{
+							goto ctr20;
+						}
+						case '\u002f':
+						{
+							goto ctr22;
+						}
+						
+					}
+					{
+						goto ctr19;
+					}
+					case 10:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						goto ctr25;
+					}
+					
+					{
+						goto ctr24;
+					}
+					case 25:
+					switch ( ( data[p ])  ) {
+						case '\u002e':
+						{
+							goto ctr72;
+						}
+						case '\u0045':
+						{
+							goto ctr75;
+						}
+						case '\u004c':
+						{
+							goto ctr83;
+						}
+						case '\u0055':
+						{
+							goto ctr83;
+						}
+						case '\u0065':
+						{
+							goto ctr75;
+						}
+						case '\u006c':
+						{
+							goto ctr83;
+						}
+						case '\u0075':
+						{
+							goto ctr83;
+						}
+						case '\u0078':
+						{
+							goto ctr84;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr82;
+					}
+					
+					{
+						goto ctr91;
+					}
+					case 26:
+					switch ( ( data[p ])  ) {
+						case '\u002e':
+						{
+							goto ctr72;
+						}
+						case '\u0045':
+						{
+							goto ctr75;
+						}
+						case '\u004c':
+						{
+							goto ctr87;
+						}
+						case '\u0055':
+						{
+							goto ctr87;
+						}
+						case '\u0065':
+						{
+							goto ctr75;
+						}
+						case '\u006c':
+						{
+							goto ctr87;
+						}
+						case '\u0075':
+						{
+							goto ctr87;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr82;
+					}
+					
+					{
+						goto ctr86;
+					}
+					case 11:
+					if ( ( data[p ]) < '\u0041' )
+					{
+						if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+						{
+							goto ctr28;
+						}
+						
+					} 
+					else if ( ( data[p ]) > '\u0046' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u0066' )
+						{
+							goto ctr28;
+						}
+						
+					} 
+					else
+					{
+						goto ctr28;
+					}
+					
+					{
+						goto ctr27;
+					}
+					case 27:
+					switch ( ( data[p ])  ) {
+						case '\u004c':
+						{
+							goto ctr90;
+						}
+						case '\u0055':
+						{
+							goto ctr90;
+						}
+						case '\u006c':
+						{
+							goto ctr90;
+						}
+						case '\u0075':
+						{
+							goto ctr90;
+						}
+						
+					}
+					if ( ( data[p ]) < '\u0041' )
+					{
+						if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+						{
+							goto ctr28;
+						}
+						
+					} 
+					else if ( ( data[p ]) > '\u0046' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u0066' )
+						{
+							goto ctr28;
+						}
+						
+					} 
+					else
+					{
+						goto ctr28;
+					}
+					
+					{
+						goto ctr89;
+					}
+					case 28:
+					switch ( ( data[p ])  ) {
+						case '\u002e':
+						{
+							goto ctr72;
+						}
+						case '\u0045':
+						{
+							goto ctr75;
+						}
+						case '\u004c':
+						{
+							goto ctr83;
+						}
+						case '\u0055':
+						{
+							goto ctr83;
+						}
+						case '\u0065':
+						{
+							goto ctr75;
+						}
+						case '\u006c':
+						{
+							goto ctr83;
+						}
+						case '\u0075':
+						{
+							goto ctr83;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr40;
+					}
+					
+					{
+						goto ctr91;
+					}
+					case 29:
+					if ( ( data[p ]) == '\u003a' )
+					{
+						goto ctr93;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 30:
+					if ( ( data[p ]) == '\u003d' )
+					{
+						goto ctr95;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 31:
+					if ( ( data[p ]) == '\u005f' )
+					{
+						goto ctr43;
+					}
+					
+					if ( ( data[p ]) < '\u0041' )
+					{
+						if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+						{
+							goto ctr43;
+						}
+						
+					} 
+					else if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr43;
+						}
+						
+					} 
+					else
+					{
+						goto ctr43;
+					}
+					
+					{
+						goto ctr98;
+					}
+					case 32:
+					switch ( ( data[p ])  ) {
+						case '\u0022':
+						{
+							goto ctr2;
+						}
+						case '\u0027':
+						{
+							goto ctr7;
+						}
+						case '\u005f':
+						{
+							goto ctr43;
+						}
+						
+					}
+					if ( ( data[p ]) < '\u0041' )
+					{
+						if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+						{
+							goto ctr43;
+						}
+						
+					} 
+					else if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr43;
+						}
+						
+					} 
+					else
+					{
+						goto ctr43;
+					}
+					
+					{
+						goto ctr98;
+					}
+					case 33:
+					if ( ( data[p ]) == '\u003d' )
+					{
+						goto ctr100;
+					}
+					
+					{
+						goto ctr101;
+					}
+					case 34:
+					switch ( ( data[p ])  ) {
+						case '\u003d':
+						{
+							goto ctr102;
+						}
+						case '\u007c':
+						{
+							goto ctr103;
+						}
+						
+					}
+					{
+						goto ctr101;
+					}
+					case 0:
+					goto _out;
+					
+				}
+				ctr2: cs = 1;
+				goto _again;
+				ctr4: cs = 2;
+				goto _again;
+				ctr7: cs = 3;
+				goto _again;
+				ctr9: cs = 4;
+				goto _again;
+				ctr71: cs = 5;
+				goto _again;
+				ctr75: cs = 6;
+				goto _again;
+				ctr15: cs = 7;
+				goto _again;
+				ctr19: cs = 8;
+				goto _again;
+				ctr20: cs = 9;
+				goto _again;
+				ctr24: cs = 10;
+				goto _again;
+				ctr84: cs = 11;
+				goto _again;
+				ctr17: cs = 12;
+				goto f0;
+				ctr3: cs = 12;
+				goto f1;
+				ctr8: cs = 12;
+				goto f2;
+				ctr23: cs = 12;
+				goto f3;
+				ctr13: cs = 12;
+				goto f4;
+				ctr22: cs = 12;
+				goto f5;
+				ctr25: cs = 12;
+				goto f6;
+				ctr27: cs = 12;
+				goto f7;
+				ctr31: cs = 12;
+				goto f10;
+				ctr48: cs = 12;
+				goto f14;
+				ctr101: cs = 12;
+				goto f15;
+				ctr51: cs = 12;
+				goto f16;
+				ctr53: cs = 12;
+				goto f17;
+				ctr55: cs = 12;
+				goto f18;
+				ctr56: cs = 12;
+				goto f19;
+				ctr58: cs = 12;
+				goto f20;
+				ctr60: cs = 12;
+				goto f21;
+				ctr61: cs = 12;
+				goto f22;
+				ctr63: cs = 12;
+				goto f23;
+				ctr64: cs = 12;
+				goto f24;
+				ctr67: cs = 12;
+				goto f25;
+				ctr68: cs = 12;
+				goto f26;
+				ctr70: cs = 12;
+				goto f27;
+				ctr77: cs = 12;
+				goto f29;
+				ctr76: cs = 12;
+				goto f30;
+				ctr79: cs = 12;
+				goto f31;
+				ctr91: cs = 12;
+				goto f32;
+				ctr83: cs = 12;
+				goto f34;
+				ctr86: cs = 12;
+				goto f35;
+				ctr87: cs = 12;
+				goto f36;
+				ctr89: cs = 12;
+				goto f37;
+				ctr90: cs = 12;
+				goto f38;
+				ctr93: cs = 12;
+				goto f39;
+				ctr95: cs = 12;
+				goto f40;
+				ctr98: cs = 12;
+				goto f41;
+				ctr100: cs = 12;
+				goto f42;
+				ctr102: cs = 12;
+				goto f43;
+				ctr103: cs = 12;
+				goto f44;
+				ctr29: cs = 13;
+				goto _again;
+				ctr30: cs = 14;
+				goto _again;
+				ctr32: cs = 15;
+				goto _again;
+				ctr33: cs = 16;
+				goto _again;
+				ctr34: cs = 17;
+				goto _again;
+				ctr35: cs = 18;
+				goto _again;
+				ctr36: cs = 19;
+				goto _again;
+				ctr65: cs = 20;
+				goto _again;
+				ctr37: cs = 21;
+				goto f11;
+				ctr72: cs = 22;
+				goto f28;
+				ctr16: cs = 23;
+				goto _again;
+				ctr38: cs = 24;
+				goto f11;
+				ctr39: cs = 25;
+				goto f12;
+				ctr82: cs = 26;
+				goto f33;
+				ctr28: cs = 27;
+				goto _again;
+				ctr40: cs = 28;
+				goto f12;
+				ctr41: cs = 29;
+				goto _again;
+				ctr42: cs = 30;
+				goto _again;
+				ctr43: cs = 31;
+				goto _again;
+				ctr44: cs = 32;
+				goto f13;
+				ctr45: cs = 33;
+				goto _again;
+				ctr46: cs = 34;
+				goto _again;
+				
+				f11:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f2:
+				{{te = p+1;
+						{token = 193;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f1:
+				{{te = p+1;
+						{token = 192;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f30:
+				{{te = p+1;
+						{token = 194;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f34:
+				{{te = p+1;
+						{token = 218;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f36:
+				{{te = p+1;
+						{token = 219;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f38:
+				{{te = p+1;
+						{token = 220;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f39:
+				{{te = p+1;
+						{token = 197;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f40:
+				{{te = p+1;
+						{token = 223;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f16:
+				{{te = p+1;
+						{token = 224;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f18:
+				{{te = p+1;
+						{token = 225;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f44:
+				{{te = p+1;
+						{token = 226;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f20:
+				{{te = p+1;
+						{token = 227;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f31:
+				{{te = p+1;
+						{token = 228;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f17:
+				{{te = p+1;
+						{token = 229;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f22:
+				{{te = p+1;
+						{token = 230;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f24:
+				{{te = p+1;
+						{token = 231;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f19:
+				{{te = p+1;
+						{token = 232;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f42:
+				{{te = p+1;
+						{token = 233;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f43:
+				{{te = p+1;
+						{token = 234;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f21:
+				{{te = p+1;
+						{token = 212;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f23:
+				{{te = p+1;
+						{token = 213;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f26:
+				{{te = p+1;
+						{token = 214;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f27:
+				{{te = p+1;
+						{token = 215;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f4:
+				{{te = p+1;
+						{token = 240;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f10:
+				{{te = p+1;
+						{token = ( int ) ( data[ts] )
+							;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f5:
+				{{te = p+1;
+						{token = 242;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f6:
+				{{te = p+1;
+						{token = 242;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f41:
+				{{te = p;
+						p = p - 1;
+						{token = 195;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f29:
+				{{te = p;
+						p = p - 1;
+						{token = 194;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f32:
+				{{te = p;
+						p = p - 1;
+						{token = 218;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f35:
+				{{te = p;
+						p = p - 1;
+						{token = 219;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f37:
+				{{te = p;
+						p = p - 1;
+						{token = 220;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f25:
+				{{te = p;
+						p = p - 1;
+						{token = 211;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f15:
+				{{te = p;
+						p = p - 1;
+						{token = ( int ) ( data[ts] )
+							;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f14:
+				{{te = p;
+						p = p - 1;
+						{token = 241;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f7:
+				{{p = ((te))-1;
+						{token = 218;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f3:
+				{{p = ((te))-1;
+						{token = ( int ) ( data[ts] )
+							;
+							Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f0:
+				{{switch ( act  ) {
+							case 0:
+							{{cs = 0;
+									goto _again;}}
+							
+							break;
+							case 3:
+							p = ((te))-1;
+							{token = 195;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+							
+							break;
+							case 4:
+							p = ((te))-1;
+							{token = 194;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+							
+							break;
+							case 5:
+							p = ((te))-1;
+							{token = 218;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+							
+							break;
+							case 6:
+							p = ((te))-1;
+							{token = 219;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+							
+							break;
+							
+						}
+					}
+				}
+				
+				goto _again;
+				f13:
+				{{te = p+1;
+					}}
+				{{act = 3;
+					}}
+				
+				goto _again;
+				f28:
+				{{te = p+1;
+					}}
+				{{act = 4;
+					}}
+				
+				goto _again;
+				f12:
+				{{te = p+1;
+					}}
+				{{act = 5;
+					}}
+				
+				goto _again;
+				f33:
+				{{te = p+1;
+					}}
+				{{act = 6;
+					}}
+				
+				goto _again;
+				
+				_again:
+				switch ( _scanner_to_state_actions[cs]  ) {
+					case 9:
+					{{ts = 0;
+						}}
+					{{act = 0;
+						}}
+					
+					break;
+					
+				}
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( cs  ) {
+						case 13:
+						goto ctr48;
+						case 14:
+						goto ctr101;
+						case 1:
+						goto ctr17;
+						case 2:
+						goto ctr17;
+						case 15:
+						goto ctr101;
+						case 16:
+						goto ctr101;
+						case 3:
+						goto ctr17;
+						case 4:
+						goto ctr17;
+						case 17:
+						goto ctr101;
+						case 18:
+						goto ctr101;
+						case 19:
+						goto ctr101;
+						case 20:
+						goto ctr67;
+						case 21:
+						goto ctr101;
+						case 5:
+						goto ctr23;
+						case 22:
+						goto ctr77;
+						case 6:
+						goto ctr17;
+						case 7:
+						goto ctr17;
+						case 23:
+						goto ctr77;
+						case 24:
+						goto ctr101;
+						case 8:
+						goto ctr23;
+						case 9:
+						goto ctr23;
+						case 10:
+						goto ctr23;
+						case 25:
+						goto ctr91;
+						case 26:
+						goto ctr86;
+						case 11:
+						goto ctr27;
+						case 27:
+						goto ctr89;
+						case 28:
+						goto ctr91;
+						case 29:
+						goto ctr101;
+						case 30:
+						goto ctr101;
+						case 31:
+						goto ctr98;
+						case 32:
+						goto ctr98;
+						case 33:
+						goto ctr101;
+						case 34:
+						goto ctr101;
+						
+					}
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+			"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+			"'\n'\n",
+		};
+		
+		
+		static readonly int inplen = 3;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

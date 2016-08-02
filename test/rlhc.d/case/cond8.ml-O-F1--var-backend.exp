@@ -1,0 +1,196 @@
+(*
+* @LANG: ocaml
+*)
+
+let id x = x
+let fail fmt = Printf.ksprintf failwith fmt
+let pr fmt = Printf.ksprintf print_endline fmt
+
+let failed fmt = Printf.ksprintf (fun s -> prerr_endline s; exit 1) fmt
+let test' show f x y = if f x <> y then failed "FAILED: test %S" (show x)
+let case = ref 0
+let test f x y = incr case; if f x <> y then failed "FAILED: case %d" !case
+let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILED: fail %S" x | None -> ()
+
+
+let _cond_trans_keys : int array = [|
+1; 0; 0; 0; 0; 1; 4; 4; 3; 4; 0 ; 
+|]
+let _cond_char_class : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 3; 3; 3; 4; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 0 ; 
+|]
+let _cond_index_offsets : int array = [|
+0; 0; 1; 3; 4; 0 ; 
+|]
+let _cond_indicies : int array = [|
+0; 0; 2; 3; 4; 5; 0 ; 
+|]
+let _cond_index_defaults : int array = [|
+0; 1; 1; 1; 1; 0 ; 
+|]
+let _cond_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; 0; 0; 0 ; 
+|]
+let _cond_trans_offsets : int array = [|
+0; 1; 2; 3; 4; 6; 0 ; 
+|]
+let _cond_cond_targs : int array = [|
+2; 0; 4; 1; 0; 4; 1; 4; 0 ; 
+|]
+let _cond_cond_actions : int array = [|
+0; 0; 0; 0; 0; 1; 0; 1; 0 ; 
+|]
+let _cond_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _cond_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0 ; 
+|]
+let _cond_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _cond_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let cond_start  : int  = 3
+let cond_first_final  : int  = 3
+let cond_error  : int  = 0
+let cond_en_main  : int  = 3
+let fail fmt = Printf.ksprintf failwith fmt
+
+let run data n =
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let i = ref 0 in
+
+begin
+	cs  := cond_start;
+	
+end;
+begin
+	let _cpc : int  ref = ref 0 in
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _cond  : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _cond_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 122 && ( Char.code data.[p.contents] )>= 48  then
+						begin
+							begin
+								let _ic  : int  ref = ref _cond_char_class.(( Char.code data.[p.contents] )- 48) in
+								if _ic.contents<= _cond_trans_keys.( _keys.contents+1  )&& _ic.contents>= _cond_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _cond_indicies.( _inds.contents+ ( _ic.contents- _cond_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _cond_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _cond_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;_cond  := _cond_trans_offsets.(_trans.contents);
+						_cpc  := 0;
+						if _cond_trans_cond_spaces.(_trans.contents) = 0  then
+						begin
+							if (i < n ) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;
+						end
+						;
+						_cond  := _cond.contents + _cpc.contents;
+						
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _cond_cond_targs.(_cond.contents);
+						if _cond_cond_actions.(_cond.contents) = 1  then
+						begin
+							begin
+								i := i.contents + 1 
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs < cond_first_final then
+print_string "fail\n"
+else
+print_string "ok\n"
+
+let () =
+run "d2:abc" ( ref 1 );
+run "d2:abc" ( ref 2 );
+run "d2:abc" ( ref 3 );
+run "d2:abc" ( ref 4 );
+

@@ -1,0 +1,288 @@
+package main
+import "fmt"
+
+var neg  int ;
+var value  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _atoi_key_offsets [] int8  = [] int8  { 0, 0, 4, 6, 9, 0  }
+var _atoi_trans_keys [] byte  = [] byte  { 43, 45, 48, 57, 48, 57, 10, 48, 57, 0 }
+var _atoi_single_lengths [] int8  = [] int8  { 0, 2, 0, 1, 0, 0  }
+var _atoi_range_lengths [] int8  = [] int8  { 0, 1, 1, 1, 0, 0  }
+var _atoi_index_offsets [] int8  = [] int8  { 0, 0, 4, 6, 9, 0  }
+var _atoi_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _atoi_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0  }
+var _atoi_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _atoi_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _atoi_cond_targs [] int8  = [] int8  { 2, 2, 3, 0, 3, 0, 4, 3, 0, 0, 0  }
+var _atoi_cond_actions [] int8  = [] int8  { 1, 2, 3, 0, 4, 0, 5, 4, 0, 0, 0  }
+var _atoi_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _atoi_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0  }
+var _atoi_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _atoi_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var atoi_start  int  = 1
+var atoi_first_final  int  = 4
+var atoi_error  int  = 0
+var atoi_en_main  int  = 1
+func prepare() {
+	value = 0;
+	neg = 0;
+	
+	{
+		cs = int(atoi_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _klen int 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		var  _trans uint 
+		var  _cond  uint   = 0
+		var  _have  uint   = 0
+		var  _cont  uint   = 1
+		for _cont == 1  {
+			{
+			
+				if cs == 0  {
+					_cont = 0;
+					
+				}
+				_have = 0;
+				if p == pe  {
+					{
+						if _have == 0  {
+							_cont = 0;
+							
+						}
+					}
+					
+				}
+				if _cont == 1  {
+					{
+						if _have == 0  {
+							{
+								_keys = int(_atoi_key_offsets[cs] );
+								_trans = uint(_atoi_index_offsets[cs]);
+								_have = 0;
+								_klen = int(_atoi_single_lengths[cs]);
+								if _klen > 0  {
+									{
+										var  _lower int
+										var  _mid int
+										var  _upper int
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										for _upper >= _lower && _have == 0  {
+											{
+												_mid = _lower + ((_upper-_lower) >> 1);
+												switch {
+													case ( data[p ]) < _atoi_trans_keys[_mid ]:
+													_upper = _mid - 1;
+													
+													case ( data[p ]) > _atoi_trans_keys[_mid ]:
+													_lower = _mid + 1;
+													
+													default:
+													{
+														_trans += uint((_mid - _keys));
+														_have = 1;
+													}
+													
+												}
+											}
+											
+										}
+										if _have == 0  {
+											{
+												_keys += _klen;
+												_trans += uint(_klen);
+											}
+											
+										}
+									}
+									
+									
+								}
+								if _have == 0  {
+									{
+										_klen = int(_atoi_range_lengths[cs]);
+										if _klen > 0  {
+											{
+												var  _lower int
+												var  _mid int
+												var  _upper int
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												for _have == 0 && _lower <= _upper  {
+													{
+														_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+														switch {
+															case ( data[p ]) < _atoi_trans_keys[_mid ]:
+															_upper = _mid - 2;
+															
+															case ( data[p ]) > _atoi_trans_keys[_mid + 1 ]:
+															_lower = _mid + 2;
+															
+															default:
+															{
+																_trans += uint(((_mid - _keys)>>1));
+																_have = 1;
+															}
+															
+														}
+													}
+													
+												}
+												if _have == 0  {
+													_trans += uint(_klen);
+													
+												}
+											}
+											
+										}
+									}
+									
+									
+								}
+								_ckeys = int(_atoi_trans_offsets[_trans] );
+								_klen = int(_atoi_trans_lengths[_trans]);
+								_cond = uint(_atoi_trans_offsets[_trans]);
+								_have = 0;
+								_cpc = 0;
+								{
+									var  _lower int
+									var  _mid int
+									var  _upper int
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									for _have == 0 && _lower <= _upper  {
+										{
+											_mid = _lower + ((_upper-_lower) >> 1);
+											switch {
+												case _cpc < int(_atoi_cond_keys[_mid ]):
+												_upper = _mid - 1;
+												
+												case _cpc > int(_atoi_cond_keys[_mid ]):
+												_lower = _mid + 1;
+												
+												default:
+												{
+													_cond += uint((_mid - _ckeys));
+													_have = 1;
+												}
+												
+											}
+										}
+										
+									}
+									if _have == 0  {
+										{
+											cs = 0;
+											_cont = 0;
+										}
+										
+									}
+								}
+							}
+							
+						}
+						if _cont == 1  {
+							{
+								cs = int(_atoi_cond_targs[_cond]);
+								switch _atoi_cond_actions[_cond]  {
+									case 1 :
+									{neg = 0;
+										value = 0;
+									}
+									
+									break;
+									case 4 :
+									{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+										;
+									}
+									
+									break;
+									case 2 :
+									{neg = 0;
+										value = 0;
+									}
+									{neg = 1;
+									}
+									
+									break;
+									case 3 :
+									{neg = 0;
+										value = 0;
+									}
+									{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+										;
+									}
+									
+									break;
+									case 5 :
+									{if ( neg != 0 ) {
+											value = -1 * value;
+											
+										}
+									}
+									{fmt.Print( value );fmt.Print( "\n" );}
+									
+									break;
+									
+								}
+								if cs == 0  {
+									_cont = 0;
+									
+								}
+								if _cont == 1  {
+									p += 1;
+									
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+	}
+}
+func finish() {
+	if cs >= atoi_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"1\n",
+	"12\n",
+	"222222\n",
+	"+2123\n",
+	"213 3213\n",
+	"-12321\n",
+	"--123\n",
+	"-99\n",
+	" -3000\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

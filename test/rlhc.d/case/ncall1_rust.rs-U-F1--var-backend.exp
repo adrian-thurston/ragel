@@ -1,0 +1,170 @@
+static mut top : i32 = 0;
+static mut stack : [ i32 ; 32] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+static mut target : i32 = 0;
+
+
+
+
+
+static _ncall1_trans_keys: [u8 ; 36] = [ 1, 0, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 0, 3, 1, 0, 1, 0, 1, 0, 0 , 0 ];
+static _ncall1_char_class: [i8 ; 112] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 , 0 ];
+static _ncall1_index_offsets: [i8 ; 19] = [ 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0 , 0 ];
+static _ncall1_indicies: [i8 ; 18] = [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 , 0 ];
+static _ncall1_index_defaults: [i8 ; 19] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 0 ];
+static _ncall1_trans_cond_spaces: [i8 ; 18] = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
+static _ncall1_cond_targs: [i8 ; 18] = [ 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0 , 0 ];
+static _ncall1_cond_actions: [i8 ; 18] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 3, 4, 0 , 0 ];
+static _ncall1_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _ncall1_nfa_offsets: [i8 ; 19] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ];
+static _ncall1_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _ncall1_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static ncall1_start : i32 = 13;
+static ncall1_first_final : i32 = 13;
+static ncall1_error : i32 = 0;
+static ncall1_en_unused : i32 = 1;
+static ncall1_en_one : i32 = 7;
+static ncall1_en_two : i32 = 10;
+static ncall1_en_main : i32 = 13;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( ncall1_start ) as i32;
+		top = 0;
+	}
+	
+	{
+		let mut _trans  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		let mut _keys :i32 = 0;
+		let mut _inds :i32 = 0;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  ) {
+				_cont = 0;
+				
+			}
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							_keys = ( (cs<<1)  ) as i32;
+							_inds = ( _ncall1_index_offsets[(cs) as usize] ) as i32;
+							if ( ( data[(p ) as usize]
+							) <= 119 && ( data[(p ) as usize]
+							) >= 10  ) {
+								{
+									let mut _ic  = ( _ncall1_char_class[(( ( data[(p ) as usize]
+									)  ) as i32- 10) as usize] ) as i32;
+									if ( _ic <= ( _ncall1_trans_keys[(_keys+1 ) as usize]
+									) as i32&& _ic >= ( _ncall1_trans_keys[(_keys ) as usize]
+									) as i32 ) {
+										_trans = ( _ncall1_indicies[(_inds + ( ( _ic - ( _ncall1_trans_keys[(_keys ) as usize]
+										) as i32)   ) as i32) as usize]
+										) as u32;
+										
+									}
+									else {
+										_trans = ( _ncall1_index_defaults[(cs) as usize] ) as u32;
+										
+									}
+								}
+								
+							}
+							else {
+								{
+									_trans = ( _ncall1_index_defaults[(cs) as usize] ) as u32;
+								}
+								
+								
+							}
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _ncall1_cond_targs[(_trans) as usize] ) as i32;
+							match ( _ncall1_cond_actions[(_trans) as usize] ) {
+								1  => {
+									{print!( "{}", "one\n" );
+										{top-= 1;
+											cs = stack[(top) as usize];
+										}}
+									
+								}
+								2  => {
+									{print!( "{}", "two\n" );
+										{top-= 1;
+											cs = stack[(top) as usize];
+										}}
+									
+								}
+								3  => {
+									{target = 7;
+										{stack[(top) as usize]
+											= cs;
+											top += 1;
+											cs = (target);
+										}}
+									
+								}
+								4  => {
+									{target = 10;
+										{stack[(top) as usize]
+											= cs;
+											top += 1;
+											cs = (target);
+										}}
+									
+								}
+								
+								_ => {}
+							}
+							if ( cs == 0  ) {
+								_cont = 0;
+								
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= ncall1_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "1one2two1one\n".to_string() ); }
+}
+

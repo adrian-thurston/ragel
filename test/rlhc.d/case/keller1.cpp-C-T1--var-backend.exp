@@ -1,0 +1,1323 @@
+#line 1 "tmp.gmr"
+#include <iostream>
+using std::cout;
+using std::endl;
+
+
+#line 16 "tmp.rl"
+enum token_type_e {
+	tt_id,
+	tt_equals,
+	tt_semi,
+	tt_pipe,
+	tt_amp,
+	tt_minus,
+	tt_dot,
+	tt_colon,
+	tt_percent,
+	tt_dollar,
+	tt_plus,
+	tt_number,
+	tt_star,
+	tt_question,
+	tt_not,
+	tt_andFSM,
+	tt_orFSM,
+	tt_open,
+	tt_close
+};
+
+struct LangEl
+{
+	int line, lineEnd;
+	int pos;
+	
+	int type;
+	int state;
+	LangEl *prev, *next;
+};
+
+struct Token : public LangEl
+{
+	const char *value;
+};
+
+struct Lel_start : public LangEl
+{
+	#line 32 "tmp.gmr"
+	
+	int si;
+	#line 59 "tmp.rl"
+};
+
+struct Lel_M : public LangEl
+{
+	#line 36 "tmp.gmr"
+	
+	int mi;
+	#line 67 "tmp.rl"
+};
+
+#define l__error 19
+#define l_tt_id 0
+#define l_tt_equals 1
+#define l_tt_semi 2
+#define l_tt_pipe 3
+#define l_tt_amp 4
+#define l_tt_minus 5
+#define l_tt_dot 6
+#define l_tt_colon 7
+#define l_tt_percent 8
+#define l_tt_dollar 9
+#define l_tt_plus 10
+#define l_tt_number 11
+#define l_tt_star 12
+#define l_tt_question 13
+#define l_tt_not 14
+#define l_tt_andFSM 15
+#define l_tt_orFSM 16
+#define l_tt_open 17
+#define l_tt_close 18
+#define l_start 23
+#define l_M 24
+#define l_A 25
+#define l_E 26
+#define l_T 27
+#define l_N 28
+#define l_K 29
+#define l_F 30
+#define l__start 31
+#define l__eof 20
+
+struct LangEl;
+
+struct Parser
+{
+	Parser();
+	
+	void parseLangEl( LangEl *langEl );
+	int done( );
+	
+	void push( LangEl *lel ) {
+		lel->prev = stack;
+		stack = lel;
+	}
+	LangEl *pop() {
+		LangEl *ret = stack;
+		stack = stack->prev;
+		return ret;
+	}
+	int pop( int n );
+	void rem( LangEl *lel, int n );
+	LangEl *stack;
+	int next;
+	LangEl *redLel;
+	LangEl *rhs[10];
+	
+	int cs;
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	int init( );
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	int execute(  LangEl *data, int len );
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	int finish( );
+};
+
+
+
+
+static const short  _Parser_key_offsets [] = { 0, 0, 4, 5, 15, 20, 25, 30, 35, 45, 49, 58, 70, 78, 86, 89, 94, 95, 100, 101, 106, 109, 114, 115, 120, 121, 126, 129, 134, 135, 140, 141, 146, 151, 159, 164, 169, 174, 182, 190, 199, 211, 220, 232, 237, 249, 257, 262, 267, 272, 276, 278, 279, 282, 284, 286, 0 ,  };
+static const char  _Parser_trans_keys [] = { 0, 23, 24, 25, 1, 0, 14, 15, 16, 17, 26, 27, 28, 29, 30, 0, 2, 10, 12, 18, 0, 15, 16, 17, 30, 0, 2, 10, 12, 18, 0, 2, 10, 12, 18, 0, 14, 15, 16, 17, 26, 27, 28, 29, 30, 3, 4, 5, 18, 0, 14, 15, 16, 17, 27, 28, 29, 30, 0, 6, 14, 15, 16, 17, 18, 28, 29, 30, 2, 5, 0, 14, 15, 16, 17, 28, 29, 30, 0, 7, 8, 9, 2, 6, 14, 18, 0, 5, 10, 0, 2, 9, 14, 18, 11, 0, 2, 9, 14, 18, 11, 0, 2, 9, 14, 18, 0, 5, 10, 0, 2, 9, 14, 18, 11, 0, 2, 9, 14, 18, 11, 0, 2, 9, 14, 18, 0, 5, 10, 0, 2, 9, 14, 18, 11, 0, 2, 9, 14, 18, 11, 0, 2, 9, 14, 18, 0, 2, 9, 14, 18, 0, 10, 12, 13, 2, 9, 14, 18, 0, 2, 9, 14, 18, 0, 2, 9, 14, 18, 0, 2, 9, 14, 18, 0, 7, 8, 9, 2, 6, 14, 18, 0, 7, 8, 9, 2, 6, 14, 18, 0, 14, 15, 16, 17, 27, 28, 29, 30, 0, 6, 14, 15, 16, 17, 18, 28, 29, 30, 2, 5, 0, 14, 15, 16, 17, 27, 28, 29, 30, 0, 6, 14, 15, 16, 17, 18, 28, 29, 30, 2, 5, 0, 2, 10, 12, 18, 0, 6, 14, 15, 16, 17, 18, 28, 29, 30, 2, 5, 0, 10, 12, 13, 2, 9, 14, 18, 0, 2, 9, 14, 18, 0, 2, 9, 14, 18, 0, 2, 9, 14, 18, 2, 3, 4, 5, 0, 20, 20, 0, 20, 25, 0, 20, 0, 20, 0 ,  };
+static const char  _Parser_single_lengths [] = { 0, 4, 1, 10, 1, 5, 1, 1, 10, 4, 9, 10, 8, 4, 3, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 4, 4, 9, 10, 9, 10, 1, 10, 4, 1, 1, 1, 4, 2, 1, 3, 2, 2, 0, 0 ,  };
+static const char  _Parser_range_lengths [] = { 0, 0, 0, 0, 2, 0, 2, 2, 0, 0, 0, 1, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 0, 1, 2, 1, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const short  _Parser_index_offsets [] = { 0, 0, 5, 7, 18, 22, 28, 32, 36, 47, 52, 62, 74, 83, 90, 94, 98, 100, 104, 106, 110, 114, 118, 120, 124, 126, 130, 134, 138, 140, 144, 146, 150, 154, 161, 165, 169, 173, 180, 187, 197, 209, 219, 231, 235, 247, 254, 258, 262, 266, 271, 274, 276, 280, 283, 286, 0 ,  };
+static const char  _Parser_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const short  _Parser_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 0 ,  };
+static const char  _Parser_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _Parser_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Parser_cond_targs [] = { 2, 51, 52, 54, 0, 3, 0, 4, 5, 6, 7, 8, 49, 44, 38, 32, 33, 0, 55, 55, 55, 0, 4, 6, 7, 8, 45, 0, 55, 55, 55, 0, 55, 55, 55, 0, 4, 5, 6, 7, 8, 9, 44, 38, 32, 33, 0, 10, 39, 41, 43, 0, 4, 5, 6, 7, 8, 11, 38, 32, 33, 0, 4, 12, 5, 6, 7, 8, 55, 37, 32, 33, 55, 0, 4, 5, 6, 7, 8, 13, 32, 33, 0, 55, 14, 20, 26, 55, 55, 0, 15, 16, 18, 0, 55, 55, 55, 0, 17, 0, 55, 55, 55, 0, 19, 0, 55, 55, 55, 0, 21, 22, 24, 0, 55, 55, 55, 0, 23, 0, 55, 55, 55, 0, 25, 0, 55, 55, 55, 0, 27, 28, 30, 0, 55, 55, 55, 0, 29, 0, 55, 55, 55, 0, 31, 0, 55, 55, 55, 0, 55, 55, 55, 0, 55, 34, 35, 36, 55, 55, 0, 55, 55, 55, 0, 55, 55, 55, 0, 55, 55, 55, 0, 55, 14, 20, 26, 55, 55, 0, 55, 14, 20, 26, 55, 55, 0, 4, 5, 6, 7, 8, 40, 38, 32, 33, 0, 4, 12, 5, 6, 7, 8, 55, 37, 32, 33, 55, 0, 4, 5, 6, 7, 8, 42, 38, 32, 33, 0, 4, 12, 5, 6, 7, 8, 55, 37, 32, 33, 55, 0, 55, 55, 55, 0, 4, 12, 5, 6, 7, 8, 55, 37, 32, 33, 55, 0, 55, 46, 47, 48, 55, 55, 0, 55, 55, 55, 0, 55, 55, 55, 0, 55, 55, 55, 0, 50, 10, 39, 41, 0, 55, 55, 0, 55, 0, 2, 55, 53, 0, 55, 55, 0, 55, 55, 0, 0, 0 ,  };
+static const char  _Parser_cond_actions [] = { 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 0, 3, 3, 3, 0, 4, 4, 4, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 5, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 6, 1, 1, 1, 6, 6, 0, 1, 1, 1, 0, 7, 7, 7, 0, 1, 0, 8, 8, 8, 0, 1, 0, 9, 9, 9, 0, 1, 1, 1, 0, 10, 10, 10, 0, 1, 0, 11, 11, 11, 0, 1, 0, 12, 12, 12, 0, 1, 1, 1, 0, 13, 13, 13, 0, 1, 0, 14, 14, 14, 0, 1, 0, 15, 15, 15, 0, 16, 16, 16, 0, 17, 1, 1, 1, 17, 17, 0, 18, 18, 18, 0, 19, 19, 19, 0, 20, 20, 20, 0, 21, 1, 1, 1, 21, 21, 0, 22, 1, 1, 1, 22, 22, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 23, 1, 1, 1, 23, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 24, 1, 1, 1, 24, 0, 25, 25, 25, 0, 1, 1, 1, 1, 1, 1, 26, 1, 1, 1, 26, 0, 27, 1, 1, 1, 27, 27, 0, 28, 28, 28, 0, 29, 29, 29, 0, 30, 30, 30, 0, 1, 1, 1, 1, 0, 31, 31, 0, 1, 0, 1, 32, 1, 0, 33, 33, 0, 34, 34, 0, 0, 0 ,  };
+static const char  _Parser_nfa_targs [] = { 0, 0 ,  };
+static const char  _Parser_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Parser_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Parser_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Parser_start  = 1;
+static const int  Parser_first_final  = 55;
+static const int  Parser_error  = 0;
+static const int  Parser_en_main  = 1;
+Parser::Parser( ) 
+{ }
+
+int Parser::init( )
+{
+
+	{
+		cs = ( int ) Parser_start;
+	}
+	return 0;
+}
+
+int Parser::execute( LangEl *_data, int _len )
+{
+	LangEl *p = _data;
+	LangEl *pe = _data+_len;
+	
+	{
+		int _klen;
+		int _ps;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _Parser_trans_keys + _Parser_key_offsets[cs];
+					_trans = ( unsigned int  ) _Parser_index_offsets[cs];
+					_have = 0;
+					_klen = ( int ) _Parser_single_lengths[cs];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( (p->type) < (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( (p->type) > (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _Parser_range_lengths[cs];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( (p->type) < (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( (p->type) > (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _Parser_cond_keys + _Parser_trans_offsets[_trans];
+					_klen = ( int ) _Parser_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _Parser_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					_ps = cs;
+					cs = ( int ) _Parser_cond_targs[_cond];
+					switch ( _Parser_cond_actions[_cond] ) {
+						case 1 :
+						{
+							p->state = (_ps);
+							push( p );
+							
+						}
+						
+						break;
+						case 32 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new Lel_start();
+							redLel->type = 23;
+							
+						}
+						{
+							#line 41 "tmp.gmr"
+							
+							cout << "start = M;" << endl;
+							static_cast<Lel_start*>(redLel)->si = static_cast<Lel_M*>(rhs[0])->mi;
+							
+							#line 214 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 34 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new Lel_M();
+							redLel->type = 24;
+							
+						}
+						{
+							#line 45 "tmp.gmr"
+							cout << "M = A;" << endl; 
+							#line 228 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 26 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 26;
+							
+						}
+						{
+							#line 50 "tmp.gmr"
+							cout << "E = T;" << endl; 
+							#line 263 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 22 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 27;
+							
+						}
+						{
+							#line 53 "tmp.gmr"
+							cout << "T = N;" << endl; 
+							#line 284 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 16 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 63 "tmp.gmr"
+							cout << "N = K;" << endl; 
+							#line 354 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 17 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 67 "tmp.gmr"
+							cout << "K = F;" << endl; 
+							#line 382 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 3 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 30;
+							
+						}
+						{
+							#line 72 "tmp.gmr"
+							cout << "F = tt_andFSM;" << endl; 
+							#line 417 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 4 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 30;
+							
+						}
+						{
+							#line 73 "tmp.gmr"
+							cout << "F = tt_orFSM;" << endl; 
+							#line 424 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 2 :
+						{
+							{
+								cs = (pop(1));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 30;
+							
+						}
+						{
+							#line 74 "tmp.gmr"
+							cout << "F = tt_id;" << endl; 
+							#line 431 "tmp.rl"
+							
+						}
+						{
+							rem(p, 1); 
+						}
+						
+						break;
+						case 33 :
+						{
+							{
+								cs = (pop(2));
+								
+							}
+							
+						}
+						{
+							redLel = new Lel_M();
+							redLel->type = 24;
+							
+						}
+						{
+							#line 44 "tmp.gmr"
+							cout << "M = M A;" << endl; 
+							#line 221 "tmp.rl"
+							
+						}
+						{
+							rem(p, 2); 
+						}
+						
+						break;
+						case 21 :
+						{
+							{
+								cs = (pop(2));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 27;
+							
+						}
+						{
+							#line 52 "tmp.gmr"
+							cout << "T = T N;" << endl; 
+							#line 277 "tmp.rl"
+							
+						}
+						{
+							rem(p, 2); 
+						}
+						
+						break;
+						case 19 :
+						{
+							{
+								cs = (pop(2));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 64 "tmp.gmr"
+							cout << "K = F tt_star;" << endl; 
+							#line 361 "tmp.rl"
+							
+						}
+						{
+							rem(p, 2); 
+						}
+						
+						break;
+						case 20 :
+						{
+							{
+								cs = (pop(2));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 65 "tmp.gmr"
+							cout << "K = F tt_question;" << endl; 
+							#line 368 "tmp.rl"
+							
+						}
+						{
+							rem(p, 2); 
+						}
+						
+						break;
+						case 18 :
+						{
+							{
+								cs = (pop(2));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 66 "tmp.gmr"
+							cout << "K = F tt_plus;" << endl; 
+							#line 375 "tmp.rl"
+							
+						}
+						{
+							rem(p, 2); 
+						}
+						
+						break;
+						case 27 :
+						{
+							{
+								cs = (pop(2));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 71 "tmp.gmr"
+							cout << "K = tt_not F;" << endl; 
+							#line 410 "tmp.rl"
+							
+						}
+						{
+							rem(p, 2); 
+						}
+						
+						break;
+						case 5 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 26;
+							
+						}
+						{
+							#line 47 "tmp.gmr"
+							cout << "E = E tt_pipe T;" << endl; 
+							#line 242 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 23 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 26;
+							
+						}
+						{
+							#line 48 "tmp.gmr"
+							cout << "E = E tt_amp T;" << endl; 
+							#line 249 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 24 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 26;
+							
+						}
+						{
+							#line 49 "tmp.gmr"
+							cout << "E = E tt_minus T;" << endl; 
+							#line 256 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 6 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 27;
+							
+						}
+						{
+							#line 51 "tmp.gmr"
+							cout << "T = T tt_dot N;" << endl; 
+							#line 270 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 7 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 54 "tmp.gmr"
+							cout << "N = N tt_colon tt_id;" << endl; 
+							#line 291 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 10 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 55 "tmp.gmr"
+							cout << "N = N tt_percent tt_id;" << endl; 
+							#line 298 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 13 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 56 "tmp.gmr"
+							cout << "N = N tt_dollar tt_id;" << endl; 
+							#line 305 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 29 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 68 "tmp.gmr"
+							cout << "K = tt_not F tt_star;" << endl; 
+							#line 389 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 30 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 69 "tmp.gmr"
+							cout << "K = tt_not F tt_question;" << endl; 
+							#line 396 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 28 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 29;
+							
+						}
+						{
+							#line 70 "tmp.gmr"
+							cout << "K = tt_not F tt_plus;" << endl; 
+							#line 403 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 25 :
+						{
+							{
+								cs = (pop(3));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 30;
+							
+						}
+						{
+							#line 75 "tmp.gmr"
+							cout << "F = tt_open E tt_close;" << endl; 
+							#line 438 "tmp.rl"
+							
+						}
+						{
+							rem(p, 3); 
+						}
+						
+						break;
+						case 31 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 25;
+							
+						}
+						{
+							#line 46 "tmp.gmr"
+							cout << "A = tt_id tt_equals E tt_semi;" << endl; 
+							#line 235 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						case 9 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 57 "tmp.gmr"
+							cout << "N = N tt_colon tt_plus tt_number;" << endl; 
+							#line 312 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						case 8 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 58 "tmp.gmr"
+							cout << "N = N tt_colon tt_minus tt_number;" << endl; 
+							#line 319 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						case 12 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 59 "tmp.gmr"
+							cout << "N = N tt_percent tt_plus tt_number;" << endl; 
+							#line 326 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						case 11 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 60 "tmp.gmr"
+							cout << "N = N tt_percent tt_minus tt_number;" << endl; 
+							#line 333 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						case 15 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 61 "tmp.gmr"
+							cout << "N = N tt_dollar tt_plus tt_number;" << endl; 
+							#line 340 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						case 14 :
+						{
+							{
+								cs = (pop(4));
+								
+							}
+							
+						}
+						{
+							redLel = new LangEl();
+							redLel->type = 28;
+							
+						}
+						{
+							#line 62 "tmp.gmr"
+							cout << "N = N tt_dollar tt_minus tt_number;" << endl; 
+							#line 347 "tmp.rl"
+							
+						}
+						{
+							rem(p, 4); 
+						}
+						
+						break;
+						
+					}
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+	if ( cs == Parser_error )
+	return -1;
+	if ( cs >= Parser_first_final )
+	return 1;
+	return 0;
+}
+
+int Parser::finish( )
+{
+	if ( cs == Parser_error )
+	return -1;
+	if ( cs >= Parser_first_final )
+	return 1;
+	return 0;
+}
+
+void Parser::parseLangEl( LangEl *lel )
+{
+	redLel = 0;
+	execute( lel, 1 );
+	while ( redLel != 0 ) {
+		execute( redLel, 1 );
+		redLel = 0;
+		execute( lel, 1 );
+	}
+}
+
+int Parser::pop( int n )
+{
+	for ( int i = n-1; i >= 0; i-- )
+	rhs[i] = pop();
+	return rhs[0]->state;
+}
+
+void Parser::rem( LangEl *lel, int n )
+{
+	for ( int i = n-1; i >= 0; i-- )
+	delete rhs[i];
+}
+
+int Parser::done( )
+{
+	Token *eof = new Token;
+	eof->type = l__eof;
+	eof->line = 0;
+	eof->pos = 0;
+	parseLangEl( eof );
+	return finish();
+}
+
+#line 77 "tmp.gmr"
+
+
+#include <assert.h>
+#define MAX_TOKS 10000
+
+struct TokList
+{
+	TokList() : numToks(0) { }
+	
+	void append( int type );
+	int parse();
+	
+	Token *toks[MAX_TOKS];
+	int numToks;
+};
+
+void TokList::append( int type )
+{
+	assert( numToks < MAX_TOKS );
+	toks[numToks] = new Token;
+	toks[numToks]->type = type;
+	numToks += 1;
+}
+
+int TokList::parse()
+{
+	Parser parser;
+	parser.init();
+	for ( int i = 0; i < numToks; i++ )
+	parser.parseLangEl( toks[i] );
+	return parser.done();
+}
+
+void test0()
+{
+	TokList tokList;
+	tokList.append( tt_id );
+	tokList.append( tt_equals );
+	tokList.append( tt_id );
+	tokList.append( tt_star );
+	tokList.append( tt_minus );
+	tokList.append( tt_andFSM );
+	tokList.append( tt_dot );
+	tokList.append( tt_id );
+	tokList.append( tt_semi );
+	tokList.append( tt_id );
+	tokList.append( tt_equals );
+	tokList.append( tt_id );
+	tokList.append( tt_andFSM );
+	tokList.append( tt_id );
+	tokList.append( tt_semi );
+	cout << tokList.parse() << endl;
+}
+
+void test1()
+{
+	TokList tokList;
+	tokList.append( tt_id );
+	tokList.append( tt_equals );
+	tokList.append( tt_open );
+	tokList.append( tt_orFSM );
+	tokList.append( tt_minus );
+	tokList.append( tt_andFSM );
+	tokList.append( tt_close );
+	tokList.append( tt_star );
+	tokList.append( tt_semi );
+	cout << tokList.parse() << endl;
+}
+void test2()
+{
+	TokList tokList;
+	tokList.append( tt_id );
+	tokList.append( tt_equals );
+	tokList.append( tt_not );
+	tokList.append( tt_open );
+	tokList.append( tt_orFSM );
+	tokList.append( tt_minus );
+	tokList.append( tt_not );
+	tokList.append( tt_andFSM );
+	tokList.append( tt_close );
+	tokList.append( tt_star );
+	tokList.append( tt_semi );
+	cout << tokList.parse() << endl;
+}
+void test3()
+{
+	TokList tokList;
+	tokList.append( tt_id );
+	tokList.append( tt_equals );
+	tokList.append( tt_id );
+	tokList.append( tt_colon );
+	tokList.append( tt_minus );
+	tokList.append( tt_number );
+	tokList.append( tt_id );
+	tokList.append( tt_colon );
+	tokList.append( tt_id );
+	tokList.append( tt_id );
+	tokList.append( tt_dollar );
+	tokList.append( tt_plus );
+	tokList.append( tt_number );
+	tokList.append( tt_id );
+	tokList.append( tt_percent );
+	tokList.append( tt_minus );
+	tokList.append( tt_number );
+	tokList.append( tt_semi );
+	cout << tokList.parse() << endl;
+}
+void test4()
+{
+	TokList tokList;
+	tokList.append( tt_id );
+	tokList.append( tt_equals );
+	tokList.append( tt_id );
+	tokList.append( tt_pipe );
+	tokList.append( tt_id );
+	tokList.append( tt_amp );
+	tokList.append( tt_id );
+	tokList.append( tt_minus );
+	tokList.append( tt_id );
+	tokList.append( tt_semi );
+	cout << tokList.parse() << endl;
+}
+
+int main()
+{
+	test0();
+	test1();
+	test2();
+	test3();
+	test4();
+}
+

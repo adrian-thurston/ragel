@@ -1,0 +1,552 @@
+
+namespace julia_out
+	token _IN_ /''/
+	token _EX_ /''/
+
+	lex
+		token comment /
+			'//' any* :> '\n' |
+			'/*' any* :>> '*/'
+		/
+
+		literal `function `end `while `if `else `elseif
+
+		token id
+			/[a-zA-Z_][a-zA-Z_0-9]*/
+
+		token number /
+			[0-9]+
+		/
+
+		token symbol /
+			'!' | '#' | '$' | '%' | '&' | '(' | ')' | '*' |
+			'+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' |
+			'=' | '>' | '?' | '@' | '[' | ']' | '^' | '|' |
+			'~' /
+
+		literal `{ `}
+
+		token string /
+				'"' ( [^"\\] | '\\' any ) * '"' |
+				"'" ( [^'\\] | '\\' any ) * "'"
+			/
+
+		ignore
+			/[ \t\v\r\n]+/
+	end
+
+	def kw
+		[`function _IN_]
+	|	[`while _IN_]
+	|	[`if _IN_]
+	|	[_EX_ `elseif _IN_]
+	|	[_EX_ `else _IN_]
+	|	[_EX_ `end]
+
+	def item
+		[comment]
+	|	[kw]
+	|	[id]
+	|	[number]
+	|	[symbol]
+	|	[string]
+	|	[`{ _IN_ item* _EX_ `} ]
+
+	def julia_out
+		[_IN_ _EX_ item*]
+end
+
+namespace julia_gen
+
+	global Parser: parser<julia_out::julia_out>
+
+	void tok_list( TL: host::tok* )
+	{
+		for Tok: host::tok in repeat(TL) {
+			switch Tok
+			case [host::`${ StmtList: stmt* host::`}$] {
+				send Parser
+					"{
+					"	[stmt_list( StmtList )]
+					"}
+			}
+			case [host::`={ Expr: expr host::`}=] {
+				send Parser
+					"([expr( Expr )])"
+			}
+			case [E: escape] {
+				Str: str = $E
+				send Parser
+					"[Str.suffix( 1 )]"
+			}
+			default {
+				send Parser
+					[Tok]
+			}
+		}
+	}
+
+	void embedded_host( EmbeddedHost: embedded_host )
+	{
+		switch EmbeddedHost
+		case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+		{
+			send Parser
+				"([tok_list( TL )])"
+		}
+		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+		{
+			send Parser 
+				[tok_list( TL )]
+		}
+		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+		{
+			send Parser
+				[tok_list( TL )]
+		}
+	}
+
+	void expr_factor( ExprFactor: expr_factor )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [`( E: expr `)]
+		{
+			send Parser
+				"([expr(E)])"
+		}
+		case [I: ident `[ E: expr `]]
+		{
+			send Parser
+				"[I]\[1+([expr( E )])\]"
+		}
+		case [I: ident `[ E: expr `] `. F: ident]
+		{
+			send Parser
+				"[I]\[1+([expr( E )])\].[F]"
+		}
+		case [`offset `( ident `, expr `)]
+		{
+			send Parser
+				[expr( ExprFactor.expr )]
+		}
+		case [`deref `( I: ident `, E: expr `)]
+		{
+			send Parser
+				"[I]\[1+([ expr( E ) ])\]"
+		}
+		case [`TRUE]
+		{
+			send Parser "true"
+		}
+		case [`FALSE]
+		{
+			send Parser "false"
+		}
+		case [N: `nil]
+		{
+			send Parser "0"
+		}
+		case [Number: number]
+		{
+			number( Number )
+		}
+		case [E1: embedded_host `-> E2: expr_factor]
+		{
+			# The accessor operator is contained wihtin the lhs.
+			embedded_host( E1 )
+			expr_factor( E2 )
+		}
+		case [`cast `( T: type `) F: expr_factor]
+		{
+			send Parser 
+				"convert([type( T )], [expr_factor( F )] )"
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
+	}
+
+	void lvalue( ExprFactor: lvalue )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [I: ident `[ E: expr `]]
+		{
+			send Parser
+				"[I]\[1+([expr( E )])\]"
+		}
+		case [I: ident `[ E: expr `] `. F: ident]
+		{
+			send Parser
+				"[I]\[1+([ expr( E )])\].[F]"
+		}
+		case [E1: embedded_host `-> E2: lvalue]
+		{
+			# The accessor operator is contained wihtin the lhs.
+			embedded_host( E1 )
+			lvalue( E2 )
+		}
+		default {
+			# Catches cases not specified
+			send Parser [ExprFactor]
+		}
+	}
+
+	void expr_factor_op( ExprFactorOp: expr_factor_op )
+	{
+		switch ExprFactorOp
+		case [B: `! expr_factor_op]
+		{
+			send Parser [B]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
+		}
+		case [T: `~ expr_factor_op]
+		{
+			send Parser [T]
+			expr_factor_op( ExprFactorOp._expr_factor_op )
+		}
+		case [expr_factor]
+		{
+			expr_factor( ExprFactorOp.expr_factor )
+		}
+	}
+
+	void expr_bitwise( ExprBitwise: expr_bitwise )
+	{
+		switch ExprBitwise
+		case [expr_bitwise A: `& expr_factor_op]
+		{
+			expr_bitwise( ExprBitwise._expr_bitwise )
+			send Parser [A]
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
+		case [expr_factor_op]
+		{
+			expr_factor_op( ExprBitwise.expr_factor_op )
+		}
+	}
+
+	void expr_mult( ExprMult: expr_mult )
+	{
+		switch ExprMult
+		case [expr_mult T: `* expr_bitwise]
+		{
+			expr_mult( ExprMult._expr_mult )
+			send Parser [T]
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+		case [expr_bitwise]
+		{
+			expr_bitwise( ExprMult.expr_bitwise )
+		}
+	}
+
+	void expr_add( ExprAdd: expr_add )
+	{
+		switch ExprAdd
+		case [expr_add Op: add_op expr_mult]
+		{
+			expr_add( ExprAdd._expr_add )
+			send Parser [Op]
+			expr_mult( ExprAdd.expr_mult )
+		}
+		case [expr_mult]
+		{
+			expr_mult( ExprAdd.expr_mult )
+		}
+	}
+
+	void expr_shift( ExprShift: expr_shift )
+	{
+		switch ExprShift
+		case [expr_shift Op: shift_op expr_add]
+		{
+			expr_shift( ExprShift._expr_shift )
+			send Parser [Op]
+			expr_add( ExprShift.expr_add )
+		}
+		case [expr_add]
+		{
+			expr_add( ExprShift.expr_add )
+		}
+	}
+
+	void expr_test( ExprTest: expr_test )
+	{
+		switch ExprTest
+		case [expr_test Op: test_op expr_shift]
+		{
+			expr_test( ExprTest._expr_test )
+			send Parser [Op]
+			expr_shift( ExprTest.expr_shift )
+		}
+		case [expr_shift]
+		{
+			expr_shift( ExprTest.expr_shift )
+		}
+	}
+
+	void expr( Expr: expr )
+	{
+		expr_test( Expr.expr_test )
+	}
+
+	void type( Type: type )
+	{
+		switch Type
+		case "s8"
+			send Parser ['Int8']
+		case "u8"
+			send Parser ['UInt8']
+		case "s16"
+			send Parser ['Int16']
+		case "s32"
+			send Parser ['Int32']
+		case "s64"
+			send Parser ['Int64']
+		case "s128"
+			send Parser ['Int128']
+		case "uint"
+			send Parser ['UInt']
+		case "int"
+			send Parser ['Int']
+		default
+			send Parser [Type]
+	}
+
+	void number( Number: number )
+	{
+		switch Number
+		case [`u `( uint `) ]
+			send Parser "[Number.uint]u"
+		default
+			send Parser [Number]
+	}
+
+	void num_list( NumList: num_list )
+	{
+		for Number: number in NumList
+			send Parser "[number( Number )], "
+	}
+
+	void stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [EH: embedded_host]
+		{
+			send Parser
+				[embedded_host( EH )]
+		}
+		case [A: static_array] {
+			send Parser
+				"const [A.ident] = [type(A.type)]\[[num_list(A.num_list)]\]
+		}
+		case [V: static_value] {
+			send Parser
+				"const [V.ident] = [V.number]
+		}
+		# case [declaration]
+		case [
+			TypeList: opt_const Type: type
+			Ident: ident OptInit: opt_init Semi: `;
+		]
+		{
+			send Parser
+				[Ident]
+
+			if match OptInit [E: `= expr] {
+				send Parser
+					[E expr(OptInit.expr)]
+			}
+			else {
+				send Parser
+					"= 0
+			}
+
+			send Parser
+				[Semi]
+		}
+		case [
+				`if `( IfExpr: expr `) IfStmt: stmt
+				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+		] {
+			send Parser
+				"if [expr(IfExpr)]
+				"	[stmt(IfStmt)]
+
+			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+				match ElseIfClause
+					[`else `if `( ElseIfExpr: expr `) ElseIfStmt: stmt]
+
+				send Parser
+					"elseif [expr(ElseIfExpr)]
+					"	[stmt(ElseIfStmt)]
+			}
+
+			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+				send Parser
+					"else
+					"	[stmt(ElseStmt)]
+			}
+
+			send Parser
+				"end
+		}
+		case [`while `( WhileExpr: expr `) WhileStmt: stmt] {
+			send Parser
+				"while [expr(WhileExpr)]
+				"	[stmt(WhileStmt)]
+				"end
+		}
+		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
+
+			require StmtList
+				[`case E1: expr `{ Inner: stmt* `} Rest: stmt*]
+
+			send Parser
+				"if [expr(SwitchExpr)] == [expr(E1)]
+				"	[stmt_list(Inner)]
+
+			for S: stmt in repeat(Rest) {
+				switch S
+				case [`case E1: expr `{ Inner: stmt* `}]
+				{
+					send Parser
+						"elseif [expr(SwitchExpr)] == [expr(E1)]
+						"	[stmt_list(Inner)]
+				}
+				case
+					[`default `{ Inner: stmt* `}]
+				{
+					send Parser
+						"else
+						"	[stmt_list(Inner)]
+				}
+			}
+
+			send Parser
+				"end
+		}
+		case [ExprExpr: expr Semi: `;] {
+			send Parser
+				[expr(ExprExpr)]
+		}
+		case [L: `{ TL: stmt* R: `}] {
+			send Parser
+				[stmt_list(TL)]
+		}
+		case [
+			TypeList: opt_const Type: type
+			Ident: ident OptInit: opt_init Semi: `;
+		]
+		{
+			send Parser
+				[TypeList type(Type) Ident]
+
+			if match OptInit [E: `= expr] {
+				send Parser
+					[E expr(OptInit.expr)]
+			}
+
+			send Parser
+				[Semi]
+		}
+		case [Export: export_stmt]
+		{
+			send Parser
+				"#define [Export.ident] [number(Export.number)] 
+		}
+		case ['fallthrough' ';']
+		{
+			# Nothing needed here.
+		}
+		case [Index: index_stmt]
+		{
+			send Parser
+				"[Index.ident] = 0;
+		}
+		case [case_block]
+		{
+			send Parser
+				"@case [expr( Stmt.case_block.expr )] begin
+				"[stmt_list( Stmt.case_block._repeat_stmt )]
+				"end
+		}
+		case [default_block]
+		{
+			send Parser
+				"default:
+				"[stmt_list( Stmt.default_block._repeat_stmt )]
+				"break;
+		}
+		case [case_label]
+		{
+			send Parser
+				"@case [expr( Stmt.case_label.expr )]
+		}
+		case [label_stmt]
+		{
+			send Parser
+				"@label [Stmt.label_stmt.ident]
+				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+		}
+		case [L: goto_label]
+		{
+			send Parser
+				"@label [L.ident]
+		}
+		case [G: goto_stmt]
+		{
+			send Parser
+				"@goto [G.ident]
+		}
+		case [entry_loop]
+		{
+			send Parser
+				[stmt_list( Stmt.entry_loop._repeat_stmt )]
+		}
+		case [AS: assign_stmt]
+		{
+			send Parser
+				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)]
+		}
+		default {
+			# catches unspecified cases
+			send Parser [Stmt]
+		}
+	}
+
+	void stmt_list( StmtList: stmt* )
+	{
+		for Stmt: stmt in repeat( StmtList )
+			stmt( Stmt )
+	}
+
+	void trans( Output: stream, Start: start )
+	{
+		Parser = new parser<julia_out::julia_out>()
+
+		stmt_list( Start._repeat_stmt )
+
+		CO: julia_out::julia_out = Parser->finish()
+
+		if CO {
+			send Output
+				[CO]
+		}
+		else {
+			send stderr
+				"failed to parse output: [Parser->error]
+		}
+	}
+end

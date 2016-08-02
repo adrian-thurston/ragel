@@ -1,0 +1,135 @@
+host( "working/include2.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	
+	
+	
+	
+}@
+array char _include_test_1_trans_keys( 0, 3 ) = { 1, 0, 2, 2, 3, 3, 2, 2, 3, 3, 2, 2, 3, 3, 0, 0, 1, 0, 0 };
+
+array s8 _include_test_1_char_class( 0, 3 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 };
+
+array s8 _include_test_1_index_offsets( 0, 7 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 0 };
+
+array s8 _include_test_1_indicies( 0, 7 ) = { 0, 2, 3, 4, 5, 6, 7, 0 };
+
+array s8 _include_test_1_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _include_test_1_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _include_test_1_cond_targs( 0, 8 ) = { 2, 0, 3, 4, 5, 6, 7, 8, 0 };
+
+array s8 _include_test_1_cond_actions( 0, 7 ) = { 1, 0, 2, 3, 4, 5, 6, 7, 0 };
+
+array s8 _include_test_1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _include_test_1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _include_test_1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _include_test_1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int include_test_1_start = 1;
+value int include_test_1_first_final = 8;
+value int include_test_1_error = 0;
+
+value int include_test_1_en_main = 1;
+
+host( "working/include2.rl", 35 ) @{
+	
+	void test( char *p )
+	{
+		int cs;
+	}@
+	{
+		cs = cast(int)include_test_1_start;
+	}
+	host( "working/include2.rl", 40 ) @{
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		int _nbreak;
+		entry {
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _include_test_1_trans_keys, (cs<<1) );
+				_inds = offset( _include_test_1_indicies, _include_test_1_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 98 && ( deref( data, p )) >= 0 )
+				{
+					int _ic = cast(int)_include_test_1_char_class[cast(int)( deref( data, p )) - 0];
+					if ( _ic <= cast(int)deref( _include_test_1_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _include_test_1_trans_keys, _keys ) )
+					_trans = cast(int)deref( _include_test_1_indicies, _inds + cast(int)( _ic - cast(int)deref( _include_test_1_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_include_test_1_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_include_test_1_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_include_test_1_cond_targs[_trans];
+				
+				if ( _include_test_1_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				_nbreak = 0;
+				switch ( _include_test_1_cond_actions[_trans] ) {
+					case 1 {
+						host( "./include1.rl", 11 ) ${printf(" a1");}$
+					}
+					case 3 {
+						host( "./include1.rl", 25 ) ${printf(" a2");}$
+					}
+					case 5 {
+						host( "working/include2.rl", 13 ) ${printf(" a3");}$
+					}
+					case 7 {
+						host( "working/include2.rl", 31 ) ${${p += 1;  _nbreak = 1; }$}$
+					}
+					case 2 {
+						host( "./include1.rl", 12 ) ${printf(" b1");}$	host( "./include1.rl", 14 ) ${printf(" nr1");}$
+					}
+					case 4 {
+						host( "./include1.rl", 26 ) ${printf(" b2");}$	host( "./include1.rl", 23 ) ${printf(" nr2");}$
+					}
+					case 6 {
+						host( "working/include2.rl", 14 ) ${printf(" b3");}$	host( "working/include2.rl", 11 ) ${printf(" nr3");}$
+					}
+				}
+				
+				if ( _nbreak == 1 )
+				goto _out;
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				goto _resume;
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/include2.rl", 41 ) @{
+		printf("\n");
+	}
+	
+	int main()
+	{
+		test( "ababab" );
+		return 0;
+	}
+	
+}@

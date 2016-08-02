@@ -1,0 +1,207 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+static const char  _foo_actions [] = { 0, 1, 0, 1, 1, 1, 2, 0 ,  };
+static const char  _foo_to_state_actions [] = { 0, 5, 5, 5, 5, 5, 5, 0 ,  };
+static const char  _foo_eof_actions [] = { 0, 3, 3, 3, 3, 3, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 6;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+int main()
+{
+	int cs;
+	char *p = "hello", *pe = p + strlen(p);
+	char *eof = pe;
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 104  )
+			{
+				goto ctr1;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 101  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 88  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 88  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 88  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 6:
+			{
+				goto ctr0;
+			}
+			
+		}
+		ctr0: cs = 0;
+		goto f1;
+		ctr1: cs = 2;
+		goto f2;
+		ctr2: cs = 3;
+		goto f2;
+		ctr3: cs = 4;
+		goto f2;
+		ctr4: cs = 5;
+		goto f2;
+		ctr5: cs = 6;
+		goto f2;
+		
+		f2: _acts = _foo_actions + 1 ;
+		goto execFuncs;
+		f1: _acts = _foo_actions + 3 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					printf("char: %c\n", *p); 
+				}
+				
+				break;
+				case 1:
+				{
+					printf("err: %c\n", *p); 
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		_acts = _foo_actions + _foo_to_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 2:
+				{
+					printf("to state: %c\n", *p); 
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			const char  *__acts;
+			unsigned int __nacts;
+			__acts = _foo_actions + _foo_eof_actions[cs];
+			__nacts = ( unsigned int  ) (*( __acts  ))
+			;
+			__acts += 1;
+			while ( __nacts > 0  )
+			{
+				switch ( (*( __acts  ))
+				) {
+					case 1:
+					{
+						printf("err: %c\n", *p); 
+					}
+					
+					break;
+					
+				}
+				__acts += 1;
+				__nacts -= 1;
+			}
+			
+		}
+		
+		
+		_out: {}
+	}
+	printf( "rest: %s\n", p );
+	
+	return 0;
+}
+

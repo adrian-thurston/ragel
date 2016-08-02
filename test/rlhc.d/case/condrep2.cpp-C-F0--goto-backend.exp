@@ -1,0 +1,219 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+
+
+static const char  _foo_actions [] = { 0, 1, 1, 2, 2, 0, 0 ,  };
+static const char  _foo_trans_keys [] = { 1, 0, 2, 2, 0, 2, 1, 0, 0 ,  };
+static const char  _foo_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 ,  };
+static const char  _foo_index_offsets [] = { 0, 0, 1, 4, 0 ,  };
+static const char  _foo_indicies [] = { 0, 2, 1, 0, 0 ,  };
+static const char  _foo_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
+static const char  _foo_trans_cond_spaces [] = { 1, -1, 0, 0 ,  };
+static const char  _foo_trans_offsets [] = { 0, 2, 3, 0 ,  };
+static const char  _foo_cond_targs [] = { 0, 2, 0, 0, 3, 0 ,  };
+static const char  _foo_cond_actions [] = { 0, 3, 0, 0, 0, 0 ,  };
+static const char  _foo_from_state_actions [] = { 0, 1, 0, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 3;
+static const int  foo_en_main  = 1;
+void test( int min, int max, const char *str )
+{
+	int cs;
+	const char *p = str;
+	const char *pe = str + strlen( str ) + 1;
+	int c = 0, seen = 0;
+	
+	cout << "run " << str << " " << min << " " << max << ":";
+	
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		int _trans = 0;
+		unsigned int _cond = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		int _cpc;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_acts = _foo_actions + _foo_from_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 1 :
+				{
+					c = 0; 
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		_keys = _foo_trans_keys + (cs<<1);
+		_inds = _foo_indicies + _foo_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 46 && ((*( p  ))
+		)>= 0  )
+		{
+			int _ic = ( int ) _foo_char_class[( int ) ((*( p  ))
+			)- 0];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _foo_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _foo_index_defaults[cs];
+		}
+		
+		
+		_cond = ( unsigned int  ) _foo_trans_offsets[_trans];
+		_cpc = 0;
+		switch ( _foo_trans_cond_spaces[_trans] ) {
+			case 0 :
+			if ( (({ c >= min; }) ) )
+			_cpc += 1;
+			
+			
+			break;
+			case 1 :
+			if ( (({ c < max; }) ) )
+			_cpc += 1;
+			
+			
+			break;
+			
+		}
+		_cond += ( unsigned int  ) _cpc;
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _foo_cond_targs[_cond];
+		if ( _foo_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		_acts = _foo_actions + _foo_cond_actions[_cond];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					seen += 1; 
+				}
+				
+				break;
+				case 2 :
+				{
+					c += 1; 
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+	cout << " " << seen;
+	
+	if ( cs >= foo_first_final )
+	cout << " success" << endl;
+	else
+	cout << " failure" << endl;
+}
+
+int main()
+{
+	test( 0, 0, "" );
+	test( 0, 1, "" );
+	test( 1, 1, "" );
+	test( 1, 2, "" );
+	test( 2, 2, "" );
+	test( 2, 3, "" );
+	
+	test( 0, 0, "." );
+	test( 0, 1, "." );
+	test( 1, 1, "." );
+	test( 1, 2, "." );
+	test( 2, 2, "." );
+	test( 2, 3, "." );
+	
+	test( 0, 0, ".." );
+	test( 0, 1, ".." );
+	test( 1, 1, ".." );
+	test( 1, 2, ".." );
+	test( 2, 2, ".." );
+	test( 2, 3, ".." );
+	
+	test( 0, 0, "..." );
+	test( 0, 1, "..." );
+	test( 1, 1, "..." );
+	test( 1, 2, "..." );
+	test( 2, 2, "..." );
+	test( 2, 3, "..." );
+	
+	test( 0, 0, "...." );
+	test( 0, 1, "...." );
+	test( 1, 1, "...." );
+	test( 1, 2, "...." );
+	test( 2, 2, "...." );
+	test( 2, 3, "...." );
+	return 0;
+}
+

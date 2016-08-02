@@ -1,0 +1,300 @@
+host( "working/genrep1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stddef.h>
+	#include <stdint.h>
+	#include <stdlib.h> 
+	#include <stdbool.h>
+	#include <string.h>
+	#include <stdio.h>
+	
+	const char s[4096];
+	
+	struct nfa_stack
+	{
+		void *data;
+		unsigned long sz;
+	};
+	
+	struct nfa_bp_rec
+	{
+		long state;
+		const char *p;
+		long popTrans;
+		long q_2;
+	};
+	
+}@
+array s8 _genrep_nfa_targs( 0, 11 ) = { 0, 1, 8, 1, 8, 3, 11, 8, 10, 0 };
+
+array s8 _genrep_nfa_offsets( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 1, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _genrep_nfa_push_actions( 0, 1 ) = { 0, 0, 1, 0, 1, 0, 1, 1, 1, 0 };
+
+array s8 _genrep_nfa_pop_trans( 0, 7 ) = { 0, 0, 4, 0, 4, 0, 7, 6, 5, 0 };
+
+value int genrep_start = 1;
+value int genrep_first_final = 17;
+value int genrep_error = 0;
+
+value int genrep_en_main = 1;
+
+host( "working/genrep1.rl", 71 ) @{
+	
+	int test( const char *p )
+	{
+		int len = strlen( p ) + 1;
+		const char *pe = p + len;
+		int cs;
+		
+		struct nfa_bp_rec *nfa_bp = (struct nfa_bp_rec*) s;
+		long nfa_len = 0;
+		long nfa_count = 0;
+		
+		long q_2 = 0;
+		
+		printf( "testing: %s\n", p );
+		
+	}@
+	{
+		cs = cast(int)genrep_start;
+		nfa_len = 0;
+	}
+	
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		if ( _genrep_nfa_offsets[cs] ) {
+			int alt = 0; 
+			int new_recs = _genrep_nfa_targs[cast(int)_genrep_nfa_offsets[cs]];
+			while ( alt < new_recs ) { 
+				nfa_bp[nfa_len].state = _genrep_nfa_targs[cast(int)_genrep_nfa_offsets[cs] + 1 + alt];
+				nfa_bp[nfa_len].p = p;
+				nfa_bp[nfa_len].popTrans = cast(long)_genrep_nfa_offsets[cs] + 1 + alt;
+				
+				switch ( _genrep_nfa_push_actions[cast(int)_genrep_nfa_offsets[cs] + 1 + alt] ) {
+					case 1 {
+						host( "working/genrep1.rl", 33 ) ${
+							nfa_bp[nfa_len].q_2 = q_2;
+						}$
+					}
+				}
+				nfa_len += 1;
+				alt += 1;
+			}
+		}
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) == u(104) ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == u(101) ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == u(108) ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == u(108) ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == u(111) ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == u(32) ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ( deref( data, p )) == u(32) ) {
+				goto ctr7;
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( ( deref( data, p )) == u(116) ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ( deref( data, p )) == u(104) ) {
+				goto ctr9;
+			}
+			{
+				goto ctr1;
+			}
+			case 13:
+			if ( ( deref( data, p )) == u(101) ) {
+				goto ctr10;
+			}
+			{
+				goto ctr1;
+			}
+			case 14:
+			if ( ( deref( data, p )) == u(114) ) {
+				goto ctr11;
+			}
+			{
+				goto ctr1;
+			}
+			case 15:
+			if ( ( deref( data, p )) == u(101) ) {
+				goto ctr12;
+			}
+			{
+				goto ctr1;
+			}
+			case 16:
+			{
+				goto ctr13;
+			}
+			case 17:
+			{
+				goto ctr1;
+			}
+			case 10:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr2: cs = 3; goto _again;
+		ctr3: cs = 4; goto _again;
+		ctr4: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		ctr6: cs = 7; goto _again;
+		ctr7: cs = 9; goto _again;
+		ctr8: cs = 12; goto _again;
+		ctr9: cs = 13; goto _again;
+		ctr10: cs = 14; goto _again;
+		ctr11: cs = 15; goto _again;
+		ctr12: cs = 16; goto _again;
+		ctr13: cs = 17; goto f7;
+		
+		f7:
+		host( "working/genrep1.rl", 66 ) ${
+			printf( "------ MATCH\n" );
+		}$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+		if ( nfa_len > 0 ) {
+			nfa_count += 1;
+			nfa_len -= 1;
+			p = nfa_bp[nfa_len].p;
+			int _pop_test = 1;
+			switch ( _genrep_nfa_pop_trans[nfa_bp[nfa_len].popTrans] ) {
+				case 4 {
+					_pop_test = host( "working/genrep1.rl", 38 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep1.rl", 43 ) ={
+						({  q_2 = 0; 1; })
+					}=;
+					
+				}
+				case 5 {
+					_pop_test = host( "working/genrep1.rl", 38 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep1.rl", 47 ) ={
+						({ 1; })
+					}=;
+					
+				}
+				case 6 {
+					_pop_test = host( "working/genrep1.rl", 38 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep1.rl", 51 ) ={
+						({ ++q_2 < 10; })
+					}=;
+					
+				}
+				case 7 {
+					_pop_test = host( "working/genrep1.rl", 38 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep1.rl", 55 ) ={
+						({ ++q_2 >= 10; })
+					}=;
+					
+				}
+			}
+			if ( _pop_test ) {
+				cs = nfa_bp[nfa_len].state;
+				goto _resume;
+			}
+			goto _out;
+		}
+	}
+	host( "working/genrep1.rl", 91 ) @{
+		
+		return 0;
+	}
+	
+	int main()
+	{
+		test( "hello         there" );
+		test( "hello          there" );
+		test( "hello           there" );
+		test( "hello            there" );
+		return 0;
+	}
+	
+}@

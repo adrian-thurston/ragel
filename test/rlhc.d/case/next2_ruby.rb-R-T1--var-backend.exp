@@ -1,0 +1,478 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+class << self
+	attr_accessor :_next2_key_offsets 
+	private :_next2_key_offsets, :_next2_key_offsets=
+end
+self._next2_key_offsets = [
+0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 22, 22, 22, 22, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_trans_keys 
+	private :_next2_trans_keys, :_next2_trans_keys=
+end
+self._next2_trans_keys = [
+120, 117, 110, 117, 115, 101, 100, 111, 110, 101, 116, 119, 111, 116, 104, 114, 101, 101, 10, 49, 50, 51, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_single_lengths 
+	private :_next2_single_lengths, :_next2_single_lengths=
+end
+self._next2_single_lengths = [
+0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_range_lengths 
+	private :_next2_range_lengths, :_next2_range_lengths=
+end
+self._next2_range_lengths = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_index_offsets 
+	private :_next2_index_offsets, :_next2_index_offsets=
+end
+self._next2_index_offsets = [
+0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 41, 42, 43, 44, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_trans_cond_spaces 
+	private :_next2_trans_cond_spaces, :_next2_trans_cond_spaces=
+end
+self._next2_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_trans_offsets 
+	private :_next2_trans_offsets, :_next2_trans_offsets=
+end
+self._next2_trans_offsets = [
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_trans_lengths 
+	private :_next2_trans_lengths, :_next2_trans_lengths=
+end
+self._next2_trans_lengths = [
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_cond_keys 
+	private :_next2_cond_keys, :_next2_cond_keys=
+end
+self._next2_cond_keys = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_cond_targs 
+	private :_next2_cond_targs, :_next2_cond_targs=
+end
+self._next2_cond_targs = [
+19, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 20, 0, 9, 0, 10, 0, 21, 0, 12, 0, 13, 0, 22, 0, 15, 0, 16, 0, 17, 0, 18, 0, 23, 0, 19, 19, 19, 1, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_cond_actions 
+	private :_next2_cond_actions, :_next2_cond_actions=
+end
+self._next2_cond_actions = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 4, 5, 6, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_nfa_targs 
+	private :_next2_nfa_targs, :_next2_nfa_targs=
+end
+self._next2_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_nfa_offsets 
+	private :_next2_nfa_offsets, :_next2_nfa_offsets=
+end
+self._next2_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_nfa_push_actions 
+	private :_next2_nfa_push_actions, :_next2_nfa_push_actions=
+end
+self._next2_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_next2_nfa_pop_trans 
+	private :_next2_nfa_pop_trans, :_next2_nfa_pop_trans=
+end
+self._next2_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :next2_start 
+end
+self.next2_start  = 19;
+
+class << self
+	attr_accessor :next2_first_final 
+end
+self.next2_first_final  = 19;
+
+class << self
+	attr_accessor :next2_error 
+end
+self.next2_error  = 0;
+
+class << self
+	attr_accessor :next2_en_unused 
+end
+self.next2_en_unused  = 2;
+
+class << self
+	attr_accessor :next2_en_one 
+end
+self.next2_en_one  = 8;
+
+class << self
+	attr_accessor :next2_en_two 
+end
+self.next2_en_two  = 11;
+
+class << self
+	attr_accessor :next2_en_three 
+end
+self.next2_en_three  = 14;
+
+class << self
+	attr_accessor :next2_en_main 
+end
+self.next2_en_main  = 19;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	target = 1
+	last = 1
+	begin
+		cs = next2_start;
+		
+	end
+	begin
+		_klen= 0
+		;
+		_keys = 0;
+		_ckeys = 0;
+		_cpc= 0
+		;
+		_trans= 0
+		;
+		_cond = 0;
+		_have = 0;
+		_cont = 1;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_keys = _next2_key_offsets[cs] ;
+								_trans = _next2_index_offsets[cs];
+								_have = 0;
+								_klen = _next2_single_lengths[cs];
+								if ( _klen > 0  )
+									begin
+										_lower = 0;
+										_mid = 0;
+										_upper = 0;
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										while ( _upper >= _lower && _have == 0  )
+											begin
+												_mid = _lower + ((_upper-_lower) >> 1);
+												if ( ( data[p ].ord) < _next2_trans_keys[_mid ] )
+													_upper = _mid - 1;
+													
+													elsif ( ( data[p ].ord) > _next2_trans_keys[_mid ] )
+													_lower = _mid + 1;
+													
+													else
+													begin
+														_trans += (_mid - _keys);
+														_have = 1;
+														
+													end
+													
+												end
+												
+											end
+											
+										end
+										if ( _have == 0  )
+											begin
+												_keys += _klen;
+												_trans += _klen;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+										_klen = _next2_range_lengths[cs];
+										if ( _klen > 0  )
+											begin
+												_lower = 0;
+												_mid = 0;
+												_upper = 0;
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												while ( _have == 0 && _lower <= _upper  )
+													begin
+														_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+														if ( ( data[p ].ord) < _next2_trans_keys[_mid ] )
+															_upper = _mid - 2;
+															
+															elsif ( ( data[p ].ord) > _next2_trans_keys[_mid + 1 ] )
+															_lower = _mid + 2;
+															
+															else
+															begin
+																_trans += ((_mid - _keys)>>1);
+																_have = 1;
+																
+															end
+															
+														end
+														
+													end
+													
+												end
+												if ( _have == 0  )
+													_trans += _klen;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								_ckeys = _next2_trans_offsets[_trans] ;
+								_klen = _next2_trans_lengths[_trans];
+								_cond = _next2_trans_offsets[_trans];
+								_have = 0;
+								_cpc = 0;
+								begin
+									_lower = 0;
+									_mid = 0;
+									_upper = 0;
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									while ( _have == 0 && _lower <= _upper  )
+										begin
+											_mid = _lower + ((_upper-_lower) >> 1);
+											if ( _cpc < _next2_cond_keys[_mid ] )
+												_upper = _mid - 1;
+												
+												elsif ( _cpc > _next2_cond_keys[_mid ] )
+												_lower = _mid + 1;
+												
+												else
+												begin
+													_cond += (_mid - _ckeys);
+													_have = 1;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									if ( _have == 0  )
+										begin
+											cs = 0;
+											_cont = 0;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _cont == 1  )
+							begin
+								cs = _next2_cond_targs[_cond];
+								case  _next2_cond_actions[_cond]  
+								when -2 then
+								begin
+								end
+								when 1  then
+								begin
+									begin
+										print( "one\n" );
+										target = 19;
+										begin
+											cs = (target);
+											
+										end
+										
+									end
+									
+								end
+								when 2  then
+								begin
+									begin
+										print( "two\n" );
+										target = 19;
+										begin
+											cs = (target);
+											
+										end
+										
+									end
+									
+								end
+								when 3  then
+								begin
+									begin
+										print( "three\n" );
+										target = 19;
+										begin
+											cs = (target);
+											
+										end
+										
+									end
+									
+								end
+								when 4  then
+								begin
+									begin
+										target = 8;
+										begin
+											cs = (target);
+											
+										end
+										last = 1;
+										
+									end
+									
+								end
+								when 5  then
+								begin
+									begin
+										target = 11;
+										begin
+											cs = (target);
+											
+										end
+										last = 2;
+										
+									end
+									
+								end
+								when 6  then
+								begin
+									begin
+										if ( last == 2 )
+											target = 14;
+											begin
+												cs = (target);
+												
+											end
+											
+										end
+										last = 3;
+										
+									end
+									
+									
+								end
+							end
+							if ( cs == 0  )
+								_cont = 0;
+								
+							end
+							if ( _cont == 1  )
+								p += 1;
+								
+							end
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+if cs >= next2_first_final
+	puts "ACCEPT"
+	else
+	puts "FAIL"
+end
+end
+	
+	inp = [
+	"1one3x2two3three\n",
+	]
+	
+	inplen = 1
+	
+	inp.each { |str| run_machine(str) }
+	

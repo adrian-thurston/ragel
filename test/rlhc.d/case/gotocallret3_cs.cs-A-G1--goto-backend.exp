@@ -1,0 +1,322 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		char comm;
+		int top;
+		int [] stack = new int [32];
+		
+		
+		
+		
+		static readonly sbyte  []_gotocallret_eof_actions = { 0, 1, 1, 4, 4, 8, 8, 0, 4, 0, 0, 0,  };
+		static readonly sbyte  []_gotocallret_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_gotocallret_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_gotocallret_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_gotocallret_nfa_pop_trans = { 0, 0,  };
+		static readonly int  gotocallret_start  = 7;
+		static readonly int  gotocallret_first_final  = 7;
+		static readonly int  gotocallret_error  = 0;
+		static readonly int  gotocallret_en_garble_line  = 3;
+		static readonly int  gotocallret_en_alp_comm  = 5;
+		static readonly int  gotocallret_en_dig_comm  = 6;
+		static readonly int  gotocallret_en_main  = 7;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)gotocallret_start;
+				top = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( cs  ) {
+					case 7:
+					if ( ( data[p ]) > '\u0039' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0030' )
+					{
+						goto ctr10;
+					}
+					
+					{
+						goto ctr0;
+					}
+					case 0:
+					goto _out;
+					case 1:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr1;
+					}
+					
+					{
+						goto ctr0;
+					}
+					case 2:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						goto ctr2;
+					}
+					
+					{
+						goto ctr0;
+					}
+					case 3:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						goto ctr4;
+					}
+					
+					{
+						goto ctr3;
+					}
+					case 4:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						goto ctr6;
+					}
+					
+					{
+						goto ctr5;
+					}
+					case 8:
+					{
+						goto ctr11;
+					}
+					case 5:
+					if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr8;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0041' )
+					{
+						goto ctr8;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 9:
+					if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr8;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0041' )
+					{
+						goto ctr8;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 6:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr9;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 10:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr9;
+					}
+					
+					{
+						goto ctr7;
+					}
+					
+				}
+				ctr11: cs = 0;
+				goto _again;
+				ctr0: cs = 0;
+				goto f0;
+				ctr7: cs = 0;
+				goto f7;
+				ctr10: cs = 1;
+				goto f8;
+				ctr1: cs = 2;
+				goto f1;
+				ctr5: cs = 4;
+				goto _again;
+				ctr3: cs = 4;
+				goto f4;
+				ctr2: cs = 7;
+				goto f2;
+				ctr4: cs = 8;
+				goto f5;
+				ctr6: cs = 8;
+				goto f6;
+				ctr8: cs = 9;
+				goto _again;
+				ctr9: cs = 10;
+				goto _again;
+				
+				f4:
+				{Console.Write( "error: garbling line\n" );}
+				
+				goto _again;
+				f6:
+				{cs = 7;}
+				
+				goto _again;
+				f7:
+				{{p = p - 1;
+					}{top-= 1;
+						cs = stack[top];
+					}}
+				
+				goto _again;
+				f8:
+				{comm = (( data[p ]));
+				}
+				
+				goto _again;
+				f2:
+				{Console.Write( "correct command\n" );}
+				
+				goto _again;
+				f0:
+				{{p = p - 1;
+					}cs = 3;}
+				
+				goto _again;
+				f5:
+				{Console.Write( "error: garbling line\n" );}
+				{cs = 7;}
+				
+				goto _again;
+				f1:
+				{if ( comm >= 97 )
+					{
+						{stack[top] = cs;
+							top += 1;
+							cs = 5;
+						}} 
+					else {
+						{stack[top] = cs;
+							top += 1;
+							cs = 6;
+						}}
+				}
+				{Console.Write( "prints\n" );}
+				
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( _gotocallret_eof_actions[cs]  ) {
+						case 4:
+						{Console.Write( "error: failed to recover\n" );}
+						
+						break;
+						case 8:
+						{{p = p - 1;
+							}{top-= 1;
+								cs = stack[top];
+							}}
+						
+						break;
+						case 1:
+						{{p = p - 1;
+							}cs = 3;}
+						
+						break;
+						
+					}
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= gotocallret_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"lkajsdf\n",
+			"2134\n",
+			"(\n",
+			"\n",
+			"*234234()0909 092 -234aslkf09`1 11\n",
+			"1\n",
+			"909\n",
+			"1 a\n",
+			"11 1\n",
+			"a 1\n",
+			"aa a\n",
+			"1 1\n",
+			"1 123456\n",
+			"a a\n",
+			"a abcdef\n",
+			"h",
+			"a aa1",
+		};
+		
+		
+		static readonly int inplen = 17;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

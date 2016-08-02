@@ -1,0 +1,232 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 6;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+int main()
+{
+	int cs;
+	char *p = "hello", *pe = p + strlen(p);
+	char *eof = pe;
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			
+		}
+		goto st_out;
+		{
+			printf("to state: %c\n", *p); 
+		}
+		
+		st_case_1:
+		if ( ((*( p  ))
+		)== 104  )
+		{
+			goto ctr1;
+		}
+		
+		{
+			goto ctr0;
+		}
+		ctr0:
+		{
+			printf("err: %c\n", *p); 
+		}
+		
+		
+		goto st0;
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr1:
+		{
+			printf("char: %c\n", *p); 
+		}
+		
+		
+		goto st2;
+		st2:
+		{
+			printf("to state: %c\n", *p); 
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		if ( ((*( p  ))
+		)== 101  )
+		{
+			goto ctr2;
+		}
+		
+		{
+			goto ctr0;
+		}
+		ctr2:
+		{
+			printf("char: %c\n", *p); 
+		}
+		
+		
+		goto st3;
+		st3:
+		{
+			printf("to state: %c\n", *p); 
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( ((*( p  ))
+		)== 88  )
+		{
+			goto ctr3;
+		}
+		
+		{
+			goto ctr0;
+		}
+		ctr3:
+		{
+			printf("char: %c\n", *p); 
+		}
+		
+		
+		goto st4;
+		st4:
+		{
+			printf("to state: %c\n", *p); 
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		if ( ((*( p  ))
+		)== 88  )
+		{
+			goto ctr4;
+		}
+		
+		{
+			goto ctr0;
+		}
+		ctr4:
+		{
+			printf("char: %c\n", *p); 
+		}
+		
+		
+		goto st5;
+		st5:
+		{
+			printf("to state: %c\n", *p); 
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		if ( ((*( p  ))
+		)== 88  )
+		{
+			goto ctr5;
+		}
+		
+		{
+			goto ctr0;
+		}
+		ctr5:
+		{
+			printf("char: %c\n", *p); 
+		}
+		
+		
+		goto st6;
+		st6:
+		{
+			printf("to state: %c\n", *p); 
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		{
+			goto ctr0;
+		}
+		st_out:
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				{
+					printf("err: %c\n", *p); 
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	printf( "rest: %s\n", p );
+	
+	return 0;
+}
+

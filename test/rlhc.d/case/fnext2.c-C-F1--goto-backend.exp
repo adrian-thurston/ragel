@@ -1,0 +1,273 @@
+#include <string.h>
+#include <stdio.h>
+
+char comm;
+int top;
+int stack [32];
+
+
+
+int cs;
+char *ts, *te;
+int act;
+
+static const char  _fnext_trans_keys [] = { 1, 0, 3, 3, 2, 2, 4, 4, 4, 4, 0, 0, 1, 0, 1, 0, 1, 0, 5, 5, 1, 0, 0 ,  };
+static const char  _fnext_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 0 ,  };
+static const char  _fnext_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 6, 0 ,  };
+static const char  _fnext_indicies [] = { 0, 2, 3, 4, 5, 6, 0 ,  };
+static const char  _fnext_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _fnext_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _fnext_cond_targs [] = { 6, 0, 7, 4, 8, 10, 9, 0 ,  };
+static const char  _fnext_cond_actions [] = { 2, 0, 3, 4, 5, 6, 8, 0 ,  };
+static const char  _fnext_to_state_actions [] = { 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0 ,  };
+static const char  _fnext_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0 ,  };
+static const char  _fnext_nfa_targs [] = { 0, 0 ,  };
+static const char  _fnext_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _fnext_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _fnext_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  fnext_start  = 1;
+static const int  fnext_first_final  = 6;
+static const int  fnext_error  = 0;
+static const int  fnext_en_main  = 1;
+static const int  fnext_en_e  = 2;
+static const int  fnext_en_l  = 3;
+static const int  fnext_en_o  = 9;
+static const int  fnext_en_nl  = 5;
+void init()
+{
+
+	{
+		cs = ( int ) fnext_start;
+		ts = 0;
+		te = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	while ( cs != fnext_error && p < pe ) {
+		printf( "%c\n", *p );
+		
+		{
+			int _trans = 0;
+			const char  *_keys;
+			const char  *_inds;
+			int _nbreak;
+			if ( p == pe  )
+			goto _test_eof;
+			
+			if ( cs == 0  )
+			goto _out;
+			
+			_resume :
+			switch ( _fnext_from_state_actions[cs] ) {
+				case 7 :
+				{
+					{
+						ts = p;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_keys = _fnext_trans_keys + (cs<<1);
+			_inds = _fnext_indicies + _fnext_index_offsets[cs];
+			if ( ((*( p  ))
+			)<= 111 && ((*( p  ))
+			)>= 10  )
+			{
+				int _ic = ( int ) _fnext_char_class[( int ) ((*( p  ))
+				)- 10];
+				if ( _ic <= ( int ) (*( _keys+1  ))
+				&& _ic >= ( int ) (*( _keys  ))
+				)
+				_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+				) ))
+				;
+				
+				else
+				_trans = ( int ) _fnext_index_defaults[cs];
+				
+			}
+			
+			else
+			{
+				_trans = ( int ) _fnext_index_defaults[cs];
+			}
+			
+			
+			goto _match_cond;
+			
+			_match_cond :
+			cs = ( int ) _fnext_cond_targs[_trans];
+			if ( _fnext_cond_actions[_trans]== 0  )
+			goto _again;
+			
+			
+			_nbreak = 0;
+			switch ( _fnext_cond_actions[_trans] ) {
+				case 2 :
+				{
+					{
+						cs = 2;
+						
+					}
+					{
+						p += 1;
+						_nbreak = 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 4 :
+				{
+					{
+						p += 1;
+						_nbreak = 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 6 :
+				{
+					{
+						p += 1;
+						_nbreak = 1;
+						
+					}
+					printf("ACCEPT\n"); 
+				}
+				
+				break;
+				case 8 :
+				{
+					{
+						te = p+1;
+						{
+							{
+								cs = 5;
+								
+							}
+							{
+								p += 1;
+								_nbreak = 1;
+								
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 3 :
+				{
+					{
+						cs = 3;
+						
+					}
+					
+				}
+				{
+					{
+						p += 1;
+						_nbreak = 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 5 :
+				{
+					{
+						cs = 9;
+						
+					}
+					
+				}
+				{
+					{
+						p += 1;
+						_nbreak = 1;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			if ( _nbreak == 1  )
+			goto _out;
+			
+			
+			
+			_again :
+			switch ( _fnext_to_state_actions[cs] ) {
+				case 1 :
+				{
+					{
+						ts = 0;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			if ( cs == 0  )
+			goto _out;
+			
+			p+= 1;
+			if ( p != pe  )
+			goto _resume;
+			
+			
+			_test_eof :
+			{}
+			
+			_out :
+			{}
+			
+		}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= fnext_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"hello\n"
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

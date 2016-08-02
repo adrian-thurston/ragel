@@ -1,0 +1,269 @@
+host( "working/ncall1_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	int top ;
+	int stack [32];
+	int target ;
+	
+	
+	
+	
+	
+}@
+array s8 _ncall1_actions( 0, 3 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 };
+
+array s8 _ncall1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _ncall1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _ncall1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _ncall1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int ncall1_start = 13;
+value int ncall1_first_final = 13;
+value int ncall1_error = 0;
+
+value int ncall1_en_unused = 1;
+value int ncall1_en_one = 7;
+value int ncall1_en_two = 10;
+value int ncall1_en_main = 13;
+
+host( "working/ncall1_c.rl", 36 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)ncall1_start;
+		top = 0;
+	}
+	host( "working/ncall1_c.rl", 43 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 13:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr13;
+				}
+				case 49: {
+					goto ctr14;
+				}
+				case 50: {
+					goto ctr15;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ( deref( data, p )) == 117 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 2:
+			if ( ( deref( data, p )) == 110 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 117 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 115 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 100 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 14:
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ( deref( data, p )) == 110 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr9;
+			}
+			{
+				goto ctr1;
+			}
+			case 15:
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 116 ) {
+				goto ctr10;
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( ( deref( data, p )) == 119 ) {
+				goto ctr11;
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr12;
+			}
+			{
+				goto ctr1;
+			}
+			case 16:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr2: cs = 3; goto _again;
+		ctr3: cs = 4; goto _again;
+		ctr4: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		ctr7: cs = 8; goto _again;
+		ctr8: cs = 9; goto _again;
+		ctr10: cs = 11; goto _again;
+		ctr11: cs = 12; goto _again;
+		ctr13: cs = 13; goto _again;
+		ctr14: cs = 13; goto f2;
+		ctr15: cs = 13; goto f3;
+		ctr6: cs = 14; goto _again;
+		ctr9: cs = 15; goto f0;
+		ctr12: cs = 16; goto f1;
+		
+		f0: _acts = offset( _ncall1_actions, 1 ); goto execFuncs;
+		f1: _acts = offset( _ncall1_actions, 3 ); goto execFuncs;
+		f2: _acts = offset( _ncall1_actions, 5 ); goto execFuncs;
+		f3: _acts = offset( _ncall1_actions, 7 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _ncall1_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _ncall1_actions, _acts ) ) {
+				case 0{
+					host( "working/ncall1_c.rl", 18 ) ${printf( "%s", "one\n" );
+						${top-= 1;cs = stack[top];}$}$
+				}
+				case 1{
+					host( "working/ncall1_c.rl", 21 ) ${printf( "%s", "two\n" );
+						${top-= 1;cs = stack[top];}$}$
+				}
+				case 2{
+					host( "working/ncall1_c.rl", 25 ) ${target = 7;
+						${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={target}=; }$}$
+				}
+				case 3{
+					host( "working/ncall1_c.rl", 27 ) ${target = 10;
+						${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={target}=; }$}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/ncall1_c.rl", 50 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= ncall1_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"1one2two1one\n",
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

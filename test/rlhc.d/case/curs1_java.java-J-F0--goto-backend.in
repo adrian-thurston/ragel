@@ -1,0 +1,179 @@
+host( "working/curs1_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class curs1_java
+	{
+		int return_to ;
+		
+		
+		
+		
+		
+	}@
+	array s8 _curs1_actions( 0, 3 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 };
+	
+	array char _curs1_trans_keys( 0, 11 ) = { u(1), u(0), u(0), u(3), u(10), u(10), u(6), u(6), u(10), u(10), u(8), u(8), u(5), u(5), u(4), u(4), u(7), u(7), u(6), u(6), u(5), u(5), u(9), u(9), u(11), u(11), u(7), u(7), u(1), u(0), u(1), u(0), u(1), u(0), u(1), u(0), u(0) };
+	
+	array s8 _curs1_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 };
+	
+	array s8 _curs1_index_offsets( 0, 16 ) = { 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 };
+	
+	array s8 _curs1_indicies( 0, 15 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 };
+	
+	array s8 _curs1_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+	
+	array s8 _curs1_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _curs1_cond_targs( 0, 17 ) = { 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 };
+	
+	array s8 _curs1_cond_actions( 0, 7 ) = { 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0 };
+	
+	array s8 _curs1_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _curs1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _curs1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _curs1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int curs1_start = 1;
+	value int curs1_first_final = 14;
+	value int curs1_error = 0;
+	
+	value int curs1_en_unused = 2;
+	value int curs1_en_one = 8;
+	value int curs1_en_two = 11;
+	value int curs1_en_main = 1;
+	
+	host( "working/curs1_java.rl", 33 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)curs1_start;
+		}
+		host( "working/curs1_java.rl", 38 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			String _s;
+		}@
+		{
+			int _ps;
+			int _trans = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_keys = offset( _curs1_trans_keys, (cs<<1) );
+					_inds = offset( _curs1_indicies, _curs1_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 119 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_curs1_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _curs1_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _curs1_trans_keys, _keys ) )
+						_trans = cast(int)deref( _curs1_indicies, _inds + cast(int)( _ic - cast(int)deref( _curs1_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_curs1_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_curs1_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					_ps = cs;
+					cs = cast(int)_curs1_cond_targs[_trans];
+					
+					if ( _curs1_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_acts = offset( _curs1_actions, _curs1_cond_actions[_trans] );
+					_nacts = cast(uint)deref( _curs1_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _curs1_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/curs1_java.rl", 16 ) ${System.out.print( "one\n" );
+									${cs = host( "-", 1 ) ={return_to}=;}$}$
+							}
+							case 1 {
+								host( "working/curs1_java.rl", 19 ) ${System.out.print( "two\n" );
+									${cs = host( "-", 1 ) ={return_to}=;}$}$
+							}
+							case 2 {
+								host( "working/curs1_java.rl", 23 ) ${return_to = ={_ps}=;
+									${cs = 8;}$}$
+							}
+							case 3 {
+								host( "working/curs1_java.rl", 25 ) ${return_to = ={_ps}=;
+									${cs = 11;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+				}
+				label _again {
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/curs1_java.rl", 49 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= curs1_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"1one2two1one\n",
+		};
+		
+		static final int inplen = 1;
+		
+		public static void main (String[] args)
+		{
+			curs1_java machine = new curs1_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

@@ -1,0 +1,389 @@
+host( "working/cppscan6_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var ts  int ;
+	var te  int ;
+	var act  int ;
+	var token  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _scanner_actions( 0, 45 ) = { 0, 1, 2, 1, 3, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 1, 28, 1, 29, 1, 30, 1, 31, 1, 32, 1, 33, 1, 34, 1, 35, 1, 36, 1, 37, 1, 38, 1, 39, 1, 40, 1, 41, 1, 42, 1, 43, 1, 44, 1, 45, 2, 0, 1, 2, 3, 4, 2, 3, 5, 2, 3, 6, 2, 3, 7, 0 };
+
+array byte _scanner_trans_keys( 0, 28 ) = { u(1), u(0), u(0), u(24), u(1), u(0), u(0), u(24), u(1), u(0), u(11), u(11), u(9), u(14), u(13), u(14), u(2), u(2), u(2), u(12), u(0), u(0), u(13), u(20), u(2), u(28), u(2), u(28), u(16), u(16), u(16), u(16), u(6), u(16), u(16), u(16), u(9), u(16), u(10), u(17), u(8), u(8), u(8), u(14), u(13), u(26), u(13), u(26), u(2), u(16), u(11), u(27), u(11), u(26), u(13), u(26), u(11), u(26), u(15), u(15), u(16), u(16), u(13), u(27), u(3), u(27), u(16), u(16), u(16), u(28), u(0) };
+
+array s8 _scanner_char_class( 0, 28 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 4, 4, 8, 9, 4, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 4, 4, 16, 17, 4, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 22, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 21, 21, 21, 4, 24, 4, 25, 21, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 26, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 27, 21, 21, 4, 28, 4, 4, 0 };
+
+array s16 _scanner_index_offsets( 0, 321 ) = { 0, 0, 25, 25, 50, 50, 51, 57, 59, 60, 71, 72, 80, 107, 134, 135, 136, 147, 148, 156, 164, 165, 172, 186, 200, 215, 232, 248, 262, 278, 279, 280, 295, 320, 321, 0 };
+
+array s8 _scanner_indicies( 0, 70 ) = { 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 8, 9, 9, 0, 0, 10, 10, 10, 10, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 13, 15, 17, 17, 16, 16, 16, 17, 17, 17, 19, 1, 20, 21, 22, 4, 23, 24, 25, 26, 27, 28, 29, 30, 31, 20, 32, 32, 32, 32, 33, 32, 20, 34, 32, 32, 35, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 38, 39, 40, 37, 37, 37, 37, 37, 37, 37, 37, 37, 41, 42, 43, 37, 37, 37, 37, 37, 37, 44, 45, 37, 37, 37, 37, 37, 46, 47, 49, 50, 37, 37, 51, 37, 52, 52, 52, 52, 53, 53, 53, 53, 54, 55, 53, 55, 53, 53, 53, 55, 10, 10, 53, 53, 53, 53, 53, 55, 53, 55, 53, 53, 53, 55, 11, 37, 37, 37, 37, 37, 37, 37, 37, 37, 14, 37, 37, 37, 56, 52, 57, 58, 58, 57, 57, 57, 57, 54, 57, 57, 59, 59, 57, 57, 59, 60, 52, 61, 58, 58, 61, 61, 61, 61, 54, 61, 61, 62, 62, 61, 61, 62, 17, 17, 63, 63, 63, 17, 17, 17, 63, 64, 64, 63, 63, 64, 52, 57, 29, 29, 57, 57, 57, 57, 54, 57, 57, 59, 59, 57, 57, 59, 65, 66, 32, 32, 67, 67, 67, 32, 32, 32, 32, 32, 32, 67, 67, 32, 32, 1, 67, 67, 67, 4, 67, 67, 67, 67, 67, 32, 32, 67, 67, 67, 32, 32, 32, 32, 32, 32, 67, 67, 32, 32, 68, 69, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 70, 0 };
+
+array s8 _scanner_index_defaults( 0, 67 ) = { 0, 1, 1, 4, 4, 7, 0, 0, 11, 11, 14, 16, 18, 18, 37, 37, 37, 37, 37, 37, 48, 37, 53, 53, 37, 57, 61, 63, 57, 37, 37, 67, 67, 37, 37, 0 };
+
+array s8 _scanner_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _scanner_cond_targs( 0, 34 ) = { 12, 1, 12, 2, 3, 12, 4, 12, 12, 7, 23, 8, 9, 12, 10, 12, 12, 27, 13, 14, 12, 15, 16, 17, 18, 19, 21, 24, 25, 28, 29, 30, 31, 32, 33, 34, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 20, 12, 12, 12, 5, 22, 12, 6, 12, 12, 12, 26, 12, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0 };
+
+array s8 _scanner_cond_actions( 0, 93 ) = { 79, 0, 7, 0, 0, 5, 0, 77, 51, 0, 0, 0, 0, 55, 0, 57, 75, 0, 0, 0, 53, 0, 0, 0, 0, 0, 3, 3, 90, 90, 0, 0, 0, 84, 0, 0, 73, 71, 21, 31, 23, 37, 27, 43, 33, 45, 35, 0, 69, 47, 49, 0, 87, 61, 0, 9, 29, 63, 93, 11, 0, 65, 13, 67, 15, 17, 19, 59, 39, 41, 25, 0 };
+
+array s8 _scanner_to_state_actions( 0, 81 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_from_state_actions( 0, 1 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_eof_trans( 0, 68 ) = { 0, 1, 1, 1, 1, 8, 1, 1, 8, 8, 8, 17, 0, 37, 38, 38, 38, 38, 38, 38, 49, 38, 54, 54, 38, 58, 62, 64, 58, 38, 38, 68, 68, 38, 38, 0 };
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int scanner_start = 12;
+value int scanner_first_final = 12;
+value int scanner_error = 0;
+
+value int scanner_en_main = 12;
+
+host( "working/cppscan6_go.rl", 122 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/cppscan6_go.rl", 125 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		int _trans = 0;
+		index s8 _acts;
+		uint _nacts;
+		index byte _keys;
+		index s8 _inds;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_acts = offset( _scanner_actions, _scanner_from_state_actions[cs] );
+				_nacts = cast(uint)deref( _scanner_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _scanner_actions, _acts ) ) {
+						case 2 {
+							host( "NONE", 1 ) ${${ts = p;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				_keys = offset( _scanner_trans_keys, (cs<<1) );
+				_inds = offset( _scanner_indicies, _scanner_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 126 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_scanner_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _scanner_trans_keys, _keys ) )
+					_trans = cast(int)deref( _scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_scanner_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_scanner_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_scanner_cond_targs[_trans];
+				
+				if ( _scanner_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				_acts = offset( _scanner_actions, _scanner_cond_actions[_trans] );
+				_nacts = cast(uint)deref( _scanner_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _scanner_actions, _acts ) )
+					{
+						case 3 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$
+						}
+						case 4 {
+							host( "working/cppscan6_go.rl", 33 ) ${${act = 3;}$}$
+						}
+						case 5 {
+							host( "working/cppscan6_go.rl", 43 ) ${${act = 4;}$}$
+						}
+						case 6 {
+							host( "working/cppscan6_go.rl", 48 ) ${${act = 5;}$}$
+						}
+						case 7 {
+							host( "working/cppscan6_go.rl", 53 ) ${${act = 6;}$}$
+						}
+						case 8 {
+							host( "working/cppscan6_go.rl", 25 ) ${${te = p+1;host( "working/cppscan6_go.rl", 25 ) ${token = 193;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 9 {
+							host( "working/cppscan6_go.rl", 28 ) ${${te = p+1;host( "working/cppscan6_go.rl", 28 ) ${token = 192;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 10 {
+							host( "working/cppscan6_go.rl", 43 ) ${${te = p+1;host( "working/cppscan6_go.rl", 43 ) ${token = 194;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 11 {
+							host( "working/cppscan6_go.rl", 48 ) ${${te = p+1;host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 12 {
+							host( "working/cppscan6_go.rl", 53 ) ${${te = p+1;host( "working/cppscan6_go.rl", 53 ) ${token = 219;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 13 {
+							host( "working/cppscan6_go.rl", 58 ) ${${te = p+1;host( "working/cppscan6_go.rl", 58 ) ${token = 220;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 14 {
+							host( "working/cppscan6_go.rl", 62 ) ${${te = p+1;host( "working/cppscan6_go.rl", 62 ) ${token = 197;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 15 {
+							host( "working/cppscan6_go.rl", 64 ) ${${te = p+1;host( "working/cppscan6_go.rl", 64 ) ${token = 223;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 16 {
+							host( "working/cppscan6_go.rl", 66 ) ${${te = p+1;host( "working/cppscan6_go.rl", 66 ) ${token = 224;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 17 {
+							host( "working/cppscan6_go.rl", 68 ) ${${te = p+1;host( "working/cppscan6_go.rl", 68 ) ${token = 225;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 18 {
+							host( "working/cppscan6_go.rl", 70 ) ${${te = p+1;host( "working/cppscan6_go.rl", 70 ) ${token = 226;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 19 {
+							host( "working/cppscan6_go.rl", 72 ) ${${te = p+1;host( "working/cppscan6_go.rl", 72 ) ${token = 227;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 20 {
+							host( "working/cppscan6_go.rl", 74 ) ${${te = p+1;host( "working/cppscan6_go.rl", 74 ) ${token = 228;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 21 {
+							host( "working/cppscan6_go.rl", 76 ) ${${te = p+1;host( "working/cppscan6_go.rl", 76 ) ${token = 229;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 22 {
+							host( "working/cppscan6_go.rl", 78 ) ${${te = p+1;host( "working/cppscan6_go.rl", 78 ) ${token = 230;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 23 {
+							host( "working/cppscan6_go.rl", 80 ) ${${te = p+1;host( "working/cppscan6_go.rl", 80 ) ${token = 231;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 24 {
+							host( "working/cppscan6_go.rl", 82 ) ${${te = p+1;host( "working/cppscan6_go.rl", 82 ) ${token = 232;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 25 {
+							host( "working/cppscan6_go.rl", 84 ) ${${te = p+1;host( "working/cppscan6_go.rl", 84 ) ${token = 233;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 26 {
+							host( "working/cppscan6_go.rl", 86 ) ${${te = p+1;host( "working/cppscan6_go.rl", 86 ) ${token = 234;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 27 {
+							host( "working/cppscan6_go.rl", 88 ) ${${te = p+1;host( "working/cppscan6_go.rl", 88 ) ${token = 212;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 28 {
+							host( "working/cppscan6_go.rl", 90 ) ${${te = p+1;host( "working/cppscan6_go.rl", 90 ) ${token = 213;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 29 {
+							host( "working/cppscan6_go.rl", 94 ) ${${te = p+1;host( "working/cppscan6_go.rl", 94 ) ${token = 214;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 30 {
+							host( "working/cppscan6_go.rl", 96 ) ${${te = p+1;host( "working/cppscan6_go.rl", 96 ) ${token = 215;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 31 {
+							host( "working/cppscan6_go.rl", 100 ) ${${te = p+1;host( "working/cppscan6_go.rl", 100 ) ${token = 240;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 32 {
+							host( "working/cppscan6_go.rl", 104 ) ${${te = p+1;host( "working/cppscan6_go.rl", 104 ) ${token = ( int ) ( data[ts] )
+										;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 33 {
+							host( "working/cppscan6_go.rl", 17 ) ${${te = p+1;host( "working/cppscan6_go.rl", 17 ) ${token = 242;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 34 {
+							host( "working/cppscan6_go.rl", 17 ) ${${te = p+1;host( "working/cppscan6_go.rl", 17 ) ${token = 242;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 35 {
+							host( "working/cppscan6_go.rl", 33 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 33 ) ${token = 195;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 36 {
+							host( "working/cppscan6_go.rl", 43 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 43 ) ${token = 194;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 37 {
+							host( "working/cppscan6_go.rl", 48 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 38 {
+							host( "working/cppscan6_go.rl", 53 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 53 ) ${token = 219;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 39 {
+							host( "working/cppscan6_go.rl", 58 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 58 ) ${token = 220;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 40 {
+							host( "working/cppscan6_go.rl", 92 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 92 ) ${token = 211;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 41 {
+							host( "working/cppscan6_go.rl", 104 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 104 ) ${token = ( int ) ( data[ts] )
+										;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 42 {
+							host( "working/cppscan6_go.rl", 111 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 111 ) ${token = 241;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 43 {
+							host( "working/cppscan6_go.rl", 48 ) ${${p = ((te))-1;
+									host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 44 {
+							host( "working/cppscan6_go.rl", 104 ) ${${p = ((te))-1;
+									host( "working/cppscan6_go.rl", 104 ) ${token = ( int ) ( data[ts] )
+										;
+										fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+						}
+						case 45 {
+							host( "NONE", 1 ) ${${switch( act ) {
+										case 0 {
+											host( "NONE", 1 ) ${${cs = 0; goto _again;}$}$ }
+										case 3 {
+											p = ((te))-1;
+											host( "working/cppscan6_go.rl", 33 ) ${token = 195;
+												fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+										case 4 {
+											p = ((te))-1;
+											host( "working/cppscan6_go.rl", 43 ) ${token = 194;
+												fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+										case 5 {
+											p = ((te))-1;
+											host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+												fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+										case 6 {
+											p = ((te))-1;
+											host( "working/cppscan6_go.rl", 53 ) ${token = 219;
+												fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+									}}$
+							}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				_acts = offset( _scanner_actions, _scanner_to_state_actions[cs] );
+				_nacts = cast(uint)deref( _scanner_actions, _acts ); _acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _scanner_actions, _acts ) ) {
+						case 0 {
+							host( "NONE", 1 ) ${${ts = nil;}$}$
+						}
+						case 1 {
+							host( "NONE", 1 ) ${${act = 0;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					if ( _scanner_eof_trans[cs] > 0 ) {
+						_trans = cast(int)_scanner_eof_trans[cs] - 1;
+						goto _match_cond;
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/cppscan6_go.rl", 132 ) @{
+	}
+	func finish() {
+		if cs >= scanner_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+		"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+		"'\n'\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

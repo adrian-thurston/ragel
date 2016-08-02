@@ -1,0 +1,366 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const char  _scanner_key_offsets [] = { 0, 3, 5, 0 ,  };
+static const char  _scanner_trans_keys [] = { 99, 97, 98, 97, 98, 99, 97, 98, 0 ,  };
+static const char  _scanner_single_lengths [] = { 1, 2, 1, 0 ,  };
+static const char  _scanner_range_lengths [] = { 1, 0, 1, 0 ,  };
+static const char  _scanner_index_offsets [] = { 0, 3, 6, 0 ,  };
+static const char  _scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _scanner_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0 ,  };
+static const char  _scanner_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _scanner_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _scanner_cond_targs [] = { 1, 0, 1, 2, 2, 1, 1, 0, 1, 1, 1, 0 ,  };
+static const char  _scanner_cond_actions [] = { 2, 0, 1, 6, 7, 5, 2, 0, 1, 1, 1, 0 ,  };
+static const char  _scanner_to_state_actions [] = { 0, 3, 0, 0 ,  };
+static const char  _scanner_from_state_actions [] = { 0, 4, 0, 0 ,  };
+static const char  _scanner_eof_trans_indexed [] = { 2, 0, 2, 0 ,  };
+static const char  _scanner_eof_trans_direct [] = { 10, 0, 11, 0 ,  };
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  scanner_start  = 1;
+static const int  scanner_first_final  = 1;
+static const int  scanner_error  = -1;
+static const int  scanner_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		while ( _cont == 1  )
+		{
+		
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _scanner_eof_trans_direct[cs]> 0  )
+					{
+						_trans = ( unsigned int  ) _scanner_eof_trans_direct[cs]- 1;
+						_cond = ( unsigned int  ) _scanner_trans_offsets[_trans];
+						_have = 1;
+					}
+					
+					if ( _have == 0  )
+					{
+					}
+					
+				}
+				
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					switch ( _scanner_from_state_actions[cs] ) {
+						case 4 :
+						{
+							{
+								ts = p;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					_keys = _scanner_trans_keys + _scanner_key_offsets[cs];
+					_trans = ( unsigned int  ) _scanner_index_offsets[cs];
+					_have = 0;
+					_klen = ( int ) _scanner_single_lengths[cs];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( ((*( p  ))
+							)< (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( ((*( p  ))
+							)> (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _scanner_range_lengths[cs];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( ((*( p  ))
+								)< (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( ((*( p  ))
+								)> (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _scanner_cond_keys + _scanner_trans_offsets[_trans];
+					_klen = ( int ) _scanner_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _scanner_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = -1;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _scanner_cond_targs[_cond];
+					switch ( _scanner_cond_actions[_cond] ) {
+						case 2 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "pat2\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 5 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						
+						break;
+						case 1 :
+						{
+							{
+								switch ( act  ) {
+									case 1 :
+									p = ((te))-1;
+									{
+										printf( "%s", "pat1\n" );
+										
+									}
+									
+									break;
+									default:
+									p = ((te))-1;
+									
+									break;
+									
+								}
+								
+							}
+							
+							
+						}
+						
+						break;
+						case 6 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						{
+							{
+								act = 1;
+								
+							}
+							
+						}
+						
+						break;
+						case 7 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						{
+							{
+								act = 3;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					switch ( _scanner_to_state_actions[cs] ) {
+						case 3 :
+						{
+							{
+								ts = 0;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"ba a",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

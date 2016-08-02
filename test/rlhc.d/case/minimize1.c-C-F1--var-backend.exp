@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <string.h>
+
+struct min
+{
+	int cs;
+};
+
+
+
+static const char  _min_trans_keys [] = { 1, 0, 2, 2, 0, 2, 1, 0, 0 ,  };
+static const char  _min_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 0 ,  };
+static const char  _min_index_offsets [] = { 0, 0, 1, 4, 0 ,  };
+static const char  _min_indicies [] = { 0, 2, 1, 3, 0 ,  };
+static const char  _min_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
+static const char  _min_trans_cond_spaces [] = { -1, -1, -1, -1, 0 ,  };
+static const char  _min_cond_targs [] = { 2, 0, 3, 2, 0 ,  };
+static const char  _min_cond_actions [] = { 0, 0, 0, 1, 0 ,  };
+static const char  _min_nfa_targs [] = { 0, 0 ,  };
+static const char  _min_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _min_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _min_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  min_start  = 1;
+static const int  min_first_final  = 3;
+static const int  min_error  = 0;
+static const int  min_en_main  = 1;
+void min_init( struct min *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) min_start;
+	}
+}
+
+void min_execute( struct min *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+		unsigned int _trans = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_keys;
+		const char  *_inds;
+		while ( _cont == 1  )
+		{
+		
+			if ( (fsm->cs) == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _min_trans_keys + ((fsm->cs)<<1);
+					_inds = _min_indicies + _min_index_offsets[(fsm->cs)];
+					if ( ((*( p  ))
+					)<= 98 && ((*( p  ))
+					)>= 10  )
+					{
+						int _ic = ( int ) _min_char_class[( int ) ((*( p  ))
+						)- 10];
+						if ( _ic <= ( int ) (*( _keys+1  ))
+						&& _ic >= ( int ) (*( _keys  ))
+						)
+						_trans = ( unsigned int  ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+						) ))
+						;
+						
+						else
+						_trans = ( unsigned int  ) _min_index_defaults[(fsm->cs)];
+						
+					}
+					
+					else
+					{
+						_trans = ( unsigned int  ) _min_index_defaults[(fsm->cs)];
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					(fsm->cs) = ( int ) _min_cond_targs[_trans];
+					switch ( _min_cond_actions[_trans] ) {
+						case 1 :
+						{
+							printf("a or b\n"); 
+						}
+						
+						break;
+						
+					}
+					if ( (fsm->cs) == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+int min_finish( struct min *fsm )
+{
+	if ( fsm->cs == min_error )
+	return -1;
+	if ( fsm->cs >= min_first_final )
+	return 1;
+	return 0;
+}
+
+struct min fsm;
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	min_init( &fsm );
+	min_execute( &fsm, buf, len );
+	if ( min_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+
+int main()
+{
+	test( "aaaaaa\n" );
+	test( "a\n" );
+	test( "abc\n" );
+	return 0;
+}
+

@@ -1,0 +1,229 @@
+host( "working/fnext3.rl", 1 ) @{/*
+	* @@LANG: c
+	*
+	* Tests fnext in combination with fbreak.
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char comm;
+	int top;
+	int stack [32];
+	
+	
+	
+	int cs;
+	char *ts, *te;
+	int act;
+	
+}@
+array s8 _fnext_to_state_actions( 0, 1 ) = { 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0 };
+
+array s8 _fnext_from_state_actions( 0, 7 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0 };
+
+array s8 _fnext_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _fnext_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _fnext_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _fnext_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int fnext_start = 1;
+value int fnext_first_final = 6;
+value int fnext_error = 0;
+
+value int fnext_en_main = 1;
+value int fnext_en_e = 2;
+value int fnext_en_l = 3;
+value int fnext_en_o = 9;
+value int fnext_en_nl = 5;
+
+host( "working/fnext3.rl", 30 ) @{
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)fnext_start;
+		ts = nil;
+		te = nil;
+	}
+	host( "working/fnext3.rl", 34 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		
+		while ( cs != fnext_error && p < pe ) {
+			printf( "%c\n", *p );
+		}@
+		{
+			int _nbreak;
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			_resume:
+			switch ( _fnext_from_state_actions[cs] ) {
+				case 7{
+					host( "NONE", 1 ) ${${ts = p;}$}$
+				}
+			}
+			
+			switch ( cs ) {
+				case 1:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr0;
+				}
+				{
+					goto ctr1;
+				}
+				case 0:
+				goto _out;
+				case 6:
+				{
+					goto ctr1;
+				}
+				case 2:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr2;
+				}
+				{
+					goto ctr1;
+				}
+				case 7:
+				{
+					goto ctr1;
+				}
+				case 3:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr3;
+				}
+				{
+					goto ctr1;
+				}
+				case 4:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr4;
+				}
+				{
+					goto ctr1;
+				}
+				case 8:
+				{
+					goto ctr1;
+				}
+				case 5:
+				if ( ( deref( data, p )) == 10 ) {
+					goto ctr5;
+				}
+				{
+					goto ctr1;
+				}
+				case 10:
+				{
+					goto ctr1;
+				}
+				case 9:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr6;
+				}
+				{
+					goto ctr1;
+				}
+			}
+			
+			ctr1: cs = 0; goto _again;
+			ctr3: cs = 4; goto f3;
+			ctr0: cs = 6; goto f1;
+			ctr2: cs = 7; goto f2;
+			ctr4: cs = 8; goto f4;
+			ctr6: cs = 9; goto f7;
+			ctr5: cs = 10; goto f5;
+			
+			f1:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 18 ) ${ /*h*/  cs = 2;${p += 1;  _nbreak = 1; }$ }$	if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			f3:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 20 ) ${ ${p += 1;  _nbreak = 1; }$ }$	if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			f5:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 22 ) ${ /*nl*/ ${p += 1;  _nbreak = 1; }$ printf("ACCEPT\n"); }$	if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			f7:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 21 ) ${${te = p+1;host( "working/fnext3.rl", 21 ) ${ /*o*/  cs = 5;${p += 1;  _nbreak = 1; }$ }$}$}$	if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			f2:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 19 ) ${ /*e*/  cs = 3;}$	host( "working/fnext3.rl", 19 ) ${ ${p += 1;  _nbreak = 1; }$ }$	if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			f4:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 20 ) ${ /*ll*/ cs = 9;}$	host( "working/fnext3.rl", 20 ) ${ ${p += 1;  _nbreak = 1; }$ }$	if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			
+			_again:
+			switch ( _fnext_to_state_actions[cs] ) {
+				case 1{
+					host( "NONE", 1 ) ${${ts = nil;}$}$
+				}
+			}
+			
+			if ( cs == 0 )
+			goto _out;
+			p+= 1;
+			if ( p != pe )
+			goto _resume;
+			_test_eof: {}
+			_out: {}
+		}
+		host( "working/fnext3.rl", 44 ) @{
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= fnext_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hello\n"
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

@@ -1,0 +1,199 @@
+#include <string.h>
+#include <stdio.h>
+
+int target ;
+
+
+
+
+
+static const char  _next1_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 ,  };
+static const char  _next1_trans_keys [] = { 1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0 ,  };
+static const char  _next1_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 ,  };
+static const char  _next1_index_offsets [] = { 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 ,  };
+static const char  _next1_indicies [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  };
+static const char  _next1_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _next1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _next1_cond_targs [] = { 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 ,  };
+static const char  _next1_cond_actions [] = { 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0 ,  };
+static const char  _next1_nfa_targs [] = { 0, 0 ,  };
+static const char  _next1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _next1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  next1_start  = 1;
+static const int  next1_first_final  = 14;
+static const int  next1_error  = 0;
+static const int  next1_en_unused  = 2;
+static const int  next1_en_one  = 8;
+static const int  next1_en_two  = 11;
+static const int  next1_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) next1_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _trans = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _next1_trans_keys + (cs<<1);
+		_inds = _next1_indicies + _next1_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 119 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _next1_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _next1_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _next1_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _next1_cond_targs[_trans];
+		if ( _next1_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		_acts = _next1_actions + _next1_cond_actions[_trans];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					printf( "%s", "one\n" );
+					target = 1;
+					{
+						cs = (target);
+						
+					}
+					
+				}
+				
+				break;
+				case 1 :
+				{
+					printf( "%s", "two\n" );
+					target = 1;
+					{
+						cs = (target);
+						
+					}
+					
+				}
+				
+				break;
+				case 2 :
+				{
+					target = 8;
+					{
+						cs = (target);
+						
+					}
+					
+				}
+				
+				break;
+				case 3 :
+				{
+					target = 11;
+					{
+						cs = (target);
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= next1_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"1one2two1one\n",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

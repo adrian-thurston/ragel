@@ -1,0 +1,346 @@
+host( "working/union.rl", 1 ) @{/*
+	* @@LANG: c++
+	* Show off concurrent abilities.
+	*/
+	
+	#include <iostream>
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+	
+	using namespace std;
+	
+	#define BUFSIZE 2048
+	
+	struct Concurrent
+	{
+		Concurrent() :
+		cur_char(0),
+		start_word(0),
+		start_comment(0),
+		start_literal(0)
+		{}
+		
+		int cur_char;
+		int start_word;
+		int start_comment;
+		int start_literal;
+		
+		int cs;
+		
+		// Initialize the machine. Invokes any init statement blocks. Returns 0
+		// if the machine begins in a non-accepting state and 1 if the machine
+		// begins in an accepting state.
+		void init( );
+		
+		// Execute the machine on a block of data. Returns -1 if after processing
+		// the data, the machine is in the error state and can never accept, 0 if
+		// the machine is in a non-accepting state and 1 if the machine is in an
+		// accepting state.
+		void execute( const char *data, int len );
+		
+		// Indicate that there is no more data. Returns -1 if the machine finishes
+		// in the error state and does not accept, 0 if the machine finishes
+		// in any other non-accepting state and 1 if the machine finishes in an
+		// accepting state.
+		int finish( );
+	};
+	
+	
+	
+}@
+array char _Concurrent_trans_keys( 0, 5 ) = { 0, 4, 0, 4, 0, 5, 0, 5, 0, 4, 0, 4, 0, 3, 0, 3, 0, 5, 0, 5, 0, 3, 0, 4, 0, 4, 0, 5, 0, 5, 0, 5, 0, 4, 0, 3, 0 };
+
+array s8 _Concurrent_char_class( 0, 5 ) = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 0 };
+
+array s8 _Concurrent_index_offsets( 0, 89 ) = { 0, 5, 10, 16, 22, 27, 32, 36, 40, 46, 52, 56, 61, 66, 72, 78, 84, 89, 0 };
+
+array s8 _Concurrent_indicies( 0, 54 ) = { 1, 0, 2, 0, 3, 5, 4, 6, 4, 7, 9, 8, 10, 8, 11, 12, 14, 13, 15, 13, 16, 17, 19, 18, 20, 18, 21, 5, 4, 6, 22, 7, 23, 22, 24, 25, 27, 26, 28, 29, 31, 30, 32, 33, 30, 34, 36, 35, 37, 38, 35, 39, 41, 40, 42, 43, 23, 22, 24, 25, 44, 46, 45, 47, 45, 48, 31, 30, 32, 33, 49, 34, 51, 50, 52, 50, 53, 54, 9, 8, 10, 30, 11, 12, 9, 8, 8, 8, 11, 31, 30, 30, 33, 0 };
+
+array s8 _Concurrent_index_defaults( 0, 50 ) = { 0, 4, 8, 13, 18, 4, 22, 26, 30, 35, 40, 22, 45, 30, 50, 8, 8, 30, 0 };
+
+array s8 _Concurrent_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _Concurrent_cond_targs( 0, 17 ) = { 1, 0, 2, 5, 1, 0, 2, 5, 2, 3, 4, 15, 16, 2, 3, 4, 15, 16, 1, 0, 2, 5, 6, 7, 8, 11, 6, 7, 8, 11, 8, 9, 10, 13, 17, 8, 9, 10, 13, 17, 6, 7, 8, 11, 12, 1, 0, 2, 5, 14, 2, 3, 4, 15, 16, 0 };
+
+array s8 _Concurrent_cond_actions( 0, 18 ) = { 1, 2, 3, 4, 2, 6, 7, 8, 2, 6, 2, 8, 2, 1, 2, 1, 4, 1, 10, 11, 12, 13, 2, 6, 7, 2, 1, 2, 3, 1, 2, 6, 2, 2, 2, 1, 2, 1, 1, 1, 10, 11, 12, 10, 2, 15, 16, 17, 18, 2, 15, 16, 15, 18, 15, 0 };
+
+array s8 _Concurrent_eof_actions( 0, 14 ) = { 0, 5, 5, 0, 9, 5, 5, 0, 5, 0, 9, 5, 14, 5, 14, 5, 5, 5, 0 };
+
+array s8 _Concurrent_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _Concurrent_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Concurrent_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _Concurrent_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int Concurrent_start = 0;
+value int Concurrent_first_final = 0;
+value int Concurrent_error = -1;
+
+value int Concurrent_en_main = 0;
+
+host( "working/union.rl", 100 ) @{
+	
+	void Concurrent::init( )
+	{
+		cur_char = 0;
+	}@
+	{
+		cs = cast(int)Concurrent_start;
+	}
+	host( "working/union.rl", 105 ) @{
+	}
+	
+	void Concurrent::execute( const char *data, int len )
+	{
+		const char *p = data;
+		const char *pe = data + len;
+		const char *eof = pe;
+		
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			label _resume {
+				_keys = offset( _Concurrent_trans_keys, (cs<<1) );
+				_inds = offset( _Concurrent_indicies, _Concurrent_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 92 && ( deref( data, p )) >= 9 )
+				{
+					int _ic = cast(int)_Concurrent_char_class[cast(int)( deref( data, p )) - 9];
+					if ( _ic <= cast(int)deref( _Concurrent_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _Concurrent_trans_keys, _keys ) )
+					_trans = cast(int)deref( _Concurrent_indicies, _inds + cast(int)( _ic - cast(int)deref( _Concurrent_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_Concurrent_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_Concurrent_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_Concurrent_cond_targs[_trans];
+				
+				if ( _Concurrent_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _Concurrent_cond_actions[_trans] ) {
+					case 2 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$
+					}
+					case 1 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 56 ) ${
+							start_word = cur_char;
+						}$
+					}
+					case 6 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 59 ) ${
+							cout << "word: " << start_word << 
+							" " << cur_char-1 << endl;
+						}$
+					}
+					case 8 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 64 ) ${
+							start_comment = cur_char;
+						}$
+					}
+					case 15 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 67 ) ${
+							cout << "comment: " << start_comment <<
+							" " << cur_char-1 << endl;
+						}$
+					}
+					case 7 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 72 ) ${
+							start_literal = cur_char;
+						}$
+					}
+					case 10 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 75 ) ${
+							cout << "literal: " << start_literal <<
+							" " << cur_char-1 << endl;
+						}$
+					}
+					case 4 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 56 ) ${
+							start_word = cur_char;
+						}$	host( "working/union.rl", 64 ) ${
+							start_comment = cur_char;
+						}$
+					}
+					case 3 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 56 ) ${
+							start_word = cur_char;
+						}$	host( "working/union.rl", 72 ) ${
+							start_literal = cur_char;
+						}$
+					}
+					case 16 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 59 ) ${
+							cout << "word: " << start_word << 
+							" " << cur_char-1 << endl;
+						}$	host( "working/union.rl", 67 ) ${
+							cout << "comment: " << start_comment <<
+							" " << cur_char-1 << endl;
+						}$
+					}
+					case 11 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 59 ) ${
+							cout << "word: " << start_word << 
+							" " << cur_char-1 << endl;
+						}$	host( "working/union.rl", 75 ) ${
+							cout << "literal: " << start_literal <<
+							" " << cur_char-1 << endl;
+						}$
+					}
+					case 13 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 64 ) ${
+							start_comment = cur_char;
+						}$	host( "working/union.rl", 75 ) ${
+							cout << "literal: " << start_literal <<
+							" " << cur_char-1 << endl;
+						}$
+					}
+					case 18 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 67 ) ${
+							cout << "comment: " << start_comment <<
+							" " << cur_char-1 << endl;
+						}$	host( "working/union.rl", 64 ) ${
+							start_comment = cur_char;
+						}$
+					}
+					case 17 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 67 ) ${
+							cout << "comment: " << start_comment <<
+							" " << cur_char-1 << endl;
+						}$	host( "working/union.rl", 72 ) ${
+							start_literal = cur_char;
+						}$
+					}
+					case 12 {
+						host( "working/union.rl", 52 ) ${
+							cur_char += 1;
+						}$	host( "working/union.rl", 75 ) ${
+							cout << "literal: " << start_literal <<
+							" " << cur_char-1 << endl;
+						}$	host( "working/union.rl", 72 ) ${
+							start_literal = cur_char;
+						}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					switch ( _Concurrent_eof_actions[cs] ) {
+						case 5 {
+							host( "working/union.rl", 59 ) ${
+								cout << "word: " << start_word << 
+								" " << cur_char-1 << endl;
+							}$
+						}
+						case 14 {
+							host( "working/union.rl", 59 ) ${
+								cout << "word: " << start_word << 
+								" " << cur_char-1 << endl;
+							}$	host( "working/union.rl", 67 ) ${
+								cout << "comment: " << start_comment <<
+								" " << cur_char-1 << endl;
+							}$
+						}
+						case 9 {
+							host( "working/union.rl", 59 ) ${
+								cout << "word: " << start_word << 
+								" " << cur_char-1 << endl;
+							}$	host( "working/union.rl", 75 ) ${
+								cout << "literal: " << start_literal <<
+								" " << cur_char-1 << endl;
+							}$
+						}
+					}
+				}
+				
+			}
+		}
+	}
+	host( "working/union.rl", 114 ) @{
+	}
+	
+	int Concurrent::finish( )
+	{
+		if ( cs == Concurrent_error )
+		return -1;
+		if ( cs >= Concurrent_first_final )
+		return 1;
+		return 0;
+	}
+	
+	void test( const char *buf )
+	{
+		Concurrent concurrent;
+		concurrent.init();
+		concurrent.execute( buf, strlen(buf) );
+		if ( concurrent.finish() > 0 )
+		cout << "ACCEPT" << endl;
+		else
+		cout << "FAIL" << endl;
+	}
+	
+	int main()
+	{
+		test( 
+		"/* in a comment,\n"
+		" * ' and now in a literal string\n"
+		" */ \n"
+		" \n"
+		"the comment has now ended but the literal string lives on\n"
+		"\n"
+		"' comment closed\n" );
+		test( "/* * ' \\' */ \\' '\n" );
+		test( "/**/'\\''/*/*/\n" );
+		return 0;
+	}
+	
+}@

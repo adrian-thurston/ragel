@@ -1,0 +1,499 @@
+package main
+import "fmt"
+
+var ts  int ;
+var te  int ;
+var act  int ;
+var token  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _scanner_actions [] int8  = [] int8  { 0, 1, 2, 1, 3, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 2, 0, 1, 2, 3, 4, 2, 3, 5, 0  }
+var _scanner_to_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0  }
+var _scanner_from_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0  }
+var _scanner_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _scanner_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var scanner_start  int  = 7
+var scanner_first_final  int  = 7
+var scanner_error  int  = 0
+var scanner_en_main  int  = 7
+func prepare() {
+
+	{
+		cs = int(scanner_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _acts int
+		var  _nacts uint 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		_acts = int(_scanner_from_state_actions[cs] );
+		_nacts = uint(_scanner_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _scanner_actions[_acts ] {
+					case 2:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		switch cs  {
+			case 7:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr15;
+				}
+				case 97:
+				{
+					goto ctr16;
+				}
+				case 98:
+				{
+					goto ctr17;
+				}
+				case 99:
+				{
+					goto ctr18;
+				}
+				case 100:
+				{
+					goto ctr19;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr5;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			switch ( data[p ])  {
+				case 46:
+				{
+					goto ctr2;
+				}
+				case 100:
+				{
+					goto ctr3;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr25;
+			}
+			case 8:
+			if ( data[p ]) == 98  {
+				{
+					goto ctr17;
+				}
+				
+			}
+			{
+				goto ctr21;
+			}
+			case 2:
+			if ( data[p ]) == 49  {
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr5;
+			}
+			case 9:
+			if ( data[p ]) == 100  {
+				{
+					goto ctr24;
+				}
+				
+			}
+			{
+				goto ctr23;
+			}
+			case 3:
+			if ( data[p ]) == 120  {
+				{
+					goto ctr8;
+				}
+				
+			}
+			{
+				goto ctr11;
+			}
+			case 4:
+			if ( data[p ]) == 120  {
+				{
+					goto ctr10;
+				}
+				
+			}
+			{
+				goto ctr11;
+			}
+			case 5:
+			if ( data[p ]) == 120  {
+				{
+					goto ctr12;
+				}
+				
+			}
+			{
+				goto ctr11;
+			}
+			case 6:
+			switch ( data[p ])  {
+				case 46:
+				{
+					goto ctr2;
+				}
+				case 49:
+				{
+					goto ctr13;
+				}
+				case 50:
+				{
+					goto ctr14;
+				}
+				case 100:
+				{
+					goto ctr3;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr5;
+			}
+			case 10:
+			switch ( data[p ])  {
+				case 46:
+				{
+					goto ctr2;
+				}
+				case 100:
+				{
+					goto ctr3;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr25;
+			}
+			
+		}
+		ctr5: cs = 0;
+		goto _again;
+		ctr3: cs = 1;
+		goto _again;
+		ctr18: cs = 2;
+		goto _again;
+		ctr24: cs = 3;
+		goto _again;
+		ctr8: cs = 4;
+		goto _again;
+		ctr10: cs = 5;
+		goto _again;
+		ctr19: cs = 6;
+		goto _again;
+		ctr25: cs = 7;
+		goto f0;
+		ctr2: cs = 7;
+		goto f1;
+		ctr11: cs = 7;
+		goto f3;
+		ctr12: cs = 7;
+		goto f4;
+		ctr15: cs = 7;
+		goto f9;
+		ctr16: cs = 7;
+		goto f10;
+		ctr21: cs = 7;
+		goto f11;
+		ctr23: cs = 7;
+		goto f12;
+		ctr17: cs = 8;
+		goto _again;
+		ctr4: cs = 9;
+		goto f2;
+		ctr13: cs = 10;
+		goto f5;
+		ctr14: cs = 10;
+		goto f6;
+		
+		f2: _acts = int(3 );
+		goto execFuncs;
+		f10: _acts = int(5 );
+		goto execFuncs;
+		f4: _acts = int(7 );
+		goto execFuncs;
+		f1: _acts = int(9 );
+		goto execFuncs;
+		f9: _acts = int(11 );
+		goto execFuncs;
+		f11: _acts = int(13 );
+		goto execFuncs;
+		f12: _acts = int(15 );
+		goto execFuncs;
+		f3: _acts = int(17 );
+		goto execFuncs;
+		f0: _acts = int(19 );
+		goto execFuncs;
+		f5: _acts = int(24 );
+		goto execFuncs;
+		f6: _acts = int(27 );
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = uint(_scanner_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _scanner_actions[_acts ] {
+					case 3:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 4:
+					{{act = 4;
+						}}
+					
+					break;
+					case 5:
+					{{act = 5;
+						}}
+					
+					break;
+					case 6:
+					{{te = p+1;
+							{fmt.Print( "on last     " );if ( p + 1 == te ) {
+									fmt.Print( "yes" );
+								}
+								fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 7:
+					{{te = p+1;
+							{fmt.Print( "on lag      " );if ( p + 1 == te ) {
+									fmt.Print( "yes" );
+								}
+								fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 8:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 9:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 10:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "on next     " );if ( p + 1 == te ) {
+									fmt.Print( "yes" );
+								}
+								fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 11:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "on lag      " );if ( p + 1 == te ) {
+									fmt.Print( "yes" );
+								}
+								fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 12:
+					{{p = ((te))-1;
+							{fmt.Print( "on lag      " );if ( p + 1 == te ) {
+									fmt.Print( "yes" );
+								}
+								fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 13:
+					{{switch act  {
+								case 0 :
+								{{cs = 0;
+										goto _again;}}
+								
+								break;
+								case 4 :
+								p = ((te))-1;
+								{fmt.Print( "lm switch1  " );if ( p + 1 == te ) {
+										fmt.Print( "yes" );
+									}
+									fmt.Print( "\n" );}
+								
+								break;
+								case 5 :
+								p = ((te))-1;
+								{fmt.Print( "lm switch2  " );if ( p + 1 == te ) {
+										fmt.Print( "yes" );
+									}
+									fmt.Print( "\n" );}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		goto _again;
+		
+		_again:
+		_acts = int(_scanner_to_state_actions[cs] );
+		_nacts = uint(_scanner_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _scanner_actions[_acts ] {
+					case 0:
+					{{ts = 0;
+						}}
+					
+					break;
+					case 1:
+					{{act = 0;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 1:
+					goto ctr25;
+					case 8:
+					goto ctr21;
+					case 9:
+					goto ctr23;
+					case 3:
+					goto ctr11;
+					case 4:
+					goto ctr11;
+					case 5:
+					goto ctr11;
+					case 10:
+					goto ctr25;
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= scanner_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"abbc1d1d2\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

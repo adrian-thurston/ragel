@@ -1,0 +1,217 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int i;
+		int c;
+		
+		
+		
+		
+		static readonly sbyte  []_foo_actions = { 0, 1, 0, 1, 1, 0,  };
+		static readonly sbyte  []_foo_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_foo_nfa_offsets = { 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_foo_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_foo_nfa_pop_trans = { 0, 0,  };
+		static readonly int  foo_start  = 1;
+		static readonly int  foo_first_final  = 4;
+		static readonly int  foo_error  = 0;
+		static readonly int  foo_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)foo_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _acts;
+				uint _nacts;
+				
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( cs  ) {
+					case 1:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr0;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						int ck = 0;
+						if ( (i > 0) )
+						ck += 1;
+						
+						if ( ck > 0 )
+						{
+							goto ctr3;
+						} 
+						else
+						{
+							goto ctr2;
+						}
+						
+						
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 3:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						int ck = 0;
+						if ( (i > 0) )
+						ck += 1;
+						
+						if ( ck <= 0 )
+						{
+							goto ctr4;
+						}
+						
+						goto ctr5;
+						
+					}
+					
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						int ck = 0;
+						if ( (i > 0) )
+						ck += 1;
+						
+						if ( 1<= ck  )
+						{		goto ctr6;
+						}
+						
+						goto ctr5;
+						
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 4:
+					{
+						goto ctr1;
+					}
+					
+				}
+				ctr1: cs = 0;
+				goto _again;
+				ctr0: cs = 2;
+				goto f0;
+				ctr5: cs = 0;
+				goto _again;
+				ctr3: cs = 2;
+				goto f1;
+				ctr2: cs = 3;
+				goto f0;
+				ctr6: cs = 3;
+				goto f1;
+				ctr4: cs = 4;
+				goto _again;
+				
+				f1: _acts = 1;
+				goto execFuncs;
+				f0: _acts = 3;
+				goto execFuncs;
+				
+				execFuncs:
+				_nacts = (uint )_foo_actions[_acts ];
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( _foo_actions[_acts ] ) {
+						case 0:
+						{i = i - 1;
+							c = ( int ) ( (( data[p ])) )
+							;
+							Console.Write( "item: " );Console.Write( c );Console.Write( "\n" );}
+						
+						break;
+						case 1:
+						{i = ( int ) ( (( data[p ])) - 48 )
+							;
+							Console.Write( "count: " );Console.Write( i );Console.Write( "\n" );}
+						
+						break;
+						
+					}
+					_acts += 1;
+					_nacts -= 1;
+				}
+				
+				
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= foo_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"00\n",
+			"019\n",
+			"190\n",
+			"1719\n",
+			"1040000\n",
+			"104000a\n",
+			"104000\n",
+		};
+		
+		
+		static readonly int inplen = 7;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

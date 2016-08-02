@@ -1,0 +1,329 @@
+package main
+import "fmt"
+
+var ts  int ;
+var te  int ;
+var act  int ;
+var token  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _scanner_key_offsets [] int8  = [] int8  { 0, 0, 2, 0  }
+var _scanner_trans_keys [] byte  = [] byte  { 97, 98, 0 }
+var _scanner_single_lengths [] int8  = [] int8  { 0, 2, 0, 0  }
+var _scanner_range_lengths [] int8  = [] int8  { 0, 0, 0, 0  }
+var _scanner_index_offsets [] int8  = [] int8  { 0, 0, 3, 0  }
+var _scanner_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, 0  }
+var _scanner_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 0  }
+var _scanner_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 0  }
+var _scanner_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0  }
+var _scanner_cond_targs [] int8  = [] int8  { 2, 2, 0, 2, 1, 0  }
+var _scanner_cond_actions [] int8  = [] int8  { 3, 4, 0, 6, 5, 0  }
+var _scanner_to_state_actions [] int8  = [] int8  { 0, 1, 0, 0  }
+var _scanner_from_state_actions [] int8  = [] int8  { 0, 2, 0, 0  }
+var _scanner_eof_trans_indexed [] int8  = [] int8  { 0, 0, 2, 0  }
+var _scanner_eof_trans_direct [] int8  = [] int8  { 0, 0, 5, 0  }
+var _scanner_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0  }
+var _scanner_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var scanner_start  int  = 1
+var scanner_first_final  int  = 1
+var scanner_error  int  = 0
+var scanner_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(scanner_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _klen int 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		var  _trans uint 
+		var  _cond  uint   = 0
+		var  _have  uint   = 0
+		var  _cont  uint   = 1
+		for _cont == 1  {
+			{
+			
+				if cs == 0  {
+					_cont = 0;
+					
+				}
+				_have = 0;
+				if p == pe  {
+					{
+						if p == eof  {
+							{
+								if _scanner_eof_trans_direct[cs] > 0  {
+									{
+										_trans = uint(_scanner_eof_trans_direct[cs] )- 1;
+										_cond = uint(_scanner_trans_offsets[_trans]);
+										_have = 1;
+									}
+									
+								}
+								if _have == 0  {
+									{
+									}
+									
+								}
+							}
+							
+							
+						}
+						if _have == 0  {
+							_cont = 0;
+							
+						}
+					}
+					
+				}
+				if _cont == 1  {
+					{
+						if _have == 0  {
+							{
+								switch _scanner_from_state_actions[cs]  {
+									case 2 :
+									{{ts = p;
+										}}
+									
+									break;
+									
+								}
+								_keys = int(_scanner_key_offsets[cs] );
+								_trans = uint(_scanner_index_offsets[cs]);
+								_have = 0;
+								_klen = int(_scanner_single_lengths[cs]);
+								if _klen > 0  {
+									{
+										var  _lower int
+										var  _mid int
+										var  _upper int
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										for _upper >= _lower && _have == 0  {
+											{
+												_mid = _lower + ((_upper-_lower) >> 1);
+												switch {
+													case ( data[p ]) < _scanner_trans_keys[_mid ]:
+													_upper = _mid - 1;
+													
+													case ( data[p ]) > _scanner_trans_keys[_mid ]:
+													_lower = _mid + 1;
+													
+													default:
+													{
+														_trans += uint((_mid - _keys));
+														_have = 1;
+													}
+													
+												}
+											}
+											
+										}
+										if _have == 0  {
+											{
+												_keys += _klen;
+												_trans += uint(_klen);
+											}
+											
+										}
+									}
+									
+									
+								}
+								if _have == 0  {
+									{
+										_klen = int(_scanner_range_lengths[cs]);
+										if _klen > 0  {
+											{
+												var  _lower int
+												var  _mid int
+												var  _upper int
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												for _have == 0 && _lower <= _upper  {
+													{
+														_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+														switch {
+															case ( data[p ]) < _scanner_trans_keys[_mid ]:
+															_upper = _mid - 2;
+															
+															case ( data[p ]) > _scanner_trans_keys[_mid + 1 ]:
+															_lower = _mid + 2;
+															
+															default:
+															{
+																_trans += uint(((_mid - _keys)>>1));
+																_have = 1;
+															}
+															
+														}
+													}
+													
+												}
+												if _have == 0  {
+													_trans += uint(_klen);
+													
+												}
+											}
+											
+										}
+									}
+									
+									
+								}
+								_ckeys = int(_scanner_trans_offsets[_trans] );
+								_klen = int(_scanner_trans_lengths[_trans]);
+								_cond = uint(_scanner_trans_offsets[_trans]);
+								_have = 0;
+								_cpc = 0;
+								{
+									var  _lower int
+									var  _mid int
+									var  _upper int
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									for _have == 0 && _lower <= _upper  {
+										{
+											_mid = _lower + ((_upper-_lower) >> 1);
+											switch {
+												case _cpc < int(_scanner_cond_keys[_mid ]):
+												_upper = _mid - 1;
+												
+												case _cpc > int(_scanner_cond_keys[_mid ]):
+												_lower = _mid + 1;
+												
+												default:
+												{
+													_cond += uint((_mid - _ckeys));
+													_have = 1;
+												}
+												
+											}
+										}
+										
+									}
+									if _have == 0  {
+										{
+											cs = 0;
+											_cont = 0;
+										}
+										
+									}
+								}
+							}
+							
+						}
+						if _cont == 1  {
+							{
+								cs = int(_scanner_cond_targs[_cond]);
+								switch _scanner_cond_actions[_cond]  {
+									case 5 :
+									{{switch act  {
+												case 1 :
+												p = ((te))-1;
+												{fmt.Print( "pat1\n" );}
+												
+												break;
+												case 2 :
+												p = ((te))-1;
+												{fmt.Print( "pat2\n" );}
+												
+												break;
+												case 3 :
+												p = ((te))-1;
+												{fmt.Print( "pat3\n" );}
+												
+												break;
+												
+											}
+										}
+									}
+									
+									break;
+									case 3 :
+									{{te = p+1;
+										}}
+									{{act = 1;
+										}}
+									
+									break;
+									case 4 :
+									{{te = p+1;
+										}}
+									{{act = 2;
+										}}
+									
+									break;
+									case 6 :
+									{{te = p+1;
+										}}
+									{{act = 3;
+										}}
+									
+									break;
+									
+								}
+								switch _scanner_to_state_actions[cs]  {
+									case 1 :
+									{{ts = 0;
+										}}
+									
+									break;
+									
+								}
+								if cs == 0  {
+									_cont = 0;
+									
+								}
+								if _cont == 1  {
+									p += 1;
+									
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+	}
+}
+func finish() {
+	if cs >= scanner_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"ab89",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

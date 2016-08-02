@@ -1,0 +1,310 @@
+#include <string.h>
+#include <stdio.h>
+
+int neg ;
+int value ;
+
+
+
+
+
+static const char  _state_chart_actions [] = { 0, 1, 0, 1, 2, 2, 0, 1, 2, 0, 2, 2, 3, 4, 0 ,  };
+static const char  _state_chart_key_offsets [] = { 0, 0, 2, 5, 0 ,  };
+static const char  _state_chart_trans_keys [] = { 48, 57, 10, 48, 57, 43, 45, 48, 57, 0 ,  };
+static const char  _state_chart_single_lengths [] = { 0, 0, 1, 2, 0 ,  };
+static const char  _state_chart_range_lengths [] = { 0, 1, 1, 1, 0 ,  };
+static const char  _state_chart_index_offsets [] = { 0, 0, 2, 5, 0 ,  };
+static const char  _state_chart_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _state_chart_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0 ,  };
+static const char  _state_chart_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _state_chart_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_chart_cond_targs [] = { 2, 0, 3, 2, 0, 1, 1, 2, 0, 0 ,  };
+static const char  _state_chart_cond_actions [] = { 3, 0, 11, 3, 0, 1, 5, 8, 0, 0 ,  };
+static const char  _state_chart_nfa_targs [] = { 0, 0 ,  };
+static const char  _state_chart_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _state_chart_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _state_chart_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  state_chart_start  = 3;
+static const int  state_chart_first_final  = 3;
+static const int  state_chart_error  = 0;
+static const int  state_chart_en_main  = 3;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+	value = 0;
+	neg = 0;
+	
+	{
+		cs = ( int ) state_chart_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _klen;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _state_chart_trans_keys + _state_chart_key_offsets[cs];
+					_trans = ( unsigned int  ) _state_chart_index_offsets[cs];
+					_have = 0;
+					_klen = ( int ) _state_chart_single_lengths[cs];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( ((*( p  ))
+							)< (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( ((*( p  ))
+							)> (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _state_chart_range_lengths[cs];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( ((*( p  ))
+								)< (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( ((*( p  ))
+								)> (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _state_chart_cond_keys + _state_chart_trans_offsets[_trans];
+					_klen = ( int ) _state_chart_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _state_chart_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _state_chart_cond_targs[_cond];
+					if ( _state_chart_cond_actions[_cond]!= 0  )
+					{
+						_acts = _state_chart_actions + _state_chart_cond_actions[_cond];
+						_nacts = ( unsigned int  ) (*( _acts  ))
+						;
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							switch ( (*( _acts  ))
+							) {
+								case 0 :
+								{
+									neg = 0;
+									value = 0;
+									
+								}
+								
+								break;
+								case 1 :
+								{
+									neg = 1;
+									
+								}
+								
+								break;
+								case 2 :
+								{
+									value = value * 10 + ( int ) ( (((*( p  ))
+									)) - 48 )
+									;
+									
+								}
+								
+								break;
+								case 3 :
+								{
+									if ( neg != 0 )
+									{
+										value = -1 * value;
+										
+									} 
+									
+								}
+								
+								break;
+								case 4 :
+								{
+									printf( "%d", value );
+									printf( "%s", "\n" );
+									
+								}
+								
+								break;
+								
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+						
+					}
+					
+					
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= state_chart_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"1\n",
+	"12\n",
+	"222222\n",
+	"+2123\n",
+	"213 3213\n",
+	"-12321\n",
+	"--123\n",
+	"-99\n",
+	" -3000\n",
+};
+
+int inplen = 9;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

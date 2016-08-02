@@ -1,0 +1,291 @@
+#include <stdio.h>
+#include <string.h>
+
+#define LINEBUF 2048
+static char lineBuf[LINEBUF];
+static char blineBuf[LINEBUF];
+static int lineLen;
+static int blineLen;
+static int words;
+
+void finishLine();
+
+struct awkemu
+{
+	int cs;
+};
+
+
+
+void finishLine()
+{
+	int i;
+	char *pword = blineBuf;
+	lineBuf[lineLen] = 0;
+	printf("endline(%i): %s\n", words, lineBuf );
+	for ( i = 0; i < words; i++ ) {
+		printf("  word: %s\n", pword );
+		pword += strlen(pword) + 1;
+	}
+}
+
+static const int  awkemu_start  = 2;
+static const int  awkemu_first_final  = 2;
+static const int  awkemu_error  = -1;
+static const int  awkemu_en_main  = 2;
+static const char  _awkemu_nfa_targs [] = { 0, 0 ,  };
+static const char  _awkemu_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _awkemu_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _awkemu_nfa_pop_trans [] = { 0, 0 ,  };
+void awkemu_init( struct awkemu *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) awkemu_start;
+	}
+}
+
+void awkemu_execute( struct awkemu *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( (fsm->cs) ) {
+			case 2:
+			goto st_case_2;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			
+		}
+		goto st_out;
+		ctr2:
+		{
+			blineBuf[blineLen++] = 0;
+			words += 1;
+			
+		}
+		{
+			finishLine(); 
+		}
+		
+		
+		goto st2;
+		ctr4:
+		{
+			finishLine(); 
+		}
+		
+		
+		goto st2;
+		ctr7:
+		{
+			lineLen = 0;	
+			blineLen = 0;	
+			words = 0;
+			
+		}
+		{
+			finishLine(); 
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		switch ( ((*( p  ))
+		) ) {
+			case 9:
+			{
+				goto ctr6;
+			}
+			case 10:
+			{
+				goto ctr7;
+			}
+			case 32:
+			{
+				goto ctr6;
+			}
+			
+		}
+		{
+			goto ctr5;
+		}
+		ctr0:
+		{
+			blineBuf[blineLen++] = (((*( p  ))
+			));
+			
+		}
+		{
+			lineBuf[lineLen++] = (((*( p  ))
+			));
+			
+		}
+		
+		
+		goto st0;
+		ctr5:
+		{
+			lineLen = 0;	
+			blineLen = 0;	
+			words = 0;
+			
+		}
+		{
+			blineBuf[blineLen++] = (((*( p  ))
+			));
+			
+		}
+		{
+			lineBuf[lineLen++] = (((*( p  ))
+			));
+			
+		}
+		
+		
+		goto st0;
+		st0:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof0;
+		
+		st_case_0:
+		switch ( ((*( p  ))
+		) ) {
+			case 9:
+			{
+				goto ctr1;
+			}
+			case 10:
+			{
+				goto ctr2;
+			}
+			case 32:
+			{
+				goto ctr1;
+			}
+			
+		}
+		{
+			goto ctr0;
+		}
+		ctr1:
+		{
+			blineBuf[blineLen++] = 0;
+			words += 1;
+			
+		}
+		{
+			lineBuf[lineLen++] = (((*( p  ))
+			));
+			
+		}
+		
+		
+		goto st1;
+		ctr3:
+		{
+			lineBuf[lineLen++] = (((*( p  ))
+			));
+			
+		}
+		
+		
+		goto st1;
+		ctr6:
+		{
+			lineLen = 0;	
+			blineLen = 0;	
+			words = 0;
+			
+		}
+		{
+			lineBuf[lineLen++] = (((*( p  ))
+			));
+			
+		}
+		
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		switch ( ((*( p  ))
+		) ) {
+			case 9:
+			{
+				goto ctr3;
+			}
+			case 10:
+			{
+				goto ctr4;
+			}
+			case 32:
+			{
+				goto ctr3;
+			}
+			
+		}
+		{
+			goto ctr0;
+		}
+		st_out:
+		_test_eof2: (fsm->cs) = 2;
+		goto _test_eof; 
+		_test_eof0: (fsm->cs) = 0;
+		goto _test_eof; 
+		_test_eof1: (fsm->cs) = 1;
+		goto _test_eof; 
+		
+		_test_eof: {}
+	}
+}
+
+int awkemu_finish( struct awkemu *fsm )
+{
+	if ( fsm->cs == awkemu_error ) 
+	return -1;
+	if ( fsm->cs >= awkemu_first_final ) 
+	return 1;
+	return 0;
+}
+
+#include <stdio.h>
+#define BUFSIZE 2048
+
+struct awkemu fsm;
+char buf[BUFSIZE];
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	awkemu_init( &fsm );
+	awkemu_execute( &fsm, buf, len );
+	if ( awkemu_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+int main()
+{
+	test( "" );
+	test( "one line with no newline" );
+	test( "one line\n" );
+	return 0;
+}
+

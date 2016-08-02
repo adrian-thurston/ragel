@@ -1,0 +1,219 @@
+host( "working/range.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct range
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _range_key_offsets( 0, 3 ) = { 0, 0, 2, 3, 0 };
+
+array char _range_trans_keys( 0, 122 ) = { 97, 122, 10, 0 };
+
+array s8 _range_single_lengths( 0, 1 ) = { 0, 0, 1, 0, 0 };
+
+array s8 _range_range_lengths( 0, 1 ) = { 0, 1, 0, 0, 0 };
+
+array s8 _range_index_offsets( 0, 4 ) = { 0, 0, 2, 4, 0 };
+
+array s8 _range_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, 0 };
+
+array s8 _range_trans_offsets( 0, 4 ) = { 0, 1, 2, 3, 4, 0 };
+
+array s8 _range_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 0 };
+
+array s8 _range_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _range_cond_targs( 0, 3 ) = { 2, 0, 3, 0, 0, 0 };
+
+array s8 _range_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _range_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _range_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _range_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _range_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int range_start = 1;
+value int range_first_final = 3;
+value int range_error = 0;
+
+value int range_en_main = 1;
+
+host( "working/range.rl", 21 ) @{
+	
+	void range_init( struct range *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)range_start;
+	}
+	host( "working/range.rl", 25 ) @{
+	}
+	
+	void range_execute( struct range *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		int _klen;
+		index char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans = 0;
+		uint _cond = 0;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			goto _out;
+			label _resume { 
+				_keys = offset( _range_trans_keys, _range_key_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_trans = cast(uint)_range_index_offsets[host( "-", 1 ) ={ fsm->cs}=];
+				
+				_klen = cast(int)_range_single_lengths[host( "-", 1 ) ={ fsm->cs}=];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _range_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _range_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_range_range_lengths[host( "-", 1 ) ={ fsm->cs}=];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( deref( data, p )) < deref( _range_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( ( deref( data, p )) > deref( _range_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _range_cond_keys, _range_trans_offsets[_trans] );
+				_klen = cast(int)_range_trans_lengths[_trans];
+				_cond = cast(uint)_range_trans_offsets[_trans];
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _range_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _range_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					host( "-", 1 ) ={ fsm->cs}= = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				host( "-", 1 ) ={ fsm->cs}= = cast(int)_range_cond_targs[_cond];
+				
+			}
+			label _again {
+				if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/range.rl", 33 ) @{
+	}
+	
+	int range_finish( struct range *fsm )
+	{
+		if ( fsm->cs == range_error )
+		return -1;
+		if ( fsm->cs >= range_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct range fsm;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		range_init( &fsm );
+		range_execute( &fsm, buf, len );
+		if ( range_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	int main()
+	{
+		test( "a\n" );
+		test( "z\n" );
+		test( "g\n" );
+		test( "no\n" );
+		test( "1\n" );
+		
+		return 0;
+	}
+	
+}@

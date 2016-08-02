@@ -1,0 +1,442 @@
+#include <stdio.h>
+#include <string.h>
+
+int num = 0;
+
+struct test
+{
+	int cs, top, stack[32];
+};
+
+
+
+static const char  _test_nfa_targs [] = { 0, 0 ,  };
+static const char  _test_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _test_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _test_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  test_start  = 1;
+static const int  test_first_final  = 23;
+static const int  test_error  = 0;
+static const int  test_en_even  = 13;
+static const int  test_en_odd  = 18;
+static const int  test_en_fail  = 22;
+static const int  test_en_main  = 1;
+void test_init( struct test *fsm )
+{
+	num = 0;
+	
+	{
+		fsm->cs = ( int ) test_start;
+		fsm->top = 0;
+	}
+}
+
+void test_execute( struct test *fsm, const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data+len;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( fsm->cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( fsm->cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 79  )
+			{
+				goto ctr2;
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 32  )
+			{
+				goto ctr3;
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 23:
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 65  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 32  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 6:
+			switch ( ((*( p  ))
+			) ) {
+				case 101:
+				{
+					goto ctr7;
+				}
+				case 111:
+				{
+					goto ctr8;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ((*( p  ))
+			)== 114  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ((*( p  ))
+			)== 114  )
+			{
+				goto ctr10;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr11;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ((*( p  ))
+			)== 114  )
+			{
+				goto ctr12;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( 49 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 50  )
+			{
+				goto ctr13;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ((*( p  ))
+			)== 107  )
+			{
+				goto ctr13;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 13:
+			if ( ((*( p  ))
+			)== 101  )
+			{
+				goto ctr14;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 14:
+			if ( ((*( p  ))
+			)== 118  )
+			{
+				goto ctr15;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 15:
+			if ( ((*( p  ))
+			)== 101  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 16:
+			if ( ((*( p  ))
+			)== 110  )
+			{
+				goto ctr17;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 17:
+			{
+				goto ctr18;
+			}
+			case 24:
+			{
+				goto ctr1;
+			}
+			case 18:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr19;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 19:
+			if ( ((*( p  ))
+			)== 100  )
+			{
+				goto ctr20;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 20:
+			if ( ((*( p  ))
+			)== 100  )
+			{
+				goto ctr21;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 21:
+			{
+				goto ctr22;
+			}
+			case 25:
+			{
+				goto ctr1;
+			}
+			case 22:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: fsm->cs = 0;
+		goto _again;
+		ctr0: fsm->cs = 2;
+		goto f0;
+		ctr13: fsm->cs = 3;
+		goto _again;
+		ctr3: fsm->cs = 3;
+		goto f1;
+		ctr2: fsm->cs = 4;
+		goto _again;
+		ctr5: fsm->cs = 5;
+		goto _again;
+		ctr6: fsm->cs = 6;
+		goto _again;
+		ctr7: fsm->cs = 7;
+		goto _again;
+		ctr9: fsm->cs = 8;
+		goto _again;
+		ctr10: fsm->cs = 9;
+		goto _again;
+		ctr11: fsm->cs = 10;
+		goto _again;
+		ctr12: fsm->cs = 11;
+		goto _again;
+		ctr8: fsm->cs = 12;
+		goto _again;
+		ctr14: fsm->cs = 14;
+		goto _again;
+		ctr15: fsm->cs = 15;
+		goto _again;
+		ctr16: fsm->cs = 16;
+		goto _again;
+		ctr17: fsm->cs = 17;
+		goto _again;
+		ctr19: fsm->cs = 19;
+		goto _again;
+		ctr20: fsm->cs = 20;
+		goto _again;
+		ctr21: fsm->cs = 21;
+		goto _again;
+		ctr4: fsm->cs = 23;
+		goto _again;
+		ctr18: fsm->cs = 24;
+		goto f2;
+		ctr22: fsm->cs = 25;
+		goto f3;
+		
+		f1:
+		{
+			if ( num & 1 )
+			{
+				fsm->stack[fsm->top] = fsm->cs;
+				fsm->top += 1;
+				fsm->cs = (18);
+				goto _again;
+			}
+			
+			else
+			{
+				fsm->stack[fsm->top] = fsm->cs;
+				fsm->top += 1;
+				fsm->cs = 13;
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f2:
+		{
+			{
+				p = p - 1;
+				
+			}
+			{
+				fsm->top-= 1;
+				fsm->cs = fsm->stack[fsm->top];
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f3:
+		{
+			{
+				p = p - 1;
+				
+			}
+			{
+				fsm->top-= 1;
+				fsm->cs = fsm->stack[fsm->top];
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f0:
+		{
+			num = num * 10 + ((((*( p  ))
+			)) - '0'); 
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( fsm->cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+int test_finish( struct test *fsm )
+{
+	if ( fsm->cs == test_error )
+	return -1;
+	if ( fsm->cs >= test_first_final )
+	return 1;
+	return 0;
+}
+
+#define BUFSIZE 1024
+
+void test( char *buf )
+{   
+	struct test test;
+	test_init( &test );
+	test_execute( &test, buf, strlen(buf) );
+	if ( test_finish( &test ) > 0 )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+int main()
+{
+	test( "78 even\n" );
+	test( "89 odd\n" );
+	test( "1 even\n" );
+	test( "0 odd\n" );
+	test( "OA ok\n" );
+	test( "OA error1\n" );
+	test( "OA error2\n" );
+	
+	return 0;
+}
+
+

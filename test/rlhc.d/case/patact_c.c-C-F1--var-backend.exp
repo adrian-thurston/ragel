@@ -1,0 +1,690 @@
+#include <string.h>
+#include <stdio.h>
+
+char comm ;
+int top ;
+int stack [32];
+char * ts ;
+char * te ;
+int act ;
+int value ;
+
+
+
+
+
+static const char  _patact_trans_keys [] = { 1, 0, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 0, 11, 2, 5, 2, 5, 2, 11, 0, 11, 4, 5, 7, 11, 0, 11, 2, 5, 2, 5, 2, 11, 6, 6, 0 ,  };
+static const char  _patact_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 7, 8, 7, 7, 9, 7, 7, 10, 7, 7, 11, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0 ,  };
+static const char  _patact_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 32, 36, 46, 58, 60, 65, 77, 81, 85, 95, 0 ,  };
+static const char  _patact_indicies [] = { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0 ,  };
+static const char  _patact_index_defaults [] = { 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 21, 0, 28, 30, 21, 35, 36, 21, 10, 43, 45, 21, 0 ,  };
+static const char  _patact_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _patact_cond_targs [] = { 17, 2, 3, 4, 17, 17, 6, 7, 8, 17, 24, 10, 11, 12, 24, 24, 14, 15, 16, 24, 17, 0, 17, 18, 19, 17, 20, 1, 17, 18, 17, 5, 21, 22, 23, 21, 21, 24, 24, 25, 26, 27, 9, 24, 25, 24, 13, 28, 0 ,  };
+static const char  _patact_cond_actions [] = { 1, 0, 0, 0, 2, 3, 0, 0, 0, 4, 5, 0, 0, 0, 6, 7, 0, 0, 0, 8, 11, 0, 12, 13, 13, 14, 15, 0, 16, 17, 18, 0, 19, 0, 0, 20, 21, 22, 23, 24, 24, 15, 0, 25, 26, 27, 0, 28, 0 ,  };
+static const char  _patact_to_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 9, 0 ,  };
+static const char  _patact_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 10, 0, 0, 0, 10, 0 ,  };
+static const char  _patact_eof_trans [] = { 0, 1, 1, 1, 1, 6, 6, 6, 6, 11, 11, 11, 11, 16, 16, 16, 16, 0, 1, 29, 31, 0, 36, 37, 0, 11, 44, 46, 0, 0 ,  };
+static const char  _patact_nfa_targs [] = { 0, 0 ,  };
+static const char  _patact_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _patact_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _patact_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  patact_start  = 17;
+static const int  patact_first_final  = 17;
+static const int  patact_error  = 0;
+static const int  patact_en_other  = 21;
+static const int  patact_en_exec_test  = 24;
+static const int  patact_en_semi  = 28;
+static const int  patact_en_main  = 17;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) patact_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		unsigned int _trans = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_keys;
+		const char  *_inds;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _patact_eof_trans[cs]> 0  )
+					{
+						_trans = ( unsigned int  ) _patact_eof_trans[cs]- 1;
+						_have = 1;
+					}
+					
+					if ( _have == 0  )
+					{
+					}
+					
+				}
+				
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					switch ( _patact_from_state_actions[cs] ) {
+						case 10 :
+						{
+							{
+								ts = p;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					_keys = _patact_trans_keys + (cs<<1);
+					_inds = _patact_indicies + _patact_index_offsets[cs];
+					if ( ((*( p  ))
+					)<= 122 && ((*( p  ))
+					)>= 10  )
+					{
+						int _ic = ( int ) _patact_char_class[( int ) ((*( p  ))
+						)- 10];
+						if ( _ic <= ( int ) (*( _keys+1  ))
+						&& _ic >= ( int ) (*( _keys  ))
+						)
+						_trans = ( unsigned int  ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+						) ))
+						;
+						
+						else
+						_trans = ( unsigned int  ) _patact_index_defaults[cs];
+						
+					}
+					
+					else
+					{
+						_trans = ( unsigned int  ) _patact_index_defaults[cs];
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _patact_cond_targs[_trans];
+					switch ( _patact_cond_actions[_trans] ) {
+						case 15 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						
+						break;
+						case 19 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "space\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 21 :
+						{
+							{
+								te = p;
+								p = p - 1;
+								{
+									printf( "%s", "word\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 20 :
+						{
+							{
+								te = p;
+								p = p - 1;
+								{
+									printf( "%s", "num\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 8 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "word (c/lbh)\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 22 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "space\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 6 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "num (c/switch)\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 23 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						
+						break;
+						case 27 :
+						{
+							{
+								te = p;
+								p = p - 1;
+								{
+									printf( "%s", "word (w/lbh)\n" );
+									{
+										p = ((te-1))-1;
+										
+									}
+									
+									{
+										cs = 21;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 25 :
+						{
+							{
+								te = p;
+								p = p - 1;
+								{
+									printf( "%s", "num (w/switch)\n" );
+									{
+										p = ((te-1))-1;
+										
+									}
+									
+									{
+										cs = 21;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 7 :
+						{
+							{
+								p = ((te))-1;
+								{
+									printf( "%s", "word (w/lbh)\n" );
+									{
+										p = ((te-1))-1;
+										
+									}
+									
+									{
+										cs = 21;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 5 :
+						{
+							{
+								switch ( act  ) {
+									case 7 :
+									p = ((te))-1;
+									{
+										printf( "%s", "num (w/switch)\n" );
+										
+									}
+									
+									break;
+									case 8 :
+									p = ((te))-1;
+									{
+										printf( "%s", "num (w/switch)\n" );
+										{
+											p = ((te-1))-1;
+											
+										}
+										
+										{
+											cs = 21;
+											
+										}
+										
+									}
+									
+									break;
+									
+								}
+								
+							}
+							
+							
+						}
+						
+						break;
+						case 28 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "in semi\n" );
+									{
+										cs = 17;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 4 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "word (c/lbh)\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 11 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "space\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 2 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "num (c/switch)\n" );
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 14 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "going to semi\n" );
+									{
+										p = p - 1;
+										
+									}
+									{
+										cs = 28;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 12 :
+						{
+							{
+								te = p+1;
+								{
+									printf( "%s", "immdiate\n" );
+									{
+										cs = 24;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 18 :
+						{
+							{
+								te = p;
+								p = p - 1;
+								{
+									printf( "%s", "word (w/lbh)\n" );
+									{
+										p = p - 1;
+										
+									}
+									{
+										cs = 21;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 16 :
+						{
+							{
+								te = p;
+								p = p - 1;
+								{
+									printf( "%s", "num (w/switch)\n" );
+									{
+										p = p - 1;
+										
+									}
+									{
+										cs = 21;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 3 :
+						{
+							{
+								p = ((te))-1;
+								{
+									printf( "%s", "word (w/lbh)\n" );
+									{
+										p = p - 1;
+										
+									}
+									{
+										cs = 21;
+										
+									}
+									
+								}
+								
+							}
+							
+						}
+						
+						break;
+						case 1 :
+						{
+							{
+								switch ( act  ) {
+									case 15 :
+									p = ((te))-1;
+									{
+										printf( "%s", "num (w/switch)\n" );
+										
+									}
+									
+									break;
+									case 16 :
+									p = ((te))-1;
+									{
+										printf( "%s", "num (w/switch)\n" );
+										{
+											p = p - 1;
+											
+										}
+										{
+											cs = 21;
+											
+										}
+										
+									}
+									
+									break;
+									
+								}
+								
+							}
+							
+							
+						}
+						
+						break;
+						case 26 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						{
+							{
+								act = 7;
+								
+							}
+							
+						}
+						
+						break;
+						case 24 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						{
+							{
+								act = 8;
+								
+							}
+							
+						}
+						
+						break;
+						case 17 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						{
+							{
+								act = 15;
+								
+							}
+							
+						}
+						
+						break;
+						case 13 :
+						{
+							{
+								te = p+1;
+								
+							}
+							
+						}
+						{
+							{
+								act = 16;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					switch ( _patact_to_state_actions[cs] ) {
+						case 9 :
+						{
+							{
+								ts = 0;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= patact_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"abcd foix\n",
+	"abcd\nanother\n",
+	"123 foix\n",
+	"!abcd foix\n",
+	"!abcd\nanother\n",
+	"!123 foix\n",
+	";",
+};
+
+int inplen = 7;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

@@ -1,0 +1,384 @@
+host( "working/lmgoto.rl", 1 ) @{/*
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using namespace std;
+	
+	#define TK_Dlit 192
+	#define TK_Slit 193
+	#define TK_Float 194
+	#define TK_Id 195
+	#define TK_NameSep 197
+	#define TK_Arrow 211
+	#define TK_PlusPlus 212
+	#define TK_MinusMinus 213
+	#define TK_ArrowStar 214
+	#define TK_DotStar 215
+	#define TK_ShiftLeft 216
+	#define TK_ShiftRight 217
+	#define TK_IntegerDecimal 218
+	#define TK_IntegerOctal 219
+	#define TK_IntegerHex 220
+	#define TK_EqualsEquals 223
+	#define TK_NotEquals 224
+	#define TK_AndAnd 225
+	#define TK_OrOr 226
+	#define TK_MultAssign 227
+	#define TK_DivAssign 228
+	#define TK_PercentAssign 229
+	#define TK_PlusAssign 230
+	#define TK_MinusAssign 231
+	#define TK_AmpAssign 232
+	#define TK_CaretAssign 233
+	#define TK_BarAssign 234
+	#define TK_DotDotDot 240
+	#define TK_Whitespace 241
+	#define TK_Comment 242
+	
+	struct Scanner
+	{
+		int cs, act;
+		const char *ts, *te;
+		bool isCxx;
+		
+		void token( int tok );
+		void run( const char *buf );
+	};
+	
+	
+	
+	
+}@
+array char _Scanner_trans_keys( 0, 28 ) = { 1, 0, 0, 24, 1, 0, 0, 24, 1, 0, 11, 11, 9, 14, 13, 14, 13, 20, 2, 28, 2, 28, 16, 16, 16, 16, 6, 16, 16, 16, 9, 16, 10, 17, 8, 8, 8, 14, 13, 26, 13, 26, 8, 16, 11, 27, 11, 26, 22, 26, 22, 26, 22, 26, 13, 26, 22, 26, 11, 26, 15, 15, 16, 16, 13, 27, 3, 27, 16, 16, 16, 28, 0, 8, 12, 12, 0 };
+
+array s8 _Scanner_char_class( 0, 28 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 4, 4, 8, 9, 4, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 4, 4, 16, 17, 4, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 22, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 21, 21, 21, 4, 24, 4, 25, 21, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 26, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 27, 21, 21, 4, 28, 4, 4, 0 };
+
+array s16 _Scanner_index_offsets( 0, 344 ) = { 0, 0, 25, 25, 50, 50, 51, 57, 59, 67, 94, 121, 122, 123, 134, 135, 143, 151, 152, 159, 173, 187, 196, 213, 229, 234, 239, 244, 258, 263, 279, 280, 281, 296, 321, 322, 335, 344, 0 };
+
+array s8 _Scanner_indicies( 0, 76 ) = { 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 8, 9, 9, 0, 0, 10, 10, 10, 10, 12, 12, 11, 11, 11, 12, 12, 12, 14, 1, 15, 16, 17, 4, 18, 19, 20, 21, 22, 23, 24, 25, 26, 15, 27, 27, 27, 27, 28, 27, 15, 29, 27, 27, 30, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 33, 34, 35, 32, 32, 32, 32, 32, 32, 32, 32, 32, 36, 37, 38, 32, 32, 32, 32, 32, 32, 39, 40, 32, 32, 32, 32, 32, 41, 42, 44, 45, 32, 32, 46, 32, 47, 47, 47, 47, 48, 48, 48, 48, 49, 50, 48, 50, 48, 48, 48, 50, 10, 10, 48, 48, 48, 48, 48, 50, 48, 50, 48, 48, 48, 50, 51, 32, 32, 32, 52, 32, 32, 32, 53, 47, 54, 55, 55, 54, 54, 54, 54, 49, 54, 54, 56, 56, 54, 54, 56, 57, 47, 58, 55, 55, 58, 58, 58, 58, 49, 58, 58, 59, 59, 58, 58, 59, 60, 60, 58, 58, 60, 61, 61, 54, 54, 61, 62, 62, 54, 54, 62, 12, 12, 63, 63, 63, 12, 12, 12, 63, 64, 64, 63, 63, 64, 65, 65, 63, 63, 65, 47, 54, 24, 24, 54, 54, 54, 54, 49, 54, 54, 56, 56, 54, 54, 56, 66, 67, 27, 27, 68, 68, 68, 27, 27, 27, 27, 27, 27, 68, 68, 27, 27, 1, 68, 68, 68, 4, 68, 68, 68, 68, 68, 27, 27, 68, 68, 68, 27, 27, 27, 27, 27, 27, 68, 68, 27, 27, 69, 70, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 71, 73, 72, 72, 72, 72, 72, 72, 72, 74, 76, 0 };
+
+array s8 _Scanner_index_defaults( 0, 75 ) = { 0, 1, 1, 4, 4, 7, 0, 0, 11, 13, 13, 32, 32, 32, 32, 32, 32, 43, 32, 48, 48, 32, 54, 58, 58, 54, 54, 63, 63, 54, 32, 32, 68, 68, 32, 32, 72, 75, 0 };
+
+array s8 _Scanner_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _Scanner_cond_targs( 0, 37 ) = { 9, 1, 9, 2, 3, 9, 4, 9, 9, 7, 20, 9, 27, 10, 11, 9, 12, 13, 14, 15, 16, 18, 21, 22, 29, 30, 31, 32, 33, 34, 35, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 17, 9, 9, 9, 5, 19, 9, 6, 9, 9, 9, 9, 9, 23, 25, 8, 9, 24, 9, 26, 9, 9, 28, 9, 9, 9, 9, 9, 9, 9, 36, 36, 37, 36, 36, 0 };
+
+array s8 _Scanner_cond_actions( 0, 50 ) = { 1, 0, 2, 0, 0, 3, 0, 4, 5, 0, 0, 6, 0, 0, 0, 9, 0, 0, 0, 0, 0, 10, 0, 11, 11, 0, 0, 0, 12, 0, 0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 0, 24, 25, 26, 0, 27, 28, 0, 29, 30, 31, 32, 33, 34, 0, 0, 35, 0, 36, 0, 37, 38, 0, 39, 40, 41, 42, 43, 44, 45, 47, 48, 0, 49, 50, 0 };
+
+array s8 _Scanner_to_state_actions( 0, 46 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 0, 0 };
+
+array s8 _Scanner_from_state_actions( 0, 8 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0 };
+
+array s8 _Scanner_eof_trans( 0, 76 ) = { 0, 1, 1, 1, 1, 8, 1, 1, 12, 0, 32, 33, 33, 33, 33, 33, 33, 44, 33, 49, 49, 33, 55, 59, 59, 55, 55, 64, 64, 55, 33, 33, 69, 69, 33, 33, 0, 76, 0 };
+
+array s8 _Scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _Scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _Scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int Scanner_start = 9;
+value int Scanner_error = 0;
+
+value int Scanner_en_comment = 36;
+value int Scanner_en_main = 9;
+
+host( "working/lmgoto.rl", 140 ) @{
+	
+	void Scanner::token( int tok )
+	{
+		const char *data = ts;
+		int len = te - ts;
+		cout << "<" << tok << "> ";
+		if ( data != 0 ) {
+			for ( int i = 0; i < len; i++ )
+			cout << data[i];
+		}
+		cout << '\n';
+	}
+	
+	void Scanner::run( const char *buf )
+	{
+		int len = strlen( buf );
+	}@
+	{
+		cs = cast(int)Scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/lmgoto.rl", 157 ) @{
+		const char *p = buf;
+		const char *pe = buf + len;
+		const char *eof = pe;
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				switch ( _Scanner_from_state_actions[cs] ) {
+					case 8 {
+						host( "NONE", 1 ) ${${ts = p;}$}$
+					}
+				}
+				
+				_keys = offset( _Scanner_trans_keys, (cs<<1) );
+				_inds = offset( _Scanner_indicies, _Scanner_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 126 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_Scanner_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _Scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _Scanner_trans_keys, _keys ) )
+					_trans = cast(int)deref( _Scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _Scanner_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_Scanner_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_Scanner_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_Scanner_cond_targs[_trans];
+				
+				if ( _Scanner_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _Scanner_cond_actions[_trans] ) {
+					case 10 {
+						host( "NONE", 1 ) ${${te = p+1;}$}$
+					}
+					case 50 {
+						host( "working/lmgoto.rl", 56 ) ${${te = p+1;host( "working/lmgoto.rl", 56 ) ${
+									if ( ! isCxx )
+									${cs = 9; goto _again;}$else {
+										cout << "comm char: " << ts[0] << endl;
+										cout << "comm char: " << ts[1] << endl;
+									}
+								}$}$}$
+					}
+					case 48 {
+						host( "working/lmgoto.rl", 65 ) ${${te = p+1;host( "working/lmgoto.rl", 65 ) ${
+									if ( isCxx )
+									${cs = 9; goto _again;}$else
+									cout << "comm char: " << ts[0] << endl;
+								}$}$}$
+					}
+					case 47 {
+						host( "working/lmgoto.rl", 72 ) ${${te = p+1;host( "working/lmgoto.rl", 72 ) ${
+									cout << "comm char: " << ts[0] << endl;
+								}$}$}$
+					}
+					case 49 {
+						host( "working/lmgoto.rl", 72 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 72 ) ${
+									cout << "comm char: " << ts[0] << endl;
+								}$}$}$
+					}
+					case 3 {
+						host( "working/lmgoto.rl", 80 ) ${${te = p+1;host( "working/lmgoto.rl", 80 ) ${ token( TK_Slit );}$}$}$
+					}
+					case 2 {
+						host( "working/lmgoto.rl", 81 ) ${${te = p+1;host( "working/lmgoto.rl", 81 ) ${ token( TK_Dlit );}$}$}$
+					}
+					case 29 {
+						host( "working/lmgoto.rl", 92 ) ${${te = p+1;host( "working/lmgoto.rl", 92 ) ${ token( TK_Float );}$}$}$
+					}
+					case 37 {
+						host( "working/lmgoto.rl", 95 ) ${${te = p+1;host( "working/lmgoto.rl", 95 ) ${ token( TK_IntegerDecimal );}$}$}$
+					}
+					case 36 {
+						host( "working/lmgoto.rl", 98 ) ${${te = p+1;host( "working/lmgoto.rl", 98 ) ${ token( TK_IntegerOctal );}$}$}$
+					}
+					case 39 {
+						host( "working/lmgoto.rl", 101 ) ${${te = p+1;host( "working/lmgoto.rl", 101 ) ${ token( TK_IntegerHex );}$}$}$
+					}
+					case 40 {
+						host( "working/lmgoto.rl", 104 ) ${${te = p+1;host( "working/lmgoto.rl", 104 ) ${token( TK_NameSep );}$}$}$
+					}
+					case 41 {
+						host( "working/lmgoto.rl", 105 ) ${${te = p+1;host( "working/lmgoto.rl", 105 ) ${token( TK_EqualsEquals );}$}$}$
+					}
+					case 15 {
+						host( "working/lmgoto.rl", 106 ) ${${te = p+1;host( "working/lmgoto.rl", 106 ) ${token( TK_NotEquals );}$}$}$
+					}
+					case 17 {
+						host( "working/lmgoto.rl", 107 ) ${${te = p+1;host( "working/lmgoto.rl", 107 ) ${token( TK_AndAnd );}$}$}$
+					}
+					case 45 {
+						host( "working/lmgoto.rl", 108 ) ${${te = p+1;host( "working/lmgoto.rl", 108 ) ${token( TK_OrOr );}$}$}$
+					}
+					case 19 {
+						host( "working/lmgoto.rl", 109 ) ${${te = p+1;host( "working/lmgoto.rl", 109 ) ${token( TK_MultAssign );}$}$}$
+					}
+					case 32 {
+						host( "working/lmgoto.rl", 110 ) ${${te = p+1;host( "working/lmgoto.rl", 110 ) ${token( TK_DivAssign );}$}$}$
+					}
+					case 16 {
+						host( "working/lmgoto.rl", 111 ) ${${te = p+1;host( "working/lmgoto.rl", 111 ) ${token( TK_PercentAssign );}$}$}$
+					}
+					case 21 {
+						host( "working/lmgoto.rl", 112 ) ${${te = p+1;host( "working/lmgoto.rl", 112 ) ${token( TK_PlusAssign );}$}$}$
+					}
+					case 23 {
+						host( "working/lmgoto.rl", 113 ) ${${te = p+1;host( "working/lmgoto.rl", 113 ) ${token( TK_MinusAssign );}$}$}$
+					}
+					case 18 {
+						host( "working/lmgoto.rl", 114 ) ${${te = p+1;host( "working/lmgoto.rl", 114 ) ${token( TK_AmpAssign );}$}$}$
+					}
+					case 43 {
+						host( "working/lmgoto.rl", 115 ) ${${te = p+1;host( "working/lmgoto.rl", 115 ) ${token( TK_CaretAssign );}$}$}$
+					}
+					case 44 {
+						host( "working/lmgoto.rl", 116 ) ${${te = p+1;host( "working/lmgoto.rl", 116 ) ${token( TK_BarAssign );}$}$}$
+					}
+					case 20 {
+						host( "working/lmgoto.rl", 117 ) ${${te = p+1;host( "working/lmgoto.rl", 117 ) ${token( TK_PlusPlus );}$}$}$
+					}
+					case 22 {
+						host( "working/lmgoto.rl", 118 ) ${${te = p+1;host( "working/lmgoto.rl", 118 ) ${token( TK_MinusMinus );}$}$}$
+					}
+					case 25 {
+						host( "working/lmgoto.rl", 120 ) ${${te = p+1;host( "working/lmgoto.rl", 120 ) ${token( TK_ArrowStar );}$}$}$
+					}
+					case 26 {
+						host( "working/lmgoto.rl", 121 ) ${${te = p+1;host( "working/lmgoto.rl", 121 ) ${token( TK_DotStar );}$}$}$
+					}
+					case 5 {
+						host( "working/lmgoto.rl", 124 ) ${${te = p+1;host( "working/lmgoto.rl", 124 ) ${ token( TK_DotDotDot );}$}$}$
+					}
+					case 9 {
+						host( "working/lmgoto.rl", 127 ) ${${te = p+1;host( "working/lmgoto.rl", 127 ) ${ token( ts[0] );}$}$}$
+					}
+					case 30 {
+						host( "working/lmgoto.rl", 131 ) ${${te = p+1;host( "working/lmgoto.rl", 131 ) ${ isCxx = false; ${cs = 36; goto _again;}$}$}$}$
+					}
+					case 31 {
+						host( "working/lmgoto.rl", 132 ) ${${te = p+1;host( "working/lmgoto.rl", 132 ) ${ isCxx = true; ${cs = 36; goto _again;}$}$}$}$
+					}
+					case 42 {
+						host( "working/lmgoto.rl", 84 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 84 ) ${ token( TK_Id ); }$}$}$
+					}
+					case 28 {
+						host( "working/lmgoto.rl", 92 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 92 ) ${ token( TK_Float );}$}$}$
+					}
+					case 33 {
+						host( "working/lmgoto.rl", 95 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 95 ) ${ token( TK_IntegerDecimal );}$}$}$
+					}
+					case 35 {
+						host( "working/lmgoto.rl", 98 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 98 ) ${ token( TK_IntegerOctal );}$}$}$
+					}
+					case 38 {
+						host( "working/lmgoto.rl", 101 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 101 ) ${ token( TK_IntegerHex );}$}$}$
+					}
+					case 24 {
+						host( "working/lmgoto.rl", 119 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 119 ) ${token( TK_Arrow );}$}$}$
+					}
+					case 14 {
+						host( "working/lmgoto.rl", 127 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 127 ) ${ token( ts[0] );}$}$}$
+					}
+					case 13 {
+						host( "working/lmgoto.rl", 134 ) ${${te = p;p = p - 1;host( "working/lmgoto.rl", 134 ) ${ token( TK_Whitespace );}$}$}$
+					}
+					case 6 {
+						host( "working/lmgoto.rl", 95 ) ${${p = ((te))-1;
+								host( "working/lmgoto.rl", 95 ) ${ token( TK_IntegerDecimal );}$}$}$
+					}
+					case 4 {
+						host( "working/lmgoto.rl", 127 ) ${${p = ((te))-1;
+								host( "working/lmgoto.rl", 127 ) ${ token( ts[0] );}$}$}$
+					}
+					case 1 {
+						host( "NONE", 1 ) ${${switch( act ) {
+									case 0 {
+										host( "NONE", 1 ) ${${cs = 0; goto _again;}$}$ }
+									case 6 {
+										p = ((te))-1;
+										host( "working/lmgoto.rl", 84 ) ${ token( TK_Id ); }$ }
+									case 7 {
+										p = ((te))-1;
+										host( "working/lmgoto.rl", 92 ) ${ token( TK_Float );}$ }
+									case 8 {
+										p = ((te))-1;
+										host( "working/lmgoto.rl", 95 ) ${ token( TK_IntegerDecimal );}$ }
+									case 9 {
+										p = ((te))-1;
+										host( "working/lmgoto.rl", 98 ) ${ token( TK_IntegerOctal );}$ }
+								}}$
+						}$
+					}
+					case 12 {
+						host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/lmgoto.rl", 84 ) ${${act = 6;}$}$
+					}
+					case 27 {
+						host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/lmgoto.rl", 92 ) ${${act = 7;}$}$
+					}
+					case 11 {
+						host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/lmgoto.rl", 95 ) ${${act = 8;}$}$
+					}
+					case 34 {
+						host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/lmgoto.rl", 98 ) ${${act = 9;}$}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				switch ( _Scanner_to_state_actions[cs] ) {
+					case 46 {
+						host( "NONE", 1 ) ${${ts = nil;}$}$
+					}
+					case 7 {
+						host( "NONE", 1 ) ${${ts = nil;}$}$	host( "NONE", 1 ) ${${act = 0;}$}$
+					}
+				}
+				
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					if ( _Scanner_eof_trans[cs] > 0 ) {
+						_trans = cast(int)_Scanner_eof_trans[cs] - 1;
+						goto _match_cond;
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/lmgoto.rl", 161 ) @{
+		
+		if ( cs == Scanner_error ) {
+			/* Machine failed before finding a token. */
+			cout << "PARSE ERROR" << endl;
+		}
+	}
+	
+	int main()
+	{
+		Scanner scanner;
+		scanner.run(
+		"//hello*/\n"
+		"/*hi there*/ hello 0x88"
+		);
+		return 0;
+	}
+	
+}@

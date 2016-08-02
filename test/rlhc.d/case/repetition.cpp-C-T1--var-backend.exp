@@ -1,0 +1,306 @@
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+using namespace std;
+
+struct Rep
+{
+	int cs;
+	
+	int init( );
+	int execute( const char *data, int len );
+	int finish( );
+};
+
+
+
+static const char  _Rep_key_offsets [] = { 0, 0, 2, 3, 6, 7, 9, 10, 11, 13, 15, 17, 18, 19, 20, 21, 22, 24, 26, 28, 30, 32, 33, 34, 35, 36, 37, 38, 0 ,  };
+static const char  _Rep_trans_keys [] = { 45, 97, 10, 10, 45, 98, 10, 45, 99, 10, 100, 10, 100, 10, 100, 10, 100, 10, 99, 99, 99, 99, 10, 99, 10, 98, 10, 98, 10, 98, 10, 98, 10, 97, 97, 97, 97, 10, 100, 0 ,  };
+static const char  _Rep_single_lengths [] = { 0, 2, 1, 3, 1, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _Rep_range_lengths [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Rep_index_offsets [] = { 0, 0, 3, 5, 9, 11, 14, 16, 18, 21, 24, 27, 29, 31, 33, 35, 37, 40, 43, 46, 49, 52, 54, 56, 58, 60, 62, 64, 0 ,  };
+static const char  _Rep_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _Rep_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 0 ,  };
+static const char  _Rep_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _Rep_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Rep_cond_targs [] = { 2, 22, 0, 3, 0, 3, 4, 17, 0, 5, 0, 6, 12, 0, 27, 0, 8, 0, 27, 9, 0, 27, 10, 0, 27, 11, 0, 27, 0, 13, 0, 14, 0, 15, 0, 16, 0, 5, 16, 0, 3, 18, 0, 3, 19, 0, 3, 20, 0, 3, 21, 0, 3, 0, 23, 0, 24, 0, 25, 0, 26, 0, 1, 0, 7, 0, 0 ,  };
+static const char  _Rep_cond_actions [] = { 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 3, 2, 0, 3, 2, 0, 3, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3, 2, 0, 3, 2, 0, 3, 2, 0, 3, 2, 0, 3, 2, 0, 3, 0, 2, 0, 2, 0, 2, 0, 2, 0, 3, 0, 1, 0, 0 ,  };
+static const char  _Rep_nfa_targs [] = { 0, 0 ,  };
+static const char  _Rep_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Rep_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Rep_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Rep_start  = 1;
+static const int  Rep_first_final  = 27;
+static const int  Rep_error  = 0;
+static const int  Rep_en_main  = 1;
+int Rep::init( )
+{
+
+	{
+		cs = ( int ) Rep_start;
+	}
+	return 1;
+}
+
+int Rep::execute( const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _Rep_trans_keys + _Rep_key_offsets[cs];
+					_trans = ( unsigned int  ) _Rep_index_offsets[cs];
+					_have = 0;
+					_klen = ( int ) _Rep_single_lengths[cs];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( ((*( p  ))
+							)< (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( ((*( p  ))
+							)> (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _Rep_range_lengths[cs];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( ((*( p  ))
+								)< (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( ((*( p  ))
+								)> (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _Rep_cond_keys + _Rep_trans_offsets[_trans];
+					_klen = ( int ) _Rep_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _Rep_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _Rep_cond_targs[_cond];
+					switch ( _Rep_cond_actions[_cond] ) {
+						case 3 :
+						{
+							cout << "end" << endl; 
+						}
+						
+						break;
+						case 1 :
+						{
+							cout << "begin" << endl; 
+						}
+						{
+							cout << "in" << endl; 
+						}
+						
+						break;
+						case 2 :
+						{
+							cout << "end" << endl; 
+						}
+						{
+							cout << "begin" << endl; 
+						}
+						{
+							cout << "in" << endl; 
+						}
+						
+						break;
+						
+					}
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+	if ( cs == Rep_error )
+	return -1;
+	if ( cs >= Rep_first_final )
+	return 1;
+	return 0;
+}
+
+int Rep::finish( )
+{
+	if ( cs == Rep_error )
+	return -1;
+	if ( cs >= Rep_first_final )
+	return 1;
+	return 0;
+}
+
+void test( const char *buf )
+{
+	Rep rep;
+	int len = strlen( buf );
+	rep.init();
+	rep.execute( buf, len );
+	if ( rep.finish() > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+int main()
+{
+	test(
+	"aaaaa\n"
+	"-\n"
+	"\n"
+	"b\n"
+	"bb\n"
+	"bbb\n"
+	"bbbb\n"
+	"bbbbb\n"
+	"-\n"
+	"ccccc\n"
+	"ccccccc\n"
+	"cccccccccc\n"
+	"-\n"
+	"dd\n"
+	"ddd\n"
+	"dddd\n"
+	"ddddd\n"
+	);
+	
+	test(
+	"a\n"
+	"-\n"
+	"b\n"
+	"-\n"
+	"c\n"
+	"-\n"
+	"d\n"
+	);
+	
+	return 0;
+}
+

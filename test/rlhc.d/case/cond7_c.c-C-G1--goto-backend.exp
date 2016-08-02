@@ -1,0 +1,208 @@
+#include <string.h>
+#include <stdio.h>
+
+int i ;
+int c ;
+
+
+
+
+
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 4;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) foo_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (i > 0) )
+				ck += 1;
+				
+				if ( ck > 0  )
+				{
+					goto ctr3;
+				} 
+				else
+				{
+					goto ctr2;
+				}
+				
+				
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				int ck = 0;
+				if ( (i > 0) )
+				ck += 1;
+				
+				if ( ck <= 0  )
+				{
+					goto ctr4;
+				}
+				
+				goto ctr5;
+				
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (i > 0) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto ctr6;
+				}
+				
+				goto ctr5;
+				
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto f0;
+		ctr5: cs = 0;
+		goto _again;
+		ctr3: cs = 2;
+		goto f1;
+		ctr2: cs = 3;
+		goto f0;
+		ctr6: cs = 3;
+		goto f1;
+		ctr4: cs = 4;
+		goto _again;
+		
+		f1:
+		{
+			i = i - 1;
+			c = ( int ) ( (((*( p  ))
+			)) )
+			;
+			printf( "%s", "item: " );
+			printf( "%d", c );
+			printf( "%s", "\n" );
+			
+		}
+		
+		goto _again;
+		f0:
+		{
+			i = ( int ) ( (((*( p  ))
+			)) - 48 )
+			;
+			printf( "%s", "count: " );
+			printf( "%d", i );
+			printf( "%s", "\n" );
+			
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= foo_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"00\n",
+	"019\n",
+	"190\n",
+	"1719\n",
+	"1040000\n",
+	"104000a\n",
+	"104000\n",
+};
+
+int inplen = 7;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

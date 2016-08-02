@@ -1,0 +1,184 @@
+host( "working/atoi2_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			int neg;
+			int value;
+			
+			
+			
+			
+		}@
+		array s8 _state_chart_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _state_chart_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+		
+		array s8 _state_chart_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _state_chart_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int state_chart_start = 3;
+		value int state_chart_first_final = 3;
+		value int state_chart_error = 0;
+		
+		value int state_chart_en_main = 3;
+		
+		host( "working/atoi2_cs.rl", 61 ) @{
+			int cs;
+			
+			void init()
+			{
+				value = 0;
+				neg = 0;
+			}@
+			{
+				cs = cast(int)state_chart_start;
+			}
+			host( "working/atoi2_cs.rl", 68 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				_resume:
+				switch ( cs ) {
+					case 3:
+					switch( ( deref( data, p )) ) {
+						case c(43): {
+							goto ctr3;
+						}
+						case c(45): {
+							goto ctr4;
+						}
+					}
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(57) ) {
+						goto ctr5;
+					}
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 1:
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(57) ) {
+						goto ctr0;
+					}
+					{
+						goto ctr1;
+					}
+					case 2:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr2;
+					}
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(57) ) {
+						goto ctr0;
+					}
+					{
+						goto ctr1;
+					}
+				}
+				
+				ctr1: cs = 0; goto _again;
+				ctr3: cs = 1; goto f2;
+				ctr4: cs = 1; goto f3;
+				ctr0: cs = 2; goto f0;
+				ctr5: cs = 2; goto f4;
+				ctr2: cs = 3; goto f1;
+				
+				f2:
+				host( "working/atoi2_cs.rl", 18 ) ${neg = 0;
+					value = 0;
+				}$
+				goto _again;
+				f0:
+				host( "working/atoi2_cs.rl", 25 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+					;
+				}$
+				goto _again;
+				f3:
+				host( "working/atoi2_cs.rl", 18 ) ${neg = 0;
+					value = 0;
+				}$	host( "working/atoi2_cs.rl", 22 ) ${neg = 1;
+				}$
+				goto _again;
+				f4:
+				host( "working/atoi2_cs.rl", 18 ) ${neg = 0;
+					value = 0;
+				}$	host( "working/atoi2_cs.rl", 25 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+					;
+				}$
+				goto _again;
+				f1:
+				host( "working/atoi2_cs.rl", 29 ) ${if ( neg != 0 )
+					{
+						value = -1 * value;
+						
+					} 
+				}$	host( "working/atoi2_cs.rl", 55 ) ${Console.Write( value );Console.Write( "\n" );}$
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				_out: {}
+			}
+			host( "working/atoi2_cs.rl", 79 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= state_chart_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"1\n",
+				"12\n",
+				"222222\n",
+				"+2123\n",
+				"213 3213\n",
+				"-12321\n",
+				"--123\n",
+				"-99\n",
+				" -3000\n",
+			};
+			
+			
+			static readonly int inplen = 9;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

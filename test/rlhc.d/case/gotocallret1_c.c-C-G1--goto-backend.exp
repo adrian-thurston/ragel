@@ -1,0 +1,406 @@
+#include <string.h>
+#include <stdio.h>
+
+char comm ;
+int top ;
+int stack [32];
+
+
+
+
+
+static const char  _GotoCallRet_eof_actions [] = { 0, 1, 1, 4, 4, 8, 8, 0, 4, 0, 0, 0 ,  };
+static const char  _GotoCallRet_nfa_targs [] = { 0, 0 ,  };
+static const char  _GotoCallRet_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _GotoCallRet_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _GotoCallRet_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  GotoCallRet_start  = 7;
+static const int  GotoCallRet_first_final  = 7;
+static const int  GotoCallRet_error  = 0;
+static const int  GotoCallRet_en_garble_line  = 3;
+static const int  GotoCallRet_en_alp_comm  = 5;
+static const int  GotoCallRet_en_dig_comm  = 6;
+static const int  GotoCallRet_en_main  = 7;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) GotoCallRet_start;
+		top = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 7:
+			if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr10;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 48  )
+			{
+				goto ctr10;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ((*( p  ))
+			)== 32  )
+			{
+				goto ctr1;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 2:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr3;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr5;
+			}
+			case 8:
+			{
+				goto ctr11;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr8;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 65  )
+			{
+				goto ctr8;
+			}
+			
+			{
+				goto ctr7;
+			}
+			case 9:
+			if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr8;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 65  )
+			{
+				goto ctr8;
+			}
+			
+			{
+				goto ctr7;
+			}
+			case 6:
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr7;
+			}
+			case 10:
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr7;
+			}
+			
+		}
+		ctr11: cs = 0;
+		goto _again;
+		ctr0: cs = 0;
+		goto f0;
+		ctr7: cs = 0;
+		goto f7;
+		ctr10: cs = 1;
+		goto f8;
+		ctr1: cs = 2;
+		goto f1;
+		ctr5: cs = 4;
+		goto _again;
+		ctr3: cs = 4;
+		goto f4;
+		ctr2: cs = 7;
+		goto f2;
+		ctr4: cs = 8;
+		goto f5;
+		ctr6: cs = 8;
+		goto f6;
+		ctr8: cs = 9;
+		goto _again;
+		ctr9: cs = 10;
+		goto _again;
+		
+		f4:
+		{
+			printf( "%s", "error: garbling line\n" );
+			
+		}
+		
+		goto _again;
+		f6:
+		{
+			{
+				cs = 7;
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f7:
+		{
+			{
+				p = p - 1;
+				
+			}
+			{
+				top-= 1;
+				cs = stack[top];
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f1:
+		{
+			if ( comm >= 'a' )
+			{
+				{
+					stack[top] = cs;
+					top += 1;
+					cs = 5;
+					goto _again;
+				}
+			} 
+			else {
+				{
+					stack[top] = cs;
+					top += 1;
+					cs = 6;
+					goto _again;
+				}
+			}
+			
+		}
+		
+		goto _again;
+		f8:
+		{
+			comm = (((*( p  ))
+			));
+			
+		}
+		
+		goto _again;
+		f2:
+		{
+			printf( "%s", "correct command\n" );
+			
+		}
+		
+		goto _again;
+		f0:
+		{
+			{
+				p = p - 1;
+				
+			}
+			{
+				cs = 3;
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f5:
+		{
+			printf( "%s", "error: garbling line\n" );
+			
+		}
+		{
+			{
+				cs = 7;
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( _GotoCallRet_eof_actions[cs] ) {
+				case 4:
+				{
+					printf( "%s", "error: failed to recover\n" );
+					
+				}
+				
+				break;
+				case 8:
+				{
+					{
+						p = p - 1;
+						
+					}
+					{
+						top-= 1;
+						cs = stack[top];
+						goto _again;
+					}
+					
+				}
+				
+				break;
+				case 1:
+				{
+					{
+						p = p - 1;
+						
+					}
+					{
+						cs = 3;
+						goto _again;
+					}
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= GotoCallRet_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"lkajsdf\n",
+	"2134\n",
+	"(\n",
+	"\n",
+	"*234234()0909 092 -234aslkf09`1 11\n",
+	"1\n",
+	"909\n",
+	"1 a\n",
+	"11 1\n",
+	"a 1\n",
+	"aa a\n",
+	"1 1\n",
+	"1 123456\n",
+	"a a\n",
+	"a abcdef\n",
+	"h",
+	"a aa1",
+};
+
+int inplen = 17;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

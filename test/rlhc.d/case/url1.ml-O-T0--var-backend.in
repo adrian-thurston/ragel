@@ -1,0 +1,921 @@
+host( "working/url1.rl", 1 ) @{(*
+	* @@LANG: ocaml
+	*)
+	
+	(*
+	//
+	// URL Parser
+	// Copyright (c) 2010 J.A. Roberts Tunney
+	// MIT License
+	//
+	// Converted to OCaml by ygrek
+	//
+	// To compile:
+	//
+	//	ragel -O url.rl -o url.ml
+	//  ragel -O url_authority.rl -o url_authority.ml
+	//	ocamlopt -g unix.cmxa url_authority.ml url.ml -o url
+	//	./url
+	//
+	// To show a diagram of your state machine:
+	//
+	//   ragel -V -G2 -p -o url.dot url.rl
+	//   dot -Tpng -o url.png url.dot
+	//   chrome url.png
+	//
+	//   ragel -V -G2 -p -o url_authority.dot url_authority.rl
+	//   dot -Tpng -o url_authority.png url_authority.dot
+	//   chrome url_authority.png
+	//
+	// Reference:
+	//
+	// - http://tools.ietf.org/html/rfc3986
+	//
+	*)
+	
+	(*
+	// -*-go-*-
+	//
+	// URL Parser
+	// Copyright (c) 2010 J.A. Roberts Tunney
+	// MIT License
+	//
+	*)
+	
+	
+}@
+array s8 _url_authority_actions( 0, 12 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 11, 1, 12, 2, 1, 2, 2, 5, 7, 2, 6, 8, 2, 6, 11, 2, 9, 10, 3, 0, 9, 10, 3, 1, 6, 8, 3, 5, 7, 12, 3, 5, 11, 2, 3, 6, 8, 12, 3, 12, 5, 7, 3, 12, 6, 8, 4, 1, 6, 8, 12, 0 };
+
+array s16 _url_authority_key_offsets( 0, 301 ) = { 0, 0, 14, 20, 26, 40, 46, 52, 65, 71, 77, 83, 89, 95, 101, 114, 127, 133, 139, 145, 151, 165, 179, 185, 191, 206, 222, 236, 240, 244, 256, 268, 270, 287, 301, 0 };
+
+array int _url_authority_trans_keys( 0, 127 ) = { 37, 47, 64, 91, 93, 127, 0, 32, 34, 35, 58, 60, 62, 63, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 37, 47, 64, 91, 93, 127, 0, 32, 34, 35, 58, 60, 62, 63, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 37, 47, 91, 93, 127, 0, 32, 34, 35, 58, 60, 62, 63, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 37, 47, 91, 93, 127, 0, 32, 34, 35, 59, 60, 62, 63, 37, 47, 91, 93, 127, 0, 32, 34, 35, 59, 60, 62, 63, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 37, 47, 64, 91, 93, 127, 0, 32, 34, 35, 59, 60, 62, 63, 37, 47, 64, 91, 93, 127, 0, 32, 34, 35, 59, 60, 62, 63, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 37, 47, 58, 59, 60, 64, 91, 93, 127, 0, 32, 34, 35, 62, 63, 37, 47, 59, 91, 93, 127, 0, 32, 34, 35, 48, 57, 58, 60, 62, 64, 37, 47, 58, 59, 60, 91, 93, 127, 0, 32, 34, 35, 62, 63, 37, 59, 48, 57, 37, 59, 48, 57, 37, 47, 60, 91, 93, 127, 0, 32, 34, 35, 62, 63, 37, 47, 60, 91, 93, 127, 0, 32, 34, 35, 62, 63, 58, 59, 37, 47, 59, 64, 91, 93, 127, 0, 32, 34, 35, 48, 57, 58, 60, 62, 63, 37, 47, 58, 59, 60, 91, 93, 127, 0, 32, 34, 35, 62, 63, 58, 59, 64, 0 };
+
+array s8 _url_authority_single_lengths( 0, 9 ) = { 0, 6, 0, 0, 6, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 6, 6, 0, 0, 9, 6, 8, 2, 2, 6, 6, 2, 7, 8, 3, 0 };
+
+array s8 _url_authority_range_lengths( 0, 5 ) = { 0, 4, 3, 3, 4, 3, 3, 4, 3, 3, 3, 3, 3, 3, 4, 4, 3, 3, 3, 3, 4, 4, 3, 3, 3, 5, 3, 1, 1, 3, 3, 0, 5, 3, 0, 0 };
+
+array s16 _url_authority_index_offsets( 0, 231 ) = { 0, 0, 11, 15, 19, 30, 34, 38, 48, 52, 56, 60, 64, 68, 72, 82, 92, 96, 100, 104, 108, 119, 130, 134, 138, 151, 163, 175, 179, 183, 193, 203, 206, 219, 231, 0 };
+
+array s8 _url_authority_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s16 _url_authority_trans_offsets( 0, 234 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 0 };
+
+array s8 _url_authority_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _url_authority_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _url_authority_cond_targs( 0, 34 ) = { 2, 0, 26, 20, 0, 0, 0, 0, 0, 0, 24, 3, 3, 3, 0, 24, 24, 24, 0, 5, 0, 7, 0, 0, 0, 0, 0, 0, 0, 4, 6, 6, 6, 0, 4, 4, 4, 0, 8, 0, 14, 0, 0, 0, 0, 0, 0, 26, 9, 9, 9, 0, 26, 26, 26, 0, 11, 11, 11, 0, 28, 28, 28, 0, 13, 13, 13, 0, 30, 30, 30, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 15, 16, 0, 0, 31, 0, 0, 0, 0, 0, 15, 17, 17, 17, 0, 15, 15, 15, 0, 19, 19, 19, 0, 32, 32, 32, 0, 22, 0, 15, 0, 0, 0, 0, 0, 0, 0, 21, 22, 0, 15, 0, 34, 0, 0, 0, 0, 0, 21, 23, 23, 23, 0, 21, 21, 21, 0, 2, 0, 25, 29, 0, 33, 0, 0, 0, 0, 0, 0, 24, 18, 0, 29, 0, 0, 0, 0, 0, 32, 0, 0, 4, 8, 0, 27, 29, 0, 0, 0, 0, 0, 0, 0, 26, 10, 29, 28, 0, 10, 29, 28, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 30, 12, 0, 0, 0, 0, 0, 0, 0, 0, 30, 27, 29, 0, 18, 0, 29, 7, 0, 0, 0, 0, 0, 32, 0, 0, 4, 8, 0, 27, 29, 0, 14, 0, 0, 0, 0, 0, 26, 25, 29, 7, 0, 0 };
+
+array s8 _url_authority_cond_actions( 0, 42 ) = { 3, 0, 15, 0, 0, 0, 0, 0, 0, 0, 15, 7, 7, 7, 0, 9, 9, 9, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 5, 7, 7, 7, 0, 9, 9, 9, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 15, 7, 7, 7, 0, 9, 9, 9, 0, 7, 7, 7, 0, 9, 9, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 18, 0, 0, 0, 0, 0, 5, 7, 7, 7, 0, 9, 9, 9, 0, 7, 7, 7, 0, 9, 9, 9, 0, 3, 0, 15, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 5, 0, 18, 0, 0, 0, 0, 0, 5, 7, 7, 7, 0, 9, 9, 9, 0, 0, 0, 18, 18, 0, 42, 0, 0, 0, 0, 0, 0, 5, 3, 0, 34, 0, 0, 0, 0, 0, 15, 0, 0, 15, 0, 0, 18, 18, 0, 0, 0, 0, 0, 0, 0, 5, 3, 34, 15, 0, 0, 21, 5, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 24, 0, 0, 0, 0, 0, 5, 0, 0, 5, 3, 0, 18, 18, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 11, 0, 0 };
+
+array s8 _url_authority_eof_actions( 0, 58 ) = { 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 58, 38, 58, 46, 30, 27, 13, 54, 38, 13, 0 };
+
+array s8 _url_authority_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _url_authority_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _url_authority_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _url_authority_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int url_authority_start = 1;
+value int url_authority_first_final = 24;
+value int url_authority_error = 0;
+
+value int url_authority_en_main = 1;
+
+host( "working/url1.rl", 47 ) @{
+	
+	(*
+	// i parse strings like `alice@@pokémon.com`.
+	//
+	// sounds simple right?  but i also parse stuff like:
+	//
+	//   bob%20barker:priceisright@@[dead:beef::666]:5060;isup-oli=00
+	//
+	// which in actual reality is:
+	//
+	// - User: "bob barker"
+	// - Pass: "priceisright"
+	// - Host: "dead:beef::666"
+	// - Port: 5060
+	// - Params: "isup-oli=00"
+	//
+	// which was probably extracted from an absolute url that looked like:
+	//
+	//   sip:bob%20barker:priceisright@@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg
+	//
+	// which was probably extracted from its address form:
+	//
+	//   "Bob Barker" <sip:bob%20barker:priceisright@@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg>;tag=666
+	//
+	// who would have thought this could be so hard ._.
+	*)
+	
+	type url = {
+		scheme   : string; (* http, sip, file, etc. (never blank, always lowercase) *)
+		user     : string; (* who is you *)
+		pass     : string; (* for like, logging in *)
+		host     : string; (* IP 4/6 address or hostname (mandatory) *)
+		port     : int;    (* like 80 or 5060 (default 0) *)
+		params   : string; (* stuff after ';' (NOT UNESCAPED, used in sip) *)
+		path     : string; (* stuff starting with '/' *)
+		query    : string; (* stuff after '?' (NOT UNESCAPED) *)
+		fragment : string; (* stuff after '#' *)
+	}
+	
+	let fail fmt = Printf.ksprintf failwith fmt
+	
+	let unhex c =
+	match c with
+	| '0'..'9' -> Char.code c - Char.code '0'
+	| 'a'..'f' -> Char.code c - Char.code 'a' + 10
+	| 'A'..'F' -> Char.code c - Char.code 'A' + 10
+	| _ -> fail "unhex %C" c
+	
+	let parse_authority u data =
+	let (cs, p, pe, eof) = (ref 0, ref 0, ref (String.length data), ref (String.length data)) in
+	let mark = ref 0 in
+	
+	(*
+	// temporary holding place for user:pass and/or host:port cuz an
+	// optional term (user[:pass]) coming before a mandatory term
+	// (host[:pass]) would require require backtracking and all that
+	// evil nondeterministic stuff which ragel seems to hate.  (for
+	// this same reason you're also allowed to use square quotes
+	// around the username.)
+	*)
+	let (b1, b2) = (ref "", ref "") in
+	
+	(*
+	// this buffer is so we can unescape while we roll
+	var hex byte
+	buf := make([]byte, len(data))
+	amt := 0
+	*)
+	let buf = Buffer.create 10 in
+	let hex = ref 0 in
+	
+}@
+{
+	cs = cast(int)url_authority_start;
+}
+
+{
+	int _klen;
+	uint _trans = 0;
+	uint _cond = 0;
+	uint _have = 0;
+	uint _cont = 1;
+	index s8 _acts;
+	uint _nacts;
+	index int _keys;
+	index s8 _ckeys;
+	int _cpc;
+	while ( _cont == 1 ) {
+		
+		if ( cs == 0 )
+		_cont = 0;
+		_have = 0;
+		if ( p == pe ) {
+			if ( p == eof )
+			{
+				if ( _have == 0 ) {
+					index s8 __acts;
+					uint __nacts;
+					__acts = offset( _url_authority_actions, _url_authority_eof_actions[cs] );
+					__nacts = cast(uint)deref( _url_authority_actions, __acts );
+					__acts += 1;
+					while ( __nacts > 0 ) {
+						switch ( deref( _url_authority_actions, __acts ) ) {
+							case 0 {
+								host( "working/url1.rl", 119 ) ${ mark := !p                             }$
+							}
+							case 1 {
+								host( "working/url1.rl", 120 ) ${ Buffer.reset buf                       }$
+							}
+							case 5 {
+								host( "working/url1.rl", 125 ) ${ b1 := Buffer.contents buf; Buffer.clear buf }$
+							}
+							case 6 {
+								host( "working/url1.rl", 126 ) ${ b2 := Buffer.contents buf; Buffer.clear buf }$
+							}
+							case 7 {
+								host( "working/url1.rl", 127 ) ${ u := { !u with host = !b1 }; Buffer.clear buf }$
+							}
+							case 8 {
+								host( "working/url1.rl", 129 ) ${
+									if !b2 <> "" then
+									begin
+									u := { !u with port = int_of_string !b2 };
+									if !u.port > 65535 then fail "bad url authority: %S" data
+									end
+								}$
+							}
+							case 9 {
+								host( "working/url1.rl", 137 ) ${
+									u := { !u with params = String.sub data !mark (!p - !mark) }
+								}$
+							}
+							case 10 {
+								host( "working/url1.rl", 141 ) ${
+									u := { !u with params = String.sub data !mark (!p - !mark) }
+									(*       return nil *)
+								}$
+							}
+							case 12 {
+								host( "working/url1.rl", 151 ) ${
+									u := { !u with host = !b1 };
+									if !u.host = "" then
+									u := { !u with host = Buffer.contents buf }
+									else
+									begin
+									if Buffer.length buf > 0 then b2 := Buffer.contents buf;
+									if !b2 <> "" then
+									begin
+									u := { !u with port = int_of_string !b2 };
+									if !u.port > 65535 then fail "bad url authority: %S" data
+									end
+									end
+									(* 			return nil *)
+								}$
+							}
+						}
+						__nacts -= 1;
+						__acts += 1;
+					}
+				}
+			}
+			
+			if ( _have == 0 )
+			_cont = 0;
+		}
+		if ( _cont == 1 ) {
+			if ( _have == 0 ) {
+				_keys = offset( _url_authority_trans_keys, _url_authority_key_offsets[cs] );
+				_trans = cast(uint)_url_authority_index_offsets[cs];
+				_have = 0;
+				
+				_klen = cast(int)_url_authority_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index int _lower;
+					index int _mid;
+					index int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( _upper >= _lower && _have == 0 ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _url_authority_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _url_authority_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						_keys += _klen;
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				if ( _have == 0 ) {
+					_klen = cast(int)_url_authority_range_lengths[cs];
+					if ( _klen > 0 ) {
+						index int _lower;
+						index int _mid;
+						index int _upper;
+						_lower = _keys;
+						_upper = _keys + (_klen<<1) - 2;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+							if ( ( deref( data, p )) < deref( _url_authority_trans_keys, _mid ) )
+							_upper = _mid - 2;
+							else if ( ( deref( data, p )) > deref( _url_authority_trans_keys, _mid + 1 ) )
+							_lower = _mid + 2;
+							else {
+								_trans += cast(uint)((_mid - _keys)>>1);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 )
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				_ckeys = offset( _url_authority_cond_keys, _url_authority_trans_offsets[_trans] );
+				_klen = cast(int)_url_authority_trans_lengths[_trans];
+				_cond = cast(uint)_url_authority_trans_offsets[_trans];
+				_have = 0;
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( _have == 0 && _lower <= _upper ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _url_authority_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _url_authority_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						cs = 0;
+						_cont = 0;
+					}
+				}
+			}
+			if ( _cont == 1 ) {
+				cs = cast(int)_url_authority_cond_targs[_cond];
+				
+				if ( _url_authority_cond_actions[_cond] != 0 ) {
+					_acts = offset( _url_authority_actions, _url_authority_cond_actions[_cond] );
+					_nacts = cast(uint)deref( _url_authority_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 )
+					{
+						switch ( deref( _url_authority_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/url1.rl", 119 ) ${ mark := !p                             }$
+							}
+							case 1 {
+								host( "working/url1.rl", 120 ) ${ Buffer.reset buf                       }$
+							}
+							case 2 {
+								host( "working/url1.rl", 121 ) ${ Buffer.add_char buf data.[p.contents]                }$
+							}
+							case 3 {
+								host( "working/url1.rl", 123 ) ${ hex := unhex data.[p.contents] * 16                   }$
+							}
+							case 4 {
+								host( "working/url1.rl", 124 ) ${ Buffer.add_char buf (Char.chr (!hex + unhex data.[p.contents])) }$
+							}
+							case 5 {
+								host( "working/url1.rl", 125 ) ${ b1 := Buffer.contents buf; Buffer.clear buf }$
+							}
+							case 6 {
+								host( "working/url1.rl", 126 ) ${ b2 := Buffer.contents buf; Buffer.clear buf }$
+							}
+							case 7 {
+								host( "working/url1.rl", 127 ) ${ u := { !u with host = !b1 }; Buffer.clear buf }$
+							}
+							case 8 {
+								host( "working/url1.rl", 129 ) ${
+									if !b2 <> "" then
+									begin
+									u := { !u with port = int_of_string !b2 };
+									if !u.port > 65535 then fail "bad url authority: %S" data
+									end
+								}$
+							}
+							case 11 {
+								host( "working/url1.rl", 146 ) ${
+									u := { !u with user = !b1; pass = !b2 };
+									b2 := ""
+								}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+				}
+				
+				if ( cs == 0 )
+				_cont = 0;
+				if ( _cont == 1 )
+				p += 1;
+				
+			}
+		}
+	}
+}
+host( "working/url1.rl", 207 ) @{
+	
+	(*
+	// if cs >= url_authority_first_final {
+		// 	return nil
+		// }
+	*)
+	
+	(*
+	// fmt.Println("error state", cs)
+	// fmt.Println(string(data))
+	// for i := 0; i < p; i++ {
+		// 	fmt.Print(" ")
+		// }
+	// fmt.Println("^")
+	// fmt.Println(url)
+	*)
+	;;
+	
+	
+	let dummy = {
+		scheme = ""; user = ""; pass = ""; host = ""; port = 0; 
+		params = ""; path = ""; query = ""; fragment = ""; }
+	
+	let show u =
+	Printf.sprintf "%s :// %s : %s @@ %s : %d ;%s %s ?%s #%s" u.scheme u.user u.pass u.host u.port
+	u.params u.path u.query u.fragment
+	
+	
+}@
+array s8 _url_actions( 0, 10 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 2, 0, 9, 2, 1, 2, 2, 1, 3, 2, 1, 10, 3, 7, 1, 2, 0 };
+
+array s8 _url_key_offsets( 0, 124 ) = { 0, 0, 4, 14, 24, 30, 36, 42, 48, 54, 60, 66, 72, 73, 83, 91, 99, 108, 116, 124, 0 };
+
+array int _url_trans_keys( 0, 127 ) = { 65, 90, 97, 122, 43, 58, 45, 46, 48, 57, 65, 90, 97, 122, 37, 47, 60, 127, 0, 32, 34, 35, 62, 63, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 48, 57, 65, 70, 97, 102, 47, 34, 35, 37, 47, 60, 62, 63, 127, 0, 32, 37, 60, 62, 127, 0, 32, 34, 35, 37, 60, 62, 127, 0, 32, 34, 35, 34, 35, 37, 60, 62, 63, 127, 0, 32, 34, 35, 37, 60, 62, 127, 0, 32, 34, 35, 37, 60, 62, 127, 0, 32, 34, 35, 37, 47, 60, 62, 63, 127, 0, 32, 0 };
+
+array s8 _url_single_lengths( 0, 8 ) = { 0, 0, 2, 4, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8, 4, 4, 7, 6, 6, 8, 0 };
+
+array s8 _url_range_lengths( 0, 4 ) = { 0, 2, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 1, 2, 2, 1, 1, 1, 1, 0 };
+
+array s8 _url_index_offsets( 0, 101 ) = { 0, 0, 3, 10, 18, 22, 26, 30, 34, 38, 42, 46, 50, 52, 62, 69, 76, 85, 93, 101, 0 };
+
+array s8 _url_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _url_trans_offsets( 0, 110 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 0 };
+
+array s8 _url_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _url_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _url_cond_targs( 0, 19 ) = { 2, 2, 0, 2, 3, 2, 2, 2, 2, 0, 6, 12, 0, 0, 0, 0, 0, 13, 5, 5, 5, 0, 15, 15, 15, 0, 7, 7, 7, 0, 13, 13, 13, 0, 9, 9, 9, 0, 16, 16, 16, 0, 11, 11, 11, 0, 18, 18, 18, 0, 19, 0, 0, 14, 6, 16, 0, 0, 17, 0, 0, 13, 4, 0, 0, 0, 0, 0, 15, 4, 0, 0, 0, 0, 0, 15, 0, 14, 8, 0, 0, 17, 0, 0, 16, 0, 14, 10, 0, 0, 0, 0, 18, 0, 14, 10, 0, 0, 0, 0, 18, 0, 14, 6, 16, 0, 0, 17, 0, 0, 13, 0 };
+
+array s8 _url_cond_actions( 0, 35 ) = { 29, 26, 0, 5, 13, 5, 5, 7, 5, 0, 1, 0, 0, 0, 0, 0, 0, 1, 9, 9, 9, 0, 11, 11, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 9, 9, 0, 11, 11, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 35, 0, 0, 15, 0, 0, 0, 3, 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 5, 0, 17, 0, 0, 0, 17, 0, 0, 5, 0, 23, 1, 0, 0, 0, 0, 1, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 1, 26, 0, 0, 0, 0, 0, 1, 0 };
+
+array s8 _url_eof_actions( 0, 32 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 32, 21, 17, 23, 19, 0, 0 };
+
+array s8 _url_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _url_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _url_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _url_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int url_start = 1;
+value int url_first_final = 13;
+value int url_error = 0;
+
+value int url_en_main = 1;
+
+host( "working/url1.rl", 237 ) @{
+	
+	(*
+	// i parse absolute urls and don't suck at it.  i'll parse just about
+	// any type of url you can think of and give you a human-friendly data
+	// structure.
+	//
+	// this routine takes no more than a few microseconds, is reentrant,
+	// performs in a predictable manner (for security/soft-realtime,)
+	// doesn't modify your `data` buffer, and under no circumstances will
+	// it panic (i hope!)
+	*)
+	let url_parse data =
+	let (cs, p, pe, eof) = (ref 0, ref 0, ref (String.length data), ref (String.length data)) in
+	let mark = ref 0 in
+	let u = ref dummy in
+	
+	(*
+	// this buffer is so we can unescape while we roll
+	*)
+	let buf = Buffer.create 16 in
+	let hex = ref 0 in
+	
+}@
+{
+	cs = cast(int)url_start;
+}
+
+{
+	int _klen;
+	uint _trans = 0;
+	uint _cond = 0;
+	uint _have = 0;
+	uint _cont = 1;
+	index s8 _acts;
+	uint _nacts;
+	index int _keys;
+	index s8 _ckeys;
+	int _cpc;
+	while ( _cont == 1 ) {
+		
+		if ( cs == 0 )
+		_cont = 0;
+		_have = 0;
+		if ( p == pe ) {
+			if ( p == eof )
+			{
+				if ( _have == 0 ) {
+					index s8 __acts;
+					uint __nacts;
+					__acts = offset( _url_actions, _url_eof_actions[cs] );
+					__nacts = cast(uint)deref( _url_actions, __acts );
+					__acts += 1;
+					while ( __nacts > 0 ) {
+						switch ( deref( _url_actions, __acts ) ) {
+							case 0 {
+								host( "working/url1.rl", 260 ) ${ mark := !p                             }$
+							}
+							case 1 {
+								host( "working/url1.rl", 261 ) ${ Buffer.reset buf                       }$
+							}
+							case 7 {
+								host( "working/url1.rl", 267 ) ${ parse_authority u (String.sub data !mark (!p - !mark)) }$
+							}
+							case 8 {
+								host( "working/url1.rl", 268 ) ${ u := { !u with path = Buffer.contents buf } }$
+							}
+							case 9 {
+								host( "working/url1.rl", 269 ) ${ u := { !u with query = String.sub data !mark (!p - !mark) } }$
+							}
+							case 10 {
+								host( "working/url1.rl", 270 ) ${ u := { !u with fragment = Buffer.contents buf } }$
+							}
+						}
+						__nacts -= 1;
+						__acts += 1;
+					}
+				}
+			}
+			
+			if ( _have == 0 )
+			_cont = 0;
+		}
+		if ( _cont == 1 ) {
+			if ( _have == 0 ) {
+				_keys = offset( _url_trans_keys, _url_key_offsets[cs] );
+				_trans = cast(uint)_url_index_offsets[cs];
+				_have = 0;
+				
+				_klen = cast(int)_url_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index int _lower;
+					index int _mid;
+					index int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( _upper >= _lower && _have == 0 ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _url_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _url_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						_keys += _klen;
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				if ( _have == 0 ) {
+					_klen = cast(int)_url_range_lengths[cs];
+					if ( _klen > 0 ) {
+						index int _lower;
+						index int _mid;
+						index int _upper;
+						_lower = _keys;
+						_upper = _keys + (_klen<<1) - 2;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+							if ( ( deref( data, p )) < deref( _url_trans_keys, _mid ) )
+							_upper = _mid - 2;
+							else if ( ( deref( data, p )) > deref( _url_trans_keys, _mid + 1 ) )
+							_lower = _mid + 2;
+							else {
+								_trans += cast(uint)((_mid - _keys)>>1);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 )
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				_ckeys = offset( _url_cond_keys, _url_trans_offsets[_trans] );
+				_klen = cast(int)_url_trans_lengths[_trans];
+				_cond = cast(uint)_url_trans_offsets[_trans];
+				_have = 0;
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( _have == 0 && _lower <= _upper ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _url_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _url_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						cs = 0;
+						_cont = 0;
+					}
+				}
+			}
+			if ( _cont == 1 ) {
+				cs = cast(int)_url_cond_targs[_cond];
+				
+				if ( _url_cond_actions[_cond] != 0 ) {
+					_acts = offset( _url_actions, _url_cond_actions[_cond] );
+					_nacts = cast(uint)deref( _url_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 )
+					{
+						switch ( deref( _url_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/url1.rl", 260 ) ${ mark := !p                             }$
+							}
+							case 1 {
+								host( "working/url1.rl", 261 ) ${ Buffer.reset buf                       }$
+							}
+							case 2 {
+								host( "working/url1.rl", 262 ) ${ Buffer.add_char buf data.[p.contents]                 }$
+							}
+							case 3 {
+								host( "working/url1.rl", 263 ) ${ Buffer.add_char buf (Char.lowercase data.[p.contents])}$
+							}
+							case 4 {
+								host( "working/url1.rl", 264 ) ${ hex := unhex data.[p.contents] * 16                   }$
+							}
+							case 5 {
+								host( "working/url1.rl", 265 ) ${ Buffer.add_char buf (Char.chr (!hex + unhex data.[p.contents])) }$
+							}
+							case 6 {
+								host( "working/url1.rl", 266 ) ${ u := { !u with scheme = Buffer.contents buf } }$
+							}
+							case 7 {
+								host( "working/url1.rl", 267 ) ${ parse_authority u (String.sub data !mark (!p - !mark)) }$
+							}
+							case 8 {
+								host( "working/url1.rl", 268 ) ${ u := { !u with path = Buffer.contents buf } }$
+							}
+							case 9 {
+								host( "working/url1.rl", 269 ) ${ u := { !u with query = String.sub data !mark (!p - !mark) } }$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+				}
+				
+				if ( cs == 0 )
+				_cont = 0;
+				if ( _cont == 1 )
+				p += 1;
+				
+			}
+		}
+	}
+}
+host( "working/url1.rl", 307 ) @{
+	
+	if !cs < url_first_final then
+	if !p = !pe then
+	fail "unexpected eof: %s" data
+	else
+	fail "error in url at pos %d (%c): %s" !p data.[!p] data
+	else
+	!u
+	
+	(* ////////////////////////////////////////////////////////////////////// *)
+	
+	let tests = [
+	"http://user:pass@@example.com:80;hello/lol.php?fun#omg",
+	{
+		scheme = "http";
+		user = "user";
+		pass = "pass";
+		host = "example.com";
+		port = 80;
+		params = "hello";
+		path = "/lol.php";
+		query = "fun";
+		fragment = "omg";
+	};
+	
+	"a:b",
+	{ dummy with
+		scheme = "a";
+		host = "b";
+	};
+	
+	"GoPHeR://@@example.com@@:;/?#",
+	{ dummy with
+		scheme = "gopher";
+		host = "@@example.com@@";
+		path = "/";
+	};
+	
+	"ldap://[2001:db8::7]/c=GB?objectClass/?one",
+	{ dummy with
+		scheme = "ldap";
+		host = "2001:db8::7";
+		path = "/c=GB";
+		query = "objectClass/?one";
+	};
+	
+	"http://user@@example.com",
+	{ dummy with
+		scheme = "http";
+		user = "user";
+		host = "example.com";
+	};
+	
+	"http://品研发和研发管@@☃.com:65000;%20",
+	{ dummy with
+		scheme = "http";
+		user = "品研发和研发管";
+		host = "☃.com";
+		port = 65000;
+		params = "%20";
+	};
+	
+	"https://example.com:80",
+	{ dummy with
+		scheme = "https";
+		host = "example.com";
+		port = 80;
+	};
+	
+	"file:///etc/passwd",
+	{ dummy with
+		scheme = "file";
+		path = "/etc/passwd";
+	};
+	
+	"file:///c:/WINDOWS/clock.avi",
+	{ dummy with
+		scheme = "file";
+		path = "/c:/WINDOWS/clock.avi"; (* <-- is this kosher? *)
+	};
+	
+	"file://hostname/path/to/the%20file.txt",
+	{ dummy with
+		scheme = "file";
+		host = "hostname";
+		path = "/path/to/the file.txt";
+	};
+	
+	"sip:example.com",
+	{ dummy with
+		scheme = "sip";
+		host = "example.com";
+	};
+	
+	"sip:example.com:5060",
+	{ dummy with
+		scheme = "sip";
+		host = "example.com";
+		port = 5060;
+	};
+	
+	"mailto:ditto@@pokémon.com",
+	{ dummy with
+		scheme = "mailto";
+		user = "ditto";
+		host = "pokémon.com";
+	};
+	
+	"sip:[dead:beef::666]:5060",
+	{ dummy with
+		scheme = "sip";
+		host = "dead:beef::666";
+		port = 5060;
+	};
+	
+	"tel:+12126660420",
+	{ dummy with
+		scheme = "tel";
+		host = "+12126660420";
+	};
+	
+	"sip:bob%20barker:priceisright@@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg",
+	{
+		scheme = "sip";
+		user = "bob barker";
+		pass = "priceisright";
+		host = "dead:beef::666";
+		port = 5060;
+		params = "isup-oli=00";
+		path = "/palfun.html";
+		query = "haha";
+		fragment = "omg";
+	};
+	
+	"http://www.google.com/search?%68l=en&safe=off&q=omfg&aq=f&aqi=g2g-s1g1g-s1g5&aql=&oq=&gs_rfai=",
+	{ dummy with
+		scheme = "http";
+		host = "www.google.com";
+		path = "/search";
+		query = "%68l=en&safe=off&q=omfg&aq=f&aqi=g2g-s1g1g-s1g5&aql=&oq=&gs_rfai=";
+	};
+	]
+	
+	(*
+	func (test *urlTest) compare(url *URL) (passed bool) {
+		if url.Scheme != test.url.Scheme {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) scheme: %#v != %#v\n",
+			string(test.s), url.Scheme, test.url.Scheme)
+			passed = true
+		}
+		if url.User != test.url.User {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) user: %#v != %#v\n",
+			string(test.s), url.User, test.url.User)
+			passed = true
+		}
+		if url.Pass != test.url.Pass {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) pass: %#v != %#v\n",
+			string(test.s), url.Pass, test.url.Pass)
+			passed = true
+		}
+		if url.Host != test.url.Host {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) host: %#v != %#v\n",
+			string(test.s), url.Host, test.url.Host)
+			passed = true
+		}
+		if url.Port != test.url.Port {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) port: %#v != %#v\n",
+			string(test.s), url.Port, test.url.Port)
+			passed = true
+		}
+		if url.Port != test.url.Port {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) port: %#v != %#v\n",
+			string(test.s), url.Port, test.url.Port)
+			passed = true
+		}
+		if url.Params != test.url.Params {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) params: %#v != %#v\n",
+			string(test.s), url.Params, test.url.Params)
+			passed = true
+		}
+		if url.Path != test.url.Path {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) path: %#v != %#v\n",
+			string(test.s), url.Path, test.url.Path)
+			passed = true
+		}
+		if url.Query != test.url.Query {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) query: %#v != %#v\n",
+			string(test.s), url.Query, test.url.Query)
+			passed = true
+		}
+		if url.Fragment != test.url.Fragment {
+			fmt.Fprintf(os.Stderr, "FAIL url(%#v) fragment: %#v != %#v\n",
+			string(test.s), url.Fragment, test.url.Fragment)
+			passed = true
+		}
+		return !passed
+	}
+	*)
+	
+	let bench () = 
+	let rounds = 0 in
+	let urls = [
+	"a:a";
+	"http://google.com/";
+	"sip:jtunney@@lobstertech.com";
+	"http://user:pass@@example.com:80;hello/lol.php?fun#omg";
+	"file:///etc/passwd";
+	] in
+	List.iter (fun url ->
+	for i = 1 to rounds do
+	ignore (url_parse url)
+	done;
+	Printf.printf "BENCH parse %S \n%!" url
+	) urls
+	
+	let test () =
+	List.iter (fun (s,res) ->
+	let url = url_parse s in
+	if url <> res then
+	fail "got %S for %S" (show url) (*show res*) s
+	) tests
+	
+	let () =
+	test ();
+	bench ();
+	exit 0
+	
+}@

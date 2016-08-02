@@ -1,0 +1,138 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+
+
+
+
+
+
+
+
+let _zlen1_trans_keys : int array = [|
+1; 0; 1; 0; 0 ; 
+|]
+let _zlen1_char_class : int array = [|
+0 ; 
+|]
+let _zlen1_index_offsets : int array = [|
+0; 0; 0 ; 
+|]
+let _zlen1_indicies : int array = [|
+0 ; 
+|]
+let _zlen1_index_defaults : int array = [|
+0; 0; 0 ; 
+|]
+let _zlen1_trans_cond_spaces : int array = [|
+-1; 0 ; 
+|]
+let _zlen1_cond_targs : int array = [|
+0; 0 ; 
+|]
+let _zlen1_cond_actions : int array = [|
+0; 0 ; 
+|]
+let _zlen1_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _zlen1_nfa_offsets : int array = [|
+0; 0; 0 ; 
+|]
+let _zlen1_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _zlen1_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let zlen1_start  : int  = 1
+let zlen1_first_final  : int  = 1
+let zlen1_error  : int  = 0
+let zlen1_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := zlen1_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_trans  := _zlen1_index_defaults.(cs.contents);
+						
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _zlen1_cond_targs.(_trans.contents);
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= zlen1_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "";
+exec "x";
+()
+;;
+

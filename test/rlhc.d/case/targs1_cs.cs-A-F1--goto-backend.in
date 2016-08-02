@@ -1,0 +1,166 @@
+host( "working/targs1_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			int return_to;
+			
+			
+			
+			
+		}@
+		array char _targs1_trans_keys( 0, 11 ) = { c(1), c(0), c(10), c(10), c(6), c(6), c(10), c(10), c(8), c(8), c(5), c(5), c(4), c(4), c(7), c(7), c(6), c(6), c(5), c(5), c(9), c(9), c(11), c(11), c(7), c(7), c(0), c(3), c(1), c(0), c(1), c(0), c(1), c(0), c(0) };
+		
+		array s8 _targs1_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 };
+		
+		array s8 _targs1_index_offsets( 0, 16 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0 };
+		
+		array s8 _targs1_indicies( 0, 15 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 };
+		
+		array s8 _targs1_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+		
+		array s8 _targs1_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+		
+		array s8 _targs1_cond_targs( 0, 16 ) = { 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0 };
+		
+		array s8 _targs1_cond_actions( 0, 4 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 3, 4, 0 };
+		
+		array s8 _targs1_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _targs1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _targs1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _targs1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int targs1_start = 13;
+		value int targs1_first_final = 13;
+		value int targs1_error = 0;
+		
+		value int targs1_en_unused = 1;
+		value int targs1_en_one = 7;
+		value int targs1_en_two = 10;
+		value int targs1_en_main = 13;
+		
+		host( "working/targs1_cs.rl", 34 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)targs1_start;
+			}
+			host( "working/targs1_cs.rl", 39 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _trans = 0;
+				index char _keys;
+				index s8 _inds;
+				entry {
+					if ( p == pe )
+					goto _test_eof;
+					if ( cs == 0 )
+					goto _out;
+					label _resume {
+						_keys = offset( _targs1_trans_keys, (cs<<1) );
+						_inds = offset( _targs1_indicies, _targs1_index_offsets[cs] );
+						
+						if ( ( deref( data, p )) <= 119 && ( deref( data, p )) >= 10 )
+						{
+							int _ic = cast(int)_targs1_char_class[cast(int)( deref( data, p )) - 10];
+							if ( _ic <= cast(int)deref( _targs1_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _targs1_trans_keys, _keys ) )
+							_trans = cast(int)deref( _targs1_indicies, _inds + cast(int)( _ic - cast(int)deref( _targs1_trans_keys, _keys ) )  ); 
+							else
+							_trans = cast(int)_targs1_index_defaults[cs];
+						}
+						else {
+							_trans = cast(int)_targs1_index_defaults[cs];
+						}
+						
+						goto _match_cond;
+					}
+					label _match_cond {
+						cs = cast(int)_targs1_cond_targs[_trans];
+						
+						if ( _targs1_cond_actions[_trans] == 0 )
+						goto _again;
+						
+						switch ( _targs1_cond_actions[_trans] ) {
+							case 1 {
+								host( "working/targs1_cs.rl", 19 ) ${Console.Write( "one\n" );${cs = host( "-", 1 ) ={return_to}=;}$}$
+							}
+							case 2 {
+								host( "working/targs1_cs.rl", 21 ) ${Console.Write( "two\n" );${cs = host( "-", 1 ) ={return_to}=;}$}$
+							}
+							case 3 {
+								host( "working/targs1_cs.rl", 24 ) ${return_to = ={cs}=;
+									${cs = 7;}$}$
+							}
+							case 4 {
+								host( "working/targs1_cs.rl", 26 ) ${return_to = ={cs}=;
+									${cs = 10;}$}$
+							}
+						}
+						
+						
+					}
+					label _again {
+						if ( cs == 0 )
+						goto _out;
+						p+= 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/targs1_cs.rl", 50 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= targs1_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"1one2two1one\n",
+			};
+			
+			
+			static readonly int inplen = 1;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

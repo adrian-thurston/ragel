@@ -1,0 +1,171 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int top;
+		int [] stack = new int [32];
+		int target;
+		
+		
+		
+		
+		static readonly char  []_ncall1_trans_keys = { '\u0001', '\u0000', '\u000a', '\u000a', '\u0006', '\u0006', '\u000a', '\u000a', '\u0008', '\u0008', '\u0005', '\u0005', '\u0004', '\u0004', '\u0007', '\u0007', '\u0006', '\u0006', '\u0005', '\u0005', '\u0009', '\u0009', '\u000b', '\u000b', '\u0007', '\u0007', '\u0000', '\u0003', '\u0001', '\u0000', '\u0001', '\u0000', '\u0001', '\u0000', '\u0000',  };
+		static readonly sbyte  []_ncall1_char_class = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0,  };
+		static readonly sbyte  []_ncall1_index_offsets = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0,  };
+		static readonly sbyte  []_ncall1_indicies = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0,  };
+		static readonly sbyte  []_ncall1_index_defaults = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  };
+		static readonly sbyte  []_ncall1_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
+		static readonly sbyte  []_ncall1_cond_targs = { 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0,  };
+		static readonly sbyte  []_ncall1_cond_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 3, 4, 0,  };
+		static readonly sbyte  []_ncall1_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_ncall1_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_ncall1_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_ncall1_nfa_pop_trans = { 0, 0,  };
+		static readonly int  ncall1_start  = 13;
+		static readonly int  ncall1_first_final  = 13;
+		static readonly int  ncall1_error  = 0;
+		static readonly int  ncall1_en_unused  = 1;
+		static readonly int  ncall1_en_one  = 7;
+		static readonly int  ncall1_en_two  = 10;
+		static readonly int  ncall1_en_main  = 13;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)ncall1_start;
+				top = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				uint _trans = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				int _keys;
+				int _inds;
+				while ( _cont == 1 )
+				{
+				
+					if ( cs == 0 )
+					_cont = 0;
+					
+					_have = 0;
+					if ( p == pe  )
+					{
+						if ( _have == 0 )
+						_cont = 0;
+						
+					}
+					
+					if ( _cont == 1 )
+					{
+						if ( _have == 0 )
+						{
+							_keys = (cs<<1) ;
+							_inds = _ncall1_index_offsets[cs] ;
+							if ( ( data[p ]) <= 119&& ( data[p ]) >= 10 )
+							{
+								int _ic = (int)_ncall1_char_class[(int)( data[p ]) - 10];
+								if ( _ic <= (int)_ncall1_trans_keys[_keys+1]&& _ic >= (int)_ncall1_trans_keys[_keys ] )
+								_trans = (uint )_ncall1_indicies[_inds + (int)( _ic - (int)_ncall1_trans_keys[_keys ])  ];
+								
+								else
+								_trans = (uint )_ncall1_index_defaults[cs];
+								
+							}
+							
+							else
+							{
+								_trans = (uint )_ncall1_index_defaults[cs];
+							}
+							
+							
+						}
+						
+						if ( _cont == 1 )
+						{
+							cs = (int)_ncall1_cond_targs[_trans];
+							switch ( _ncall1_cond_actions[_trans]  ) {
+								case 1:
+								{Console.Write( "one\n" );{top-= 1;
+										cs = stack[top];
+									}}
+								
+								break;
+								case 2:
+								{Console.Write( "two\n" );{top-= 1;
+										cs = stack[top];
+									}}
+								
+								break;
+								case 3:
+								{target = 7;
+									{stack[top] = cs;
+										top += 1;
+										cs = (target);
+									}}
+								
+								break;
+								case 4:
+								{target = 10;
+									{stack[top] = cs;
+										top += 1;
+										cs = (target);
+									}}
+								
+								break;
+								
+							}
+							if ( cs == 0 )
+							_cont = 0;
+							
+							if ( _cont == 1 )
+							p += 1;
+							
+						}
+					}
+					
+				}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= ncall1_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"1one2two1one\n",
+		};
+		
+		
+		static readonly int inplen = 1;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

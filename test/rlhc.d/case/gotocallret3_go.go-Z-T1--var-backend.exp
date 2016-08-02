@@ -1,0 +1,351 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _gotocallret_key_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 8, 10, 14, 14, 18, 0  }
+var _gotocallret_trans_keys [] byte  = [] byte  { 32, 10, 10, 10, 65, 90, 97, 122, 48, 57, 48, 57, 97, 122, 65, 90, 97, 122, 48, 57, 0 }
+var _gotocallret_single_lengths [] int8  = [] int8  { 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0  }
+var _gotocallret_range_lengths [] int8  = [] int8  { 0, 0, 0, 0, 0, 2, 1, 2, 0, 2, 1, 0  }
+var _gotocallret_index_offsets [] int8  = [] int8  { 0, 0, 2, 4, 6, 8, 11, 13, 16, 17, 20, 0  }
+var _gotocallret_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _gotocallret_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0  }
+var _gotocallret_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _gotocallret_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _gotocallret_cond_targs [] int8  = [] int8  { 2, 0, 7, 0, 8, 4, 8, 4, 9, 9, 0, 10, 0, 1, 1, 0, 0, 9, 9, 0, 10, 0, 0  }
+var _gotocallret_cond_actions [] int8  = [] int8  { 2, 1, 3, 1, 6, 5, 7, 0, 0, 0, 8, 0, 8, 9, 9, 1, 0, 0, 0, 8, 0, 8, 0  }
+var _gotocallret_eof_actions [] int8  = [] int8  { 0, 1, 1, 4, 4, 8, 8, 0, 4, 0, 0, 0  }
+var _gotocallret_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _gotocallret_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _gotocallret_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _gotocallret_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var gotocallret_start  int  = 7
+var gotocallret_first_final  int  = 7
+var gotocallret_error  int  = 0
+var gotocallret_en_garble_line  int  = 3
+var gotocallret_en_alp_comm  int  = 5
+var gotocallret_en_dig_comm  int  = 6
+var gotocallret_en_main  int  = 7
+func prepare() {
+
+	{
+		cs = int(gotocallret_start);
+		top = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _klen int 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		var  _trans uint 
+		var  _cond  uint   = 0
+		var  _have  uint   = 0
+		var  _cont  uint   = 1
+		for _cont == 1  {
+			{
+			
+				if cs == 0  {
+					_cont = 0;
+					
+				}
+				_have = 0;
+				if p == pe  {
+					{
+						if p == eof  {
+							{
+								if _have == 0  {
+									{
+										switch _gotocallret_eof_actions[cs]  {
+											case 4 :
+											{fmt.Print( "error: failed to recover\n" );}
+											
+											break;
+											case 8 :
+											{{p = p - 1;
+												} 
+												{top-= 1;
+													cs = stack[top];
+												}
+											}
+											
+											break;
+											case 1 :
+											{{p = p - 1;
+												}
+												{cs = 3;
+												}}
+											
+											break;
+											
+										}
+									}
+									
+								}
+							}
+							
+							
+						}
+						if _have == 0  {
+							_cont = 0;
+							
+						}
+					}
+					
+				}
+				if _cont == 1  {
+					{
+						if _have == 0  {
+							{
+								_keys = int(_gotocallret_key_offsets[cs] );
+								_trans = uint(_gotocallret_index_offsets[cs]);
+								_have = 0;
+								_klen = int(_gotocallret_single_lengths[cs]);
+								if _klen > 0  {
+									{
+										var  _lower int
+										var  _mid int
+										var  _upper int
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										for _upper >= _lower && _have == 0  {
+											{
+												_mid = _lower + ((_upper-_lower) >> 1);
+												switch {
+													case ( data[p ]) < _gotocallret_trans_keys[_mid ]:
+													_upper = _mid - 1;
+													
+													case ( data[p ]) > _gotocallret_trans_keys[_mid ]:
+													_lower = _mid + 1;
+													
+													default:
+													{
+														_trans += uint((_mid - _keys));
+														_have = 1;
+													}
+													
+												}
+											}
+											
+										}
+										if _have == 0  {
+											{
+												_keys += _klen;
+												_trans += uint(_klen);
+											}
+											
+										}
+									}
+									
+									
+								}
+								if _have == 0  {
+									{
+										_klen = int(_gotocallret_range_lengths[cs]);
+										if _klen > 0  {
+											{
+												var  _lower int
+												var  _mid int
+												var  _upper int
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												for _have == 0 && _lower <= _upper  {
+													{
+														_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+														switch {
+															case ( data[p ]) < _gotocallret_trans_keys[_mid ]:
+															_upper = _mid - 2;
+															
+															case ( data[p ]) > _gotocallret_trans_keys[_mid + 1 ]:
+															_lower = _mid + 2;
+															
+															default:
+															{
+																_trans += uint(((_mid - _keys)>>1));
+																_have = 1;
+															}
+															
+														}
+													}
+													
+												}
+												if _have == 0  {
+													_trans += uint(_klen);
+													
+												}
+											}
+											
+										}
+									}
+									
+									
+								}
+								_ckeys = int(_gotocallret_trans_offsets[_trans] );
+								_klen = int(_gotocallret_trans_lengths[_trans]);
+								_cond = uint(_gotocallret_trans_offsets[_trans]);
+								_have = 0;
+								_cpc = 0;
+								{
+									var  _lower int
+									var  _mid int
+									var  _upper int
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									for _have == 0 && _lower <= _upper  {
+										{
+											_mid = _lower + ((_upper-_lower) >> 1);
+											switch {
+												case _cpc < int(_gotocallret_cond_keys[_mid ]):
+												_upper = _mid - 1;
+												
+												case _cpc > int(_gotocallret_cond_keys[_mid ]):
+												_lower = _mid + 1;
+												
+												default:
+												{
+													_cond += uint((_mid - _ckeys));
+													_have = 1;
+												}
+												
+											}
+										}
+										
+									}
+									if _have == 0  {
+										{
+											cs = 0;
+											_cont = 0;
+										}
+										
+									}
+								}
+							}
+							
+						}
+						if _cont == 1  {
+							{
+								cs = int(_gotocallret_cond_targs[_cond]);
+								switch _gotocallret_cond_actions[_cond]  {
+									case 5 :
+									{fmt.Print( "error: garbling line\n" );}
+									
+									break;
+									case 7 :
+									{{cs = 7;
+										}}
+									
+									break;
+									case 8 :
+									{{p = p - 1;
+										} 
+										{top-= 1;
+											cs = stack[top];
+										}
+									}
+									
+									break;
+									case 9 :
+									{comm = (( data[p ]));
+									}
+									
+									break;
+									case 3 :
+									{fmt.Print( "correct command\n" );}
+									
+									break;
+									case 1 :
+									{{p = p - 1;
+										}
+										{cs = 3;
+										}}
+									
+									break;
+									case 6 :
+									{fmt.Print( "error: garbling line\n" );}
+									{{cs = 7;
+										}}
+									
+									break;
+									case 2 :
+									{if ( comm >= 97 ) {
+											{stack[top] = cs;
+												top += 1;
+												cs = 5;
+											}} else {
+											{stack[top] = cs;
+												top += 1;
+												cs = 6;
+											}}
+									}
+									{fmt.Print( "prints\n" );}
+									
+									break;
+									
+								}
+								if cs == 0  {
+									_cont = 0;
+									
+								}
+								if _cont == 1  {
+									p += 1;
+									
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+	}
+}
+func finish() {
+	if cs >= gotocallret_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"lkajsdf\n",
+	"2134\n",
+	"(\n",
+	"\n",
+	"*234234()0909 092 -234aslkf09`1 11\n",
+	"1\n",
+	"909\n",
+	"1 a\n",
+	"11 1\n",
+	"a 1\n",
+	"aa a\n",
+	"1 1\n",
+	"1 123456\n",
+	"a a\n",
+	"a abcdef\n",
+	"h",
+	"a aa1",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

@@ -1,0 +1,100 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+
+static const char  _zlen1_trans_keys [] = { 1, 0, 1, 0, 0 ,  };
+static const char  _zlen1_char_class [] = { 0 ,  };
+static const char  _zlen1_index_offsets [] = { 0, 0, 0 ,  };
+static const char  _zlen1_indicies [] = { 0 ,  };
+static const char  _zlen1_index_defaults [] = { 0, 0, 0 ,  };
+static const char  _zlen1_trans_cond_spaces [] = { -1, 0 ,  };
+static const char  _zlen1_cond_targs [] = { 0, 0 ,  };
+static const char  _zlen1_cond_actions [] = { 0, 0 ,  };
+static const char  _zlen1_nfa_targs [] = { 0, 0 ,  };
+static const char  _zlen1_nfa_offsets [] = { 0, 0, 0 ,  };
+static const char  _zlen1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _zlen1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  zlen1_start  = 1;
+static const int  zlen1_first_final  = 1;
+static const int  zlen1_error  = 0;
+static const int  zlen1_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) zlen1_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _trans = 0;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_trans = ( int ) _zlen1_index_defaults[cs];
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _zlen1_cond_targs[_trans];
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= zlen1_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"",
+	"x",
+};
+
+int inplen = 2;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

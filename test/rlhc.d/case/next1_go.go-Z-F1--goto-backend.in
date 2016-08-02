@@ -1,0 +1,159 @@
+host( "working/next1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var target  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array byte _next1_trans_keys( 0, 11 ) = { u(1), u(0), u(0), u(3), u(10), u(10), u(6), u(6), u(10), u(10), u(8), u(8), u(5), u(5), u(4), u(4), u(7), u(7), u(6), u(6), u(5), u(5), u(9), u(9), u(11), u(11), u(7), u(7), u(1), u(0), u(1), u(0), u(1), u(0), u(1), u(0), u(0) };
+
+array s8 _next1_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 };
+
+array s8 _next1_index_offsets( 0, 16 ) = { 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 };
+
+array s8 _next1_indicies( 0, 15 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 };
+
+array s8 _next1_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _next1_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _next1_cond_targs( 0, 17 ) = { 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 };
+
+array s8 _next1_cond_actions( 0, 4 ) = { 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 4, 0 };
+
+array s8 _next1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _next1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _next1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int next1_start = 1;
+value int next1_first_final = 14;
+value int next1_error = 0;
+
+value int next1_en_unused = 2;
+value int next1_en_one = 8;
+value int next1_en_two = 11;
+value int next1_en_main = 1;
+
+host( "working/next1_go.rl", 42 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)next1_start;
+	}
+	host( "working/next1_go.rl", 45 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		int _trans = 0;
+		index byte _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _next1_trans_keys, (cs<<1) );
+				_inds = offset( _next1_indicies, _next1_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 119 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_next1_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _next1_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _next1_trans_keys, _keys ) )
+					_trans = cast(int)deref( _next1_indicies, _inds + cast(int)( _ic - cast(int)deref( _next1_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_next1_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_next1_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_next1_cond_targs[_trans];
+				
+				if ( _next1_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _next1_cond_actions[_trans] ) {
+					case 3 {
+						host( "working/next1_go.rl", 16 ) ${fmt.Print( "one\n" );target = 1;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+						}$
+					}
+					case 4 {
+						host( "working/next1_go.rl", 21 ) ${fmt.Print( "two\n" );target = 1;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+						}$
+					}
+					case 1 {
+						host( "working/next1_go.rl", 27 ) ${target = 8;
+							${cs = host( "-", 1 ) ={target}=;}$ 
+						}$
+					}
+					case 2 {
+						host( "working/next1_go.rl", 30 ) ${target = 11;
+							${cs = host( "-", 1 ) ={target}=;}$ 
+						}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/next1_go.rl", 51 ) @{
+	}
+	func finish() {
+		if cs >= next1_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1one2two1one\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

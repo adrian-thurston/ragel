@@ -1,0 +1,349 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+var ts  int ;
+var te  int ;
+var act  int ;
+var val  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _GotoCallRet_trans_keys [] byte  = [] byte  { 1, 0, 6, 6, 9, 9, 7, 7, 8, 8, 1, 0, 0, 10, 2, 9, 5, 9, 1, 0, 2, 11, 5, 9, 2, 2, 2, 10, 2, 2, 5, 9, 0 }
+var _GotoCallRet_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 4, 1, 1, 1, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5, 5, 8, 5, 5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 10, 1, 11, 0  }
+var _GotoCallRet_index_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 4, 15, 23, 28, 28, 38, 43, 44, 53, 54, 0  }
+var _GotoCallRet_indicies [] int8  = [] int8  { 1, 2, 3, 4, 6, 7, 8, 9, 7, 10, 10, 10, 10, 10, 11, 13, 12, 12, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 16, 7, 17, 17, 17, 17, 17, 18, 19, 17, 17, 17, 17, 17, 19, 22, 23, 24, 25, 25, 25, 25, 25, 26, 24, 25, 25, 25, 25, 25, 0  }
+var _GotoCallRet_index_defaults [] int8  = [] int8  { 0, 0, 0, 0, 0, 5, 7, 12, 12, 7, 7, 20, 21, 7, 27, 28, 0  }
+var _GotoCallRet_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _GotoCallRet_cond_targs [] int8  = [] int8  { 6, 2, 3, 4, 6, 9, 6, 0, 6, 6, 7, 6, 6, 1, 8, 10, 10, 11, 10, 12, 10, 10, 13, 13, 14, 15, 13, 13, 13, 0  }
+var _GotoCallRet_cond_actions [] int8  = [] int8  { 1, 0, 0, 0, 2, 4, 6, 0, 7, 8, 9, 10, 11, 0, 0, 12, 13, 0, 14, 0, 15, 16, 17, 18, 0, 0, 19, 20, 21, 0  }
+var _GotoCallRet_to_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0  }
+var _GotoCallRet_from_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0  }
+var _GotoCallRet_eof_trans [] int8  = [] int8  { 0, 1, 1, 1, 1, 0, 0, 13, 13, 0, 0, 21, 22, 0, 28, 29, 0  }
+var _GotoCallRet_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _GotoCallRet_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var GotoCallRet_start  int  = 6
+var GotoCallRet_first_final  int  = 6
+var GotoCallRet_error  int  = 0
+var GotoCallRet_en_handle  int  = 5
+var GotoCallRet_en_one  int  = 10
+var GotoCallRet_en_two  int  = 13
+var GotoCallRet_en_main  int  = 6
+func prepare() {
+
+	{
+		cs = int(GotoCallRet_start);
+		top = 0;
+		ts = 0;
+		te = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _trans  int   = 0
+		var  _keys int
+		var  _inds int
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		switch _GotoCallRet_from_state_actions[cs]  {
+			case 5 :
+			{{ts = p;
+				}}
+			
+			break;
+			
+		}
+		_keys = int((cs<<1) );
+		_inds = int(_GotoCallRet_index_offsets[cs] );
+		switch {
+			case ( data[p ]) <= 125 && ( data[p ]) >= 10 :
+			{
+				var  _ic  int   = int(_GotoCallRet_char_class[int(( data[p ]) )- 10])
+				switch {
+					case _ic <= int(_GotoCallRet_trans_keys[_keys+1 ])&& _ic >= int(_GotoCallRet_trans_keys[_keys ]):
+					_trans = int(_GotoCallRet_indicies[_inds + int(( _ic - int(_GotoCallRet_trans_keys[_keys ]))  )]);
+					
+					default:
+					_trans = int(_GotoCallRet_index_defaults[cs]);
+					
+				}
+			}
+			
+			default:
+			{
+				_trans = int(_GotoCallRet_index_defaults[cs]);
+			}
+			
+			
+		}
+		goto _match_cond;
+		
+		_match_cond :
+		cs = int(_GotoCallRet_cond_targs[_trans]);
+		if _GotoCallRet_cond_actions[_trans] == 0  {
+			goto _again;
+			
+			
+		}
+		switch _GotoCallRet_cond_actions[_trans]  {
+			case 4 :
+			{fmt.Print( "handle " );{p = p - 1;
+				} 
+				
+				if ( val == 1 ) {
+					{cs = (10);
+					} 
+					
+				}
+				if ( val == 2 ) {
+					{cs = (13);
+					} 
+					
+				}
+				if ( val == 3 ) {
+					{cs = 6;
+					}}
+			}
+			
+			break;
+			case 9 :
+			{{te = p+1;
+				}}
+			
+			break;
+			case 14 :
+			{{te = p+1;
+					{fmt.Print( "{ " );{stack[top] = cs;
+							top += 1;
+							cs = (10);
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 13 :
+			{{te = p+1;
+					{fmt.Print( "[ " );{stack[top] = cs;
+							top += 1;
+							cs = (13);
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 12 :
+			{{te = p+1;
+					{fmt.Print( "space " );}
+				}}
+			
+			break;
+			case 16 :
+			{{te = p;
+					p = p - 1;
+					{fmt.Print( "} " );{top -= 1;
+							cs = stack[top];
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 15 :
+			{{te = p;
+					p = p - 1;
+					{fmt.Print( "word " );val = 1;
+						{cs = (5);
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 19 :
+			{{te = p+1;
+					{fmt.Print( "{ " );{stack[top] = cs;
+							top += 1;
+							cs = (10);
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 18 :
+			{{te = p+1;
+					{fmt.Print( "[ " );{stack[top] = cs;
+							top += 1;
+							cs = (13);
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 17 :
+			{{te = p+1;
+					{fmt.Print( "space " );}
+				}}
+			
+			break;
+			case 20 :
+			{{te = p;
+					p = p - 1;
+					{fmt.Print( "] " );{top -= 1;
+							cs = stack[top];
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 21 :
+			{{te = p;
+					p = p - 1;
+					{fmt.Print( "word " );val = 2;
+						{cs = (5);
+							goto _again;} 
+					}
+				}}
+			
+			break;
+			case 10 :
+			{{te = p+1;
+					{fmt.Print( "{ " );{stack[top] = cs;
+							top += 1;
+							cs = 10;
+							goto _again;}}
+				}}
+			
+			break;
+			case 8 :
+			{{te = p+1;
+					{fmt.Print( "[ " );{stack[top] = cs;
+							top += 1;
+							cs = 13;
+							goto _again;}}
+				}}
+			
+			break;
+			case 2 :
+			{{te = p+1;
+					{fmt.Print( "this is the foil" );}
+				}}
+			
+			break;
+			case 7 :
+			{{te = p+1;
+					{fmt.Print( "space " );}
+				}}
+			
+			break;
+			case 6 :
+			{{te = p+1;
+				}}
+			
+			break;
+			case 11 :
+			{{te = p;
+					p = p - 1;
+					{fmt.Print( "word " );val = 3;
+						{cs = 5;
+							goto _again;}}
+				}}
+			
+			break;
+			case 1 :
+			{{p = ((te))-1;
+					{fmt.Print( "word " );val = 3;
+						{cs = 5;
+							goto _again;}}
+				}}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch _GotoCallRet_to_state_actions[cs]  {
+			case 3 :
+			{{ts = 0;
+				}}
+			
+			break;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		if p == eof  {
+			{
+				if _GotoCallRet_eof_trans[cs] > 0  {
+					{
+						_trans = int(_GotoCallRet_eof_trans[cs] )- 1;
+						goto _match_cond;
+					}
+					
+				}
+			}
+			
+			
+		}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= GotoCallRet_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"{a{b[c d]d}c}\n",
+	"[a{b[c d]d}c}\n",
+	"[a[b]c]d{ef{g{h}i}j}l\n",
+	"{{[]}}\n",
+	"a b c\n",
+	"{a b c}\n",
+	"[a b c]\n",
+	"{]\n",
+	"{{}\n",
+	"[[[[[[]]]]]]\n",
+	"[[[[[[]]}]]]\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

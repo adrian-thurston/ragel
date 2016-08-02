@@ -1,0 +1,254 @@
+host( "working/next1_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			int target;
+			
+			
+			
+			
+		}@
+		array s8 _next1_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _next1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _next1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _next1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int next1_start = 1;
+		value int next1_first_final = 14;
+		value int next1_error = 0;
+		
+		value int next1_en_unused = 2;
+		value int next1_en_one = 8;
+		value int next1_en_two = 11;
+		value int next1_en_main = 1;
+		
+		host( "working/next1_cs.rl", 35 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)next1_start;
+			}
+			host( "working/next1_cs.rl", 40 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				_resume:
+				switch ( cs ) {
+					case 1:
+					switch( ( deref( data, p )) ) {
+						case c(10): {
+							goto ctr0;
+						}
+						case c(49): {
+							goto ctr2;
+						}
+						case c(50): {
+							goto ctr3;
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 14:
+					{
+						goto ctr1;
+					}
+					case 2:
+					if ( ( deref( data, p )) == c(117) ) {
+						goto ctr4;
+					}
+					{
+						goto ctr1;
+					}
+					case 3:
+					if ( ( deref( data, p )) == c(110) ) {
+						goto ctr5;
+					}
+					{
+						goto ctr1;
+					}
+					case 4:
+					if ( ( deref( data, p )) == c(117) ) {
+						goto ctr6;
+					}
+					{
+						goto ctr1;
+					}
+					case 5:
+					if ( ( deref( data, p )) == c(115) ) {
+						goto ctr7;
+					}
+					{
+						goto ctr1;
+					}
+					case 6:
+					if ( ( deref( data, p )) == c(101) ) {
+						goto ctr8;
+					}
+					{
+						goto ctr1;
+					}
+					case 7:
+					if ( ( deref( data, p )) == c(100) ) {
+						goto ctr9;
+					}
+					{
+						goto ctr1;
+					}
+					case 15:
+					{
+						goto ctr1;
+					}
+					case 8:
+					if ( ( deref( data, p )) == c(111) ) {
+						goto ctr10;
+					}
+					{
+						goto ctr1;
+					}
+					case 9:
+					if ( ( deref( data, p )) == c(110) ) {
+						goto ctr11;
+					}
+					{
+						goto ctr1;
+					}
+					case 10:
+					if ( ( deref( data, p )) == c(101) ) {
+						goto ctr12;
+					}
+					{
+						goto ctr1;
+					}
+					case 16:
+					{
+						goto ctr1;
+					}
+					case 11:
+					if ( ( deref( data, p )) == c(116) ) {
+						goto ctr13;
+					}
+					{
+						goto ctr1;
+					}
+					case 12:
+					if ( ( deref( data, p )) == c(119) ) {
+						goto ctr14;
+					}
+					{
+						goto ctr1;
+					}
+					case 13:
+					if ( ( deref( data, p )) == c(111) ) {
+						goto ctr15;
+					}
+					{
+						goto ctr1;
+					}
+					case 17:
+					{
+						goto ctr1;
+					}
+				}
+				
+				ctr1: cs = 0; goto _again;
+				ctr4: cs = 3; goto _again;
+				ctr5: cs = 4; goto _again;
+				ctr6: cs = 5; goto _again;
+				ctr7: cs = 6; goto _again;
+				ctr8: cs = 7; goto _again;
+				ctr10: cs = 9; goto _again;
+				ctr11: cs = 10; goto _again;
+				ctr13: cs = 12; goto _again;
+				ctr14: cs = 13; goto _again;
+				ctr0: cs = 14; goto _again;
+				ctr2: cs = 14; goto f0;
+				ctr3: cs = 14; goto f1;
+				ctr9: cs = 15; goto _again;
+				ctr12: cs = 16; goto f2;
+				ctr15: cs = 17; goto f3;
+				
+				f2:
+				host( "working/next1_cs.rl", 19 ) ${Console.Write( "one\n" );target = 1;
+					cs = (target);}$
+				goto _again;
+				f3:
+				host( "working/next1_cs.rl", 22 ) ${Console.Write( "two\n" );target = 1;
+					cs = (target);}$
+				goto _again;
+				f0:
+				host( "working/next1_cs.rl", 26 ) ${target = 8;
+					cs = (target);}$
+				goto _again;
+				f1:
+				host( "working/next1_cs.rl", 28 ) ${target = 11;
+					cs = (target);}$
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				_out: {}
+			}
+			host( "working/next1_cs.rl", 51 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= next1_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"1one2two1one\n",
+			};
+			
+			
+			static readonly int inplen = 1;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@
