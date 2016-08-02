@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+
+make
+
+. ../subject.sh
+export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
+
+langs='asm crack c cs d go java julia ocaml'
+
+mkdir -p working
+
+set -x
+
+for fn in `find case -type f -and -not -name '*_*'`; do 
+	
+	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $fn`
+
+	for l in $langs; do
+
+		echo "$prohibit_languages" | grep -q "\<$l\>" && continue;
+		
+		out=${fn%.rl}_$l.out
+		out=working/${out#case/}
+
+		class=${fn%.rl}
+		class=${class#case/}_$l
+
+		exp=${fn%.rl}_$l.rl
+
+		./trans $l $out $fn $class
+
+		if ! diff $exp $out; then
+			exit 1;
+		fi
+	done
+done
+
