@@ -274,7 +274,7 @@ reduction TopLevel
 		}
 
 		/* Clear the write args collector. */
-		writeArgs.empty();
+		writeArgs.clear();
 	}
 
 	# def alphtype_type
