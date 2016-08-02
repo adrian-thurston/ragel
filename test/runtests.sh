@@ -129,7 +129,7 @@ function test_error
 
 function run_test()
 {
-	opts="$lang_opt $min_opt $gen_opt $enc_opt $f_opt $b_opt $v_opt"
+	opts="$lang_opt $min_opt $gen_opt $enc_opt $f_opt"
 	args="-I. $opts -o $wk/$code_src $translated"
 	echo "$ragel $args"
 	if ! $ragel $args; then
@@ -446,25 +446,7 @@ function run_options()
 					# Ragel must support the frontend.
 					echo "$supported_frontends" | grep -qe $f_opt || continue
 
-					for b_opt in $backflags; do
-						echo "" "$prohibit_backflags" | \
-								grep -e $b_opt >/dev/null && continue
-
-						# Ragel must support the backend.
-						echo "$supported_backends" | grep -qe $b_opt || continue
-
-						for v_opt in $featflags; do
-
-							echo "" "$prohibit_featflags" | \
-									grep -e $v_opt >/dev/null && continue
-
-							[ $gen_opt = -G0 ] && [ $v_opt = --var-backend ] && continue
-							[ $gen_opt = -G1 ] && [ $v_opt = --var-backend ] && continue
-							[ $gen_opt = -G2 ] && [ $v_opt = --var-backend ] && continue
-
-							run_test
-						done
-					done
+					run_test
 				done
 			done
 		done
