@@ -156,9 +156,12 @@ struct IncludeRec
 
 	const FnMachine &getKey()
 		{ return key; }
+
+	std::string foundFileName;
 	
 	char *data;
 	int len;
+
 };
 
 typedef AvlTree<IncludeRec, FnMachine, CmpFnMachine> IncludeDict;

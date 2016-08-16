@@ -115,6 +115,7 @@ void TopLevel::loadIncludeData( IncludeRec *el, IncludePass &includePass, const 
 	else {
 		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
 			std::ifstream f( fileName.c_str() );
+
 			f.seekg( ii->start, std::ios::beg );
 			f.read( el->data + len, ii->length );
 			size_t read = f.gcount();
@@ -140,16 +141,20 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	if ( el == 0 ) {
 		el = new IncludeRec( fileName, machine );
 
+		const char **includeChecks = 0;
+		long found = 0;
+
 		/* First collect the locations of the text using an include pass. */
 		IncludePass includePass( id, machine );
 		if ( id->inLibRagel && !fileSpecified ) {
-			/* In libragel and no file was specified in the include statement.
+			el->foundFileName = curFileName;
+
+			/* In LibRagel and no file was specified in the include statement.
 			 * In this case we run the include pass on the input text supplied. */
 			includePass.reduceStr( fileName.c_str(), id->hostLang, id->input );
 		}
 		else {
 			const char *inclSectionName = machine.c_str();
-			const char **includeChecks = 0;
 
 			/* Implement defaults for the input file and section name. */
 			if ( inclSectionName == 0 )
@@ -167,7 +172,6 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 				includeChecks[1] = 0;
 			}
 
-			long found = 0;
 			ifstream *inFile = pd->id->tryOpenInclude( includeChecks, found );
 			if ( inFile == 0 ) {
 				id->error(incLoc) << "include: failed to locate file" << endl;
@@ -177,6 +181,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 			}
 			else {
 				delete inFile;
+				el->foundFileName = curFileName;
 
 				/* Don't include anything that's already been included. */
 				if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
@@ -196,7 +201,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 		}
 		else {
 			/* Load the data into include el. Save in the dict. */
-			loadIncludeData( el, includePass, fileName );
+			loadIncludeData( el, includePass, includeChecks[found] );
 			id->includeDict.insert( el );
 			includePass.incItems.empty();
 		}
@@ -211,7 +216,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	targetMachine = sectionName.c_str();
 	searchMachine = machine.c_str();
 
-	reduceStr( "-", el->data );
+	reduceStr( el->foundFileName.c_str(), el->data );
 
 	pd = pd0;
 	includeDepth -= 1;
