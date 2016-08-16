@@ -1,24 +1,14 @@
 #!/bin/bash
 
 #
-#   Copyright 2006-2015 Adrian Thurston <thurston@complang.org>
+# Test Case Features
+# ------------------
+#    If the test case has a directory by the same name, copy it into the
+#    working direcotory.
 #
-
-#   This file is part of Ragel.
-#
-#   Ragel is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
-#
-#   Ragel is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with Ragel; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+#    @RAGEL_FILE: file name to pass on the command line instead of file created
+#    by extracting section. Does not work with translated test cases.
+# 
 
 TRANS=./trans
 
@@ -496,6 +486,15 @@ function run_translate()
 		continue;
 	fi
 
+	# Override the test case file name.
+	RAGEL_FILE=`sed '/@RAGEL_FILE:/s/^.*: *//p;d' $test_case`
+
+	# If the test case has a directory by the same name, copy it into the
+	# working direcotory.
+	if [ -d $root ]; then
+		cp -a $root working/
+	fi
+
 	expected_out=$root.exp;
 	case_rl=${root}.rl
 
@@ -559,6 +558,10 @@ function run_translate()
 		else
 			sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
 			cases=$wk/$case_rl
+
+			if [ -n "$RAGEL_FILE" ]; then
+				cases="$RAGEL_FILE"
+			fi
 		fi
 
 		for translated in $cases; do
