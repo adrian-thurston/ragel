@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Aapl.
@@ -544,14 +544,10 @@ protected:
 /* Copy constructor. New up each item. */
 template <AVLMEL_TEMPDEF> AvlTree<AVLMEL_TEMPUSE>::
 		AvlTree(const AvlTree<AVLMEL_TEMPUSE> &other)
-#if !defined( AVL_KEYLESS ) && defined ( WALKABLE )
-	/* BASELIST should be made empty. The copyBranch function 
-	 * will fill in the details for us. */
-	: Compare(other), BASELIST()
-#elif !defined( AVL_KEYLESS )
-	: Compare(other)
-#elif defined( WALKABLE )
-	: BASELIST()
+#ifdef WALKABLE
+:
+	/* Make an empty list, copyBranch will fill in the details for us. */
+	BASELIST()
 #endif
 {
 	treeSize = other.treeSize;
@@ -885,9 +881,9 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 		}
 
 #ifdef AVL_BASIC
-		keyRelation = compare( *element, *curEl );
+		keyRelation = this->compare( *element, *curEl );
 #else
-		keyRelation = compare( element->BASEKEY(getKey()), 
+		keyRelation = this->compare( element->BASEKEY(getKey()),
 				curEl->BASEKEY(getKey()) );
 #endif
 
@@ -924,7 +920,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 	long keyRelation;
 
 	while (curEl) {
-		keyRelation = compare( *element, *curEl );
+		keyRelation = this->compare( *element, *curEl );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )
@@ -973,7 +969,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 			return element;
 		}
 
-		keyRelation = compare( key, curEl->BASEKEY(getKey()) );
+		keyRelation = this->compare( key, curEl->BASEKEY(getKey()) );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -1027,7 +1023,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 			return element;
 		}
 
-		keyRelation = compare(key, curEl->getKey());
+		keyRelation = this->compare(key, curEl->getKey());
 
 		/* Do we go left? */
 		if ( keyRelation < 0 ) {
@@ -1062,7 +1058,7 @@ template <AVLMEL_TEMPDEF> Element *AvlTree<AVLMEL_TEMPUSE>::
 	long keyRelation;
 
 	while (curEl) {
-		keyRelation = compare( key, curEl->BASEKEY(getKey()) );
+		keyRelation = this->compare( key, curEl->BASEKEY(getKey()) );
 
 		/* Do we go left? */
 		if ( keyRelation < 0 )
@@ -1299,6 +1295,8 @@ template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::empty()
 
 #ifdef WALKABLE
 		BASELIST::abandon();
+#else
+		head = tail = 0;
 #endif
 	}
 }
@@ -1315,6 +1313,8 @@ template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::abandon()
 
 #ifdef WALKABLE
 	BASELIST::abandon();
+#else
+	head = tail = 0;
 #endif
 }
 

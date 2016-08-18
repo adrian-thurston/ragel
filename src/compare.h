@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Aapl.
@@ -23,7 +23,7 @@
 #define _AAPL_COMPARE_H
 
 #include <string.h>
-#include "astring.h"
+#include <string>
 #include "table.h"
 
 #ifdef AAPL_NAMESPACE
@@ -55,26 +55,21 @@ namespace Aapl {
  *
  * This comparision class is a wrapper for strcmp.
  */
-template<class T> struct CmpStrTmpl
+struct CmpStr
 {
 	/**
 	 * \brief Compare two null terminated string types.
 	 */
-	static inline long compare( const char *k1, const char *k2 )
+	static inline long compare(const char *k1, const char *k2)
 		{ return strcmp(k1, k2); }
-
-	static int compare( const StrTmpl<T> &s1, const StrTmpl<T> &s2 )
-	{
-		if ( s1.length() < s2.length() )
-			return -1;
-		else if ( s1.length() > s2.length() )
-			return 1;
-		else
-			return memcmp( s1.data, s2.data, s1.length() );
-	}
 };
 
-typedef CmpStrTmpl<char> CmpStr;
+struct CmpString
+{
+	static inline long compare(const std::string &k1, const std::string &k2)
+		{ return k1.compare( k2 ); }
+};
+
 
 /**
  * \brief Compare a type for which < and > are implemented.

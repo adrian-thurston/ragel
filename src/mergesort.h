@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001, 2002 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2001, 2002 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Aapl.
@@ -110,7 +110,7 @@ template< class T, class Compare> void MergeSort<T,Compare>::
 		}
 		else {
 			/* Both upper and lower left. */
-			if ( compare(*lower, *upper) <= 0 )
+			if ( this->compare(*lower, *upper) <= 0 )
 				memcpy( dest++, lower++, sizeof(T) );
 			else
 				memcpy( dest++, upper++, sizeof(T) );

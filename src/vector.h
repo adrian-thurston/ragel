@@ -1,5 +1,5 @@
 /*
- *  Copyright 2002, 2006 Adrian Thurston <thurston@cs.queensu.ca>
+ *  Copyright 2002, 2006 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Aapl.
@@ -113,10 +113,6 @@ public:
 	/* Perform a deep copy of another vector into this vector. */
 	Vector &operator=( const Vector &v );
 
-	/* Stack operations. */
-	void push( const T &t ) { append( t ); }
-	void pop() { remove( BaseTable::tabLen - 1 ); }
-	T &top() { return BaseTable::data[BaseTable::tabLen - 1]; }
 
 	/*@{*/
 	/**
