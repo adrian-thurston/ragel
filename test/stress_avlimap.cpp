@@ -32,6 +32,8 @@
 #undef WALKABLE
 #undef AVLTREE_MAP
 
+#include "util.h"
+
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the
  * cases will be more thoroughly tested. The tree will be more likely to
@@ -49,8 +51,6 @@ template class AvliMap< int, int >;
 template class AvliMapVer< int, int >;
 
 using namespace std;
-void expandTab( char *dst, char *src );
-void processArgs( int argc, char** argv );
 
 int increment = 0;
 int curIndex = 0;

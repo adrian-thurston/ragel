@@ -30,6 +30,8 @@
 #include "avlverify.h"
 #undef AVLTREE_MAP
 
+#include "util.h"
+
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the
  * cases will be more thoroughly tested. The tree will be more likely to
@@ -43,8 +45,6 @@
 #define OUTBUFSIZE 100
 
 using namespace std;
-void processArgs( int argc, char** argv );
-void expandTab( char *dst, char *src );
 
 /* Instantiate the entire tree. */
 template class AvlMap< int, int >;

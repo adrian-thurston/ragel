@@ -141,7 +141,7 @@ template <AVL_TEMPDEF> void AvlTreeVer<AVL_TEMPUSE>::
 	if ( BaseTree::treeSize > 0 ) {
 		Element *prev = BaseList::head, *cur = BaseList::head->BASE_EL(next);
 		while ( cur != 0 ) {
-			assert( compare( prev->BASEKEY(getKey()), 
+			assert( this->compare( prev->BASEKEY(getKey()), 
 				cur->BASEKEY(getKey()) ) < 0 );
 
 			/* If there is no parent, then the element should be the root. */
@@ -191,12 +191,12 @@ template <AVL_TEMPDEF> void AvlTreeVer<AVL_TEMPUSE>::
 	assert( element->BASE_EL(parent) == parent);
 
 	if ( element->BASE_EL(left) ) {
-		assert( compare( element->BASEKEY(getKey()), 
+		assert( this->compare( element->BASEKEY(getKey()), 
 				element->BASE_EL(left)->BASEKEY(getKey()) ) > 0 );
 	}
 
 	if ( element->BASE_EL(right) ) {
-		assert( compare( element->BASEKEY(getKey()),
+		assert( this->compare( element->BASEKEY(getKey()),
 				element->BASE_EL(right)->BASEKEY(getKey()) ) < 0 );
 	}
 

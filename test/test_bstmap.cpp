@@ -27,7 +27,7 @@ using std::endl;
 
 #include "bstmap.h"
 
-typedef BstMap< char *, int, CmpStr > Map;
+typedef BstMap< const char *, int, CmpStr > Map;
 
 void testBstMap1()
 {
@@ -42,10 +42,10 @@ void testBstMap1()
 void testBstMap2()
 {
 	cout << "TEST 2" << endl;
-	BstMap<char *, int, CmpStr> table1( "hi" );
+	Map table1( "hi" );
 	cout << table1[0].key << endl;
 
-	BstMap<char *, int, CmpStr> table2( "there", 1  );
+	Map table2( "there", 1  );
 	cout << table2[0].key << endl;
 	cout << table2[0].value << endl;
 }

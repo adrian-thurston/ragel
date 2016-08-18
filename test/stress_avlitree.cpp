@@ -31,9 +31,9 @@
 #undef WALKABLE
 #undef AVLTREE_SINGULAR
 
+#include "util.h"
+
 using namespace std;
-void processArgs( int argc, char** argv );
-void expandTab( char *dst, char *src );
 
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the

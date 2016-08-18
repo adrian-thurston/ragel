@@ -25,7 +25,7 @@ void processArgs( int argc, char** argv )
 }
 
 /* Expand the tabs in a buffer a buffer. */
-void expandTab( char *dst, char *src )
+void expandTab( char *dst, const char *src )
 {
 	char *pd = dst;
 	for ( ; *src != 0; src++ ) {
