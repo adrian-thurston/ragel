@@ -32,6 +32,8 @@
 #undef WALKABLE
 #undef AVLTREE_MEL
 
+#include "util.h"
+
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the
  * cases will be more thoroughly tested. The tree will be more likely to
@@ -73,9 +75,6 @@ int increment = 0;
 int curIndex = 0;
 int action = 1;
 int curRound = 0;
-
-void expandTab( char *dst, char *src );
-void processArgs( int argc, char** argv );
 
 /* Replace the current stats line with new stats. For two trees. */
 void printStats( int treeSize1, int treeSize2 )

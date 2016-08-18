@@ -32,6 +32,8 @@
 #undef WALKABLE
 #undef AVLTREE_MELKEY
 
+#include "util.h"
+
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the
  * cases will be more thoroughly tested. The tree will be more likely to
@@ -45,8 +47,6 @@
 #define OUTBUFSIZE 100
 
 using namespace std;
-void expandTab( char *dst, char *src );
-void processArgs( int argc, char** argv );
 
 struct TreeEl;
 struct BaseEl1 : public AvliTreeEl< TreeEl >

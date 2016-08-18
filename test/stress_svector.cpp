@@ -28,6 +28,7 @@
 #include "vector.h"
 #include "svector.h"
 #include "compare.h"
+#include "util.h"
 
 using namespace std;
 
@@ -110,8 +111,6 @@ int testShared()
 #define OUTBUFSIZE 1000
 #define NUM_ROUNDS 1e9
 int curRound = 0;
-
-void expandTab( char *dst, char *src );
 
 
 /* Print a statistics header. */

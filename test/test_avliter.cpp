@@ -33,6 +33,8 @@
 #include "avlverify.h"
 #undef AVLTREE_SINGULAR
 
+#include "util.h"
+
 using namespace std;
 
 /* Having the action change perion larger than the number of initial entries
@@ -116,7 +118,7 @@ void PrintStats( int treeSize, TreeEl *root )
 		sprintf(buf1, "%i\t%i\t%s\t%s\t%i\t%i\t%li\t", curRound, increment,
 				action&0x1 ? "yes" : "no", action&0x2 ? "yes" : "no", 
 				curIndex, treeSize, root ? root->height : 0 );
-		ExpandTab(buf1, buf2);
+		expandTab(buf2, buf1);
 		fputs(buf2, stdout);
 		fflush(stdout);
 	}
@@ -136,7 +138,7 @@ void NewIndex()
 void printHeader()
 {
 	char buf[OUTBUFSIZE];
-	ExpandTab( "round\tinc\tins\trem\tindex\tels\theight\n", buf);
+	expandTab( buf, "round\tinc\tins\trem\tindex\tels\theight\n" );
 	fputs(buf, stdout);
 }
 

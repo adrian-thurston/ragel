@@ -30,6 +30,8 @@
 #include "avlverify.h"
 #undef AVLTREE_MELKEY
 
+#include "util.h"
+
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the
  * cases will be more thoroughly tested. The tree will be more likely to
@@ -44,8 +46,6 @@
 #define TAB_WIDTH 10
 
 using namespace std;
-void expandTab( char *dst, char *src );
-void processArgs( int argc, char** argv );
 
 struct TreeEl;
 struct BaseEl1 : public AvlTreeEl< TreeEl >

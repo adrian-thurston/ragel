@@ -30,6 +30,8 @@
 #include "avlverify.h"
 #undef AVLTREE_SET
 
+#include "util.h"
+
 /* Having the action change perion larger than the number of initial entries
  * means that it will take longer to get to all the cases, but all the
  * cases will be more thoroughly tested. The tree will be more likely to
@@ -47,8 +49,6 @@ template class AvlSet< int >;
 template class AvlSetVer< int >;
 
 using namespace std;
-void expandTab( char *dst, char *src );
-void processArgs( int argc, char** argv );
 
 int increment = 0;
 int curIndex = 0;
@@ -118,7 +118,6 @@ int main( int argc, char **argv )
 	processArgs( argc, argv );
 	srandom( time(0) );
 
-	typedef AvlSetEl<int> TreeEl;
 	AvlSetVer<int> tree;
 
 	printHeader();
