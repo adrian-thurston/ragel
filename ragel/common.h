@@ -116,8 +116,10 @@ struct HostType
 	bool isSigned;
 	bool isOrd;
 	bool isChar;
-	long long minVal;
-	long long maxVal;
+	long long sMinVal;
+	long long sMaxVal;
+	unsigned long long uMinVal;
+	unsigned long long uMaxVal;
 	unsigned int size;
 };
 
@@ -174,12 +176,12 @@ struct KeyOps
 		this->alphType = alphType;
 		isSigned = alphType->isSigned;
 		if ( isSigned ) {
-			minKey = (long) alphType->minVal;
-			maxKey = (long) alphType->maxVal;
+			minKey = (long) alphType->sMinVal;
+			maxKey = (long) alphType->sMaxVal;
 		}
 		else {
-			minKey = (long) (unsigned long) alphType->minVal; 
-			maxKey = (long) (unsigned long) alphType->maxVal;
+			minKey = (long) (unsigned long) alphType->uMinVal; 
+			maxKey = (long) (unsigned long) alphType->uMaxVal;
 		}
 	}
 
@@ -200,18 +202,25 @@ struct KeyOps
 
 	HostType *typeSubsumes( long long maxVal )
 	{
+		HostType *hostTypes = hostLang->hostTypes;
+
 		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( maxVal <= hostLang->hostTypes[i].maxVal )
-				return hostLang->hostTypes + i;
+			long long typeMaxVal = hostTypes[i].isSigned ? hostTypes[i].sMaxVal : hostTypes[i].uMaxVal;
+			if ( maxVal <= typeMaxVal )
+				return &hostLang->hostTypes[i];
 		}
+
 		return 0;
 	}
 
 	HostType *typeSubsumes( bool isSigned, long long maxVal )
 	{
+		HostType *hostTypes = hostLang->hostTypes;
+
 		for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-			if ( ( ( isSigned && hostLang->hostTypes[i].isSigned ) || !isSigned ) &&
-					maxVal <= hostLang->hostTypes[i].maxVal )
+			long long typeMaxVal = hostTypes[i].isSigned ? hostTypes[i].sMaxVal : hostTypes[i].uMaxVal;
+			if ( ( ( isSigned && hostTypes[i].isSigned ) || !isSigned ) &&
+					maxVal <= typeMaxVal )
 				return hostLang->hostTypes + i;
 		}
 		return 0;
