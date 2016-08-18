@@ -73,7 +73,7 @@ template <class T, class Compare>
 		T *smallest = dest;
 		for ( T *src = dest+1; src < data+len; src++ ) {
 			/* If src is smaller than the current src, then use it. */
-			if ( compare( *src, *smallest ) < 0 )
+			if ( this->compare( *src, *smallest ) < 0 )
 				smallest = src;
 		}
 

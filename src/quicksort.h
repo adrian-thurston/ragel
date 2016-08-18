@@ -86,17 +86,17 @@ template <class T, class Compare> T *QuickSort<T,Compare>::
 	T *pivot, *mid = start + (end-start)/2;
 
 	/* CChoose the pivot. */
-	if ( compare(*start, *mid) < 0  ) {
-		if ( compare(*mid, *end) < 0 )
+	if ( this->compare(*start, *mid) < 0  ) {
+		if ( this->compare(*mid, *end) < 0 )
 			pivot = mid;
-		else if ( compare(*start, *end) < 0 )
+		else if ( this->compare(*start, *end) < 0 )
 			pivot = end;
 		else
 			pivot = start;
 	}
-	else if ( compare(*start, *end) < 0 )
+	else if ( this->compare(*start, *end) < 0 )
 		pivot = start;
-	else if ( compare(*mid, *end) < 0 )
+	else if ( this->compare(*mid, *end) < 0 )
 		pivot = end;
 	else
 		pivot = mid;
@@ -128,7 +128,7 @@ template <class T, class Compare> T *QuickSort<T,Compare>::
 			first += 1;
 			if ( first == last )
 				goto done;
-			if ( compare( *first, *pivot ) > 0 ) {
+			if ( this->compare( *first, *pivot ) > 0 ) {
 				memcpy(last, first, sizeof(T));
 				break;
 			}
@@ -139,7 +139,7 @@ template <class T, class Compare> T *QuickSort<T,Compare>::
 			last -= 1;
 			if ( last == first )
 				goto done;
-			if ( compare( *last, *pivot ) < 0 ) {
+			if ( this->compare( *last, *pivot ) < 0 ) {
 				memcpy(first, last, sizeof(T));
 				break;
 			}
