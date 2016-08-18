@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <assert.h>
+#include <string.h>
 
 #ifdef AAPL_NAMESPACE
 namespace Aapl {
