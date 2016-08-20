@@ -469,13 +469,10 @@ bool InputData::processReduce()
 	makeDefaultFileName();
 	makeTranslateOutputFileName();
 	createOutputStream();
-	openOutput();
 
 	bool success = parseReduce();
 	if ( success )
 		flushRemaining();
-
-	closeOutput();
 
 	for ( ParseDataList::Iter pd = parseDataList; pd.lte(); pd++ )
 		pd->dump();
