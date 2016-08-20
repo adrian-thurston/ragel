@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 using std::istream;
+using std::cout;
 using std::ifstream;
 using std::stringstream;
 using std::ostream;
@@ -254,10 +255,6 @@ void InputData::openOutput()
 
 void InputData::verifyWriteHasData( InputItem *ii )
 {
-	if ( ii->type == InputItem::Write ) {
-		if ( ii->pd->cgd == 0 )
-			error( ii->loc ) << "no machine instantiations to write" << endl;
-	}
 }
 
 void InputData::verifyWritesHaveData()
@@ -317,14 +314,7 @@ bool InputData::checkLastRef( InputItem *ii )
 			if ( errorCount > 0 )
 				return false;
 
-			/* If this is the last reference to a pd, we can now clear the
-			 * memory for it. */
-			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
-				if ( lastFlush->pd->instanceList.length() > 0 ) {
-					lastFlush->pd->clear();
-
-				}
-			}
+			writeOutput( lastFlush );
 
 			lastFlush = lastFlush->next;
 		}
@@ -343,6 +333,26 @@ void InputData::makeFirstInputItem()
 	inputItems.append( firstInputItem );
 }
 
+void InputData::writeOutput( InputItem *ii )
+{
+	switch ( ii->type ) {
+		case InputItem::Write: {
+			cout << "write:";
+			for ( size_t i = 0; i < ii->writeArgs.size(); i++ )
+				cout << " " << ii->writeArgs[i];
+			cout << endl;
+			break;
+		}
+		case InputItem::HostData: {
+			cout << ii->data.str() << endl;
+			break;
+		}
+		case InputItem::EndSection: {
+			break;
+		}
+	}
+}
+
 /* Send eof to all parsers. */
 void InputData::terminateAllParsers( )
 {
@@ -352,6 +362,8 @@ void InputData::flushRemaining()
 {
 	/* Flush remaining items. */
 	while ( lastFlush != 0 ) {
+		/* Flush out. */
+		writeOutput( lastFlush );
 		lastFlush = lastFlush->next;
 	}
 }
@@ -363,6 +375,12 @@ void InputData::makeTranslateOutputFileName()
 		outputFileName = fileNameFromStem( inputFileName, ".ri" );
 		genOutputFileName = outputFileName;
 	}
+}
+
+void InputData::writeOutput()
+{
+	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ )
+		writeOutput( ii );
 }
 
 void InputData::processColm()
@@ -388,6 +406,11 @@ void InputData::processColm()
 		abortCompile( 1 );
 
 	assert( errorCount == 0 );
+
+	writeOutput();
+
+	for ( ParseDataList::Iter pd = parseDataList; pd.lte(); pd++ )
+		pd->dump();
 }
 
 bool InputData::parseReduce()
@@ -443,24 +466,21 @@ bool InputData::parseReduce()
 
 bool InputData::processReduce()
 {
-	if ( generateDot ) {
-		parseReduce();
-		return true;
-	}
-	else {
-		makeDefaultFileName();
-		makeTranslateOutputFileName();
-		createOutputStream();
-		openOutput();
+	makeDefaultFileName();
+	makeTranslateOutputFileName();
+	createOutputStream();
+	openOutput();
 
-		bool success = parseReduce();
-		if ( success )
-			flushRemaining();
+	bool success = parseReduce();
+	if ( success )
+		flushRemaining();
 
-		closeOutput();
+	closeOutput();
 
-		return success;
-	}
+	for ( ParseDataList::Iter pd = parseDataList; pd.lte(); pd++ )
+		pd->dump();
+
+	return success;
 }
 
 bool InputData::process()
@@ -474,5 +494,7 @@ bool InputData::process()
 			return processReduce();
 		}
 	}
+	
+
 	return false;
 }

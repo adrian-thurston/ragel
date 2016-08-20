@@ -776,47 +776,11 @@ int main( int argc, const char **argv )
 {
 	int code = 0;
 	InputData id;
-	try {
-		id.parseArgs( argc, argv );
-		id.checkArgs();
 
-		if ( id.forceLibRagel ) {
-			id.inLibRagel = true;
-			id.input = id.readInput( id.inputFileName );
-			if ( id.input != 0 ) {
-				id.frontend = ReduceBased;
-				if ( !id.process() )
-					id.abortCompile( 1 );
-			}
+	id.parseArgs( argc, argv );
+	id.checkArgs();
+	id.process();
 
-		}
-		else {
-			if ( !id.process() )
-				id.abortCompile( 1 );
-		}
-	}
-	catch ( const AbortCompile &ac ) {
-		code = ac.code;
-
-	}
-
-	if ( id.comm.size() > 0 ) {
-		if ( id.commFileName == 0 ) {
-			std::cout << id.comm;
-		}
-		else {
-			ofstream ofs( id.commFileName, std::fstream::app );
-			ofs << id.comm;
-			ofs.close();
-		}
-	}
-
-	if ( id.forceLibRagel ) {
-		std::cerr << id.libcerr.str();
-		std::cout << id.libcout.str();
-		std::cerr.flush();
-		std::cout.flush();
-	}
 	return code;
 }
 

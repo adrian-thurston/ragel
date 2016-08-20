@@ -253,6 +253,8 @@ struct VarDef
 	std::string name;
 	MachineDef *machineDef;
 	bool isExport;
+
+	void dump();
 };
 
 
@@ -337,6 +339,7 @@ struct LongestMatch
 	bool lmSwitchHandlesError;
 
 	LongestMatch *next, *prev;
+	void dump();
 };
 
 
@@ -379,6 +382,8 @@ struct MachineDef
 	LengthDef *lengthDef;
 	NfaUnion *nfaUnion;
 	Type type;
+
+	void dump();
 };
 
 /*
@@ -404,6 +409,8 @@ struct Join
 	/* Data. */
 	InputLoc loc;
 	ExprList exprList;
+
+	void dump();
 };
 
 /*
@@ -449,6 +456,8 @@ struct Expression
 	Type type;
 
 	Expression *prev, *next;
+
+	void dump();
 };
 
 typedef Vector<Term*> TermVect;
@@ -521,6 +530,8 @@ struct Term
 
 	/* Priority descriptor for RightFinish type. */
 	PriorDesc priorDescs[2];
+
+	void dump();
 };
 
 
@@ -554,6 +565,8 @@ struct FactorWithAug
 	Vector<ConditionTest> conditions;
 
 	FactorWithRep *factorWithRep;
+
+	void dump();
 };
 
 /* Fourth level of precedence. Trailing unary operators. Provide kleen star,
@@ -600,6 +613,8 @@ struct FactorWithRep
 
 	/* Priority descriptor for StarStar type. */
 	PriorDesc priorDescs[4];
+
+	void dump();
 };
 
 /* Fifth level of precedence. Provides Negation. */
@@ -628,6 +643,8 @@ struct FactorWithNeg
 	FactorWithNeg *factorWithNeg;
 	Factor *factor;
 	Type type;
+
+	void dump();
 };
 
 /*
@@ -715,6 +732,8 @@ struct Factor
 	PriorDesc priorDescs[4];
 
 	Type type;
+
+	void dump();
 };
 
 /* A range machine. Only ever composed of two literals. */

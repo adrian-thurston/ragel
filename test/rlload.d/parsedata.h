@@ -404,6 +404,8 @@ struct ParseData
 	IncludeHistory includeHistory;
 
 	std::set<std::string> actionParams;
+
+	void dump();
 };
 
 Key makeFsmKeyHex( char *str, const InputLoc &loc, ParseData *pd );

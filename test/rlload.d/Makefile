@@ -7,7 +7,8 @@ COLM_LIB = $(SUBJECT_LDFLAGS)
 all: loadred
 
 OBJ = parse.o actparams.o commit.o parsetree.o parsedata.o common.o fsmap.o \
-	fsmbase.o idbase.o load.o if.o reducer.o inputdata.o fsmgraph.o main.o
+	fsmbase.o idbase.o load.o if.o reducer.o inputdata.o fsmgraph.o main.o \
+	dump.o
 
 %.o: %.c
 	gcc -c -o $@ -Wall $(COLM_INC) $<

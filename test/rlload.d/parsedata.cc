@@ -1087,3 +1087,4 @@ void ParseData::clear()
 	 * string data that represents the actions to be deallocated. */
 	fsmCtx->actionList.empty();
 }
+
