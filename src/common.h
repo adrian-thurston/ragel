@@ -451,7 +451,6 @@ void operator<<( std::ostream &out, exit_object & );
 enum RagelFrontend
 {
 	KelbtBased,
-	ColmBased,
 	ReduceBased
 };
 

@@ -572,36 +572,6 @@ void InputData::processKelbt()
 }
 #endif
 
-void InputData::processColm()
-{
-	/*
-	 * Colm-based parser introduced in ragel 7. Uses more memory.
-	 */
-
-	/* Check input file. */
-	ifstream *inFile = new ifstream( inputFileName );
-	if ( ! inFile->is_open() )
-		error() << "could not open " << inputFileName << " for reading" << endp;
-	delete inFile;
-
-	makeFirstInputItem();
-
-	LoadRagel *lr = newLoadRagel( *this, hostLang, minimizeLevel, minimizeOpt );
-	loadRagel( lr, inputFileName );
-	deleteLoadRagel( lr );
-
-	/* Bail on above error. */
-	if ( errorCount > 0 )
-		abortCompile( 1 );
-
-	if ( generateDot )
-		processDot();
-	else 
-		processCode();
-
-	assert( errorCount == 0 );
-}
-
 bool InputData::parseReduce()
 {
 	/*
@@ -686,10 +656,6 @@ bool InputData::process()
 #ifdef WITH_RAGEL_KELBT
 			processKelbt();
 #endif
-			return true;
-		}
-		case ColmBased: {
-			processColm();
 			return true;
 		}
 		case ReduceBased: {

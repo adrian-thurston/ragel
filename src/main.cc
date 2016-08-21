@@ -397,10 +397,6 @@ void InputData::parseArgs( int argc, const char **argv )
 							"ragel not built with ragel+kelbt support" << endp;
 				}
 #endif
-				else if ( strcmp( arg, "colm-frontend" ) == 0 ) {
-					frontend = ColmBased;
-					frontendSpecified = true;
-				}
 				else if ( strcmp( arg, "reduce-frontend" ) == 0 ) {
 					frontend = ReduceBased;
 					frontendSpecified = true;
@@ -624,12 +620,8 @@ void InputData::checkArgs()
 				"\" is the same as the input file" << endp;
 	}
 
-	if ( !frontendSpecified ) {
-		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
-			frontend = ReduceBased;
-		else
-			frontend = ColmBased;
-	}
+	if ( !frontendSpecified )
+		frontend = ReduceBased;
 
 	if ( !backendSpecified ) {
 		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
