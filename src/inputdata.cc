@@ -69,7 +69,7 @@ InputData::~InputData()
 }
 
 /* Invoked by the parser when the root element is opened. */
-void InputData::cdDefaultFileName( const char *inputFile )
+void InputData::cDefaultFileName( const char *inputFile )
 {
 	/* If the output format is code and no output file name is given, then
 	 * make a default. */
@@ -81,71 +81,11 @@ void InputData::cdDefaultFileName( const char *inputFile )
 			const char *defExtension = 0;
 			switch ( hostLang->lang ) {
 				case HostLang::C: defExtension = ".c"; break;
-				case HostLang::D: defExtension = ".d"; break;
 				default: break;
 			}
 			outputFileName = fileNameFromStem( inputFile, defExtension );
 		}
 	}
-}
-
-/* Invoked by the parser when the root element is opened. */
-void InputData::goDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".go" );
-}
-
-/* Invoked by the parser when the root element is opened. */
-void InputData::javaDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".java" );
-}
-
-/* Invoked by the parser when the root element is opened. */
-void InputData::rubyDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".rb" );
-}
-
-/* Invoked by the parser when the root element is opened. */
-void InputData::csharpDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 ) {
-		const char *ext = findFileExtension( inputFile );
-		if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
-			outputFileName = fileNameFromStem( inputFile, ".h" );
-		else
-			outputFileName = fileNameFromStem( inputFile, ".cs" );
-	}
-}
-
-/* Invoked by the parser when the root element is opened. */
-void InputData::ocamlDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".ml" );
-}
-
-/* Invoked by the parser when the root element is opened. */
-void InputData::crackDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".crk" );
 }
 
 void InputData::asmDefaultFileName( const char *inputFile )
@@ -154,62 +94,14 @@ void InputData::asmDefaultFileName( const char *inputFile )
         outputFileName = fileNameFromStem( inputFile, ".s" );
 }
 
-void InputData::rustDefaultFileName( const char *inputFile )
-{
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".rs" );
-}
-
-void InputData::juliaDefaultFileName( const char *inputFile )
-{
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".jl" );
-}
-
-void InputData::jsDefaultFileName( const char *inputFile )
-{
-	/* If the output format is code and no output file name is given, then
-	 * make a default. */
-	if ( outputFileName == 0 )
-		outputFileName = fileNameFromStem( inputFile, ".js" );
-}
-
 void InputData::makeDefaultFileName()
 {
 	switch ( hostLang->lang ) {
 		case HostLang::C:
-		case HostLang::D:
-			cdDefaultFileName( inputFileName );
-			break;
-		case HostLang::Java:
-			javaDefaultFileName( inputFileName );
-			break;
-		case HostLang::Go:
-			goDefaultFileName( inputFileName );
-			break;
-		case HostLang::Ruby:
-			rubyDefaultFileName( inputFileName );
-			break;
-		case HostLang::CSharp:
-			csharpDefaultFileName( inputFileName );
-			break;
-		case HostLang::OCaml:
-			ocamlDefaultFileName( inputFileName );
-			break;
-		case HostLang::Crack:
-			crackDefaultFileName( inputFileName );
+			cDefaultFileName( inputFileName );
 			break;
 		case HostLang::Asm:
 			asmDefaultFileName( inputFileName );
-			break;
-		case HostLang::Rust:
-			rustDefaultFileName( inputFileName );
-			break;
-		case HostLang::Julia:
-			juliaDefaultFileName( inputFileName );
-			break;
-		case HostLang::JS:
-			jsDefaultFileName( inputFileName );
 			break;
 	}
 }
