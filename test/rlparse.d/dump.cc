@@ -143,19 +143,19 @@ void FactorWithRep::dump()
 			break;
 		case ExactType:
 			factorWithRep->dump();
-			cout << "{}";
+			cout << "{" << lowerRep << "}";
 			break;
 		case MaxType:
 			factorWithRep->dump();
-			cout << "{}";
+			cout << "{," << upperRep << "}";
 			break;
 		case MinType:
 			factorWithRep->dump();
-			cout << "{}";
+			cout << "{" << lowerRep << ",}";
 			break;
 		case RangeType:
 			factorWithRep->dump();
-			cout << "{}";
+			cout << "{" << lowerRep << "," << upperRep << "}";
 			break;
 		case FactorWithNegType:
 			factorWithNeg->dump();
@@ -182,6 +182,39 @@ void FactorWithNeg::dump()
 
 void Factor::dump()
 {
-	cout << "F";
+	switch ( type ) {
+		case LiteralType:
+			cout << "lit";
+			break;
+		case RangeType:
+			cout << "range";
+			break;
+		case OrExprType:
+			cout << "or_expr";
+			break;
+		case RegExprType:
+			cout << "reg_expr";
+			break;
+		case ReferenceType:
+			cout << "ref";
+			break;
+		case ParenType:
+			cout << "( ";
+			join->dump();
+			cout << " )";
+			break;
+		case LongestMatchType:
+			cout << "F";
+			break;
+		case NfaRep:
+			cout << "F";
+			break;
+		case CondStar:
+			cout << "F";
+			break;
+		case CondPlus:
+			cout << "F";
+			break;
+	}
 }
 
