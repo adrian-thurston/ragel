@@ -34,7 +34,7 @@ def import_val
 |	[c_host::string] :String
 
 def import
-	[Name: c_host::ident Val: import_val]
+	[Name: c_host::ident Val: import_val] :Import
 
 export RagelTree: start
 export RagelError: str
@@ -102,6 +102,11 @@ if ( Cmd == 'import-file' ) {
 	Stream: stream = open( FileName, "r" )
 	RagelTree = parse start[ Stream ]
 	RagelImport = import( FileName, RagelTree )
+	RagelError = error
+}
+else if ( Cmd == 'reduce-import' ) {
+	Stream: stream = open( FileName, "r" )
+	reduce Import start[ Stream ]
 	RagelError = error
 }
 else if ( Cmd == 'parse-file' ) {

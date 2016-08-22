@@ -142,6 +142,8 @@ namespace c_host
 		rl d_literal
 			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
 
+		literal `define `=
+
 		token ident /ident "'"?/
 		token number /digit+/
 		token hex_number /'0x' [0-9a-fA-F]+/
@@ -159,7 +161,13 @@ namespace c_host
 	end
 
 	def tok
-		[ident] :Ident
+		[`define whitespace ident whitespace? number]  :ImportDefNum
+	|	[`define whitespace ident whitespace? string]  :ImportDefStr
+	|	[ident whitespace? `= whitespace? number]      :ImportAssignNum
+	|	[ident whitespace? `= whitespace? string]      :ImportAssignStr
+	|	[`define]              :Def
+	|	[`=]                   :Eq
+	|	[ident] :Ident
 	|	[number] :Number
 	|	[hex_number] :HexNumber
 	|	[comment] :Comment

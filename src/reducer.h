@@ -83,7 +83,6 @@ struct TopLevel
 	void tryMachineDef( InputLoc &loc, std::string name, 
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
-	void loadImport( std::string fileName );
 	void include( const InputLoc &incLoc, string fileName, string machine );
 
 	void reduceFile( const char *inputFileName );
@@ -133,6 +132,24 @@ struct IncludePass
 
 	void reduceFile( const char *inputFileName, const HostLang *hostLang );
 	void reduceStr( const char *inputFileName, const HostLang *hostLang, const char *input );
+
+	/* Generated and called by colm. */
+	void commit_reduce_forward( program_t *prg, tree_t **root,
+			struct pda_run *pda_run, parse_tree_t *pt );
+};
+
+struct Import
+{
+	Import( InputData *id, ParseData *pd ) : id(id), pd(pd), curFileName(0) {}
+
+	InputData *id;
+	ParseData *pd;
+	const char *curFileName;
+
+	void import( const InputLoc &loc, std::string name, Literal *literal );
+	void tryMachineDef( const InputLoc &loc, std::string name, MachineDef *machineDef, bool isInstance );
+	void import( Literal *literal );
+	void reduceImport( std::string fileName );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,

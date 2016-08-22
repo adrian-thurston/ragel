@@ -320,7 +320,8 @@ reduction TopLevel
 					fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 
-		loadImport( unescaped );
+		Import import( id, pd );
+		import.reduceImport( unescaped );
 	}
 
 	# def statement
@@ -2492,13 +2493,70 @@ reduction TopLevel
 
 	# Pass Through.
 	# def tok
-	# 	[ident] :Ident
+	#	[`define ident number] :Def1
+	# |	[`define ident string] :Def2
+	# |	[ident `= number]      :Ass1
+	# |	[ident `= string]      :Ass2
+	#	[`define whitespace ident whitespace? number]  :ImportDefNum
+	# |	[`define whitespace ident whitespace? string]  :ImportDefStr
+	# |	[ident whitespace? `= whitespace? number]      :ImportAssignNum
+	# |	[ident whitespace? `= whitespace? string]      :ImportAssignStr
+	# |	[`define]              :Def
+	# |	[`=]                   :Eq
+	# |	[ident] :Ident
 	# |	[number] :Number
 	# |	[hex_number] :HexNumber
 	# |	[comment] :Comment
 	# |	[string] :String
 	# |	[whitespace] :Whitespace
 	# |	[c_any] :Any
+
+	c_host::tok  :ImportDefNum
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem->data.write( "define ", 7 );
+			id->curItem->data.write( $ident->data, $ident->length );
+			id->curItem->data.write( " ", 1 );
+			id->curItem->data.write( $number->data, $number->length );
+		}
+	}
+	c_host::tok  :ImportDefStr
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem->data.write( "define ", 7 );
+			id->curItem->data.write( $ident->data, $ident->length );
+			id->curItem->data.write( " ", 1 );
+			id->curItem->data.write( $string->data, $string->length );
+		}
+	}
+	c_host::tok  :ImportAssignNum
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem->data.write( $ident->data, $ident->length );
+			id->curItem->data.write( "=", 1 );
+			id->curItem->data.write( $number->data, $number->length );
+		}
+	}
+	c_host::tok  :ImportAssignStr
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem->data.write( $ident->data, $ident->length );
+			id->curItem->data.write( "=", 1 );
+			id->curItem->data.write( $string->data, $string->length );
+		}
+	}
+	c_host::tok  :Def
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( "define", 6 );
+
+	}
+	c_host::tok  :Eq
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( "=", 1 );
+	}
+
 	c_host::tok :Ident
 	{
 		if ( includeDepth == 0 )
@@ -2637,5 +2695,43 @@ reduction IncludePass
 			incItem->section = section;
 			incItems.append( incItem );
 		}
+	}
+end
+
+reduction Import
+	c_host::tok :ImportDefNum
+	{
+		Literal *lit = new Literal( @number,
+				false /* $number->neg */, $number->data,
+				$number->length, Literal::Number );
+
+		string name( $ident->data, $ident->length );
+		import( @ident, name, lit );
+	}
+
+	c_host::tok :ImportDefStr
+	{
+		Literal *lit = new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString );
+		string name( $ident->data, $ident->length );
+		import( @ident, name, lit );
+	}
+
+	c_host::tok :ImportAssignNum
+	{
+		Literal *lit = new Literal( @number,
+				false /*$number->neg */, $number->data,
+				$number->length, Literal::Number );
+		string name( $ident->data, $ident->length );
+		import( @ident, name, lit );
+	}
+
+	c_host::tok :ImportAssignStr
+	{
+		Literal *lit = new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString );
+
+		string name( $ident->data, $ident->length );
+		import( @ident, name, lit );
 	}
 end

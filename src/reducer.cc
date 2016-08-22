@@ -225,80 +225,6 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	searchMachine = searchMachine0;
 }
 
-void TopLevel::loadImport( std::string fileName )
-{
-	const char *argv[5];
-	argv[0] = "rlparse";
-	argv[1] = "import-file";
-	argv[2] = fileName.c_str();
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = 0;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_run_program( program, 4, argv );
-
-	/* Extract the parse tree. */
-	start Start = RagelTree( program );
-	str Error = RagelError( program );
-	_repeat_import ImportList = RagelImport( program );
-
-	if ( Start == 0 ) {
-		pd->id->error(Error.loc()) << fileName << ": parse error: " << Error.text() << std::endl;
-		return;
-	}
-
-	while ( !ImportList.end() ) {
-		import Import = ImportList.value();
-
-		InputLoc loc = Import.loc();
-		string name = Import.Name().text();
-		loadMachineName( name );
-
-		Literal *literal = 0;
-		switch ( Import.Val().prodName() ) {
-			case import_val::String: {
-				string s = Import.Val().string().text();
-				Token tok;
-				tok.set( s.c_str(), s.size(), loc );
-				literal = new Literal( loc, false, tok.data, tok.length, Literal::LitString );
-				break;
-			}
-
-			case import_val::Number: {
-				string s = Import.Val().number().text();
-				Token tok;
-				tok.set( s.c_str(), s.size(), loc );
-				literal = new Literal( loc, false, tok.data, tok.length, Literal::Number );
-				break;
-			}
-		}
-
-		MachineDef *machineDef = new MachineDef(
-			new Join(
-				new Expression(
-					new Term(
-						new FactorWithAug(
-							new FactorWithRep(
-								new FactorWithNeg( new Factor( literal ) )
-							)
-						)
-					)
-				)
-			)
-		);
-
-		/* Generic creation of machine for instantiation and assignment. */
-		tryMachineDef( loc, name, machineDef, false );
-		machineDef->join->loc = loc;
-
-		ImportList = ImportList.next();
-	}
-
-	id->streamFileNames.append( colm_extract_fns( program ) );
-	colm_delete_program( program );
-}
-
 void TopLevel::reduceFile( const char *inputFileName )
 {
 	const char *argv[5];
@@ -444,4 +370,73 @@ void IncludePass::reduceStr( const char *inputFileName, const HostLang *hostLang
 		id->error(Error.loc()) << Error.text() << std::endl;
 
 	colm_delete_program( program );
+}
+
+void Import::tryMachineDef( const InputLoc &loc, std::string name, 
+		MachineDef *machineDef, bool isInstance )
+{
+	GraphDictEl *newEl = pd->graphDict.insert( name );
+	if ( newEl != 0 ) {
+		/* New element in the dict, all good. */
+		newEl->value = new VarDef( name, machineDef );
+		newEl->isInstance = isInstance;
+		newEl->loc = loc;
+		newEl->value->isExport = false; //exportContext[exportContext.length()-1];
+
+		/* It it is an instance, put on the instance list. */
+		if ( isInstance )
+			pd->instanceList.append( newEl );
+	}
+	else {
+		// Recover by ignoring the duplicate.
+		pd->id->error(loc) << "fsm \"" << name << "\" previously defined" << endl;
+	}
+}
+
+void Import::import( const InputLoc &loc, std::string name, Literal *literal )
+{
+	MachineDef *machineDef = new MachineDef(
+			new Join(
+				new Expression(
+					new Term(
+						new FactorWithAug(
+							new FactorWithRep(
+								new FactorWithNeg( new Factor( literal ) )
+								)
+							)
+						)
+					)
+				)
+			);
+
+	/* Generic creation of machine for instantiation and assignment. */
+	tryMachineDef( loc, name, machineDef, false );
+	machineDef->join->loc = loc;
+}
+
+void Import::reduceImport( std::string fileName )
+{
+	const char *argv[5];
+	argv[0] = "rlparse";
+	argv[1] = "reduce-import";
+	argv[2] = fileName.c_str();
+	argv[3] = id->hostLang->rlhcArg;
+	argv[4] = 0;
+
+	const char *prevCurFileName = curFileName;
+	curFileName = fileName.c_str();
+
+	colm_program *program = colm_new_program( &rlparse_object );
+	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
+	colm_run_program( program, 4, argv );
+	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	str Error = RagelError( program );
+	if ( Error != 0 )
+		id->error(Error.loc()) << Error.text() << std::endl;
+
+	colm_delete_program( program );
+
+	curFileName = prevCurFileName;
 }
