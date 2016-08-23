@@ -1,5 +1,5 @@
 /*
- *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2004-2014 Adrian Thurston <thurston@complang.org>
  */
 
 /*  This file is part of Ragel.
@@ -19,23 +19,25 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef FLATEXPVAR_H
-#define FLATEXPVAR_H
+#ifndef _FLATEXP_H
+#define _FLATEXP_H
 
 #include <iostream>
-#include "flatvar.h"
+#include "flat.h"
 
 /* Forwards. */
 struct CodeGenData;
 
-class FlatExpVar
-:
-	public FlatVar
+/*
+ * FlatExpGoto
+ */
+class FlatExpGoto
+	: public Flat
 {
 public:
-	FlatExpVar( const CodeGenArgs &args );
+	FlatExpGoto( const CodeGenArgs &args ) 
+		: Flat(args) {}
 
-	void calcIndexSize();
 	void tableDataPass();
 
 	virtual void genAnalysis();
@@ -43,7 +45,6 @@ public:
 	virtual void writeExec();
 
 protected:
-
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();
 	std::ostream &EOF_ACTION_SWITCH();
@@ -61,13 +62,13 @@ protected:
 
 namespace C
 {
-	class FlatExpVar
+	class FlatExpGoto
 	:
-		public ::FlatExpVar
+		public ::FlatExpGoto
 	{
 	public:
-		FlatExpVar( const CodeGenArgs &args )
-			: ::FlatExpVar( args )
+		FlatExpGoto( const CodeGenArgs &args )
+			: ::FlatExpGoto( args )
 		{}
 	};
 }

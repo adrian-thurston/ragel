@@ -20,19 +20,19 @@
  */
 
 #include "ragel.h"
-#include "binvarloop.h"
+#include "binloop.h"
 #include "redfsm.h"
 #include "gendata.h"
-#include "parsedata.h"
 #include "inputdata.h"
+#include "parsedata.h"
 
-BinaryLoopVar::BinaryLoopVar( const CodeGenArgs &args )
+BinaryLoopGoto::BinaryLoopGoto( const CodeGenArgs &args )
 :
-	BinaryVar( args )
+	Binary( args )
 {}
 
 /* Determine if we should use indicies or not. */
-void BinaryLoopVar::calcIndexSize()
+void BinaryLoopGoto::calcIndexSize()
 {
 //	long long sizeWithInds =
 //		indicies.size() +
@@ -50,7 +50,8 @@ void BinaryLoopVar::calcIndexSize()
 	useIndicies = false;
 }
 
-void BinaryLoopVar::tableDataPass()
+
+void BinaryLoopGoto::tableDataPass()
 {
 	taActions();
 	taKeyOffsets();
@@ -86,7 +87,7 @@ void BinaryLoopVar::tableDataPass()
 	taNfaPopTrans();
 }
 
-void BinaryLoopVar::genAnalysis()
+void BinaryLoopGoto::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -119,7 +120,7 @@ void BinaryLoopVar::genAnalysis()
 }
 
 
-void BinaryLoopVar::COND_ACTION( RedCondPair *cond )
+void BinaryLoopGoto::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )
@@ -127,7 +128,7 @@ void BinaryLoopVar::COND_ACTION( RedCondPair *cond )
 	condActions.value( act );
 }
 
-void BinaryLoopVar::TO_STATE_ACTION( RedStateAp *state )
+void BinaryLoopGoto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -135,7 +136,7 @@ void BinaryLoopVar::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinaryLoopVar::FROM_STATE_ACTION( RedStateAp *state )
+void BinaryLoopGoto::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -143,7 +144,7 @@ void BinaryLoopVar::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinaryLoopVar::EOF_ACTION( RedStateAp *state )
+void BinaryLoopGoto::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -151,14 +152,31 @@ void BinaryLoopVar::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-std::ostream &BinaryLoopVar::TO_STATE_ACTION_SWITCH()
+void BinaryLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void BinaryLoopGoto::NFA_POP_TEST( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
+	nfaPopTrans.value( act );
+}
+
+
+std::ostream &BinaryLoopGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numToStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -167,14 +185,14 @@ std::ostream &BinaryLoopVar::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryLoopVar::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -183,14 +201,14 @@ std::ostream &BinaryLoopVar::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryLoopVar::EOF_ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -200,14 +218,14 @@ std::ostream &BinaryLoopVar::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &BinaryLoopVar::ACTION_SWITCH()
+std::ostream &BinaryLoopGoto::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numTransRefs > 0 ) {
 			/* Write the case label, the action and the case break. */
-			out << "\t" << CASE( STR( act->actionId ) ) << " {\n";
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
 		}
@@ -217,7 +235,7 @@ std::ostream &BinaryLoopVar::ACTION_SWITCH()
 }
 
 
-void BinaryLoopVar::writeData()
+void BinaryLoopGoto::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -269,23 +287,7 @@ void BinaryLoopVar::writeData()
 	STATE_IDS();
 }
 
-void BinaryLoopVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
-{
-	int act = 0;
-	if ( targ->push != 0 )
-		act = targ->push->actListId+1;
-	nfaPushActions.value( act );
-}
-
-void BinaryLoopVar::NFA_POP_TEST( RedNfaTarg *targ )
-{
-	int act = 0;
-	if ( targ->popTest != 0 )
-		act = targ->popTest->actListId+1;
-	nfaPopTrans.value( act );
-}
-
-void BinaryLoopVar::NFA_FROM_STATE_ACTION_EXEC()
+void BinaryLoopGoto::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -303,20 +305,11 @@ void BinaryLoopVar::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void BinaryLoopVar::writeExec()
+void BinaryLoopGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
-	matchCondLabelUsed = false;
 
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"{\n"
-			"	" << UINT() << " _nfa_cont = 1;\n"
-			"	" << UINT() << " _nfa_repeat = 1;\n"
-			"	while ( _nfa_cont != 0 )\n";
-	}
-	
 	out <<
 		"	{\n"
 		"	int _klen;\n";
@@ -325,10 +318,11 @@ void BinaryLoopVar::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	" << UINT() << " _trans = 0;\n" <<
-		"	" << UINT() << " _cond = 0;\n"
-		"	" << UINT() << " _have = 0;\n"
-		"	" << UINT() << " _cont = 1;\n";
+		"	" << UINT() << " _trans = 0;\n"
+		"	" << UINT() << " _cond = 0;\n";
+	
+	if ( redFsm->anyRegNbreak() )
+		out << "	int _nbreak;\n";
 
 	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 			|| redFsm->anyFromStateActions() )
@@ -339,85 +333,33 @@ void BinaryLoopVar::writeExec()
 	}
 
 	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ALPH_TYPE(),  "_keys" ) << ";\n"
 		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 		"	int _cpc;\n"
-		"	while ( _cont == 1 ) {\n"
+		"	" << ENTRY() << " {\n"
 		"\n";
+
+	if ( !noEnd ) {
+		testEofUsed = true;
+		out << 
+			"	if ( " << P() << " == " << PE() << " )\n"
+			"		goto _test_eof;\n";
+	}
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		_cont = 0;\n";
+			"		goto _out;\n";
 	}
 
-	out << 
-//		"label _resume {\n"
-		"_have = 0;\n";
-
-	if ( !noEnd ) {
-		out << 
-			"	if ( " << P() << " == " << PE() << " ) {\n";
-
-		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-			out << 
-				"	if ( " << P() << " == " << vEOF() << " )\n"
-				"	{\n";
-
-			if ( redFsm->anyEofTrans() ) {
-				TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
-				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
-					"		_have = 1;\n"
-					"	}\n";
-					matchCondLabelUsed = true;
-			}
-
-			out << "if ( _have == 0 ) {\n";
-
-			if ( redFsm->anyEofActions() ) {
-				out <<
-					"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
-					"	" << UINT() << " __nacts;\n"
-					"	__acts = " << OFFSET( ARR_REF( actions ),
-							ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-					"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"
-					"	__acts += 1;\n"
-					"	while ( __nacts > 0 ) {\n"
-					"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
-					EOF_ACTION_SWITCH() <<
-					"		}\n"
-					"		__nacts -= 1;\n"
-					"		__acts += 1;\n"
-					"	}\n";
-			}
-
-			out << "}\n";
-			
-			out << 
-				"	}\n"
-				"\n";
-		}
-
-		out << 
-			"	if ( _have == 0 )\n"
-			"		_cont = 0;\n"
-			"	}\n";
-
-	}
-
-	out << 
-		"	if ( _cont == 1 ) {\n"
-		"	if ( _have == 0 ) {\n";
+	out << LABEL( "_resume" ) << " {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + 
+			"	_acts = " << OFFSET( ARR_REF( actions ),  ARR_REF( fromStateActions ) +
 					"[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_nacts = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
@@ -433,52 +375,66 @@ void BinaryLoopVar::writeExec()
 
 	LOCATE_TRANS();
 
+	out << "}\n";
+	out << LABEL( "_match" ) << " {\n";
+
 	if ( useIndicies )
 		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
 
 	LOCATE_COND();
 
 	out << "}\n";
+	out << LABEL( "_match_cond" ) << " {\n";
 	
-	out << "if ( _cont == 1 ) {\n";
-
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
 	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = " << CAST( "int" ) << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n"
-			"		_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[_cond]" ) << ";\n"
-			"		_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-			"		_acts += 1;\n"
-			"		while ( _nacts > 0 )\n	{\n"
-			"			switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
-			"			{\n";
+			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
+			"		goto _again;\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() )
+			out << "	_nbreak = 0;\n";
+
+		out <<
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[_cond]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ),  "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 )\n	{\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
+			"		{\n";
 			ACTION_SWITCH() <<
-			"			}\n"
-			"			_nacts -= 1;\n"
-			"			_acts += 1;\n"
 			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
 			"	}\n"
 			"\n";
+
+		if ( redFsm->anyRegNbreak() ) {
+			out <<
+				"	if ( _nbreak == 1 )\n"
+				"		goto _out;\n";
+			outLabelUsed = true;
+		}
+		out << "\n";
 	}
 
-//	if ( /*redFsm->anyRegActions() || */ redFsm->anyActionGotos() || 
+//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 //			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-//	{
-//		out << "}\n";
-//		out << "label _again {\n";
-//	}
+	out << "}\n";
+	out << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ),  ARR_REF( toStateActions ) +
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) +
 					"[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_nacts = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
 			"	_acts += 1;\n"
 			"	while ( _nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
@@ -494,24 +450,68 @@ void BinaryLoopVar::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		_cont = 0;\n";
+			"		goto _out;\n";
 	}
 
-	out << 
-		"	if ( _cont == 1 )\n"
-		"		" << P() << " += 1;\n"
-		"\n"
-		"}\n";
+	if ( !noEnd ) {
+		out << 
+			"	" << P() << " += 1;\n"
+			"	if ( " << P() << " != " << PE() << " )\n"
+			"		goto _resume;\n";
+	}
+	else {
+		out << 
+			"	" << P() << " += 1;\n"
+			"	goto _resume;\n";
+	}
+	
+	if ( testEofUsed )
+		out << "}\n" << LABEL( "_test_eof" ) << " { {}\n";
+	
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+		out << 
+			"	if ( " << P() << " == " << vEOF() << " )\n"
+			"	{\n";
 
-	out <<
-		"}\n";
+		if ( redFsm->anyEofTrans() ) {
+			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
+			out <<
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		goto _match_cond;\n"
+				"	}\n";
+		}
 
-	out << "}\n";
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
+				"	" << UINT() << " __nacts;\n"
+				"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+				"	__nacts = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"
+				"	__acts += 1;\n"
+				"	while ( __nacts > 0 ) {\n"
+				"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
+				EOF_ACTION_SWITCH() <<
+				"		}\n"
+				"		__nacts -= 1;\n"
+				"		__acts += 1;\n"
+				"	}\n";
+		}
+		
+		out << 
+			"	}\n"
+			"\n";
+	}
+
+	if ( outLabelUsed )
+		out << "}\n" << LABEL( "_out" ) << " { {}\n";
+
+	/* The entry loop. */
+	out << "}\n}\n";
 
 	NFA_POP();
 
-	out << "}\n";
-
-	if ( redFsm->anyNfaStates() )
-		out << "}\n";
+	/* The execute block. */
+	out << "	}\n";
 }

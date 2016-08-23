@@ -19,11 +19,11 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef BINBASIC_H
-#define BINBASIC_H
+#ifndef _BINLOOP_H
+#define _BINLOOP_H
 
 #include <iostream>
-#include "binvar.h"
+#include "binary.h"
 #include "vector.h"
 
 /* Forwards. */
@@ -32,11 +32,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryLoopVar
-	: public BinaryVar
+class BinaryLoopGoto
+	: public Binary
 {
 public:
-	BinaryLoopVar( const CodeGenArgs &args );
+	BinaryLoopGoto( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -62,13 +62,13 @@ public:
 
 namespace C
 {
-	class BinaryLoopVar
+	class BinaryLoopGoto
 	:
-		public ::BinaryLoopVar
+		public ::BinaryLoopGoto
 	{
 	public:
-		BinaryLoopVar( const CodeGenArgs &args )
-			: ::BinaryLoopVar( args )
+		BinaryLoopGoto( const CodeGenArgs &args )
+			: ::BinaryLoopGoto( args )
 		{}
 	};
 }

@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef SWITCH_GOTO_EXP_H
-#define SWITCH_GOTO_EXP_H
+#ifndef _GOTOEXP_H
+#define _GOTOEXP_H
 
 #include <iostream>
 #include "goto.h"

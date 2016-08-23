@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef FLAT_GOTO_LOOP_H
-#define FLAT_GOTO_LOOP_H
+#ifndef _FLATLOOP_H
+#define _FLATLOOP_H
 
 #include <iostream>
 #include "flat.h"

@@ -160,7 +160,6 @@ protected:
 	long long tableData;
 	RagelBackend backend;
 	bool stringTables;
-	BackendFeature backendFeature;
 
 	virtual string GET_KEY();
 

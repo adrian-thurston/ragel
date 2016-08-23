@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _C_GOTO_H
-#define _C_GOTO_H
+#ifndef _GOTO_H
+#define _GOTO_H
 
 #include <iostream>
 #include "codegen.h"
