@@ -20,7 +20,6 @@
  */
 
 #include "reducer.h"
-#include "if.h"
 
 #include <colm/colm.h>
 #include <colm/tree.h>
@@ -243,9 +242,10 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 
@@ -271,9 +271,10 @@ void TopLevel::reduceStr( const char *inputFileName, const char *input )
 	colm_run_program( program, 5, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << "trs: " << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 
@@ -296,9 +297,10 @@ void SectionPass::reduceFile( const char *inputFileName )
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 }
@@ -319,9 +321,10 @@ void SectionPass::reduceStr( const char *inputFileName, const char *input )
 	colm_run_program( program, 5, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << "srs: " << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 }
@@ -342,9 +345,10 @@ void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLan
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 }
@@ -365,9 +369,10 @@ void IncludePass::reduceStr( const char *inputFileName, const HostLang *hostLang
 	colm_run_program( program, 5, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 }
@@ -432,9 +437,10 @@ void Import::reduceImport( std::string fileName )
 	colm_run_program( program, 4, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
-	str Error = RagelError( program );
-	if ( Error != 0 )
-		id->error(Error.loc()) << Error.text() << std::endl;
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 )
+		id->error_plain() << string( err, length ) << std::endl;
 
 	colm_delete_program( program );
 

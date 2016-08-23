@@ -369,6 +369,14 @@ ostream &FsmGbl::error( const InputLoc &loc )
 	return err;
 }
 
+ostream &FsmGbl::error_plain()
+{
+	errorCount += 1;
+	ostream &err = inLibRagel ? libcerr : std::cerr;
+	return err;
+}
+
+
 std::ostream &FsmGbl::stats()
 {
 	return inLibRagel ? libcout : std::cout;

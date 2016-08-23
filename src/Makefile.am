@@ -53,7 +53,7 @@ nodist_ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h
 endif
 
 nodist_ragel_SOURCES += \
-	parse.c if.h if.cc commit.cc \
+	parse.c commit.cc \
 	rlhc.c
 
 ragel_LDADD = $(COLM_LD)
@@ -96,7 +96,7 @@ EXTRA_DIST = \
 	rlparse.kh \
 	rlparse.kl
 
-CLEANFILES = parse.c if.h if.cc commit.cc rlhc.c
+CLEANFILES = parse.c commit.cc rlhc.c
 
 if WITH_RAGEL_KELBT
 CLEANFILES += rlscan.cc rlparse.cc rlparse.h 
@@ -110,10 +110,8 @@ RAGEL_LM = \
 	ragel-crack.lm
 
 parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
+	$(COLM) -c -b rlparse_object -o $@ -m commit.cc $<
 
-if.cc: parse.c
-if.h: parse.c
 commit.cc: parse.c
 
 # These are necessary because we are not using built sources. They create the

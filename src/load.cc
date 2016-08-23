@@ -20,7 +20,6 @@
  */
 
 #include "load.h"
-#include "if.h"
 #include "ragel.h"
 #include "inputdata.h"
 #include "parsedata.h"

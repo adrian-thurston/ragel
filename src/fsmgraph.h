@@ -1033,9 +1033,20 @@ struct FsmGbl
 
 	bool printStatistics;
 
-	/* Error reporting. */
+	/*
+	 * Error reporting.
+	 */
+	
+	/* PROGNAME: txt */
 	std::ostream &error();
+
+	/* file:loc: txt */
 	std::ostream &error( const InputLoc &loc ); 
+
+	/* txt */
+	std::ostream &error_plain();
+
+	/* file:loc: warning: txt */
 	std::ostream &warning( const InputLoc &loc ); 
 
 	/* Stats reporting. */
