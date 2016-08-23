@@ -107,6 +107,8 @@ int colm_delete_program( struct colm_program *prg );
 void *colm_get_reduce_ctx( struct colm_program *prg );
 void colm_set_reduce_ctx( struct colm_program *prg, void *ctx );
 
+const char *colm_error( struct colm_program *prg, int *length );
+
 const char **colm_extract_fns( struct colm_program *prg );
 
 #ifdef __cplusplus

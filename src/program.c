@@ -248,6 +248,17 @@ const char **colm_extract_fns( struct colm_program *prg )
 	return fns;
 }
 
+const char *colm_error( struct colm_program *prg, int *length )
+{
+	const char *rtn = 0;
+	if ( prg->error != 0 ) {
+		rtn = prg->error->tokdata->data;
+		if ( length != 0 )
+			*length = prg->error->tokdata->length;
+	}
+	return rtn;
+}
+
 int colm_delete_program( program_t *prg )
 {
 	tree_t **sp = prg->stack_root;
