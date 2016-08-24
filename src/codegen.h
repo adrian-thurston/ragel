@@ -158,7 +158,6 @@ protected:
 
 	bool isAlphTypeSigned();
 	long long tableData;
-	RagelBackend backend;
 	bool stringTables;
 
 	virtual string GET_KEY();
@@ -239,30 +238,23 @@ protected:
 	void VALUE( string type, string name, string value );
 
 	string ACCESS_OPER()
-		{ return backend == Direct ? "" : " -> "; }
+		{ return ""; }
 
 	string OPEN_HOST_EXPR()
-		{ return backend == Direct ? "(" : "host( \"-\", 1 ) ={"; }
+		{ return "("; }
 
 	string OPEN_HOST_EXPR( string fileName, int line )
-	{
-		return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; 
-	}
+		{ return "("; }
 
 	string CLOSE_HOST_EXPR()
-		{ return backend == Direct ? ")" : "}="; }
+		{ return ")"; }
 
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
-		if ( backend == Direct ) {
-			if ( lineDirectives )
-				return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
-			else
-				return "{\n";
-		}
-		else {
-			return "host( \"" + fileName + "\", " + STR(line) + " ) ${";
-		}
+		if ( lineDirectives )
+			return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
+		else
+			return "{\n";
 	}
 
 	string OPEN_HOST_BLOCK( GenInlineExpr *inlineExpr )
@@ -271,129 +263,93 @@ protected:
 	}
 
 	string CLOSE_HOST_BLOCK()
-		{ return backend == Direct ? "}" : "}$"; }
+		{ return "}"; }
 
 	string OPEN_HOST_PLAIN()
-		{ return backend == Direct ? "" : "host( \"-\", 1 ) @{"; }
+		{ return ""; }
 
 	string CLOSE_HOST_PLAIN()
-		{ return backend == Direct ? "" : "}@"; }
+		{ return ""; }
 
 	string OPEN_GEN_EXPR()
-		{ return backend == Direct ? "(" : "={"; }
+		{ return "("; }
 
 	string CLOSE_GEN_EXPR()
-		{ return backend == Direct ? ")" : "}="; }
+		{ return ")"; }
 
 	string OPEN_GEN_BLOCK()
-		{ return backend == Direct ? "{" : "${"; }
+		{ return "{"; }
 
 	string CLOSE_GEN_BLOCK()
-		{ return backend == Direct ? "}" : "}$"; }
+		{ return "}"; }
 
 	string OPEN_GEN_PLAIN()
-		{ return backend == Direct ? "" : "@{"; }
+		{ return ""; }
 
 	string CLOSE_GEN_PLAIN()
-		{ return backend == Direct ? "" : "}@"; }
+		{ return ""; }
 	
 	string UINT()
-		{ return backend == Direct ? "unsigned int" : "uint"; }
+		{ return "unsigned int"; }
 
 	string INDEX( string type, string name )
 	{
-		if ( backend == Direct )
-			return "const " + type + " *" + name;
-		else
-			return "index " + type + " " + name;
+		return "const " + type + " *" + name;
 	}
 
 	string ENTRY()
 	{
-		if ( backend == Direct )
-			return "";
-		else
-			return "entry";
+		return "";
 	}
 
 	string LABEL( string name )
 	{
-		if ( backend == Direct )
-			return name + ": ";
-		else
-			return "label " + name;
+		return name + ": ";
 	}
 
 	string OFFSET( string arr, string off )
 	{
-		if ( backend == Direct )
-			return "( " + arr + " + (" + off + "))";
-		else
-			return "offset( " + arr + ", " + off + " )";
+		return "( " + arr + " + (" + off + "))";
 	}
 
 	string TRUE()
 	{
-		if ( backend == Direct )
-			return "1";
-		else
-			return "TRUE";
+		return "1";
 	}
 
 	string DEREF( string arr, string off )
 	{
-		if ( backend == Direct )
-			return "(*( " + off + "))";
-		else
-			return "deref( " + arr + ", " + off + " )";
+		return "(*( " + off + "))";
 	}
 	
 	string CASE( string val )
 	{
-		if ( backend == Direct )
-			return "case " + val + ": ";
-		else
-			return "case " + val;
+		return "case " + val + ": ";
 	}
 
 	string DEFAULT()
 	{
-		if ( backend == Direct )
-			return "default:";
-		else
-			return "default";
+		return "default:";
 	}
 
 	string CEND( )
 	{
-		if ( backend == Direct )
-			return " break; ";
-		else
-			return " ";
+		return " break; ";
 	}
 
 	string FALLTHROUGH()
 	{
-		if ( backend == Direct )
-			return " ";
-		else
-			return "fallthrough;";
+		return " ";
 	}
 
 	string NIL()
 	{
-		if ( backend == Direct )
-			return "0";
-		else
-			return "nil";
+		return "0";
 	}
 
 	string EXPORT( string type, string name, string value )
 	{
-		if ( backend == Direct )
-			return "#define " + name + " " + value;
-		else
-			return "export " + type + " " + name + " " + value + ";";
+		return "#define " + name + " " + value;
 	}
 
 public:

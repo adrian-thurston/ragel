@@ -53,8 +53,7 @@ nodist_ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h
 endif
 
 nodist_ragel_SOURCES += \
-	parse.c commit.cc \
-	rlhc.c
+	parse.c commit.cc
 
 ragel_LDADD = $(COLM_LD)
 ragel_DEPENDENCIES = $(COLM_LIBDEP)
@@ -73,19 +72,6 @@ libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 EXTRA_DIST = \
 	ragel.lm \
-	rlhc.lm \
-	rlhc-host.lm \
-	rlhc-c.lm \
-	rlhc-d.lm \
-	rlhc-csharp.lm \
-	rlhc-go.lm \
-	rlhc-ruby.lm \
-	rlhc-java.lm \
-	rlhc-rust.lm \
-	rlhc-ocaml.lm \
-	rlhc-crack.lm \
-	rlhc-julia.lm \
-	rlhc-js.lm \
 	ragel-c.lm \
 	ragel-crack.lm \
 	ragel-ruby.lm \

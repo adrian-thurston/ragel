@@ -1022,7 +1022,6 @@ struct FsmGbl
 		errorCount(0),
 		inLibRagel(false),
 		displayPrintables(false),
-		backend(Direct),
 		stringTables(false),
 		checkPriorInteraction(0),
 		wantDupsRemoved(true),
@@ -1062,7 +1061,6 @@ struct FsmGbl
 	void abortCompile( int code );
 	bool displayPrintables;
 
-	RagelBackend backend;
 	bool stringTables;
 	bool checkPriorInteraction;
 	bool wantDupsRemoved;

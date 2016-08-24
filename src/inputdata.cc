@@ -37,8 +37,6 @@ using std::ostream;
 using std::endl;
 using std::ios;
 
-extern colm_sections rlhc_object;
-
 InputData::~InputData()
 {
 	includeDict.empty();
@@ -231,25 +229,16 @@ void InputData::writeOutput( InputItem *ii )
 			break;
 		}
 		case InputItem::HostData: {
-			switch ( backend ) {
-				case Direct:
-					if ( hostLang->lang == HostLang::C ) {
-						if ( ii->loc.fileName != 0 ) {
-							if ( !noLineDirectives ) {
-								*outStream << "\n#line " << ii->loc.line <<
-										" \"" << ii->loc.fileName << "\"\n";
-							}
-						}
+			if ( hostLang->lang == HostLang::C ) {
+				if ( ii->loc.fileName != 0 ) {
+					if ( !noLineDirectives ) {
+						*outStream << "\n#line " << ii->loc.line <<
+								" \"" << ii->loc.fileName << "\"\n";
 					}
-						
-					*outStream << ii->data.str();
-					break;
-				case Translated:
-					openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
-					translatedHostData( *outStream, ii->data.str() );
-					*outStream << "}@";
-					break;
+				}
 			}
+					
+			*outStream << ii->data.str();
 			break;
 		}
 		case InputItem::EndSection: {
@@ -294,79 +283,6 @@ void InputData::processDot()
 	openOutput();
 	writeDot( *outStream );
 	closeOutput();
-}
-
-void InputData::runRlhc()
-{
-	if ( backend != Translated || noIntermediate )
-		return;
-
-	string rlhc = dirName + "/rlhc " + 
-			origOutputFileName + " " +
-			genOutputFileName + " " +
-			hostLang->rlhcArg;
-
-	if ( rlhcShowCmd )
-		info() << rlhc << std::endl;
-
-	const char *argv[5];
-	argv[0] = "rlhc";
-	argv[1] = origOutputFileName.c_str();
-	argv[2] = genOutputFileName.c_str(); 
-	argv[3] = hostLang->rlhcArg;
-	argv[4] = 0;
-
-	colm_program *program = colm_new_program( &rlhc_object );
-	colm_set_debug( program, 0 );
-	colm_run_program( program, 4, argv );
-	int es = program->exit_status;
-
-	streamFileNames.append( colm_extract_fns( program ) );
-
-	colm_delete_program( program );
-
-	if ( !saveTemps )
-		unlink( genOutputFileName.c_str() );
-
-	/* Translation step shouldn't fail, but it can if there is an
-	 * internal error. Pass it up.  */
-	if ( es != 0 )
-		abortCompile( es );
-}
-
-void InputData::processCode()
-{
-	/* Compiles machines. */
-	prepareAllMachines();
-
-	if ( errorCount > 0 )
-		abortCompile( 1 );
-
-	makeDefaultFileName();
-
-	makeTranslateOutputFileName();
-
-	createOutputStream();
-
-	/* Generates the reduced machine, which we use to write output. */
-	generateReduced();
-
-	if ( errorCount > 0 )
-		abortCompile( 1 );
-
-	verifyWritesHaveData();
-
-	if ( errorCount > 0 )
-		abortCompile( 1 );
-
-	/*
-	 * From this point on we should not be reporting any errors.
-	 */
-
-	openOutput();
-	writeOutput();
-	closeOutput();
-	runRlhc();
 }
 
 bool InputData::checkLastRef( InputItem *ii )
@@ -483,7 +399,7 @@ void InputData::flushRemaining()
 
 void InputData::makeTranslateOutputFileName()
 {
-	if ( backend == Translated ) {
+	if ( false ) {
 		origOutputFileName = outputFileName;
 		outputFileName = fileNameFromStem( inputFileName, ".ri" );
 		genOutputFileName = outputFileName;
@@ -565,7 +481,6 @@ void InputData::processKelbt()
 		parseKelbt();
 		flushRemaining();
 		closeOutput();
-		runRlhc();
 	}
 
 	assert( errorCount == 0 );
@@ -641,10 +556,6 @@ bool InputData::processReduce()
 			flushRemaining();
 
 		closeOutput();
-
-		if ( success )
-			runRlhc();
-
 		return success;
 	}
 }

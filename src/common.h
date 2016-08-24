@@ -454,10 +454,4 @@ enum RagelFrontend
 	ReduceBased
 };
 
-enum RagelBackend
-{
-	Direct,
-	Translated
-};
-
 #endif
