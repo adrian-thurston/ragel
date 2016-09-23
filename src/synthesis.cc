@@ -1171,6 +1171,7 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	return lookup.uniqueType;
 }
 
+/* Can match on a tree or a ref. A tree always comes back. */
 UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 {
 	/* Add the vars bound by the pattern into the local scope. */
@@ -1204,6 +1205,10 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 					lookup.objField, exprType, false );
 		}
 	}
+
+	/* The process of matching turns refs into trees. */
+	if ( ut->typeId == TYPE_REF )
+		ut = pd->findUniqueType( TYPE_TREE, ut->langEl );
 
 	return ut;
 }
