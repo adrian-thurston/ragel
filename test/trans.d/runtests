@@ -12,7 +12,7 @@ mkdir -p working
 
 set -x
 
-for fn in `find case -type f -and -not -name '*_*'`; do 
+for fn in `find case -type f -and -not -name '*_*' | sort`; do 
 	
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $fn`
 
