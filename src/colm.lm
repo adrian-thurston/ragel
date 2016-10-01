@@ -114,6 +114,7 @@ lex
 	token BANG /'!'/
 	token DOLLAR /'$'/
 	token CARET /'^'/
+	token AT /'@'/
 	token PERCENT /'%'/
 	token PLUS /'+'/
 	token MINUS /'-'/
@@ -722,6 +723,10 @@ def pattern
 # Constructor List
 #
 
+def opt_no_trim
+	[AT] :At
+|	[] :Trim
+
 def E1 []
 def E2 []
 def E3 []
@@ -732,7 +737,7 @@ def cons_el
 |	[E1 DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
 |	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[E2 code_expr] :CodeExpr
+|	[E2 opt_no_trim code_expr] :CodeExpr
 
 def lit_cons_el
 	[dq_cons_data] :ConsData
@@ -759,7 +764,7 @@ def accum_el
 	[E1 DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
 |	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[E2 code_expr] :CodeExpr
+|	[E2 opt_no_trim code_expr] :CodeExpr
 
 def lit_accum_el
 	[dq_cons_data] :ConsData
@@ -786,7 +791,7 @@ def string_el
 	[E1 DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
 |	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[E2 code_expr] :CodeExpr
+|	[E2 opt_no_trim code_expr] :CodeExpr
 
 def lit_string_el
 	[dq_cons_data] :ConsData

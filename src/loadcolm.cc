@@ -1378,6 +1378,12 @@ struct LoadColm
 		return list;
 	}
 
+	/* Returns the trim status. (true for trim, false otherwise) */
+	bool walkTrim( opt_no_trim OptNoTrim )
+	{
+		return OptNoTrim.prodName() != opt_no_trim::At;
+	}
+
 	ConsItemList *walkConsEl( cons_el consEl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = 0;
@@ -1402,9 +1408,10 @@ struct LoadColm
 			break;
 		}
 		case cons_el::CodeExpr: {
+			bool trim = walkTrim( consEl.opt_no_trim() );
 			LangExpr *consExpr = walkCodeExpr( consEl.code_expr() );
 			ConsItem *consItem = ConsItem::cons( consExpr->loc,
-					ConsItem::ExprType, consExpr );
+					ConsItem::ExprType, consExpr, trim );
 			list = ConsItemList::cons( consItem );
 			break;
 		}
@@ -1538,9 +1545,10 @@ struct LoadColm
 			break;
 		}
 		case string_el::CodeExpr: {
+			bool trim = walkTrim( stringEl.opt_no_trim() );
 			LangExpr *consExpr = walkCodeExpr( stringEl.code_expr() );
 			ConsItem *consItem = ConsItem::cons( consExpr->loc,
-					ConsItem::ExprType, consExpr );
+					ConsItem::ExprType, consExpr, trim );
 			list = ConsItemList::cons( consItem );
 			break;
 		}}
@@ -1669,9 +1677,10 @@ struct LoadColm
 			break;
 		}
 		case accum_el::CodeExpr: {
+			bool trim = walkTrim( accumEl.opt_no_trim() );
 			LangExpr *accumExpr = walkCodeExpr( accumEl.code_expr() );
 			ConsItem *consItem = ConsItem::cons( accumExpr->loc,
-					ConsItem::ExprType, accumExpr );
+					ConsItem::ExprType, accumExpr, trim );
 			list = ConsItemList::cons( consItem );
 			break;
 		}}

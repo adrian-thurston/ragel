@@ -1735,7 +1735,8 @@ struct ConsItem
 		expr(0),
 		langEl(0),
 		prodEl(0),
-		bindId(-1)
+		bindId(-1),
+		trim(false)
 	{
 	}
 
@@ -1748,12 +1749,13 @@ struct ConsItem
 		return r;
 	}
 
-	static ConsItem *cons( const InputLoc &loc, Type type, LangExpr *expr )
+	static ConsItem *cons( const InputLoc &loc, Type type, LangExpr *expr, bool trim )
 	{
 		ConsItem *r = new ConsItem;
 		r->loc = loc;
 		r->type = type;
 		r->expr = expr;
+		r->trim = trim;
 		return r;
 	}
 
@@ -1774,6 +1776,7 @@ struct ConsItem
 	LangEl *langEl;
 	ProdEl *prodEl;
 	long bindId;
+	bool trim;
 	ConsItem *prev, *next;
 };
 

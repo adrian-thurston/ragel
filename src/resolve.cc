@@ -483,7 +483,9 @@ void LangTerm::resolve( Compiler *pd )
 					pd->resolveProdEl( item->prodEl );
 					break;
 				case ConsItem::InputText:
+					break;
 				case ConsItem::ExprType:
+					item->expr->resolve( pd );
 					break;
 				}
 			}
@@ -627,8 +629,23 @@ void LangStmt::resolve( Compiler *pd ) const
 				(*pex)->expr->resolve( pd );
 			break;
 		}
-		case PrintAccum:
+		case PrintAccum: {
+			/* Types in constructor. */
+			for ( ConsItemList::Iter item = *consItemList; item.lte(); item++ ) {
+				switch ( item->type ) {
+				case ConsItem::LiteralType:
+					/* Use pdaFactor reference resolving. */
+					pd->resolveProdEl( item->prodEl );
+					break;
+				case ConsItem::InputText:
+					break;
+				case ConsItem::ExprType:
+					item->expr->resolve( pd );
+					break;
+				}
+			}
 			break;
+		}
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
 			expr->resolve( pd );

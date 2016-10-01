@@ -30,6 +30,16 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
+bool isStr( UniqueType *ut )
+{
+	return ut->typeId == TYPE_TREE && ut->langEl != 0 && ut->langEl->id == LEL_ID_STR;
+}
+
+bool isTree( UniqueType *ut )
+{
+	return ut->typeId == TYPE_TREE;
+}
+
 IterDef::IterDef( Type type )
 : 
 	type(type), 
@@ -1344,6 +1354,11 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 						"replacements must be trees" << endp;
 			}
 
+			if ( !isStr( ut ) ) {
+				if ( item->trim ) 
+					code.append( IN_TREE_TRIM );
+			}
+
 			item->langEl = ut->langEl;
 		}
 	}
@@ -1600,6 +1615,10 @@ void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
 				code.append( IN_POP_TREE );
 				code.append( IN_POP_TREE );
 				continue;
+			}
+			else if ( ut->typeId == TYPE_TREE && !isStr( ut ) ) {
+				if ( item->trim )
+					code.append( IN_TREE_TRIM );
 			}
 
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
@@ -2503,6 +2522,9 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 					types[pex.pos()]->typeId == TYPE_BOOL )
 				{
 					code.append( IN_INT_TO_STR );
+				}
+				else if ( isTree( types[pex.pos()] ) && !isStr( types[pex.pos()] ) ) {
+					code.append( IN_TREE_TRIM );
 				}
 			}
 

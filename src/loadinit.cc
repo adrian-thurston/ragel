@@ -323,7 +323,7 @@ void LoadInit::consParseStmt( StmtList *stmtList )
 	LangExpr *open = LangExpr::cons( LangTerm::cons( InputLoc(), openRef, openArgs ) );
 
 	/* Construct a list containing the open stream. */
-	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, open );
+	ConsItem *consItem = ConsItem::cons( internal, ConsItem::ExprType, open, false );
 	ConsItemList *list = ConsItemList::cons( consItem );
 
 	/* Will capture the parser to "P" */
