@@ -27,7 +27,7 @@ context undo
 	|	[A2 item* `; NL]
 	{
 		for Item: item in List {
-			print "list el: [Item]
+			print "list el: [@Item]
 		}
 	}
 
@@ -37,7 +37,7 @@ Undo: undo = new undo()
 Undo->List = new list<undo::item>()
 
 parse Input: undo::start(Undo)[ stdin ]
-print( Input )
+print[ @Input ]
 
 ###### IN #######
 a b c ( d e ) f;

@@ -10,7 +10,7 @@ namespace n1
 end
 
 parse P: n1::start[stdin]
-print( P )
+print[ @P ]
 ##### IN #####
 a
   b

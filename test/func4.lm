@@ -22,7 +22,7 @@ void func2( K: int, L: int, A: ref<a>, I: int, J: int )
 {
 	A.I = 77
 	#exit( 0 )
-	print "[K] [L] [I] [J]
+	print "[@K] [@L] [@I] [@J]
 }
 
 void func1()
@@ -30,7 +30,7 @@ void func1()
 	cons B: b[]
 	B.A = cons a[]
 	func2( 33, 44, B.A, 55, 66 )
-	print "[B.A.I]
+	print "[@B.A.I]
 }
 
 func1()

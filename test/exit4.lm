@@ -721,9 +721,9 @@ int indepToHost( Indep: ref<section*> )
 
 for Section: section in RagelTree {
 	if match Section [Decl: var_decl] {
-		cons SectionList: section* [Decl]
+		cons SectionList: section* [@Decl]
 		indepToHost( SectionList )
-		send Output [SectionList]
+		send Output [@SectionList]
 	}
 }
 
@@ -740,7 +740,7 @@ for Section: section in RagelTree {
 			Action = parse ragel::action_block[$SectionList]
 		}
 
-		send Output ["\n" Section "\n"]
+		send Output ["\n" @Section "\n"]
 	}
 }
 
@@ -753,7 +753,7 @@ send Output
 
 for Section: section in RagelTree {
 	if match Section [ExprStmt: expr_stmt] {
-		cons SectionList: section* [ExprStmt]
+		cons SectionList: section* [@ExprStmt]
 		indepToHost( SectionList )
 		send Output [SectionList]
 	}
@@ -819,7 +819,7 @@ send Output
 
 send Output "/* _____OUTPUT_____
 for OutputLine: output_line in RagelTree {
-	send Output [OutputLine]
+	send Output [@OutputLine]
 	exit(1)
 }
 send Output "*/

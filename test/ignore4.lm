@@ -48,7 +48,7 @@ else {
 	#print( Input.tree '\n' )
 	for H: lang::statement in Input {
 		require H [ lang::`# hash::hash ]
-		print[ '--' H '==\n' ]
+		print[ '--' @H '==\n' ]
 	}
 }
 ##### IN #####

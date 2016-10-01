@@ -48,7 +48,7 @@ cons SQ: shared_queue [
 	"
 ]
 
-print( SQ )
+print[ @SQ ]
 
 ##### EXP #####
 

@@ -59,11 +59,11 @@ for AttrListIter:attr_list in RootItemList {
 	{
 		# Remove the attribute
 		AttrListIter = construct attr_list 
-			[SubAttrList]
+			[@SubAttrList]
 
 		# Add it to the colection
 		CollectedAttrs = construct attr_list 
-			[CollectedAttrs " foo=" ^Val]
+			[@CollectedAttrs " foo=" ^Val]
 	}
 }
 

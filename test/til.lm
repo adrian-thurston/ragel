@@ -160,12 +160,12 @@ for S: statement* in P
                 "	[^First]
                 "	[^Rest]
                 "while [^Expr];
-                Following]
+                @Following]
 		}
     }
 }
 
-print( P )
+print[ @P ]
 ##### IN #####
 
 var a;

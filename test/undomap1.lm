@@ -27,7 +27,7 @@ context undo
 	|	[A2 item* `; NL]
 	{
 		for I: item in Map
-			print "map el: [I]
+			print "map el: [@I]
 	}
 
 end
@@ -36,7 +36,7 @@ Undo: undo = new undo()
 Undo->Map = new map<undo::item, undo::item>()
 
 parse Input: undo::start(Undo)[ stdin ]
-print( Input )
+print[ @Input ]
 
 ###### IN #######
 a b c ( d e ) f;

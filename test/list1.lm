@@ -32,7 +32,7 @@ E->S = S
 L->push_head( E )
 
 for SE: start_el in L {
-	print( SE->S )
+	print[ @SE->S ]
 }
 
 ##### IN ######

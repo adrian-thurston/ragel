@@ -16,7 +16,7 @@ end
 
 Undo: undo = new undo()
 parse Input: undo::start( Undo )[ stdin ]
-print( Input )
+print[ @Input ]
 ##### IN #####
 a b;
 ##### EXP #####

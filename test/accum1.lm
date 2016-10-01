@@ -22,7 +22,7 @@ for Id: id in Input {
 
 S: start = Output->finish()
 
-print( S )
+print[@S]
 ##### IN #####
 a b c ( chocolate fudge ) d e
 ##### EXP #####

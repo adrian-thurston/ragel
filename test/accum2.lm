@@ -29,7 +29,7 @@ end # ctx
 SP: parser<ctx::start> = new parser<ctx::start>( new ctx() )
 send SP [stdin]
 Input: ctx::start = SP->finish()
-print( Input )
+print[ @Input ]
 ##### IN #####
 a b c ( d e f )
 ##### EXP #####

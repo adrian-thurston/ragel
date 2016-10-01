@@ -16,7 +16,7 @@ def program
 
 int func( P: program )
 {
-	print( P )
+	print[ @ P ]
 }
 
 int main()

@@ -27,7 +27,7 @@ parse Input: undo::start(Undo)[ stdin ]
 
 Input.Foo = new undo::foo()
 Input.Foo->Start = Input
-print( Input.Foo->Start )
+print[ @Input.Foo->Start ]
 ###### IN ######
 a b c ( d e ) f;
 ###### EXP ######

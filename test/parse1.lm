@@ -6,7 +6,7 @@ end
 def start [id*]
 
 parse S: start[stdin]
-print( S )
+print[ @S ]
 ##### IN #####
 ab cd ef
 ##### EXP #####

@@ -12,7 +12,7 @@ namespace n1
 end
 
 parse P: n1::n2::id+[stdin]
-print( P )
+print[ @P ]
 ##### IN #####
 
 ##### EXP #####

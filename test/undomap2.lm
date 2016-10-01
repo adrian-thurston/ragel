@@ -45,7 +45,7 @@ cons I: undo::item "a"
 Undo->Map->insert( I, I )
 
 parse Input: undo::start(Undo)[ stdin ]
-print( Input )
+print[ @Input ]
 
 ###### IN #######
 a a a ( a a ) a;

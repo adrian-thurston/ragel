@@ -9,11 +9,11 @@ parse S: start[stdin]
 
 for Id: id in ((start in S))
 {
-	print( Id )
+	print[ @Id ]
 	Id = cons id "s"
 }
 
-print( S )
+print[ @S ]
 
 context on_heap
 	S: start
@@ -30,11 +30,11 @@ OnHeap: on_heap = newHeap( S )
 
 for Id: id in OnHeap->S 
 {
-	print( Id )
+	print[ @Id ]
 	Id = cons id "s"
 }
 
-print( S )
+print[ @S ]
 
 int main( S: start )
 {
@@ -43,21 +43,21 @@ int main( S: start )
 
 	for Id: id in OnHeap->S 
 	{
-		print( Id )
+		print[ @Id ]
 		Id = cons id "s"
 	}
 
-	print( S )
+	print[ @S ]
 }
 
 main( S )
 
 int someRefs( S1: ref<start>, S2: ref<start>, S3: ref<start>, S4: ref<start> )
 {
-	print( S1 )
-	print( S2 )
-	print( S3 )
-	print( S4 )
+	print[ @S1 ]
+	print[ @S2 ]
+	print[ @S3 ]
+	print[ @S4 ]
 }
 
 cons S1: start "a b
