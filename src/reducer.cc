@@ -329,7 +329,6 @@ void SectionPass::reduceStr( const char *inputFileName, const char *input )
 	colm_delete_program( program );
 }
 
-
 void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLang )
 {
 	const char *argv[5];

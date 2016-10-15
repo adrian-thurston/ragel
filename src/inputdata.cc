@@ -556,6 +556,9 @@ bool InputData::processReduce()
 			flushRemaining();
 
 		closeOutput();
+
+		if ( !success && outputFileName != 0 )
+			unlink( outputFileName );
 		return success;
 	}
 }
