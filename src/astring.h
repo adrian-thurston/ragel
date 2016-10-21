@@ -343,6 +343,8 @@ public:
 	/* Return the length of the string. Must check for null data pointer. */
 	long length() const { return data ? (((Head*)data)-1)->length : 0; }
 
+	void empty() { setAs( (const char *)0, 0 ); }
+
 	/**
 	 * \brief Pointer to the data.
 	 */
