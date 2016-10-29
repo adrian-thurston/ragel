@@ -190,6 +190,8 @@ template < AVLMEL_CLASSDEF > class AvlTree
 #endif
 {
 public:
+	typedef Element El;
+
 	/**
 	 * \brief Create an empty tree.
 	 */
