@@ -1796,6 +1796,7 @@ struct ConsItemList
 		return new ConsItemList;
 	}
 
+	void resolve( Compiler *pd );
 	void evaluateSendStream( Compiler *pd, CodeVect &code );
 };
 

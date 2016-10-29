@@ -164,6 +164,24 @@ StructEl *TypeRef::declareListEl( Compiler *pd, TypeRef *valType )
 	return declareStruct( pd, pd->rootNamespace, name, structDef );
 }
 
+void ConsItemList::resolve( Compiler *pd )
+{
+	/* Types in constructor. */
+	for ( ConsItemList::Iter item = first(); item.lte(); item++ ) {
+		switch ( item->type ) {
+		case ConsItem::LiteralType:
+			/* Use pdaFactor reference resolving. */
+			pd->resolveProdEl( item->prodEl );
+			break;
+		case ConsItem::InputText:
+			break;
+		case ConsItem::ExprType:
+			item->expr->resolve( pd );
+			break;
+		}
+	}
+}
+
 UniqueType *TypeRef::resolveTypeListEl( Compiler *pd )
 {
 	TypeRef *valTr = typeRef1;
@@ -476,20 +494,9 @@ void LangTerm::resolve( Compiler *pd )
 			resolveFieldArgs( pd );
 
 			/* Types in constructor. */
-			for ( ConsItemList::Iter item = *constructor->list; item.lte(); item++ ) {
-				switch ( item->type ) {
-				case ConsItem::LiteralType:
-					/* Use pdaFactor reference resolving. */
-					pd->resolveProdEl( item->prodEl );
-					break;
-				case ConsItem::InputText:
-					break;
-				case ConsItem::ExprType:
-					item->expr->resolve( pd );
-					break;
-				}
-			}
+			constructor->list->resolve( pd );
 			break;
+
 		case VarRefType:
 			break;
 
@@ -543,16 +550,7 @@ void LangTerm::resolve( Compiler *pd )
 
 			resolveFieldArgs( pd );
 
-			for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-				switch ( item->type ) {
-				case ConsItem::LiteralType:
-					pd->resolveProdEl( item->prodEl );
-					break;
-				case ConsItem::InputText:
-				case ConsItem::ExprType:
-					break;
-				}
-			}
+			parserText->list->resolve( pd );
 			break;
 
 		case SendType:
@@ -630,20 +628,7 @@ void LangStmt::resolve( Compiler *pd ) const
 			break;
 		}
 		case PrintAccum: {
-			/* Types in constructor. */
-			for ( ConsItemList::Iter item = *consItemList; item.lte(); item++ ) {
-				switch ( item->type ) {
-				case ConsItem::LiteralType:
-					/* Use pdaFactor reference resolving. */
-					pd->resolveProdEl( item->prodEl );
-					break;
-				case ConsItem::InputText:
-					break;
-				case ConsItem::ExprType:
-					item->expr->resolve( pd );
-					break;
-				}
-			}
+			consItemList->resolve( pd );
 			break;
 		}
 		case ExprType: {
