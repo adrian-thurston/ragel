@@ -1362,6 +1362,10 @@ FsmGraph *ReItem::walk( Compiler *pd, RegExpr *rootRegex )
 		case OrBlock: {
 			/* Get the or block and minmize it. */
 			rtnVal = orBlock->walk( pd, rootRegex );
+			if ( rtnVal == 0 ) {
+				rtnVal = new FsmGraph();
+				rtnVal->lambdaFsm();
+			}
 			rtnVal->minimizePartition2();
 			break;
 		}
