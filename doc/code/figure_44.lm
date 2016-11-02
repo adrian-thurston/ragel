@@ -1,0 +1,10 @@
+i: int = 0
+j: int = i
+
+while ( i < 10 ) {
+    if ( i * ( 10 - i ) < 20 ) {
+        print ( "hello ", i, ' ', j , '\n' )
+        j = j+ 1
+    }
+    i = i + 1
+}

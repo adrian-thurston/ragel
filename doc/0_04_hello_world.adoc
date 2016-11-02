@@ -6,7 +6,7 @@ The obligatory 'hello world' program:
 [source,chapel]
 .hello_world.lm
 ----
-print "hello world" "\n"
+include::code/hello_world.lm[]
 ----
 
 We run it with:
@@ -24,15 +24,21 @@ This creates a executable chmod+x file with the same name:
 ls -l hello_world
 ----
 
- -rwxr-xr-x 1 peter peter 29848 Nov  2 10:06 /tmp/hello_world
+----
+-rwxr-xr-x 1 peter peter 29848 Nov  2 10:06 /tmp/hello_world
+----
 
 When we execute it:
 
- ./hello_world
+----
+./hello_world
+----
 
 We'll see:
 
- hello world
+----
+hello world
+----
 
 We can strip the file to check if we can reduce the executable.
 [source,bash]
@@ -41,13 +47,15 @@ strip ./hello_world
 ls -l hello_words
 ----
 
- -rwxr-xr-x 1 peter peter 10360 Nov  2 10:10 /tmp/hello_world
+----
+-rwxr-xr-x 1 peter peter 10360 Nov  2 10:10 /tmp/hello_world
+----
 
 == Deja-vu: python2-python3
 TIP: It turns out that print is also a function that can have multiple arguments.
 
 [source,chapel]
-.hello_world_ext.lm]
+.hello_world_ext.lm
 ----
 print( 'hello ', "world" "\r\n" )
 ----

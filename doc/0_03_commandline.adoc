@@ -3,7 +3,9 @@ Commandline
 
 Let's start colm with the '--help' command line argument.
 
- colm --help
+----
+colm --help
+----
 
 NOTE: This reflects the development version 0.13.0.4;
 

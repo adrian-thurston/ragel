@@ -16,11 +16,15 @@ sudo make install
 
 When we do:
 
- /opt/colm/bin/colm
+----
+/opt/colm/bin/colm
+----
 
 We get:
 
- error: colm: colm: no input file given
+----
+error: colm: colm: no input file given
+----
 
 It works!
 

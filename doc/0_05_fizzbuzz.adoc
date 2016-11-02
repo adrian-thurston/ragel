@@ -9,16 +9,7 @@ With some modifications we can reactivate this example.
 [source,chapel]
 .figure_44.lm
 ----
-i: int = 0
-j: int = i
-
-while ( i < 10 ) {
-    if ( i * ( 10 - i ) < 20 ) {
-        print ( "hello ", i, ' ', j , '\n' )
-        j = j+ 1
-    }
-    i = i + 1
-}
+include::code/figure_44.lm[]
 ----
 
 Please Note:
@@ -50,26 +41,7 @@ It is the next logical step to 'hello world'.
 [source,chapel]
 .fizzbuzz.lm
 ----
-int modulo( value:int, div:int) {
-    times:int = value / div
-    return value - ( times * div )
-}
-
-i:int = 0
-while( i < 20 ) {
-    mod5:int = modulo( i, 5 )
-    mod3:int = modulo( i, 3 )
-    if ( mod5 == 0 && mod3 == 0 ) {
-        print( "FizzBuzz\n" )
-    } elsif( mod5 == 0 ) {
-        print( "Buzz\n" )
-    } elsif( mod3 == 0 ) {
-        print( "Fizz\n" )
-    } else {
-        print( i, "\n" )
-    }
-    i = i + 1
-}
+include::code/fizzbuzz.lm[]
 ----
 
 It appears that there is no modulo operator ('%').

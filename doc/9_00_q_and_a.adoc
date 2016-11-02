@@ -4,7 +4,9 @@ Q and A
 == FAQ
 
 .Q: I get this error
- error while loading shared libraries: libcolm-0.13.0.4.so: cannot open shared object file: No such file or directory
+----
+error while loading shared libraries: libcolm-0.13.0.4.so: cannot open shared object file: No such file or directory
+----
 
 *A*: You probably configured and installed colm with the '--prexix' argument
 You can find the dynamic library and symlink it to a familiar place.

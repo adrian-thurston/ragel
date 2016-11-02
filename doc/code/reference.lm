@@ -1,0 +1,11 @@
+str sa( where:ref < str > ) {
+    print( "in SA ", where, "\n" )
+    where = "sa"
+    print( "in SA ", where, "\n" )
+}
+
+where: str =  "global"
+print( "in global ", where, "\n" )
+sa( where )
+print( "in global ", where, "\n" )
+

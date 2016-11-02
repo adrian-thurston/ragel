@@ -14,4 +14,6 @@ au BufRead,BufNewFile *.lm set filetype=colm
 
 When we open an '.lm' file, we will see some colors
 
- vi src/colm.lm
+----
+vi src/colm.lm
+----

@@ -1,0 +1,55 @@
+alias Value_t map<int,str>
+values:Value_t = new Value_t()
+
+values->insert(0, "Ace")
+values->insert(1, "1")
+values->insert(2, "2")
+values->insert(3, "3")
+values->insert(4, "4")
+values->insert(5, "5")
+values->insert(6, "6")
+values->insert(7, "7")
+values->insert(8, "8")
+values->insert(9, "9")
+values->insert(10, "Ten")
+values->insert(11, "Jack")
+values->insert(12, "Queen")
+values->insert(13, "King")
+
+alias Suit_t map<int,str> 
+suit:Suit_t = new Suit_t()
+suit->insert(1, "hearts")
+suit->insert(2, "spades")
+suit->insert(3, "diamonds")
+suit->insert(4, "clubs")
+
+struct Card_t
+    s:int
+    v:int
+end
+
+alias Hand_t list<Card_t>
+
+struct Person_t
+    name:str
+    age:int
+    hand:Hand_t
+end
+
+john:Person_t
+
+john = new Person_t()
+john->name = "john"
+john->age = 18
+john->hand = new Hand_t()
+
+card:Card_t = new Card_t()
+card->s = 2
+card->v = 13
+john->hand->push(card)
+
+print("ok ", john->name, " ", john->age, "\n")
+for card:Card_t in john->hand {
+    print("\n\t", suit->find(card->s), " ", values->find(card->v), "\n")
+}
+

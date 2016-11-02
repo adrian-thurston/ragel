@@ -38,7 +38,6 @@ But colm is also the driving force in http://www.colm.net/open-source/ragel/[the
 
 Colm's development started by https://twitter.com/ehdtee[Adrian Thurston] during his http://www.colm.net/files/colm/thurston-phdthesis.pdf[Ph.D. thesis] period after intensive study of http://research.cs.queensu.ca/~cordy/Papers/TC_SCAM06_ETXL.pdf[TXL].
 
-
 === When not to use Colm
 
 Colm is meant to create executables or object files that can be linked in other programs. 

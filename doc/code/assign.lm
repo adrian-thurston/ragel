@@ -1,0 +1,22 @@
+lex start
+	token id / ('a' .. 'z' | 'A' .. 'Z' ) + /
+	token value / ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' )+ /
+	literal `= `;
+	ignore / [ \t\n] /
+end
+
+def assignment
+	[ id `=  value `;]
+
+	
+def assignment_list
+	[assignment assignment_list]
+|	[assignment]
+|	[]
+
+parse Simple: assignment_list[ stdin ]
+
+for I:assignment in Simple {
+	print( I.id, "->", I.value, "\n" )
+}
+

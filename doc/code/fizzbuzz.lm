@@ -1,0 +1,21 @@
+int modulo( value:int, div:int) {
+    times:int = value / div
+    return value - ( times * div )
+}
+
+i:int = 0
+while( i < 20 ) {
+    mod5:int = modulo( i, 5 )
+    mod3:int = modulo( i, 3 )
+    if ( mod5 == 0 && mod3 == 0 ) {
+        print( "FizzBuzz\n" )
+    } elsif( mod5 == 0 ) {
+        print( "Buzz\n" )
+    } elsif( mod3 == 0 ) {
+        print( "Fizz\n" )
+    } else {
+        print( i, "\n" )
+    }
+    i = i + 1
+}
+

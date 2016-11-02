@@ -1,0 +1,33 @@
+str d (where:str) {
+    print( "in D ", where, "\n")
+    where = "d"
+    print( "in D ", where, "\n")
+}
+
+str c ( ) {
+    print( "in C ", where_g, "\n")
+    where_g = "c"
+    print( "in C ", where_g, "\n")
+}
+
+str b ( where:str ) {
+    print( "in B ", where, "\n")
+    where = "b" 
+    print( "in B ", where, "\n")
+}
+
+str a( where:str ) {
+    print( "in A ", where, "\n")
+    where = "a" 
+    b( where )
+    print( "in A ", where, "\n")
+}
+
+where: str =  "global"
+print( "in global ", where, "\n")
+a( where )
+print( "in global ", where, "\n")
+global where_g:str
+c( )
+print( "in global ", where_g, "\n")
+
