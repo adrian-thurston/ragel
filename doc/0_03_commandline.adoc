@@ -1,0 +1,25 @@
+Commandline
+===========
+
+Let's start colm with the '--help' command line argument.
+
+ colm --help
+
+NOTE: This reflects the development version 0.13.0.4;
+
+
+```usage: colm [options] file
+general:
+   -h, -H, -?, --help   print this usage and exit
+   -v --version         print version information and exit
+   -o <file>            write output to <file>
+   -c                   compile only (don't produce binary)
+   -e <file>            write C++ export header to <file>
+   -x <file>            write C++ export code to <file>
+   -m <file>            write C++ commit code to <file>
+   -a <file>            additional code file to include in output program
+```
+
+This reveals us some more insights: it reads a 'colm' file and creates a object file with eventually cpp/h/x code.
+
+

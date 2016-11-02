@@ -1,0 +1,37 @@
+Installing
+=========
+
+Installing on a linux system is a breeze
+
+[source,bash]
+----
+wget -q http://www.colm.net/files/colm/thurston-phdthesis.pdf
+wget -q http://www.colm.net/files/colm/colm-0.13.0.4.tar.gz
+tar -xaf colm-0.13.0.4.tar.gz
+cd colm-0.13.0.4
+./configure --prefix=/opt/colm
+make
+sudo make install
+----
+
+When we do:
+
+ /opt/colm/bin/colm
+
+We get:
+
+ error: colm: colm: no input file given
+
+It works!
+
+== First impression
+
+When we look a little bit closer we see that colm:
+
+* is able to be build as a static and/or shared libray.
+* is licenced under GPL 2
+* is equiped with a vim syntax highlighting file
+* is using the aapl (LGPL 2.1 licenced) library from Adrian Thurston (just like ragel does).
+* There is one file in the repository that stands out: 'colm.lm'
+  In the Ragel repository there are also serveral '.lm' files. And it's syntax looks like the colm language that is presented in the thesis.
+

@@ -1,0 +1,50 @@
+Def
+===
+
+The 'def' is where colm realy shines.
+A 'def' is somewhere between a struct and a regular expression.
+Again one example is much more clearer.
+
+[source,chapel]
+.assign.lm
+----
+lex start
+	token id / ('a' .. 'z' | 'A' .. 'Z' ) + /
+	token value / ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' )+ /
+	literal `= `;
+	ignore / [ \t\n] /
+end
+
+def assignment
+	[ id `=  value `;]
+
+	
+def assignment_list
+	[assignment assignment_list]
+|	[assignment]
+|	[]
+
+parse Simple: assignment_list[ stdin ]
+
+for I:assignment in Simple {
+	print( I.id, "->", I.value, "\n" )
+}
+----
+
+After the compilation we can pipe some input to it's stdin.
+
+[source,bash]
+----
+/opt/colm/bin/colm assign.lm
+echo -e 'b=3;a=1;\n c=2;' |./assign
+----
+
+This gives us:
+
+----
+b->3
+a->1
+c->2
+----
+
+NOTE: this also illustrates how to read from 'stdin'.

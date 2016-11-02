@@ -1,0 +1,17 @@
+Vim syntax
+==========
+
+To activatecd colm syntax highlighting in vi
+
+ cp /path_to_extracted_files/lcolm.vim  ~/.vim/syntax
+
+[source,vim]
+.~/.vimrc
+----
+" Work with colm
+au BufRead,BufNewFile *.lm set filetype=colm
+----
+
+When we open an '.lm' file, we will see some colors
+
+ vi src/colm.lm

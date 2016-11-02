@@ -1,0 +1,36 @@
+Functions
+=========
+
+The 'FizzBuzz' example gave us an good overview.
+
+
+== Arguments 'by reference'
+
+We can also pass parameters by reference.
+This enables us to change the variable with in the function.
+
+
+[source,chapel]
+./reference.lm
+----
+str sa( where:ref < str > ) {
+    print( "in SA ", where, "\n" )
+    where = "sa"
+    print( "in SA ", where, "\n" )
+}
+
+where: str =  "global"
+print( "in global ", where, "\n" )
+sa( where )
+print( "in global ", where, "\n" )
+----
+
+Compiling and running would give us:
+
+----
+in global global
+in SA global
+in SA sa
+in global sa
+----
+

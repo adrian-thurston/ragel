@@ -1,0 +1,121 @@
+Scope
+=====
+
+We saw in the previous paragraph that functions can be used, and that they can have parameter.
+This forces us to clarify 'scope'.
+
+[source,chapel]
+./scope.lm
+----
+str d (where:str) {
+    print( "in D ", where, "\n")
+    where = "d"
+    print( "in D ", where, "\n")
+}
+
+str c ( ) {
+    print( "in C ", where_g, "\n")
+    where_g = "c"
+    print( "in C ", where_g, "\n")
+}
+
+str b ( where:str ) {
+    print( "in B ", where, "\n")
+    where = "b" 
+    print( "in B ", where, "\n")
+}
+
+str a( where:str ) {
+    print( "in A ", where, "\n")
+    where = "a" 
+    b( where )
+    print( "in A ", where, "\n")
+}
+
+where: str =  "global"
+print( "in global ", where, "\n")
+a( where )
+print( "in global ", where, "\n")
+global where_g:str
+c( )
+print( "in global ", where_g, "\n")
+----
+
+We run it with
+[source,bash]
+----
+/opt/colm/bin/colm scope.lm
+./scope
+----
+
+That gives us:
+----
+in global global
+in A global
+in B a
+in B b
+in A a
+in global global
+in C NIL
+in C c
+in global c
+----
+
+The thesis also mentions that variables can be passed by reference instead of by value.
+
+[source,chapel]
+.nested_scope.lm
+----
+str a( where:str ) {
+    print( "before block1 ", where, "\n" )
+    while(true) {
+        where = "block1"
+        print( "in block1 ", where, "\n" )
+        i:int = 0
+        while( true ) {
+            where =  where + "a"
+            print( "in loop ", where, "\n" )
+            break
+        }
+        print( "in block1 ", where, "\n" )
+        break
+    }
+    print( "in A ", where, "\n" )
+    return where
+}
+
+where: str =  "global"
+print( "in global ", where, "\n" )
+a( where )
+print( "in global ", where, "\n" )
+----
+
+That gives us:
+----
+in global global
+in A global
+in B a
+in B b
+in A a
+in global global
+in C NIL
+in C c
+in global c
+----
+
+[source,bash]
+----
+/opt/colm/bin/colm nested_scope.lm
+./nested_scope
+----
+
+It seems that this is still the case.
+----
+in global global
+before block1 global
+in block1 block1
+in loop block1a
+in block1 block1a
+in A block1a
+in global global
+----

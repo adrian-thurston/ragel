@@ -1,0 +1,111 @@
+FizzBuzz
+========
+
+== Slightly modified example of thesis: Figure 4.4, page 87
+
+The colm language has evolved since it has been described in the thesis.
+With some modifications we can reactivate this example.
+
+[source,chapel]
+.figure_44.lm
+----
+i: int = 0
+j: int = i
+
+while ( i < 10 ) {
+    if ( i * ( 10 - i ) < 20 ) {
+        print ( "hello ", i, ' ', j , '\n' )
+        j = j+ 1
+    }
+    i = i + 1
+}
+----
+
+Please Note:
+
+* the syntax is very c-ish
+* the variables are defined with their type
+* there is no postfix increment operator (i = i +1)
+
+[source,bash]
+----
+/opt/colm/bin/colm fizzbuzz.lm
+./fizzbuzz
+----
+
+That gives us:
+----
+hello 0 0
+hello 1 1
+hello 2 2
+hello 8 3
+hello 9 4
+----
+
+== Real FizzBuzz
+
+The fizzbuzz test is often used to check is someone has programming skils.
+It is the next logical step to 'hello world'.
+
+[source,chapel]
+.fizzbuzz.lm
+----
+int modulo( value:int, div:int) {
+    times:int = value / div
+    return value - ( times * div )
+}
+
+i:int = 0
+while( i < 20 ) {
+    mod5:int = modulo( i, 5 )
+    mod3:int = modulo( i, 3 )
+    if ( mod5 == 0 && mod3 == 0 ) {
+        print( "FizzBuzz\n" )
+    } elsif( mod5 == 0 ) {
+        print( "Buzz\n" )
+    } elsif( mod3 == 0 ) {
+        print( "Fizz\n" )
+    } else {
+        print( i, "\n" )
+    }
+    i = i + 1
+}
+----
+
+It appears that there is no modulo operator ('%').
+Therefor we'll resort to a function.
+Writing a function seems rather straight forward
+
+Please note:
+* that '&&' is working.
+* The return type is needed, but if 'nil' is retuned by default.
+
+[source,bash]
+----
+/opt/colm/bin/colm fizzbuzz.lm
+./fizzbuzz
+----
+
+That gives us
+----
+FizzBuzz
+1
+2
+Fizz
+4
+Buzz
+Fizz
+7
+8
+Fizz
+Buzz
+11
+Fizz
+13
+14
+FizzBuzz
+16
+17
+Fizz
+19
+----
