@@ -16,11 +16,11 @@ bin_PROGRAMS = ragel
 
 endif
 
-include_HEADERS = \
+pkginclude_HEADERS = \
 	action.h fsmgraph.h ragel.h common.h \
 	gendata.h redfsm.h dot.h
 
-nodist_include_HEADERS = config.h
+nodist_pkginclude_HEADERS = config.h
 
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 

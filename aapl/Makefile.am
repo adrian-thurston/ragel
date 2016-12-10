@@ -1,4 +1,4 @@
-include_HEADERS = \
+pkginclude_HEADERS = \
 	avlbasic.h avlimel.h avlmap.h bstcommon.h compare.h insertsort.h \
 	sbstset.h avlcommon.h avlimelkey.h avlmel.h bstmap.h dlcommon.h \
 	mergesort.h sbsttable.h avlibasic.h avliset.h avlmelkey.h bstset.h \
