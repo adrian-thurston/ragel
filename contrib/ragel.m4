@@ -41,7 +41,7 @@ AC_DEFUN([CHECK_RAGEL], [
     AS_IF([test x"$ragel_needed" = x"yes"],
       [AC_MSG_ERROR([dnl
 You need Ragel to build from development sources.
-You can find Ragel at http://www.complang.org/ragel/dnl
+You can find Ragel at http://www.colm.net/open-source/ragel/dnl
       ])])
   ])
 ])
