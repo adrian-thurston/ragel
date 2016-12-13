@@ -19,22 +19,24 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FSMGRAPH_H
-#define _FSMGRAPH_H
+#ifndef _COLM_FSMGRAPH_H
+#define _COLM_FSMGRAPH_H
 
 #include <assert.h>
+
+#include <avltree.h>
+#include <avlmap.h>
+#include <avlset.h>
+#include <bstmap.h>
+#include <vector.h>
+#include <sbstmap.h>
+#include <sbstset.h>
+#include <sbsttable.h>
+#include <bstset.h>
+#include <compare.h>
+#include <dlist.h>
+
 #include "keyops.h"
-#include "vector.h"
-#include "bstset.h"
-#include "compare.h"
-#include "avltree.h"
-#include "dlist.h"
-#include "bstmap.h"
-#include "sbstmap.h"
-#include "sbstset.h"
-#include "sbsttable.h"
-#include "avlset.h"
-#include "avlmap.h"
 
 /* Flags that control merging. */
 #define SB_GRAPH1     0x01
@@ -1314,4 +1316,5 @@ struct FsmGraph
 };
 
 
-#endif /* _FSMGRAPH_H */
+#endif /* _COLM_FSMGRAPH_H */
+

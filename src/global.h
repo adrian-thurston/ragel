@@ -19,18 +19,20 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef __COLM_GLOBAL_H
-#define __COLM_GLOBAL_H
+#ifndef _COLM_GLOBAL_H
+#define _COLM_GLOBAL_H
 
 #include <stdio.h>
+
 #include <iostream>
 #include <fstream>
 #include <fstream>
 #include <string>
 
+#include <avltree.h>
+
 #include "config.h"
 #include "defs.h"
-#include "avltree.h"
 #include "keyops.h"
 
 #define PROGNAME "colm"
@@ -103,4 +105,5 @@ void openOutput();
 void escapeLiteralString( std::ostream &out, const char *data );
 bool readCheck( const char *fn );
 
-#endif
+#endif /* _COLM_GLOBAL_H */
+

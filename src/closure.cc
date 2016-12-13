@@ -18,14 +18,12 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include "global.h"
-#include "compiler.h"
-
-#include "vector.h"
 #include <assert.h>
-#include <string.h>
+#include <stdbool.h>
+
 #include <iostream>
+
+#include "compiler.h"
 
 using std::endl;
 using std::cerr;

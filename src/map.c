@@ -18,15 +18,14 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <colm/map.h>
 
 #include <assert.h>
+#include <stdbool.h>
+
 #include <colm/pdarun.h>
-#include <colm/map.h>
 #include <colm/pool.h>
 #include <colm/bytecode.h>
-
-#define true 1
-#define false 0
 
 struct colm_struct *colm_map_el_get( struct colm_program *prg,
 		map_el_t *map_el, word_t gen_id, word_t field )

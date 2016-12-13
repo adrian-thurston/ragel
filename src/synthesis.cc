@@ -18,13 +18,12 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include "bytecode.h"
-#include "compiler.h"
-#include "pdarun.h"
-#include "input.h"
-#include <iostream>
 #include <assert.h>
+#include <stdbool.h>
+
+#include <iostream>
+
+#include "compiler.h"
 
 using std::cout;
 using std::cerr;

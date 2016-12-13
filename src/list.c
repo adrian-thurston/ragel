@@ -18,14 +18,14 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #include <colm/pdarun.h>
 #include <colm/program.h>
 #include <colm/struct.h>
 #include <colm/bytecode.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
 
 static void colm_list_add_after( list_t *list, list_el_t *prev_el, list_el_t *new_el );
 static void colm_list_add_before( list_t *list, list_el_t *next_el, list_el_t *new_el);

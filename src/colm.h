@@ -1,5 +1,5 @@
-#ifndef __COLM_COLM_H
-#define __COLM_COLM_H
+#ifndef _COLM_COLM_H
+#define _COLM_COLM_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -115,4 +115,5 @@ const char **colm_extract_fns( struct colm_program *prg );
 }
 #endif
 
-#endif
+#endif /* _COLM_COLM_H */
+

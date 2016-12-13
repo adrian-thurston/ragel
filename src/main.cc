@@ -19,28 +19,20 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <unistd.h>
-#include <sstream>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+#include <iostream>
 
-#include "global.h"
 #include "debug.h"
 #include "pcheck.h"
-#include "vector.h"
 #include "version.h"
-#include "keyops.h"
 #include "compiler.h"
-#include "vector.h"
-#include "version.h"
-#include "fsmcodegen.h"
-#include "colm.h"
 
 #if defined(CONS_INIT)
 #include "consinit.h"

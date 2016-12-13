@@ -18,22 +18,20 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include "compiler.h"
-#include "fsmcodegen.h"
-#include "redfsm.h"
-#include "bstmap.h"
-#include <sstream>
-#include <string>
 #include <assert.h>
+#include <string.h>
+#include <stdbool.h>
 
+#include <sstream>
+#include <iostream>
+
+#include "fsmcodegen.h"
 
 using std::ostream;
 using std::ostringstream;
 using std::string;
 using std::cerr;
 using std::endl;
-
 
 /* Init code gen with in parameters. */
 FsmCodeGen::FsmCodeGen( ostream &out, 

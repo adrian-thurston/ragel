@@ -18,16 +18,15 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include <colm/pool.h>
-#include <colm/pdarun.h>
-#include <colm/bytecode.h>
-
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#include <colm/pool.h>
+#include <colm/pdarun.h>
+#include <colm/bytecode.h>
 
 str_t *string_prefix( program_t *prg, str_t *str, long len )
 {

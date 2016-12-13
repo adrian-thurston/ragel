@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _BUFFER_H
-#define _BUFFER_H
+#ifndef _COLM_BUFFER_H
+#define _COLM_BUFFER_H
 
 #define BUFFER_INITIAL_SIZE 4096
 
@@ -52,4 +52,5 @@ struct Buffer
 	int length;
 };
 
-#endif /* _BUFFER_H */
+#endif /* _COLM_BUFFER_H */
+

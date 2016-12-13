@@ -19,6 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#ifndef _COLM_DEBUG_H
+#define _COLM_DEBUG_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,3 +61,6 @@ extern const char *const colmRealmNames[REALMS];
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* _COLM_DEBUG_H */
+

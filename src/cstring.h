@@ -22,13 +22,14 @@
 #ifndef _AAPL_ASTRING_H
 #define _AAPL_ASTRING_H
 
-#include <new>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <iostream>
 #include <assert.h>
+
+#include <new>
+#include <iostream>
 
 #include "tree.h"
 
@@ -852,10 +853,9 @@ template<class T> struct CmpStrTmpl
 
 typedef CmpStrTmpl<char> CmpStr;
 
-
-
 #ifdef AAPL_NAMESPACE
 }
 #endif
 
 #endif /* _AAPL_ASTRING_H */
+

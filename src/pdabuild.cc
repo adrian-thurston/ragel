@@ -18,25 +18,21 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
 #define EOF_REGION 0
 
-#include <iostream>
-#include <iomanip>
-#include <errno.h>
-#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <assert.h>
 
-/* Parsing. */
-#include "global.h"
-#include "compiler.h"
-#include "pdacodegen.h"
-#include "pdarun.h"
-#include "redfsm.h"
-#include "fsmcodegen.h"
-#include "redbuild.h"
+#include <iostream>
 
 /* Dumping the fsm. */
-#include "mergesort.h"
+#include <mergesort.h>
+
+/* Parsing. */
+#include "compiler.h"
+#include "pdacodegen.h"
 
 using std::endl;
 using std::cerr;

@@ -18,17 +18,13 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include "parser.h"
 
-#include <iostream>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <errno.h>
 
-#include "parser.h"
-#include "config.h"
-#include "avltree.h"
-#include "compiler.h"
-#include "parser.h"
-#include "global.h"
-#include "input.h"
+#include <iostream>
 
 using std::endl;
 

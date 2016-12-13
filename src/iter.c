@@ -18,15 +18,14 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <assert.h>
+#include <stdbool.h>
 
 #include <colm/tree.h>
 #include <colm/bytecode.h>
 #include <colm/program.h>
-#include <assert.h>
-#include "internal.h"
 
-#define true 1
-#define false 0
+#include "internal.h"
 
 void colm_init_list_iter( generic_iter_t *list_iter, tree_t **stack_root,
 		long arg_size, long root_size, const ref_t *root_ref, int generic_id )

@@ -19,27 +19,28 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _PARSEDATA_H
-#define _PARSEDATA_H
+#ifndef _COLM_PARSEDATA_H
+#define _COLM_PARSEDATA_H
+
+#include <limits.h>
 
 #include <iostream>
-#include <limits.h>
-#include "bstset.h"
+
+#include <avlmap.h>
+#include <avlset.h>
+#include <bstmap.h>
+#include <vector.h>
+#include <bstset.h>
+#include <dlist.h>
+#include <dlistmel.h>
+#include <fsmgraph.h>
+#include <compare.h>
+
 #include "global.h"
-#include "avlmap.h"
-#include "avlset.h"
-#include "bstmap.h"
-#include "vector.h"
-#include "dlist.h"
-#include "dlistmel.h"
-#include "fsmgraph.h"
-#include "compare.h"
-#include "vector.h"
 #include "keyops.h"
 #include "parsetree.h"
 #include "cstring.h"
 #include "pdagraph.h"
-#include "compare.h"
 #include "pdarun.h"
 #include "bytecode.h"
 #include "program.h"
@@ -1106,5 +1107,5 @@ ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *o
 		UniqueType *arg1, UniqueType *arg2, bool isConst,
 		bool useFnInstr = false, GenericType *useGeneric = 0 );
 
+#endif /* _COLM_PARSEDATA_H */
 
-#endif /* _PARSEDATA_H */

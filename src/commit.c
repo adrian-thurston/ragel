@@ -18,6 +18,11 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 #include "config.h"
 #include "debug.h"
@@ -25,17 +30,7 @@
 #include "bytecode.h"
 #include "tree.h"
 #include "pool.h"
-
 #include "internal.h"
-
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-
-//#define true 1
-//#define false 0
 
 void commit_clear_kid_list( program_t *prg, tree_t **sp, kid_t *kid )
 {

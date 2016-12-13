@@ -18,12 +18,16 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include <iostream>
-#include <sstream>
 #include "redfsm.h"
-#include "avlmap.h"
-#include "mergesort.h"
+
+#include <assert.h>
+#include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
+
+#include <sstream>
+#include <iostream>
+
 #include "fsmgraph.h"
 #include "parsetree.h"
 

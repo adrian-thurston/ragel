@@ -18,27 +18,20 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include "compiler.h"
 
-#include <iostream>
-#include <iomanip>
 #include <errno.h>
 #include <stdlib.h>
-#include <limits.h>
-#include <sstream>
+#include <string.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <assert.h>
+#include <iostream>
 
-#include "global.h"
-#include "avltree.h"
-#include "compiler.h"
-#include "parser.h"
-#include "parsetree.h"
-#include "mergesort.h"
 #include "redbuild.h"
 #include "pdacodegen.h"
 #include "fsmcodegen.h"
-#include "pdarun.h"
 #include "colm.h"
-#include "pool.h"
-#include "struct.h"
 
 using std::ostringstream;
 using std::cout;

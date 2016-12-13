@@ -19,25 +19,28 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _REDFSM_H
-#define _REDFSM_H
+#ifndef _COLM_REDFSM_H
+#define _COLM_REDFSM_H
 
 #include <assert.h>
 #include <string.h>
+
 #include <string>
+
+#include <avlbasic.h>
+#include <avltree.h>
+#include <avlmap.h>
+#include <bstmap.h>
+#include <vector.h>
+#include <dlist.h>
+#include <bstset.h>
+#include <mergesort.h>
+#include <sbstmap.h>
+#include <sbstset.h>
+#include <sbsttable.h>
+
 #include "keyops.h"
-#include "vector.h"
-#include "dlist.h"
 #include "compare.h"
-#include "bstmap.h"
-#include "bstset.h"
-#include "avlmap.h"
-#include "avltree.h"
-#include "avlbasic.h"
-#include "mergesort.h"
-#include "sbstmap.h"
-#include "sbstset.h"
-#include "sbsttable.h"
 #include "global.h"
 #include "pdarun.h"
 
@@ -471,5 +474,5 @@ struct RedFsm
 	fsm_tables *makeFsmTables();
 };
 
+#endif /* _COLM_REDFSM_H */
 
-#endif /* _REDFSM_H */

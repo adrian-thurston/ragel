@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _PCHECK_H
-#define _PCHECK_H
+#ifndef _COLM_PCHECK_H
+#define _COLM_PCHECK_H
 
 class ParamCheck
 {
@@ -45,4 +45,5 @@ private:
 	const char **argv;
 };
 
-#endif /* _PCHECK_H */
+#endif /* _COLM_PCHECK_H */
+

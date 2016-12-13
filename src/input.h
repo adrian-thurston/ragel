@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _INPUT_H
-#define _INPUT_H
+#ifndef _COLM_INPUT_H
+#define _COLM_INPUT_H
 
 #include <stdio.h>
 
@@ -173,4 +173,5 @@ struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 }
 #endif
 
-#endif /* _INPUT_H */
+#endif /* _COLM_INPUT_H */
+

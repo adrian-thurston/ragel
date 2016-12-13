@@ -18,9 +18,12 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <stdbool.h>
+#include <assert.h>
+
+#include <mergesort.h>
 
 #include "fsmgraph.h"
-#include "mergesort.h"
 
 int FsmGraph::partitionRound( FsmState **statePtrs, MinPartition *parts, int numParts )
 {

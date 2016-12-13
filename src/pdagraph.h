@@ -19,22 +19,23 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _PDAGRAPH_H
-#define _PDAGRAPH_H
+#ifndef _COLM_PDAGRAPH_H
+#define _COLM_PDAGRAPH_H
 
 #include <assert.h>
-#include "vector.h"
-#include "bstset.h"
-#include "compare.h"
-#include "avltree.h"
-#include "dlist.h"
-#include "bstmap.h"
-#include "sbstmap.h"
-#include "sbstset.h"
-#include "sbsttable.h"
-#include "avlset.h"
-#include "dlistmel.h"
-#include "avltree.h"
+
+#include <avltree.h>
+#include <bstmap.h>
+#include <vector.h>
+#include <sbstmap.h>
+#include <sbstset.h>
+#include <sbsttable.h>
+#include <bstset.h>
+#include <compare.h>
+#include <avltree.h>
+#include <dlist.h>
+#include <avlset.h>
+#include <dlistmel.h>
 
 /* Flags for states. */
 #define SB_ISFINAL    0x04
@@ -511,5 +512,5 @@ struct PdaGraph
 	PdaActionSet actionSet;
 };
 
+#endif /* _COLM_PDAGRAPH_H */
 
-#endif /* _FSMGRAPH_H */

@@ -20,8 +20,8 @@
  */
 
 
-#ifndef _PDACODEGEN_H
-#define _PDACODEGEN_H
+#ifndef _COLM_PDACODEGEN_H
+#define _COLM_PDACODEGEN_H
 
 struct Compiler;
 
@@ -103,4 +103,5 @@ extern "C"
 	void internalPopBinding( struct pda_run *pdaRun, parse_tree_t *parseTree );
 }
 
-#endif
+#endif /* _COLM_PDACODEGEN_H */
+

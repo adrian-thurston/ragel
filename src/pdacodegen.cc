@@ -18,17 +18,11 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <string.h>
 
 #include <iostream>
-#include <stdlib.h>
-#include <ctype.h>
-#include <limits.h>
-#include "global.h"
+
 #include "compiler.h"
-#include "avlmap.h"
-#include "avlbasic.h"
-#include "avlset.h"
-#include "mergesort.h"
 #include "pdacodegen.h"
 
 using std::cerr;

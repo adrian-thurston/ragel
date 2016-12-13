@@ -18,14 +18,11 @@
  *  along with Aapl; if not, write to the Free Software Foundation, Inc., 59
  *  Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
+#include <string.h>
+#include <stdlib.h>
 
 #include <colm/rtvector.h>
 #include <colm/pdarun.h>
-
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-
 
 void init_rt_code_vect( struct rt_code_vect *vect )
 {

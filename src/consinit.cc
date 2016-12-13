@@ -19,17 +19,9 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include <iostream>
-#include <errno.h>
-
-#include "parser.h"
-#include "config.h"
-#include "avltree.h"
-#include "compiler.h"
-#include "parser.h"
-#include "global.h"
-#include "input.h"
 #include "consinit.h"
+
+#include <iostream>
 
 using std::cout;
 using std::cerr;

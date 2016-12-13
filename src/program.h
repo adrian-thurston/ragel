@@ -19,8 +19,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef __COLM_PROGRAM_H
-#define __COLM_PROGRAM_H
+#ifndef _COLM_PROGRAM_H
+#define _COLM_PROGRAM_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <colm/pdarun.h>
 
@@ -164,4 +168,9 @@ struct colm_program
 	const char **stream_fns;
 };
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* _COLM_PROGRAM_H */
+

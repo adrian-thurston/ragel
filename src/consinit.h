@@ -20,9 +20,14 @@
  */
 
 #include <iostream>
-#include "avltree.h"
+
+#include <avltree.h>
+
 #include "compiler.h"
 #include "parser.h"
+
+#ifndef _COLM_CONSINIT_H
+#define _COLM_CONSINIT_H
 
 struct ConsInit
 :
@@ -100,4 +105,5 @@ struct ConsInit
 	virtual void go( long activeRealm );
 };
 
+#endif /* _COLM_CONSINIT_H */
 

@@ -18,14 +18,15 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-
-#include "global.h"
 #include "redbuild.h"
-#include "fsmgraph.h"
-#include "redfsm.h"
-#include "fsmcodegen.h"
+
+#include <assert.h>
 #include <string.h>
+#include <stdbool.h>
+
+#include <iostream>
+
+#include "fsmcodegen.h"
 
 using namespace std;
 

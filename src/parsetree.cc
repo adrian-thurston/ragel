@@ -18,19 +18,14 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include "avltree.h"
-#include "compiler.h"
-#include "parser.h"
-#include "parsetree.h"
-#include "input.h"
+#include <assert.h>
+#include <stdbool.h>
 
 #include <iostream>
-#include <iomanip>
-#include <errno.h>
-#include <limits.h>
-#include <stdlib.h>
 
+#include "fsmgraph.h"
+#include "compiler.h"
+#include "parsetree.h"
 
 using namespace std;
 ostream &operator<<( ostream &out, const NameRef &nameRef );

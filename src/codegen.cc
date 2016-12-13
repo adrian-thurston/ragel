@@ -19,17 +19,17 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#include "compiler.h"
+#include <iostream>
 #include "fsmcodegen.h"
-#include "redfsm.h"
-#include "bstmap.h"
-#include "debug.h"
-#include <sstream>
-#include <string>
 
 void FsmCodeGen::writeIncludes()
 {
 	out << 
+		"#include <stdio.h>\n"
+		"#include <stdlib.h>\n"
+		"#include <string.h>\n"
+		"#include <assert.h>\n"
+		"\n"
 		"#include <colm/pdarun.h>\n"
 		"#include <colm/debug.h>\n"
 		"#include <colm/bytecode.h>\n"
@@ -39,15 +39,8 @@ void FsmCodeGen::writeIncludes()
 		"#include <colm/tree.h>\n"
 		"#include <colm/program.h>\n"
 		"#include <colm/colm.h>\n"
-		"\n"
-		"#include <stdio.h>\n"
-		"#include <stdlib.h>\n"
-		"#include <string.h>\n"
-		"#include <assert.h>\n"
-		"\n"
 		"\n";
 }
-
 
 void FsmCodeGen::writeMain( long activeRealm )
 {

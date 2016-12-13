@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _KEYOPS_H
-#define _KEYOPS_H
+#ifndef _COLM_KEYOPS_H
+#define _COLM_KEYOPS_H
 
 #include <fstream>
 #include <climits>
@@ -193,4 +193,5 @@ inline Key operator-(const Key key1, const Key key2)
 const char *findFileExtension( const char *stemFile );
 char *fileNameFromStem( const char *stemFile, const char *suffix );
 
-#endif /* _KEYOPS_H */
+#endif /* _COLM_KEYOPS_H */
+

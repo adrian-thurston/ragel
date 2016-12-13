@@ -18,15 +18,16 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include "compiler.h"
-#include "parsetree.h"
-#include "input.h"
-#include "debug.h"
-#include "pool.h"
-#include "pdacodegen.h"
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <assert.h>
 
 #include <iostream>
+
+#include "compiler.h"
+#include "pool.h"
+//#include "debug.h"
 
 using std::cerr;
 using std::endl;

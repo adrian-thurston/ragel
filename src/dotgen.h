@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _GVDOTGEN_H
-#define _GVDOTGEN_H
+#ifndef _COLM_GVDOTGEN_H
+#define _COLM_GVDOTGEN_H
 
 #include <iostream>
 
@@ -47,5 +47,5 @@ private:
 
 #endif
 
+#endif /* _COLM_GVDOTGEN_H */
 
-#endif /* _GVDOTGEN_H */

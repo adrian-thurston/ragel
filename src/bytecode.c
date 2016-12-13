@@ -18,22 +18,19 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-#include <colm/pdarun.h>
-#include <colm/tree.h>
 #include <colm/bytecode.h>
+
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <assert.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+
 #include <colm/pool.h>
 #include <colm/debug.h>
-#include <colm/config.h>
-#include <colm/struct.h>
-
-#include <alloca.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <signal.h>
 
 typedef struct colm_struct struct_t;
 
@@ -43,9 +40,6 @@ typedef struct colm_struct struct_t;
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif
-
-#define true 1
-#define false 0
 
 #define read_byte( i ) do { \
 	i = ((uchar) *instr++); \

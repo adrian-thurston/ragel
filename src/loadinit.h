@@ -19,8 +19,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#ifndef _COLM_LOADINIT_H
+#define _COLM_LOADINIT_H
+
 #include <iostream>
-#include "avltree.h"
+
+#include <avltree.h>
+
 #include "compiler.h"
 #include "parser.h"
 
@@ -66,3 +71,6 @@ struct LoadInit
 
 	virtual void go( long activeRealm );
 };
+
+#endif /* _COLM_LOAD_INIT_H */
+

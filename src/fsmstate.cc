@@ -18,12 +18,14 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
 #include <string.h>
 #include <assert.h>
-#include "fsmgraph.h"
+#include <stdbool.h>
 
 #include <iostream>
+
+#include "fsmgraph.h"
+
 using namespace std;
 
 /* Construct a mark index for a specified number of states. Must new up

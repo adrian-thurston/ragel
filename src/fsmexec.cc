@@ -18,17 +18,12 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <stdbool.h>
 
-#include <string.h>
-#include <iostream>
+#include <assert.h>
 
-#include "config.h"
-#include "defs.h"
 #include "redfsm.h"
 #include "compiler.h"
-#include "parsetree.h"
-#include "pdarun.h"
-#include "global.h"
 
 void execAction( struct pda_run *pdaRun, GenAction *genAction )
 {

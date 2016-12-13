@@ -18,24 +18,17 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <assert.h>
 
-#include <colm/pdarun.h>
 #include <colm/tree.h>
 #include <colm/pool.h>
 #include <colm/bytecode.h>
 #include <colm/debug.h>
-#include <colm/map.h>
-#include <colm/struct.h>
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <assert.h>
-#include <errno.h>
-
-#define true 1
-#define false 0
 
 #define BUFFER_INITIAL_SIZE 4096
 

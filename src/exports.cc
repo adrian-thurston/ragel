@@ -18,14 +18,11 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <stdbool.h>
 
-#include "compiler.h"
+#include <iostream>
+
 #include "fsmcodegen.h"
-#include "redfsm.h"
-#include "bstmap.h"
-#include "debug.h"
-#include <sstream>
-#include <string>
 
 using std::ostream;
 using std::ostringstream;

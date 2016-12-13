@@ -20,10 +20,12 @@
  */
 
 #include <colm/debug.h>
-#include <colm/program.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <colm/program.h>
 
 const char *const colm_realm_names[REALMS] =
 	{

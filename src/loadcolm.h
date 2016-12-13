@@ -19,6 +19,12 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
+#ifndef _COLM_LOADCOLM_H
+#define _COLM_LOADCOLM_H
+
 #include "parser.h"
 
 BaseParser *consLoadColm( Compiler *pd, const char *inputFileName );
+
+#endif /* _COLM_LOADCOLM_H */
+

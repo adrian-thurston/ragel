@@ -19,11 +19,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FSMREDUCE_H
-#define _FSMREDUCE_H
+#ifndef _COLM_FSMREDUCE_H
+#define _COLM_FSMREDUCE_H
 
 #include <iostream>
-#include "avltree.h"
+
+#include <avltree.h>
+
 #include "fsmgraph.h"
 #include "compiler.h"
 
@@ -154,5 +156,5 @@ private:
 	int curStateCond;
 };
 
+#endif /* _COLM_FSMREDUCE_H */
 
-#endif /* _FSMREDUCE_H */

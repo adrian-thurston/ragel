@@ -20,13 +20,6 @@
  */
 
 #include <colm/input.h>
-#include <colm/pdarun.h>
-#include <colm/debug.h>
-#include <colm/program.h>
-#include <colm/tree.h>
-#include <colm/bytecode.h>
-#include <colm/pool.h>
-#include <colm/struct.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,6 +27,14 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdbool.h>
+
+#include <colm/pdarun.h>
+#include <colm/debug.h>
+#include <colm/program.h>
+#include <colm/tree.h>
+#include <colm/bytecode.h>
+#include <colm/pool.h>
+#include <colm/struct.h>
 
 char *colm_filename_add( program_t *prg, const char *fn )
 {

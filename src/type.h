@@ -20,4 +20,5 @@ enum TYPE
 	TYPE_MAP_PTRS    = 0x0a,
 };
 
-#endif
+#endif /* _COLM_TYPE_H */
+

@@ -19,12 +19,14 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _FSMCODEGEN_H
-#define _FSMCODEGEN_H
+#ifndef _COLM_FSMCODEGEN_H
+#define _COLM_FSMCODEGEN_H
 
-#include <iostream>
-#include <string>
 #include <stdio.h>
+
+#include <string>
+#include <iostream>
+
 #include "keyops.h"
 #include "compiler.h"
 #include "redfsm.h"
@@ -203,4 +205,5 @@ protected:
 	void setLabelsNeeded();
 };
 
-#endif /* _FSMCODEGEN_H */
+#endif /* _COLM_FSMCODEGEN_H */
+

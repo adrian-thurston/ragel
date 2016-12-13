@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _BYTECODE_H
-#define _BYTECODE_H
+#ifndef _COLM_BYTECODE_H
+#define _COLM_BYTECODE_H
 
 #include <colm/pdarun.h>
 #include <colm/type.h>
@@ -679,4 +679,5 @@ code_t *colm_pop_reverse_code( struct rt_code_vect *all_rev );
 }
 #endif
 
-#endif
+#endif /* _COLM_BYTECODE_H */
+

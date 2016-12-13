@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef __COLM_PDARUN_H
-#define __COLM_PDARUN_H
+#ifndef _COLM_PDARUN_H
+#define _COLM_PDARUN_H
 
 #include <colm/input.h>
 #include <colm/defs.h>
@@ -471,4 +471,5 @@ void commit_reduce( program_t *prg, tree_t **root,
 }
 #endif
 
-#endif
+#endif /* _COLM_PDRUN_H */
+

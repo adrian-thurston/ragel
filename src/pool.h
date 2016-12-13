@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _POOL_H
-#define _POOL_H
+#ifndef _COLM_POOL_H
+#define _COLM_POOL_H
 
 /* Allocation, number of items. */
 #define FRESH_BLOCK 8128                    
@@ -68,4 +68,5 @@ long pool_alloc_num_lost( struct pool_alloc *pool_alloc );
 }
 #endif
 
-#endif
+#endif /* _COLM_POOL_H */
+

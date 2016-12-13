@@ -157,4 +157,5 @@ struct colm_struct *colm_construct_reducer( struct colm_program *prg, long gener
 }
 #endif
 
-#endif
+#endif /* _COLM_STRUCT_H */
+

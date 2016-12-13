@@ -18,6 +18,11 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <alloca.h>
+#include <sys/mman.h>
+#include <string.h>
+#include <assert.h>
+#include <stdlib.h>
 
 #include <colm/pdarun.h>
 #include <colm/tree.h>
@@ -26,12 +31,6 @@
 #include <colm/debug.h>
 #include <colm/config.h>
 #include <colm/struct.h>
-
-#include <alloca.h>
-#include <sys/mman.h>
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
 
 #define VM_STACK_SIZE (8192)
 

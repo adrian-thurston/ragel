@@ -1,13 +1,12 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
 #include <colm/program.h>
 #include <colm/struct.h>
 
 #include "internal.h"
 #include "bytecode.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <stdbool.h>
 
 struct colm_tree *colm_get_global( program_t *prg, long pos )
 {

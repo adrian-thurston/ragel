@@ -19,8 +19,8 @@
  *  Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef _RT_VECTOR_H
-#define _RT_VECTOR_H
+#ifndef _COLM_RTVECTOR_H
+#define _COLM_RTVECTOR_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,5 +30,5 @@ extern "C" {
 }
 #endif
 
-#endif 
+#endif /* _COLM_RT_VECTOR_H */
 

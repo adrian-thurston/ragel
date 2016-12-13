@@ -19,11 +19,13 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef _COLM_PARSER_H
+#define _COLM_PARSER_H
 
 #include <iostream>
-#include "avltree.h"
+
+#include <avltree.h>
+
 #include "compiler.h"
 #include "parser.h"
 
@@ -186,4 +188,5 @@ struct BaseParser
 
 };
 
-#endif
+#endif /* _COLM_PARSER_H */
+

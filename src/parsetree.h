@@ -19,24 +19,26 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _PARSETREE_H
-#define _PARSETREE_H
+#ifndef _COLM_PARSETREE_H
+#define _COLM_PARSETREE_H
 
 #include <iostream>
 #include <string.h>
 #include <string>
 
+#include <avlbasic.h>
+#include <avlmap.h>
+#include <bstmap.h>
+#include <bstset.h>
+#include <vector.h>
+#include <dlist.h>
+#include <dlistval.h>
+#include <dlistmel.h>
+
 #include "global.h"
-#include "avlmap.h"
-#include "bstmap.h"
-#include "bstset.h"
-#include "vector.h"
-#include "dlist.h"
-#include "dlistval.h"
-#include "dlistmel.h"
 #include "cstring.h"
 #include "bytecode.h"
-#include "avlbasic.h"
+
 
 /* Operators that are represented with single symbol characters. */
 #define OP_DoubleEql 'e'
@@ -3529,4 +3531,5 @@ struct Function
 
 typedef DList<Function> FunctionList;
 
-#endif /* _PARSETREE_H */
+#endif /* _COLM_PARSETREE_H */
+

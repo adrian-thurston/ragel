@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef __COLM_TREE_H
-#define __COLM_TREE_H
+#ifndef _COLM_TREE_H
+#define _COLM_TREE_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -374,5 +374,5 @@ tree_t *construct_string( struct colm_program *prg, head_t *s );
 }
 #endif
 
-#endif
+#endif /* COLM_TREE_H */
 

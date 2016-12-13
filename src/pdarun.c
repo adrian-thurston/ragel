@@ -18,25 +18,21 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
-
-
-#include "config.h"
-#include "debug.h"
 #include "pdarun.h"
-#include "bytecode.h"
-#include "tree.h"
-#include "pool.h"
-
-#include "internal.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 
-#define true 1
-#define false 0
+#include "config.h"
+#include "debug.h"
+#include "bytecode.h"
+#include "tree.h"
+#include "pool.h"
+#include "internal.h"
 
 #define act_sb 0x1
 #define act_rb 0x2

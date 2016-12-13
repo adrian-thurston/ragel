@@ -18,12 +18,13 @@
  *  along with Colm; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
+#include <colm/pool.h>
 
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
 #include <colm/pdarun.h>
-#include <colm/pool.h>
 #include <colm/debug.h>
 
 void init_pool_alloc( struct pool_alloc *pool_alloc, int sizeofT )

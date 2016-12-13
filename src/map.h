@@ -19,8 +19,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
-#ifndef _MAP_H
-#define _MAP_H
+#ifndef _COLM_MAP_H
+#define _COLM_MAP_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -28,6 +28,7 @@ extern "C" {
 
 #include <colm/program.h>
 #include <colm/struct.h>
+
 #include "internal.h"
 
 void map_list_abandon( map_t *map );
@@ -80,5 +81,5 @@ tree_t *colm_vmap_find( program_t *prg, map_t *map, tree_t *key );
 }
 #endif
 
-#endif
+#endif /* _COLM_MAP_H */
 
