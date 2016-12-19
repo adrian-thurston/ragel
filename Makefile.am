@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 
-SUBDIRS = src
+SUBDIRS = src doc
 DIST_SUBDIRS = $(SUBDIRS) aapl
 
 dist_doc_DATA =  colm.vim
