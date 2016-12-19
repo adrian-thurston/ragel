@@ -309,7 +309,7 @@ int colm_delete_program( program_t *prg )
 	vm_clear( prg );
 
 	if ( prg->stream_fns ) {
-		char **ptr = prg->stream_fns;
+		char **ptr = (char**)prg->stream_fns;
 		while ( *ptr != 0 ) {
 			free( *ptr );
 			ptr += 1;

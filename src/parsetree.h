@@ -223,7 +223,7 @@ struct LangEl;
 enum AugType
 {
 	at_start,
-	at_leave,
+	at_leave
 };
 
 struct Action;
@@ -1303,7 +1303,7 @@ struct LexFactor
 		OrExprType,
 		RegExprType, 
 		ReferenceType,
-		ParenType,
+		ParenType
 	}; 
 	
 	LexFactor()
@@ -2082,7 +2082,7 @@ enum RepeatType {
 	RepeatNone = 1,
 	RepeatRepeat,
 	RepeatList,
-	RepeatOpt,
+	RepeatOpt
 };
 
 /*
@@ -2886,7 +2886,7 @@ struct LangTerm
 		MakeTreeType,
 		MakeTokenType,
 		EmbedStringType,
-		CastType,
+		CastType
 	};
 
 	LangTerm()

@@ -41,12 +41,8 @@ typedef unsigned long half_t;
 struct bindings;
 struct function_info;
 
-typedef struct colm_stream stream_t;
-typedef struct colm_parser parser_t;
-typedef struct colm_list list_t;
-typedef struct colm_list_el list_el_t;
-typedef struct colm_map map_t;
-typedef struct colm_map_el map_el_t;
+typedef struct colm_tree tree_t;
+#include <colm/struct.h>
 
 typedef struct colm_location
 {
@@ -79,8 +75,6 @@ typedef struct colm_ref
 	kid_t *kid;
 	struct colm_ref *next;
 } ref_t;
-
-typedef struct colm_tree tree_t;
 
 struct tree_pair
 {

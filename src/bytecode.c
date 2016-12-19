@@ -34,8 +34,6 @@
 #include <colm/pool.h>
 #include <colm/debug.h>
 
-typedef struct colm_struct struct_t;
-
 #define TRUE_VAL  1
 #define FALSE_VAL 0
 

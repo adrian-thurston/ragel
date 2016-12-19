@@ -38,9 +38,6 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
-typedef unsigned long colm_value_t;
-
-
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -440,7 +437,7 @@ typedef unsigned long colm_value_t;
 enum GEN {
 	GEN_PARSER   = 0x14,
 	GEN_LIST     = 0x15,
-	GEN_MAP      = 0x16,
+	GEN_MAP      = 0x16
 };
 
 /* Known language element ids. */

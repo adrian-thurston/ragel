@@ -1785,7 +1785,7 @@ enum VisitType
 	IgnoreWrapper,
 	IgnoreData,
 	Term,
-	NonTerm,
+	NonTerm
 };
 
 #define TF_TERM_SEEN 0x1
