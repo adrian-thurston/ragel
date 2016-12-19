@@ -71,7 +71,7 @@ inline string itoa( int i )
 /*
  * class FsmCodeGen
  */
-class FsmCodeGen
+struct FsmCodeGen
 {
 public:
 	FsmCodeGen( ostream &out, RedFsm *redFsm, fsm_tables *fsmTables );
