@@ -641,7 +641,7 @@ int BaseParser::lexFactorRepNum( const InputLoc &loc, const String &data )
 {
 	/* Convert the priority number to a long. Check for overflow. */
 	errno = 0;
-	int rep = strtol( data, 0, 10 );
+	long rep = strtol( data, 0, 10 );
 	if ( errno == ERANGE && rep == LONG_MAX ) {
 		/* Repetition too large. Recover by returing repetition 1. */
 		error(loc) << "repetition number " << data << " overflows" << endl;
