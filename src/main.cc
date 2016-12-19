@@ -616,21 +616,22 @@ void processArgs( int argc, const char **argv )
 
 			case 'D':
 #if DEBUG
-				if ( strcmp( pc.parameterArg, "BYTECODE" ) == 0 )
+				// @NOTE: keep this in sync with 'debug.c': 'colm_realm_names'
+				if ( strcmp( pc.parameterArg, colm_realm_names[0] ) == 0 )
 					gblActiveRealm |= REALM_BYTECODE;
-				else if ( strcmp( pc.parameterArg, "PARSE" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[1] ) == 0 )
 					gblActiveRealm |= REALM_PARSE;
-				else if ( strcmp( pc.parameterArg, "MATCH" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[2] ) == 0 )
 					gblActiveRealm |= REALM_MATCH;
-				else if ( strcmp( pc.parameterArg, "COMPILE" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[3] ) == 0 )
 					gblActiveRealm |= REALM_COMPILE;
-				else if ( strcmp( pc.parameterArg, "POOL" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[4] ) == 0 )
 					gblActiveRealm |= REALM_POOL;
-				else if ( strcmp( pc.parameterArg, "PRINT" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[5] ) == 0 )
 					gblActiveRealm |= REALM_PRINT;
-				else if ( strcmp( pc.parameterArg, "INPUT" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[6] ) == 0 )
 					gblActiveRealm |= REALM_INPUT;
-				else if ( strcmp( pc.parameterArg, "SCAN" ) == 0 )
+				else if ( strcmp( pc.parameterArg, colm_realm_names[7] ) == 0 )
 					gblActiveRealm |= REALM_SCAN;
 				else
 					fatal( "unknown argument to -D %s\n", pc.parameterArg );

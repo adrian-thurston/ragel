@@ -29,6 +29,7 @@
 #include <colm/program.h>
 
 const char *const colm_realm_names[REALMS] =
+	// @NOTE: keep this in sync with 'main.cc': 'processArgs()' '-D' option
 	{
 		"BYTECODE",
 		"PARSE",

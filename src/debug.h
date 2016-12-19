@@ -40,8 +40,6 @@ void fatal( const char *fmt, ... );
 #define check_realm( realm ) 
 #endif
 
-struct colm_program;
-
 int _debug( struct colm_program *prg, long realm, const char *fmt, ... );
 
 void message( const char *fmt, ... );
@@ -57,7 +55,7 @@ void message( const char *fmt, ... );
 
 #define REALMS            32
 
-extern const char *const colmRealmNames[REALMS];
+extern const char *const colm_realm_names[REALMS];
 
 #ifdef __cplusplus
 }
