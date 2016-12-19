@@ -175,13 +175,23 @@ void usage()
 "general:\n"
 "   -h, -H, -?, --help   print this usage and exit\n"
 "   -v --version         print version information and exit\n"
-"   -o <file>            write output to <file>\n"
-"   -c                   compile only (don't produce binary)\n"
+"   -b <file>            write binary to <file>\n"
+"   -o <file>            write object to <file>\n"
 "   -e <file>            write C++ export header to <file>\n"
 "   -x <file>            write C++ export code to <file>\n"
 "   -m <file>            write C++ commit code to <file>\n"
 "   -a <file>            additional code file to include in output program\n"
 "   -E N=V               set a string value availabe in the program\n"
+"   -I <path>            additional include path for the compiler\n"
+"   -i                   activate branchpoint information\n"
+"   -l                   activate logging\n"
+"   -c                   compile only (don't produce binary)\n"
+"   -V                   print dot format (graphiz)\n"
+"   -d                   print verbose debug information\n"
+#if DEBUG
+"   -D <tag>             print more information about <tag>\n"
+"                        (BYTECODE|PARSE|MATCH|COMPILE|POOL|PRINT|INPUT|SCAN\n"
+#endif
 	;	
 }
 
