@@ -1,0 +1,66 @@
+CODE
+====
+
+1. Use tabs for indentation. It must always be possible to alter tab expansion
+   to any number of characters.
+
+2. Spaces may be used for alignment anytime after the first non-whitespace
+   character. Please use sparingly. Preferrably only for formatting lists of
+   things.
+
+   int var1     = 5;
+   int othervar = 4;
+   int x        = 8;
+
+3. Try not to go over 100 chars wide.
+
+4. Statatements that span multiple lines should have two indentations on lines
+   two and up.
+
+   some_function( arg1, arg2, arg3,
+   <TAB><TAB>arg4, arg5, arg6 );
+
+5. Put spaces on the interior of argument lists
+
+   some_function( a );
+
+6. Blocks with one line don't need to be wrapped in {}
+
+   if ( test )
+       call_function();
+
+7. Start a new line after every block close.
+   
+   if ( test ) {
+       do_something();
+   }
+   else {
+       something_else();
+   }
+
+8. Comment with C-style comments.
+
+   /* This is the most important call. */
+   the_program();
+
+9. Disable code (temporarily or for illustration purposes) with C++ style
+   comments. For very large blocks use #if 0.
+
+   // dont_pass_this_function_zero( 0 );
+
+
+COMMITS
+=======
+
+1. The first line:
+
+   a) should be a summary of the changes.
+
+   b) should be as short as possible.
+
+   c) should start with a lowercase.
+
+   d) does not need to be a full sentence.
+
+2. Expand with detail, if necessary, in lines 3 and up. Please fold
+   lines to 80 chars.
