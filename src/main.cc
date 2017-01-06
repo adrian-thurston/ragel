@@ -90,6 +90,7 @@ bool gblLibrary = false;
 long gblActiveRealm = 0;
 
 ArgsVector includePaths;
+ArgsVector libraryPaths;
 DefineVector defineArgs;
 ArgsVector additionalCodeFiles;
 
@@ -147,7 +148,7 @@ ostream &warning( )
 ostream &warning( const InputLoc &loc )
 {
 	assert( inputFn != 0 );
-	cerr << "warning: " << inputFn << ":" << 
+	cerr << "warning: " << inputFn << ":" <<
 			loc.line << ":" << loc.col << ": ";
 	return cerr;
 }
@@ -184,6 +185,7 @@ void usage()
 "   -E N=V               set a string value availabe in the program\n"
 "   -I <path>            additional include path for the compiler\n"
 "   -i                   activate branchpoint information\n"
+"   -L <path>            additional library path for the linker\n"
 "   -l                   activate logging\n"
 "   -c                   compile only (don't produce binary)\n"
 "   -V                   print dot format (graphiz)\n"
@@ -192,7 +194,7 @@ void usage()
 "   -D <tag>             print more information about <tag>\n"
 "                        (BYTECODE|PARSE|MATCH|COMPILE|POOL|PRINT|INPUT|SCAN\n"
 #endif
-	;	
+	;
 }
 
 /* Print version information. */
@@ -223,9 +225,9 @@ const char *findFileExtension( const char *stemFile )
 			break;
 		}
 		ppos--;
-	} 
+	}
 
-	/* If we got to the front of the string then bail we 
+	/* If we got to the front of the string then bail we
 	 * did not find an extension  */
 	if ( ppos == stemFile )
 		ppos = 0;
@@ -271,14 +273,14 @@ void openOutputCompiled()
 	if ( binaryFn != 0 && inputFn != 0 &&
 			strcmp( inputFn, binaryFn  ) == 0 )
 	{
-		error() << "output file \"" << binaryFn  << 
+		error() << "output file \"" << binaryFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
 	if ( intermedFn != 0 && inputFn != 0 &&
 			strcmp( inputFn, intermedFn  ) == 0 )
 	{
-		error() << "intermediate file \"" << intermedFn  << 
+		error() << "intermediate file \"" << intermedFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
@@ -308,7 +310,7 @@ void openOutputLibrary()
 	if ( outputFn != 0 && inputFn != 0 &&
 			strcmp( inputFn, outputFn  ) == 0 )
 	{
-		error() << "output file \"" << outputFn  << 
+		error() << "output file \"" << outputFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
@@ -333,7 +335,7 @@ void openExports( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( inputFn != 0 && exportHeaderFn != 0 && strcmp( inputFn, exportHeaderFn  ) == 0 ) {
-		error() << "output file \"" << exportHeaderFn  << 
+		error() << "output file \"" << exportHeaderFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
@@ -358,7 +360,7 @@ void openExportsImpl( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( inputFn != 0 && exportCodeFn != 0 && strcmp( inputFn, exportCodeFn  ) == 0 ) {
-		error() << "output file \"" << exportCodeFn  << 
+		error() << "output file \"" << exportCodeFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
@@ -383,7 +385,7 @@ void openCommit( )
 {
 	/* Make sure we are not writing to the same file as the input file. */
 	if ( inputFn != 0 && commitCodeFn != 0 && strcmp( inputFn, commitCodeFn  ) == 0 ) {
-		error() << "output file \"" << commitCodeFn  << 
+		error() << "output file \"" << commitCodeFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
@@ -406,89 +408,80 @@ void openCommit( )
 
 void compileOutputCommand( const char *command )
 {
-	//cout << "compiling with: " << command << endl;
+	if ( verbose )
+		cout << "compiling with: '" << command << "'" << endl;
 	int res = system( command );
 	if ( res != 0 )
 		error() << "there was a problem compiling the output" << endl;
 }
 
-void compileOutputInstalled( const char *argv0 )
+void compileOutput( const char *argv0, const bool installed )
 {
 	/* Find the location of the colm program that is executing. */
 	char *location = strdup( argv0 );
-	char *last = location + strlen(location) - 1;
-	while ( true ) {
-		if ( last == location ) {
-			last[0] = '.';
-			last[1] = 0;
-			break;
+	char *last;
+	int length = 1024 + strlen( intermedFn ) + strlen( binaryFn );
+	if ( installed ) {
+		last = location + strlen( location ) - 1;
+		while ( true ) {
+			if ( last == location ) {
+				last[0] = '.';
+				last[1] = 0;
+				break;
+			}
+			if ( *last == '/' ) {
+				last[0] = 0;
+				break;
+			}
+			last -= 1;
 		}
-		if ( *last == '/' ) {
-			last[0] = 0;
-			break;
-		}
-		last -= 1;
+	} else {
+		last = strrchr( location, '/' );
+		assert( last != 0 );
+		last[0] = 0;
+		length += 3 * strlen( location );
 	}
-
-
-	int length = 1024 + strlen(intermedFn) + strlen(binaryFn);
-
 	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ )
 		length += strlen( *af ) + 2;
-
-	char *command = new char[length];
-
-	sprintf( command, 
-		"gcc -Wall -Wwrite-strings"
-		" -I" PREFIX "/include"
-		" -g"
-		" -o %s"
+	for ( ArgsVector::Iter ip = includePaths; ip.lte(); ip++ )
+		length += strlen( *ip ) + 3;
+	for ( ArgsVector::Iter lp = libraryPaths; lp.lte(); lp++ )
+		length += strlen( *lp ) + 3;
+#define COMPILE_COMMAND_STRING "gcc -Wall -Wwrite-strings" \
+		" -g" \
+		" -o %s" \
 		" %s"
-		" -L" PREFIX "/lib"
-		" -lcolm",
-		binaryFn, intermedFn );
-	
+	char *command = new char[length];
+	if ( installed) {
+		sprintf( command,
+				COMPILE_COMMAND_STRING
+				" -I" PREFIX "/include"
+				" -L" PREFIX "/lib",
+				binaryFn, intermedFn );
+	}
+	else {
+		sprintf( command,
+				COMPILE_COMMAND_STRING
+				" -I%s/../aapl"
+				" -I%s/include"
+				" -L%s",
+				binaryFn, intermedFn, location, location, location );
+	}
+#undef COMPILE_COMMAND_STRING
 	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
 		strcat( command, " " );
 		strcat( command, *af );
 	}
-
-	compileOutputCommand( command );
-
-	delete[] command;
-}
-
-void compileOutputInSource( const char *argv0 )
-{
-	/* Find the location of the colm program that is executing. */
-	char *location = strdup( argv0 );
-	char *last = strrchr( location, '/' );
-	assert( last != 0 );
-	last[0] = 0;
-
-	int length = 1024 + 3 * strlen(location) + strlen(intermedFn) + strlen(binaryFn);
-
-	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ )
-		length += strlen( *af ) + 2;
-
-	char *command = new char[length];
-	sprintf( command, 
-		"gcc -Wall -Wwrite-strings"
-		" -I%s/../aapl"
-		" -I%s/include"
-		" -g"
-		" -o %s"
-		" %s"
-		" -L%s"
-		" -lcolm",
-		location, location,
-		binaryFn, intermedFn, location );
-
-	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
-		strcat( command, " " );
-		strcat( command, *af );
+	for ( ArgsVector::Iter ip = includePaths; ip.lte(); ip++ ) {
+		strcat( command, " -I" );
+		strcat( command, *ip );
 	}
-	
+	for ( ArgsVector::Iter lp = libraryPaths; lp.lte(); lp++ ) {
+		strcat( command, " -L" );
+		strcat( command, *lp );
+	}
+	strcat( command, " -lcolm" );
+
 	compileOutputCommand( command );
 
 	delete[] command;
@@ -516,7 +509,7 @@ bool inSourceTree( const char *argv0 )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:vdlio:S:M:vHh?-:sVa:m:b:E:", argc, argv );
+	ParamCheck pc( "cD:e:x:I:L:vdlio:S:M:vHh?-:sVa:m:b:E:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -534,6 +527,9 @@ void processArgs( int argc, const char **argv )
 				break;
 			case 'l':
 				logging = true;
+				break;
+			case 'L':
+				libraryPaths.append( pc.parameterArg );
 				break;
 			case 'i':
 				branchPointInfo = true;
@@ -580,7 +576,7 @@ void processArgs( int argc, const char **argv )
 					exit(0);
 				}
 				else {
-					error() << "--" << pc.parameterArg << 
+					error() << "--" << pc.parameterArg <<
 							" is an invalid argument" << endl;
 				}
 				break;
@@ -607,7 +603,7 @@ void processArgs( int argc, const char **argv )
 				if ( eq == pc.parameterArg )
 					fatal( "-E variable name is of zero length" );
 
-				defineArgs.append( DefineArg( 
+				defineArgs.append( DefineArg(
 						String( pc.parameterArg, eq-pc.parameterArg ),
 						String( eq + 1 ) ) );
 
@@ -639,7 +635,7 @@ void processArgs( int argc, const char **argv )
 				fatal( "-D option specified but debugging messsages not compiled in\n" );
 #endif
 				break;
-				
+
 			}
 			break;
 
@@ -688,10 +684,10 @@ int main(int argc, const char **argv)
 		exit(1);
 
 	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFn != 0 && outputFn != 0 && 
+	if ( inputFn != 0 && outputFn != 0 &&
 			strcmp( inputFn, outputFn  ) == 0 )
 	{
-		error() << "output file \"" << outputFn  << 
+		error() << "output file \"" << outputFn  <<
 				"\" is the same as the input file" << endl;
 	}
 
@@ -749,9 +745,9 @@ int main(int argc, const char **argv)
 
 		if ( !gblLibrary ) {
 			if ( inSourceTree( argv[0] ) )
-				compileOutputInSource( argv[0] );
+				compileOutput( argv[0], false );
 			else
-				compileOutputInstalled( argv[0] );
+				compileOutput( argv[0], true );
 		}
 
 		if ( exportHeaderFn != 0 ) {
