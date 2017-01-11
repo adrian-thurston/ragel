@@ -112,6 +112,28 @@ struct Rope
 		return ret;
 	}
 
+	char *appendBlock( int len )
+	{
+		if ( tblk == 0 ) {
+			/* There are no blocks. */
+			hblk = tblk = allocateBlock( len );
+		}
+		else {
+			/* Terminate the existing tail block by setting the size to the
+			 * farthest we got in. */
+			tblk->size = toff;
+
+			RopeBlock *block = allocateBlock( len );
+			tblk->next = block;
+			tblk = block;
+		}
+
+		char *ret = data(tblk);
+		toff = len;
+		ropeLen += len;
+		return ret;
+	}
+
 	void empty()
 	{
 		hblk = 0;
