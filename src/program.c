@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-#include <alloca.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <assert.h>
