@@ -25,3 +25,4 @@ DIST_SUBDIRS = $(SUBDIRS) aapl
 
 dist_doc_DATA =  colm.vim
 EXTRA_DIST = colm.vim
+ACLOCAL_AMFLAGS = -I m4

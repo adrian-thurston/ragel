@@ -1,8 +1,8 @@
 #!/bin/bash
-#
 
-libtoolize --copy --force
+libtoolize --quiet --copy --force
 aclocal
-autoheader 
-automake --foreign --add-missing 
+autoheader
+automake --foreign --add-missing
 autoconf
+
