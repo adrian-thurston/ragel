@@ -75,8 +75,8 @@ AC_ARG_ENABLE(debug,
 		AC_HELP_STRING([--enable-debug], [enable debug statements]), 
 		AC_DEFINE([DEBUG], [1], [enable debug statements]))
 
-AC_CHECK_PROG( ASCIIDOC, [asciidoc], [asciidoc] )
-AC_CHECK_PROG( PYGMENTIZE, [pygmentize], [pygmentize] )
+AC_CHECK_PROG([ASCIIDOC], [asciidoc], [asciidoc])
+AC_CHECK_PROG([PYGMENTIZE], [pygmentize], [pygmentize])
 
 dnl write output files
 AC_OUTPUT([
