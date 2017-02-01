@@ -118,6 +118,9 @@ void colm_set_debug( struct colm_program *prg, long active_realm );
 /* Run a top-level colm program. */
 void colm_run_program( struct colm_program *prg, int argc, const char **argv );
 
+/* Run a top-level colm program, with argument lengths (allows binary data). */
+void colm_run_program2( struct colm_program *prg, int argc, const char **argv, const int *argl );
+
 /* Run a single exported colm function. */
 struct colm_tree *colm_run_func( struct colm_program *prg, int frame_id,
 		const char **params, int param_count );

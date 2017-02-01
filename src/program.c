@@ -201,7 +201,7 @@ program_t *colm_new_program( struct colm_sections *rtd )
 	return prg;
 }
 
-void colm_run_program( program_t *prg, int argc, const char **argv )
+void colm_run_program2( program_t *prg, int argc, const char **argv, const int *argl )
 {
 	if ( prg->rtd->root_code_len == 0 )
 		return;
@@ -209,6 +209,7 @@ void colm_run_program( program_t *prg, int argc, const char **argv )
 	/* Make the arguments available to the program. */
 	prg->argc = argc;
 	prg->argv = argv;
+	prg->argl = argl;
 
 	Execution execution;
 	memset( &execution, 0, sizeof(execution) );
@@ -219,6 +220,11 @@ void colm_run_program( program_t *prg, int argc, const char **argv )
 	/* Clear the arg and stack. */
 	prg->argc = 0;
 	prg->argv = 0;
+}
+
+void colm_run_program( program_t *prg, int argc, const char **argv )
+{
+	colm_run_program2( prg, argc, argv, 0 );
 }
 
 static void colm_clear_heap( program_t *prg, tree_t **sp )

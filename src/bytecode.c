@@ -331,23 +331,25 @@ static void downref_locals( program_t *prg, tree_t ***psp,
 	}
 }
 
-static tree_t *construct_arg0( program_t *prg, int argc, const char **argv )
+static tree_t *construct_arg0( program_t *prg, int argc, const char **argv, const int *argl )
 {
 	tree_t *arg0 = 0;
 	if ( argc > 0 ) {
-		head_t *head = colm_string_alloc_pointer( prg, argv[0], strlen(argv[0]) );
+		size_t len = argl != 0 ? argl[0] : strlen(argv[0]);
+		head_t *head = colm_string_alloc_pointer( prg, argv[0], len );
 		arg0 = construct_string( prg, head );
 		colm_tree_upref( arg0 );
 	}
 	return arg0;
 }
 
-static list_t *construct_argv( program_t *prg, int argc, const char **argv )
+static list_t *construct_argv( program_t *prg, int argc, const char **argv, const int *argl )
 {
 	list_t *list = (list_t*)colm_construct_generic( prg, prg->rtd->argv_generic_id );
 	int i;
 	for ( i = 1; i < argc; i++ ) {
-		head_t *head = colm_string_alloc_pointer( prg, argv[i], strlen(argv[i]) );
+		size_t len = argl != 0 ? argl[i] : strlen(argv[i]);
+		head_t *head = colm_string_alloc_pointer( prg, argv[i], len );
 		tree_t *arg = construct_string( prg, head );
 		colm_tree_upref( arg );
 
@@ -428,6 +430,7 @@ tree_t *colm_run_func( struct colm_program *prg, int frame_id,
 	/* Make the arguments available to the program. */
 	prg->argc = 0;
 	prg->argv = 0;
+	prg->argl = 0;
 
 	Execution execution;
 	memset( &execution, 0, sizeof(execution) );
@@ -3809,7 +3812,7 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARG0 %lu\n", field );
 
 				/* tree_t comes back upreffed. */
-				tree_t *tree = construct_arg0( prg, prg->argc, prg->argv );
+				tree_t *tree = construct_arg0( prg, prg->argc, prg->argv, prg->argl );
 				tree_t *prev = colm_struct_get_field( prg->global, tree_t*, field );
 				colm_tree_downref( prg, sp, prev );
 				colm_struct_set_field( prg->global, tree_t*, field, tree );
@@ -3820,7 +3823,7 @@ again:
 				read_half( field );
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
-				list_t *list = construct_argv( prg, prg->argc, prg->argv );
+				list_t *list = construct_argv( prg, prg->argc, prg->argv, prg->argl );
 				colm_struct_set_field( prg->global, list_t*, field, list );
 				break;
 			}

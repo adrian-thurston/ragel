@@ -126,6 +126,7 @@ struct colm_program
 
 	int argc;
 	const char **argv;
+	const int *argl;
 
 	unsigned char ctx_dep_parsing;
 	struct colm_sections *rtd;
