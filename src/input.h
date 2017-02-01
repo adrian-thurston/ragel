@@ -170,6 +170,8 @@ struct stream_impl *colm_stream_impl( struct colm_struct *s );
 struct colm_str *collect_string( struct colm_program *prg, struct colm_stream *s );
 struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 
+void colm_close_stream_file( FILE *file );
+
 #ifdef __cplusplus
 }
 #endif

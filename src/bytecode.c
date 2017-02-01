@@ -2286,7 +2286,7 @@ again:
 			struct stream_impl *si = stream->impl;
 
 			if ( si->file != 0 ) {
-				fclose( si->file );
+				colm_close_stream_file( si->file );
 				si->file = 0;
 			}
 

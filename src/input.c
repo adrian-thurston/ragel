@@ -127,13 +127,22 @@ void colm_clear_source_stream( struct colm_program *prg,
 	source_stream->queue = 0;
 }
 
+void colm_close_stream_file( FILE *file )
+{
+	if ( file != stdin && file != stdout && file != stderr &&
+			fileno(file) != 0 && fileno( file) != 1 && fileno(file) != 2 )
+	{
+		fclose( file );
+	}
+}
+
 void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 {
 	stream_t *stream = (stream_t*) s;
 	colm_clear_source_stream( prg, sp, stream->impl );
 
 	if ( stream->impl->file != 0 )
-		fclose( stream->impl->file );
+		colm_close_stream_file( stream->impl->file );
 	
 	if ( stream->impl->collect != 0 ) {
 		str_collect_destroy( stream->impl->collect );
