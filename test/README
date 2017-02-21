@@ -1,0 +1,13 @@
+
+The test suite now depends on TXL. Since the trend in Ragel is towards
+independence of the host-language, tests are now being written in a fictional
+mini-language designed for the purpose of testing ragel. The host language
+test-cases are then generated using a TXL transformation. This allows one test
+case to be run against all host languages in addition to all code generation
+styles.
+
+TXL is not open source, but a free download is available from the homepage.
+
+http://www.txl.ca/
+
+-Adrian
