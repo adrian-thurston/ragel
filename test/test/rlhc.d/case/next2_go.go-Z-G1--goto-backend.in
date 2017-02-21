@@ -1,0 +1,318 @@
+host( "working/next2_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var target  int ;
+	var last  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _next2_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _next2_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _next2_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int next2_start = 19;
+value int next2_first_final = 19;
+value int next2_error = 0;
+
+value int next2_en_unused = 2;
+value int next2_en_one = 8;
+value int next2_en_two = 11;
+value int next2_en_three = 14;
+value int next2_en_main = 19;
+
+host( "working/next2_go.rl", 65 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)next2_start;
+	}
+	host( "working/next2_go.rl", 68 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 19:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr0;
+				}
+				case 49: {
+					goto ctr19;
+				}
+				case 50: {
+					goto ctr20;
+				}
+				case 51: {
+					goto ctr21;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ( deref( data, p )) == 120 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 2:
+			if ( ( deref( data, p )) == 117 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 110 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 117 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 115 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 100 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr1;
+			}
+			case 20:
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ( deref( data, p )) == 110 ) {
+				goto ctr9;
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr10;
+			}
+			{
+				goto ctr1;
+			}
+			case 21:
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( ( deref( data, p )) == 116 ) {
+				goto ctr11;
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ( deref( data, p )) == 119 ) {
+				goto ctr12;
+			}
+			{
+				goto ctr1;
+			}
+			case 13:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 22:
+			{
+				goto ctr1;
+			}
+			case 14:
+			if ( ( deref( data, p )) == 116 ) {
+				goto ctr14;
+			}
+			{
+				goto ctr1;
+			}
+			case 15:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr15;
+			}
+			{
+				goto ctr1;
+			}
+			case 16:
+			if ( ( deref( data, p )) == 114 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr1;
+			}
+			case 17:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr17;
+			}
+			{
+				goto ctr1;
+			}
+			case 18:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr18;
+			}
+			{
+				goto ctr1;
+			}
+			case 23:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr21: cs = 1; goto f5;
+		ctr2: cs = 3; goto _again;
+		ctr3: cs = 4; goto _again;
+		ctr4: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		ctr6: cs = 7; goto _again;
+		ctr8: cs = 9; goto _again;
+		ctr9: cs = 10; goto _again;
+		ctr11: cs = 12; goto _again;
+		ctr12: cs = 13; goto _again;
+		ctr14: cs = 15; goto _again;
+		ctr15: cs = 16; goto _again;
+		ctr16: cs = 17; goto _again;
+		ctr17: cs = 18; goto _again;
+		ctr0: cs = 19; goto _again;
+		ctr19: cs = 19; goto f3;
+		ctr20: cs = 19; goto f4;
+		ctr7: cs = 20; goto _again;
+		ctr10: cs = 21; goto f0;
+		ctr13: cs = 22; goto f1;
+		ctr18: cs = 23; goto f2;
+		
+		f0:
+		host( "working/next2_go.rl", 17 ) ${fmt.Print( "one\n" );target = 19;
+			cs = (target);
+			
+		}$
+		goto _again;
+		f1:
+		host( "working/next2_go.rl", 22 ) ${fmt.Print( "two\n" );target = 19;
+			cs = (target);
+			
+		}$
+		goto _again;
+		f2:
+		host( "working/next2_go.rl", 27 ) ${fmt.Print( "three\n" );target = 19;
+			cs = (target);
+			
+		}$
+		goto _again;
+		f3:
+		host( "working/next2_go.rl", 33 ) ${target = 8;
+			cs = (target);
+			
+			last = 1;
+		}$
+		goto _again;
+		f4:
+		host( "working/next2_go.rl", 39 ) ${target = 11;
+			cs = (target);
+			
+			last = 2;
+		}$
+		goto _again;
+		f5:
+		host( "working/next2_go.rl", 46 ) ${if ( last == 2 ) {
+				target = 14;
+				cs = (target);
+				
+				
+			}
+			last = 3;
+		}$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/next2_go.rl", 74 ) @{
+	}
+	func finish() {
+		if cs >= next2_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1one3x2two3three\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

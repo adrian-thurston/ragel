@@ -1,0 +1,692 @@
+#include <stdio.h>
+#include <string.h>
+
+int num = 0;
+
+struct CallTest
+{
+	int cs, top, stack[32];
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	void init( );
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	void execute( const char *data, int len );
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	int finish( );
+};
+
+
+
+static const int  CallTest_start  = 1;
+static const int  CallTest_first_final  = 23;
+static const int  CallTest_error  = 0;
+static const int  CallTest_en_even  = 13;
+static const int  CallTest_en_odd  = 18;
+static const int  CallTest_en_fail  = 22;
+static const int  CallTest_en_main  = 1;
+static const char  _CallTest_nfa_targs [] = { 0, 0 ,  };
+static const char  _CallTest_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _CallTest_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _CallTest_nfa_pop_trans [] = { 0, 0 ,  };
+void CallTest::init( )
+{
+	num = 0;
+	
+	{
+		cs = ( int ) CallTest_start;
+		top = 0;
+	}
+}
+
+void CallTest::execute( const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data+len;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		goto _resume;
+		
+		_again:
+		switch ( cs  ) {
+			case 1:
+			goto st1;
+			case 0:
+			goto st0;
+			case 2:
+			goto st2;
+			case 3:
+			goto st3;
+			case 23:
+			goto st23;
+			case 4:
+			goto st4;
+			case 5:
+			goto st5;
+			case 6:
+			goto st6;
+			case 7:
+			goto st7;
+			case 8:
+			goto st8;
+			case 9:
+			goto st9;
+			case 10:
+			goto st10;
+			case 11:
+			goto st11;
+			case 12:
+			goto st12;
+			case 13:
+			goto st13;
+			case 14:
+			goto st14;
+			case 15:
+			goto st15;
+			case 16:
+			goto st16;
+			case 17:
+			goto st17;
+			case 24:
+			goto st24;
+			case 18:
+			goto st18;
+			case 19:
+			goto st19;
+			case 20:
+			goto st20;
+			case 21:
+			goto st21;
+			case 25:
+			goto st25;
+			case 22:
+			goto st22;
+			
+		}
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 23:
+			goto st_case_23;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 17:
+			goto st_case_17;
+			case 24:
+			goto st_case_24;
+			case 18:
+			goto st_case_18;
+			case 19:
+			goto st_case_19;
+			case 20:
+			goto st_case_20;
+			case 21:
+			goto st_case_21;
+			case 25:
+			goto st_case_25;
+			case 22:
+			goto st_case_22;
+			
+		}
+		goto st_out;
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		if ( ((*( p  ))
+		)== 79  )
+		{
+			goto st4;
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr0;
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr0:
+		{
+			num = num * 10 + ((((*( p  ))
+			)) - '0'); 
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		if ( ((*( p  ))
+		)== 32  )
+		{
+			goto ctr3;
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr0;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr3:
+		{
+			if ( num & 1 )
+			{
+				stack[top] = 3;
+				top+= 1;
+				cs = (18);
+				goto _again;
+			}
+			
+			else
+			{
+				stack[top] = 3;
+				top+= 1;
+				goto st13;
+			}
+			
+		}
+		
+		
+		goto st3;
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto st23;
+		}
+		
+		{
+			goto st0;
+		}
+		st23:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof23;
+		
+		st_case_23:
+		{
+			goto st0;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		if ( ((*( p  ))
+		)== 65  )
+		{
+			goto st5;
+		}
+		
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		if ( ((*( p  ))
+		)== 32  )
+		{
+			goto st6;
+		}
+		
+		{
+			goto st0;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		switch ( ((*( p  ))
+		) ) {
+			case 101:
+			{
+				goto st7;
+			}
+			case 111:
+			{
+				goto st12;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		if ( ((*( p  ))
+		)== 114  )
+		{
+			goto st8;
+		}
+		
+		{
+			goto st0;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( ((*( p  ))
+		)== 114  )
+		{
+			goto st9;
+		}
+		
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		if ( ((*( p  ))
+		)== 111  )
+		{
+			goto st10;
+		}
+		
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		if ( ((*( p  ))
+		)== 114  )
+		{
+			goto st11;
+		}
+		
+		{
+			goto st0;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 50  )
+		{
+			goto st3;
+		}
+		
+		{
+			goto st0;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		if ( ((*( p  ))
+		)== 107  )
+		{
+			goto st3;
+		}
+		
+		{
+			goto st0;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		if ( ((*( p  ))
+		)== 101  )
+		{
+			goto st14;
+		}
+		
+		{
+			goto st0;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof14;
+		
+		st_case_14:
+		if ( ((*( p  ))
+		)== 118  )
+		{
+			goto st15;
+		}
+		
+		{
+			goto st0;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof15;
+		
+		st_case_15:
+		if ( ((*( p  ))
+		)== 101  )
+		{
+			goto st16;
+		}
+		
+		{
+			goto st0;
+		}
+		st16:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof16;
+		
+		st_case_16:
+		if ( ((*( p  ))
+		)== 110  )
+		{
+			goto st17;
+		}
+		
+		{
+			goto st0;
+		}
+		st17:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof17;
+		
+		st_case_17:
+		{
+			goto ctr18;
+		}
+		ctr18:
+		{
+			{
+				p = p - 1;
+				
+			}
+			{
+				top -= 1;
+				cs = stack[top];
+				goto _again;
+			}
+			
+		}
+		
+		
+		goto st24;
+		st24:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof24;
+		
+		st_case_24:
+		{
+			goto st0;
+		}
+		st18:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof18;
+		
+		st_case_18:
+		if ( ((*( p  ))
+		)== 111  )
+		{
+			goto st19;
+		}
+		
+		{
+			goto st0;
+		}
+		st19:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof19;
+		
+		st_case_19:
+		if ( ((*( p  ))
+		)== 100  )
+		{
+			goto st20;
+		}
+		
+		{
+			goto st0;
+		}
+		st20:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof20;
+		
+		st_case_20:
+		if ( ((*( p  ))
+		)== 100  )
+		{
+			goto st21;
+		}
+		
+		{
+			goto st0;
+		}
+		st21:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof21;
+		
+		st_case_21:
+		{
+			goto ctr22;
+		}
+		ctr22:
+		{
+			{
+				p = p - 1;
+				
+			}
+			{
+				top -= 1;
+				cs = stack[top];
+				goto _again;
+			}
+			
+		}
+		
+		
+		goto st25;
+		st25:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof25;
+		
+		st_case_25:
+		{
+			goto st0;
+		}
+		st22:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof22;
+		
+		st_case_22:
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof23: cs = 23;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof14: cs = 14;
+		goto _test_eof; 
+		_test_eof15: cs = 15;
+		goto _test_eof; 
+		_test_eof16: cs = 16;
+		goto _test_eof; 
+		_test_eof17: cs = 17;
+		goto _test_eof; 
+		_test_eof24: cs = 24;
+		goto _test_eof; 
+		_test_eof18: cs = 18;
+		goto _test_eof; 
+		_test_eof19: cs = 19;
+		goto _test_eof; 
+		_test_eof20: cs = 20;
+		goto _test_eof; 
+		_test_eof21: cs = 21;
+		goto _test_eof; 
+		_test_eof25: cs = 25;
+		goto _test_eof; 
+		_test_eof22: cs = 22;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+int CallTest::finish( )
+{
+	if ( this->cs == CallTest_error )
+	return -1;
+	if ( this->cs >= CallTest_first_final )
+	return 1;
+	return 0;
+}
+
+#define BUFSIZE 1024
+
+void test( const char *buf )
+{   
+	CallTest test;
+	
+	test.init();
+	test.execute( buf, strlen(buf) );
+	if ( test.finish() > 0 )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+int main()
+{
+	test( "78 even\n" );
+	test( "89 odd\n" );
+	test( "1 even\n" );
+	test( "0 odd\n" );
+	test( "OA ok\n" );
+	test( "OA error1\n" );
+	test( "OA error2\n" );
+	return 0;
+}
+

@@ -1,0 +1,772 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let comm = ref 0
+let top = ref 0
+let stack = Array.make 32 0
+let ts = ref 0
+let te = ref 0
+let act = ref 0
+let value = ref 0
+
+
+
+
+
+
+let _patact_actions : int array = [|
+0; 1; 0; 1; 1; 1; 2; 1; 3; 1; 4; 1; 5; 1; 8; 1; 9; 1; 10; 1; 11; 1; 12; 1; 13; 1; 14; 1; 15; 1; 16; 1; 19; 1; 20; 1; 21; 1; 22; 1; 23; 1; 24; 1; 25; 1; 26; 1; 27; 2; 2; 6; 2; 2; 7; 2; 2; 17; 2; 2; 18; 0 ; 
+|]
+let _patact_trans_keys : int array = [|
+1; 0; 8; 8; 11; 11; 9; 9; 10; 10; 8; 8; 11; 11; 9; 9; 10; 10; 8; 8; 11; 11; 9; 9; 10; 10; 8; 8; 11; 11; 9; 9; 10; 10; 0; 11; 2; 5; 2; 5; 2; 11; 0; 11; 4; 5; 7; 11; 0; 11; 2; 5; 2; 5; 2; 11; 6; 6; 0 ; 
+|]
+let _patact_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 3; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 4; 4; 5; 4; 4; 4; 4; 4; 4; 4; 1; 6; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 7; 7; 7; 7; 7; 8; 7; 7; 9; 7; 7; 10; 7; 7; 11; 7; 7; 7; 7; 7; 7; 7; 7; 7; 7; 7; 0 ; 
+|]
+let _patact_index_offsets : int array = [|
+0; 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 28; 32; 36; 46; 58; 60; 65; 77; 81; 85; 95; 0 ; 
+|]
+let _patact_indicies : int array = [|
+1; 2; 3; 4; 6; 7; 8; 9; 11; 12; 13; 14; 16; 17; 18; 19; 20; 21; 20; 22; 23; 24; 25; 26; 26; 26; 26; 26; 27; 0; 23; 23; 27; 28; 23; 29; 31; 30; 30; 30; 30; 26; 26; 26; 26; 26; 32; 21; 32; 21; 33; 33; 21; 34; 34; 34; 34; 34; 33; 33; 34; 34; 34; 34; 34; 37; 21; 37; 38; 39; 40; 21; 41; 41; 41; 41; 41; 42; 10; 39; 39; 42; 43; 39; 44; 46; 45; 45; 45; 45; 41; 41; 41; 41; 41; 47; 0 ; 
+|]
+let _patact_index_defaults : int array = [|
+0; 0; 0; 0; 0; 5; 5; 5; 5; 10; 10; 10; 10; 15; 15; 15; 15; 21; 0; 28; 30; 21; 35; 36; 21; 10; 43; 45; 21; 0 ; 
+|]
+let _patact_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _patact_cond_targs : int array = [|
+17; 2; 3; 4; 17; 17; 6; 7; 8; 17; 24; 10; 11; 12; 24; 24; 14; 15; 16; 24; 17; 0; 17; 18; 19; 17; 20; 1; 17; 18; 17; 5; 21; 22; 23; 21; 21; 24; 24; 25; 26; 27; 9; 24; 25; 24; 13; 28; 0 ; 
+|]
+let _patact_cond_actions : int array = [|
+47; 0; 0; 0; 35; 45; 0; 0; 0; 31; 27; 0; 0; 0; 17; 25; 0; 0; 0; 13; 33; 0; 39; 58; 58; 37; 5; 0; 43; 55; 41; 0; 7; 0; 0; 11; 9; 15; 19; 52; 52; 5; 0; 23; 49; 21; 0; 29; 0 ; 
+|]
+let _patact_to_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 0; 1; 0; 0; 1; 0; 0; 0; 1; 0 ; 
+|]
+let _patact_from_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 3; 0; 0; 0; 3; 0; 0; 3; 0; 0; 0; 3; 0 ; 
+|]
+let _patact_eof_trans : int array = [|
+0; 1; 1; 1; 1; 6; 6; 6; 6; 11; 11; 11; 11; 16; 16; 16; 16; 0; 1; 29; 31; 0; 36; 37; 0; 11; 44; 46; 0; 0 ; 
+|]
+let _patact_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _patact_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _patact_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _patact_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let patact_start  : int  = 17
+let patact_first_final  : int  = 17
+let patact_error  : int  = 0
+let patact_en_other  : int  = 21
+let patact_en_exec_test  : int  = 24
+let patact_en_semi  : int  = 28
+let patact_en_main  : int  = 17
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let eof = pe in
+begin
+	cs  := patact_start;
+	ts  := 0;
+	te  := 0;
+	act  := 0;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _acts : int ref = ref 0 in
+	let _nacts : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _patact_eof_trans.(cs.contents)> 0  then
+						begin
+							begin
+								_trans  := _patact_eof_trans.(cs.contents)- 1;
+								_have  := 1;
+								
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+							
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_acts  := _patact_from_state_actions.(cs.contents);
+						_nacts  := _patact_actions.( _acts.contents );
+						_acts  := _acts.contents + 1;
+						while _nacts.contents> 0  do
+						begin
+							if _patact_actions.( _acts.contents ) = 1  then
+							begin
+								begin
+									begin
+										ts  := p.contents;
+										
+									end;
+									
+								end;
+								
+							end
+							;
+							_nacts  := _nacts.contents - 1;
+							_acts  := _acts.contents + 1;
+							
+						end;
+						
+						done;
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _patact_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 122 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _patact_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _patact_trans_keys.( _keys.contents+1  )&& _ic.contents>= _patact_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _patact_indicies.( _inds.contents+ ( _ic.contents- _patact_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _patact_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _patact_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _patact_cond_targs.(_trans.contents);
+						if _patact_cond_actions.(_trans.contents)!= 0  then
+						begin
+							begin
+								_acts  := _patact_cond_actions.(_trans.contents);
+								_nacts  := _patact_actions.( _acts.contents );
+								_acts  := _acts.contents + 1;
+								while _nacts.contents> 0  do
+								begin
+									if _patact_actions.( _acts.contents ) = 2  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 3  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "space\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 4  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string( "word\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 5  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string( "num\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 6  then
+									begin
+										begin
+											begin
+												act  := 7;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 7  then
+									begin
+										begin
+											begin
+												act  := 8;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 8  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "word (c/lbh)\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 9  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "space\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 10  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "num (c/switch)\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 11  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 12  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string( "word (w/lbh)\n" );
+													begin
+														p  := ( ( te.contents-1 ) )-1;
+														
+													end;
+													
+													begin
+														cs  := 21;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 13  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string( "num (w/switch)\n" );
+													begin
+														p  := ( ( te.contents-1 ) )-1;
+														
+													end;
+													
+													begin
+														cs  := 21;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 14  then
+									begin
+										begin
+											begin
+												p  := ( ( te.contents ) )-1;
+												begin
+													print_string( "word (w/lbh)\n" );
+													begin
+														p  := ( ( te.contents-1 ) )-1;
+														
+													end;
+													
+													begin
+														cs  := 21;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 15  then
+									begin
+										begin
+											begin
+												if act.contents = 7  then
+												begin
+													p  := ( ( te.contents ) )-1;
+													begin
+														print_string( "num (w/switch)\n" );
+														
+													end;
+													
+												end
+												else if act.contents = 8  then
+												begin
+													p  := ( ( te.contents ) )-1;
+													begin
+														print_string( "num (w/switch)\n" );
+														begin
+															p  := ( ( te.contents-1 ) )-1;
+															
+														end;
+														
+														begin
+															cs  := 21;
+															
+														end;
+														
+													end;
+													
+												end
+												;
+												
+											end;
+											
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 16  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "in semi\n" );
+													begin
+														cs  := 17;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 17  then
+									begin
+										begin
+											begin
+												act  := 15;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 18  then
+									begin
+										begin
+											begin
+												act  := 16;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 19  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "word (c/lbh)\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 20  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "space\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 21  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "num (c/switch)\n" );
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 22  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "going to semi\n" );
+													begin
+														p  := p.contents- 1;
+														
+													end;
+													begin
+														cs  := 28;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 23  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string( "immdiate\n" );
+													begin
+														cs  := 24;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 24  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string( "word (w/lbh)\n" );
+													begin
+														p  := p.contents- 1;
+														
+													end;
+													begin
+														cs  := 21;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 25  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string( "num (w/switch)\n" );
+													begin
+														p  := p.contents- 1;
+														
+													end;
+													begin
+														cs  := 21;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 26  then
+									begin
+										begin
+											begin
+												p  := ( ( te.contents ) )-1;
+												begin
+													print_string( "word (w/lbh)\n" );
+													begin
+														p  := p.contents- 1;
+														
+													end;
+													begin
+														cs  := 21;
+														
+													end;
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _patact_actions.( _acts.contents ) = 27  then
+									begin
+										begin
+											begin
+												if act.contents = 15  then
+												begin
+													p  := ( ( te.contents ) )-1;
+													begin
+														print_string( "num (w/switch)\n" );
+														
+													end;
+													
+												end
+												else if act.contents = 16  then
+												begin
+													p  := ( ( te.contents ) )-1;
+													begin
+														print_string( "num (w/switch)\n" );
+														begin
+															p  := p.contents- 1;
+															
+														end;
+														begin
+															cs  := 21;
+															
+														end;
+														
+													end;
+													
+												end
+												;
+												
+											end;
+											
+											
+										end;
+										
+									end
+									;
+									_nacts  := _nacts.contents - 1;
+									_acts  := _acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;_acts  := _patact_to_state_actions.(cs.contents);
+						_nacts  := _patact_actions.( _acts.contents );
+						_acts  := _acts.contents + 1;
+						while _nacts.contents> 0  do
+						begin
+							if _patact_actions.( _acts.contents ) = 0  then
+							begin
+								begin
+									begin
+										ts  := 0;
+										
+									end;
+									
+								end;
+								
+							end
+							;
+							_nacts  := _nacts.contents - 1;
+							_acts  := _acts.contents + 1;
+							
+						end;
+						
+						done;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= patact_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "abcd foix\n";
+exec "abcd\nanother\n";
+exec "123 foix\n";
+exec "!abcd foix\n";
+exec "!abcd\nanother\n";
+exec "!123 foix\n";
+exec ";";
+()
+;;
+

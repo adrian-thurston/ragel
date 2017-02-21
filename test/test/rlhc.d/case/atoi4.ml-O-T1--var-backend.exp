@@ -1,0 +1,332 @@
+(*
+* @LANG: ocaml
+*)
+
+let id x = x
+let fail fmt = Printf.ksprintf failwith fmt
+let pr fmt = Printf.ksprintf print_endline fmt
+
+let failed fmt = Printf.ksprintf (fun s -> prerr_endline s; exit 1) fmt
+let test' show f x y = if f x <> y then failed "FAILED: test %S" (show x)
+let case = ref 0
+let test f x y = incr case; if f x <> y then failed "FAILED: case %d" !case
+let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILED: fail %S" x | None -> ()
+
+let _atoi_key_offsets : int array = [|
+0; 0; 4; 6; 9; 0 ; 
+|]
+let _atoi_trans_keys : int array = [|
+43; 45; 48; 57; 48; 57; 10; 48; 57; 0 ; 
+|]
+let _atoi_single_lengths : int array = [|
+0; 2; 0; 1; 0; 0 ; 
+|]
+let _atoi_range_lengths : int array = [|
+0; 1; 1; 1; 0; 0 ; 
+|]
+let _atoi_index_offsets : int array = [|
+0; 0; 4; 6; 9; 0 ; 
+|]
+let _atoi_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _atoi_trans_offsets : int array = [|
+0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 0 ; 
+|]
+let _atoi_trans_lengths : int array = [|
+1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0 ; 
+|]
+let _atoi_cond_keys : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _atoi_cond_targs : int array = [|
+2; 2; 3; 0; 3; 0; 4; 3; 0; 0; 0 ; 
+|]
+let _atoi_cond_actions : int array = [|
+0; 1; 2; 0; 2; 0; 0; 2; 0; 0; 0 ; 
+|]
+let _atoi_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _atoi_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0 ; 
+|]
+let _atoi_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _atoi_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let atoi_start  : int  = 1
+let atoi_first_final  : int  = 3
+let atoi_error  : int  = 0
+let atoi_en_main  : int  = 1
+let fail fmt = Printf.ksprintf failwith fmt
+
+let atoi data =
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let neg = ref false in
+let res = ref 0 in
+
+begin
+	cs  := atoi_start;
+	
+end;
+begin
+	let _klen : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _ckeys : int ref = ref 0 in
+	let _cpc : int  ref = ref 0 in
+	let _trans : int  ref = ref 0 in
+	let _cond  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := _atoi_key_offsets.(cs.contents);
+						_trans  := _atoi_index_offsets.(cs.contents);
+						_have  := 0;
+						_klen  := _atoi_single_lengths.(cs.contents);
+						if _klen.contents> 0  then
+						begin
+							begin
+								let _lower : int ref = ref 0 in
+								let _mid : int ref = ref 0 in
+								let _upper : int ref = ref 0 in
+								_lower  := _keys.contents;
+								_upper  := _keys.contents+ _klen.contents- 1;
+								while _upper.contents>= _lower.contents&& _have.contents= 0  do
+								begin
+									_mid  := _lower.contents+ ( ( _upper.contents-_lower.contents ) asr 1 );
+									if ( Char.code data.[p.contents] )< _atoi_trans_keys.( _mid.contents ) then
+									begin
+										_upper  := _mid.contents- 1;
+										
+									end
+									else if ( Char.code data.[p.contents] )> _atoi_trans_keys.( _mid.contents ) then
+									begin
+										_lower  := _mid.contents+ 1;
+										
+									end
+									else
+									begin
+										begin
+											_trans  := _trans.contents + ( _mid.contents- _keys.contents );
+											_have  := 1;
+											
+										end;
+										
+									end
+									;
+								end;
+								
+								done;
+								if _have.contents= 0  then
+								begin
+									begin
+										_keys  := _keys.contents + _klen.contents;
+										_trans  := _trans.contents + _klen.contents;
+										
+									end;
+									
+								end
+								;
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+								_klen  := _atoi_range_lengths.(cs.contents);
+								if _klen.contents> 0  then
+								begin
+									begin
+										let _lower : int ref = ref 0 in
+										let _mid : int ref = ref 0 in
+										let _upper : int ref = ref 0 in
+										_lower  := _keys.contents;
+										_upper  := _keys.contents+ ( _klen.contents lsl 1 )- 2;
+										while _have.contents= 0 && _lower.contents<= _upper.contents do
+										begin
+											_mid  := _lower.contents+ ( ( ( _upper.contents-_lower.contents ) asr 1 ) land  lnot 1 );
+											if ( Char.code data.[p.contents] )< _atoi_trans_keys.( _mid.contents ) then
+											begin
+												_upper  := _mid.contents- 2;
+												
+											end
+											else if ( Char.code data.[p.contents] )> _atoi_trans_keys.( _mid.contents+ 1  ) then
+											begin
+												_lower  := _mid.contents+ 2;
+												
+											end
+											else
+											begin
+												begin
+													_trans  := _trans.contents + ( ( _mid.contents- _keys.contents ) asr 1 );
+													_have  := 1;
+													
+												end;
+												
+											end
+											;
+										end;
+										
+										done;
+										if _have.contents= 0  then
+										begin
+											_trans  := _trans.contents + _klen.contents;
+											
+										end
+										;
+									end;
+									
+								end
+								;
+							end;
+							
+						end
+						;_ckeys  := _atoi_trans_offsets.(_trans.contents);
+						_klen  := _atoi_trans_lengths.(_trans.contents);
+						_cond  := _atoi_trans_offsets.(_trans.contents);
+						_have  := 0;
+						_cpc  := 0;
+						begin
+							let _lower : int ref = ref 0 in
+							let _mid : int ref = ref 0 in
+							let _upper : int ref = ref 0 in
+							_lower  := _ckeys.contents;
+							_upper  := _ckeys.contents+ _klen.contents- 1;
+							while _have.contents= 0 && _lower.contents<= _upper.contents do
+							begin
+								_mid  := _lower.contents+ ( ( _upper.contents-_lower.contents ) asr 1 );
+								if _cpc.contents< _atoi_cond_keys.( _mid.contents ) then
+								begin
+									_upper  := _mid.contents- 1;
+									
+								end
+								else if _cpc.contents> _atoi_cond_keys.( _mid.contents ) then
+								begin
+									_lower  := _mid.contents+ 1;
+									
+								end
+								else
+								begin
+									begin
+										_cond  := _cond.contents + ( _mid.contents- _ckeys.contents );
+										_have  := 1;
+										
+									end;
+									
+								end
+								;
+							end;
+							
+							done;
+							if _have.contents= 0  then
+							begin
+								begin
+									cs  := 0;
+									_cont  := 0;
+									
+								end;
+								
+							end
+							;
+						end;
+						
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _atoi_cond_targs.(_cond.contents);
+						if _atoi_cond_actions.(_cond.contents) = 1  then
+						begin
+							begin
+								neg := true; 
+							end;
+							
+						end
+						else if _atoi_cond_actions.(_cond.contents) = 2  then
+						begin
+							begin
+								res := !res * 10 + ((( Char.code data.[p.contents] )) - Char.code '0'); 
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !neg then
+res := (-1) * !res ;
+
+print_int res.contents;
+print_string "\n";
+
+if !cs < atoi_first_final then
+fail "atoi: cs %d < %d" !cs atoi_first_final;
+
+!res 
+;;
+
+let () =
+let t = test atoi in
+t "7" 7;
+t "666" 666;
+t "-666" (-666);
+t "+666" 666;
+t "123456789" 123456789;
+t "+123456789\n" 123456789;
+error atoi "+ 1234567890";
+()
+;;
+

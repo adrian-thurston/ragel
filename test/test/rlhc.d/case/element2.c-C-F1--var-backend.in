@@ -1,0 +1,162 @@
+host( "working/element2.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	
+	struct LangEl
+	{
+		int key;
+		char *name;
+	};
+	
+	struct fsm
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array int _fsm_trans_keys( 0, 2 ) = { 1, 0, 0, 0, 1, 2, 1, 0, 0 };
+
+array s8 _fsm_char_class( 0, 2 ) = { 0, 1, 2, 0 };
+
+array s8 _fsm_index_offsets( 0, 3 ) = { 0, 0, 1, 3, 0 };
+
+array s8 _fsm_indicies( 0, 2 ) = { 0, 0, 2, 0 };
+
+array s8 _fsm_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 0 };
+
+array s8 _fsm_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, 0 };
+
+array s8 _fsm_cond_targs( 0, 3 ) = { 2, 0, 3, 0 };
+
+array s8 _fsm_cond_actions( 0, 1 ) = { 1, 0, 1, 0 };
+
+array s8 _fsm_eof_actions( 0, 2 ) = { 0, 0, 0, 2, 0 };
+
+array s8 _fsm_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _fsm_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _fsm_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _fsm_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int fsm_start = 1;
+value int fsm_first_final = 3;
+value int fsm_error = 0;
+
+value int fsm_en_main = 1;
+
+host( "working/element2.rl", 34 ) @{
+	
+	void fsm_init( struct fsm *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)fsm_start;
+	}
+	host( "working/element2.rl", 38 ) @{
+	}
+	
+	void fsm_execute( struct fsm *fsm,  struct LangEl *_data, int _len )
+	{
+		struct LangEl *p = _data;
+		struct LangEl *pe = _data+_len;
+		struct LangEl *eof = pe;
+		
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index int _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( p == eof )
+				{
+					if ( _have == 0 ) {
+						switch ( _fsm_eof_actions[host( "-", 1 ) ={ fsm->cs}=] ) {
+							case 2 {
+								host( "working/element2.rl", 30 ) ${printf("accept\n");}$
+							}
+						}
+					}
+				}
+				
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _fsm_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
+					_inds = offset( _fsm_indicies, _fsm_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+					
+					if ( host( "-", 1 ) ={p->key}= <= 3 && host( "-", 1 ) ={p->key}= >= 1 )
+					{
+						int _ic = cast(int)_fsm_char_class[cast(int)host( "-", 1 ) ={p->key}= - 1];
+						if ( _ic <= cast(int)deref( _fsm_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _fsm_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _fsm_indicies, _inds + cast(int)( _ic - cast(int)deref( _fsm_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_fsm_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+					}
+					else {
+						_trans = cast(uint)_fsm_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					host( "-", 1 ) ={ fsm->cs}= = cast(int)_fsm_cond_targs[_trans];
+					
+					switch ( _fsm_cond_actions[_trans] ) {
+						case 1 {
+							host( "working/element2.rl", 29 ) ${printf("%s\n", p->name);}$
+						}
+					}
+					
+					if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/element2.rl", 47 ) @{
+	}
+	
+	int fsm_finish( struct fsm *fsm )
+	{
+		if ( fsm->cs == fsm_error )
+		return -1;
+		if ( fsm->cs >= fsm_first_final )
+		return 1;
+		return 0;
+	}
+	
+	int main()
+	{
+		static struct fsm fsm;
+		static struct LangEl lel[] = { 
+			{1, "one"}, 
+			{2, "two-a"}, 
+			{2, "two-b"}, 
+			{2, "two-c"}, 
+			{3, "three"}
+		};
+		
+		fsm_init( &fsm );
+		fsm_execute( &fsm, lel, 5 );
+		fsm_finish( &fsm );
+		
+		return 0;
+	}
+	
+}@

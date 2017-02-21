@@ -1,0 +1,240 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let neg = ref 0
+let value = ref 0
+
+
+
+
+
+
+let _state_chart_trans_keys : int array = [|
+1; 0; 4; 4; 0; 4; 2; 4; 0 ; 
+|]
+let _state_chart_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 1; 3; 1; 1; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 0 ; 
+|]
+let _state_chart_index_offsets : int array = [|
+0; 0; 1; 6; 0 ; 
+|]
+let _state_chart_indicies : int array = [|
+0; 2; 1; 1; 1; 0; 3; 4; 5; 0 ; 
+|]
+let _state_chart_index_defaults : int array = [|
+0; 1; 1; 1; 0 ; 
+|]
+let _state_chart_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _state_chart_cond_targs : int array = [|
+2; 0; 3; 1; 1; 2; 0 ; 
+|]
+let _state_chart_cond_actions : int array = [|
+1; 0; 2; 3; 4; 5; 0 ; 
+|]
+let _state_chart_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _state_chart_nfa_offsets : int array = [|
+0; 0; 0; 0; 0 ; 
+|]
+let _state_chart_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _state_chart_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let state_chart_start  : int  = 3
+let state_chart_first_final  : int  = 3
+let state_chart_error  : int  = 0
+let state_chart_en_main  : int  = 3
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+value := 0;
+neg := 0;
+begin
+	cs  := state_chart_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _state_chart_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 57 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _state_chart_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _state_chart_trans_keys.( _keys.contents+1  )&& _ic.contents>= _state_chart_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _state_chart_indicies.( _inds.contents+ ( _ic.contents- _state_chart_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _state_chart_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _state_chart_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _state_chart_cond_targs.(_trans.contents);
+						if _state_chart_cond_actions.(_trans.contents) = 3  then
+						begin
+							begin
+								neg := 0;
+								value := 0;
+								
+							end;
+							
+						end
+						else if _state_chart_cond_actions.(_trans.contents) = 1  then
+						begin
+							begin
+								value := value .contents * 10  + ( (( Char.code data.[p.contents] )) - 48 )
+								;
+								
+							end;
+							
+						end
+						else if _state_chart_cond_actions.(_trans.contents) = 4  then
+						begin
+							begin
+								neg := 0;
+								value := 0;
+								
+							end;
+							begin
+								neg := 1;
+								
+							end;
+							
+						end
+						else if _state_chart_cond_actions.(_trans.contents) = 5  then
+						begin
+							begin
+								neg := 0;
+								value := 0;
+								
+							end;
+							begin
+								value := value .contents * 10  + ( (( Char.code data.[p.contents] )) - 48 )
+								;
+								
+							end;
+							
+						end
+						else if _state_chart_cond_actions.(_trans.contents) = 2  then
+						begin
+							begin
+								if neg .contents != 0  then
+								begin
+									value := -1  * value.contents;
+									
+								end 
+								;
+								
+							end;
+							begin
+								print_int( value.contents );
+								print_string( "\n" );
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= state_chart_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "1\n";
+exec "12\n";
+exec "222222\n";
+exec "+2123\n";
+exec "213 3213\n";
+exec "-12321\n";
+exec "--123\n";
+exec "-99\n";
+exec " -3000\n";
+()
+;;
+

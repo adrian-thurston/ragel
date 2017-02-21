@@ -1,0 +1,438 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+
+static const char  _recdescent_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 2, 1, 0, 2, 1, 2, 2, 1, 3, 0 ,  };
+static const char  _recdescent_eof_actions [] = { 0, 0, 0, 3, 3, 0 ,  };
+static const char  _recdescent_nfa_targs [] = { 0, 0 ,  };
+static const char  _recdescent_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _recdescent_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _recdescent_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  recdescent_start  = 2;
+static const int  recdescent_first_final  = 2;
+static const int  recdescent_error  = 0;
+static const int  recdescent_en_main  = 2;
+void test( char *buf )
+{
+	int cs;
+	int *stack;
+	int top, stack_size;
+	char *p, *pe, *eof, *item = 0;
+	
+	int len = strlen( buf );
+	
+	
+	{
+		cs = ( int ) recdescent_start;
+		top = 0;
+	}
+	stack_size = 1;
+	stack = (int*)malloc( sizeof(int) * stack_size );
+	
+	p = buf;
+	pe = buf + len;
+	eof = pe;
+	
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		int _nbreak;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 2:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr0;
+				}
+				case 95:
+				{
+					goto ctr3;
+				}
+				case 123:
+				{
+					goto ctr4;
+				}
+				case 125:
+				{
+					goto ctr5;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 9 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 10  )
+				{
+					goto ctr0;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 90  )
+				{
+					if ( 97 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 122  )
+					{
+						goto ctr3;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)>= 65  )
+				{
+					goto ctr3;
+				}
+				
+			} 
+			else
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 3:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr6;
+				}
+				case 95:
+				{
+					goto ctr8;
+				}
+				case 123:
+				{
+					goto ctr9;
+				}
+				case 125:
+				{
+					goto ctr10;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 9 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 10  )
+				{
+					goto ctr6;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 90  )
+				{
+					if ( 97 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 122  )
+					{
+						goto ctr8;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)>= 65  )
+				{
+					goto ctr8;
+				}
+				
+			} 
+			else
+			{
+				goto ctr7;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr6;
+				}
+				case 95:
+				{
+					goto ctr12;
+				}
+				case 123:
+				{
+					goto ctr9;
+				}
+				case 125:
+				{
+					goto ctr10;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 9 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 10  )
+				{
+					goto ctr6;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 90  )
+				{
+					if ( 97 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 122  )
+					{
+						goto ctr12;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)>= 65  )
+				{
+					goto ctr12;
+				}
+				
+			} 
+			else
+			{
+				goto ctr11;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 1:
+			if ( ((*( p  ))
+			)== 125  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr4: cs = 1;
+		goto f1;
+		ctr9: cs = 1;
+		goto f5;
+		ctr0: cs = 2;
+		goto _again;
+		ctr5: cs = 2;
+		goto f2;
+		ctr6: cs = 2;
+		goto f3;
+		ctr10: cs = 2;
+		goto f6;
+		ctr7: cs = 3;
+		goto _again;
+		ctr2: cs = 3;
+		goto f0;
+		ctr11: cs = 3;
+		goto f4;
+		ctr12: cs = 4;
+		goto _again;
+		ctr3: cs = 4;
+		goto f0;
+		ctr8: cs = 4;
+		goto f4;
+		
+		f0: _acts = _recdescent_actions + 1 ;
+		goto execFuncs;
+		f3: _acts = _recdescent_actions + 3 ;
+		goto execFuncs;
+		f1: _acts = _recdescent_actions + 5 ;
+		goto execFuncs;
+		f2: _acts = _recdescent_actions + 7 ;
+		goto execFuncs;
+		f4: _acts = _recdescent_actions + 9 ;
+		goto execFuncs;
+		f5: _acts = _recdescent_actions + 12 ;
+		goto execFuncs;
+		f6: _acts = _recdescent_actions + 15 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nbreak = 0;
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					item = p; 
+				}
+				
+				break;
+				case 1:
+				{
+					printf( "item: " );
+					fwrite( item, 1, p-item, stdout );
+					printf( "\n" );
+					
+				}
+				
+				break;
+				case 2:
+				{
+					printf( "calling main\n" );
+					{
+						{
+							if ( top == stack_size ) {
+								printf( "growing stack\n" );
+								stack_size = top * 2;
+								stack = (int*)realloc( stack, sizeof(int)*stack_size );
+							}
+							
+						}
+						stack[top] = cs;
+						top += 1;
+						cs = 2;
+						
+					}
+					
+				}
+				
+				break;
+				case 3:
+				{
+					if ( top == 0 ) {
+						printf( "STRAY CLOSE\n" );
+						{
+							p += 1;
+							_nbreak = 1;
+							
+						}
+						
+					}
+					else {
+						printf( "returning from main\n" );
+						{
+							p = p - 1;
+							
+						}
+						
+						{
+							top-= 1;
+							cs = stack[top];
+							{
+								if ( stack_size > (top * 4) ) {
+									stack_size = top * 2;
+									stack = (int*)realloc( stack, sizeof(int)*stack_size );
+									printf( "shrinking stack\n" );
+								}
+								
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			const char  *__acts;
+			unsigned int __nacts;
+			__acts = _recdescent_actions + _recdescent_eof_actions[cs];
+			__nacts = ( unsigned int  ) (*( __acts  ))
+			;
+			__acts += 1;
+			while ( __nacts > 0  )
+			{
+				switch ( (*( __acts  ))
+				) {
+					case 1:
+					{
+						printf( "item: " );
+						fwrite( item, 1, p-item, stdout );
+						printf( "\n" );
+						
+					}
+					
+					break;
+					
+				}
+				__acts += 1;
+				__nacts -= 1;
+			}
+			
+		}
+		
+		
+		_out: {}
+	}
+	if ( cs == recdescent_error ) {
+		/* Machine failed before finding a token. */
+		printf( "PARSE ERROR\n" );
+	}
+}
+
+int main()
+{
+	test( "88 foo { 99 {{{{}}}}{ } }");
+	test( "76 } sadf");
+	return 0;
+}
+

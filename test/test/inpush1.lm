@@ -1,0 +1,133 @@
+namespace string
+	lex
+		literal `"
+		token data /[^"\\]+/
+		token escape /'\\' any/
+	end
+
+	def string_data
+		[data]
+	|	[escape]
+
+	def string 
+		[`" string_data* `"]
+	
+	str unquote( S: string )
+	{
+		match S [`" DL: string_data* `"]
+		for E: escape in DL
+			E.data = 'x'
+		return $DL
+	}
+
+end # string
+		
+namespace hash
+
+	lex
+		literal `define `include
+		literal `#
+		token NL /'\n'/ -ni
+
+		token id /[a-zA-Z_][a-zA-Z_0-9]*/
+		token number /[0-9]+/
+
+		ignore /[ \t]/
+	end
+
+	def hash
+		[`# `define Id: id number NL]
+	|	[`# `include Inc: string::string NL]
+
+end # hash
+
+token rest_of_line /[^\n]* '\n'/
+
+namespace lang
+
+	lex
+		ignore /space/
+		literal `* `( `) `;
+		token id /[a-zA-Z_][a-zA-Z_0-9]*/
+		token number /[0-9]+/
+
+		token hash /'#'/ {
+			parse_stop H: hash::hash[ input ]
+			if ( H ) {
+				if ( H.Inc ) {
+					FN: str = string::unquote( H.Inc )
+					print[ 'opening ' FN '\n' ]
+					IS: stream = open( FN, 'r' )
+					if ( ! IS ) {
+						print[ 'ERROR: failed to open ' FN '\n' ]
+						exit(1)
+					}
+					input->push_stream( IS )
+				}
+			}
+			else {
+				parse_stop L: rest_of_line[ input ]
+				if ! L {
+					print[ "ERROR: stuck: " error ]
+					exit(1)
+				}
+				print[ "ERROR: failed to parse # directive: " L ]
+			}
+		}
+	end
+
+	def item 
+		[id]
+	|	[`( item* `)]
+
+	def statement
+		[item* `;]
+
+	def start 
+		[statement*]
+
+end # lang
+
+parse Input: lang::start[ stdin ]
+
+if ! Input
+	print[ error '\n' ]
+else {
+	print[ @Input ]
+}
+##### IN #####
+
+hello;
+
+#include "inpush1a.in"
+
+there;
+
+#include "inpush1b.in"
+
+dude;
+
+#include "inpush1c.in"
+
+and dudettes;
+##### EXP #####
+opening inpush1a.in
+opening inpush1b.in
+opening inpush1c.in
+
+hello;
+
+a;
+b;
+
+there;
+
+c;
+d;
+
+dude;
+
+e;
+f;
+
+and dudettes;

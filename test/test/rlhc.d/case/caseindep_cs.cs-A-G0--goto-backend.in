@@ -1,0 +1,251 @@
+host( "working/caseindep_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			
+			
+			
+			
+			
+		}@
+		array s8 _indep_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _indep_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _indep_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _indep_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int indep_start = 1;
+		value int indep_first_final = 13;
+		value int indep_error = 0;
+		
+		value int indep_en_main = 1;
+		
+		host( "working/caseindep_cs.rl", 29 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)indep_start;
+			}
+			host( "working/caseindep_cs.rl", 34 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				_resume:
+				switch ( cs ) {
+					case 1:
+					if ( ( deref( data, p )) > c(51) ) {
+						if ( ( deref( data, p )) <= c(54) ) {
+							goto ctr2;
+						}
+					} else if ( ( deref( data, p )) >= c(49) ) {
+						goto ctr0;
+					}
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					if ( ( deref( data, p )) == c(104) ) {
+						goto ctr3;
+					}
+					{
+						goto ctr1;
+					}
+					case 3:
+					if ( ( deref( data, p )) == c(101) ) {
+						goto ctr4;
+					}
+					{
+						goto ctr1;
+					}
+					case 4:
+					if ( ( deref( data, p )) == c(108) ) {
+						goto ctr5;
+					}
+					{
+						goto ctr1;
+					}
+					case 5:
+					if ( ( deref( data, p )) == c(108) ) {
+						goto ctr6;
+					}
+					{
+						goto ctr1;
+					}
+					case 6:
+					if ( ( deref( data, p )) == c(111) ) {
+						goto ctr7;
+					}
+					{
+						goto ctr1;
+					}
+					case 7:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr8;
+					}
+					{
+						goto ctr1;
+					}
+					case 13:
+					{
+						goto ctr1;
+					}
+					case 8:
+					switch( ( deref( data, p )) ) {
+						case c(72): {
+							goto ctr9;
+						}
+						case c(104): {
+							goto ctr9;
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 9:
+					switch( ( deref( data, p )) ) {
+						case c(69): {
+							goto ctr10;
+						}
+						case c(101): {
+							goto ctr10;
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 10:
+					switch( ( deref( data, p )) ) {
+						case c(76): {
+							goto ctr11;
+						}
+						case c(108): {
+							goto ctr11;
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 11:
+					switch( ( deref( data, p )) ) {
+						case c(76): {
+							goto ctr12;
+						}
+						case c(108): {
+							goto ctr12;
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 12:
+					switch( ( deref( data, p )) ) {
+						case c(79): {
+							goto ctr7;
+						}
+						case c(111): {
+							goto ctr7;
+						}
+					}
+					{
+						goto ctr1;
+					}
+				}
+				
+				ctr1: cs = 0; goto _again;
+				ctr0: cs = 2; goto _again;
+				ctr3: cs = 3; goto _again;
+				ctr4: cs = 4; goto _again;
+				ctr5: cs = 5; goto _again;
+				ctr6: cs = 6; goto _again;
+				ctr7: cs = 7; goto _again;
+				ctr2: cs = 8; goto _again;
+				ctr9: cs = 9; goto _again;
+				ctr10: cs = 10; goto _again;
+				ctr11: cs = 11; goto _again;
+				ctr12: cs = 12; goto _again;
+				ctr8: cs = 13; goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				_out: {}
+			}
+			host( "working/caseindep_cs.rl", 45 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= indep_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"1hello\n",
+				"1HELLO\n",
+				"1HeLLo\n",
+				"2hello\n",
+				"2HELLO\n",
+				"2HeLLo\n",
+				"3hello\n",
+				"3HELLO\n",
+				"3HeLLo\n",
+				"4hello\n",
+				"4HELLO\n",
+				"4HeLLo\n",
+				"5hello\n",
+				"5HELLO\n",
+				"5HeLLo\n",
+				"6hello\n",
+				"6HELLO\n",
+				"6HeLLo\n",
+			};
+			
+			
+			static readonly int inplen = 18;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

@@ -1,0 +1,52 @@
+context undo
+
+	lex
+		ignore /( ' ' | '\t')+/
+		literal `* `( `) `^ `;
+		token NL /'\n'/
+		token id /[a-zA-Z_]+/
+	end
+
+	List: list<item>
+
+	def item 
+		[id]
+		{
+			List->push_tail( lhs )
+		}
+	|	[`( item* `)]
+		{
+			List->push_tail( lhs )
+		}
+
+	def A1 []
+	def A2 []
+
+	def start 
+		[A1 item* `^]
+	|	[A2 item* `; NL]
+	{
+		for Item: item in List {
+			print "list el: [@Item]
+		}
+	}
+
+end
+
+Undo: undo = new undo()
+Undo->List = new list<undo::item>()
+
+parse Input: undo::start(Undo)[ stdin ]
+print[ @Input ]
+
+###### IN #######
+a b c ( d e ) f;
+###### EXP #######
+list el: a 
+list el: b 
+list el: c 
+list el: d 
+list el: e 
+list el: ( d e ) 
+list el: f
+a b c ( d e ) f;

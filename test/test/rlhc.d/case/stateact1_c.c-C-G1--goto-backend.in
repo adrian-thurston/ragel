@@ -1,0 +1,179 @@
+host( "working/stateact1_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	
+	
+	
+	
+	
+}@
+array s8 _state_act_to_state_actions( 0, 6 ) = { 0, 0, 1, 4, 6, 4, 0 };
+
+array s8 _state_act_from_state_actions( 0, 7 ) = { 0, 0, 2, 5, 7, 5, 0 };
+
+array s8 _state_act_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _state_act_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_act_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _state_act_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int state_act_start = 4;
+value int state_act_first_final = 4;
+value int state_act_error = 0;
+
+value int state_act_en_main = 4;
+value int state_act_en_main_line_again = 3;
+
+host( "working/stateact1_c.rl", 47 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)state_act_start;
+	}
+	host( "working/stateact1_c.rl", 54 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( _state_act_from_state_actions[cs] ) {
+			case 5{
+				host( "working/stateact1_c.rl", 21 ) ${printf( "%s", "b2\n" );
+				}$
+			}
+			case 2{
+				host( "working/stateact1_c.rl", 25 ) ${printf( "%s", "c2\n" );
+				}$
+			}
+			case 7{
+				host( "working/stateact1_c.rl", 17 ) ${printf( "%s", "a2\n" );
+				}$	host( "working/stateact1_c.rl", 21 ) ${printf( "%s", "b2\n" );
+				}$
+			}
+		}
+		
+		switch ( cs ) {
+			case 4:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ( deref( data, p )) == 105 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 2:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr3: cs = 1; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr2: cs = 5; goto f2;
+		
+		f2:
+		host( "working/stateact1_c.rl", 27 ) ${cs = 3;}$
+		goto _again;
+		
+		_again:
+		switch ( _state_act_to_state_actions[cs] ) {
+			case 4{
+				host( "working/stateact1_c.rl", 19 ) ${printf( "%s", "b1\n" );
+				}$
+			}
+			case 1{
+				host( "working/stateact1_c.rl", 23 ) ${printf( "%s", "c1\n" );
+				}$
+			}
+			case 6{
+				host( "working/stateact1_c.rl", 15 ) ${printf( "%s", "a1\n" );
+				}$	host( "working/stateact1_c.rl", 19 ) ${printf( "%s", "b1\n" );
+				}$
+			}
+		}
+		
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/stateact1_c.rl", 61 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= state_act_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hi\nhi\n",
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

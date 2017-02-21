@@ -1,0 +1,991 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+#define TK_Dlit 192
+#define TK_Slit 193
+#define TK_Float 194
+#define TK_Id 195
+#define TK_NameSep 197
+#define TK_Arrow 211
+#define TK_PlusPlus 212
+#define TK_MinusMinus 213
+#define TK_ArrowStar 214
+#define TK_DotStar 215
+#define TK_ShiftLeft 216
+#define TK_ShiftRight 217
+#define TK_IntegerDecimal 218
+#define TK_IntegerOctal 219
+#define TK_IntegerHex 220
+#define TK_EqualsEquals 223
+#define TK_NotEquals 224
+#define TK_AndAnd 225
+#define TK_OrOr 226
+#define TK_MultAssign 227
+#define TK_DivAssign 228
+#define TK_PercentAssign 229
+#define TK_PlusAssign 230
+#define TK_MinusAssign 231
+#define TK_AmpAssign 232
+#define TK_CaretAssign 233
+#define TK_BarAssign 234
+#define TK_DotDotDot 240
+#define TK_Whitespace 241
+#define TK_Comment 242
+
+#define BUFSIZE 4096
+
+char buf[BUFSIZE];
+
+struct Scanner
+{
+	int cs, act;
+	const char *ts, *te;
+	
+	void token( int tok );
+	void run();
+	
+	void init( );
+	void execute( const char *data, int len );
+	int finish( );
+};
+
+
+
+static const short  _Scanner_key_offsets [] = { 0, 0, 3, 3, 6, 6, 7, 11, 13, 14, 16, 17, 23, 54, 56, 57, 58, 60, 61, 63, 66, 67, 71, 79, 85, 88, 98, 107, 111, 115, 119, 129, 133, 142, 143, 144, 151, 160, 161, 0 ,  };
+static const char  _Scanner_trans_keys [] = { 10, 34, 92, 10, 39, 92, 46, 43, 45, 48, 57, 48, 57, 42, 42, 47, 10, 48, 57, 65, 70, 97, 102, 33, 34, 37, 38, 39, 42, 43, 45, 46, 47, 48, 58, 61, 76, 94, 95, 124, 35, 44, 49, 57, 59, 64, 65, 90, 91, 96, 97, 122, 123, 126, 33, 126, 61, 61, 38, 61, 61, 43, 61, 45, 61, 62, 42, 42, 46, 48, 57, 69, 70, 76, 101, 102, 108, 48, 57, 70, 76, 102, 108, 48, 57, 42, 47, 61, 46, 69, 76, 85, 101, 108, 117, 120, 48, 57, 46, 69, 76, 85, 101, 108, 117, 48, 57, 76, 85, 108, 117, 76, 85, 108, 117, 76, 85, 108, 117, 76, 85, 108, 117, 48, 57, 65, 70, 97, 102, 76, 85, 108, 117, 46, 69, 76, 85, 101, 108, 117, 48, 57, 58, 61, 95, 48, 57, 65, 90, 97, 122, 34, 39, 95, 48, 57, 65, 90, 97, 122, 61, 61, 124, 0 ,  };
+static const char  _Scanner_single_lengths [] = { 0, 3, 0, 3, 0, 1, 2, 0, 1, 2, 1, 0, 17, 0, 1, 1, 2, 1, 2, 3, 1, 2, 6, 4, 3, 8, 7, 4, 4, 4, 4, 4, 7, 1, 1, 1, 3, 1, 2, 0 ,  };
+static const char  _Scanner_range_lengths [] = { 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 7, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 3, 0, 1, 0, 0, 3, 3, 0, 0, 0 ,  };
+static const short  _Scanner_index_offsets [] = { 0, 0, 4, 5, 9, 10, 12, 16, 18, 20, 23, 25, 29, 54, 56, 58, 60, 63, 65, 68, 72, 74, 78, 86, 92, 96, 106, 115, 120, 125, 130, 138, 143, 152, 154, 156, 161, 168, 170, 0 ,  };
+static const char  _Scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const short  _Scanner_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 0 ,  };
+static const char  _Scanner_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _Scanner_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_cond_targs [] = { 12, 12, 2, 1, 1, 12, 12, 4, 3, 3, 12, 12, 7, 7, 23, 12, 23, 12, 9, 8, 9, 12, 8, 12, 10, 30, 30, 30, 12, 14, 1, 15, 16, 3, 17, 18, 19, 21, 24, 25, 33, 34, 36, 37, 35, 38, 12, 32, 12, 35, 12, 35, 12, 13, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 20, 12, 12, 12, 12, 5, 22, 12, 6, 12, 12, 6, 12, 12, 22, 12, 12, 12, 12, 12, 23, 12, 8, 10, 12, 12, 22, 6, 28, 28, 6, 28, 28, 11, 26, 12, 22, 6, 27, 27, 6, 27, 27, 26, 12, 12, 12, 12, 12, 12, 29, 29, 29, 29, 12, 12, 12, 12, 12, 12, 31, 31, 31, 31, 30, 30, 30, 12, 12, 12, 12, 12, 12, 22, 6, 28, 28, 6, 28, 28, 32, 12, 12, 12, 12, 12, 35, 35, 35, 35, 12, 1, 3, 35, 35, 35, 35, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0 ,  };
+static const char  _Scanner_cond_actions [] = { 1, 2, 0, 0, 0, 1, 3, 0, 0, 0, 5, 4, 0, 0, 0, 1, 0, 1, 0, 0, 0, 6, 0, 7, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 12, 12, 13, 0, 0, 14, 0, 0, 0, 11, 13, 11, 0, 11, 0, 11, 0, 15, 0, 17, 16, 18, 16, 19, 20, 16, 21, 16, 22, 23, 16, 24, 25, 0, 16, 27, 26, 28, 0, 29, 16, 0, 31, 31, 0, 31, 31, 29, 30, 31, 31, 31, 31, 0, 30, 0, 0, 32, 16, 29, 0, 0, 0, 0, 0, 0, 0, 34, 33, 29, 0, 0, 0, 0, 0, 0, 34, 35, 36, 36, 36, 36, 35, 0, 0, 0, 0, 33, 37, 37, 37, 37, 33, 0, 0, 0, 0, 0, 0, 0, 38, 39, 39, 39, 39, 38, 29, 0, 0, 0, 0, 0, 0, 13, 33, 40, 16, 41, 16, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 42, 43, 16, 44, 45, 16, 1, 1, 1, 1, 4, 1, 1, 4, 4, 4, 8, 15, 16, 16, 16, 16, 16, 16, 26, 16, 30, 30, 16, 33, 35, 35, 33, 33, 38, 38, 33, 16, 16, 42, 42, 16, 16, 0 ,  };
+static const char  _Scanner_to_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_eof_trans_indexed [] = { 0, 12, 12, 12, 12, 15, 12, 12, 15, 15, 15, 19, 0, 21, 22, 22, 22, 22, 22, 22, 32, 22, 35, 35, 22, 38, 39, 39, 38, 38, 42, 42, 38, 22, 22, 46, 46, 22, 22, 0 ,  };
+static const short  _Scanner_eof_trans_direct [] = { 0, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 0, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 0 ,  };
+static const char  _Scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Scanner_start  = 12;
+static const int  Scanner_first_final  = 12;
+static const int  Scanner_error  = 0;
+static const int  Scanner_en_main  = 12;
+void Scanner::init( )
+{
+
+	{
+		cs = ( int ) Scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+/* Returns the count of bytes still in the buffer 
+* (shifted to the biginning) */
+void Scanner::execute( const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
+	
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		switch ( _Scanner_from_state_actions[cs] ) {
+			case 10 :
+			{
+				{
+					ts = p;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		_keys = _Scanner_trans_keys + _Scanner_key_offsets[cs];
+		_trans = ( unsigned int  ) _Scanner_index_offsets[cs];
+		_klen = ( int ) _Scanner_single_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_trans += ( unsigned int  ) (_mid - _keys);
+					goto _match;
+				}
+				
+			}
+			
+			_keys += _klen;
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		_klen = ( int ) _Scanner_range_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + (_klen<<1)- 2;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 2;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid + 1  ))
+				)
+				_lower = _mid + 2;
+				
+				else
+				{
+					_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+					goto _match;
+				}
+				
+			}
+			
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		
+		_match :
+		_ckeys = _Scanner_cond_keys + _Scanner_trans_offsets[_trans];
+		_klen = ( int ) _Scanner_trans_lengths[_trans];
+		_cond = ( unsigned int  ) _Scanner_trans_offsets[_trans];
+		_cpc = 0;
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( _cpc < ( int ) (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( _cpc > ( int ) (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_cond += ( unsigned int  ) (_mid - _ckeys);
+					goto _match_cond;
+				}
+				
+			}
+			
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = ( int ) _Scanner_cond_targs[_cond];
+		if ( _Scanner_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		switch ( _Scanner_cond_actions[_cond] ) {
+			case 12 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			
+			break;
+			case 3 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_Slit );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 2 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_Dlit );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 31 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_Float );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 37 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_IntegerDecimal );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 36 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_IntegerOctal );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 39 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_IntegerHex );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 40 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_NameSep );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 41 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_EqualsEquals );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 17 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_NotEquals );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 19 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_AndAnd );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 45 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_OrOr );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 21 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_MultAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 32 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_DivAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 18 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_PercentAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 23 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_PlusAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 25 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_MinusAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 20 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_AmpAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 43 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_CaretAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 44 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_BarAssign );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 22 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_PlusPlus );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 24 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_MinusMinus );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 27 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_ArrowStar );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 28 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_DotStar );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 5 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_DotDotDot );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 11 :
+			{
+				{
+					te = p+1;
+					{
+						token( ts[0] );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 6 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_Comment );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 7 :
+			{
+				{
+					te = p+1;
+					{
+						token( TK_Comment );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 42 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_Id );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 30 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_Float );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 33 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_IntegerDecimal );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 35 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_IntegerOctal );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 38 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_IntegerHex );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 26 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_Arrow );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 16 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( ts[0] );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 15 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token( TK_Whitespace );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 8 :
+			{
+				{
+					p = ((te))-1;
+					{
+						token( TK_IntegerDecimal );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 4 :
+			{
+				{
+					p = ((te))-1;
+					{
+						token( ts[0] );
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 1 :
+			{
+				{
+					switch ( act  ) {
+						case 0 :
+						{
+							{
+								cs = 0;
+								goto _again;
+							}
+							
+						}
+						
+						break;
+						case 3 :
+						p = ((te))-1;
+						{
+							token( TK_Id );
+						}
+						
+						break;
+						case 4 :
+						p = ((te))-1;
+						{
+							token( TK_Float );
+						}
+						
+						break;
+						case 5 :
+						p = ((te))-1;
+						{
+							token( TK_IntegerDecimal );
+						}
+						
+						break;
+						case 6 :
+						p = ((te))-1;
+						{
+							token( TK_IntegerOctal );
+						}
+						
+						break;
+						
+					}
+					
+				}
+				
+				
+			}
+			
+			break;
+			case 14 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 3;
+					
+				}
+				
+			}
+			
+			break;
+			case 29 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 4;
+					
+				}
+				
+			}
+			
+			break;
+			case 13 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 5;
+					
+				}
+				
+			}
+			
+			break;
+			case 34 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 6;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch ( _Scanner_to_state_actions[cs] ) {
+			case 9 :
+			{
+				{
+					ts = 0;
+					
+				}
+				
+			}
+			{
+				{
+					act = 0;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			if ( _Scanner_eof_trans_direct[cs]> 0  )
+			{
+				_trans = ( unsigned int  ) _Scanner_eof_trans_direct[cs]- 1;
+				_cond = ( unsigned int  ) _Scanner_trans_offsets[_trans];
+				goto _match_cond;
+			}
+			
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+	cout << "P: " << (p - data) << endl;
+}
+
+int Scanner::finish( )
+{
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+
+void Scanner::token( int tok )
+{
+	const char *data = ts;
+	int len = te - ts;
+	cout << "<" << tok << "> ";
+	for ( int i = 0; i < len; i++ )
+	cout << data[i];
+	cout << '\n';
+}
+
+void test( const char *buf )
+{
+	int len = strlen( buf );
+	std::ios::sync_with_stdio(false);
+	Scanner scanner;
+	scanner.init();
+	
+	scanner.execute( buf, len );
+	if ( scanner.cs == Scanner_error ) {
+		/* Machine failed before finding a token. */
+		cout << "PARSE ERROR" << endl;
+	}
+	
+	/* FIXME: Last token may get lost. */
+	scanner.finish();
+}
+
+int main()
+{
+	test(
+	"\"\\\"hi\" /*\n"
+	"*/\n"
+	"44 .44\n"
+	"44. 44\n"
+	"44 . 44\n"
+	"44.44\n"
+	"_hithere22"
+	);
+	
+	test(
+	"'\\''\"\\n\\d'\\\"\"\n"
+	"hi\n"
+	"99\n"
+	".99\n"
+	"99e-4\n"
+	"->*\n"
+	"||\n"
+	"0x98\n"
+	"0x\n"
+	"//\n"
+	"/* * */"
+	);
+	
+	test(
+	"'\n"
+	"'\n"
+	);
+	
+}
+

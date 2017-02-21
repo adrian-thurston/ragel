@@ -1,0 +1,474 @@
+(*
+* @LANG: ocaml
+*)
+
+let id x = x
+let fail fmt = Printf.ksprintf failwith fmt
+let pr fmt = Printf.ksprintf print_endline fmt
+
+let failed fmt = Printf.ksprintf (fun s -> prerr_endline s; exit 1) fmt
+let test' show f x y = if f x <> y then failed "FAILED: test %S" (show x)
+let case = ref 0
+let test f x y = incr case; if f x <> y then failed "FAILED: case %d" !case
+let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILED: fail %S" x | None -> ()
+
+
+
+
+let _clang_trans_keys : int array = [|
+1; 0; 0; 12; 0; 0; 0; 12; 0; 0; 0; 0; 8; 9; 8; 10; 0; 5; 0; 7; 0; 13; 5; 7; 6; 13; 8; 9; 6; 9; 8; 10; 8; 13; 1; 0; 0 ; 
+|]
+let _clang_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 3; 2; 2; 2; 2; 4; 2; 2; 5; 2; 2; 2; 6; 7; 8; 9; 9; 9; 9; 9; 9; 9; 9; 9; 2; 2; 2; 2; 2; 2; 2; 10; 10; 10; 10; 10; 10; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 2; 12; 2; 2; 11; 2; 10; 10; 10; 10; 10; 10; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 11; 13; 11; 11; 2; 2; 2; 2; 0 ; 
+|]
+let _clang_index_offsets : int array = [|
+0; 0; 13; 14; 27; 28; 29; 31; 34; 40; 48; 62; 65; 73; 75; 79; 82; 88; 0 ; 
+|]
+let _clang_indicies : int array = [|
+1; 0; 0; 2; 0; 0; 0; 0; 0; 0; 0; 0; 3; 1; 5; 4; 4; 4; 6; 4; 4; 4; 4; 4; 4; 4; 7; 5; 10; 12; 12; 13; 13; 13; 15; 14; 14; 14; 14; 16; 15; 14; 14; 14; 14; 16; 14; 17; 19; 18; 20; 0; 4; 20; 20; 21; 22; 23; 24; 24; 20; 24; 26; 25; 9; 28; 27; 23; 23; 27; 27; 27; 29; 12; 12; 28; 27; 23; 23; 13; 13; 13; 24; 24; 24; 24; 32; 24; 0 ; 
+|]
+let _clang_index_defaults : int array = [|
+0; 0; 0; 4; 4; 9; 11; 11; 14; 14; 18; 25; 27; 30; 27; 31; 32; 33; 0 ; 
+|]
+let _clang_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _clang_cond_targs : int array = [|
+1; 1; 10; 2; 3; 3; 10; 4; 10; 5; 10; 10; 13; 15; 8; 8; 9; 17; 10; 10; 10; 11; 12; 14; 16; 10; 10; 10; 6; 7; 10; 10; 10; 0; 0 ; 
+|]
+let _clang_cond_actions : int array = [|
+0; 1; 2; 0; 0; 1; 3; 0; 4; 0; 5; 6; 0; 0; 0; 1; 0; 8; 10; 11; 12; 13; 13; 13; 0; 14; 15; 16; 0; 0; 17; 18; 19; 0; 0 ; 
+|]
+let _clang_to_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 7; 0; 7; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _clang_from_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 9; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _clang_eof_trans : int array = [|
+0; 0; 0; 0; 0; 9; 12; 12; 0; 0; 0; 26; 28; 31; 28; 32; 33; 0; 0 ; 
+|]
+let _clang_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _clang_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _clang_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _clang_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let clang_start  : int  = 10
+let clang_first_final  : int  = 10
+let clang_error  : int  = 0
+let clang_en_c_comment  : int  = 8
+let clang_en_main  : int  = 10
+let clang data =
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let ts = ref 0 in
+let te = ref 0 in
+let eof = pe in 
+let curlin = ref 1 in
+
+begin
+	cs  := clang_start;
+	ts  := 0;
+	te  := 0;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _clang_eof_trans.(cs.contents)> 0  then
+						begin
+							begin
+								_trans  := _clang_eof_trans.(cs.contents)- 1;
+								_have  := 1;
+								
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+							
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						if _clang_from_state_actions.(cs.contents) = 9  then
+						begin
+							begin
+								begin
+									ts  := p.contents;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _clang_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 126 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _clang_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _clang_trans_keys.( _keys.contents+1  )&& _ic.contents>= _clang_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _clang_indicies.( _inds.contents+ ( _ic.contents- _clang_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _clang_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _clang_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _clang_cond_targs.(_trans.contents);
+						if _clang_cond_actions.(_trans.contents) = 1  then
+						begin
+							begin
+								incr curlin 
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 8  then
+						begin
+							begin
+								begin
+									cs  := 10;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 13  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 12  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										pr "symbol(%i): %c" !curlin data.[!ts];
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 3  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										pr "single_lit(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 2  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										pr "double_lit(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 10  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 15  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										begin
+											cs  := 8;
+											
+										end;
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 14  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										pr "symbol(%i): %c" !curlin data.[!ts];
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 19  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										pr "ident(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 16  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										pr "int(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 17  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										pr "float(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 18  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										pr "hex(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 4  then
+						begin
+							begin
+								begin
+									p  := ( ( te.contents ) )-1;
+									begin
+										pr "symbol(%i): %c" !curlin data.[!ts];
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 6  then
+						begin
+							begin
+								begin
+									p  := ( ( te.contents ) )-1;
+									begin
+										pr "int(%i): %s" !curlin (String.sub data !ts (!te - !ts));
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 11  then
+						begin
+							begin
+								incr curlin 
+							end;
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _clang_cond_actions.(_trans.contents) = 5  then
+						begin
+							begin
+								incr curlin 
+							end;
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if _clang_to_state_actions.(cs.contents) = 7  then
+						begin
+							begin
+								begin
+									ts  := 0;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs < clang_first_final then
+fail "atoi: cs %d < %d" !cs clang_first_final;
+;;
+
+let () =
+clang "999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n";
+clang "wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n";
+()
+;;
+
+

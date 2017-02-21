@@ -1,0 +1,1490 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+extern char buf[];
+
+struct Scanner
+{
+	int cs, act;
+	char *ts, *te;
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	void init( );
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	int execute( char *data, int len );
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	int finish( );
+};
+
+
+
+static const char  _Scanner_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 7, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 1, 28, 1, 29, 1, 30, 1, 31, 2, 4, 0, 2, 6, 1, 2, 7, 8, 2, 7, 9, 2, 7, 10, 2, 7, 11, 3, 4, 5, 0, 0 ,  };
+static const char  _Scanner_to_state_actions [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 51, 1, 51, 69, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _Scanner_from_state_actions [] = { 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 54, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0 ,  };
+static const char  _Scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Scanner_start  = 12;
+static const int  Scanner_first_final  = 12;
+static const int  Scanner_error  = 0;
+static const int  Scanner_en_c_comm  = 9;
+static const int  Scanner_en_cxx_comm  = 11;
+static const int  Scanner_en_main  = 12;
+void Scanner::init( )
+{
+
+	{
+		cs = ( int ) Scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+int Scanner::execute( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		_acts = _Scanner_actions + _Scanner_from_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 1:
+				{
+					cout << "from: fc = ";
+					if ( (((*( p  ))
+					)) == '\'' )
+					cout << (int)(((*( p  ))
+					));
+					else
+					cout << (((*( p  ))
+					));
+					cout << " ts = " << ( ts == 0 ? -1 : ts-buf ) << endl;
+					
+				}
+				
+				break;
+				case 6:
+				{
+					{
+						ts = p;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		switch ( cs  ) {
+			case 12:
+			switch ( ((*( p  ))
+			) ) {
+				case 34:
+				{
+					goto ctr2;
+				}
+				case 39:
+				{
+					goto ctr7;
+				}
+				case 46:
+				{
+					goto ctr28;
+				}
+				case 47:
+				{
+					goto ctr29;
+				}
+				case 48:
+				{
+					goto ctr30;
+				}
+				case 76:
+				{
+					goto ctr33;
+				}
+				case 95:
+				{
+					goto ctr32;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( ((*( p  ))
+				)< 49  )
+				{
+					if ( 33 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 45  )
+					{
+						goto ctr27;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)> 57  )
+				{
+					{
+						goto ctr27;
+					}
+				} 
+				else
+				{
+					goto ctr31;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( ((*( p  ))
+				)< 97  )
+				{
+					{
+						goto ctr27;
+					}
+				} 
+				else if ( ((*( p  ))
+				)> 122  )
+				{
+					if ( ((*( p  ))
+					)<= 126  )
+					{
+						goto ctr27;
+					}
+					
+				} 
+				else
+				{
+					goto ctr32;
+				}
+				
+			} 
+			else
+			{
+				goto ctr32;
+			}
+			
+			{
+				goto ctr26;
+			}
+			case 13:
+			if ( 33 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 126  )
+			{
+				goto ctr35;
+			}
+			
+			{
+				goto ctr26;
+			}
+			case 1:
+			switch ( ((*( p  ))
+			) ) {
+				case 10:
+				{
+					goto ctr17;
+				}
+				case 34:
+				{
+					goto ctr3;
+				}
+				case 92:
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr2;
+			}
+			case 2:
+			{
+				goto ctr2;
+			}
+			case 3:
+			switch ( ((*( p  ))
+			) ) {
+				case 10:
+				{
+					goto ctr17;
+				}
+				case 39:
+				{
+					goto ctr8;
+				}
+				case 92:
+				{
+					goto ctr9;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			{
+				goto ctr7;
+			}
+			case 14:
+			if ( ((*( p  ))
+			)== 46  )
+			{
+				goto ctr38;
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr39;
+			}
+			
+			{
+				goto ctr45;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 46  )
+			{
+				goto ctr13;
+			}
+			
+			{
+				goto ctr12;
+			}
+			case 15:
+			switch ( ((*( p  ))
+			) ) {
+				case 69:
+				{
+					goto ctr42;
+				}
+				case 70:
+				{
+					goto ctr43;
+				}
+				case 76:
+				{
+					goto ctr43;
+				}
+				case 101:
+				{
+					goto ctr42;
+				}
+				case 102:
+				{
+					goto ctr43;
+				}
+				case 108:
+				{
+					goto ctr43;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr39;
+			}
+			
+			{
+				goto ctr44;
+			}
+			case 6:
+			switch ( ((*( p  ))
+			) ) {
+				case 43:
+				{
+					goto ctr15;
+				}
+				case 45:
+				{
+					goto ctr15;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr17;
+			}
+			case 7:
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr17;
+			}
+			case 16:
+			switch ( ((*( p  ))
+			) ) {
+				case 70:
+				{
+					goto ctr43;
+				}
+				case 76:
+				{
+					goto ctr43;
+				}
+				case 102:
+				{
+					goto ctr43;
+				}
+				case 108:
+				{
+					goto ctr43;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr44;
+			}
+			case 17:
+			switch ( ((*( p  ))
+			) ) {
+				case 42:
+				{
+					goto ctr46;
+				}
+				case 47:
+				{
+					goto ctr47;
+				}
+				
+			}
+			{
+				goto ctr45;
+			}
+			case 18:
+			switch ( ((*( p  ))
+			) ) {
+				case 46:
+				{
+					goto ctr39;
+				}
+				case 69:
+				{
+					goto ctr42;
+				}
+				case 76:
+				{
+					goto ctr51;
+				}
+				case 85:
+				{
+					goto ctr51;
+				}
+				case 101:
+				{
+					goto ctr42;
+				}
+				case 108:
+				{
+					goto ctr51;
+				}
+				case 117:
+				{
+					goto ctr51;
+				}
+				case 120:
+				{
+					goto ctr52;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr50;
+			}
+			
+			{
+				goto ctr67;
+			}
+			case 19:
+			switch ( ((*( p  ))
+			) ) {
+				case 46:
+				{
+					goto ctr39;
+				}
+				case 69:
+				{
+					goto ctr42;
+				}
+				case 76:
+				{
+					goto ctr55;
+				}
+				case 85:
+				{
+					goto ctr55;
+				}
+				case 101:
+				{
+					goto ctr42;
+				}
+				case 108:
+				{
+					goto ctr55;
+				}
+				case 117:
+				{
+					goto ctr55;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr50;
+			}
+			
+			{
+				goto ctr56;
+			}
+			case 20:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr57;
+				}
+				case 85:
+				{
+					goto ctr57;
+				}
+				case 108:
+				{
+					goto ctr57;
+				}
+				case 117:
+				{
+					goto ctr57;
+				}
+				
+			}
+			{
+				goto ctr56;
+			}
+			case 21:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr59;
+				}
+				case 85:
+				{
+					goto ctr59;
+				}
+				case 108:
+				{
+					goto ctr59;
+				}
+				case 117:
+				{
+					goto ctr59;
+				}
+				
+			}
+			{
+				goto ctr67;
+			}
+			case 22:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr61;
+				}
+				case 85:
+				{
+					goto ctr61;
+				}
+				case 108:
+				{
+					goto ctr61;
+				}
+				case 117:
+				{
+					goto ctr61;
+				}
+				
+			}
+			{
+				goto ctr67;
+			}
+			case 8:
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr20;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 70  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 102  )
+				{
+					goto ctr20;
+				}
+				
+			} 
+			else
+			{
+				goto ctr20;
+			}
+			
+			{
+				goto ctr19;
+			}
+			case 23:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr64;
+				}
+				case 85:
+				{
+					goto ctr64;
+				}
+				case 108:
+				{
+					goto ctr64;
+				}
+				case 117:
+				{
+					goto ctr64;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr20;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 70  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 102  )
+				{
+					goto ctr20;
+				}
+				
+			} 
+			else
+			{
+				goto ctr20;
+			}
+			
+			{
+				goto ctr65;
+			}
+			case 24:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr66;
+				}
+				case 85:
+				{
+					goto ctr66;
+				}
+				case 108:
+				{
+					goto ctr66;
+				}
+				case 117:
+				{
+					goto ctr66;
+				}
+				
+			}
+			{
+				goto ctr65;
+			}
+			case 25:
+			switch ( ((*( p  ))
+			) ) {
+				case 46:
+				{
+					goto ctr39;
+				}
+				case 69:
+				{
+					goto ctr42;
+				}
+				case 76:
+				{
+					goto ctr51;
+				}
+				case 85:
+				{
+					goto ctr51;
+				}
+				case 101:
+				{
+					goto ctr42;
+				}
+				case 108:
+				{
+					goto ctr51;
+				}
+				case 117:
+				{
+					goto ctr51;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr31;
+			}
+			
+			{
+				goto ctr67;
+			}
+			case 26:
+			if ( ((*( p  ))
+			)== 95  )
+			{
+				goto ctr32;
+			}
+			
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr32;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr32;
+				}
+				
+			} 
+			else
+			{
+				goto ctr32;
+			}
+			
+			{
+				goto ctr70;
+			}
+			case 27:
+			switch ( ((*( p  ))
+			) ) {
+				case 34:
+				{
+					goto ctr2;
+				}
+				case 39:
+				{
+					goto ctr7;
+				}
+				case 95:
+				{
+					goto ctr32;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr32;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr32;
+				}
+				
+			} 
+			else
+			{
+				goto ctr32;
+			}
+			
+			{
+				goto ctr70;
+			}
+			case 9:
+			if ( ((*( p  ))
+			)== 42  )
+			{
+				goto ctr22;
+			}
+			
+			{
+				goto ctr21;
+			}
+			case 10:
+			switch ( ((*( p  ))
+			) ) {
+				case 42:
+				{
+					goto ctr22;
+				}
+				case 47:
+				{
+					goto ctr23;
+				}
+				
+			}
+			{
+				goto ctr21;
+			}
+			case 28:
+			{
+				goto ctr71;
+			}
+			case 0:
+			goto _out;
+			case 11:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr25;
+			}
+			
+			{
+				goto ctr24;
+			}
+			case 29:
+			{
+				goto ctr71;
+			}
+			
+		}
+		ctr71: cs = 0;
+		goto _again;
+		ctr2: cs = 1;
+		goto _again;
+		ctr4: cs = 2;
+		goto _again;
+		ctr7: cs = 3;
+		goto _again;
+		ctr9: cs = 4;
+		goto _again;
+		ctr38: cs = 5;
+		goto _again;
+		ctr42: cs = 6;
+		goto _again;
+		ctr15: cs = 7;
+		goto _again;
+		ctr52: cs = 8;
+		goto _again;
+		ctr21: cs = 9;
+		goto _again;
+		ctr22: cs = 10;
+		goto _again;
+		ctr24: cs = 11;
+		goto _again;
+		ctr17: cs = 12;
+		goto f2;
+		ctr3: cs = 12;
+		goto f3;
+		ctr8: cs = 12;
+		goto f4;
+		ctr12: cs = 12;
+		goto f5;
+		ctr13: cs = 12;
+		goto f6;
+		ctr19: cs = 12;
+		goto f7;
+		ctr27: cs = 12;
+		goto f13;
+		ctr35: cs = 12;
+		goto f17;
+		ctr45: cs = 12;
+		goto f18;
+		ctr44: cs = 12;
+		goto f20;
+		ctr43: cs = 12;
+		goto f21;
+		ctr46: cs = 12;
+		goto f22;
+		ctr47: cs = 12;
+		goto f23;
+		ctr67: cs = 12;
+		goto f24;
+		ctr56: cs = 12;
+		goto f26;
+		ctr57: cs = 12;
+		goto f27;
+		ctr61: cs = 12;
+		goto f28;
+		ctr65: cs = 12;
+		goto f29;
+		ctr66: cs = 12;
+		goto f30;
+		ctr70: cs = 12;
+		goto f31;
+		ctr26: cs = 13;
+		goto _again;
+		ctr28: cs = 14;
+		goto f14;
+		ctr39: cs = 15;
+		goto f19;
+		ctr16: cs = 16;
+		goto _again;
+		ctr29: cs = 17;
+		goto _again;
+		ctr30: cs = 18;
+		goto f15;
+		ctr50: cs = 19;
+		goto f25;
+		ctr55: cs = 20;
+		goto _again;
+		ctr51: cs = 21;
+		goto _again;
+		ctr59: cs = 22;
+		goto _again;
+		ctr20: cs = 23;
+		goto _again;
+		ctr64: cs = 24;
+		goto _again;
+		ctr31: cs = 25;
+		goto f15;
+		ctr32: cs = 26;
+		goto _again;
+		ctr33: cs = 27;
+		goto f16;
+		ctr23: cs = 28;
+		goto f9;
+		ctr25: cs = 29;
+		goto f10;
+		
+		f9: _acts = _Scanner_actions + 5 ;
+		goto execFuncs;
+		f10: _acts = _Scanner_actions + 7 ;
+		goto execFuncs;
+		f14: _acts = _Scanner_actions + 9 ;
+		goto execFuncs;
+		f4: _acts = _Scanner_actions + 11 ;
+		goto execFuncs;
+		f3: _acts = _Scanner_actions + 13 ;
+		goto execFuncs;
+		f21: _acts = _Scanner_actions + 15 ;
+		goto execFuncs;
+		f28: _acts = _Scanner_actions + 17 ;
+		goto execFuncs;
+		f27: _acts = _Scanner_actions + 19 ;
+		goto execFuncs;
+		f30: _acts = _Scanner_actions + 21 ;
+		goto execFuncs;
+		f6: _acts = _Scanner_actions + 23 ;
+		goto execFuncs;
+		f13: _acts = _Scanner_actions + 25 ;
+		goto execFuncs;
+		f22: _acts = _Scanner_actions + 27 ;
+		goto execFuncs;
+		f23: _acts = _Scanner_actions + 29 ;
+		goto execFuncs;
+		f31: _acts = _Scanner_actions + 31 ;
+		goto execFuncs;
+		f20: _acts = _Scanner_actions + 33 ;
+		goto execFuncs;
+		f24: _acts = _Scanner_actions + 35 ;
+		goto execFuncs;
+		f26: _acts = _Scanner_actions + 37 ;
+		goto execFuncs;
+		f29: _acts = _Scanner_actions + 39 ;
+		goto execFuncs;
+		f18: _acts = _Scanner_actions + 41 ;
+		goto execFuncs;
+		f17: _acts = _Scanner_actions + 43 ;
+		goto execFuncs;
+		f7: _acts = _Scanner_actions + 45 ;
+		goto execFuncs;
+		f5: _acts = _Scanner_actions + 47 ;
+		goto execFuncs;
+		f2: _acts = _Scanner_actions + 49 ;
+		goto execFuncs;
+		f16: _acts = _Scanner_actions + 57 ;
+		goto execFuncs;
+		f19: _acts = _Scanner_actions + 60 ;
+		goto execFuncs;
+		f15: _acts = _Scanner_actions + 63 ;
+		goto execFuncs;
+		f25: _acts = _Scanner_actions + 66 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 2:
+				{
+					{
+						cs = 12;
+						goto _again;
+					}
+					
+				}
+				
+				break;
+				case 3:
+				{
+					{
+						cs = 12;
+						goto _again;
+					}
+					
+				}
+				
+				break;
+				case 7:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 8:
+				{
+					{
+						act = 3;
+						
+					}
+					
+				}
+				
+				break;
+				case 9:
+				{
+					{
+						act = 4;
+						
+					}
+					
+				}
+				
+				break;
+				case 10:
+				{
+					{
+						act = 5;
+						
+					}
+					
+				}
+				
+				break;
+				case 11:
+				{
+					{
+						act = 6;
+						
+					}
+					
+				}
+				
+				break;
+				case 12:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 13:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 14:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 15:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 16:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 17:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 18:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 19:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 20:
+				{
+					{
+						te = p+1;
+						{
+							{
+								cs = 9;
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 21:
+				{
+					{
+						te = p+1;
+						{
+							{
+								cs = 11;
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 22:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 23:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 24:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 25:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 26:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 27:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 28:
+				{
+					{
+						te = p;
+						p = p - 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 29:
+				{
+					{
+						p = ((te))-1;
+						
+					}
+					
+				}
+				
+				break;
+				case 30:
+				{
+					{
+						p = ((te))-1;
+						
+					}
+					
+				}
+				
+				break;
+				case 31:
+				{
+					{
+						switch ( act  ) {
+							case 0 :
+							{
+								{
+									cs = 0;
+									goto _again;
+								}
+								
+							}
+							
+							break;
+							default:
+							p = ((te))-1;
+							
+							break;
+							
+						}
+						
+					}
+					
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		_acts = _Scanner_actions + _Scanner_to_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					cout << "to:   fc = ";
+					if ( (((*( p  ))
+					)) == '\'' )
+					cout << (int)(((*( p  ))
+					));
+					else
+					cout << (((*( p  ))
+					));
+					cout << " ts = " << ( ts == 0 ? -1 : ts-buf ) << endl;
+					
+				}
+				
+				break;
+				case 4:
+				{
+					{
+						ts = 0;
+						
+					}
+					
+				}
+				
+				break;
+				case 5:
+				{
+					{
+						act = 0;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 13:
+				goto ctr35;
+				case 1:
+				goto ctr17;
+				case 2:
+				goto ctr17;
+				case 3:
+				goto ctr17;
+				case 4:
+				goto ctr17;
+				case 14:
+				goto ctr45;
+				case 5:
+				goto ctr12;
+				case 15:
+				goto ctr44;
+				case 6:
+				goto ctr17;
+				case 7:
+				goto ctr17;
+				case 16:
+				goto ctr44;
+				case 17:
+				goto ctr45;
+				case 18:
+				goto ctr67;
+				case 19:
+				goto ctr56;
+				case 20:
+				goto ctr56;
+				case 21:
+				goto ctr67;
+				case 22:
+				goto ctr67;
+				case 8:
+				goto ctr19;
+				case 23:
+				goto ctr65;
+				case 24:
+				goto ctr65;
+				case 25:
+				goto ctr67;
+				case 26:
+				goto ctr70;
+				case 27:
+				goto ctr70;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	return 0;
+}
+
+int Scanner::finish( )
+{
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+void test( )
+{
+	int len = strlen( buf );
+	Scanner scanner;
+	
+	scanner.init();
+	scanner.execute( buf, len );
+	if ( scanner.cs == Scanner_error ) {
+		/* Machine failed before finding a token. */
+		cout << "PARSE ERROR" << endl;
+	}
+	scanner.finish();
+}
+
+char buf[4096];
+
+int main()
+{
+	strcpy( buf, 
+	"a b 0.98 /*\n"
+	"9 */'\\''//hi\n"
+	"there\n"
+	);
+	test();
+	return 0;
+}
+

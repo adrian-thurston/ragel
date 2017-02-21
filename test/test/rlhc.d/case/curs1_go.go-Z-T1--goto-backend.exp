@@ -1,0 +1,257 @@
+package main
+import "fmt"
+
+var return_to  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _curs1_key_offsets [] int8  = [] int8  { 0, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 0  }
+var _curs1_trans_keys [] byte  = [] byte  { 10, 49, 50, 117, 110, 117, 115, 101, 100, 111, 110, 101, 116, 119, 111, 0 }
+var _curs1_single_lengths [] int8  = [] int8  { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0  }
+var _curs1_range_lengths [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _curs1_index_offsets [] int8  = [] int8  { 0, 0, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 29, 30, 31, 0  }
+var _curs1_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _curs1_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0  }
+var _curs1_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _curs1_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _curs1_cond_targs [] int8  = [] int8  { 14, 14, 14, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 15, 0, 9, 0, 10, 0, 16, 0, 12, 0, 13, 0, 17, 0, 0, 0, 0, 0, 0  }
+var _curs1_cond_actions [] int8  = [] int8  { 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0  }
+var _curs1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _curs1_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _curs1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _curs1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var curs1_start  int  = 1
+var curs1_first_final  int  = 14
+var curs1_error  int  = 0
+var curs1_en_unused  int  = 2
+var curs1_en_one  int  = 8
+var curs1_en_two  int  = 11
+var curs1_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(curs1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _klen int 
+		var  _ps int 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		var  _trans  uint   = 0
+		var  _cond  uint   = 0
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_keys = int(_curs1_key_offsets[cs] );
+		_trans = uint(_curs1_index_offsets[cs]);
+		_klen = int(_curs1_single_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + _klen - 1;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + ((_upper-_lower) >> 1);
+						switch {
+							case ( data[p ]) < _curs1_trans_keys[_mid ]:
+							_upper = _mid - 1;
+							
+							case ( data[p ]) > _curs1_trans_keys[_mid ]:
+							_lower = _mid + 1;
+							
+							default:
+							{
+								_trans += uint((_mid - _keys));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_keys += _klen;
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		_klen = int(_curs1_range_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + (_klen<<1) - 2;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+						switch {
+							case ( data[p ]) < _curs1_trans_keys[_mid ]:
+							_upper = _mid - 2;
+							
+							case ( data[p ]) > _curs1_trans_keys[_mid + 1 ]:
+							_lower = _mid + 2;
+							
+							default:
+							{
+								_trans += uint(((_mid - _keys)>>1));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		
+		_match :
+		_ckeys = int(_curs1_trans_offsets[_trans] );
+		_klen = int(_curs1_trans_lengths[_trans]);
+		_cond = uint(_curs1_trans_offsets[_trans]);
+		_cpc = 0;
+		{
+			var  _lower int
+			var  _mid int
+			var  _upper int
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			for {
+				{
+					if _upper < _lower  {
+						break;
+						
+						
+					}
+					_mid = _lower + ((_upper-_lower) >> 1);
+					switch {
+						case _cpc < int(_curs1_cond_keys[_mid ]):
+						_upper = _mid - 1;
+						
+						case _cpc > int(_curs1_cond_keys[_mid ]):
+						_lower = _mid + 1;
+						
+						default:
+						{
+							_cond += uint((_mid - _ckeys));
+							goto _match_cond;
+						}
+						
+					}
+				}
+				
+			}
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		_ps = cs;
+		cs = int(_curs1_cond_targs[_cond]);
+		if _curs1_cond_actions[_cond] == 0  {
+			goto _again;
+			
+			
+		}
+		switch _curs1_cond_actions[_cond]  {
+			case 3 :
+			{fmt.Print( "one\n" );{cs = (return_to);
+				}
+				
+			}
+			
+			break;
+			case 4 :
+			{fmt.Print( "two\n" );{cs = (return_to);
+				}
+				
+			}
+			
+			break;
+			case 1 :
+			{return_to = (_ps);
+				{cs = 8;
+				}}
+			
+			break;
+			case 2 :
+			{return_to = (_ps);
+				{cs = 11;
+				}}
+			
+			break;
+			
+		}
+		
+		_again :
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= curs1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"1one2two1one\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

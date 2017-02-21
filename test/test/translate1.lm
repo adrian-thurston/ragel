@@ -1,0 +1,27 @@
+lex
+	ignore /space+/
+	literal `* `( `)
+	token id /[a-zA-Z_]+/ 
+		{
+			t: str = input->pull( match_length )
+			input->push( make_token( typeid<id>, t ) )
+		}
+end
+
+def foo [id]
+
+def item 
+	[id]
+|	[foo]
+|	[`( item* `)]
+
+def start 
+	[item*]
+
+parse Input: start[ stdin ]
+print[ @Input ]
+
+##### IN #####
+a b ( c d ) e f
+##### EXP #####
+a b ( c d ) e f

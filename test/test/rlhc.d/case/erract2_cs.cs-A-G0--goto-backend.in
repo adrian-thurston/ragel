@@ -1,0 +1,245 @@
+host( "working/erract2_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			
+			
+			
+			
+			
+			
+		}@
+		array s8 _erract_actions( 0, 7 ) = { 0, 2, 0, 1, 2, 1, 2, 2, 1, 3, 4, 0, 4, 1, 5, 4, 1, 2, 5, 6, 4, 1, 3, 5, 7, 0 };
+		
+		array s8 _erract_eof_actions( 0, 20 ) = { 0, 10, 15, 15, 15, 15, 20, 0, 0 };
+		
+		array s8 _erract_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _erract_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _erract_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _erract_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int erract_start = 1;
+		value int erract_first_final = 7;
+		value int erract_error = 0;
+		
+		value int erract_en_main = 1;
+		
+		host( "working/erract2_cs.rl", 36 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)erract_start;
+			}
+			host( "working/erract2_cs.rl", 41 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				index s8 _acts;
+				uint _nacts;
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				_resume:
+				switch ( cs ) {
+					case 1:
+					if ( ( deref( data, p )) == c(104) ) {
+						goto ctr1;
+					}
+					{
+						goto ctr0;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					if ( ( deref( data, p )) == c(101) ) {
+						goto ctr3;
+					}
+					{
+						goto ctr2;
+					}
+					case 3:
+					if ( ( deref( data, p )) == c(108) ) {
+						goto ctr4;
+					}
+					{
+						goto ctr2;
+					}
+					case 4:
+					if ( ( deref( data, p )) == c(108) ) {
+						goto ctr5;
+					}
+					{
+						goto ctr2;
+					}
+					case 5:
+					if ( ( deref( data, p )) == c(111) ) {
+						goto ctr6;
+					}
+					{
+						goto ctr2;
+					}
+					case 6:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr8;
+					}
+					{
+						goto ctr7;
+					}
+					case 7:
+					{
+						goto ctr9;
+					}
+				}
+				
+				ctr9: cs = 0; goto _again;
+				ctr0: cs = 0; goto f1;
+				ctr2: cs = 0; goto f3;
+				ctr7: cs = 0; goto f5;
+				ctr1: cs = 2; goto _again;
+				ctr3: cs = 3; goto _again;
+				ctr4: cs = 4; goto _again;
+				ctr5: cs = 5; goto _again;
+				ctr6: cs = 6; goto _again;
+				ctr8: cs = 7; goto _again;
+				
+				f1: _acts = offset( _erract_actions, 1 ); goto execFuncs;
+				f3: _acts = offset( _erract_actions, 4 ); goto execFuncs;
+				f5: _acts = offset( _erract_actions, 7 ); goto execFuncs;
+				
+				execFuncs:
+				_nacts = cast(uint)deref( _erract_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _erract_actions, _acts ) ) {
+						case 0{
+							host( "working/erract2_cs.rl", 18 ) ${Console.Write( "err_start\n" );}$
+						}
+						case 1{
+							host( "working/erract2_cs.rl", 19 ) ${Console.Write( "err_all\n" );}$
+						}
+						case 2{
+							host( "working/erract2_cs.rl", 20 ) ${Console.Write( "err_middle\n" );}$
+						}
+						case 3{
+							host( "working/erract2_cs.rl", 21 ) ${Console.Write( "err_out\n" );}$
+						}
+					}
+					_acts += 1;
+					_nacts -= 1;
+				}
+				
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				if ( p == eof )
+				{
+					index s8 __acts;
+					uint __nacts;
+					__acts = offset( _erract_actions, _erract_eof_actions[cs] );
+					__nacts = cast(uint)deref( _erract_actions, __acts ); __acts += 1;
+					while ( __nacts > 0 ) {
+						switch ( deref( _erract_actions, __acts ) ) {
+							case 0{
+								host( "working/erract2_cs.rl", 18 ) ${Console.Write( "err_start\n" );}$
+							}
+							case 1{
+								host( "working/erract2_cs.rl", 19 ) ${Console.Write( "err_all\n" );}$
+							}
+							case 2{
+								host( "working/erract2_cs.rl", 20 ) ${Console.Write( "err_middle\n" );}$
+							}
+							case 3{
+								host( "working/erract2_cs.rl", 21 ) ${Console.Write( "err_out\n" );}$
+							}
+							case 4{
+								host( "working/erract2_cs.rl", 23 ) ${Console.Write( "eof_start\n" );}$
+							}
+							case 5{
+								host( "working/erract2_cs.rl", 24 ) ${Console.Write( "eof_all\n" );}$
+							}
+							case 6{
+								host( "working/erract2_cs.rl", 25 ) ${Console.Write( "eof_middle\n" );}$
+							}
+							case 7{
+								host( "working/erract2_cs.rl", 26 ) ${Console.Write( "eof_out\n" );}$
+							}
+						}
+						__acts += 1;
+						__nacts -= 1;
+					}
+				}
+				
+				_out: {}
+			}
+			host( "working/erract2_cs.rl", 52 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= erract_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"",
+				"h",
+				"x",
+				"he",
+				"hx",
+				"hel",
+				"hex",
+				"hell",
+				"helx",
+				"hello",
+				"hellx",
+				"hello\n",
+				"hellox",
+			};
+			
+			
+			static readonly int inplen = 13;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

@@ -1,0 +1,391 @@
+host( "working/cond1_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			int i;
+			int j;
+			int k;
+			
+			
+			
+			
+		}@
+		array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int foo_start = 1;
+		value int foo_first_final = 15;
+		value int foo_error = 0;
+		
+		value int foo_en_main = 1;
+		
+		host( "working/cond1_cs.rl", 73 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)foo_start;
+			}
+			host( "working/cond1_cs.rl", 78 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _nbreak;
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				_resume:
+				switch ( cs ) {
+					case 1:
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(49) ) {
+						goto ctr0;
+					}
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(49) ) {
+						goto ctr2;
+					}
+					{
+						goto ctr1;
+					}
+					case 3:
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(49) ) {
+						goto ctr3;
+					}
+					{
+						goto ctr1;
+					}
+					case 4:
+					switch( ( deref( data, p )) ) {
+						case c(97): {
+							goto ctr4;
+						}
+						case c(98): {
+							int ck = 0;
+							if ( host( "working/cond1_cs.rl", 20 ) ={j != 0}= ) ck += 1;
+							if ( 1 <= ck )
+							{		goto ctr5;
+							}
+							goto ctr6;
+							
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 5:
+					switch( ( deref( data, p )) ) {
+						case c(97): {
+							goto ctr7;
+						}
+						case c(98): {
+							int ck = 0;
+							if ( host( "working/cond1_cs.rl", 19 ) ={i != 0}= ) ck += 1;
+							if ( host( "working/cond1_cs.rl", 20 ) ={j != 0}= ) ck += 2;
+							if ( host( "working/cond1_cs.rl", 21 ) ={k != 0}= ) ck += 4;
+							if ( ck < 4 ) {
+								if ( ck < 2 ) {
+									if ( 1 <= ck )
+									{				goto ctr8;
+									}
+								} else if ( ck > 2 ) {
+									goto ctr9;
+								} else {
+									goto ctr5;
+								}
+							} else if ( ck > 4 ) {
+								if ( ck < 6 ) {
+									goto ctr11;
+								} else if ( ck > 6 ) {
+									goto ctr13;
+								} else {
+									goto ctr12;
+								}
+							} else {
+								goto ctr10;
+							}
+							goto ctr6;
+							
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 6:
+					switch( ( deref( data, p )) ) {
+						case c(97): {
+							goto ctr7;
+						}
+						case c(98): {
+							int ck = 0;
+							if ( host( "working/cond1_cs.rl", 20 ) ={j != 0}= ) ck += 1;
+							if ( host( "working/cond1_cs.rl", 21 ) ={k != 0}= ) ck += 2;
+							if ( ck < 2 ) {
+								if ( 1 <= ck )
+								{			goto ctr5;
+								}
+							} else if ( ck > 2 ) {
+								goto ctr12;
+							} else {
+								goto ctr10;
+							}
+							goto ctr6;
+							
+						}
+					}
+					{
+						goto ctr1;
+					}
+					case 7:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr14;
+					}
+					{
+						goto ctr1;
+					}
+					case 8:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr15;
+					}
+					{
+						goto ctr1;
+					}
+					case 15:
+					{
+						goto ctr1;
+					}
+					case 9:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr16;
+					}
+					{
+						goto ctr1;
+					}
+					case 10:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr17;
+					}
+					{
+						goto ctr1;
+					}
+					case 11:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr18;
+					}
+					{
+						goto ctr1;
+					}
+					case 12:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr19;
+					}
+					{
+						goto ctr1;
+					}
+					case 13:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr20;
+					}
+					{
+						goto ctr1;
+					}
+					case 14:
+					if ( ( deref( data, p )) == c(99) ) {
+						goto ctr21;
+					}
+					{
+						goto ctr1;
+					}
+				}
+				
+				ctr1: cs = 0; goto _again;
+				ctr0: cs = 2; goto f0;
+				ctr2: cs = 3; goto f1;
+				ctr3: cs = 4; goto f2;
+				ctr4: cs = 5; goto _again;
+				ctr7: cs = 6; goto _again;
+				ctr14: cs = 8; goto f3;
+				ctr16: cs = 8; goto f5;
+				ctr17: cs = 8; goto f6;
+				ctr18: cs = 8; goto f7;
+				ctr19: cs = 8; goto f8;
+				ctr20: cs = 8; goto f9;
+				ctr21: cs = 8; goto f10;
+				ctr15: cs = 15; goto f4;
+				ctr6: cs = 0; goto _again;
+				ctr5: cs = 7; goto _again;
+				ctr10: cs = 9; goto _again;
+				ctr12: cs = 10; goto _again;
+				ctr8: cs = 11; goto _again;
+				ctr9: cs = 12; goto _again;
+				ctr11: cs = 13; goto _again;
+				ctr13: cs = 14; goto _again;
+				
+				f7:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 22 ) ${Console.Write( "  one\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f3:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 23 ) ${Console.Write( "  two\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f5:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 24 ) ${Console.Write( "  three\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f0:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 26 ) ${if ( ={( deref( data, p ))}= == 48 )
+					{
+						i = 0;
+						
+					} 
+					else {
+						i = 1;
+						
+					}
+				}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f1:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 36 ) ${if ( ={( deref( data, p ))}= == 48 )
+					{
+						j = 0;
+						
+					} 
+					else {
+						j = 1;
+						
+					}
+				}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f2:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 46 ) ${if ( ={( deref( data, p ))}= == 48 )
+					{
+						k = 0;
+						
+					} 
+					else {
+						k = 1;
+						
+					}
+				}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f4:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 57 ) ${${p += 1;  _nbreak = 1; }$}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f8:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 22 ) ${Console.Write( "  one\n" );}$	host( "working/cond1_cs.rl", 23 ) ${Console.Write( "  two\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f9:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 22 ) ${Console.Write( "  one\n" );}$	host( "working/cond1_cs.rl", 24 ) ${Console.Write( "  three\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f6:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 23 ) ${Console.Write( "  two\n" );}$	host( "working/cond1_cs.rl", 24 ) ${Console.Write( "  three\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				f10:
+				_nbreak = 0;
+				host( "working/cond1_cs.rl", 22 ) ${Console.Write( "  one\n" );}$	host( "working/cond1_cs.rl", 23 ) ${Console.Write( "  two\n" );}$	host( "working/cond1_cs.rl", 24 ) ${Console.Write( "  three\n" );}$	if ( _nbreak == 1 )
+				goto _out;
+				
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				_out: {}
+			}
+			host( "working/cond1_cs.rl", 89 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= foo_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"000abc\n",
+				"100abc\n",
+				"010abc\n",
+				"110abc\n",
+				"001abc\n",
+				"101abc\n",
+				"011abc\n",
+				"111abc\n",
+			};
+			
+			
+			static readonly int inplen = 8;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

@@ -1,0 +1,12 @@
+print_xml( arg0 )
+
+A: list_el<str> = argv->head_el
+while ( A ) {
+	print_xml( A->value )
+	A = A->next
+}
+print( '\n' )
+##### ARGS #####
+a b c 1 2 3
+##### EXP #####
+<str>./working/argv1</str><str>a</str><str>b</str><str>c</str><str>1</str><str>2</str><str>3</str>

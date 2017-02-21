@@ -1,0 +1,1578 @@
+package main
+import "fmt"
+
+var ts  int ;
+var te  int ;
+var act  int ;
+var token  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _scanner_actions [] int8  = [] int8  { 0, 1, 2, 1, 3, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 1, 28, 1, 29, 1, 30, 1, 31, 1, 32, 1, 33, 1, 34, 1, 35, 1, 36, 1, 37, 1, 38, 1, 39, 1, 40, 1, 41, 1, 42, 1, 43, 1, 44, 1, 45, 2, 0, 1, 2, 3, 4, 2, 3, 5, 2, 3, 6, 2, 3, 7, 0  }
+var _scanner_to_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _scanner_from_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _scanner_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _scanner_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var scanner_start  int  = 12
+var scanner_first_final  int  = 12
+var scanner_error  int  = 0
+var scanner_en_main  int  = 12
+func prepare() {
+
+	{
+		cs = int(scanner_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _acts int
+		var  _nacts uint 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		_acts = int(_scanner_from_state_actions[cs] );
+		_nacts = uint(_scanner_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _scanner_actions[_acts ] {
+					case 2:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		switch cs  {
+			case 12:
+			switch ( data[p ])  {
+				case 33:
+				{
+					goto ctr30;
+				}
+				case 34:
+				{
+					goto ctr2;
+				}
+				case 37:
+				{
+					goto ctr32;
+				}
+				case 38:
+				{
+					goto ctr33;
+				}
+				case 39:
+				{
+					goto ctr7;
+				}
+				case 42:
+				{
+					goto ctr34;
+				}
+				case 43:
+				{
+					goto ctr35;
+				}
+				case 45:
+				{
+					goto ctr36;
+				}
+				case 46:
+				{
+					goto ctr37;
+				}
+				case 47:
+				{
+					goto ctr38;
+				}
+				case 48:
+				{
+					goto ctr39;
+				}
+				case 58:
+				{
+					goto ctr41;
+				}
+				case 61:
+				{
+					goto ctr42;
+				}
+				case 76:
+				{
+					goto ctr44;
+				}
+				case 94:
+				{
+					goto ctr45;
+				}
+				case 95:
+				{
+					goto ctr43;
+				}
+				case 124:
+				{
+					goto ctr46;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) < 65 :
+				{
+					switch {
+						case ( data[p ]) < 49 :
+						{
+							if 35 <= ( data[p ]) && ( data[p ]) <= 44  {
+								{
+									goto ctr31;
+								}
+								
+							}
+						} 
+						case ( data[p ]) > 57 :
+						{
+							if 59 <= ( data[p ])  {
+								{
+									goto ctr31;
+								}
+								
+							}
+						} 
+						default:
+						{
+							goto ctr40;
+						}
+						
+					}
+				} 
+				case ( data[p ]) > 90 :
+				{
+					switch {
+						case ( data[p ]) < 97 :
+						{
+							{
+								goto ctr31;
+							}
+						} 
+						case ( data[p ]) > 122 :
+						{
+							if ( data[p ]) <= 126  {
+								{
+									goto ctr31;
+								}
+								
+							}
+						} 
+						default:
+						{
+							goto ctr43;
+						}
+						
+					}
+				} 
+				default:
+				{
+					goto ctr43;
+				}
+				
+			}
+			{
+				goto ctr29;
+			}
+			case 13:
+			if 33 <= ( data[p ]) && ( data[p ]) <= 126  {
+				{
+					goto ctr48;
+				}
+				
+			}
+			{
+				goto ctr29;
+			}
+			case 14:
+			if ( data[p ]) == 61  {
+				{
+					goto ctr51;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 1:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr17;
+				}
+				case 34:
+				{
+					goto ctr3;
+				}
+				case 92:
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr2;
+			}
+			case 2:
+			{
+				goto ctr2;
+			}
+			case 15:
+			if ( data[p ]) == 61  {
+				{
+					goto ctr53;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 16:
+			switch ( data[p ])  {
+				case 38:
+				{
+					goto ctr55;
+				}
+				case 61:
+				{
+					goto ctr56;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 3:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr17;
+				}
+				case 39:
+				{
+					goto ctr8;
+				}
+				case 92:
+				{
+					goto ctr9;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			{
+				goto ctr7;
+			}
+			case 17:
+			if ( data[p ]) == 61  {
+				{
+					goto ctr58;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 18:
+			switch ( data[p ])  {
+				case 43:
+				{
+					goto ctr60;
+				}
+				case 61:
+				{
+					goto ctr61;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 19:
+			switch ( data[p ])  {
+				case 45:
+				{
+					goto ctr63;
+				}
+				case 61:
+				{
+					goto ctr64;
+				}
+				case 62:
+				{
+					goto ctr65;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 20:
+			if ( data[p ]) == 42  {
+				{
+					goto ctr68;
+				}
+				
+			}
+			{
+				goto ctr67;
+			}
+			case 21:
+			switch ( data[p ])  {
+				case 42:
+				{
+					goto ctr70;
+				}
+				case 46:
+				{
+					goto ctr71;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr72;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 5:
+			if ( data[p ]) == 46  {
+				{
+					goto ctr13;
+				}
+				
+			}
+			{
+				goto ctr23;
+			}
+			case 22:
+			switch ( data[p ])  {
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 70:
+				{
+					goto ctr76;
+				}
+				case 76:
+				{
+					goto ctr76;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 102:
+				{
+					goto ctr76;
+				}
+				case 108:
+				{
+					goto ctr76;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr72;
+				}
+				
+			}
+			{
+				goto ctr77;
+			}
+			case 6:
+			switch ( data[p ])  {
+				case 43:
+				{
+					goto ctr15;
+				}
+				case 45:
+				{
+					goto ctr15;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr16;
+				}
+				
+			}
+			{
+				goto ctr17;
+			}
+			case 7:
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr16;
+				}
+				
+			}
+			{
+				goto ctr17;
+			}
+			case 23:
+			switch ( data[p ])  {
+				case 70:
+				{
+					goto ctr76;
+				}
+				case 76:
+				{
+					goto ctr76;
+				}
+				case 102:
+				{
+					goto ctr76;
+				}
+				case 108:
+				{
+					goto ctr76;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr16;
+				}
+				
+			}
+			{
+				goto ctr77;
+			}
+			case 24:
+			switch ( data[p ])  {
+				case 33:
+				{
+					goto ctr19;
+				}
+				case 47:
+				{
+					goto ctr24;
+				}
+				case 61:
+				{
+					goto ctr79;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 8:
+			if ( data[p ]) == 33  {
+				{
+					goto ctr20;
+				}
+				
+			}
+			{
+				goto ctr19;
+			}
+			case 9:
+			switch ( data[p ])  {
+				case 33:
+				{
+					goto ctr20;
+				}
+				case 47:
+				{
+					goto ctr22;
+				}
+				
+			}
+			{
+				goto ctr19;
+			}
+			case 10:
+			if ( data[p ]) == 10  {
+				{
+					goto ctr25;
+				}
+				
+			}
+			{
+				goto ctr24;
+			}
+			case 25:
+			switch ( data[p ])  {
+				case 46:
+				{
+					goto ctr72;
+				}
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 76:
+				{
+					goto ctr83;
+				}
+				case 85:
+				{
+					goto ctr83;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 108:
+				{
+					goto ctr83;
+				}
+				case 117:
+				{
+					goto ctr83;
+				}
+				case 120:
+				{
+					goto ctr84;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr82;
+				}
+				
+			}
+			{
+				goto ctr91;
+			}
+			case 26:
+			switch ( data[p ])  {
+				case 46:
+				{
+					goto ctr72;
+				}
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 76:
+				{
+					goto ctr87;
+				}
+				case 85:
+				{
+					goto ctr87;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 108:
+				{
+					goto ctr87;
+				}
+				case 117:
+				{
+					goto ctr87;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr82;
+				}
+				
+			}
+			{
+				goto ctr86;
+			}
+			case 11:
+			switch {
+				case ( data[p ]) < 65 :
+				{
+					if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+						{
+							goto ctr28;
+						}
+						
+					}
+				} 
+				case ( data[p ]) > 70 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 102  {
+						{
+							goto ctr28;
+						}
+						
+					}
+				} 
+				default:
+				{
+					goto ctr28;
+				}
+				
+			}
+			{
+				goto ctr27;
+			}
+			case 27:
+			switch ( data[p ])  {
+				case 76:
+				{
+					goto ctr90;
+				}
+				case 85:
+				{
+					goto ctr90;
+				}
+				case 108:
+				{
+					goto ctr90;
+				}
+				case 117:
+				{
+					goto ctr90;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) < 65 :
+				{
+					if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+						{
+							goto ctr28;
+						}
+						
+					}
+				} 
+				case ( data[p ]) > 70 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 102  {
+						{
+							goto ctr28;
+						}
+						
+					}
+				} 
+				default:
+				{
+					goto ctr28;
+				}
+				
+			}
+			{
+				goto ctr89;
+			}
+			case 28:
+			switch ( data[p ])  {
+				case 46:
+				{
+					goto ctr72;
+				}
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 76:
+				{
+					goto ctr83;
+				}
+				case 85:
+				{
+					goto ctr83;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 108:
+				{
+					goto ctr83;
+				}
+				case 117:
+				{
+					goto ctr83;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr40;
+				}
+				
+			}
+			{
+				goto ctr91;
+			}
+			case 29:
+			if ( data[p ]) == 58  {
+				{
+					goto ctr93;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 30:
+			if ( data[p ]) == 61  {
+				{
+					goto ctr95;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 31:
+			if ( data[p ]) == 95  {
+				{
+					goto ctr43;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) < 65 :
+				{
+					if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+						{
+							goto ctr43;
+						}
+						
+					}
+				} 
+				case ( data[p ]) > 90 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr43;
+						}
+						
+					}
+				} 
+				default:
+				{
+					goto ctr43;
+				}
+				
+			}
+			{
+				goto ctr98;
+			}
+			case 32:
+			switch ( data[p ])  {
+				case 34:
+				{
+					goto ctr2;
+				}
+				case 39:
+				{
+					goto ctr7;
+				}
+				case 95:
+				{
+					goto ctr43;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) < 65 :
+				{
+					if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+						{
+							goto ctr43;
+						}
+						
+					}
+				} 
+				case ( data[p ]) > 90 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr43;
+						}
+						
+					}
+				} 
+				default:
+				{
+					goto ctr43;
+				}
+				
+			}
+			{
+				goto ctr98;
+			}
+			case 33:
+			if ( data[p ]) == 61  {
+				{
+					goto ctr100;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 34:
+			switch ( data[p ])  {
+				case 61:
+				{
+					goto ctr102;
+				}
+				case 124:
+				{
+					goto ctr103;
+				}
+				
+			}
+			{
+				goto ctr101;
+			}
+			case 0:
+			goto _out;
+			
+		}
+		ctr2: cs = 1;
+		goto _again;
+		ctr4: cs = 2;
+		goto _again;
+		ctr7: cs = 3;
+		goto _again;
+		ctr9: cs = 4;
+		goto _again;
+		ctr71: cs = 5;
+		goto _again;
+		ctr75: cs = 6;
+		goto _again;
+		ctr15: cs = 7;
+		goto _again;
+		ctr19: cs = 8;
+		goto _again;
+		ctr20: cs = 9;
+		goto _again;
+		ctr24: cs = 10;
+		goto _again;
+		ctr84: cs = 11;
+		goto _again;
+		ctr17: cs = 12;
+		goto f0;
+		ctr3: cs = 12;
+		goto f1;
+		ctr8: cs = 12;
+		goto f2;
+		ctr23: cs = 12;
+		goto f3;
+		ctr13: cs = 12;
+		goto f4;
+		ctr22: cs = 12;
+		goto f5;
+		ctr25: cs = 12;
+		goto f6;
+		ctr27: cs = 12;
+		goto f7;
+		ctr31: cs = 12;
+		goto f10;
+		ctr48: cs = 12;
+		goto f14;
+		ctr101: cs = 12;
+		goto f15;
+		ctr51: cs = 12;
+		goto f16;
+		ctr53: cs = 12;
+		goto f17;
+		ctr55: cs = 12;
+		goto f18;
+		ctr56: cs = 12;
+		goto f19;
+		ctr58: cs = 12;
+		goto f20;
+		ctr60: cs = 12;
+		goto f21;
+		ctr61: cs = 12;
+		goto f22;
+		ctr63: cs = 12;
+		goto f23;
+		ctr64: cs = 12;
+		goto f24;
+		ctr67: cs = 12;
+		goto f25;
+		ctr68: cs = 12;
+		goto f26;
+		ctr70: cs = 12;
+		goto f27;
+		ctr77: cs = 12;
+		goto f29;
+		ctr76: cs = 12;
+		goto f30;
+		ctr79: cs = 12;
+		goto f31;
+		ctr91: cs = 12;
+		goto f32;
+		ctr83: cs = 12;
+		goto f34;
+		ctr86: cs = 12;
+		goto f35;
+		ctr87: cs = 12;
+		goto f36;
+		ctr89: cs = 12;
+		goto f37;
+		ctr90: cs = 12;
+		goto f38;
+		ctr93: cs = 12;
+		goto f39;
+		ctr95: cs = 12;
+		goto f40;
+		ctr98: cs = 12;
+		goto f41;
+		ctr100: cs = 12;
+		goto f42;
+		ctr102: cs = 12;
+		goto f43;
+		ctr103: cs = 12;
+		goto f44;
+		ctr29: cs = 13;
+		goto _again;
+		ctr30: cs = 14;
+		goto _again;
+		ctr32: cs = 15;
+		goto _again;
+		ctr33: cs = 16;
+		goto _again;
+		ctr34: cs = 17;
+		goto _again;
+		ctr35: cs = 18;
+		goto _again;
+		ctr36: cs = 19;
+		goto _again;
+		ctr65: cs = 20;
+		goto _again;
+		ctr37: cs = 21;
+		goto f11;
+		ctr72: cs = 22;
+		goto f28;
+		ctr16: cs = 23;
+		goto _again;
+		ctr38: cs = 24;
+		goto f11;
+		ctr39: cs = 25;
+		goto f12;
+		ctr82: cs = 26;
+		goto f33;
+		ctr28: cs = 27;
+		goto _again;
+		ctr40: cs = 28;
+		goto f12;
+		ctr41: cs = 29;
+		goto _again;
+		ctr42: cs = 30;
+		goto _again;
+		ctr43: cs = 31;
+		goto _again;
+		ctr44: cs = 32;
+		goto f13;
+		ctr45: cs = 33;
+		goto _again;
+		ctr46: cs = 34;
+		goto _again;
+		
+		f11: _acts = int(3 );
+		goto execFuncs;
+		f2: _acts = int(5 );
+		goto execFuncs;
+		f1: _acts = int(7 );
+		goto execFuncs;
+		f30: _acts = int(9 );
+		goto execFuncs;
+		f34: _acts = int(11 );
+		goto execFuncs;
+		f36: _acts = int(13 );
+		goto execFuncs;
+		f38: _acts = int(15 );
+		goto execFuncs;
+		f39: _acts = int(17 );
+		goto execFuncs;
+		f40: _acts = int(19 );
+		goto execFuncs;
+		f16: _acts = int(21 );
+		goto execFuncs;
+		f18: _acts = int(23 );
+		goto execFuncs;
+		f44: _acts = int(25 );
+		goto execFuncs;
+		f20: _acts = int(27 );
+		goto execFuncs;
+		f31: _acts = int(29 );
+		goto execFuncs;
+		f17: _acts = int(31 );
+		goto execFuncs;
+		f22: _acts = int(33 );
+		goto execFuncs;
+		f24: _acts = int(35 );
+		goto execFuncs;
+		f19: _acts = int(37 );
+		goto execFuncs;
+		f42: _acts = int(39 );
+		goto execFuncs;
+		f43: _acts = int(41 );
+		goto execFuncs;
+		f21: _acts = int(43 );
+		goto execFuncs;
+		f23: _acts = int(45 );
+		goto execFuncs;
+		f26: _acts = int(47 );
+		goto execFuncs;
+		f27: _acts = int(49 );
+		goto execFuncs;
+		f4: _acts = int(51 );
+		goto execFuncs;
+		f10: _acts = int(53 );
+		goto execFuncs;
+		f5: _acts = int(55 );
+		goto execFuncs;
+		f6: _acts = int(57 );
+		goto execFuncs;
+		f41: _acts = int(59 );
+		goto execFuncs;
+		f29: _acts = int(61 );
+		goto execFuncs;
+		f32: _acts = int(63 );
+		goto execFuncs;
+		f35: _acts = int(65 );
+		goto execFuncs;
+		f37: _acts = int(67 );
+		goto execFuncs;
+		f25: _acts = int(69 );
+		goto execFuncs;
+		f15: _acts = int(71 );
+		goto execFuncs;
+		f14: _acts = int(73 );
+		goto execFuncs;
+		f7: _acts = int(75 );
+		goto execFuncs;
+		f3: _acts = int(77 );
+		goto execFuncs;
+		f0: _acts = int(79 );
+		goto execFuncs;
+		f13: _acts = int(84 );
+		goto execFuncs;
+		f28: _acts = int(87 );
+		goto execFuncs;
+		f12: _acts = int(90 );
+		goto execFuncs;
+		f33: _acts = int(93 );
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = uint(_scanner_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _scanner_actions[_acts ] {
+					case 3:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 4:
+					{{act = 3;
+						}}
+					
+					break;
+					case 5:
+					{{act = 4;
+						}}
+					
+					break;
+					case 6:
+					{{act = 5;
+						}}
+					
+					break;
+					case 7:
+					{{act = 6;
+						}}
+					
+					break;
+					case 8:
+					{{te = p+1;
+							{token = 193;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 9:
+					{{te = p+1;
+							{token = 192;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 10:
+					{{te = p+1;
+							{token = 194;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 11:
+					{{te = p+1;
+							{token = 218;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 12:
+					{{te = p+1;
+							{token = 219;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 13:
+					{{te = p+1;
+							{token = 220;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 14:
+					{{te = p+1;
+							{token = 197;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 15:
+					{{te = p+1;
+							{token = 223;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 16:
+					{{te = p+1;
+							{token = 224;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 17:
+					{{te = p+1;
+							{token = 225;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 18:
+					{{te = p+1;
+							{token = 226;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 19:
+					{{te = p+1;
+							{token = 227;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 20:
+					{{te = p+1;
+							{token = 228;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 21:
+					{{te = p+1;
+							{token = 229;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 22:
+					{{te = p+1;
+							{token = 230;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 23:
+					{{te = p+1;
+							{token = 231;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 24:
+					{{te = p+1;
+							{token = 232;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 25:
+					{{te = p+1;
+							{token = 233;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 26:
+					{{te = p+1;
+							{token = 234;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 27:
+					{{te = p+1;
+							{token = 212;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 28:
+					{{te = p+1;
+							{token = 213;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 29:
+					{{te = p+1;
+							{token = 214;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 30:
+					{{te = p+1;
+							{token = 215;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 31:
+					{{te = p+1;
+							{token = 240;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 32:
+					{{te = p+1;
+							{token = ( int ) ( data[ts] )
+								;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 33:
+					{{te = p+1;
+							{token = 242;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 34:
+					{{te = p+1;
+							{token = 242;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 35:
+					{{te = p;
+							p = p - 1;
+							{token = 195;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 36:
+					{{te = p;
+							p = p - 1;
+							{token = 194;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 37:
+					{{te = p;
+							p = p - 1;
+							{token = 218;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 38:
+					{{te = p;
+							p = p - 1;
+							{token = 219;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 39:
+					{{te = p;
+							p = p - 1;
+							{token = 220;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 40:
+					{{te = p;
+							p = p - 1;
+							{token = 211;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 41:
+					{{te = p;
+							p = p - 1;
+							{token = ( int ) ( data[ts] )
+								;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 42:
+					{{te = p;
+							p = p - 1;
+							{token = 241;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 43:
+					{{p = ((te))-1;
+							{token = 218;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 44:
+					{{p = ((te))-1;
+							{token = ( int ) ( data[ts] )
+								;
+								fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+						}}
+					
+					break;
+					case 45:
+					{{switch act  {
+								case 0 :
+								{{cs = 0;
+										goto _again;}}
+								
+								break;
+								case 3 :
+								p = ((te))-1;
+								{token = 195;
+									fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+								
+								break;
+								case 4 :
+								p = ((te))-1;
+								{token = 194;
+									fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+								
+								break;
+								case 5 :
+								p = ((te))-1;
+								{token = 218;
+									fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+								
+								break;
+								case 6 :
+								p = ((te))-1;
+								{token = 219;
+									fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		goto _again;
+		
+		_again:
+		_acts = int(_scanner_to_state_actions[cs] );
+		_nacts = uint(_scanner_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _scanner_actions[_acts ] {
+					case 0:
+					{{ts = 0;
+						}}
+					
+					break;
+					case 1:
+					{{act = 0;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 13:
+					goto ctr48;
+					case 14:
+					goto ctr101;
+					case 1:
+					goto ctr17;
+					case 2:
+					goto ctr17;
+					case 15:
+					goto ctr101;
+					case 16:
+					goto ctr101;
+					case 3:
+					goto ctr17;
+					case 4:
+					goto ctr17;
+					case 17:
+					goto ctr101;
+					case 18:
+					goto ctr101;
+					case 19:
+					goto ctr101;
+					case 20:
+					goto ctr67;
+					case 21:
+					goto ctr101;
+					case 5:
+					goto ctr23;
+					case 22:
+					goto ctr77;
+					case 6:
+					goto ctr17;
+					case 7:
+					goto ctr17;
+					case 23:
+					goto ctr77;
+					case 24:
+					goto ctr101;
+					case 8:
+					goto ctr23;
+					case 9:
+					goto ctr23;
+					case 10:
+					goto ctr23;
+					case 25:
+					goto ctr91;
+					case 26:
+					goto ctr86;
+					case 11:
+					goto ctr27;
+					case 27:
+					goto ctr89;
+					case 28:
+					goto ctr91;
+					case 29:
+					goto ctr101;
+					case 30:
+					goto ctr101;
+					case 31:
+					goto ctr98;
+					case 32:
+					goto ctr98;
+					case 33:
+					goto ctr101;
+					case 34:
+					goto ctr101;
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= scanner_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+	"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+	"'\n'\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

@@ -1,0 +1,87 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _zlen1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var zlen1_start  int  = 1
+var zlen1_first_final  int  = 1
+var zlen1_error  int  = 0
+var zlen1_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(zlen1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch cs  {
+			case 1:
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			
+		}
+		ctr0: cs = 0;
+		goto _again;
+		
+		_again:
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= zlen1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"",
+	"x",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

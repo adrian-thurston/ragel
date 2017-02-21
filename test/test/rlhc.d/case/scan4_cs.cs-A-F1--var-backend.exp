@@ -1,0 +1,213 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int ts;
+		int te;
+		int act;
+		int token;
+		
+		
+		
+		
+		static readonly char  []_scanner_trans_keys = { '\u0000', '\u0002', '\u0000', '\u0001', '\u0000', '\u0002', '\u0000',  };
+		static readonly sbyte  []_scanner_char_class = { 0, 1, 2, 0,  };
+		static readonly sbyte  []_scanner_index_offsets = { 0, 3, 5, 0,  };
+		static readonly sbyte  []_scanner_indicies = { 1, 1, 2, 4, 5, 1, 1, 2, 0,  };
+		static readonly sbyte  []_scanner_index_defaults = { 0, 3, 0, 0,  };
+		static readonly sbyte  []_scanner_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, 0,  };
+		static readonly sbyte  []_scanner_cond_targs = { 1, 0, 1, 1, 2, 2, 0,  };
+		static readonly sbyte  []_scanner_cond_actions = { 1, 0, 2, 5, 6, 7, 0,  };
+		static readonly sbyte  []_scanner_to_state_actions = { 0, 3, 0, 0,  };
+		static readonly sbyte  []_scanner_from_state_actions = { 0, 4, 0, 0,  };
+		static readonly sbyte  []_scanner_eof_trans = { 1, 0, 1, 0,  };
+		static readonly sbyte  []_scanner_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_offsets = { 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_pop_trans = { 0, 0,  };
+		static readonly int  scanner_start  = 1;
+		static readonly int  scanner_first_final  = 1;
+		static readonly int  scanner_error  = -1;
+		static readonly int  scanner_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)scanner_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				uint _trans = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				int _keys;
+				int _inds;
+				while ( _cont == 1 )
+				{
+				
+					_have = 0;
+					if ( p == pe  )
+					{
+						if ( p == eof  )
+						{
+							if ( _scanner_eof_trans[cs] > 0 )
+							{
+								_trans = (uint )_scanner_eof_trans[cs] - 1;
+								_have = 1;
+							}
+							
+							if ( _have == 0 )
+							{
+							}
+							
+						}
+						
+						
+						if ( _have == 0 )
+						_cont = 0;
+						
+					}
+					
+					if ( _cont == 1 )
+					{
+						if ( _have == 0 )
+						{
+							switch ( _scanner_from_state_actions[cs]  ) {
+								case 4:
+								{{ts = p;
+									}}
+								
+								break;
+								
+							}
+							_keys = (cs<<1) ;
+							_inds = _scanner_index_offsets[cs] ;
+							if ( ( data[p ]) <= 99&& ( data[p ]) >= 97 )
+							{
+								int _ic = (int)_scanner_char_class[(int)( data[p ]) - 97];
+								if ( _ic <= (int)_scanner_trans_keys[_keys+1]&& _ic >= (int)_scanner_trans_keys[_keys ] )
+								_trans = (uint )_scanner_indicies[_inds + (int)( _ic - (int)_scanner_trans_keys[_keys ])  ];
+								
+								else
+								_trans = (uint )_scanner_index_defaults[cs];
+								
+							}
+							
+							else
+							{
+								_trans = (uint )_scanner_index_defaults[cs];
+							}
+							
+							
+						}
+						
+						if ( _cont == 1 )
+						{
+							cs = (int)_scanner_cond_targs[_trans];
+							switch ( _scanner_cond_actions[_trans]  ) {
+								case 2:
+								{{te = p+1;
+										{Console.Write( "pat2\n" );}
+									}}
+								
+								break;
+								case 5:
+								{{te = p+1;
+									}}
+								
+								break;
+								case 1:
+								{{switch ( act  ) {
+											case 1:
+											p = ((te))-1;
+											{Console.Write( "pat1\n" );}
+											
+											break;
+											default:
+											p = ((te))-1;
+											
+											break;
+											
+										}
+									}
+								}
+								
+								break;
+								case 6:
+								{{te = p+1;
+									}}
+								{{act = 1;
+									}}
+								
+								break;
+								case 7:
+								{{te = p+1;
+									}}
+								{{act = 3;
+									}}
+								
+								break;
+								
+							}
+							switch ( _scanner_to_state_actions[cs]  ) {
+								case 3:
+								{{ts = 0;
+									}}
+								
+								break;
+								
+							}
+							if ( _cont == 1 )
+							p += 1;
+							
+						}
+					}
+					
+				}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"ba a",
+		};
+		
+		
+		static readonly int inplen = 1;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

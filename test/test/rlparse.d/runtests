@@ -1,0 +1,48 @@
+#!/bin/bash
+
+. ../subject.sh
+
+export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
+
+set -x
+
+make
+
+[ -d working ] || mkdir working
+
+cd 'case'
+
+for fn in *.rl; do
+
+	FA="--reduce-frontend --colm-frontend"
+	for frontend in $FA; do
+
+		exp=${fn%.rl}$frontend.exp
+
+		out=${fn%.rl}$frontend.out
+		out=../working/${out#case}
+
+#		lang=`echo $fn | awk -vFS=- '{ print $2 }'`
+#	
+#		case $lang in
+#			A) lang=csharp;;
+#			C) lang=c;;
+#			J) lang=java;;
+#			K) lang=crack;;
+#			O) lang=ocaml;;
+#			R) lang=ruby;;
+#			U) lang=rust;;
+#			Y) lang=julia;;
+#			Z) lang=go;;
+#		esac
+
+		../rlparse $frontend $fn > $out
+
+		if ! diff -u $exp $out; then
+			exit;
+		fi
+	done
+
+
+done
+

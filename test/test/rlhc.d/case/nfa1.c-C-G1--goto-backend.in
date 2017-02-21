@@ -1,0 +1,406 @@
+host( "working/nfa1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	int neg ;
+	long value ;
+	
+	struct nfa_bp_rec
+	{
+		long state;
+		char *p;
+		int pop;
+	};
+	
+	struct nfa_bp_rec nfa_bp[1024];
+	long nfa_len = 0;
+	long nfa_count = 0;
+	
+	
+	
+}@
+array s8 _atoi_nfa_targs( 0, 9 ) = { 0, 2, 3, 9, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 1 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 19;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/nfa1.rl", 61 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+		value = 0;
+		neg = 0;
+	}@
+	{
+		cs = cast(int)atoi_start;
+		nfa_len = 0;
+	}
+	host( "working/nfa1.rl", 70 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		if ( _atoi_nfa_offsets[cs] ) {
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[cast(int)_atoi_nfa_offsets[cs]];
+			while ( alt < new_recs ) { 
+				nfa_bp[nfa_len].state = _atoi_nfa_targs[cast(int)_atoi_nfa_offsets[cs] + 1 + alt];
+				nfa_bp[nfa_len].p = p;
+				nfa_len += 1;
+				alt += 1;
+			}
+		}
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr0;
+				}
+				case 45: {
+					goto ctr2;
+				}
+				case 48: {
+					goto ctr3;
+				}
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr6;
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 19:
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr7;
+				}
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr9;
+				}
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr10;
+				}
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr11;
+				}
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr12;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr14;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr15;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr16;
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr15;
+			}
+			{
+				goto ctr1;
+			}
+			case 13:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr17;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 14:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr18;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 15:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr19;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 16:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr20;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 17:
+			if ( ( deref( data, p )) == 48 ) {
+				goto ctr21;
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr1;
+			}
+			case 18:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr22;
+				}
+			}
+			if ( 49 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto f0;
+		ctr2: cs = 2; goto f1;
+		ctr5: cs = 3; goto f3;
+		ctr3: cs = 4; goto f2;
+		ctr22: cs = 4; goto f3;
+		ctr7: cs = 5; goto f3;
+		ctr9: cs = 6; goto f3;
+		ctr10: cs = 7; goto f3;
+		ctr11: cs = 8; goto f3;
+		ctr21: cs = 9; goto _again;
+		ctr12: cs = 10; goto _again;
+		ctr14: cs = 11; goto _again;
+		ctr15: cs = 12; goto _again;
+		ctr13: cs = 13; goto _again;
+		ctr17: cs = 14; goto _again;
+		ctr18: cs = 15; goto _again;
+		ctr19: cs = 16; goto _again;
+		ctr20: cs = 17; goto _again;
+		ctr4: cs = 18; goto f2;
+		ctr8: cs = 18; goto f3;
+		ctr6: cs = 19; goto f4;
+		ctr16: cs = 19; goto f6;
+		
+		f0:
+		host( "working/nfa1.rl", 25 ) ${neg = 0;
+			value = 0;
+		}$
+		goto _again;
+		f3:
+		host( "working/nfa1.rl", 33 ) ${
+			value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 );
+		}$
+		goto _again;
+		f6:
+		host( "working/nfa1.rl", 46 ) ${
+			printf( "saw 80808080\n" );
+		}$
+		goto _again;
+		f1:
+		host( "working/nfa1.rl", 25 ) ${neg = 0;
+			value = 0;
+		}$	host( "working/nfa1.rl", 29 ) ${
+			neg = 1;
+		}$
+		goto _again;
+		f2:
+		host( "working/nfa1.rl", 25 ) ${neg = 0;
+			value = 0;
+		}$	host( "working/nfa1.rl", 33 ) ${
+			value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 );
+		}$
+		goto _again;
+		f4:
+		host( "working/nfa1.rl", 37 ) ${
+			if ( neg != 0 ) { value = -1 * value; }
+		}$	host( "working/nfa1.rl", 41 ) ${
+			printf( "%ld", value );
+			printf( "%s", "\n" );
+		}$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+		if ( nfa_len > 0 ) {
+			nfa_count += 1;
+			nfa_len -= 1;
+			p = nfa_bp[nfa_len].p;
+			cs = nfa_bp[nfa_len].state;
+			goto _resume;
+			goto _out;
+		}
+	}
+	host( "working/nfa1.rl", 77 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= atoi_first_final )
+		printf( "-> accept\n\n" );
+		else
+		printf( "-> fail\n\n" );
+	}
+	
+	char *inp[] = {
+		"1\n",
+		"12\n",
+		"1002000000002\n",
+		"222222\n",
+		"+2123\n",
+		"-12321\n",
+		"-99\n",
+		"213 3213\n",
+		"--123\n",
+		" -3000\n",
+	};
+	
+	int inplen = 10;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

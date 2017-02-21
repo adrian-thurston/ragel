@@ -1,0 +1,112 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+
+static const char  _any1_trans_keys [] = { 1, 0, 1, 0, 1, 0, 0 ,  };
+static const char  _any1_char_class [] = { 0 ,  };
+static const char  _any1_index_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _any1_indicies [] = { 0 ,  };
+static const char  _any1_index_defaults [] = { 0, 0, 1, 0 ,  };
+static const char  _any1_trans_cond_spaces [] = { -1, -1, 0 ,  };
+static const char  _any1_cond_targs [] = { 2, 0, 0 ,  };
+static const char  _any1_cond_actions [] = { 0, 0, 0 ,  };
+static const char  _any1_nfa_targs [] = { 0, 0 ,  };
+static const char  _any1_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _any1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _any1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  any1_start  = 1;
+static const int  any1_first_final  = 2;
+static const int  any1_error  = 0;
+static const int  any1_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) any1_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		unsigned int _trans = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_trans = ( unsigned int  ) _any1_index_defaults[cs];
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _any1_cond_targs[_trans];
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= any1_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"",
+	"x",
+	"xx",
+};
+
+int inplen = 3;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

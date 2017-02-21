@@ -1,0 +1,152 @@
+host( "working/noignore.rl", 1 ) @{/*
+	* @@LANG: c
+	*
+	* Tests the no-ignore property following ragel section close. Can't be
+	* garbling up whitespace or ragel comments( C defines ).
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	#define DEF 1
+	
+}@
+array char _atoi_trans_keys( 0, 5 ) = { 1, 0, 3, 3, 2, 2, 4, 4, 4, 4, 5, 5, 0, 0, 1, 0, 0 };
+
+array s8 _atoi_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 0 };
+
+array s8 _atoi_index_offsets( 0, 6 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 0 };
+
+array s8 _atoi_indicies( 0, 6 ) = { 0, 2, 3, 4, 5, 6, 0 };
+
+array s8 _atoi_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _atoi_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _atoi_cond_targs( 0, 7 ) = { 2, 0, 3, 4, 5, 6, 7, 0 };
+
+array s8 _atoi_cond_actions( 0, 1 ) = { 0, 0, 0, 0, 0, 0, 1, 0 };
+
+array s8 _atoi_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 7;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/noignore.rl", 20 ) @{
+	
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)atoi_start;
+	}
+	host( "working/noignore.rl", 28 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _atoi_trans_keys, (cs<<1) );
+				_inds = offset( _atoi_indicies, _atoi_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_atoi_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _atoi_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _atoi_trans_keys, _keys ) )
+					_trans = cast(int)deref( _atoi_indicies, _inds + cast(int)( _ic - cast(int)deref( _atoi_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_atoi_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_atoi_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_atoi_cond_targs[_trans];
+				
+				if ( _atoi_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _atoi_cond_actions[_trans] ) {
+					case 1 {
+						host( "working/noignore.rl", 14 ) ${ printf( "hello\n" ); }$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/noignore.rl", 35 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= atoi_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hello\n",
+	};
+	
+	int inplen = 9;
+	
+	int main( )
+	{
+		#ifndef DEF
+		printf("DEF not defined -- noignore problem\n" );
+		#else
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		#endif
+		return 0;
+	}
+	
+}@

@@ -1,0 +1,303 @@
+host( "working/nfa1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	int neg ;
+	long value ;
+	
+	struct nfa_bp_rec
+	{
+		long state;
+		char *p;
+		int pop;
+	};
+	
+	struct nfa_bp_rec nfa_bp[1024];
+	long nfa_len = 0;
+	long nfa_count = 0;
+	
+	
+	
+}@
+array s8 _atoi_actions( 0, 5 ) = { 0, 0, 1, 0, 1, 2, 1, 5, 2, 0, 1, 2, 0, 2, 2, 3, 4, 0 };
+
+array s8 _atoi_key_offsets( 0, 57 ) = { 0, 0, 5, 7, 10, 14, 18, 22, 26, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 57, 0 };
+
+array char _atoi_trans_keys( 0, 57 ) = { 43, 45, 48, 49, 57, 48, 57, 10, 48, 57, 10, 48, 49, 57, 10, 48, 49, 57, 10, 48, 49, 57, 10, 48, 49, 57, 48, 49, 57, 48, 49, 57, 48, 49, 57, 10, 48, 57, 48, 49, 57, 48, 49, 57, 48, 49, 57, 48, 49, 57, 48, 49, 57, 10, 48, 49, 57, 0 };
+
+array s8 _atoi_single_lengths( 0, 3 ) = { 0, 3, 0, 1, 2, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0, 0 };
+
+array s8 _atoi_range_lengths( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 };
+
+array s8 _atoi_index_offsets( 0, 58 ) = { 0, 0, 5, 7, 10, 14, 18, 22, 26, 27, 30, 33, 36, 39, 42, 45, 48, 51, 54, 58, 0 };
+
+array s8 _atoi_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _atoi_trans_offsets( 0, 58 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 0 };
+
+array s8 _atoi_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _atoi_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_cond_targs( 0, 19 ) = { 2, 2, 4, 18, 0, 3, 0, 19, 3, 0, 19, 5, 18, 0, 19, 6, 18, 0, 19, 7, 18, 0, 19, 8, 18, 0, 0, 10, 13, 0, 11, 13, 0, 12, 13, 0, 19, 12, 0, 14, 13, 0, 15, 13, 0, 16, 13, 0, 17, 13, 0, 9, 13, 0, 19, 4, 18, 0, 0, 0 };
+
+array s8 _atoi_cond_actions( 0, 14 ) = { 2, 8, 11, 11, 0, 4, 0, 14, 4, 0, 14, 4, 4, 0, 14, 4, 4, 0, 14, 4, 4, 0, 14, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 4, 4, 0, 0, 0 };
+
+array s8 _atoi_nfa_targs( 0, 9 ) = { 0, 2, 3, 9, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 1 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 19;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/nfa1.rl", 61 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+		value = 0;
+		neg = 0;
+	}@
+	{
+		cs = cast(int)atoi_start;
+		nfa_len = 0;
+	}
+	host( "working/nfa1.rl", 70 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		int _klen;
+		uint _trans = 0;
+		uint _cond = 0;
+		index s8 _acts;
+		uint _nacts;
+		index char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				if ( _atoi_nfa_offsets[cs] ) {
+					int alt = 0; 
+					int new_recs = _atoi_nfa_targs[cast(int)_atoi_nfa_offsets[cs]];
+					while ( alt < new_recs ) { 
+						nfa_bp[nfa_len].state = _atoi_nfa_targs[cast(int)_atoi_nfa_offsets[cs] + 1 + alt];
+						nfa_bp[nfa_len].p = p;
+						nfa_len += 1;
+						alt += 1;
+					}
+				}
+				_keys = offset( _atoi_trans_keys, _atoi_key_offsets[cs] );
+				_trans = cast(uint)_atoi_index_offsets[cs];
+				
+				_klen = cast(int)_atoi_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _atoi_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _atoi_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_atoi_range_lengths[cs];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( deref( data, p )) < deref( _atoi_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( ( deref( data, p )) > deref( _atoi_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _atoi_cond_keys, _atoi_trans_offsets[_trans] );
+				_klen = cast(int)_atoi_trans_lengths[_trans];
+				_cond = cast(uint)_atoi_trans_offsets[_trans];
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _atoi_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _atoi_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					cs = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				cs = cast(int)_atoi_cond_targs[_cond];
+				
+				if ( _atoi_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				_acts = offset( _atoi_actions, _atoi_cond_actions[_cond] );
+				_nacts = cast(uint)deref( _atoi_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( deref( _atoi_actions, _acts ) )
+					{
+						case 0 {
+							host( "working/nfa1.rl", 25 ) ${neg = 0;
+								value = 0;
+							}$
+						}
+						case 1 {
+							host( "working/nfa1.rl", 29 ) ${
+								neg = 1;
+							}$
+						}
+						case 2 {
+							host( "working/nfa1.rl", 33 ) ${
+								value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 );
+							}$
+						}
+						case 3 {
+							host( "working/nfa1.rl", 37 ) ${
+								if ( neg != 0 ) { value = -1 * value; }
+							}$
+						}
+						case 4 {
+							host( "working/nfa1.rl", 41 ) ${
+								printf( "%ld", value );
+								printf( "%s", "\n" );
+							}$
+						}
+						case 5 {
+							host( "working/nfa1.rl", 46 ) ${
+								printf( "saw 80808080\n" );
+							}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+		if ( nfa_len > 0 ) {
+			nfa_count += 1;
+			nfa_len -= 1;
+			p = nfa_bp[nfa_len].p;
+			cs = nfa_bp[nfa_len].state;
+			goto _resume;
+			goto _out;
+		}
+	}
+	host( "working/nfa1.rl", 77 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= atoi_first_final )
+		printf( "-> accept\n\n" );
+		else
+		printf( "-> fail\n\n" );
+	}
+	
+	char *inp[] = {
+		"1\n",
+		"12\n",
+		"1002000000002\n",
+		"222222\n",
+		"+2123\n",
+		"-12321\n",
+		"-99\n",
+		"213 3213\n",
+		"--123\n",
+		" -3000\n",
+	};
+	
+	int inplen = 10;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

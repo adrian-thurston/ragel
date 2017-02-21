@@ -1,0 +1,181 @@
+host( "working/cond7_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			int i;
+			int c;
+			
+			
+			
+			
+		}@
+		array char _foo_trans_keys( 0, 2 ) = { c(1), c(0), c(2), c(2), c(2), c(2), c(0), c(2), c(1), c(0), c(0) };
+		
+		array s8 _foo_char_class( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 };
+		
+		array s8 _foo_index_offsets( 0, 5 ) = { 0, 0, 1, 2, 5, 0 };
+		
+		array s8 _foo_indicies( 0, 4 ) = { 0, 2, 3, 1, 4, 0 };
+		
+		array s8 _foo_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 0 };
+		
+		array s8 _foo_trans_cond_spaces( -1, 0 ) = { -1, -1, 0, 0, 0, 0 };
+		
+		array s8 _foo_trans_offsets( 0, 6 ) = { 0, 1, 2, 4, 6, 0 };
+		
+		array s8 _foo_cond_targs( 0, 4 ) = { 2, 0, 3, 2, 4, 0, 0, 3, 0 };
+		
+		array s8 _foo_cond_actions( 0, 2 ) = { 1, 0, 1, 2, 0, 0, 0, 2, 0 };
+		
+		array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int foo_start = 1;
+		value int foo_first_final = 4;
+		value int foo_error = 0;
+		
+		value int foo_en_main = 1;
+		
+		host( "working/cond7_cs.rl", 37 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)foo_start;
+			}
+			host( "working/cond7_cs.rl", 42 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _trans = 0;
+				uint _cond = 0;
+				index char _keys;
+				index s8 _inds;
+				int _cpc;
+				entry {
+					if ( p == pe )
+					goto _test_eof;
+					if ( cs == 0 )
+					goto _out;
+					label _resume {
+						_keys = offset( _foo_trans_keys, (cs<<1) );
+						_inds = offset( _foo_indicies, _foo_index_offsets[cs] );
+						
+						if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
+						{
+							int _ic = cast(int)_foo_char_class[cast(int)( deref( data, p )) - 10];
+							if ( _ic <= cast(int)deref( _foo_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _foo_trans_keys, _keys ) )
+							_trans = cast(int)deref( _foo_indicies, _inds + cast(int)( _ic - cast(int)deref( _foo_trans_keys, _keys ) )  ); 
+							else
+							_trans = cast(int)_foo_index_defaults[cs];
+						}
+						else {
+							_trans = cast(int)_foo_index_defaults[cs];
+						}
+						
+						_cond = cast(uint)_foo_trans_offsets[_trans];
+						
+						_cpc = 0;
+						switch ( _foo_trans_cond_spaces[_trans] ) {
+							
+							case 0 {
+								if ( host( "working/cond7_cs.rl", 18 ) ={i > 0}= ) _cpc += 1;
+							}
+						}
+						_cond += cast(uint)_cpc;
+						goto _match_cond;
+					}
+					label _match_cond {
+						cs = cast(int)_foo_cond_targs[_cond];
+						
+						if ( _foo_cond_actions[_cond] == 0 )
+						goto _again;
+						
+						switch ( _foo_cond_actions[_cond] ) {
+							case 2 {
+								host( "working/cond7_cs.rl", 19 ) ${i = i - 1;
+									c = ( int ) ( ={( deref( data, p ))}= )
+									;
+									Console.Write( "item: " );Console.Write( c );Console.Write( "\n" );}$
+							}
+							case 1 {
+								host( "working/cond7_cs.rl", 24 ) ${i = ( int ) ( ={( deref( data, p ))}= - 48 )
+									;
+									Console.Write( "count: " );Console.Write( i );Console.Write( "\n" );}$
+							}
+						}
+						
+						
+					}
+					label _again {
+						if ( cs == 0 )
+						goto _out;
+						p+= 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/cond7_cs.rl", 53 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= foo_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"00\n",
+				"019\n",
+				"190\n",
+				"1719\n",
+				"1040000\n",
+				"104000a\n",
+				"104000\n",
+			};
+			
+			
+			static readonly int inplen = 7;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

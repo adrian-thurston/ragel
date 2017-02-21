@@ -1,0 +1,184 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+
+
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 3;
+static const int  foo_en_main  = 1;
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+void test( int min, int max, const char *str )
+{
+	int cs;
+	const char *p = str;
+	const char *pe = str + strlen( str ) + 1;
+	int c = 0, seen = 0;
+	
+	cout << "run " << str << " " << min << " " << max << ":";
+	
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			
+		}
+		goto st_out;
+		st_case_1:
+		{
+			c = 0; 
+		}
+		if ( ((*( p  ))
+		)== 46  )
+		{
+			int ck = 0;
+			if ( (({ c < max; }) ) )
+			ck += 1;
+			
+			if ( 1 <= ck  )
+			{		goto ctr0;
+			}
+			
+			goto st0;
+			
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr0:
+		{
+			c += 1; 
+		}
+		{
+			seen += 1; 
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		switch ( ((*( p  ))
+		) ) {
+			case 0:
+			{
+				int ck = 0;
+				if ( (({ c >= min; }) ) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto st3;
+				}
+				
+				goto st0;
+				
+			}
+			case 46:
+			{
+				int ck = 0;
+				if ( (({ c < max; }) ) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto ctr0;
+				}
+				
+				goto st0;
+				
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	cout << " " << seen;
+	
+	if ( cs >= foo_first_final )
+	cout << " success" << endl;
+	else
+	cout << " failure" << endl;
+}
+
+int main()
+{
+	test( 0, 0, "" );
+	test( 0, 1, "" );
+	test( 1, 1, "" );
+	test( 1, 2, "" );
+	test( 2, 2, "" );
+	test( 2, 3, "" );
+	
+	test( 0, 0, "." );
+	test( 0, 1, "." );
+	test( 1, 1, "." );
+	test( 1, 2, "." );
+	test( 2, 2, "." );
+	test( 2, 3, "." );
+	
+	test( 0, 0, ".." );
+	test( 0, 1, ".." );
+	test( 1, 1, ".." );
+	test( 1, 2, ".." );
+	test( 2, 2, ".." );
+	test( 2, 3, ".." );
+	
+	test( 0, 0, "..." );
+	test( 0, 1, "..." );
+	test( 1, 1, "..." );
+	test( 1, 2, "..." );
+	test( 2, 2, "..." );
+	test( 2, 3, "..." );
+	
+	test( 0, 0, "...." );
+	test( 0, 1, "...." );
+	test( 1, 1, "...." );
+	test( 1, 2, "...." );
+	test( 2, 2, "...." );
+	test( 2, 3, "...." );
+	return 0;
+}
+

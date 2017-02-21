@@ -1,0 +1,1110 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let ts = ref 0
+let te = ref 0
+let act = ref 0
+let token = ref 0
+
+
+
+
+
+
+let _scanner_trans_keys : int array = [|
+1; 0; 0; 24; 1; 0; 0; 24; 1; 0; 11; 11; 9; 14; 13; 14; 2; 2; 2; 12; 0; 0; 13; 20; 2; 28; 2; 28; 16; 16; 16; 16; 6; 16; 16; 16; 9; 16; 10; 17; 8; 8; 8; 14; 13; 26; 13; 26; 2; 16; 11; 27; 11; 26; 13; 26; 11; 26; 15; 15; 16; 16; 13; 27; 3; 27; 16; 16; 16; 28; 0 ; 
+|]
+let _scanner_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 3; 4; 4; 5; 6; 7; 4; 4; 8; 9; 4; 10; 11; 12; 13; 14; 14; 14; 14; 14; 14; 14; 14; 14; 15; 4; 4; 16; 17; 4; 4; 18; 18; 18; 18; 19; 20; 21; 21; 21; 21; 21; 22; 21; 21; 21; 21; 21; 21; 21; 21; 23; 21; 21; 21; 21; 21; 4; 24; 4; 25; 21; 4; 18; 18; 18; 18; 19; 20; 21; 21; 21; 21; 21; 26; 21; 21; 21; 21; 21; 21; 21; 21; 23; 21; 21; 27; 21; 21; 4; 28; 4; 4; 0 ; 
+|]
+let _scanner_index_offsets : int array = [|
+0; 0; 25; 25; 50; 50; 51; 57; 59; 60; 71; 72; 80; 107; 134; 135; 136; 147; 148; 156; 164; 165; 172; 186; 200; 215; 232; 248; 262; 278; 279; 280; 295; 320; 321; 0 ; 
+|]
+let _scanner_indicies : int array = [|
+0; 1; 1; 2; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 3; 0; 4; 4; 4; 4; 4; 4; 5; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 6; 8; 9; 9; 0; 0; 10; 10; 10; 10; 12; 12; 11; 11; 11; 11; 11; 11; 11; 11; 11; 13; 15; 17; 17; 16; 16; 16; 17; 17; 17; 19; 1; 20; 21; 22; 4; 23; 24; 25; 26; 27; 28; 29; 30; 31; 20; 32; 32; 32; 32; 33; 32; 20; 34; 32; 32; 35; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 36; 38; 39; 40; 37; 37; 37; 37; 37; 37; 37; 37; 37; 41; 42; 43; 37; 37; 37; 37; 37; 37; 44; 45; 37; 37; 37; 37; 37; 46; 47; 49; 50; 37; 37; 51; 37; 52; 52; 52; 52; 53; 53; 53; 53; 54; 55; 53; 55; 53; 53; 53; 55; 10; 10; 53; 53; 53; 53; 53; 55; 53; 55; 53; 53; 53; 55; 11; 37; 37; 37; 37; 37; 37; 37; 37; 37; 14; 37; 37; 37; 56; 52; 57; 58; 58; 57; 57; 57; 57; 54; 57; 57; 59; 59; 57; 57; 59; 60; 52; 61; 58; 58; 61; 61; 61; 61; 54; 61; 61; 62; 62; 61; 61; 62; 17; 17; 63; 63; 63; 17; 17; 17; 63; 64; 64; 63; 63; 64; 52; 57; 29; 29; 57; 57; 57; 57; 54; 57; 57; 59; 59; 57; 57; 59; 65; 66; 32; 32; 67; 67; 67; 32; 32; 32; 32; 32; 32; 67; 67; 32; 32; 1; 67; 67; 67; 4; 67; 67; 67; 67; 67; 32; 32; 67; 67; 67; 32; 32; 32; 32; 32; 32; 67; 67; 32; 32; 68; 69; 37; 37; 37; 37; 37; 37; 37; 37; 37; 37; 37; 70; 0 ; 
+|]
+let _scanner_index_defaults : int array = [|
+0; 1; 1; 4; 4; 7; 0; 0; 11; 11; 14; 16; 18; 18; 37; 37; 37; 37; 37; 37; 48; 37; 53; 53; 37; 57; 61; 63; 57; 37; 37; 67; 67; 37; 37; 0 ; 
+|]
+let _scanner_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _scanner_cond_targs : int array = [|
+12; 1; 12; 2; 3; 12; 4; 12; 12; 7; 23; 8; 9; 12; 10; 12; 12; 27; 13; 14; 12; 15; 16; 17; 18; 19; 21; 24; 25; 28; 29; 30; 31; 32; 33; 34; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 20; 12; 12; 12; 5; 22; 12; 6; 12; 12; 12; 26; 12; 11; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 0 ; 
+|]
+let _scanner_cond_actions : int array = [|
+1; 0; 2; 0; 0; 3; 0; 4; 5; 0; 0; 0; 0; 6; 0; 7; 8; 0; 0; 0; 11; 0; 0; 0; 0; 0; 12; 12; 13; 13; 0; 0; 0; 14; 0; 0; 15; 16; 17; 18; 19; 20; 21; 22; 23; 24; 25; 0; 26; 27; 28; 0; 29; 30; 0; 31; 32; 33; 34; 35; 0; 36; 37; 38; 39; 40; 41; 42; 43; 44; 45; 0 ; 
+|]
+let _scanner_to_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 9; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _scanner_from_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 10; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _scanner_eof_trans : int array = [|
+0; 1; 1; 1; 1; 8; 1; 1; 8; 8; 8; 17; 0; 37; 38; 38; 38; 38; 38; 38; 49; 38; 54; 54; 38; 58; 62; 64; 58; 38; 38; 68; 68; 38; 38; 0 ; 
+|]
+let _scanner_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _scanner_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _scanner_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _scanner_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let scanner_start  : int  = 12
+let scanner_first_final  : int  = 12
+let scanner_error  : int  = 0
+let scanner_en_main  : int  = 12
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let eof = pe in
+begin
+	cs  := scanner_start;
+	ts  := 0;
+	te  := 0;
+	act  := 0;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _scanner_eof_trans.(cs.contents)> 0  then
+						begin
+							begin
+								_trans  := _scanner_eof_trans.(cs.contents)- 1;
+								_have  := 1;
+								
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+							
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						if _scanner_from_state_actions.(cs.contents) = 10  then
+						begin
+							begin
+								begin
+									ts  := p.contents;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _scanner_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 126 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _scanner_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _scanner_trans_keys.( _keys.contents+1  )&& _ic.contents>= _scanner_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _scanner_indicies.( _inds.contents+ ( _ic.contents- _scanner_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _scanner_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _scanner_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _scanner_cond_targs.(_trans.contents);
+						if _scanner_cond_actions.(_trans.contents) = 12  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 3  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 193;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 2  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 192;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 31  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 194;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 35  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 218;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 37  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 219;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 39  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 220;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 40  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 197;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 41  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 223;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 17  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 224;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 19  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 225;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 45  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 226;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 21  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 227;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 32  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 228;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 18  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 229;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 23  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 230;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 25  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 231;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 20  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 232;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 43  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 233;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 44  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 234;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 22  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 212;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 24  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 213;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 27  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 214;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 28  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 215;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 5  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 240;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 11  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := ( ( Char.code data.[ts.contents] ) )
+										;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 6  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 242;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 7  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										token := 242;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 42  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 195;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 30  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 194;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 33  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 218;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 36  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 219;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 38  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 220;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 26  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 211;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 16  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := ( ( Char.code data.[ts.contents] ) )
+										;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 15  then
+						begin
+							begin
+								begin
+									te  := p.contents;
+									p  := p.contents- 1;
+									begin
+										token := 241;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 8  then
+						begin
+							begin
+								begin
+									p  := ( ( te.contents ) )-1;
+									begin
+										token := 218;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 4  then
+						begin
+							begin
+								begin
+									p  := ( ( te.contents ) )-1;
+									begin
+										token := ( ( Char.code data.[ts.contents] ) )
+										;
+										print_string( "<" );
+										print_int( token.contents );
+										print_string( "> " );
+										for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 1  then
+						begin
+							begin
+								begin
+									if act.contents = 0  then
+									begin
+										begin
+											begin
+												cs  := 0;
+												
+											end;
+											
+										end;
+										
+									end
+									else if act.contents = 3  then
+									begin
+										p  := ( ( te.contents ) )-1;
+										begin
+											token := 195;
+											print_string( "<" );
+											print_int( token.contents );
+											print_string( "> " );
+											for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+											
+										end;
+										
+									end
+									else if act.contents = 4  then
+									begin
+										p  := ( ( te.contents ) )-1;
+										begin
+											token := 194;
+											print_string( "<" );
+											print_int( token.contents );
+											print_string( "> " );
+											for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+											
+										end;
+										
+									end
+									else if act.contents = 5  then
+									begin
+										p  := ( ( te.contents ) )-1;
+										begin
+											token := 218;
+											print_string( "<" );
+											print_int( token.contents );
+											print_string( "> " );
+											for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+											
+										end;
+										
+									end
+									else if act.contents = 6  then
+									begin
+										p  := ( ( te.contents ) )-1;
+										begin
+											token := 219;
+											print_string( "<" );
+											print_int( token.contents );
+											print_string( "> " );
+											for i = ts.contents to te.contents - 1 do print_char data.[i] done; print_string( "\n" );
+											
+										end;
+										
+									end
+									;
+									
+								end;
+								
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 14  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 3;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 29  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 4;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 13  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 5;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 34  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 6;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if _scanner_to_state_actions.(cs.contents) = 9  then
+						begin
+							begin
+								begin
+									ts  := 0;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 0;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= scanner_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22";
+exec "'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/";
+exec "'\n'\n";
+()
+;;
+

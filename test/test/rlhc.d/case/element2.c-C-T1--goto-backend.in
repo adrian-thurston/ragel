@@ -1,0 +1,240 @@
+host( "working/element2.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	
+	struct LangEl
+	{
+		int key;
+		char *name;
+	};
+	
+	struct fsm
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _fsm_key_offsets( 0, 3 ) = { 0, 0, 1, 3, 0 };
+
+array int _fsm_trans_keys( 0, 3 ) = { 1, 2, 3, 0 };
+
+array s8 _fsm_single_lengths( 0, 2 ) = { 0, 1, 2, 0, 0 };
+
+array s8 _fsm_range_lengths( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _fsm_index_offsets( 0, 5 ) = { 0, 0, 2, 5, 0 };
+
+array s8 _fsm_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _fsm_trans_offsets( 0, 5 ) = { 0, 1, 2, 3, 4, 5, 0 };
+
+array s8 _fsm_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _fsm_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _fsm_cond_targs( 0, 3 ) = { 2, 0, 2, 3, 0, 0, 0 };
+
+array s8 _fsm_cond_actions( 0, 1 ) = { 1, 0, 1, 1, 0, 0, 0 };
+
+array s8 _fsm_eof_actions( 0, 2 ) = { 0, 0, 0, 2, 0 };
+
+array s8 _fsm_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _fsm_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _fsm_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _fsm_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int fsm_start = 1;
+value int fsm_first_final = 3;
+value int fsm_error = 0;
+
+value int fsm_en_main = 1;
+
+host( "working/element2.rl", 34 ) @{
+	
+	void fsm_init( struct fsm *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)fsm_start;
+	}
+	host( "working/element2.rl", 38 ) @{
+	}
+	
+	void fsm_execute( struct fsm *fsm,  struct LangEl *_data, int _len )
+	{
+		struct LangEl *p = _data;
+		struct LangEl *pe = _data+_len;
+		struct LangEl *eof = pe;
+		
+	}@
+	{
+		int _klen;
+		index int _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans = 0;
+		uint _cond = 0;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			goto _out;
+			label _resume { 
+				_keys = offset( _fsm_trans_keys, _fsm_key_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_trans = cast(uint)_fsm_index_offsets[host( "-", 1 ) ={ fsm->cs}=];
+				
+				_klen = cast(int)_fsm_single_lengths[host( "-", 1 ) ={ fsm->cs}=];
+				if ( _klen > 0 ) {
+					index int _lower;
+					index int _mid;
+					index int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( host( "-", 1 ) ={p->key}= < deref( _fsm_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( host( "-", 1 ) ={p->key}= > deref( _fsm_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_fsm_range_lengths[host( "-", 1 ) ={ fsm->cs}=];
+				if ( _klen > 0 ) {
+					index int _lower;
+					index int _mid;
+					index int _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( host( "-", 1 ) ={p->key}= < deref( _fsm_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( host( "-", 1 ) ={p->key}= > deref( _fsm_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _fsm_cond_keys, _fsm_trans_offsets[_trans] );
+				_klen = cast(int)_fsm_trans_lengths[_trans];
+				_cond = cast(uint)_fsm_trans_offsets[_trans];
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _fsm_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _fsm_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					host( "-", 1 ) ={ fsm->cs}= = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				host( "-", 1 ) ={ fsm->cs}= = cast(int)_fsm_cond_targs[_cond];
+				
+				if ( _fsm_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				switch ( _fsm_cond_actions[_cond] ) {
+					case 1 {
+						host( "working/element2.rl", 29 ) ${printf("%s\n", p->name);}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					switch ( _fsm_eof_actions[host( "-", 1 ) ={ fsm->cs}=] ) {
+						case 2 {
+							host( "working/element2.rl", 30 ) ${printf("accept\n");}$
+						}
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/element2.rl", 47 ) @{
+	}
+	
+	int fsm_finish( struct fsm *fsm )
+	{
+		if ( fsm->cs == fsm_error )
+		return -1;
+		if ( fsm->cs >= fsm_first_final )
+		return 1;
+		return 0;
+	}
+	
+	int main()
+	{
+		static struct fsm fsm;
+		static struct LangEl lel[] = { 
+			{1, "one"}, 
+			{2, "two-a"}, 
+			{2, "two-b"}, 
+			{2, "two-c"}, 
+			{3, "three"}
+		};
+		
+		fsm_init( &fsm );
+		fsm_execute( &fsm, lel, 5 );
+		fsm_finish( &fsm );
+		
+		return 0;
+	}
+	
+}@

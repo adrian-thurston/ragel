@@ -1,0 +1,476 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+class << self
+	attr_accessor :_gotocallret_actions 
+	private :_gotocallret_actions, :_gotocallret_actions=
+end
+self._gotocallret_actions = [
+0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 5, 1, 7, 1, 8, 2, 0, 1, 2, 4, 6, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_trans_keys 
+	private :_gotocallret_trans_keys, :_gotocallret_trans_keys=
+end
+self._gotocallret_trans_keys = [
+1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 5, 3, 3, 3, 5, 1, 0, 4, 5, 3, 3, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_char_class 
+	private :_gotocallret_char_class, :_gotocallret_char_class=
+end
+self._gotocallret_char_class = [
+0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_index_offsets 
+	private :_gotocallret_index_offsets, :_gotocallret_index_offsets=
+end
+self._gotocallret_index_offsets = [
+0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_indicies 
+	private :_gotocallret_indicies, :_gotocallret_indicies=
+end
+self._gotocallret_indicies = [
+1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_index_defaults 
+	private :_gotocallret_index_defaults, :_gotocallret_index_defaults=
+end
+self._gotocallret_index_defaults = [
+0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_trans_cond_spaces 
+	private :_gotocallret_trans_cond_spaces, :_gotocallret_trans_cond_spaces=
+end
+self._gotocallret_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_cond_targs 
+	private :_gotocallret_cond_targs, :_gotocallret_cond_targs=
+end
+self._gotocallret_cond_targs = [
+0, 2, 7, 4, 8, 4, 8, 0, 9, 10, 1, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_cond_actions 
+	private :_gotocallret_cond_actions, :_gotocallret_cond_actions=
+end
+self._gotocallret_cond_actions = [
+13, 18, 11, 1, 15, 0, 3, 7, 0, 0, 9, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_eof_actions 
+	private :_gotocallret_eof_actions, :_gotocallret_eof_actions=
+end
+self._gotocallret_eof_actions = [
+0, 13, 13, 5, 5, 7, 7, 0, 5, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_nfa_targs 
+	private :_gotocallret_nfa_targs, :_gotocallret_nfa_targs=
+end
+self._gotocallret_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_nfa_offsets 
+	private :_gotocallret_nfa_offsets, :_gotocallret_nfa_offsets=
+end
+self._gotocallret_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_nfa_push_actions 
+	private :_gotocallret_nfa_push_actions, :_gotocallret_nfa_push_actions=
+end
+self._gotocallret_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_gotocallret_nfa_pop_trans 
+	private :_gotocallret_nfa_pop_trans, :_gotocallret_nfa_pop_trans=
+end
+self._gotocallret_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :gotocallret_start 
+end
+self.gotocallret_start  = 7;
+
+class << self
+	attr_accessor :gotocallret_first_final 
+end
+self.gotocallret_first_final  = 7;
+
+class << self
+	attr_accessor :gotocallret_error 
+end
+self.gotocallret_error  = 0;
+
+class << self
+	attr_accessor :gotocallret_en_garble_line 
+end
+self.gotocallret_en_garble_line  = 3;
+
+class << self
+	attr_accessor :gotocallret_en_alp_comm 
+end
+self.gotocallret_en_alp_comm  = 5;
+
+class << self
+	attr_accessor :gotocallret_en_dig_comm 
+end
+self.gotocallret_en_dig_comm  = 6;
+
+class << self
+	attr_accessor :gotocallret_en_main 
+end
+self.gotocallret_en_main  = 7;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	comm = 1
+	top = 1
+	stack = Array.new
+	begin
+		cs = gotocallret_start;
+		top = 0;
+		
+	end
+	begin
+		_trans = 0;
+		_have = 0;
+		_cont = 1;
+		_acts = 0;
+		_nacts= 0
+		;
+		_keys = 0;
+		_inds = 0;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( p == eof  )
+							begin
+								if ( _have == 0  )
+									begin
+										__acts = 0;
+										__nacts= 0
+										;
+										__acts = _gotocallret_eof_actions[cs] ;
+										__nacts = _gotocallret_actions[__acts ];
+										__acts += 1;
+										while ( __nacts > 0  )
+											begin
+												case  _gotocallret_actions[__acts ] 
+												when -2 then
+												begin
+												end
+												when 2  then
+												begin
+													begin
+														print( "error: failed to recover\n" );
+														
+													end
+													
+												end
+												when 3  then
+												begin
+													begin
+														begin
+															p = p - 1;
+															
+														end
+														begin
+															top-= 1;
+															cs = stack[top];
+															
+														end
+														
+													end
+													
+												end
+												when 8  then
+												begin
+													begin
+														begin
+															p = p - 1;
+															
+														end
+														begin
+															cs = 3;
+															
+														end
+														
+													end
+													
+													
+												end
+											end
+											__nacts -= 1;
+											__acts += 1;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _have == 0  )
+						_cont = 0;
+						
+					end
+					
+				end
+				
+			end
+			if ( _cont == 1  )
+				begin
+					if ( _have == 0  )
+						begin
+							_keys = (cs<<1) ;
+							_inds = _gotocallret_index_offsets[cs] ;
+							if ( ( data[p ].ord) <= 122 && ( data[p ].ord) >= 10  )
+								begin
+									_ic = _gotocallret_char_class[( data[p ].ord) - 10];
+									if ( _ic <= _gotocallret_trans_keys[_keys+1 ]&& _ic >= _gotocallret_trans_keys[_keys ] )
+										_trans = _gotocallret_indicies[_inds + ( _ic - _gotocallret_trans_keys[_keys ])  ];
+										
+										else
+										_trans = _gotocallret_index_defaults[cs];
+										
+									end
+									
+								end
+								
+								else
+								begin
+									_trans = _gotocallret_index_defaults[cs];
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _cont == 1  )
+						begin
+							cs = _gotocallret_cond_targs[_trans];
+							if ( _gotocallret_cond_actions[_trans] != 0  )
+								begin
+									_acts = _gotocallret_cond_actions[_trans] ;
+									_nacts = _gotocallret_actions[_acts ];
+									_acts += 1;
+									while ( _nacts > 0  )
+										begin
+											case  _gotocallret_actions[_acts ] 
+											when -2 then
+											begin
+											end
+											when 0  then
+											begin
+												begin
+													print( "error: garbling line\n" );
+													
+												end
+												
+											end
+											when 1  then
+											begin
+												begin
+													begin
+														cs = 7;
+														
+													end
+													
+												end
+												
+											end
+											when 3  then
+											begin
+												begin
+													begin
+														p = p - 1;
+														
+													end
+													begin
+														top-= 1;
+														cs = stack[top];
+														
+													end
+													
+												end
+												
+											end
+											when 4  then
+											begin
+												begin
+													if ( comm >= 97 )
+														begin
+															stack[top] = cs;
+															top += 1;
+															cs = 5;
+															
+														end
+														else 
+														begin
+															stack[top] = cs;
+															top += 1;
+															cs = 6;
+															
+														end
+													end
+													
+												end
+												
+											end
+											when 5  then
+											begin
+												begin
+													comm = ( data[p ].ord);
+													
+												end
+												
+											end
+											when 6  then
+											begin
+												begin
+													print( "prints\n" );
+													
+												end
+												
+											end
+											when 7  then
+											begin
+												begin
+													print( "correct command\n" );
+													
+												end
+												
+											end
+											when 8  then
+											begin
+												begin
+													begin
+														p = p - 1;
+														
+													end
+													begin
+														cs = 3;
+														
+													end
+													
+												end
+												
+												
+											end
+										end
+										_nacts -= 1;
+										_acts += 1;
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( cs == 0  )
+							_cont = 0;
+							
+						end
+						if ( _cont == 1  )
+							p += 1;
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+
+end
+if 	cs >= gotocallret_first_final
+	puts "ACCEPT"
+	else
+	puts "FAIL"
+end
+end
+	
+	inp = [
+	"lkajsdf\n",
+	"2134\n",
+	"(\n",
+	"\n",
+	"*234234()0909 092 -234aslkf09`1 11\n",
+	"1\n",
+	"909\n",
+	"1 a\n",
+	"11 1\n",
+	"a 1\n",
+	"aa a\n",
+	"1 1\n",
+	"1 123456\n",
+	"a a\n",
+	"a abcdef\n",
+	"h",
+	"a aa1",
+	]
+	
+	inplen = 17
+	
+	inp.each { |str| run_machine(str) }
+	

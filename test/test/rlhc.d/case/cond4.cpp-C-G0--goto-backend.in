@@ -1,0 +1,277 @@
+host( "working/cond4.rl", 1 ) @{/* 
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using std::cout;
+	using std::endl;
+	
+	
+	
+}@
+array s8 _foo_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+
+value int foo_en_main = 1;
+
+host( "working/cond4.rl", 27 ) @{
+	
+	void test( char *str )
+	{
+		int len = strlen( str );
+		int cs = foo_start;
+		char *p = str, *pe = str+len;
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) < 32 ) {
+				if ( ( deref( data, p )) < 10 ) {
+					if ( 0 <= ( deref( data, p )) ) {
+						goto ctr0;
+					}
+				} else if ( ( deref( data, p )) > 19 ) {
+					if ( ( deref( data, p )) > 29 ) {
+						{
+							int ck = 0;
+							if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+							if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) ck += 2;
+							if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) ck += 4;
+							if ( ck < 3 ) {
+								if ( ck < 1 ) {
+									goto ctr2;
+								} else if ( ck > 1 ) {
+									goto ctr2;
+								} else {
+									goto ctr2;
+								}
+							} else if ( ck > 3 ) {
+								if ( ck < 5 ) {
+									goto ctr2;
+								} else if ( ck > 5 ) {
+									if ( ck > 6 ) {
+										goto ctr2;
+									} else {
+										goto ctr2;
+									}
+								} else {
+									goto ctr2;
+								}
+							} else {
+								goto ctr2;
+							}
+							
+						}
+					} else {
+						int ck = 0;
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+						if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) ck += 2;
+						if ( ck < 1 ) {
+							goto ctr2;
+						} else if ( ck > 1 ) {
+							if ( ck > 2 ) {
+								goto ctr2;
+							} else {
+								goto ctr2;
+							}
+						} else {
+							goto ctr2;
+						}
+						
+					}
+				} else {
+					int ck = 0;
+					if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+					if ( ck > 0 ) {
+						goto ctr2;
+					} else {
+						goto ctr2;
+					}
+					
+				}
+			} else if ( ( deref( data, p )) > 38 ) {
+				if ( ( deref( data, p )) < 41 ) {
+					{
+						int ck = 0;
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+						if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) ck += 2;
+						if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) ck += 4;
+						if ( ck < 3 ) {
+							if ( ck < 1 ) {
+								goto ctr2;
+							} else if ( ck > 1 ) {
+								goto ctr2;
+							} else {
+								goto ctr2;
+							}
+						} else if ( ck > 3 ) {
+							if ( ck < 5 ) {
+								goto ctr2;
+							} else if ( ck > 5 ) {
+								if ( ck > 6 ) {
+									goto ctr2;
+								} else {
+									goto ctr2;
+								}
+							} else {
+								goto ctr2;
+							}
+						} else {
+							goto ctr2;
+						}
+						
+					}
+				} else if ( ( deref( data, p )) > 50 ) {
+					if ( ( deref( data, p )) > 60 ) {
+						if ( ( deref( data, p )) <= 70 ) {
+							goto ctr0;
+						}
+					} else {
+						int ck = 0;
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+						if ( ck > 0 ) {
+							goto ctr2;
+						} else {
+							goto ctr2;
+						}
+						
+					}
+				} else {
+					int ck = 0;
+					if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+					if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) ck += 2;
+					if ( ck < 1 ) {
+						goto ctr2;
+					} else if ( ck > 1 ) {
+						if ( ck > 2 ) {
+							goto ctr2;
+						} else {
+							goto ctr2;
+						}
+					} else {
+						goto ctr2;
+					}
+					
+				}
+			} else {
+				int ck = 0;
+				if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) ck += 1;
+				if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) ck += 2;
+				if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) ck += 4;
+				if ( host( "working/cond4.rl", 16 ) ={(cout << "c4 ", true)}= ) ck += 8;
+				if ( ck < 7 ) {
+					if ( ck < 3 ) {
+						if ( ck < 1 ) {
+							goto ctr2;
+						} else if ( ck > 1 ) {
+							goto ctr2;
+						} else {
+							goto ctr2;
+						}
+					} else if ( ck > 3 ) {
+						if ( ck < 5 ) {
+							goto ctr2;
+						} else if ( ck > 5 ) {
+							goto ctr2;
+						} else {
+							goto ctr2;
+						}
+					} else {
+						goto ctr2;
+					}
+				} else if ( ck > 7 ) {
+					if ( ck < 11 ) {
+						if ( ck < 9 ) {
+							goto ctr2;
+						} else if ( ck > 9 ) {
+							goto ctr2;
+						} else {
+							goto ctr2;
+						}
+					} else if ( ck > 11 ) {
+						if ( ck < 13 ) {
+							goto ctr2;
+						} else if ( ck > 13 ) {
+							if ( ck > 14 ) {
+								goto ctr2;
+							} else {
+								goto ctr2;
+							}
+						} else {
+							goto ctr2;
+						}
+					} else {
+						goto ctr2;
+					}
+				} else {
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 1; goto f0;
+		ctr2: cs = 1; goto f0;
+		
+		f0: _acts = offset( _foo_actions, 1 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _foo_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _foo_actions, _acts ) ) {
+				case 0{
+					host( "working/cond4.rl", 23 ) ${cout << "char: " << (int)*p << endl;}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/cond4.rl", 34 ) @{
+	}
+	
+	char data[] = { 5, 15, 25, 31, 35, 39, 45, 55, 65, 0 };
+	
+	int main()
+	{
+		test( data );
+		return 0;
+	}
+	
+}@

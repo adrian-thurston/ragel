@@ -1,0 +1,166 @@
+host( "working/eofact_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	
+	
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _eofact_actions( 0, 3 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 2, 0, 2, 0 };
+
+array byte _eofact_trans_keys( 0, 7 ) = { u(1), u(0), u(3), u(7), u(2), u(2), u(4), u(4), u(4), u(4), u(5), u(5), u(3), u(3), u(2), u(2), u(6), u(6), u(2), u(2), u(0), u(0), u(1), u(0), u(1), u(0), u(0) };
+
+array s8 _eofact_char_class( 0, 7 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 1, 1, 6, 1, 7, 0 };
+
+array s8 _eofact_index_offsets( 0, 14 ) = { 0, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 0 };
+
+array s8 _eofact_indicies( 0, 11 ) = { 0, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0 };
+
+array s8 _eofact_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _eofact_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _eofact_cond_targs( 0, 12 ) = { 2, 0, 6, 3, 4, 5, 10, 7, 8, 9, 12, 11, 0 };
+
+array s8 _eofact_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _eofact_eof_actions( 0, 9 ) = { 0, 9, 1, 1, 1, 1, 5, 5, 5, 5, 3, 0, 7, 0 };
+
+array s8 _eofact_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _eofact_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _eofact_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _eofact_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int eofact_start = 1;
+value int eofact_first_final = 10;
+value int eofact_error = 0;
+
+value int eofact_en_main = 1;
+
+host( "working/eofact_go.rl", 34 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)eofact_start;
+	}
+	host( "working/eofact_go.rl", 37 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		int _trans = 0;
+		index byte _keys;
+		index s8 _inds;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _eofact_trans_keys, (cs<<1) );
+				_inds = offset( _eofact_indicies, _eofact_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 116 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_eofact_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _eofact_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _eofact_trans_keys, _keys ) )
+					_trans = cast(int)deref( _eofact_indicies, _inds + cast(int)( _ic - cast(int)deref( _eofact_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_eofact_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_eofact_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_eofact_cond_targs[_trans];
+				
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					index s8 __acts;
+					uint __nacts;
+					__acts = offset( _eofact_actions, _eofact_eof_actions[cs] );
+					__nacts = cast(uint)deref( _eofact_actions, __acts ); __acts += 1;
+					while ( __nacts > 0 ) {
+						switch ( deref( _eofact_actions, __acts ) ) {
+							case 0 {
+								host( "working/eofact_go.rl", 15 ) ${fmt.Print( "a1\n" );}$
+							}
+							case 1 {
+								host( "working/eofact_go.rl", 16 ) ${fmt.Print( "a2\n" );}$
+							}
+							case 2 {
+								host( "working/eofact_go.rl", 17 ) ${fmt.Print( "a3\n" );}$
+							}
+							case 3 {
+								host( "working/eofact_go.rl", 18 ) ${fmt.Print( "a4\n" );}$
+							}
+						}
+						__nacts -= 1;
+						__acts += 1;
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/eofact_go.rl", 44 ) @{
+	}
+	func finish() {
+		if cs >= eofact_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"",
+		"h",
+		"hell",
+		"hello",
+		"hello\n",
+		"t",
+		"ther",
+		"there",
+		"friend",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

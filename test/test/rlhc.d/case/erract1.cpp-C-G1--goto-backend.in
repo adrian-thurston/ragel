@@ -1,0 +1,238 @@
+host( "working/erract1.rl", 1 ) @{/*
+	* @@LANG: c++
+	*/
+	
+	/*
+	* Test error actions.
+	*/
+	
+	#include <iostream>
+	#include <stdio.h>
+	#include <string.h>
+	
+	using namespace std;
+	
+	struct ErrAct 
+	{
+		int cs;
+		
+		// Initialize the machine. Invokes any init statement blocks. Returns 0
+		// if the machine begins in a non-accepting state and 1 if the machine
+		// begins in an accepting state.
+		int init( );
+		
+		// Execute the machine on a block of data. Returns -1 if after processing
+		// the data, the machine is in the error state and can never accept, 0 if
+		// the machine is in a non-accepting state and 1 if the machine is in an
+		// accepting state.
+		int execute( const char *data, int len );
+		
+		// Indicate that there is no more data. Returns -1 if the machine finishes
+		// in the error state and does not accept, 0 if the machine finishes
+		// in any other non-accepting state and 1 if the machine finishes in an
+		// accepting state.
+		int finish( );
+	};
+	
+	
+	
+}@
+array s8 _ErrAct_eof_actions( 0, 3 ) = { 0, 1, 2, 3, 2, 2, 0, 0 };
+
+array s8 _ErrAct_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _ErrAct_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _ErrAct_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _ErrAct_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int ErrAct_start = 1;
+value int ErrAct_first_final = 6;
+value int ErrAct_error = 0;
+
+value int ErrAct_en_main = 1;
+
+host( "working/erract1.rl", 57 ) @{
+	
+	int ErrAct::init( )
+	{
+	}@
+	{
+		cs = cast(int)ErrAct_start;
+	}
+	host( "working/erract1.rl", 61 ) @{
+		return 0;
+	}
+	
+	int ErrAct::execute( const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		const char *eof = pe;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr1;
+				}
+				case 45: {
+					goto ctr1;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr3;
+			}
+			case 3:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr5;
+				}
+				case 46: {
+					goto ctr6;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr4;
+			}
+			case 6:
+			{
+				goto ctr8;
+			}
+			case 4:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr3;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr5;
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr3;
+			}
+		}
+		
+		ctr8: cs = 0; goto _again;
+		ctr0: cs = 0; goto f0;
+		ctr3: cs = 0; goto f1;
+		ctr4: cs = 0; goto f2;
+		ctr1: cs = 2; goto _again;
+		ctr2: cs = 3; goto _again;
+		ctr6: cs = 4; goto _again;
+		ctr7: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		
+		f0:
+		host( "working/erract1.rl", 40 ) ${ printf(" DIGIT PLUS MINUS\n"); }$
+		goto _again;
+		f1:
+		host( "working/erract1.rl", 41 ) ${ printf(" DIGIT\n"); }$
+		goto _again;
+		f2:
+		host( "working/erract1.rl", 42 ) ${ printf(" DIGIT DECIMAL\n"); }$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( _ErrAct_eof_actions[cs] ) {
+				case 1{
+					host( "working/erract1.rl", 40 ) ${ printf(" DIGIT PLUS MINUS\n"); }$
+				}
+				case 2{
+					host( "working/erract1.rl", 41 ) ${ printf(" DIGIT\n"); }$
+				}
+				case 3{
+					host( "working/erract1.rl", 42 ) ${ printf(" DIGIT DECIMAL\n"); }$
+				}
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/erract1.rl", 70 ) @{
+		
+		if ( cs == ErrAct_error )
+		return -1;
+		if ( cs >= ErrAct_first_final )
+		return 1;
+		return 0;
+	}
+	
+	int ErrAct::finish( )
+	{
+		if ( cs == ErrAct_error )
+		return -1;
+		if ( cs >= ErrAct_first_final )
+		return 1;
+		return 0;
+	}
+	
+	#define BUFSIZE 1024
+	
+	void test( const char *buf )
+	{
+		ErrAct errAct;
+		errAct.init();
+		errAct.execute( buf, strlen(buf) );
+		if ( errAct.finish() > 0 )
+		cout << "ACCEPT" << endl;
+		else
+		cout << "FAIL" << endl;
+	}
+	
+	int main()
+	{
+		test( "1\n" );
+		test( "+1\n" );
+		test( "-1\n" );
+		test( "1.1\n" );
+		test( "+1.1\n" );
+		test( "-1.1\n" );
+		test( "a\n" );
+		test( "-\n" );
+		test( "+\n" );
+		test( "-a\n" );
+		test( "+b\n" );
+		test( "1.\n" );
+		test( "1d\n" );
+		test( "1.d\n" );
+		test( "1.1d\n" );
+		return 0;
+	}
+	
+}@

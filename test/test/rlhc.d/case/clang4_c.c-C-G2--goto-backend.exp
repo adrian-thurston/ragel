@@ -1,0 +1,2397 @@
+#include <string.h>
+#include <stdio.h>
+
+int pos ;
+int line ;
+
+
+
+
+
+static const int  clang_start  = 10;
+static const int  clang_first_final  = 10;
+static const int  clang_error  = 0;
+static const int  clang_en_main  = 10;
+static const char  _clang_nfa_targs [] = { 0, 0 ,  };
+static const char  _clang_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _clang_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _clang_nfa_pop_trans [] = { 0, 0 ,  };
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+	pos = 0;
+	line = 1;
+	
+	{
+		cs = ( int ) clang_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 1:
+			goto st_case_1;
+			case 12:
+			goto st_case_12;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 13:
+			goto st_case_13;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 14:
+			goto st_case_14;
+			case 7:
+			goto st_case_7;
+			case 0:
+			goto st_case_0;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 17:
+			goto st_case_17;
+			case 8:
+			goto st_case_8;
+			case 18:
+			goto st_case_18;
+			case 9:
+			goto st_case_9;
+			
+		}
+		goto st_out;
+		ctr12:
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		ctr23:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st10;
+		ctr24:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		ctr32:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st10;
+		ctr33:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		ctr41:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st10;
+		ctr42:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		ctr51:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st10;
+		ctr52:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		ctr58:
+		{
+			printf( "%s", "ident(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st10;
+		ctr59:
+		{
+			printf( "%s", "ident(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		ctr65:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st10;
+		ctr66:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st10;
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr12;
+			}
+			case 34:
+			{
+				goto ctr17;
+			}
+			case 39:
+			{
+				goto ctr18;
+			}
+			case 47:
+			{
+				goto ctr19;
+			}
+			case 48:
+			{
+				goto ctr20;
+			}
+			case 95:
+			{
+				goto ctr22;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 49  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr16;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr16;
+				}
+			} 
+			else
+			{
+				goto ctr21;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr16;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr16;
+				}
+				
+			} 
+			else
+			{
+				goto ctr22;
+			}
+			
+		} 
+		else
+		{
+			goto ctr22;
+		}
+		
+		{
+			goto st10;
+		}
+		ctr16:
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		ctr25:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		ctr34:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		ctr43:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		ctr53:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		ctr60:
+		{
+			printf( "%s", "ident(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		ctr67:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st11;
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr24;
+			}
+			case 34:
+			{
+				goto ctr26;
+			}
+			case 39:
+			{
+				goto ctr27;
+			}
+			case 47:
+			{
+				goto ctr28;
+			}
+			case 48:
+			{
+				goto ctr29;
+			}
+			case 95:
+			{
+				goto ctr31;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 49  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr25;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr25;
+				}
+			} 
+			else
+			{
+				goto ctr30;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr25;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr25;
+				}
+				
+			} 
+			else
+			{
+				goto ctr31;
+			}
+			
+		} 
+		else
+		{
+			goto ctr31;
+		}
+		
+		{
+			goto ctr23;
+		}
+		ctr0:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr1:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st1;
+		ctr17:
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr26:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr35:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr44:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr54:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr61:
+		{
+			printf( "%s", "ident(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		ctr68:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr1;
+			}
+			case 34:
+			{
+				goto st12;
+			}
+			case 92:
+			{
+				goto st9;
+			}
+			
+		}
+		{
+			goto ctr0;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr33;
+			}
+			case 34:
+			{
+				goto ctr35;
+			}
+			case 39:
+			{
+				goto ctr36;
+			}
+			case 47:
+			{
+				goto ctr37;
+			}
+			case 48:
+			{
+				goto ctr38;
+			}
+			case 95:
+			{
+				goto ctr40;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 49  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr34;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr34;
+				}
+			} 
+			else
+			{
+				goto ctr39;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr34;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr34;
+				}
+				
+			} 
+			else
+			{
+				goto ctr40;
+			}
+			
+		} 
+		else
+		{
+			goto ctr40;
+		}
+		
+		{
+			goto ctr32;
+		}
+		ctr4:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr5:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st2;
+		ctr18:
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr27:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr36:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr45:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr55:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr62:
+		{
+			printf( "%s", "ident(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr69:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr5;
+			}
+			case 39:
+			{
+				goto st12;
+			}
+			case 92:
+			{
+				goto st3;
+			}
+			
+		}
+		{
+			goto ctr4;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr5;
+		}
+		
+		{
+			goto ctr4;
+		}
+		ctr19:
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		ctr28:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		ctr37:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		ctr47:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		ctr56:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		ctr63:
+		{
+			printf( "%s", "ident(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		ctr70:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st13;
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr24;
+			}
+			case 33:
+			{
+				goto st4;
+			}
+			case 34:
+			{
+				goto ctr26;
+			}
+			case 39:
+			{
+				goto ctr27;
+			}
+			case 47:
+			{
+				goto st6;
+			}
+			case 48:
+			{
+				goto ctr29;
+			}
+			case 95:
+			{
+				goto ctr31;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 49  )
+			{
+				if ( 35 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr25;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr25;
+				}
+			} 
+			else
+			{
+				goto ctr30;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr25;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr25;
+				}
+				
+			} 
+			else
+			{
+				goto ctr31;
+			}
+			
+		} 
+		else
+		{
+			goto ctr31;
+		}
+		
+		{
+			goto ctr23;
+		}
+		ctr8:
+		{
+			line = line + 1;
+			
+		}
+		
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr8;
+			}
+			case 33:
+			{
+				goto st5;
+			}
+			
+		}
+		{
+			goto st4;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr8;
+			}
+			case 33:
+			{
+				goto st5;
+			}
+			case 47:
+			{
+				goto st10;
+			}
+			
+		}
+		{
+			goto st4;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr12;
+		}
+		
+		{
+			goto st6;
+		}
+		ctr20:
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st14;
+		ctr29:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st14;
+		ctr38:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st14;
+		st14:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof14;
+		
+		st_case_14:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr42;
+			}
+			case 34:
+			{
+				goto ctr44;
+			}
+			case 39:
+			{
+				goto ctr45;
+			}
+			case 46:
+			{
+				goto ctr46;
+			}
+			case 47:
+			{
+				goto ctr47;
+			}
+			case 95:
+			{
+				goto ctr49;
+			}
+			case 120:
+			{
+				goto st8;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 45  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr43;
+				}
+			} 
+			else
+			{
+				goto ctr48;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr43;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else
+			{
+				goto ctr49;
+			}
+			
+		} 
+		else
+		{
+			goto ctr49;
+		}
+		
+		{
+			goto ctr41;
+		}
+		ctr46:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st7;
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr13;
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr13:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st15;
+		st15:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof15;
+		
+		st_case_15:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr52;
+			}
+			case 34:
+			{
+				goto ctr54;
+			}
+			case 39:
+			{
+				goto ctr55;
+			}
+			case 47:
+			{
+				goto ctr56;
+			}
+			case 95:
+			{
+				goto ctr57;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr53;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr53;
+				}
+			} 
+			else
+			{
+				goto ctr13;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr53;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr53;
+				}
+				
+			} 
+			else
+			{
+				goto ctr57;
+			}
+			
+		} 
+		else
+		{
+			goto ctr57;
+		}
+		
+		{
+			goto ctr51;
+		}
+		ctr64:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		ctr22:
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		ctr31:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		ctr40:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		ctr49:
+		{
+			printf( "%s", "int(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		ctr57:
+		{
+			printf( "%s", "float(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		ctr72:
+		{
+			printf( "%s", "hex(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st16;
+		st16:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof16;
+		
+		st_case_16:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr59;
+			}
+			case 34:
+			{
+				goto ctr61;
+			}
+			case 39:
+			{
+				goto ctr62;
+			}
+			case 47:
+			{
+				goto ctr63;
+			}
+			case 95:
+			{
+				goto ctr64;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr60;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr60;
+				}
+			} 
+			else
+			{
+				goto ctr64;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr60;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr60;
+				}
+				
+			} 
+			else
+			{
+				goto ctr64;
+			}
+			
+		} 
+		else
+		{
+			goto ctr64;
+		}
+		
+		{
+			goto ctr58;
+		}
+		ctr48:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st17;
+		ctr21:
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st17;
+		ctr30:
+		{
+			printf( "%s", "symbol(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st17;
+		ctr39:
+		{
+			printf( "%s", "literal(" );
+			printf( "%d", line );
+			printf( "%s", "," );
+			printf( "%d", blen );
+			printf( "%s", "): " );
+			printf( "%s", buffer );
+			printf( "%s", "\n" );
+			
+		}
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st17;
+		st17:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof17;
+		
+		st_case_17:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr42;
+			}
+			case 34:
+			{
+				goto ctr44;
+			}
+			case 39:
+			{
+				goto ctr45;
+			}
+			case 46:
+			{
+				goto ctr46;
+			}
+			case 47:
+			{
+				goto ctr47;
+			}
+			case 95:
+			{
+				goto ctr49;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 45  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				{
+					goto ctr43;
+				}
+			} 
+			else
+			{
+				goto ctr48;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr43;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else
+			{
+				goto ctr49;
+			}
+			
+		} 
+		else
+		{
+			goto ctr49;
+		}
+		
+		{
+			goto ctr41;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr15;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 70  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 102  )
+			{
+				goto ctr15;
+			}
+			
+		} 
+		else
+		{
+			goto ctr15;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr71:
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st18;
+		ctr15:
+		{
+			blen = 0;
+			
+		}
+		{
+			buffer[blen++] = *p;
+			buffer[blen] = 0;
+			
+		}
+		
+		
+		goto st18;
+		st18:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof18;
+		
+		st_case_18:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr66;
+			}
+			case 34:
+			{
+				goto ctr68;
+			}
+			case 39:
+			{
+				goto ctr69;
+			}
+			case 47:
+			{
+				goto ctr70;
+			}
+			case 95:
+			{
+				goto ctr72;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 71  )
+		{
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 33 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 46  )
+				{
+					goto ctr67;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 64  )
+				{
+					{
+						goto ctr71;
+					}
+				} 
+				else
+				{
+					goto ctr67;
+				}
+				
+			} 
+			else
+			{
+				goto ctr71;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr67;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 102  )
+			{
+				if ( ((*( p  ))
+				)> 122  )
+				{
+					if ( ((*( p  ))
+					)<= 126  )
+					{
+						goto ctr67;
+					}
+					
+				} 
+				else
+				{
+					goto ctr72;
+				}
+				
+			} 
+			else
+			{
+				goto ctr71;
+			}
+			
+		} 
+		else
+		{
+			goto ctr72;
+		}
+		
+		{
+			goto ctr65;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr1;
+		}
+		
+		{
+			goto ctr0;
+		}
+		st_out:
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof14: cs = 14;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof15: cs = 15;
+		goto _test_eof; 
+		_test_eof16: cs = 16;
+		goto _test_eof; 
+		_test_eof17: cs = 17;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof18: cs = 18;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 16:
+				{
+					printf( "%s", "ident(" );
+					printf( "%d", line );
+					printf( "%s", "," );
+					printf( "%d", blen );
+					printf( "%s", "): " );
+					printf( "%s", buffer );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				case 12:
+				{
+					printf( "%s", "literal(" );
+					printf( "%d", line );
+					printf( "%s", "," );
+					printf( "%d", blen );
+					printf( "%s", "): " );
+					printf( "%s", buffer );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				case 15:
+				{
+					printf( "%s", "float(" );
+					printf( "%d", line );
+					printf( "%s", "," );
+					printf( "%d", blen );
+					printf( "%s", "): " );
+					printf( "%s", buffer );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				case 14:
+				case 17:
+				{
+					printf( "%s", "int(" );
+					printf( "%d", line );
+					printf( "%s", "," );
+					printf( "%d", blen );
+					printf( "%s", "): " );
+					printf( "%s", buffer );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				case 18:
+				{
+					printf( "%s", "hex(" );
+					printf( "%d", line );
+					printf( "%s", "," );
+					printf( "%d", blen );
+					printf( "%s", "): " );
+					printf( "%s", buffer );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				case 11:
+				case 13:
+				{
+					printf( "%s", "symbol(" );
+					printf( "%d", line );
+					printf( "%s", "," );
+					printf( "%d", blen );
+					printf( "%s", "): " );
+					printf( "%s", buffer );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= clang_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n",
+	"wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n",
+};
+
+int inplen = 2;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

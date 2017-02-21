@@ -1,0 +1,315 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let ts = ref 0
+let te = ref 0
+let act = ref 0
+let token = ref 0
+
+
+
+
+
+
+let _scanner_trans_keys : int array = [|
+0; 2; 0; 1; 0; 2; 0 ; 
+|]
+let _scanner_char_class : int array = [|
+0; 1; 2; 0 ; 
+|]
+let _scanner_index_offsets : int array = [|
+0; 3; 5; 0 ; 
+|]
+let _scanner_indicies : int array = [|
+1; 1; 2; 4; 5; 1; 1; 2; 0 ; 
+|]
+let _scanner_index_defaults : int array = [|
+0; 3; 0; 0 ; 
+|]
+let _scanner_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _scanner_cond_targs : int array = [|
+1; 0; 1; 1; 2; 2; 0 ; 
+|]
+let _scanner_cond_actions : int array = [|
+1; 0; 2; 5; 6; 7; 0 ; 
+|]
+let _scanner_to_state_actions : int array = [|
+0; 3; 0; 0 ; 
+|]
+let _scanner_from_state_actions : int array = [|
+0; 4; 0; 0 ; 
+|]
+let _scanner_eof_trans : int array = [|
+1; 0; 1; 0 ; 
+|]
+let _scanner_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _scanner_nfa_offsets : int array = [|
+0; 0; 0; 0 ; 
+|]
+let _scanner_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _scanner_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let scanner_start  : int  = 1
+let scanner_first_final  : int  = 1
+let scanner_error  : int  = -1
+let scanner_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let eof = pe in
+begin
+	cs  := scanner_start;
+	ts  := 0;
+	te  := 0;
+	act  := 0;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _scanner_eof_trans.(cs.contents)> 0  then
+						begin
+							begin
+								_trans  := _scanner_eof_trans.(cs.contents)- 1;
+								_have  := 1;
+								
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+							
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						if _scanner_from_state_actions.(cs.contents) = 4  then
+						begin
+							begin
+								begin
+									ts  := p.contents;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _scanner_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 99 && ( Char.code data.[p.contents] )>= 97  then
+						begin
+							begin
+								let _ic  : int  ref = ref _scanner_char_class.(( Char.code data.[p.contents] )- 97) in
+								if _ic.contents<= _scanner_trans_keys.( _keys.contents+1  )&& _ic.contents>= _scanner_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _scanner_indicies.( _inds.contents+ ( _ic.contents- _scanner_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _scanner_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _scanner_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _scanner_cond_targs.(_trans.contents);
+						if _scanner_cond_actions.(_trans.contents) = 2  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										print_string( "pat2\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 5  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									begin
+										print_string( "any\n" );
+										
+									end;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 1  then
+						begin
+							begin
+								begin
+									if act.contents = 1  then
+									begin
+										p  := ( ( te.contents ) )-1;
+										begin
+											print_string( "pat1\n" );
+											
+										end;
+										
+									end
+									else if act.contents = 3  then
+									begin
+										p  := ( ( te.contents ) )-1;
+										begin
+											print_string( "any\n" );
+											
+										end;
+										
+									end
+									;
+									
+								end;
+								
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 6  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 1;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _scanner_cond_actions.(_trans.contents) = 7  then
+						begin
+							begin
+								begin
+									te  := p.contents+1;
+									
+								end;
+								
+							end;
+							begin
+								begin
+									act  := 3;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if _scanner_to_state_actions.(cs.contents) = 3  then
+						begin
+							begin
+								begin
+									ts  := 0;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= scanner_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "a";
+()
+;;
+

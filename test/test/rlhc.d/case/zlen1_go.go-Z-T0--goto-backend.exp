@@ -1,0 +1,220 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _zlen1_key_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_trans_keys [] byte  = [] byte  { 0 }
+var _zlen1_single_lengths [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_range_lengths [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_index_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_trans_cond_spaces [] int8  = [] int8  { -1, 0  }
+var _zlen1_trans_offsets [] int8  = [] int8  { 0, 0  }
+var _zlen1_trans_lengths [] int8  = [] int8  { 1, 0  }
+var _zlen1_cond_keys [] int8  = [] int8  { 0, 0  }
+var _zlen1_cond_targs [] int8  = [] int8  { 0, 0  }
+var _zlen1_cond_actions [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var zlen1_start  int  = 1
+var zlen1_first_final  int  = 1
+var zlen1_error  int  = 0
+var zlen1_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(zlen1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _klen int 
+		var  _trans  uint   = 0
+		var  _cond  uint   = 0
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_keys = int(_zlen1_key_offsets[cs] );
+		_trans = uint(_zlen1_index_offsets[cs]);
+		_klen = int(_zlen1_single_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + _klen - 1;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + ((_upper-_lower) >> 1);
+						switch {
+							case ( data[p ]) < _zlen1_trans_keys[_mid ]:
+							_upper = _mid - 1;
+							
+							case ( data[p ]) > _zlen1_trans_keys[_mid ]:
+							_lower = _mid + 1;
+							
+							default:
+							{
+								_trans += uint((_mid - _keys));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_keys += _klen;
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		_klen = int(_zlen1_range_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + (_klen<<1) - 2;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+						switch {
+							case ( data[p ]) < _zlen1_trans_keys[_mid ]:
+							_upper = _mid - 2;
+							
+							case ( data[p ]) > _zlen1_trans_keys[_mid + 1 ]:
+							_lower = _mid + 2;
+							
+							default:
+							{
+								_trans += uint(((_mid - _keys)>>1));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		
+		_match :
+		_ckeys = int(_zlen1_trans_offsets[_trans] );
+		_klen = int(_zlen1_trans_lengths[_trans]);
+		_cond = uint(_zlen1_trans_offsets[_trans]);
+		_cpc = 0;
+		{
+			var  _lower int
+			var  _mid int
+			var  _upper int
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			for {
+				{
+					if _upper < _lower  {
+						break;
+						
+						
+					}
+					_mid = _lower + ((_upper-_lower) >> 1);
+					switch {
+						case _cpc < int(_zlen1_cond_keys[_mid ]):
+						_upper = _mid - 1;
+						
+						case _cpc > int(_zlen1_cond_keys[_mid ]):
+						_lower = _mid + 1;
+						
+						default:
+						{
+							_cond += uint((_mid - _ckeys));
+							goto _match_cond;
+						}
+						
+					}
+				}
+				
+			}
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = int(_zlen1_cond_targs[_cond]);
+		
+		_again :
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= zlen1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"",
+	"x",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

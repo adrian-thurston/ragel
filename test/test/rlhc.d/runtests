@@ -1,0 +1,40 @@
+#!/bin/bash
+
+. ../subject.sh
+
+export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
+
+set -x
+
+make
+
+[ -d working ] || mkdir working
+
+for fn in 'case'/*.in; do
+
+	exp=${fn%.in}.exp
+	out=${fn%.in}.out
+	out=working${out#case}
+
+	lang=`echo $fn | awk -vFS=- '{ print $2 }'`
+
+	case $lang in
+		A) lang=csharp;;
+		C) lang=c;;
+		J) lang=java;;
+		K) lang=crack;;
+		O) lang=ocaml;;
+		R) lang=ruby;;
+		U) lang=rust;;
+		Y) lang=julia;;
+		Z) lang=go;;
+	esac
+
+	./rlhc $out $fn $lang
+
+	if ! diff $exp $out; then
+		exit;
+	fi
+
+done
+

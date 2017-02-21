@@ -1,0 +1,157 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+static const char  _foo_to_state_actions [] = { 0, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _foo_eof_actions [] = { 0, 2, 2, 2, 2, 2, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 6;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+int main()
+{
+	int cs;
+	char *p = "hello", *pe = p + strlen(p);
+	char *eof = pe;
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 104  )
+			{
+				goto ctr1;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 101  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 88  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 88  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 88  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 6:
+			{
+				goto ctr0;
+			}
+			
+		}
+		ctr0: cs = 0;
+		goto f1;
+		ctr1: cs = 2;
+		goto f2;
+		ctr2: cs = 3;
+		goto f2;
+		ctr3: cs = 4;
+		goto f2;
+		ctr4: cs = 5;
+		goto f2;
+		ctr5: cs = 6;
+		goto f2;
+		
+		f2:
+		{
+			printf("char: %c\n", *p); 
+		}
+		
+		goto _again;
+		f1:
+		{
+			printf("err: %c\n", *p); 
+		}
+		
+		goto _again;
+		
+		_again:
+		switch ( _foo_to_state_actions[cs] ) {
+			case 1:
+			{
+				printf("to state: %c\n", *p); 
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( _foo_eof_actions[cs] ) {
+				case 2:
+				{
+					printf("err: %c\n", *p); 
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	printf( "rest: %s\n", p );
+	
+	return 0;
+}
+

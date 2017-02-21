@@ -1,0 +1,654 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+var ts  int ;
+var te  int ;
+var act  int ;
+var val  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _GotoCallRet_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 0  }
+var _GotoCallRet_to_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0  }
+var _GotoCallRet_from_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0  }
+var _GotoCallRet_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _GotoCallRet_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var GotoCallRet_start  int  = 6
+var GotoCallRet_first_final  int  = 6
+var GotoCallRet_error  int  = 0
+var GotoCallRet_en_handle  int  = 5
+var GotoCallRet_en_one  int  = 10
+var GotoCallRet_en_two  int  = 13
+var GotoCallRet_en_main  int  = 6
+func prepare() {
+
+	{
+		cs = int(GotoCallRet_start);
+		top = 0;
+		ts = 0;
+		te = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _acts int
+		var  _nacts uint 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		_acts = int(_GotoCallRet_from_state_actions[cs] );
+		_nacts = uint(_GotoCallRet_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _GotoCallRet_actions[_acts ] {
+					case 2:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		switch cs  {
+			case 6:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr10;
+				}
+				case 32:
+				{
+					goto ctr12;
+				}
+				case 91:
+				{
+					goto ctr13;
+				}
+				case 123:
+				{
+					goto ctr15;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr14;
+				}
+				
+			}
+			{
+				goto ctr11;
+			}
+			case 0:
+			goto _out;
+			case 7:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr18;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr19;
+				}
+				
+			}
+			{
+				goto ctr20;
+			}
+			case 1:
+			if ( data[p ]) == 102  {
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 2:
+			if ( data[p ]) == 111  {
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 3:
+			if ( data[p ]) == 105  {
+				{
+					goto ctr6;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr8;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 8:
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr19;
+				}
+				
+			}
+			{
+				goto ctr20;
+			}
+			case 5:
+			{
+				goto ctr9;
+			}
+			case 9:
+			{
+				goto ctr11;
+			}
+			case 10:
+			switch ( data[p ])  {
+				case 32:
+				{
+					goto ctr21;
+				}
+				case 91:
+				{
+					goto ctr22;
+				}
+				case 123:
+				{
+					goto ctr24;
+				}
+				case 125:
+				{
+					goto ctr25;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr23;
+				}
+				
+			}
+			{
+				goto ctr11;
+			}
+			case 11:
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr23;
+				}
+				
+			}
+			{
+				goto ctr27;
+			}
+			case 12:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr25;
+				}
+				
+			}
+			{
+				goto ctr29;
+			}
+			case 13:
+			switch ( data[p ])  {
+				case 32:
+				{
+					goto ctr30;
+				}
+				case 91:
+				{
+					goto ctr31;
+				}
+				case 93:
+				{
+					goto ctr32;
+				}
+				case 123:
+				{
+					goto ctr34;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr33;
+				}
+				
+			}
+			{
+				goto ctr11;
+			}
+			case 14:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr32;
+				}
+				
+			}
+			{
+				goto ctr36;
+			}
+			case 15:
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr33;
+				}
+				
+			}
+			{
+				goto ctr38;
+			}
+			
+		}
+		ctr11: cs = 0;
+		goto _again;
+		ctr18: cs = 1;
+		goto _again;
+		ctr2: cs = 2;
+		goto _again;
+		ctr4: cs = 3;
+		goto _again;
+		ctr6: cs = 4;
+		goto _again;
+		ctr7: cs = 6;
+		goto f0;
+		ctr8: cs = 6;
+		goto f1;
+		ctr10: cs = 6;
+		goto f5;
+		ctr12: cs = 6;
+		goto f6;
+		ctr13: cs = 6;
+		goto f7;
+		ctr15: cs = 6;
+		goto f9;
+		ctr20: cs = 6;
+		goto f10;
+		ctr14: cs = 7;
+		goto f8;
+		ctr19: cs = 8;
+		goto _again;
+		ctr9: cs = 9;
+		goto f3;
+		ctr21: cs = 10;
+		goto f11;
+		ctr22: cs = 10;
+		goto f12;
+		ctr24: cs = 10;
+		goto f13;
+		ctr27: cs = 10;
+		goto f14;
+		ctr29: cs = 10;
+		goto f15;
+		ctr23: cs = 11;
+		goto _again;
+		ctr25: cs = 12;
+		goto _again;
+		ctr30: cs = 13;
+		goto f16;
+		ctr31: cs = 13;
+		goto f17;
+		ctr34: cs = 13;
+		goto f18;
+		ctr36: cs = 13;
+		goto f19;
+		ctr38: cs = 13;
+		goto f20;
+		ctr32: cs = 14;
+		goto _again;
+		ctr33: cs = 15;
+		goto _again;
+		
+		f3: _acts = int(1 );
+		goto execFuncs;
+		f8: _acts = int(7 );
+		goto execFuncs;
+		f13: _acts = int(9 );
+		goto execFuncs;
+		f12: _acts = int(11 );
+		goto execFuncs;
+		f11: _acts = int(13 );
+		goto execFuncs;
+		f15: _acts = int(15 );
+		goto execFuncs;
+		f14: _acts = int(17 );
+		goto execFuncs;
+		f18: _acts = int(19 );
+		goto execFuncs;
+		f17: _acts = int(21 );
+		goto execFuncs;
+		f16: _acts = int(23 );
+		goto execFuncs;
+		f19: _acts = int(25 );
+		goto execFuncs;
+		f20: _acts = int(27 );
+		goto execFuncs;
+		f9: _acts = int(29 );
+		goto execFuncs;
+		f7: _acts = int(31 );
+		goto execFuncs;
+		f1: _acts = int(33 );
+		goto execFuncs;
+		f6: _acts = int(35 );
+		goto execFuncs;
+		f5: _acts = int(37 );
+		goto execFuncs;
+		f10: _acts = int(39 );
+		goto execFuncs;
+		f0: _acts = int(41 );
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = uint(_GotoCallRet_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _GotoCallRet_actions[_acts ] {
+					case 0:
+					{fmt.Print( "handle " );{p = p - 1;
+						} 
+						
+						if ( val == 1 ) {
+							cs = (10); 
+							
+						}
+						if ( val == 2 ) {
+							cs = (13); 
+							
+						}
+						if ( val == 3 ) {
+							cs = 6;}
+					}
+					
+					break;
+					case 3:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 4:
+					{{te = p+1;
+							{fmt.Print( "{ " );{stack[top] = cs;
+									top += 1;
+									cs = (10);
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 5:
+					{{te = p+1;
+							{fmt.Print( "[ " );{stack[top] = cs;
+									top += 1;
+									cs = (13);
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 6:
+					{{te = p+1;
+							{fmt.Print( "space " );}
+						}}
+					
+					break;
+					case 7:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "} " );{top-= 1;
+									cs = stack[top];
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 8:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word " );val = 1;
+								{cs = (5);
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 9:
+					{{te = p+1;
+							{fmt.Print( "{ " );{stack[top] = cs;
+									top += 1;
+									cs = (10);
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 10:
+					{{te = p+1;
+							{fmt.Print( "[ " );{stack[top] = cs;
+									top += 1;
+									cs = (13);
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 11:
+					{{te = p+1;
+							{fmt.Print( "space " );}
+						}}
+					
+					break;
+					case 12:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "] " );{top-= 1;
+									cs = stack[top];
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 13:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word " );val = 2;
+								{cs = (5);
+									goto _again;} 
+							}
+						}}
+					
+					break;
+					case 14:
+					{{te = p+1;
+							{fmt.Print( "{ " );{stack[top] = cs;
+									top += 1;
+									cs = 10;
+									goto _again;}}
+						}}
+					
+					break;
+					case 15:
+					{{te = p+1;
+							{fmt.Print( "[ " );{stack[top] = cs;
+									top += 1;
+									cs = 13;
+									goto _again;}}
+						}}
+					
+					break;
+					case 16:
+					{{te = p+1;
+							{fmt.Print( "this is the foil" );}
+						}}
+					
+					break;
+					case 17:
+					{{te = p+1;
+							{fmt.Print( "space " );}
+						}}
+					
+					break;
+					case 18:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 19:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word " );val = 3;
+								{cs = 5;
+									goto _again;}}
+						}}
+					
+					break;
+					case 20:
+					{{p = ((te))-1;
+							{fmt.Print( "word " );val = 3;
+								{cs = 5;
+									goto _again;}}
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		goto _again;
+		
+		_again:
+		_acts = int(_GotoCallRet_to_state_actions[cs] );
+		_nacts = uint(_GotoCallRet_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _GotoCallRet_actions[_acts ] {
+					case 1:
+					{{ts = 0;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 7:
+					goto ctr20;
+					case 1:
+					goto ctr7;
+					case 2:
+					goto ctr7;
+					case 3:
+					goto ctr7;
+					case 4:
+					goto ctr7;
+					case 8:
+					goto ctr20;
+					case 11:
+					goto ctr27;
+					case 12:
+					goto ctr29;
+					case 14:
+					goto ctr36;
+					case 15:
+					goto ctr38;
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= GotoCallRet_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"{a{b[c d]d}c}\n",
+	"[a{b[c d]d}c}\n",
+	"[a[b]c]d{ef{g{h}i}j}l\n",
+	"{{[]}}\n",
+	"a b c\n",
+	"{a b c}\n",
+	"[a b c]\n",
+	"{]\n",
+	"{{}\n",
+	"[[[[[[]]]]]]\n",
+	"[[[[[[]]}]]]\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

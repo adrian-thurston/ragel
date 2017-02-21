@@ -1,0 +1,215 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+	
+	
+	
+	
+	
+		static readonly sbyte  []_rangei_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_rangei_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_rangei_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_rangei_nfa_pop_trans = { 0, 0,  };
+		static readonly int  rangei_start  = 1;
+		static readonly int  rangei_first_final  = 7;
+		static readonly int  rangei_error  = 0;
+		static readonly int  rangei_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)rangei_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( cs  ) {
+					case 1:
+					if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr0;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0041' )
+					{
+						goto ctr0;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr2;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0041' )
+					{
+						goto ctr2;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 3:
+					if ( ( data[p ]) > '\u005d' )
+					{
+						if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr3;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u003c' )
+					{
+						goto ctr3;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 4:
+					if ( ( data[p ]) > '\u005a' )
+					{
+						if ( '\u005e'<= ( data[p ]) && ( data[p ]) <= '\u007d' )
+						{
+							goto ctr4;
+						}
+						
+					} 
+					else if ( ( data[p ]) >= '\u0041' )
+					{
+						goto ctr4;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 5:
+					if ( ( data[p ]) < '\u0056' )
+					{
+						if ( '\u0041'<= ( data[p ]) && ( data[p ]) <= '\u0045' )
+						{
+							goto ctr5;
+						}
+						
+					} 
+					else if ( ( data[p ]) > '\u0065' )
+					{
+						if ( '\u0076'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+						{
+							goto ctr5;
+						}
+						
+					} 
+					else
+					{
+						goto ctr5;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 6:
+					if ( '\u003c'<= ( data[p ]) && ( data[p ]) <= '\u007d' )
+					{
+						goto ctr6;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 7:
+					{
+						goto ctr1;
+					}
+					
+				}
+				ctr1: cs = 0;
+				goto _again;
+				ctr0: cs = 2;
+				goto _again;
+				ctr2: cs = 3;
+				goto _again;
+				ctr3: cs = 4;
+				goto _again;
+				ctr4: cs = 5;
+				goto _again;
+				ctr5: cs = 6;
+				goto _again;
+				ctr6: cs = 7;
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= rangei_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"AaBbAa",
+			"Aa`bAa",
+			"AaB@Aa",
+			"AaBbMa",
+			"AaBbma",
+		};
+		
+		
+		static readonly int inplen = 5;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

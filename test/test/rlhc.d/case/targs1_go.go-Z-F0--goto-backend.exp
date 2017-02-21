@@ -1,0 +1,169 @@
+package main
+import "fmt"
+
+var return_to  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _targs1_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0  }
+var _targs1_trans_keys [] byte  = [] byte  { 1, 0, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 0, 3, 1, 0, 1, 0, 1, 0, 0 }
+var _targs1_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0  }
+var _targs1_index_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0  }
+var _targs1_indicies [] int8  = [] int8  { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0  }
+var _targs1_index_defaults [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _targs1_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _targs1_cond_targs [] int8  = [] int8  { 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0  }
+var _targs1_cond_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 5, 7, 0  }
+var _targs1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _targs1_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _targs1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _targs1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var targs1_start  int  = 13
+var targs1_first_final  int  = 13
+var targs1_error  int  = 0
+var targs1_en_unused  int  = 1
+var targs1_en_one  int  = 7
+var targs1_en_two  int  = 10
+var targs1_en_main  int  = 13
+func prepare() {
+
+	{
+		cs = int(targs1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _trans  int   = 0
+		var  _acts int
+		var  _nacts uint 
+		var  _keys int
+		var  _inds int
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_keys = int((cs<<1) );
+		_inds = int(_targs1_index_offsets[cs] );
+		switch {
+			case ( data[p ]) <= 119 && ( data[p ]) >= 10 :
+			{
+				var  _ic  int   = int(_targs1_char_class[int(( data[p ]) )- 10])
+				switch {
+					case _ic <= int(_targs1_trans_keys[_keys+1 ])&& _ic >= int(_targs1_trans_keys[_keys ]):
+					_trans = int(_targs1_indicies[_inds + int(( _ic - int(_targs1_trans_keys[_keys ]))  )]);
+					
+					default:
+					_trans = int(_targs1_index_defaults[cs]);
+					
+				}
+			}
+			
+			default:
+			{
+				_trans = int(_targs1_index_defaults[cs]);
+			}
+			
+			
+		}
+		goto _match_cond;
+		
+		_match_cond :
+		cs = int(_targs1_cond_targs[_trans]);
+		if _targs1_cond_actions[_trans] == 0  {
+			goto _again;
+			
+			
+		}
+		_acts = int(_targs1_cond_actions[_trans] );
+		_nacts = uint(_targs1_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _targs1_actions[_acts ] {
+					case 0 :
+					{fmt.Print( "one\n" );{cs = (return_to);
+						}
+						
+					}
+					
+					break;
+					case 1 :
+					{fmt.Print( "two\n" );{cs = (return_to);
+						}
+						
+					}
+					
+					break;
+					case 2 :
+					{return_to = (cs);
+						{cs = 7;
+						}}
+					
+					break;
+					case 3 :
+					{return_to = (cs);
+						{cs = 10;
+						}}
+					
+					break;
+					
+				}
+				_nacts -= 1;
+				_acts += 1;
+			}
+			
+			
+			
+		}
+		
+		_again :
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= targs1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"1one2two1one\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

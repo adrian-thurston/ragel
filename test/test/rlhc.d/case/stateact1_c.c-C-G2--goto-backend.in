@@ -1,0 +1,205 @@
+host( "working/stateact1_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	
+	
+	
+	
+	
+}@
+value int state_act_start = 4;
+value int state_act_first_final = 4;
+value int state_act_error = 0;
+
+value int state_act_en_main = 4;
+value int state_act_en_main_line_again = 3;
+
+array s8 _state_act_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _state_act_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_act_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _state_act_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/stateact1_c.rl", 47 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)state_act_start;
+	}
+	host( "working/stateact1_c.rl", 54 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		goto _resume;
+		
+		_again:
+		switch ( cs ) {
+			case 4: goto st4;
+			case 0: goto st0;
+			case 1: goto st1;
+			case 2: goto st2;
+			case 5: goto st5;
+			case 3: goto st3;
+		}
+		
+		_resume:
+		switch ( cs )
+		{
+			case 4:
+			goto st_case_4;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 5:
+			goto st_case_5;
+			case 3:
+			goto st_case_3;
+		}
+		goto st_out;
+		st4:
+		host( "working/stateact1_c.rl", 15 ) ${printf( "%s", "a1\n" );
+		}$
+		host( "working/stateact1_c.rl", 19 ) ${printf( "%s", "b1\n" );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		host( "working/stateact1_c.rl", 17 ) ${printf( "%s", "a2\n" );
+		}$
+		host( "working/stateact1_c.rl", 21 ) ${printf( "%s", "b2\n" );
+		}$
+		if ( ( deref( data, p )) == 104 ) {
+			goto st1;
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 105 ) {
+			goto st2;
+		}
+		{
+			goto st0;
+		}
+		st2:
+		host( "working/stateact1_c.rl", 23 ) ${printf( "%s", "c1\n" );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		host( "working/stateact1_c.rl", 25 ) ${printf( "%s", "c2\n" );
+		}$
+		if ( ( deref( data, p )) == 10 ) {
+			goto ctr2;
+		}
+		{
+			goto st0;
+		}
+		ctr2:
+		cs = 5;
+		host( "working/stateact1_c.rl", 27 ) ${cs = 3;}$
+		
+		goto _again;
+		st5:
+		host( "working/stateact1_c.rl", 19 ) ${printf( "%s", "b1\n" );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		host( "working/stateact1_c.rl", 21 ) ${printf( "%s", "b2\n" );
+		}$
+		if ( ( deref( data, p )) == 104 ) {
+			goto st1;
+		}
+		{
+			goto st0;
+		}
+		st3:
+		host( "working/stateact1_c.rl", 19 ) ${printf( "%s", "b1\n" );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		host( "working/stateact1_c.rl", 21 ) ${printf( "%s", "b2\n" );
+		}$
+		if ( ( deref( data, p )) == 104 ) {
+			goto st1;
+		}
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof1: cs = 1; goto _test_eof; 
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof5: cs = 5; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/stateact1_c.rl", 61 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= state_act_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hi\nhi\n",
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

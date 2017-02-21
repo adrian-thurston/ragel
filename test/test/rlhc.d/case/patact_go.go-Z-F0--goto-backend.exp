@@ -1,0 +1,426 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+var ts  int ;
+var te  int ;
+var act  int ;
+var value  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _patact_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 2, 2, 6, 2, 2, 7, 2, 2, 17, 2, 2, 18, 0  }
+var _patact_trans_keys [] byte  = [] byte  { 1, 0, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 0, 11, 2, 5, 2, 5, 2, 11, 0, 11, 4, 5, 7, 11, 0, 11, 2, 5, 2, 5, 2, 11, 6, 6, 0 }
+var _patact_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 7, 8, 7, 7, 9, 7, 7, 10, 7, 7, 11, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0  }
+var _patact_index_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 32, 36, 46, 58, 60, 65, 77, 81, 85, 95, 0  }
+var _patact_indicies [] int8  = [] int8  { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0  }
+var _patact_index_defaults [] int8  = [] int8  { 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 21, 0, 28, 30, 21, 35, 36, 21, 10, 43, 45, 21, 0  }
+var _patact_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _patact_cond_targs [] int8  = [] int8  { 17, 2, 3, 4, 17, 17, 6, 7, 8, 17, 24, 10, 11, 12, 24, 24, 14, 15, 16, 24, 17, 0, 17, 18, 19, 17, 20, 1, 17, 18, 17, 5, 21, 22, 23, 21, 21, 24, 24, 25, 26, 27, 9, 24, 25, 24, 13, 28, 0  }
+var _patact_cond_actions [] int8  = [] int8  { 47, 0, 0, 0, 35, 45, 0, 0, 0, 31, 27, 0, 0, 0, 17, 25, 0, 0, 0, 13, 33, 0, 39, 58, 58, 37, 5, 0, 43, 55, 41, 0, 7, 0, 0, 11, 9, 15, 19, 52, 52, 5, 0, 23, 49, 21, 0, 29, 0  }
+var _patact_to_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0  }
+var _patact_from_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0  }
+var _patact_eof_trans [] int8  = [] int8  { 0, 1, 1, 1, 1, 6, 6, 6, 6, 11, 11, 11, 11, 16, 16, 16, 16, 0, 1, 29, 31, 0, 36, 37, 0, 11, 44, 46, 0, 0  }
+var _patact_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _patact_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _patact_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _patact_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var patact_start  int  = 17
+var patact_first_final  int  = 17
+var patact_error  int  = 0
+var patact_en_other  int  = 21
+var patact_en_exec_test  int  = 24
+var patact_en_semi  int  = 28
+var patact_en_main  int  = 17
+func prepare() {
+
+	{
+		cs = int(patact_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _trans  int   = 0
+		var  _acts int
+		var  _nacts uint 
+		var  _keys int
+		var  _inds int
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_acts = int(_patact_from_state_actions[cs] );
+		_nacts = uint(_patact_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _patact_actions[_acts ] {
+					case 1 :
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				_nacts -= 1;
+				_acts += 1;
+			}
+			
+			
+		}
+		_keys = int((cs<<1) );
+		_inds = int(_patact_index_offsets[cs] );
+		switch {
+			case ( data[p ]) <= 122 && ( data[p ]) >= 10 :
+			{
+				var  _ic  int   = int(_patact_char_class[int(( data[p ]) )- 10])
+				switch {
+					case _ic <= int(_patact_trans_keys[_keys+1 ])&& _ic >= int(_patact_trans_keys[_keys ]):
+					_trans = int(_patact_indicies[_inds + int(( _ic - int(_patact_trans_keys[_keys ]))  )]);
+					
+					default:
+					_trans = int(_patact_index_defaults[cs]);
+					
+				}
+			}
+			
+			default:
+			{
+				_trans = int(_patact_index_defaults[cs]);
+			}
+			
+			
+		}
+		goto _match_cond;
+		
+		_match_cond :
+		cs = int(_patact_cond_targs[_trans]);
+		if _patact_cond_actions[_trans] == 0  {
+			goto _again;
+			
+			
+		}
+		_acts = int(_patact_cond_actions[_trans] );
+		_nacts = uint(_patact_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _patact_actions[_acts ] {
+					case 2 :
+					{{te = p+1;
+						}}
+					
+					break;
+					case 3 :
+					{{te = p+1;
+							{fmt.Print( "space\n" );}
+						}}
+					
+					break;
+					case 4 :
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word\n" );}
+						}}
+					
+					break;
+					case 5 :
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "num\n" );}
+						}}
+					
+					break;
+					case 6 :
+					{{act = 7;
+						}}
+					
+					break;
+					case 7 :
+					{{act = 8;
+						}}
+					
+					break;
+					case 8 :
+					{{te = p+1;
+							{fmt.Print( "word (c/lbh)\n" );}
+						}}
+					
+					break;
+					case 9 :
+					{{te = p+1;
+							{fmt.Print( "space\n" );}
+						}}
+					
+					break;
+					case 10 :
+					{{te = p+1;
+							{fmt.Print( "num (c/switch)\n" );}
+						}}
+					
+					break;
+					case 11 :
+					{{te = p+1;
+						}}
+					
+					break;
+					case 12 :
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word (w/lbh)\n" );{p = (( te-1))-1;
+								}
+								
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 13 :
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "num (w/switch)\n" );{p = (( te-1))-1;
+								}
+								
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 14 :
+					{{p = ((te))-1;
+							{fmt.Print( "word (w/lbh)\n" );{p = (( te-1))-1;
+								}
+								
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 15 :
+					{{switch act  {
+								case 7 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );}
+								
+								break;
+								case 8 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );{p = (( te-1))-1;
+									}
+									
+									{cs = 21;
+										goto _again;}}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					case 16 :
+					{{te = p+1;
+							{fmt.Print( "in semi\n" );{cs = 17;
+									goto _again;}}
+						}}
+					
+					break;
+					case 17 :
+					{{act = 15;
+						}}
+					
+					break;
+					case 18 :
+					{{act = 16;
+						}}
+					
+					break;
+					case 19 :
+					{{te = p+1;
+							{fmt.Print( "word (c/lbh)\n" );}
+						}}
+					
+					break;
+					case 20 :
+					{{te = p+1;
+							{fmt.Print( "space\n" );}
+						}}
+					
+					break;
+					case 21 :
+					{{te = p+1;
+							{fmt.Print( "num (c/switch)\n" );}
+						}}
+					
+					break;
+					case 22 :
+					{{te = p+1;
+							{fmt.Print( "going to semi\n" );{p = p - 1;
+								} 
+								{cs = 28;
+									goto _again;}}
+						}}
+					
+					break;
+					case 23 :
+					{{te = p+1;
+							{fmt.Print( "immdiate\n" );{cs = 24;
+									goto _again;}}
+						}}
+					
+					break;
+					case 24 :
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word (w/lbh)\n" );{p = p - 1;
+								} 
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 25 :
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "num (w/switch)\n" );{p = p - 1;
+								} 
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 26 :
+					{{p = ((te))-1;
+							{fmt.Print( "word (w/lbh)\n" );{p = p - 1;
+								} 
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 27 :
+					{{switch act  {
+								case 15 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );}
+								
+								break;
+								case 16 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );{p = p - 1;
+									} 
+									{cs = 21;
+										goto _again;}}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					
+				}
+				_nacts -= 1;
+				_acts += 1;
+			}
+			
+			
+			
+		}
+		
+		_again :
+		_acts = int(_patact_to_state_actions[cs] );
+		_nacts = uint(_patact_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _patact_actions[_acts ] {
+					case 0 :
+					{{ts = 0;
+						}}
+					
+					break;
+					
+				}
+				_nacts -= 1;
+				_acts += 1;
+			}
+			
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		if p == eof  {
+			{
+				if _patact_eof_trans[cs] > 0  {
+					{
+						_trans = int(_patact_eof_trans[cs] )- 1;
+						goto _match_cond;
+					}
+					
+				}
+			}
+			
+			
+		}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= patact_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"abcd foix\n",
+	"abcd\nanother\n",
+	"123 foix\n",
+	"!abcd foix\n",
+	"!abcd\nanother\n",
+	"!123 foix\n",
+	";",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

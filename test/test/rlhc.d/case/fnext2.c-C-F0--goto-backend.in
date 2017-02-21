@@ -1,0 +1,223 @@
+host( "working/fnext2.rl", 1 ) @{/*
+	* @@LANG: c
+	*
+	* Tests fnext in combination with fbreak.
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char comm;
+	int top;
+	int stack [32];
+	
+	
+	
+	int cs;
+	char *ts, *te;
+	int act;
+	
+}@
+array s8 _fnext_actions( 0, 8 ) = { 0, 1, 0, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 2, 1, 2, 2, 3, 4, 0 };
+
+array char _fnext_trans_keys( 0, 5 ) = { 1, 0, 3, 3, 2, 2, 4, 4, 4, 4, 0, 0, 1, 0, 1, 0, 1, 0, 5, 5, 1, 0, 0 };
+
+array s8 _fnext_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 0 };
+
+array s8 _fnext_index_offsets( 0, 6 ) = { 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 6, 0 };
+
+array s8 _fnext_indicies( 0, 6 ) = { 0, 2, 3, 4, 5, 6, 0 };
+
+array s8 _fnext_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _fnext_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _fnext_cond_targs( 0, 10 ) = { 6, 0, 7, 4, 8, 10, 9, 0 };
+
+array s8 _fnext_cond_actions( 0, 16 ) = { 1, 0, 13, 3, 16, 5, 11, 0 };
+
+array s8 _fnext_to_state_actions( 0, 7 ) = { 0, 7, 7, 7, 0, 7, 0, 0, 0, 7, 0, 0 };
+
+array s8 _fnext_from_state_actions( 0, 9 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0 };
+
+array s8 _fnext_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _fnext_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _fnext_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _fnext_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int fnext_start = 1;
+value int fnext_first_final = 6;
+value int fnext_error = 0;
+
+value int fnext_en_main = 1;
+value int fnext_en_e = 2;
+value int fnext_en_l = 3;
+value int fnext_en_o = 9;
+value int fnext_en_nl = 5;
+
+host( "working/fnext2.rl", 30 ) @{
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)fnext_start;
+		ts = nil;
+		te = nil;
+	}
+	host( "working/fnext2.rl", 34 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		
+		while ( cs != fnext_error && p < pe ) {
+			printf( "%c\n", *p );
+		}@
+		{
+			int _trans = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _inds;
+			int _nbreak;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_acts = offset( _fnext_actions, _fnext_from_state_actions[cs] );
+					_nacts = cast(uint)deref( _fnext_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _fnext_actions, _acts ) ) {
+							case 7 {
+								host( "NONE", 1 ) ${${ts = p;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					_keys = offset( _fnext_trans_keys, (cs<<1) );
+					_inds = offset( _fnext_indicies, _fnext_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_fnext_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _fnext_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _fnext_trans_keys, _keys ) )
+						_trans = cast(int)deref( _fnext_indicies, _inds + cast(int)( _ic - cast(int)deref( _fnext_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_fnext_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_fnext_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_fnext_cond_targs[_trans];
+					
+					if ( _fnext_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_nbreak = 0;
+					_acts = offset( _fnext_actions, _fnext_cond_actions[_trans] );
+					_nacts = cast(uint)deref( _fnext_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _fnext_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/fnext2.rl", 18 ) ${ /*h*/  ${cs = 2;}$${p += 1;  _nbreak = 1; }$ }$
+							}
+							case 1 {
+								host( "working/fnext2.rl", 19 ) ${ /*e*/  ${cs = 3;}$}$
+							}
+							case 2 {
+								host( "working/fnext2.rl", 19 ) ${ ${p += 1;  _nbreak = 1; }$ }$
+							}
+							case 3 {
+								host( "working/fnext2.rl", 20 ) ${ /*ll*/ ${cs = 9;}$}$
+							}
+							case 4 {
+								host( "working/fnext2.rl", 20 ) ${ ${p += 1;  _nbreak = 1; }$ }$
+							}
+							case 5 {
+								host( "working/fnext2.rl", 22 ) ${ /*nl*/ ${p += 1;  _nbreak = 1; }$ printf("ACCEPT\n"); }$
+							}
+							case 8 {
+								host( "working/fnext2.rl", 21 ) ${${te = p+1;host( "working/fnext2.rl", 21 ) ${ /*o*/  ${cs = 5;}$${p += 1;  _nbreak = 1; }$ }$}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					if ( _nbreak == 1 )
+					goto _out;
+					
+				}
+				label _again {
+					_acts = offset( _fnext_actions, _fnext_to_state_actions[cs] );
+					_nacts = cast(uint)deref( _fnext_actions, _acts ); _acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _fnext_actions, _acts ) ) {
+							case 6 {
+								host( "NONE", 1 ) ${${ts = nil;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/fnext2.rl", 44 ) @{
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= fnext_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hello\n"
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

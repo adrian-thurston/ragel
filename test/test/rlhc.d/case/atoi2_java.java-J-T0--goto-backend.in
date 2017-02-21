@@ -1,0 +1,272 @@
+host( "working/atoi2_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class atoi2_java
+	{
+		int neg ;
+		int value ;
+		
+		
+		
+		
+		
+	}@
+	array s8 _state_chart_actions( 0, 4 ) = { 0, 1, 0, 1, 2, 2, 0, 1, 2, 0, 2, 2, 3, 4, 0 };
+	
+	array s8 _state_chart_key_offsets( 0, 5 ) = { 0, 0, 2, 5, 0 };
+	
+	array char _state_chart_trans_keys( 0, 57 ) = { u(48), u(57), u(10), u(48), u(57), u(43), u(45), u(48), u(57), u(0) };
+	
+	array s8 _state_chart_single_lengths( 0, 2 ) = { 0, 0, 1, 2, 0 };
+	
+	array s8 _state_chart_range_lengths( 0, 1 ) = { 0, 1, 1, 1, 0 };
+	
+	array s8 _state_chart_index_offsets( 0, 5 ) = { 0, 0, 2, 5, 0 };
+	
+	array s8 _state_chart_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _state_chart_trans_offsets( 0, 8 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 0 };
+	
+	array s8 _state_chart_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+	
+	array s8 _state_chart_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _state_chart_cond_targs( 0, 3 ) = { 2, 0, 3, 2, 0, 1, 1, 2, 0, 0 };
+	
+	array s8 _state_chart_cond_actions( 0, 11 ) = { 3, 0, 11, 3, 0, 1, 5, 8, 0, 0 };
+	
+	array s8 _state_chart_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _state_chart_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+	
+	array s8 _state_chart_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _state_chart_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int state_chart_start = 3;
+	value int state_chart_first_final = 3;
+	value int state_chart_error = 0;
+	
+	value int state_chart_en_main = 3;
+	
+	host( "working/atoi2_java.rl", 61 ) @{
+		int cs;
+		
+		void init()
+		{
+			value = 0;
+			neg = 0;
+		}@
+		{
+			cs = cast(int)state_chart_start;
+		}
+		host( "working/atoi2_java.rl", 68 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			String _s;
+		}@
+		{
+			int _klen;
+			uint _trans = 0;
+			uint _cond = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _ckeys;
+			int _cpc;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_keys = offset( _state_chart_trans_keys, _state_chart_key_offsets[cs] );
+					_trans = cast(uint)_state_chart_index_offsets[cs];
+					
+					_klen = cast(int)_state_chart_single_lengths[cs];
+					if ( _klen > 0 ) {
+						index char _lower;
+						index char _mid;
+						index char _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( TRUE ) {
+							if ( _upper < _lower )
+							break;
+							
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _state_chart_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _state_chart_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								goto _match;
+							}
+						}
+						_keys += _klen;
+						_trans += cast(uint)_klen;
+					}
+					
+					_klen = cast(int)_state_chart_range_lengths[cs];
+					if ( _klen > 0 ) {
+						index char _lower;
+						index char _mid;
+						index char _upper;
+						_lower = _keys;
+						_upper = _keys + (_klen<<1) - 2;
+						while ( TRUE ) {
+							if ( _upper < _lower )
+							break;
+							
+							_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+							if ( ( deref( data, p )) < deref( _state_chart_trans_keys, _mid ) )
+							_upper = _mid - 2;
+							else if ( ( deref( data, p )) > deref( _state_chart_trans_keys, _mid + 1 ) )
+							_lower = _mid + 2;
+							else {
+								_trans += cast(uint)((_mid - _keys)>>1);
+								goto _match;
+							}
+						}
+						_trans += cast(uint)_klen;
+					}
+					
+				}
+				label _match {
+					_ckeys = offset( _state_chart_cond_keys, _state_chart_trans_offsets[_trans] );
+					_klen = cast(int)_state_chart_trans_lengths[_trans];
+					_cond = cast(uint)_state_chart_trans_offsets[_trans];
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( TRUE ) {
+							if ( _upper < _lower )
+							break;
+							
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _state_chart_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _state_chart_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								goto _match_cond;
+							}
+						}
+						cs = 0;
+						goto _again;
+					}
+				}
+				label _match_cond {
+					cs = cast(int)_state_chart_cond_targs[_cond];
+					
+					if ( _state_chart_cond_actions[_cond] == 0 )
+					goto _again;
+					
+					_acts = offset( _state_chart_actions, _state_chart_cond_actions[_cond] );
+					_nacts = cast(uint)deref( _state_chart_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 )
+					{
+						switch ( deref( _state_chart_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/atoi2_java.rl", 15 ) ${neg = 0;
+									value = 0;
+								}$
+							}
+							case 1 {
+								host( "working/atoi2_java.rl", 19 ) ${neg = 1;
+								}$
+							}
+							case 2 {
+								host( "working/atoi2_java.rl", 22 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+									;
+								}$
+							}
+							case 3 {
+								host( "working/atoi2_java.rl", 26 ) ${if ( neg != 0 )
+									{
+										value = -1 * value;
+										
+									} 
+								}$
+							}
+							case 4 {
+								host( "working/atoi2_java.rl", 52 ) ${System.out.print( value );
+									System.out.print( "\n" );
+								}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+				}
+				label _again {
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/atoi2_java.rl", 79 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= state_chart_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"1\n",
+			"12\n",
+			"222222\n",
+			"+2123\n",
+			"213 3213\n",
+			"-12321\n",
+			"--123\n",
+			"-99\n",
+			" -3000\n",
+		};
+		
+		static final int inplen = 9;
+		
+		public static void main (String[] args)
+		{
+			atoi2_java machine = new atoi2_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

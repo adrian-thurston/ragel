@@ -1,0 +1,182 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+
+
+
+
+
+
+
+let _indep_trans_keys : int array = [|
+1; 0; 2; 3; 9; 9; 8; 8; 10; 10; 10; 10; 11; 11; 0; 0; 5; 9; 4; 8; 6; 10; 6; 10; 7; 11; 1; 0; 0 ; 
+|]
+let _indep_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 2; 2; 3; 3; 3; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 4; 1; 1; 5; 1; 1; 1; 6; 1; 1; 7; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 8; 1; 1; 9; 1; 1; 1; 10; 1; 1; 11; 0 ; 
+|]
+let _indep_index_offsets : int array = [|
+0; 0; 2; 3; 4; 5; 6; 7; 8; 13; 18; 23; 28; 33; 0 ; 
+|]
+let _indep_indicies : int array = [|
+0; 2; 3; 4; 5; 6; 7; 8; 9; 1; 1; 1; 9; 10; 1; 1; 1; 10; 11; 1; 1; 1; 11; 12; 1; 1; 1; 12; 7; 1; 1; 1; 7; 0 ; 
+|]
+let _indep_index_defaults : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0 ; 
+|]
+let _indep_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _indep_cond_targs : int array = [|
+2; 0; 8; 3; 4; 5; 6; 7; 13; 9; 10; 11; 12; 0 ; 
+|]
+let _indep_cond_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _indep_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _indep_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _indep_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _indep_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let indep_start  : int  = 1
+let indep_first_final  : int  = 13
+let indep_error  : int  = 0
+let indep_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := indep_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _indep_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 111 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _indep_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _indep_trans_keys.( _keys.contents+1  )&& _ic.contents>= _indep_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _indep_indicies.( _inds.contents+ ( _ic.contents- _indep_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _indep_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _indep_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _indep_cond_targs.(_trans.contents);
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= indep_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "1hello\n";
+exec "1HELLO\n";
+exec "1HeLLo\n";
+exec "2hello\n";
+exec "2HELLO\n";
+exec "2HeLLo\n";
+exec "3hello\n";
+exec "3HELLO\n";
+exec "3HeLLo\n";
+exec "4hello\n";
+exec "4HELLO\n";
+exec "4HeLLo\n";
+exec "5hello\n";
+exec "5HELLO\n";
+exec "5HeLLo\n";
+exec "6hello\n";
+exec "6HELLO\n";
+exec "6HeLLo\n";
+()
+;;
+

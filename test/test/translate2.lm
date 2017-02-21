@@ -1,0 +1,61 @@
+lex
+	ignore /space+/
+	literal `# `{ `}
+	token id2 /[a-zA-Z_]+/ 
+end
+
+def item2
+	[id2]
+|	[`{ item2* `}]
+
+def start2
+	[item2*]
+
+context ctx
+
+	lex
+		ignore /space+/
+		literal `* `( `) `!
+		token SEMI_NL /';\n'/
+		token id /[a-zA-Z_0-9]+/ 
+
+		token ddd /'...'/ {
+			print('translating\n')
+			input->pull( match_length )
+			input->push( make_token( typeid<id>, "dot" ) )
+			input->push( make_token( typeid<id>, "dot" ) )
+			input->push( make_token( typeid<id>, "dot" ) )
+		}
+	end
+
+	def item 
+		[id]
+	|	[`( item* `)]
+
+	def A [] {
+		print( 'A\n' )
+	}
+
+	def B [] {
+		print( 'B\n' )
+	}
+	
+
+	def start 
+		[A item* `!]
+	|	[B item* SEMI_NL]
+
+end # ctx
+
+CTX: ctx = new ctx()
+parse Input: ctx::start( CTX ) [ stdin ]
+print[ @Input ]
+
+##### IN #####
+a b c ( d1 ... d2 ) e f g ;
+##### EXP #####
+A
+translating
+B
+translating
+a b c ( d1 dotdotdot d2 ) e f g ;

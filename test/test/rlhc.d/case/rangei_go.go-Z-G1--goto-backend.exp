@@ -1,0 +1,220 @@
+package main
+import "fmt"
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _rangei_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _rangei_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _rangei_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _rangei_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var rangei_start  int  = 1
+var rangei_first_final  int  = 7
+var rangei_error  int  = 0
+var rangei_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(rangei_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch cs  {
+			case 1:
+			switch {
+				case ( data[p ]) > 90 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr0;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 65 :
+				{
+					goto ctr0;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch {
+				case ( data[p ]) > 90 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr2;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 65 :
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			switch {
+				case ( data[p ]) > 93 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr3;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 60 :
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch {
+				case ( data[p ]) > 90 :
+				{
+					if 94 <= ( data[p ]) && ( data[p ]) <= 125  {
+						{
+							goto ctr4;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 65 :
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			switch {
+				case ( data[p ]) < 86 :
+				{
+					if 65 <= ( data[p ]) && ( data[p ]) <= 69  {
+						{
+							goto ctr5;
+						}
+						
+					}
+				} 
+				case ( data[p ]) > 101 :
+				{
+					if 118 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr5;
+						}
+						
+					}
+				} 
+				default:
+				{
+					goto ctr5;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if 60 <= ( data[p ]) && ( data[p ]) <= 125  {
+				{
+					goto ctr6;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		ctr2: cs = 3;
+		goto _again;
+		ctr3: cs = 4;
+		goto _again;
+		ctr4: cs = 5;
+		goto _again;
+		ctr5: cs = 6;
+		goto _again;
+		ctr6: cs = 7;
+		goto _again;
+		
+		_again:
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= rangei_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"AaBbAa",
+	"Aa`bAa",
+	"AaB@Aa",
+	"AaBbMa",
+	"AaBbma",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

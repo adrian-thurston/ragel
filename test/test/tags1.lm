@@ -1,0 +1,92 @@
+context tags
+	# Open and close tags by rewriting to generic close tags. Won't work if
+	# interested in unclosed tags because a token can start as not close_id, but
+	# then become a close id during the course of parsing.
+
+	#
+	# Regular Definitions
+	#
+	rl rl_ws /[ \t\n\r\v]+/
+	rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
+
+	#
+	# Tokens
+	#
+
+	# Any single character can be a literal
+	lex
+		token BANG_NL /'!\n'/
+		token SEMI_NL /';\n'/
+
+		# Ignore whitespace.
+		ignore /rl_ws/
+
+		# Open and close id
+		token id /rl_id/
+	end
+
+	#
+	# Global Data
+	#
+
+	def tag_stack 
+		[id tag_stack]
+	|	[]
+
+	TS: tag_stack
+
+	#
+	# Productions
+	#
+
+	def open_tag 
+		[id]
+		{
+			match lhs [Id:id]
+			match TS [Top:id Rest:tag_stack]
+			if Id.data == Top.data {
+				reject
+			} else {
+				TS = construct tag_stack [Id TS]
+			}
+		}
+
+	def close_tag 
+		[id]
+		{
+			match lhs [Id: id]
+			match TS [Top: id Rest: tag_stack]
+
+			if Id.data == Top.data
+				TS = construct tag_stack [Rest]
+			else
+				reject
+		}
+
+	def tag 
+		[open_tag tag* close_tag]
+
+	def start
+		[tag* SEMI_NL]
+		{
+			print_xml( TS )
+			print_xml( lhs )
+			print( 'got structure\n' )
+		}
+
+	|	[id* SEMI_NL]
+		{
+			print_xml( TS )
+			print_xml( lhs )
+			print( 'failed\n' )
+		}
+end # tags
+
+Tags: tags = new tags()
+Tags->TS = cons tags::tag_stack ["sentinal"]
+parse tags::start(Tags)[stdin]
+##### IN #####
+y y a i i b c c m m n n b a;
+##### EXP #####
+<tags::tag_stack><tags::id>sentinal</tags::id><tags::tag_stack></tags::tag_stack></tags::tag_stack><tags::start><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>y</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>y</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>a</tags::id></tags::open_tag><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>i</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>i</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>b</tags::id></tags::open_tag><tags::_repeat_tag><tags::tag><tags::open_tag><tags::id>c</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>c</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>m</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>m</tags::id></tags::close_tag></tags::tag><tags::tag><tags::open_tag><tags::id>n</tags::id></tags::open_tag><tags::_repeat_tag></tags::_repeat_tag><tags::close_tag><tags::id>n</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::close_tag><tags::id>b</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::close_tag><tags::id>a</tags::id></tags::close_tag></tags::tag></tags::_repeat_tag><tags::SEMI_NL>;
+</tags::SEMI_NL></tags::start>got structure

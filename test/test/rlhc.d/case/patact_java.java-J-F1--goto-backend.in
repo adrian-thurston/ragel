@@ -1,0 +1,314 @@
+host( "working/patact_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class patact_java
+	{
+		char comm ;
+		int top ;
+		int stack [] = new int[32];
+		int
+		ts ;
+		int
+		te ;
+		int act ;
+		int value ;
+		
+		
+		
+		
+		
+	}@
+	array char _patact_trans_keys( 0, 11 ) = { u(1), u(0), u(8), u(8), u(11), u(11), u(9), u(9), u(10), u(10), u(8), u(8), u(11), u(11), u(9), u(9), u(10), u(10), u(8), u(8), u(11), u(11), u(9), u(9), u(10), u(10), u(8), u(8), u(11), u(11), u(9), u(9), u(10), u(10), u(0), u(11), u(2), u(5), u(2), u(5), u(2), u(11), u(0), u(11), u(4), u(5), u(7), u(11), u(0), u(11), u(2), u(5), u(2), u(5), u(2), u(11), u(6), u(6), u(0) };
+	
+	array s8 _patact_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 7, 8, 7, 7, 9, 7, 7, 10, 7, 7, 11, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0 };
+	
+	array s8 _patact_index_offsets( 0, 95 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 32, 36, 46, 58, 60, 65, 77, 81, 85, 95, 0 };
+	
+	array s8 _patact_indicies( 0, 47 ) = { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0 };
+	
+	array s8 _patact_index_defaults( 0, 45 ) = { 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 21, 0, 28, 30, 21, 35, 36, 21, 10, 43, 45, 21, 0 };
+	
+	array s8 _patact_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _patact_cond_targs( 0, 28 ) = { 17, 2, 3, 4, 17, 17, 6, 7, 8, 17, 24, 10, 11, 12, 24, 24, 14, 15, 16, 24, 17, 0, 17, 18, 19, 17, 20, 1, 17, 18, 17, 5, 21, 22, 23, 21, 21, 24, 24, 25, 26, 27, 9, 24, 25, 24, 13, 28, 0 };
+	
+	array s8 _patact_cond_actions( 0, 28 ) = { 1, 0, 0, 0, 2, 3, 0, 0, 0, 4, 5, 0, 0, 0, 6, 7, 0, 0, 0, 8, 11, 0, 12, 13, 13, 14, 15, 0, 16, 17, 18, 0, 19, 0, 0, 20, 21, 22, 23, 24, 24, 15, 0, 25, 26, 27, 0, 28, 0 };
+	
+	array s8 _patact_to_state_actions( 0, 9 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 9, 0 };
+	
+	array s8 _patact_from_state_actions( 0, 10 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 10, 0, 0, 0, 10, 0 };
+	
+	array s8 _patact_eof_trans( 0, 46 ) = { 0, 1, 1, 1, 1, 6, 6, 6, 6, 11, 11, 11, 11, 16, 16, 16, 16, 0, 1, 29, 31, 0, 36, 37, 0, 11, 44, 46, 0, 0 };
+	
+	array s8 _patact_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _patact_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _patact_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _patact_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int patact_start = 17;
+	value int patact_first_final = 17;
+	value int patact_error = 0;
+	
+	value int patact_en_other = 21;
+	value int patact_en_exec_test = 24;
+	value int patact_en_semi = 28;
+	value int patact_en_main = 17;
+	
+	host( "working/patact_java.rl", 75 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)patact_start;
+			ts = nil;
+			te = nil;
+			act = 0;
+		}
+		host( "working/patact_java.rl", 80 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			int eof = len;
+			String _s;
+		}@
+		{
+			int _trans = 0;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					switch ( _patact_from_state_actions[cs] ) {
+						case 10 {
+							host( "NONE", 1 ) ${${ts = p;}$}$
+						}
+					}
+					
+					_keys = offset( _patact_trans_keys, (cs<<1) );
+					_inds = offset( _patact_indicies, _patact_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_patact_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _patact_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _patact_trans_keys, _keys ) )
+						_trans = cast(int)deref( _patact_indicies, _inds + cast(int)( _ic - cast(int)deref( _patact_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_patact_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_patact_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_patact_cond_targs[_trans];
+					
+					if ( _patact_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					switch ( _patact_cond_actions[_trans] ) {
+						case 15 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$
+						}
+						case 19 {
+							host( "working/patact_java.rl", 27 ) ${${te = p+1;host( "working/patact_java.rl", 27 ) ${System.out.print( "space\n" );
+									}$}$}$
+						}
+						case 21 {
+							host( "working/patact_java.rl", 23 ) ${${te = p;p = p - 1;host( "working/patact_java.rl", 23 ) ${System.out.print( "word\n" );
+									}$}$}$
+						}
+						case 20 {
+							host( "working/patact_java.rl", 25 ) ${${te = p;p = p - 1;host( "working/patact_java.rl", 25 ) ${System.out.print( "num\n" );
+									}$}$}$
+						}
+						case 8 {
+							host( "working/patact_java.rl", 34 ) ${${te = p+1;host( "working/patact_java.rl", 34 ) ${System.out.print( "word (c/lbh)\n" );
+									}$}$}$
+						}
+						case 22 {
+							host( "working/patact_java.rl", 36 ) ${${te = p+1;host( "working/patact_java.rl", 36 ) ${System.out.print( "space\n" );
+									}$}$}$
+						}
+						case 6 {
+							host( "working/patact_java.rl", 42 ) ${${te = p+1;host( "working/patact_java.rl", 42 ) ${System.out.print( "num (c/switch)\n" );
+									}$}$}$
+						}
+						case 23 {
+							host( "working/patact_java.rl", 44 ) ${${te = p+1;}$}$
+						}
+						case 27 {
+							host( "working/patact_java.rl", 32 ) ${${te = p;p = p - 1;host( "working/patact_java.rl", 32 ) ${System.out.print( "word (w/lbh)\n" );
+										${p = (( te-1))-1;}$
+										${cs = 21; goto _again;}$}$}$}$
+						}
+						case 25 {
+							host( "working/patact_java.rl", 40 ) ${${te = p;p = p - 1;host( "working/patact_java.rl", 40 ) ${System.out.print( "num (w/switch)\n" );
+										${p = (( te-1))-1;}$
+										${cs = 21; goto _again;}$}$}$}$
+						}
+						case 7 {
+							host( "working/patact_java.rl", 32 ) ${${p = ((te))-1;
+									host( "working/patact_java.rl", 32 ) ${System.out.print( "word (w/lbh)\n" );
+										${p = (( te-1))-1;}$
+										${cs = 21; goto _again;}$}$}$}$
+						}
+						case 5 {
+							host( "NONE", 1 ) ${${switch( act ) {
+										case 7 {
+											p = ((te))-1;
+											host( "working/patact_java.rl", 38 ) ${System.out.print( "num (w/switch)\n" );
+											}$ }
+										case 8 {
+											p = ((te))-1;
+											host( "working/patact_java.rl", 40 ) ${System.out.print( "num (w/switch)\n" );
+												${p = (( te-1))-1;}$
+												${cs = 21; goto _again;}$}$ }
+									}}$
+							}$
+						}
+						case 28 {
+							host( "working/patact_java.rl", 48 ) ${${te = p+1;host( "working/patact_java.rl", 48 ) ${System.out.print( "in semi\n" );
+										${cs = 17; goto _again;}$}$}$}$
+						}
+						case 4 {
+							host( "working/patact_java.rl", 55 ) ${${te = p+1;host( "working/patact_java.rl", 55 ) ${System.out.print( "word (c/lbh)\n" );
+									}$}$}$
+						}
+						case 11 {
+							host( "working/patact_java.rl", 57 ) ${${te = p+1;host( "working/patact_java.rl", 57 ) ${System.out.print( "space\n" );
+									}$}$}$
+						}
+						case 2 {
+							host( "working/patact_java.rl", 63 ) ${${te = p+1;host( "working/patact_java.rl", 63 ) ${System.out.print( "num (c/switch)\n" );
+									}$}$}$
+						}
+						case 14 {
+							host( "working/patact_java.rl", 65 ) ${${te = p+1;host( "working/patact_java.rl", 65 ) ${System.out.print( "going to semi\n" );
+										${p = p - 1; }$${cs = 28; goto _again;}$}$}$}$
+						}
+						case 12 {
+							host( "working/patact_java.rl", 67 ) ${${te = p+1;host( "working/patact_java.rl", 67 ) ${System.out.print( "immdiate\n" );
+										${cs = 24; goto _again;}$}$}$}$
+						}
+						case 18 {
+							host( "working/patact_java.rl", 53 ) ${${te = p;p = p - 1;host( "working/patact_java.rl", 53 ) ${System.out.print( "word (w/lbh)\n" );
+										${p = p - 1; }$${cs = 21; goto _again;}$}$}$}$
+						}
+						case 16 {
+							host( "working/patact_java.rl", 61 ) ${${te = p;p = p - 1;host( "working/patact_java.rl", 61 ) ${System.out.print( "num (w/switch)\n" );
+										${p = p - 1; }$${cs = 21; goto _again;}$}$}$}$
+						}
+						case 3 {
+							host( "working/patact_java.rl", 53 ) ${${p = ((te))-1;
+									host( "working/patact_java.rl", 53 ) ${System.out.print( "word (w/lbh)\n" );
+										${p = p - 1; }$${cs = 21; goto _again;}$}$}$}$
+						}
+						case 1 {
+							host( "NONE", 1 ) ${${switch( act ) {
+										case 15 {
+											p = ((te))-1;
+											host( "working/patact_java.rl", 59 ) ${System.out.print( "num (w/switch)\n" );
+											}$ }
+										case 16 {
+											p = ((te))-1;
+											host( "working/patact_java.rl", 61 ) ${System.out.print( "num (w/switch)\n" );
+												${p = p - 1; }$${cs = 21; goto _again;}$}$ }
+									}}$
+							}$
+						}
+						case 26 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/patact_java.rl", 38 ) ${${act = 7;}$}$
+						}
+						case 24 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/patact_java.rl", 40 ) ${${act = 8;}$}$
+						}
+						case 17 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/patact_java.rl", 59 ) ${${act = 15;}$}$
+						}
+						case 13 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/patact_java.rl", 61 ) ${${act = 16;}$}$
+						}
+					}
+					
+					
+				}
+				label _again {
+					switch ( _patact_to_state_actions[cs] ) {
+						case 9 {
+							host( "NONE", 1 ) ${${ts = nil;}$}$
+						}
+					}
+					
+					if ( cs == 0 )
+					goto _out;
+					p+= 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+					if ( p == eof )
+					{
+						if ( _patact_eof_trans[cs] > 0 ) {
+							_trans = cast(int)_patact_eof_trans[cs] - 1;
+							goto _match_cond;
+						}
+					}
+					
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/patact_java.rl", 92 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= patact_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"abcd foix\n",
+			"abcd\nanother\n",
+			"123 foix\n",
+			"!abcd foix\n",
+			"!abcd\nanother\n",
+			"!123 foix\n",
+			";",
+		};
+		
+		static final int inplen = 7;
+		
+		public static void main (String[] args)
+		{
+			patact_java machine = new patact_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

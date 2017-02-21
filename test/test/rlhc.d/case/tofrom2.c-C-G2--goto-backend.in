@@ -1,0 +1,226 @@
+host( "working/tofrom2.rl", 1 ) @{/*
+	* @@LANG: c
+	* 
+	* Tests to/from state actions, for comparison against ASM version.
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	int neg ;
+	int value ;
+	
+	
+	
+	
+}@
+value int atoi_start = 1;
+value int atoi_first_final = 4;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+array s8 _atoi_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/tofrom2.rl", 53 ) @{
+	int cs;
+	
+	void init()
+	{
+		value = 0;
+		neg = 0;
+	}@
+	{
+		cs = cast(int)atoi_start;
+	}
+	host( "working/tofrom2.rl", 60 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( cs )
+		{
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+		}
+		goto st_out;
+		host( "working/tofrom2.rl", 35 ) ${
+			printf( "to on %d\n", (int)*p );
+		}$
+		st_case_1:
+		host( "working/tofrom2.rl", 39 ) ${
+			printf( "from on %d\n", (int)*p );
+		}$
+		switch( ( deref( data, p )) ) {
+			case 43: {
+				goto ctr0;
+			}
+			case 45: {
+				goto ctr2;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr3;
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr0:
+		host( "working/tofrom2.rl", 16 ) ${neg = 0;
+			value = 0;
+		}$
+		
+		goto st2;
+		ctr2:
+		host( "working/tofrom2.rl", 16 ) ${neg = 0;
+			value = 0;
+		}$
+		host( "working/tofrom2.rl", 19 ) ${neg = 1;
+		}$
+		
+		goto st2;
+		st2:
+		host( "working/tofrom2.rl", 35 ) ${
+			printf( "to on %d\n", (int)*p );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		host( "working/tofrom2.rl", 39 ) ${
+			printf( "from on %d\n", (int)*p );
+		}$
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr4;
+		}
+		{
+			goto st0;
+		}
+		ctr3:
+		host( "working/tofrom2.rl", 16 ) ${neg = 0;
+			value = 0;
+		}$
+		host( "working/tofrom2.rl", 21 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+			;
+		}$
+		
+		goto st3;
+		ctr4:
+		host( "working/tofrom2.rl", 21 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+			;
+		}$
+		
+		goto st3;
+		st3:
+		host( "working/tofrom2.rl", 35 ) ${
+			printf( "to on %d\n", (int)*p );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		host( "working/tofrom2.rl", 39 ) ${
+			printf( "from on %d\n", (int)*p );
+		}$
+		if ( ( deref( data, p )) == 10 ) {
+			goto ctr5;
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr4;
+		}
+		{
+			goto st0;
+		}
+		ctr5:
+		host( "working/tofrom2.rl", 24 ) ${
+			if ( neg != 0 ) {
+				value = -1 * value;
+			} 
+		}$
+		host( "working/tofrom2.rl", 30 ) ${
+			printf( "%d", value );
+			printf( "%s", "\n" );
+		}$
+		
+		goto st4;
+		st4:
+		host( "working/tofrom2.rl", 35 ) ${
+			printf( "to on %d\n", (int)*p );
+		}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		host( "working/tofrom2.rl", 39 ) ${
+			printf( "from on %d\n", (int)*p );
+		}$
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/tofrom2.rl", 67 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs < atoi_first_final )
+		printf( "-> FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"1\n",
+		"12\n",
+		"222222\n",
+		"+2123\n",
+		"-99\n",
+		"-12321\n",
+		"213 3213\n",
+		"--123\n",
+		" -3000\n",
+	};
+	
+	int inplen = 9;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

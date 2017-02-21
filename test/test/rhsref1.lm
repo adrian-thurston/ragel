@@ -1,0 +1,116 @@
+lex
+	literal `var `if `then `else `while `do `for `read `write
+			`end `to `goto
+	literal `:= `!= `; `+ `- `* `/ `= `( `) `:
+
+	ignore /'//' [^\n]* '\n'/
+	ignore /[\n\t ]+/
+	token id /[a-zA-Z_]+/
+	token integernumber /[0-9]+/
+	token stringlit /'"' [^"]* '"'/
+end
+
+def program
+	[statement*]
+
+def statement
+	[declaration]
+|	[assignment_statement]
+|	[if_statement]
+|	[while_statement]
+|	[do_statement]
+|	[for_statement]
+|	[read_statement]
+|	[write_statement]
+|	[labelled_statement]
+|	[goto_statement]
+
+def declaration
+	[`var id `;]
+
+def assignment_statement
+	[id `:= expression `;]
+
+def if_statement
+	[`if expression `then statement* opt_else_statement `end]
+
+def opt_else_statement
+	[`else statement*]
+|	[]
+
+def while_statement
+	[`while expression `do statement* `end]
+
+def do_statement
+	[`do statement* `while expression `;]
+
+def for_statement
+	[`for id `:= expression `to expression `do statement* `end]
+
+def read_statement
+	[`read id `;]
+
+def write_statement
+	[`write expression `;]
+
+def expression
+	[Term: term]
+|	[expression eqop Term: term]
+
+def eqop [`=] | [`!=]
+
+def term
+	[Factor: factor]
+|	[term addop Factor: factor]
+
+def addop [`+] | [`-]
+
+def factor
+	[Primary: primary]
+|	[factor mulop Primary: primary]
+
+def mulop [`*] | [`/]
+
+def primary
+	[id]
+|	[lit]
+|	[`( expression `)]
+
+def lit
+	[integernumber]
+|	[stringlit]
+
+def labelled_statement
+	[id `: statement] 
+
+def goto_statement
+	[`goto id `;]
+
+parse P: program[stdin]
+
+for E: expression in P {
+	print( ^(E.Term.Factor.Primary), '\n' )
+}
+
+##### IN #####
+
+var a;
+a := 1;
+
+head:
+
+a := a + 1;
+c := d;
+
+if a = 10 then
+	goto head;
+end
+
+hi := there;
+##### EXP #####
+1
+1
+d
+10
+a
+there

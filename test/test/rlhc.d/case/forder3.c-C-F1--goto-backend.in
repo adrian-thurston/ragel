@@ -1,0 +1,171 @@
+host( "working/forder3.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct forder
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array char _forder_trans_keys( 0, 3 ) = { 1, 0, 0, 3, 2, 2, 0, 3, 0, 3, 0, 2, 0, 3, 0, 3, 0, 3, 0, 2, 0, 2, 1, 0, 0 };
+
+array s8 _forder_char_class( 0, 3 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 };
+
+array s8 _forder_index_offsets( 0, 34 ) = { 0, 0, 4, 5, 9, 13, 16, 20, 24, 28, 31, 34, 0 };
+
+array s8 _forder_indicies( 0, 16 ) = { 0, 1, 2, 3, 4, 5, 1, 6, 7, 8, 1, 9, 10, 8, 1, 9, 8, 1, 9, 11, 8, 1, 9, 12, 13, 1, 14, 15, 8, 1, 16, 13, 1, 14, 0 };
+
+array s8 _forder_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _forder_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _forder_cond_targs( 0, 11 ) = { 11, 0, 2, 6, 3, 11, 2, 4, 11, 5, 4, 7, 8, 11, 9, 6, 10, 0 };
+
+array s8 _forder_cond_actions( 0, 7 ) = { 1, 0, 2, 3, 0, 4, 0, 5, 6, 0, 0, 0, 0, 7, 0, 0, 0, 0 };
+
+array s8 _forder_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _forder_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _forder_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _forder_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int forder_start = 1;
+value int forder_first_final = 11;
+value int forder_error = 0;
+
+value int forder_en_main = 1;
+
+host( "working/forder3.rl", 31 ) @{
+	
+	void forder_init( struct forder *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)forder_start;
+	}
+	host( "working/forder3.rl", 35 ) @{
+	}
+	
+	void forder_execute( struct forder *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _forder_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
+				_inds = offset( _forder_indicies, _forder_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				
+				if ( ( deref( data, p )) <= 98 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_forder_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _forder_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _forder_trans_keys, _keys ) )
+					_trans = cast(int)deref( _forder_indicies, _inds + cast(int)( _ic - cast(int)deref( _forder_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_forder_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+				}
+				else {
+					_trans = cast(int)_forder_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				host( "-", 1 ) ={ fsm->cs}= = cast(int)_forder_cond_targs[_trans];
+				
+				if ( _forder_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _forder_cond_actions[_trans] ) {
+					case 6 {
+						host( "working/forder3.rl", 24 ) ${printf("accept m1\n");}$
+					}
+					case 4 {
+						host( "working/forder3.rl", 26 ) ${printf("accept m2\n");}$
+					}
+					case 2 {
+						host( "working/forder3.rl", 18 ) ${printf("enter m1 aa\n");}$	host( "working/forder3.rl", 26 ) ${printf("enter m2\n");}$
+					}
+					case 5 {
+						host( "working/forder3.rl", 18 ) ${printf("leave m1 aa\n");}$	host( "working/forder3.rl", 19 ) ${printf("through m1 b\n");}$
+					}
+					case 7 {
+						host( "working/forder3.rl", 24 ) ${printf("accept m1\n");}$	host( "working/forder3.rl", 26 ) ${printf("accept m2\n");}$
+					}
+					case 1 {
+						host( "working/forder3.rl", 25 ) ${printf("enter m2\n");}$	host( "working/forder3.rl", 26 ) ${printf("enter m2\n");}$	host( "working/forder3.rl", 26 ) ${printf("accept m2\n");}$
+					}
+					case 3 {
+						host( "working/forder3.rl", 17 ) ${printf("enter m1 aa\n");}$	host( "working/forder3.rl", 18 ) ${printf("enter m1 aa\n");}$	host( "working/forder3.rl", 18 ) ${printf("leave m1 aa\n");}$	host( "working/forder3.rl", 19 ) ${printf("through m1 b\n");}$	host( "working/forder3.rl", 26 ) ${printf("enter m2\n");}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/forder3.rl", 43 ) @{
+	}
+	
+	int forder_finish( struct forder *fsm )
+	{
+		if ( fsm->cs == forder_error )
+		return -1;
+		if ( fsm->cs >= forder_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct forder fsm;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		forder_init( &fsm );
+		forder_execute( &fsm, buf, len );
+		if ( forder_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	int main()
+	{
+		test( "aaaaaabbbaa\n" );
+		test( "\n" );
+		test( "bbbbbbaaaaaaa\n" );
+		test( "bbbbbbaaaaaa\n" );
+		test( "aaaaa\n" );
+		
+		return 0;
+	}
+	
+}@

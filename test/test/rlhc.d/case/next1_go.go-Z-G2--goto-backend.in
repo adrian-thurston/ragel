@@ -1,0 +1,377 @@
+host( "working/next1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var target  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+value int next1_start = 1;
+value int next1_first_final = 14;
+value int next1_error = 0;
+
+value int next1_en_unused = 2;
+value int next1_en_one = 8;
+value int next1_en_two = 11;
+value int next1_en_main = 1;
+
+array s8 _next1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _next1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _next1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/next1_go.rl", 42 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)next1_start;
+	}
+	host( "working/next1_go.rl", 45 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		goto _resume;
+		
+		_again:
+		switch ( cs ) {
+			case 1: goto st1;
+			case 0: goto st0;
+			case 14: goto st14;
+			case 2: goto st2;
+			case 3: goto st3;
+			case 4: goto st4;
+			case 5: goto st5;
+			case 6: goto st6;
+			case 7: goto st7;
+			case 15: goto st15;
+			case 8: goto st8;
+			case 9: goto st9;
+			case 10: goto st10;
+			case 16: goto st16;
+			case 11: goto st11;
+			case 12: goto st12;
+			case 13: goto st13;
+			case 17: goto st17;
+		}
+		
+		_resume:
+		switch ( cs )
+		{
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 14:
+			goto st_case_14;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 15:
+			goto st_case_15;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 16:
+			goto st_case_16;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 17:
+			goto st_case_17;
+		}
+		goto st_out;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st14;
+			}
+			case 49: {
+				goto ctr2;
+			}
+			case 50: {
+				goto ctr3;
+			}
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr2:
+		cs = 14;
+		host( "working/next1_go.rl", 27 ) ${target = 8;
+			cs = (target); 
+		}$
+		
+		goto _again;
+		ctr3:
+		cs = 14;
+		host( "working/next1_go.rl", 30 ) ${target = 11;
+			cs = (target); 
+		}$
+		
+		goto _again;
+		st14:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof14;
+		st_case_14:
+		{
+			goto st0;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) == 117 ) {
+			goto st3;
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		if ( ( deref( data, p )) == 110 ) {
+			goto st4;
+		}
+		{
+			goto st0;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		if ( ( deref( data, p )) == 117 ) {
+			goto st5;
+		}
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		if ( ( deref( data, p )) == 115 ) {
+			goto st6;
+		}
+		{
+			goto st0;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		if ( ( deref( data, p )) == 101 ) {
+			goto st7;
+		}
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		if ( ( deref( data, p )) == 100 ) {
+			goto st15;
+		}
+		{
+			goto st0;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof15;
+		st_case_15:
+		{
+			goto st0;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof8;
+		st_case_8:
+		if ( ( deref( data, p )) == 111 ) {
+			goto st9;
+		}
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof9;
+		st_case_9:
+		if ( ( deref( data, p )) == 110 ) {
+			goto st10;
+		}
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof10;
+		st_case_10:
+		if ( ( deref( data, p )) == 101 ) {
+			goto ctr12;
+		}
+		{
+			goto st0;
+		}
+		ctr12:
+		cs = 16;
+		host( "working/next1_go.rl", 16 ) ${fmt.Print( "one\n" );target = 1;
+			cs = (target);
+			
+		}$
+		
+		goto _again;
+		st16:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof16;
+		st_case_16:
+		{
+			goto st0;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof11;
+		st_case_11:
+		if ( ( deref( data, p )) == 116 ) {
+			goto st12;
+		}
+		{
+			goto st0;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof12;
+		st_case_12:
+		if ( ( deref( data, p )) == 119 ) {
+			goto st13;
+		}
+		{
+			goto st0;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof13;
+		st_case_13:
+		if ( ( deref( data, p )) == 111 ) {
+			goto ctr15;
+		}
+		{
+			goto st0;
+		}
+		ctr15:
+		cs = 17;
+		host( "working/next1_go.rl", 21 ) ${fmt.Print( "two\n" );target = 1;
+			cs = (target);
+			
+		}$
+		
+		goto _again;
+		st17:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof17;
+		st_case_17:
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof1: cs = 1; goto _test_eof; 
+		_test_eof14: cs = 14; goto _test_eof; 
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof5: cs = 5; goto _test_eof; 
+		_test_eof6: cs = 6; goto _test_eof; 
+		_test_eof7: cs = 7; goto _test_eof; 
+		_test_eof15: cs = 15; goto _test_eof; 
+		_test_eof8: cs = 8; goto _test_eof; 
+		_test_eof9: cs = 9; goto _test_eof; 
+		_test_eof10: cs = 10; goto _test_eof; 
+		_test_eof16: cs = 16; goto _test_eof; 
+		_test_eof11: cs = 11; goto _test_eof; 
+		_test_eof12: cs = 12; goto _test_eof; 
+		_test_eof13: cs = 13; goto _test_eof; 
+		_test_eof17: cs = 17; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/next1_go.rl", 51 ) @{
+	}
+	func finish() {
+		if cs >= next1_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1one2two1one\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

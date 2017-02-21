@@ -1,0 +1,97 @@
+
+#
+# Regular Definitions
+#
+
+rl rl_ws /[ \t\n\r\v]+/
+rl rl_id /[a-zA-Z_][a-zA-Z0-9_]*/
+rl rl_num /[0-9]+/
+
+#
+# Tokens
+#
+
+lex
+	# Ignore whitespace.
+	ignore /rl_ws/
+
+	# Tokens. 
+	token id /rl_id/
+	token number /rl_num/
+end
+
+#
+# Productions
+#
+
+# Arbitrary item.
+def item
+	[id]
+|	[number]
+
+# List production one. The condition stops the 
+# greedy list when it has gone too far.
+def count_items
+	target: int
+	count: int
+
+	[count_items item]
+	{
+		# Pass up the data
+		lhs.target = r1.target
+		lhs.count = r1.count + 1
+
+		if lhs.count > lhs.target {
+			reject
+		}
+	}
+
+	# List production two, the base.
+|	[number]
+	{
+		match lhs [Number: number]
+		lhs.target = Number.data.atoi()
+		lhs.count = 0
+	}
+		
+
+# Wrapper which prevents short lists from getting through if the parser
+# encounters an error and needs to backtrack over counted list.
+def counted_list
+	[count_items]
+	{
+		if r1.count < r1.target {
+			reject
+		}
+	}
+
+def start 
+	[counted_list*]
+	{
+		for List: counted_list in lhs {
+			match List [CountItems:count_items]
+			print( 'num items: ', CountItems.target, '\n' )
+
+			i: int = 1
+			for Item:item in CountItems {
+				print( '  item ', i, ': ', ^Item, '\n' )
+				i = i + 1
+			}
+		}
+	}
+
+parse start[ stdin ]
+##### IN #####
+3 1 b c 1 1 0 3 a b c
+##### EXP #####
+num items: 3
+  item 1: 1
+  item 2: b
+  item 3: c
+num items: 1
+  item 1: 1
+num items: 0
+num items: 3
+  item 1: a
+  item 2: b
+  item 3: c

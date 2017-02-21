@@ -1,0 +1,351 @@
+#include <string.h>
+#include <stdio.h>
+
+char comm;
+int top;
+int stack [32];
+
+
+
+int cs;
+char *ts, *te;
+int act;
+
+static const char  _fnext_actions [] = { 0, 1, 0, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 2, 1, 2, 2, 3, 4, 0 ,  };
+static const char  _fnext_to_state_actions [] = { 0, 7, 7, 7, 0, 7, 0, 0, 0, 7, 0, 0 ,  };
+static const char  _fnext_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0 ,  };
+static const char  _fnext_nfa_targs [] = { 0, 0 ,  };
+static const char  _fnext_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _fnext_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _fnext_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  fnext_start  = 1;
+static const int  fnext_first_final  = 6;
+static const int  fnext_error  = 0;
+static const int  fnext_en_main  = 1;
+static const int  fnext_en_e  = 2;
+static const int  fnext_en_l  = 3;
+static const int  fnext_en_o  = 9;
+static const int  fnext_en_nl  = 5;
+void init()
+{
+
+	{
+		cs = ( int ) fnext_start;
+		ts = 0;
+		te = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	while ( cs != fnext_error && p < pe ) {
+		printf( "%c\n", *p );
+		
+		{
+			const char  *_acts;
+			unsigned int _nacts;
+			
+			int _nbreak;
+			if ( p == pe  )
+			goto _test_eof;
+			
+			if ( cs == 0  )
+			goto _out;
+			
+			_resume:
+			_acts = _fnext_actions + _fnext_from_state_actions[cs];
+			_nacts = ( unsigned int  ) (*( _acts  ))
+			;
+			_acts += 1;
+			while ( _nacts > 0  )
+			{
+				switch ( (*( _acts  ))
+				) {
+					case 7:
+					{
+						{
+							ts = p;
+							
+						}
+						
+					}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+			switch ( cs  ) {
+				case 1:
+				if ( ((*( p  ))
+				)== 104  )
+				{
+					goto ctr0;
+				}
+				
+				{
+					goto ctr1;
+				}
+				case 0:
+				goto _out;
+				case 6:
+				{
+					goto ctr1;
+				}
+				case 2:
+				if ( ((*( p  ))
+				)== 101  )
+				{
+					goto ctr2;
+				}
+				
+				{
+					goto ctr1;
+				}
+				case 7:
+				{
+					goto ctr1;
+				}
+				case 3:
+				if ( ((*( p  ))
+				)== 108  )
+				{
+					goto ctr3;
+				}
+				
+				{
+					goto ctr1;
+				}
+				case 4:
+				if ( ((*( p  ))
+				)== 108  )
+				{
+					goto ctr4;
+				}
+				
+				{
+					goto ctr1;
+				}
+				case 8:
+				{
+					goto ctr1;
+				}
+				case 5:
+				if ( ((*( p  ))
+				)== 10  )
+				{
+					goto ctr5;
+				}
+				
+				{
+					goto ctr1;
+				}
+				case 10:
+				{
+					goto ctr1;
+				}
+				case 9:
+				if ( ((*( p  ))
+				)== 111  )
+				{
+					goto ctr6;
+				}
+				
+				{
+					goto ctr1;
+				}
+				
+			}
+			ctr1: cs = 0;
+			goto _again;
+			ctr3: cs = 4;
+			goto f3;
+			ctr0: cs = 6;
+			goto f1;
+			ctr2: cs = 7;
+			goto f2;
+			ctr4: cs = 8;
+			goto f4;
+			ctr6: cs = 9;
+			goto f7;
+			ctr5: cs = 10;
+			goto f5;
+			
+			f1: _acts = _fnext_actions + 1 ;
+			goto execFuncs;
+			f3: _acts = _fnext_actions + 3 ;
+			goto execFuncs;
+			f5: _acts = _fnext_actions + 5 ;
+			goto execFuncs;
+			f7: _acts = _fnext_actions + 11 ;
+			goto execFuncs;
+			f2: _acts = _fnext_actions + 13 ;
+			goto execFuncs;
+			f4: _acts = _fnext_actions + 16 ;
+			goto execFuncs;
+			
+			execFuncs:
+			_nbreak = 0;
+			_nacts = ( unsigned int  ) (*( _acts  ))
+			;
+			_acts += 1;
+			while ( _nacts > 0  )
+			{
+				switch ( (*( _acts  ))
+				) {
+					case 0:
+					{
+						cs = 2;{
+							p += 1;
+							_nbreak = 1;
+							
+						}
+						
+					}
+					
+					break;
+					case 1:
+					{
+						cs = 3;
+					}
+					
+					break;
+					case 2:
+					{
+						{
+							p += 1;
+							_nbreak = 1;
+							
+						}
+						
+					}
+					
+					break;
+					case 3:
+					{
+						cs = 9;
+					}
+					
+					break;
+					case 4:
+					{
+						{
+							p += 1;
+							_nbreak = 1;
+							
+						}
+						
+					}
+					
+					break;
+					case 5:
+					{
+						{
+							p += 1;
+							_nbreak = 1;
+							
+						}
+						printf("ACCEPT\n"); 
+					}
+					
+					break;
+					case 8:
+					{
+						{
+							te = p+1;
+							{
+								cs = 5;{
+									p += 1;
+									_nbreak = 1;
+									
+								}
+								
+							}
+							
+						}
+						
+					}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+			if ( _nbreak == 1  )
+			goto _out;
+			
+			goto _again;
+			
+			_again:
+			_acts = _fnext_actions + _fnext_to_state_actions[cs];
+			_nacts = ( unsigned int  ) (*( _acts  ))
+			;
+			_acts += 1;
+			while ( _nacts > 0  )
+			{
+				switch ( (*( _acts  ))
+				) {
+					case 6:
+					{
+						{
+							ts = 0;
+							
+						}
+						
+					}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+			if ( cs == 0  )
+			goto _out;
+			
+			p += 1;
+			if ( p != pe  )
+			goto _resume;
+			
+			_test_eof: {}
+			_out: {}
+		}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= fnext_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"hello\n"
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

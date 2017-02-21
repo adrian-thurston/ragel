@@ -1,0 +1,2030 @@
+#include <iostream>
+#include <string.h>
+
+using std::cout;
+using std::endl;
+
+
+
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 13;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+void test( const char *str )
+{
+	int cs = foo_start;
+	const char *p = str;
+	const char *pe = str + strlen( str );
+	int match = 0;
+	
+	long q_4 = 0, q_5 = 0, q_6 = 0;
+	
+	cout << "run:" << endl;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 13:
+			goto st_case_13;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			
+		}
+		goto st_out;
+		st_case_1:
+		if ( ((*( p  ))
+		)== 60  )
+		{
+			goto st2;
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		if ( ((*( p  ))
+		)== 47  )
+		{
+			goto st3;
+		}
+		
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( ((*( p  ))
+		)== 115  )
+		{
+			goto st4;
+		}
+		
+		{
+			goto st0;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		if ( ((*( p  ))
+		)== 116  )
+		{
+			goto st5;
+		}
+		
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		if ( ((*( p  ))
+		)== 121  )
+		{
+			goto st6;
+		}
+		
+		{
+			goto st0;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		if ( ((*( p  ))
+		)== 108  )
+		{
+			goto st7;
+		}
+		
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		if ( ((*( p  ))
+		)== 101  )
+		{
+			goto st8;
+		}
+		
+		{
+			goto st0;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( ((*( p  ))
+		)== 62  )
+		{
+			goto st9;
+		}
+		
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		if ( ((*( p  ))
+		)== 60  )
+		{
+			goto st10;
+		}
+		
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		{
+			q_4 = 0; 
+		}
+		{
+			q_5 = 0; 
+		}
+		{
+			q_6 = 0; 
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 2;
+				
+				if ( (q_5 < 5 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 15  )
+					{
+						if ( ck == 11  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 15  )
+					{
+						if ( ck == 21  )
+						{
+							goto ctr12;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 29  )
+					{
+						if ( ck == 27  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 29  )
+					{
+						if ( 31 <= ck  )
+						{				goto ctr12;
+						}
+						
+					} 
+					else
+					{
+						goto ctr12;
+					}
+					
+				} 
+				else
+				{
+					goto ctr12;
+				}
+				
+				goto st0;
+				
+			}
+			case 95:
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 18  )
+					{
+						if ( ck > 13  )
+						{
+							if ( ck == 15  )
+							{
+								goto ctr10;
+							}
+							
+						} 
+						else if ( ck >= 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 18  )
+					{
+						if ( ck > 19  )
+						{
+							if ( 22 <= ck  )
+							{					goto ctr13;
+							}
+							
+						} 
+						else
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 29  )
+					{
+						if ( ck > 26  )
+						{
+							if ( ck <= 27  )
+							{
+								goto ctr13;
+							}
+							
+						} 
+						else if ( ck >= 26  )
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else if ( ck > 29  )
+					{
+						if ( ck > 30  )
+						{
+							goto ctr13;
+						} 
+						else
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+				goto st0;
+				
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 18  )
+					{
+						if ( ck > 13  )
+						{
+							if ( ck == 15  )
+							{
+								goto ctr10;
+							}
+							
+						} 
+						else if ( ck >= 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 18  )
+					{
+						if ( ck > 19  )
+						{
+							if ( 22 <= ck  )
+							{					goto ctr13;
+							}
+							
+						} 
+						else
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 29  )
+					{
+						if ( ck > 26  )
+						{
+							if ( ck <= 27  )
+							{
+								goto ctr13;
+							}
+							
+						} 
+						else if ( ck >= 26  )
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else if ( ck > 29  )
+					{
+						if ( ck > 30  )
+						{
+							goto ctr13;
+						} 
+						else
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+				goto st0;
+				
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 18  )
+					{
+						if ( ck > 13  )
+						{
+							if ( ck == 15  )
+							{
+								goto ctr10;
+							}
+							
+						} 
+						else if ( ck >= 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 18  )
+					{
+						if ( ck > 19  )
+						{
+							if ( 22 <= ck  )
+							{					goto ctr13;
+							}
+							
+						} 
+						else
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 29  )
+					{
+						if ( ck > 26  )
+						{
+							if ( ck <= 27  )
+							{
+								goto ctr13;
+							}
+							
+						} 
+						else if ( ck >= 26  )
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else if ( ck > 29  )
+					{
+						if ( ck > 30  )
+						{
+							goto ctr13;
+						} 
+						else
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+				goto st0;
+				
+			}
+			
+		} 
+		else
+		{
+			int ck = 0;
+			if ( (q_4 >= 1 ) )
+			ck += 1;
+			
+			if ( (q_4 < 25 ) )
+			ck += 2;
+			
+			if ( (q_5 >= 1 ) )
+			ck += 4;
+			
+			if ( (q_6 >= 100 ) )
+			ck += 8;
+			
+			if ( (q_6 < 100 ) )
+			ck += 16;
+			
+			if ( ck < 23  )
+			{
+				if ( ck < 18  )
+				{
+					if ( ck > 13  )
+					{
+						if ( ck == 15  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck >= 13  )
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 18  )
+				{
+					if ( ck > 19  )
+					{
+						if ( 22 <= ck  )
+						{					goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+			} 
+			else if ( ck > 23  )
+			{
+				if ( ck < 29  )
+				{
+					if ( ck > 26  )
+					{
+						if ( ck <= 27  )
+						{
+							goto ctr13;
+						}
+						
+					} 
+					else if ( ck >= 26  )
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else if ( ck > 29  )
+				{
+					if ( ck > 30  )
+					{
+						goto ctr13;
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else
+				{
+					goto ctr10;
+				}
+				
+			} 
+			else
+			{
+				goto ctr13;
+			}
+			
+			goto st0;
+			
+		}
+		
+		{
+			int ck = 0;
+			if ( (q_4 >= 1 ) )
+			ck += 1;
+			
+			if ( (q_5 >= 1 ) )
+			ck += 2;
+			
+			if ( (q_6 >= 100 ) )
+			ck += 4;
+			
+			if ( 7 <= ck  )
+			{		goto ctr10;
+			}
+			
+			goto st0;
+			
+		}
+		ctr10:
+		{
+			q_6++; 
+		}
+		{
+			match = 1; 
+		}
+		
+		
+		goto st13;
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		{
+			goto st0;
+		}
+		ctr12:
+		{
+			q_6++; 
+		}
+		{
+			q_5++; 
+		}
+		
+		
+		goto st11;
+		ctr14:
+		{
+			q_5++; 
+		}
+		
+		
+		goto st11;
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		{
+			q_4 = 0; 
+		}
+		{
+			q_5 = 0; 
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 2;
+				
+				if ( (q_5 < 5 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 15  )
+				{
+					if ( ck < 7  )
+					{
+						if ( ck < 5  )
+						{
+							if ( 4 <= ck  )
+							{					goto ctr14;
+							}
+							
+						} 
+						else if ( ck > 5  )
+						{
+							goto ctr14;
+						} 
+						else
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else if ( ck > 7  )
+					{
+						if ( ck < 12  )
+						{
+							if ( 11 <= ck  )
+							{					goto ctr10;
+							}
+							
+						} 
+						else if ( ck > 12  )
+						{
+							if ( ck > 13  )
+							{
+								goto ctr14;
+							} 
+							else
+							{
+								goto ctr14;
+							}
+							
+						} 
+						else
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else
+					{
+						goto ctr14;
+					}
+					
+				} 
+				else if ( ck > 15  )
+				{
+					if ( ck < 27  )
+					{
+						if ( ck < 21  )
+						{
+							if ( 20 <= ck  )
+							{					goto ctr14;
+							}
+							
+						} 
+						else if ( ck > 21  )
+						{
+							if ( ck > 22  )
+							{
+								if ( ck <= 23  )
+								{
+									goto ctr14;
+								}
+								
+							} 
+							else
+							{
+								goto ctr14;
+							}
+							
+						} 
+						else
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else if ( ck > 27  )
+					{
+						if ( ck < 29  )
+						{
+							goto ctr14;
+						} 
+						else if ( ck > 29  )
+						{
+							if ( ck > 30  )
+							{
+								goto ctr14;
+							} 
+							else
+							{
+								goto ctr14;
+							}
+							
+						} 
+						else
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else
+				{
+					goto ctr14;
+				}
+				
+				goto st0;
+				
+			}
+			case 95:
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 15  )
+					{
+						if ( ck == 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 15  )
+					{
+						if ( 22 <= ck  )
+						{				goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 30  )
+					{
+						if ( 29 <= ck  )
+						{				goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 30  )
+					{
+						goto ctr10;
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+				goto st0;
+				
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 15  )
+					{
+						if ( ck == 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 15  )
+					{
+						if ( 22 <= ck  )
+						{				goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 30  )
+					{
+						if ( 29 <= ck  )
+						{				goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 30  )
+					{
+						goto ctr10;
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+				goto st0;
+				
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 23  )
+				{
+					if ( ck < 15  )
+					{
+						if ( ck == 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 15  )
+					{
+						if ( 22 <= ck  )
+						{				goto ctr13;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 23  )
+				{
+					if ( ck < 30  )
+					{
+						if ( 29 <= ck  )
+						{				goto ctr10;
+						}
+						
+					} 
+					else if ( ck > 30  )
+					{
+						goto ctr10;
+					} 
+					else
+					{
+						goto ctr13;
+					}
+					
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+				goto st0;
+				
+			}
+			
+		} 
+		else
+		{
+			int ck = 0;
+			if ( (q_4 >= 1 ) )
+			ck += 1;
+			
+			if ( (q_4 < 25 ) )
+			ck += 2;
+			
+			if ( (q_5 >= 1 ) )
+			ck += 4;
+			
+			if ( (q_6 >= 100 ) )
+			ck += 8;
+			
+			if ( (q_6 < 100 ) )
+			ck += 16;
+			
+			if ( ck < 23  )
+			{
+				if ( ck < 15  )
+				{
+					if ( ck == 13  )
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 15  )
+				{
+					if ( 22 <= ck  )
+					{				goto ctr13;
+					}
+					
+				} 
+				else
+				{
+					goto ctr10;
+				}
+				
+			} 
+			else if ( ck > 23  )
+			{
+				if ( ck < 30  )
+				{
+					if ( 29 <= ck  )
+					{				goto ctr10;
+					}
+					
+				} 
+				else if ( ck > 30  )
+				{
+					goto ctr10;
+				} 
+				else
+				{
+					goto ctr13;
+				}
+				
+			} 
+			else
+			{
+				goto ctr13;
+			}
+			
+			goto st0;
+			
+		}
+		
+		{
+			int ck = 0;
+			if ( (q_4 >= 1 ) )
+			ck += 1;
+			
+			if ( (q_5 >= 1 ) )
+			ck += 2;
+			
+			if ( (q_6 >= 100 ) )
+			ck += 4;
+			
+			if ( 7 <= ck  )
+			{		goto ctr10;
+			}
+			
+			goto st0;
+			
+		}
+		ctr13:
+		{
+			q_4++; 
+		}
+		{
+			q_6++; 
+		}
+		
+		
+		goto st12;
+		ctr15:
+		{
+			q_4++; 
+		}
+		
+		
+		goto st12;
+		st12:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		{
+			q_4 = 0; 
+		}
+		{
+			q_5 = 0; 
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 2;
+				
+				if ( (q_5 < 5 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 15  )
+				{
+					if ( ck < 7  )
+					{
+						if ( ck == 5  )
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else if ( ck > 7  )
+					{
+						if ( ck > 11  )
+						{
+							if ( ck == 13  )
+							{
+								goto ctr14;
+							}
+							
+						} 
+						else if ( ck >= 11  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else
+					{
+						goto ctr14;
+					}
+					
+				} 
+				else if ( ck > 15  )
+				{
+					if ( ck < 27  )
+					{
+						if ( ck > 21  )
+						{
+							if ( ck == 23  )
+							{
+								goto ctr14;
+							}
+							
+						} 
+						else if ( ck >= 21  )
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else if ( ck > 27  )
+					{
+						if ( ck > 29  )
+						{
+							if ( 31 <= ck  )
+							{					goto ctr14;
+							}
+							
+						} 
+						else if ( ck >= 29  )
+						{
+							goto ctr14;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else
+				{
+					goto ctr14;
+				}
+				
+				goto st0;
+				
+			}
+			case 95:
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 15  )
+				{
+					if ( ck < 7  )
+					{
+						if ( ck < 3  )
+						{
+							if ( 2 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 3  )
+						{
+							if ( 6 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 7  )
+					{
+						if ( ck < 11  )
+						{
+							if ( 10 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 11  )
+						{
+							if ( ck > 13  )
+							{
+								goto ctr15;
+							} 
+							else if ( ck >= 13  )
+							{
+								goto ctr10;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else if ( ck > 15  )
+				{
+					if ( ck < 26  )
+					{
+						if ( ck < 19  )
+						{
+							if ( 18 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 19  )
+						{
+							if ( ck > 22  )
+							{
+								if ( ck <= 23  )
+								{
+									goto ctr15;
+								}
+								
+							} 
+							else if ( ck >= 22  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 26  )
+					{
+						if ( ck < 29  )
+						{
+							if ( ck <= 27  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 29  )
+						{
+							if ( ck > 30  )
+							{
+								goto ctr15;
+							} 
+							else
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else
+				{
+					goto ctr15;
+				}
+				
+				goto st0;
+				
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 15  )
+				{
+					if ( ck < 7  )
+					{
+						if ( ck < 3  )
+						{
+							if ( 2 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 3  )
+						{
+							if ( 6 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 7  )
+					{
+						if ( ck < 11  )
+						{
+							if ( 10 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 11  )
+						{
+							if ( ck > 13  )
+							{
+								goto ctr15;
+							} 
+							else if ( ck >= 13  )
+							{
+								goto ctr10;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else if ( ck > 15  )
+				{
+					if ( ck < 26  )
+					{
+						if ( ck < 19  )
+						{
+							if ( 18 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 19  )
+						{
+							if ( ck > 22  )
+							{
+								if ( ck <= 23  )
+								{
+									goto ctr15;
+								}
+								
+							} 
+							else if ( ck >= 22  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 26  )
+					{
+						if ( ck < 29  )
+						{
+							if ( ck <= 27  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 29  )
+						{
+							if ( ck > 30  )
+							{
+								goto ctr15;
+							} 
+							else
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else
+				{
+					goto ctr15;
+				}
+				
+				goto st0;
+				
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				int ck = 0;
+				if ( (q_4 >= 1 ) )
+				ck += 1;
+				
+				if ( (q_4 < 25 ) )
+				ck += 2;
+				
+				if ( (q_5 >= 1 ) )
+				ck += 4;
+				
+				if ( (q_6 >= 100 ) )
+				ck += 8;
+				
+				if ( (q_6 < 100 ) )
+				ck += 16;
+				
+				if ( ck < 15  )
+				{
+					if ( ck < 7  )
+					{
+						if ( ck < 3  )
+						{
+							if ( 2 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 3  )
+						{
+							if ( 6 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 7  )
+					{
+						if ( ck < 11  )
+						{
+							if ( 10 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 11  )
+						{
+							if ( ck > 13  )
+							{
+								goto ctr15;
+							} 
+							else if ( ck >= 13  )
+							{
+								goto ctr10;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else if ( ck > 15  )
+				{
+					if ( ck < 26  )
+					{
+						if ( ck < 19  )
+						{
+							if ( 18 <= ck  )
+							{					goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 19  )
+						{
+							if ( ck > 22  )
+							{
+								if ( ck <= 23  )
+								{
+									goto ctr15;
+								}
+								
+							} 
+							else if ( ck >= 22  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 26  )
+					{
+						if ( ck < 29  )
+						{
+							if ( ck <= 27  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else if ( ck > 29  )
+						{
+							if ( ck > 30  )
+							{
+								goto ctr15;
+							} 
+							else
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else
+				{
+					goto ctr15;
+				}
+				
+				goto st0;
+				
+			}
+			
+		} 
+		else
+		{
+			int ck = 0;
+			if ( (q_4 >= 1 ) )
+			ck += 1;
+			
+			if ( (q_4 < 25 ) )
+			ck += 2;
+			
+			if ( (q_5 >= 1 ) )
+			ck += 4;
+			
+			if ( (q_6 >= 100 ) )
+			ck += 8;
+			
+			if ( (q_6 < 100 ) )
+			ck += 16;
+			
+			if ( ck < 15  )
+			{
+				if ( ck < 7  )
+				{
+					if ( ck < 3  )
+					{
+						if ( 2 <= ck  )
+						{					goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 3  )
+					{
+						if ( 6 <= ck  )
+						{					goto ctr15;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else if ( ck > 7  )
+				{
+					if ( ck < 11  )
+					{
+						if ( 10 <= ck  )
+						{					goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 11  )
+					{
+						if ( ck > 13  )
+						{
+							goto ctr15;
+						} 
+						else if ( ck >= 13  )
+						{
+							goto ctr10;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else
+				{
+					goto ctr15;
+				}
+				
+			} 
+			else if ( ck > 15  )
+			{
+				if ( ck < 26  )
+				{
+					if ( ck < 19  )
+					{
+						if ( 18 <= ck  )
+						{					goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 19  )
+					{
+						if ( ck > 22  )
+						{
+							if ( ck <= 23  )
+							{
+								goto ctr15;
+							}
+							
+						} 
+						else if ( ck >= 22  )
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else
+					{
+						goto ctr15;
+					}
+					
+				} 
+				else if ( ck > 26  )
+				{
+					if ( ck < 29  )
+					{
+						if ( ck <= 27  )
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else if ( ck > 29  )
+					{
+						if ( ck > 30  )
+						{
+							goto ctr15;
+						} 
+						else
+						{
+							goto ctr15;
+						}
+						
+					} 
+					else
+					{
+						goto ctr10;
+					}
+					
+				} 
+				else
+				{
+					goto ctr15;
+				}
+				
+			} 
+			else
+			{
+				goto ctr15;
+			}
+			
+			goto st0;
+			
+		}
+		
+		{
+			int ck = 0;
+			if ( (q_4 >= 1 ) )
+			ck += 1;
+			
+			if ( (q_5 >= 1 ) )
+			ck += 2;
+			
+			if ( (q_6 >= 100 ) )
+			ck += 4;
+			
+			if ( 7 <= ck  )
+			{		goto ctr10;
+			}
+			
+			goto st0;
+			
+		}
+		st_out:
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	if ( match )
+	cout << "  success" << endl;
+	else
+	cout << "  failure" << endl;
+	cout << endl;
+}
+
+int main()
+{
+	return 0;
+}
+

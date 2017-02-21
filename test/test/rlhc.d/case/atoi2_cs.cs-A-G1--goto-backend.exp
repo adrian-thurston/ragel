@@ -1,0 +1,197 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int neg;
+		int value;
+		
+		
+		
+		
+		static readonly sbyte  []_state_chart_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_state_chart_nfa_offsets = { 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_state_chart_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_state_chart_nfa_pop_trans = { 0, 0,  };
+		static readonly int  state_chart_start  = 3;
+		static readonly int  state_chart_first_final  = 3;
+		static readonly int  state_chart_error  = 0;
+		static readonly int  state_chart_en_main  = 3;
+		int cs;
+		
+		void init()
+		{
+			value = 0;
+			neg = 0;
+			
+			{
+				cs = (int)state_chart_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( cs  ) {
+					case 3:
+					switch ( ( data[p ])  ) {
+						case '\u002b':
+						{
+							goto ctr3;
+						}
+						case '\u002d':
+						{
+							goto ctr4;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr5;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 1:
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr0;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 2:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						goto ctr2;
+					}
+					
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr0;
+					}
+					
+					{
+						goto ctr1;
+					}
+					
+				}
+				ctr1: cs = 0;
+				goto _again;
+				ctr3: cs = 1;
+				goto f2;
+				ctr4: cs = 1;
+				goto f3;
+				ctr0: cs = 2;
+				goto f0;
+				ctr5: cs = 2;
+				goto f4;
+				ctr2: cs = 3;
+				goto f1;
+				
+				f2:
+				{neg = 0;
+					value = 0;
+				}
+				
+				goto _again;
+				f0:
+				{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+					;
+				}
+				
+				goto _again;
+				f3:
+				{neg = 0;
+					value = 0;
+				}
+				{neg = 1;
+				}
+				
+				goto _again;
+				f4:
+				{neg = 0;
+					value = 0;
+				}
+				{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+					;
+				}
+				
+				goto _again;
+				f1:
+				{if ( neg != 0 )
+					{
+						value = -1 * value;
+						
+					} 
+				}
+				{Console.Write( value );Console.Write( "\n" );}
+				
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= state_chart_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"1\n",
+			"12\n",
+			"222222\n",
+			"+2123\n",
+			"213 3213\n",
+			"-12321\n",
+			"--123\n",
+			"-99\n",
+			" -3000\n",
+		};
+		
+		
+		static readonly int inplen = 9;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

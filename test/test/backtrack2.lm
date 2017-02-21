@@ -1,0 +1,28 @@
+
+# Token names.
+lex
+	token id /[a-z]+/
+	ignore ws /[ \t\n]+/
+end
+
+token bang1 /'!'/
+token bang2 /'!'/
+
+def one [bang1 id id id]
+
+def two [bang2 id id id id]
+
+def prods 
+	[one]
+|	[two]
+
+def start
+	[prods]
+
+parse S: start[ stdin ]
+print_xml( match S "!aa bb cc dd" )
+print( '\n' )
+##### IN #####
+!aa bb cc dd
+##### EXP #####
+<start><prods><two><bang2>!</bang2><id>aa</id><id>bb</id><id>cc</id><id>dd</id></two></prods></start>

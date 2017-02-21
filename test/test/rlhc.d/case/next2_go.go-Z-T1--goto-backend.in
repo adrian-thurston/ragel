@@ -1,0 +1,257 @@
+host( "working/next2_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var target  int ;
+	var last  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _next2_key_offsets( 0, 22 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 22, 22, 22, 22, 0 };
+
+array byte _next2_trans_keys( 0, 120 ) = { u(120), u(117), u(110), u(117), u(115), u(101), u(100), u(111), u(110), u(101), u(116), u(119), u(111), u(116), u(104), u(114), u(101), u(101), u(10), u(49), u(50), u(51), u(0) };
+
+array s8 _next2_single_lengths( 0, 4 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 0, 0, 0, 0, 0 };
+
+array s8 _next2_range_lengths( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_index_offsets( 0, 44 ) = { 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 41, 42, 43, 44, 0 };
+
+array s8 _next2_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _next2_trans_offsets( 0, 44 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 0 };
+
+array s8 _next2_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _next2_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_cond_targs( 0, 23 ) = { 19, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 20, 0, 9, 0, 10, 0, 21, 0, 12, 0, 13, 0, 22, 0, 15, 0, 16, 0, 17, 0, 18, 0, 23, 0, 19, 19, 19, 1, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_cond_actions( 0, 6 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 4, 5, 6, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _next2_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _next2_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int next2_start = 19;
+value int next2_first_final = 19;
+value int next2_error = 0;
+
+value int next2_en_unused = 2;
+value int next2_en_one = 8;
+value int next2_en_two = 11;
+value int next2_en_three = 14;
+value int next2_en_main = 19;
+
+host( "working/next2_go.rl", 65 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)next2_start;
+	}
+	host( "working/next2_go.rl", 68 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		int _klen;
+		index byte _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans = 0;
+		uint _cond = 0;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume { 
+				_keys = offset( _next2_trans_keys, _next2_key_offsets[cs] );
+				_trans = cast(uint)_next2_index_offsets[cs];
+				
+				_klen = cast(int)_next2_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index byte _lower;
+					index byte _mid;
+					index byte _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _next2_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _next2_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_next2_range_lengths[cs];
+				if ( _klen > 0 ) {
+					index byte _lower;
+					index byte _mid;
+					index byte _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( deref( data, p )) < deref( _next2_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( ( deref( data, p )) > deref( _next2_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _next2_cond_keys, _next2_trans_offsets[_trans] );
+				_klen = cast(int)_next2_trans_lengths[_trans];
+				_cond = cast(uint)_next2_trans_offsets[_trans];
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _next2_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _next2_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					cs = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				cs = cast(int)_next2_cond_targs[_cond];
+				
+				if ( _next2_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				switch ( _next2_cond_actions[_cond] ) {
+					case 1 {
+						host( "working/next2_go.rl", 17 ) ${fmt.Print( "one\n" );target = 19;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+						}$
+					}
+					case 2 {
+						host( "working/next2_go.rl", 22 ) ${fmt.Print( "two\n" );target = 19;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+						}$
+					}
+					case 3 {
+						host( "working/next2_go.rl", 27 ) ${fmt.Print( "three\n" );target = 19;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+						}$
+					}
+					case 4 {
+						host( "working/next2_go.rl", 33 ) ${target = 8;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+							last = 1;
+						}$
+					}
+					case 5 {
+						host( "working/next2_go.rl", 39 ) ${target = 11;
+							${cs = host( "-", 1 ) ={target}=;}$
+							
+							last = 2;
+						}$
+					}
+					case 6 {
+						host( "working/next2_go.rl", 46 ) ${if ( last == 2 ) {
+								target = 14;
+								${cs = host( "-", 1 ) ={target}=;}$
+								
+								
+							}
+							last = 3;
+						}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/next2_go.rl", 74 ) @{
+	}
+	func finish() {
+		if cs >= next2_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1one3x2two3three\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

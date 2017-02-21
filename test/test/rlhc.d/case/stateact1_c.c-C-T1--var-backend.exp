@@ -1,0 +1,306 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+
+static const char  _state_act_key_offsets [] = { 0, 0, 1, 2, 3, 4, 0 ,  };
+static const char  _state_act_trans_keys [] = { 105, 10, 104, 104, 104, 0 ,  };
+static const char  _state_act_single_lengths [] = { 0, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _state_act_range_lengths [] = { 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_act_index_offsets [] = { 0, 0, 2, 4, 6, 8, 0 ,  };
+static const char  _state_act_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _state_act_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 ,  };
+static const char  _state_act_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _state_act_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_act_cond_targs [] = { 2, 0, 5, 0, 1, 0, 1, 0, 1, 0, 0 ,  };
+static const char  _state_act_cond_actions [] = { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_act_to_state_actions [] = { 0, 0, 1, 4, 6, 4, 0 ,  };
+static const char  _state_act_from_state_actions [] = { 0, 0, 2, 5, 7, 5, 0 ,  };
+static const char  _state_act_nfa_targs [] = { 0, 0 ,  };
+static const char  _state_act_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_act_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _state_act_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  state_act_start  = 4;
+static const int  state_act_first_final  = 4;
+static const int  state_act_error  = 0;
+static const int  state_act_en_main  = 4;
+static const int  state_act_en_main_line_again  = 3;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) state_act_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					switch ( _state_act_from_state_actions[cs] ) {
+						case 5 :
+						{
+							printf( "%s", "b2\n" );
+							
+						}
+						
+						break;
+						case 2 :
+						{
+							printf( "%s", "c2\n" );
+							
+						}
+						
+						break;
+						case 7 :
+						{
+							printf( "%s", "a2\n" );
+							
+						}
+						{
+							printf( "%s", "b2\n" );
+							
+						}
+						
+						break;
+						
+					}
+					_keys = _state_act_trans_keys + _state_act_key_offsets[cs];
+					_trans = ( unsigned int  ) _state_act_index_offsets[cs];
+					_have = 0;
+					_klen = ( int ) _state_act_single_lengths[cs];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( ((*( p  ))
+							)< (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( ((*( p  ))
+							)> (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _state_act_range_lengths[cs];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( ((*( p  ))
+								)< (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( ((*( p  ))
+								)> (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _state_act_cond_keys + _state_act_trans_offsets[_trans];
+					_klen = ( int ) _state_act_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _state_act_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _state_act_cond_targs[_cond];
+					switch ( _state_act_cond_actions[_cond] ) {
+						case 3 :
+						{
+							{
+								cs = 3;
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					switch ( _state_act_to_state_actions[cs] ) {
+						case 4 :
+						{
+							printf( "%s", "b1\n" );
+							
+						}
+						
+						break;
+						case 1 :
+						{
+							printf( "%s", "c1\n" );
+							
+						}
+						
+						break;
+						case 6 :
+						{
+							printf( "%s", "a1\n" );
+							
+						}
+						{
+							printf( "%s", "b1\n" );
+							
+						}
+						
+						break;
+						
+					}
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= state_act_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"hi\nhi\n",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

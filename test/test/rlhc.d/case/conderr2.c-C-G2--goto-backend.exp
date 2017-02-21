@@ -1,0 +1,175 @@
+#include <stdio.h>
+
+
+
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 4;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+int main()
+{
+	char buffer[] = " ;";
+	
+	char *p = buffer;
+	char *pe = buffer + sizeof(buffer);
+	char *eof = pe;
+	int  cs = foo_start;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			
+		}
+		goto st_out;
+		st_case_1:
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				goto st2;
+			}
+			case 59:
+			{
+				int ck = 0;
+				if ( (0 ) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto st2;
+				}
+				
+				goto st0;
+				
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		ctr5:
+		{
+			printf("A\n"); 
+		}
+		
+		
+		goto st0;
+		ctr6:
+		{
+			printf("B\n"); 
+		}
+		
+		
+		goto st0;
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				goto st2;
+			}
+			case 59:
+			{
+				int ck = 0;
+				if ( (0 ) )
+				ck += 1;
+				
+				if ( ck > 0  )
+				{
+					goto st2;
+				} 
+				else
+				{
+					goto ctr5;
+				}
+				
+				
+			}
+			
+		}
+		{
+			goto st3;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( ((*( p  ))
+		)== 120  )
+		{
+			goto st4;
+		}
+		
+		{
+			goto ctr6;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 2:
+				{
+					printf("A\n"); 
+				}
+				
+				break;
+				case 3:
+				{
+					printf("B\n"); 
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	return 0;
+} 
+

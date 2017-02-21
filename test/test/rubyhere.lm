@@ -1,0 +1,122 @@
+context rubyhere
+	rl ident_pattern /[a-zA-Z_][a-zA-Z_0-9]*/
+	rl number_pattern /[0-9]+/
+
+	lex
+		ignore /[ \t\n]+/
+		token id /ident_pattern/
+		token number /number_pattern/
+		literal `<< `* `, `( `) `!
+	end
+
+	HereId: str
+
+	token rest_of_line /[^\n]*'\n'/
+
+	lex 
+		ignore /[ \t\n]+/
+		token here_id
+			HereData: here_data
+			/ident_pattern/
+			{
+				# Take the text of the here_id from the input stream.
+				HereId = input->pull( match_length )
+
+				# Get the data up to the rest of the line.
+				parse_stop ROL: rest_of_line(this)[ input ]
+
+				# Parse the heredoc data.
+				parse_stop HereData: here_data(this)[ input ]
+
+				# Push the rest-of-line data back to the input stream.
+				input->push( $ROL )
+
+				# Send the here_id token. Attach the heredoc data as an attribute.
+				input->push( make_token( typeid<here_id>, HereId, HereData ) )
+			}
+	end
+
+	lex 
+		token here_close_id 
+			/ ident_pattern '\n' /
+			{
+				if match_text == HereId + '\n' {
+					input->push( make_token( 
+						typeid<here_close_id>,
+						input->pull( match_length ) ) )
+				}
+				else 
+					input->push( make_token( typeid<here_line>, input->pull(match_length) ) )
+			}
+
+		token here_line
+			/ [^\n]* '\n' /
+	end
+
+	def here_data
+		[here_line* here_close_id]
+
+	def heredoc
+		[`<< here_id]
+
+	def primary
+		[id]
+	|	[number]
+	|	[heredoc]
+
+	def arglist
+		[primary arglist_more*]
+
+	def arglist_more
+		[`, primary]
+
+	def call
+		[id `( arglist? `)]
+
+	def statement
+		[primary]
+	|	[call]
+
+	token foobar /any+/
+
+	def item
+		[statement `!]
+	|	[foobar]
+
+	def start 
+		[item*]
+end # rubyhere
+
+RubyHere: rubyhere = new rubyhere()
+
+parse S: rubyhere::start(RubyHere)[ stdin ]
+
+print_xml(S)
+print('\n')
+##### IN #####
+print( <<DATA1, more, <<DATA2, 99 )
+"&^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+!
+print( <<DATA1, more, <<DATA2, 99 )
+"&^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+# error here
+##### EXP #####
+<rubyhere::start><rubyhere::_repeat_item><rubyhere::item><rubyhere::statement><rubyhere::call><rubyhere::id>print</rubyhere::id><rubyhere::_literal_000d>(</rubyhere::_literal_000d><rubyhere::_opt_arglist><rubyhere::arglist><rubyhere::primary><rubyhere::heredoc><rubyhere::_literal_0007>&lt;&lt;</rubyhere::_literal_0007><rubyhere::here_id>DATA1</rubyhere::here_id></rubyhere::heredoc></rubyhere::primary><rubyhere::_repeat_arglist_more><rubyhere::arglist_more><rubyhere::_literal_000b>,</rubyhere::_literal_000b><rubyhere::primary><rubyhere::id>more</rubyhere::id></rubyhere::primary></rubyhere::arglist_more><rubyhere::arglist_more><rubyhere::_literal_000b>,</rubyhere::_literal_000b><rubyhere::primary><rubyhere::heredoc><rubyhere::_literal_0007>&lt;&lt;</rubyhere::_literal_0007><rubyhere::here_id>DATA2</rubyhere::here_id></rubyhere::heredoc></rubyhere::primary></rubyhere::arglist_more><rubyhere::arglist_more><rubyhere::_literal_000b>,</rubyhere::_literal_000b><rubyhere::primary><rubyhere::number>99</rubyhere::number></rubyhere::primary></rubyhere::arglist_more></rubyhere::_repeat_arglist_more></rubyhere::arglist></rubyhere::_opt_arglist><rubyhere::_literal_000f>)</rubyhere::_literal_000f></rubyhere::call></rubyhere::statement><rubyhere::_literal_0011>!</rubyhere::_literal_0011></rubyhere::item><rubyhere::item><rubyhere::foobar>print( &lt;&lt;DATA1, more, &lt;&lt;DATA2, 99 )
+"&amp;^#(@ almost
+!arbitrary text!
+DATA1
+hello
+world
+DATA2
+# error here
+</rubyhere::foobar></rubyhere::item></rubyhere::_repeat_item></rubyhere::start>

@@ -1,0 +1,523 @@
+host( "working/gotocallret2_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char comm ;
+	int top ;
+	int stack [32];
+	char * ts ;
+	char * te ;
+	int act ;
+	int val ;
+	
+	
+	
+	
+	
+}@
+value int GotoCallRet_start = 6;
+value int GotoCallRet_first_final = 6;
+value int GotoCallRet_error = 0;
+
+value int GotoCallRet_en_handle = 5;
+value int GotoCallRet_en_one = 10;
+value int GotoCallRet_en_two = 13;
+value int GotoCallRet_en_main = 6;
+
+array s8 _GotoCallRet_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _GotoCallRet_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/gotocallret2_c.rl", 84 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)GotoCallRet_start;
+		top = 0;
+		ts = nil;
+		te = nil;
+	}
+	host( "working/gotocallret2_c.rl", 91 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		char *eof = pe;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		goto _resume;
+		
+		_again:
+		switch ( cs ) {
+			case 6: goto st6;
+			case 0: goto st0;
+			case 7: goto st7;
+			case 1: goto st1;
+			case 2: goto st2;
+			case 3: goto st3;
+			case 4: goto st4;
+			case 8: goto st8;
+			case 5: goto st5;
+			case 9: goto st9;
+			case 10: goto st10;
+			case 11: goto st11;
+			case 12: goto st12;
+			case 13: goto st13;
+			case 14: goto st14;
+			case 15: goto st15;
+		}
+		
+		_resume:
+		switch ( cs )
+		{
+			case 6:
+			goto st_case_6;
+			case 0:
+			goto st_case_0;
+			case 7:
+			goto st_case_7;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 8:
+			goto st_case_8;
+			case 5:
+			goto st_case_5;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 15:
+			goto st_case_15;
+		}
+		goto st_out;
+		ctr7:
+		host( "working/gotocallret2_c.rl", 70 ) ${${p = ((te))-1;
+				host( "working/gotocallret2_c.rl", 70 ) ${printf( "%s", "word " );
+					val = 3;
+					${goto st5;}$}$}$}$
+		
+		goto st6;
+		ctr8:
+		host( "working/gotocallret2_c.rl", 73 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 73 ) ${printf( "%s", "this is the foil" );
+				}$}$}$
+		
+		goto st6;
+		ctr10:
+		host( "working/gotocallret2_c.rl", 77 ) ${${te = p+1;}$}$
+		
+		goto st6;
+		ctr12:
+		host( "working/gotocallret2_c.rl", 75 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 75 ) ${printf( "%s", "space " );
+				}$}$}$
+		
+		goto st6;
+		ctr13:
+		host( "working/gotocallret2_c.rl", 68 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 68 ) ${printf( "%s", "[ " );
+					${stack[top] = 6; top+= 1; goto st13;}$}$}$}$
+		
+		goto st6;
+		ctr15:
+		host( "working/gotocallret2_c.rl", 66 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 66 ) ${printf( "%s", "{ " );
+						${stack[top] = 6; top+= 1; goto st10;}$}$}$}$
+			
+			goto st6;
+			ctr20:
+			host( "working/gotocallret2_c.rl", 70 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 70 ) ${printf( "%s", "word " );
+						val = 3;
+						${goto st5;}$}$}$}$
+			
+			goto st6;
+			st6:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof6;
+			st_case_6:
+			host( "NONE", 1 ) ${${ts = p;}$}$
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr10;
+				}
+				case 32: {
+					goto ctr12;
+				}
+				case 91: {
+					goto ctr13;
+				}
+				case 123: {
+					goto ctr15;
+				}
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr14;
+			}
+			{
+				goto st0;
+			}
+			st_case_0:
+			st0:
+			cs = 0;
+			goto _out;
+			ctr14:
+			host( "NONE", 1 ) ${${te = p+1;}$}$
+			
+			goto st7;
+			st7:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof7;
+			st_case_7:
+			if ( ( deref( data, p )) == 32 ) {
+				goto st1;
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st8;
+			}
+			{
+				goto ctr20;
+			}
+			st1:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof1;
+			st_case_1:
+			if ( ( deref( data, p )) == 102 ) {
+				goto st2;
+			}
+			{
+				goto ctr7;
+			}
+			st2:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof2;
+			st_case_2:
+			if ( ( deref( data, p )) == 111 ) {
+				goto st3;
+			}
+			{
+				goto ctr7;
+			}
+			st3:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof3;
+			st_case_3:
+			if ( ( deref( data, p )) == 105 ) {
+				goto st4;
+			}
+			{
+				goto ctr7;
+			}
+			st4:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof4;
+			st_case_4:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr7;
+			}
+			st8:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof8;
+			st_case_8:
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st8;
+			}
+			{
+				goto ctr20;
+			}
+			st5:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof5;
+			st_case_5:
+			{
+				goto ctr9;
+			}
+			ctr9:
+			cs = 9;
+			host( "working/gotocallret2_c.rl", 22 ) ${printf( "%s", "handle " );
+				${p = p - 1; }$if ( val == 1 )
+				{
+					cs = (10);
+				} 
+				if ( val == 2 )
+				{
+					cs = (13);
+				} 
+				if ( val == 3 )
+				{
+					cs = 6;} 
+			}$
+			
+			goto _again;
+			st9:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof9;
+			st_case_9:
+			{
+				goto st0;
+			}
+			ctr21:
+			host( "working/gotocallret2_c.rl", 47 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 47 ) ${printf( "%s", "space " );
+					}$}$}$
+			
+			goto st10;
+			ctr22:
+			host( "working/gotocallret2_c.rl", 40 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 40 ) ${printf( "%s", "[ " );
+						${stack[top] = 10; top+= 1;cs = host( "-", 1 ) ={13}=; goto _again;}$}$}$}$
+			
+			goto st10;
+			ctr24:
+			host( "working/gotocallret2_c.rl", 38 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 38 ) ${printf( "%s", "{ " );
+							${stack[top] = 10; top+= 1;cs = host( "-", 1 ) ={10}=; goto _again;}$}$}$}$
+				
+				goto st10;
+				ctr27:
+				host( "working/gotocallret2_c.rl", 44 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 44 ) ${printf( "%s", "word " );
+							val = 1;
+							${cs = host( "-", 1 ) ={5}=; goto _again;}$}$}$}$
+				
+				goto st10;
+				ctr29:
+				host( "working/gotocallret2_c.rl", 42 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 42 ) ${printf( "%s", "} " );
+						${top -= 1;cs = stack[top];goto _again;}$}$}$}$
+			
+			goto st10;
+			st10:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof10;
+			st_case_10:
+			host( "NONE", 1 ) ${${ts = p;}$}$
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					goto ctr21;
+				}
+				case 91: {
+					goto ctr22;
+				}
+				case 123: {
+					goto ctr24;
+				}
+				case 125: {
+					goto st12;
+				}
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st11;
+			}
+			{
+				goto st0;
+			}
+			st11:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof11;
+			st_case_11:
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st11;
+			}
+			{
+				goto ctr27;
+			}
+			st12:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof12;
+			st_case_12:
+			if ( ( deref( data, p )) == 32 ) {
+				goto st12;
+			}
+			{
+				goto ctr29;
+			}
+			ctr30:
+			host( "working/gotocallret2_c.rl", 61 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 61 ) ${printf( "%s", "space " );
+					}$}$}$
+			
+			goto st13;
+			ctr31:
+			host( "working/gotocallret2_c.rl", 54 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 54 ) ${printf( "%s", "[ " );
+						${stack[top] = 13; top+= 1;cs = host( "-", 1 ) ={13}=; goto _again;}$}$}$}$
+			
+			goto st13;
+			ctr34:
+			host( "working/gotocallret2_c.rl", 52 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 52 ) ${printf( "%s", "{ " );
+							${stack[top] = 13; top+= 1;cs = host( "-", 1 ) ={10}=; goto _again;}$}$}$}$
+				
+				goto st13;
+				ctr36:
+				host( "working/gotocallret2_c.rl", 56 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 56 ) ${printf( "%s", "] " );
+							${top -= 1;cs = stack[top];goto _again;}$}$}$}$
+				
+				goto st13;
+				ctr38:
+				host( "working/gotocallret2_c.rl", 58 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 58 ) ${printf( "%s", "word " );
+							val = 2;
+							${cs = host( "-", 1 ) ={5}=; goto _again;}$}$}$}$
+				
+				goto st13;
+				st13:
+				host( "NONE", 1 ) ${${ts = nil;}$}$
+				p+= 1;
+				if ( p == pe )
+				goto _test_eof13;
+				st_case_13:
+				host( "NONE", 1 ) ${${ts = p;}$}$
+				switch( ( deref( data, p )) ) {
+					case 32: {
+						goto ctr30;
+					}
+					case 91: {
+						goto ctr31;
+					}
+					case 93: {
+						goto st14;
+					}
+					case 123: {
+						goto ctr34;
+					}
+				}
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto st15;
+				}
+				{
+					goto st0;
+				}
+				st14:
+				p+= 1;
+				if ( p == pe )
+				goto _test_eof14;
+				st_case_14:
+				if ( ( deref( data, p )) == 32 ) {
+					goto st14;
+				}
+				{
+					goto ctr36;
+				}
+				st15:
+				p+= 1;
+				if ( p == pe )
+				goto _test_eof15;
+				st_case_15:
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto st15;
+				}
+				{
+					goto ctr38;
+				}
+				st_out:
+				_test_eof6: cs = 6; goto _test_eof; 
+				_test_eof7: cs = 7; goto _test_eof; 
+				_test_eof1: cs = 1; goto _test_eof; 
+				_test_eof2: cs = 2; goto _test_eof; 
+				_test_eof3: cs = 3; goto _test_eof; 
+				_test_eof4: cs = 4; goto _test_eof; 
+				_test_eof8: cs = 8; goto _test_eof; 
+				_test_eof5: cs = 5; goto _test_eof; 
+				_test_eof9: cs = 9; goto _test_eof; 
+				_test_eof10: cs = 10; goto _test_eof; 
+				_test_eof11: cs = 11; goto _test_eof; 
+				_test_eof12: cs = 12; goto _test_eof; 
+				_test_eof13: cs = 13; goto _test_eof; 
+				_test_eof14: cs = 14; goto _test_eof; 
+				_test_eof15: cs = 15; goto _test_eof; 
+				
+				_test_eof: {}
+				if ( p == eof )
+				{
+					switch ( cs ) {
+						case 7: goto ctr20;
+						case 1: goto ctr7;
+						case 2: goto ctr7;
+						case 3: goto ctr7;
+						case 4: goto ctr7;
+						case 8: goto ctr20;
+						case 11: goto ctr27;
+						case 12: goto ctr29;
+						case 14: goto ctr36;
+						case 15: goto ctr38;
+					}
+				}
+				
+				_out: {}
+			}
+			host( "working/gotocallret2_c.rl", 99 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= GotoCallRet_first_final )
+				printf( "ACCEPT\n" );
+				else
+				printf( "FAIL\n" );
+			}
+			
+			char *inp[] = {
+				"{a{b[c d]d}c}\n",
+				"[a{b[c d]d}c}\n",
+			"[a[b]c]d{ef{g{h}i}j}l\n",
+			"{{[]}}\n",
+			"a b c\n",
+			"{a b c}\n",
+			"[a b c]\n",
+			"{]\n",
+				"{{}\n",
+					"[[[[[[]]]]]]\n",
+					"[[[[[[]]}]]]\n",
+			};
+			
+			int inplen = 11;
+			
+			int main( )
+			{
+				int i;
+				for ( i = 0; i < inplen; i++ ) {
+					init();
+					exec( inp[i], strlen(inp[i]) );
+					finish();
+				}
+				return 0;
+			}
+			
+		}@

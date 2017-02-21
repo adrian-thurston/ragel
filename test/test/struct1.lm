@@ -1,0 +1,15 @@
+context foo
+	Int: int
+	D: d
+
+	def d []
+end
+
+Foo: foo = new foo()
+
+Foo->Int = 1
+Foo->D = construct foo::d[]
+
+print "[Foo->Int]
+##### EXP #####
+1

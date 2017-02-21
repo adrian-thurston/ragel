@@ -1,0 +1,294 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+
+
+
+
+
+
+
+
+let _erract_trans_keys : int array = [|
+1; 0; 3; 3; 2; 2; 4; 4; 4; 4; 5; 5; 0; 0; 1; 0; 0 ; 
+|]
+let _erract_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 1; 1; 3; 1; 1; 1; 4; 1; 1; 5; 0 ; 
+|]
+let _erract_index_offsets : int array = [|
+0; 0; 1; 2; 3; 4; 5; 6; 0 ; 
+|]
+let _erract_indicies : int array = [|
+1; 3; 4; 5; 6; 8; 0 ; 
+|]
+let _erract_index_defaults : int array = [|
+0; 0; 2; 2; 2; 2; 7; 9; 0 ; 
+|]
+let _erract_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _erract_cond_targs : int array = [|
+0; 2; 0; 3; 4; 5; 6; 0; 7; 0; 0 ; 
+|]
+let _erract_cond_actions : int array = [|
+2; 0; 4; 0; 0; 0; 0; 6; 0; 0; 0 ; 
+|]
+let _erract_eof_actions : int array = [|
+0; 1; 3; 3; 3; 3; 5; 0; 0 ; 
+|]
+let _erract_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _erract_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _erract_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _erract_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let erract_start  : int  = 1
+let erract_first_final  : int  = 7
+let erract_error  : int  = 0
+let erract_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let eof = pe in
+begin
+	cs  := erract_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _have.contents= 0  then
+						begin
+							begin
+								if _erract_eof_actions.(cs.contents) = 1  then
+								begin
+									begin
+										print_string( "err_start\n" );
+										
+									end;
+									begin
+										print_string( "eof_start\n" );
+										
+									end;
+									begin
+										print_string( "err_all\n" );
+										
+									end;
+									begin
+										print_string( "eof_all\n" );
+										
+									end;
+									
+								end
+								else if _erract_eof_actions.(cs.contents) = 3  then
+								begin
+									begin
+										print_string( "err_all\n" );
+										
+									end;
+									begin
+										print_string( "err_middle\n" );
+										
+									end;
+									begin
+										print_string( "eof_all\n" );
+										
+									end;
+									begin
+										print_string( "eof_middle\n" );
+										
+									end;
+									
+								end
+								else if _erract_eof_actions.(cs.contents) = 5  then
+								begin
+									begin
+										print_string( "err_all\n" );
+										
+									end;
+									begin
+										print_string( "err_out\n" );
+										
+									end;
+									begin
+										print_string( "eof_all\n" );
+										
+									end;
+									begin
+										print_string( "eof_out\n" );
+										
+									end;
+									
+								end
+								;
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _erract_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 111 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _erract_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _erract_trans_keys.( _keys.contents+1  )&& _ic.contents>= _erract_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _erract_indicies.( _inds.contents+ ( _ic.contents- _erract_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _erract_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _erract_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _erract_cond_targs.(_trans.contents);
+						if _erract_cond_actions.(_trans.contents) = 2  then
+						begin
+							begin
+								print_string( "err_start\n" );
+								
+							end;
+							begin
+								print_string( "err_all\n" );
+								
+							end;
+							
+						end
+						else if _erract_cond_actions.(_trans.contents) = 4  then
+						begin
+							begin
+								print_string( "err_all\n" );
+								
+							end;
+							begin
+								print_string( "err_middle\n" );
+								
+							end;
+							
+						end
+						else if _erract_cond_actions.(_trans.contents) = 6  then
+						begin
+							begin
+								print_string( "err_all\n" );
+								
+							end;
+							begin
+								print_string( "err_out\n" );
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= erract_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "";
+exec "h";
+exec "x";
+exec "he";
+exec "hx";
+exec "hel";
+exec "hex";
+exec "hell";
+exec "helx";
+exec "hello";
+exec "hellx";
+exec "hello\n";
+exec "hellox";
+()
+;;
+

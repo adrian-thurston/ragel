@@ -1,0 +1,1094 @@
+host( "working/cppscan3.rl", 1 ) @{/*
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using namespace std;
+	
+	#define TK_Dlit 192
+	#define TK_Slit 193
+	#define TK_Float 194
+	#define TK_Id 195
+	#define TK_NameSep 197
+	#define TK_Arrow 211
+	#define TK_PlusPlus 212
+	#define TK_MinusMinus 213
+	#define TK_ArrowStar 214
+	#define TK_DotStar 215
+	#define TK_ShiftLeft 216
+	#define TK_ShiftRight 217
+	#define TK_IntegerDecimal 218
+	#define TK_IntegerOctal 219
+	#define TK_IntegerHex 220
+	#define TK_EqualsEquals 223
+	#define TK_NotEquals 224
+	#define TK_AndAnd 225
+	#define TK_OrOr 226
+	#define TK_MultAssign 227
+	#define TK_DivAssign 228
+	#define TK_PercentAssign 229
+	#define TK_PlusAssign 230
+	#define TK_MinusAssign 231
+	#define TK_AmpAssign 232
+	#define TK_CaretAssign 233
+	#define TK_BarAssign 234
+	#define TK_DotDotDot 240
+	#define TK_Whitespace 241
+	#define TK_Comment 242
+	
+	#define BUFSIZE 4096
+	
+	char buf[BUFSIZE];
+	
+	struct Scanner
+	{
+		int cs, act;
+		const char *ts, *te;
+		
+		void token( int tok );
+		void run();
+		
+		void init( );
+		void execute( const char *data, int len );
+		int finish( );
+	};
+	
+	
+	
+}@
+array s8 _Scanner_to_state_actions( 0, 9 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_from_state_actions( 0, 10 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _Scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _Scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int Scanner_start = 12;
+value int Scanner_first_final = 12;
+value int Scanner_error = 0;
+
+value int Scanner_en_main = 12;
+
+host( "working/cppscan3.rl", 132 ) @{
+	
+	void Scanner::init( )
+	{
+	}@
+	{
+		cs = cast(int)Scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/cppscan3.rl", 136 ) @{
+	}
+	
+	/* Returns the count of bytes still in the buffer 
+	* (shifted to the biginning) */
+	void Scanner::execute( const char *data, int len )
+	{
+		const char *p = data;
+		const char *pe = data + len;
+		const char *eof = pe;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( _Scanner_from_state_actions[cs] ) {
+			case 10{
+				host( "NONE", 1 ) ${${ts = p;}$}$
+			}
+		}
+		
+		switch ( cs ) {
+			case 12:
+			switch( ( deref( data, p )) ) {
+				case 33: {
+					goto ctr30;
+				}
+				case 34: {
+					goto ctr2;
+				}
+				case 37: {
+					goto ctr32;
+				}
+				case 38: {
+					goto ctr33;
+				}
+				case 39: {
+					goto ctr7;
+				}
+				case 42: {
+					goto ctr34;
+				}
+				case 43: {
+					goto ctr35;
+				}
+				case 45: {
+					goto ctr36;
+				}
+				case 46: {
+					goto ctr37;
+				}
+				case 47: {
+					goto ctr38;
+				}
+				case 48: {
+					goto ctr39;
+				}
+				case 58: {
+					goto ctr41;
+				}
+				case 61: {
+					goto ctr42;
+				}
+				case 76: {
+					goto ctr44;
+				}
+				case 94: {
+					goto ctr45;
+				}
+				case 95: {
+					goto ctr43;
+				}
+				case 124: {
+					goto ctr46;
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( ( deref( data, p )) < 49 ) {
+					if ( 35 <= ( deref( data, p )) && ( deref( data, p )) <= 44 ) {
+						goto ctr31;
+					}
+				} else if ( ( deref( data, p )) > 57 ) {
+					if ( 59 <= ( deref( data, p )) ) {
+						goto ctr31;
+					}
+				} else {
+					goto ctr40;
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( ( deref( data, p )) < 97 ) {
+					{
+						goto ctr31;
+					}
+				} else if ( ( deref( data, p )) > 122 ) {
+					if ( ( deref( data, p )) <= 126 ) {
+						goto ctr31;
+					}
+				} else {
+					goto ctr43;
+				}
+			} else {
+				goto ctr43;
+			}
+			{
+				goto ctr29;
+			}
+			case 13:
+			if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+				goto ctr48;
+			}
+			{
+				goto ctr29;
+			}
+			case 14:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr51;
+			}
+			{
+				goto ctr109;
+			}
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr17;
+				}
+				case 34: {
+					goto ctr3;
+				}
+				case 92: {
+					goto ctr4;
+				}
+			}
+			{
+				goto ctr2;
+			}
+			case 2:
+			{
+				goto ctr2;
+			}
+			case 15:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr53;
+			}
+			{
+				goto ctr109;
+			}
+			case 16:
+			switch( ( deref( data, p )) ) {
+				case 38: {
+					goto ctr55;
+				}
+				case 61: {
+					goto ctr56;
+				}
+			}
+			{
+				goto ctr109;
+			}
+			case 3:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr17;
+				}
+				case 39: {
+					goto ctr8;
+				}
+				case 92: {
+					goto ctr9;
+				}
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			{
+				goto ctr7;
+			}
+			case 17:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr58;
+			}
+			{
+				goto ctr109;
+			}
+			case 18:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr60;
+				}
+				case 61: {
+					goto ctr61;
+				}
+			}
+			{
+				goto ctr109;
+			}
+			case 19:
+			switch( ( deref( data, p )) ) {
+				case 45: {
+					goto ctr63;
+				}
+				case 61: {
+					goto ctr64;
+				}
+				case 62: {
+					goto ctr65;
+				}
+			}
+			{
+				goto ctr109;
+			}
+			case 20:
+			if ( ( deref( data, p )) == 42 ) {
+				goto ctr68;
+			}
+			{
+				goto ctr67;
+			}
+			case 21:
+			switch( ( deref( data, p )) ) {
+				case 42: {
+					goto ctr70;
+				}
+				case 46: {
+					goto ctr71;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr72;
+			}
+			{
+				goto ctr109;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 46 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr23;
+			}
+			case 22:
+			switch( ( deref( data, p )) ) {
+				case 69: {
+					goto ctr75;
+				}
+				case 70: {
+					goto ctr76;
+				}
+				case 76: {
+					goto ctr76;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 102: {
+					goto ctr76;
+				}
+				case 108: {
+					goto ctr76;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr72;
+			}
+			{
+				goto ctr77;
+			}
+			case 6:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr15;
+				}
+				case 45: {
+					goto ctr15;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr17;
+			}
+			case 7:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr17;
+			}
+			case 23:
+			switch( ( deref( data, p )) ) {
+				case 70: {
+					goto ctr76;
+				}
+				case 76: {
+					goto ctr76;
+				}
+				case 102: {
+					goto ctr76;
+				}
+				case 108: {
+					goto ctr76;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr77;
+			}
+			case 24:
+			switch( ( deref( data, p )) ) {
+				case 42: {
+					goto ctr19;
+				}
+				case 47: {
+					goto ctr24;
+				}
+				case 61: {
+					goto ctr79;
+				}
+			}
+			{
+				goto ctr109;
+			}
+			case 8:
+			if ( ( deref( data, p )) == 42 ) {
+				goto ctr20;
+			}
+			{
+				goto ctr19;
+			}
+			case 9:
+			switch( ( deref( data, p )) ) {
+				case 42: {
+					goto ctr20;
+				}
+				case 47: {
+					goto ctr22;
+				}
+			}
+			{
+				goto ctr19;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr25;
+			}
+			{
+				goto ctr24;
+			}
+			case 25:
+			switch( ( deref( data, p )) ) {
+				case 46: {
+					goto ctr72;
+				}
+				case 69: {
+					goto ctr75;
+				}
+				case 76: {
+					goto ctr83;
+				}
+				case 85: {
+					goto ctr83;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 108: {
+					goto ctr83;
+				}
+				case 117: {
+					goto ctr83;
+				}
+				case 120: {
+					goto ctr84;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr82;
+			}
+			{
+				goto ctr99;
+			}
+			case 26:
+			switch( ( deref( data, p )) ) {
+				case 46: {
+					goto ctr72;
+				}
+				case 69: {
+					goto ctr75;
+				}
+				case 76: {
+					goto ctr87;
+				}
+				case 85: {
+					goto ctr87;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 108: {
+					goto ctr87;
+				}
+				case 117: {
+					goto ctr87;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr82;
+			}
+			{
+				goto ctr88;
+			}
+			case 27:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr89;
+				}
+				case 85: {
+					goto ctr89;
+				}
+				case 108: {
+					goto ctr89;
+				}
+				case 117: {
+					goto ctr89;
+				}
+			}
+			{
+				goto ctr88;
+			}
+			case 28:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr91;
+				}
+				case 85: {
+					goto ctr91;
+				}
+				case 108: {
+					goto ctr91;
+				}
+				case 117: {
+					goto ctr91;
+				}
+			}
+			{
+				goto ctr99;
+			}
+			case 29:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr93;
+				}
+				case 85: {
+					goto ctr93;
+				}
+				case 108: {
+					goto ctr93;
+				}
+				case 117: {
+					goto ctr93;
+				}
+			}
+			{
+				goto ctr99;
+			}
+			case 11:
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr28;
+				}
+			} else if ( ( deref( data, p )) > 70 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+					goto ctr28;
+				}
+			} else {
+				goto ctr28;
+			}
+			{
+				goto ctr27;
+			}
+			case 30:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr96;
+				}
+				case 85: {
+					goto ctr96;
+				}
+				case 108: {
+					goto ctr96;
+				}
+				case 117: {
+					goto ctr96;
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr28;
+				}
+			} else if ( ( deref( data, p )) > 70 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+					goto ctr28;
+				}
+			} else {
+				goto ctr28;
+			}
+			{
+				goto ctr97;
+			}
+			case 31:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr98;
+				}
+				case 85: {
+					goto ctr98;
+				}
+				case 108: {
+					goto ctr98;
+				}
+				case 117: {
+					goto ctr98;
+				}
+			}
+			{
+				goto ctr97;
+			}
+			case 32:
+			switch( ( deref( data, p )) ) {
+				case 46: {
+					goto ctr72;
+				}
+				case 69: {
+					goto ctr75;
+				}
+				case 76: {
+					goto ctr83;
+				}
+				case 85: {
+					goto ctr83;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 108: {
+					goto ctr83;
+				}
+				case 117: {
+					goto ctr83;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr40;
+			}
+			{
+				goto ctr99;
+			}
+			case 33:
+			if ( ( deref( data, p )) == 58 ) {
+				goto ctr101;
+			}
+			{
+				goto ctr109;
+			}
+			case 34:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr103;
+			}
+			{
+				goto ctr109;
+			}
+			case 35:
+			if ( ( deref( data, p )) == 95 ) {
+				goto ctr43;
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr43;
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr43;
+				}
+			} else {
+				goto ctr43;
+			}
+			{
+				goto ctr106;
+			}
+			case 36:
+			switch( ( deref( data, p )) ) {
+				case 34: {
+					goto ctr2;
+				}
+				case 39: {
+					goto ctr7;
+				}
+				case 95: {
+					goto ctr43;
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr43;
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr43;
+				}
+			} else {
+				goto ctr43;
+			}
+			{
+				goto ctr106;
+			}
+			case 37:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr108;
+			}
+			{
+				goto ctr109;
+			}
+			case 38:
+			switch( ( deref( data, p )) ) {
+				case 61: {
+					goto ctr110;
+				}
+				case 124: {
+					goto ctr111;
+				}
+			}
+			{
+				goto ctr109;
+			}
+			case 0:
+			goto _out;
+		}
+		
+		ctr2: cs = 1; goto _again;
+		ctr4: cs = 2; goto _again;
+		ctr7: cs = 3; goto _again;
+		ctr9: cs = 4; goto _again;
+		ctr71: cs = 5; goto _again;
+		ctr75: cs = 6; goto _again;
+		ctr15: cs = 7; goto _again;
+		ctr19: cs = 8; goto _again;
+		ctr20: cs = 9; goto _again;
+		ctr24: cs = 10; goto _again;
+		ctr84: cs = 11; goto _again;
+		ctr17: cs = 12; goto f0;
+		ctr3: cs = 12; goto f1;
+		ctr8: cs = 12; goto f2;
+		ctr23: cs = 12; goto f3;
+		ctr13: cs = 12; goto f4;
+		ctr22: cs = 12; goto f5;
+		ctr25: cs = 12; goto f6;
+		ctr27: cs = 12; goto f7;
+		ctr31: cs = 12; goto f10;
+		ctr48: cs = 12; goto f14;
+		ctr109: cs = 12; goto f15;
+		ctr51: cs = 12; goto f16;
+		ctr53: cs = 12; goto f17;
+		ctr55: cs = 12; goto f18;
+		ctr56: cs = 12; goto f19;
+		ctr58: cs = 12; goto f20;
+		ctr60: cs = 12; goto f21;
+		ctr61: cs = 12; goto f22;
+		ctr63: cs = 12; goto f23;
+		ctr64: cs = 12; goto f24;
+		ctr67: cs = 12; goto f25;
+		ctr68: cs = 12; goto f26;
+		ctr70: cs = 12; goto f27;
+		ctr77: cs = 12; goto f29;
+		ctr76: cs = 12; goto f30;
+		ctr79: cs = 12; goto f31;
+		ctr99: cs = 12; goto f32;
+		ctr88: cs = 12; goto f34;
+		ctr89: cs = 12; goto f35;
+		ctr93: cs = 12; goto f36;
+		ctr97: cs = 12; goto f37;
+		ctr98: cs = 12; goto f38;
+		ctr101: cs = 12; goto f39;
+		ctr103: cs = 12; goto f40;
+		ctr106: cs = 12; goto f41;
+		ctr108: cs = 12; goto f42;
+		ctr110: cs = 12; goto f43;
+		ctr111: cs = 12; goto f44;
+		ctr29: cs = 13; goto _again;
+		ctr30: cs = 14; goto _again;
+		ctr32: cs = 15; goto _again;
+		ctr33: cs = 16; goto _again;
+		ctr34: cs = 17; goto _again;
+		ctr35: cs = 18; goto _again;
+		ctr36: cs = 19; goto _again;
+		ctr65: cs = 20; goto _again;
+		ctr37: cs = 21; goto f11;
+		ctr72: cs = 22; goto f28;
+		ctr16: cs = 23; goto _again;
+		ctr38: cs = 24; goto f11;
+		ctr39: cs = 25; goto f12;
+		ctr82: cs = 26; goto f33;
+		ctr87: cs = 27; goto _again;
+		ctr83: cs = 28; goto _again;
+		ctr91: cs = 29; goto _again;
+		ctr28: cs = 30; goto _again;
+		ctr96: cs = 31; goto _again;
+		ctr40: cs = 32; goto f12;
+		ctr41: cs = 33; goto _again;
+		ctr42: cs = 34; goto _again;
+		ctr43: cs = 35; goto _again;
+		ctr44: cs = 36; goto f13;
+		ctr45: cs = 37; goto _again;
+		ctr46: cs = 38; goto _again;
+		
+		f11:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		goto _again;
+		f2:
+		host( "working/cppscan3.rl", 64 ) ${${te = p+1;host( "working/cppscan3.rl", 64 ) ${ token( TK_Slit );}$}$}$
+		goto _again;
+		f1:
+		host( "working/cppscan3.rl", 66 ) ${${te = p+1;host( "working/cppscan3.rl", 66 ) ${ token( TK_Dlit );}$}$}$
+		goto _again;
+		f30:
+		host( "working/cppscan3.rl", 79 ) ${${te = p+1;host( "working/cppscan3.rl", 79 ) ${ token( TK_Float );}$}$}$
+		goto _again;
+		f36:
+		host( "working/cppscan3.rl", 83 ) ${${te = p+1;host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$}$}$
+		goto _again;
+		f35:
+		host( "working/cppscan3.rl", 87 ) ${${te = p+1;host( "working/cppscan3.rl", 87 ) ${ token( TK_IntegerOctal );}$}$}$
+		goto _again;
+		f38:
+		host( "working/cppscan3.rl", 91 ) ${${te = p+1;host( "working/cppscan3.rl", 91 ) ${ token( TK_IntegerHex );}$}$}$
+		goto _again;
+		f39:
+		host( "working/cppscan3.rl", 94 ) ${${te = p+1;host( "working/cppscan3.rl", 94 ) ${token( TK_NameSep );}$}$}$
+		goto _again;
+		f40:
+		host( "working/cppscan3.rl", 95 ) ${${te = p+1;host( "working/cppscan3.rl", 95 ) ${token( TK_EqualsEquals );}$}$}$
+		goto _again;
+		f16:
+		host( "working/cppscan3.rl", 96 ) ${${te = p+1;host( "working/cppscan3.rl", 96 ) ${token( TK_NotEquals );}$}$}$
+		goto _again;
+		f18:
+		host( "working/cppscan3.rl", 97 ) ${${te = p+1;host( "working/cppscan3.rl", 97 ) ${token( TK_AndAnd );}$}$}$
+		goto _again;
+		f44:
+		host( "working/cppscan3.rl", 98 ) ${${te = p+1;host( "working/cppscan3.rl", 98 ) ${token( TK_OrOr );}$}$}$
+		goto _again;
+		f20:
+		host( "working/cppscan3.rl", 99 ) ${${te = p+1;host( "working/cppscan3.rl", 99 ) ${token( TK_MultAssign );}$}$}$
+		goto _again;
+		f31:
+		host( "working/cppscan3.rl", 100 ) ${${te = p+1;host( "working/cppscan3.rl", 100 ) ${token( TK_DivAssign );}$}$}$
+		goto _again;
+		f17:
+		host( "working/cppscan3.rl", 101 ) ${${te = p+1;host( "working/cppscan3.rl", 101 ) ${token( TK_PercentAssign );}$}$}$
+		goto _again;
+		f22:
+		host( "working/cppscan3.rl", 102 ) ${${te = p+1;host( "working/cppscan3.rl", 102 ) ${token( TK_PlusAssign );}$}$}$
+		goto _again;
+		f24:
+		host( "working/cppscan3.rl", 103 ) ${${te = p+1;host( "working/cppscan3.rl", 103 ) ${token( TK_MinusAssign );}$}$}$
+		goto _again;
+		f19:
+		host( "working/cppscan3.rl", 104 ) ${${te = p+1;host( "working/cppscan3.rl", 104 ) ${token( TK_AmpAssign );}$}$}$
+		goto _again;
+		f42:
+		host( "working/cppscan3.rl", 105 ) ${${te = p+1;host( "working/cppscan3.rl", 105 ) ${token( TK_CaretAssign );}$}$}$
+		goto _again;
+		f43:
+		host( "working/cppscan3.rl", 106 ) ${${te = p+1;host( "working/cppscan3.rl", 106 ) ${token( TK_BarAssign );}$}$}$
+		goto _again;
+		f21:
+		host( "working/cppscan3.rl", 107 ) ${${te = p+1;host( "working/cppscan3.rl", 107 ) ${token( TK_PlusPlus );}$}$}$
+		goto _again;
+		f23:
+		host( "working/cppscan3.rl", 108 ) ${${te = p+1;host( "working/cppscan3.rl", 108 ) ${token( TK_MinusMinus );}$}$}$
+		goto _again;
+		f26:
+		host( "working/cppscan3.rl", 110 ) ${${te = p+1;host( "working/cppscan3.rl", 110 ) ${token( TK_ArrowStar );}$}$}$
+		goto _again;
+		f27:
+		host( "working/cppscan3.rl", 111 ) ${${te = p+1;host( "working/cppscan3.rl", 111 ) ${token( TK_DotStar );}$}$}$
+		goto _again;
+		f4:
+		host( "working/cppscan3.rl", 114 ) ${${te = p+1;host( "working/cppscan3.rl", 114 ) ${ token( TK_DotDotDot );}$}$}$
+		goto _again;
+		f10:
+		host( "working/cppscan3.rl", 117 ) ${${te = p+1;host( "working/cppscan3.rl", 117 ) ${ token( ts[0] );}$}$}$
+		goto _again;
+		f5:
+		host( "working/cppscan3.rl", 119 ) ${${te = p+1;host( "working/cppscan3.rl", 119 ) ${
+					token( TK_Comment );
+				}$}$}$
+		goto _again;
+		f6:
+		host( "working/cppscan3.rl", 119 ) ${${te = p+1;host( "working/cppscan3.rl", 119 ) ${
+					token( TK_Comment );
+				}$}$}$
+		goto _again;
+		f41:
+		host( "working/cppscan3.rl", 70 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 70 ) ${ token( TK_Id );}$}$}$
+		goto _again;
+		f29:
+		host( "working/cppscan3.rl", 79 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 79 ) ${ token( TK_Float );}$}$}$
+		goto _again;
+		f32:
+		host( "working/cppscan3.rl", 83 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$}$}$
+		goto _again;
+		f34:
+		host( "working/cppscan3.rl", 87 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 87 ) ${ token( TK_IntegerOctal );}$}$}$
+		goto _again;
+		f37:
+		host( "working/cppscan3.rl", 91 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 91 ) ${ token( TK_IntegerHex );}$}$}$
+		goto _again;
+		f25:
+		host( "working/cppscan3.rl", 109 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 109 ) ${token( TK_Arrow );}$}$}$
+		goto _again;
+		f15:
+		host( "working/cppscan3.rl", 117 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 117 ) ${ token( ts[0] );}$}$}$
+		goto _again;
+		f14:
+		host( "working/cppscan3.rl", 126 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 126 ) ${ token( TK_Whitespace );}$}$}$
+		goto _again;
+		f7:
+		host( "working/cppscan3.rl", 83 ) ${${p = ((te))-1;
+				host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$}$}$
+		goto _again;
+		f3:
+		host( "working/cppscan3.rl", 117 ) ${${p = ((te))-1;
+				host( "working/cppscan3.rl", 117 ) ${ token( ts[0] );}$}$}$
+		goto _again;
+		f0:
+		host( "NONE", 1 ) ${${switch( act ) {
+					case 0 {
+						host( "NONE", 1 ) ${${cs = 0; goto _again;}$}$ }
+					case 3 {
+						p = ((te))-1;
+						host( "working/cppscan3.rl", 70 ) ${ token( TK_Id );}$ }
+					case 4 {
+						p = ((te))-1;
+						host( "working/cppscan3.rl", 79 ) ${ token( TK_Float );}$ }
+					case 5 {
+						p = ((te))-1;
+						host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$ }
+					case 6 {
+						p = ((te))-1;
+						host( "working/cppscan3.rl", 87 ) ${ token( TK_IntegerOctal );}$ }
+				}}$
+		}$
+		goto _again;
+		f13:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan3.rl", 70 ) ${${act = 3;}$}$
+		goto _again;
+		f28:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan3.rl", 79 ) ${${act = 4;}$}$
+		goto _again;
+		f12:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan3.rl", 83 ) ${${act = 5;}$}$
+		goto _again;
+		f33:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan3.rl", 87 ) ${${act = 6;}$}$
+		goto _again;
+		
+		_again:
+		switch ( _Scanner_to_state_actions[cs] ) {
+			case 9{
+				host( "NONE", 1 ) ${${ts = nil;}$}$	host( "NONE", 1 ) ${${act = 0;}$}$
+			}
+		}
+		
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( cs ) {
+				case 13: goto ctr48;
+				case 14: goto ctr109;
+				case 1: goto ctr17;
+				case 2: goto ctr17;
+				case 15: goto ctr109;
+				case 16: goto ctr109;
+				case 3: goto ctr17;
+				case 4: goto ctr17;
+				case 17: goto ctr109;
+				case 18: goto ctr109;
+				case 19: goto ctr109;
+				case 20: goto ctr67;
+				case 21: goto ctr109;
+				case 5: goto ctr23;
+				case 22: goto ctr77;
+				case 6: goto ctr17;
+				case 7: goto ctr17;
+				case 23: goto ctr77;
+				case 24: goto ctr109;
+				case 8: goto ctr23;
+				case 9: goto ctr23;
+				case 10: goto ctr23;
+				case 25: goto ctr99;
+				case 26: goto ctr88;
+				case 27: goto ctr88;
+				case 28: goto ctr99;
+				case 29: goto ctr99;
+				case 11: goto ctr27;
+				case 30: goto ctr97;
+				case 31: goto ctr97;
+				case 32: goto ctr99;
+				case 33: goto ctr109;
+				case 34: goto ctr109;
+				case 35: goto ctr106;
+				case 36: goto ctr106;
+				case 37: goto ctr109;
+				case 38: goto ctr109;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/cppscan3.rl", 147 ) @{
+		
+		cout << "P: " << (p - data) << endl;
+	}
+	
+	int Scanner::finish( )
+	{
+		if ( cs == Scanner_error )
+		return -1;
+		if ( cs >= Scanner_first_final )
+		return 1;
+		return 0;
+	}
+	
+	
+	void Scanner::token( int tok )
+	{
+		const char *data = ts;
+		int len = te - ts;
+		cout << "<" << tok << "> ";
+		for ( int i = 0; i < len; i++ )
+		cout << data[i];
+		cout << '\n';
+	}
+	
+	void test( const char *buf )
+	{
+		int len = strlen( buf );
+		std::ios::sync_with_stdio(false);
+		Scanner scanner;
+		scanner.init();
+		
+		scanner.execute( buf, len );
+		if ( scanner.cs == Scanner_error ) {
+			/* Machine failed before finding a token. */
+			cout << "PARSE ERROR" << endl;
+		}
+		
+		/* FIXME: Last token may get lost. */
+		scanner.finish();
+	}
+	
+	int main()
+	{
+		test(
+		"\"\\\"hi\" /*\n"
+		"*/\n"
+		"44 .44\n"
+		"44. 44\n"
+		"44 . 44\n"
+		"44.44\n"
+		"_hithere22"
+		);
+		
+		test(
+		"'\\''\"\\n\\d'\\\"\"\n"
+		"hi\n"
+		"99\n"
+		".99\n"
+		"99e-4\n"
+		"->*\n"
+		"||\n"
+		"0x98\n"
+		"0x\n"
+		"//\n"
+		"/* * */"
+		);
+		
+		test(
+		"'\n"
+		"'\n"
+		);
+		
+	}
+	
+}@

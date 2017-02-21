@@ -1,0 +1,132 @@
+class empty1_java
+{
+
+
+
+
+
+
+
+	private static char  _empty1_trans_keys [] = { 1, 0, 1, 0, 0,  };
+	private static byte  _empty1_char_class [] = { 0 ,  };
+	private static byte  _empty1_index_offsets [] = { 0, 0, 0 ,  };
+	private static byte  _empty1_indicies [] = { 0 ,  };
+	private static byte  _empty1_index_defaults [] = { 0, 0, 0 ,  };
+	private static byte  _empty1_trans_cond_spaces [] = { -1, 0 ,  };
+	private static byte  _empty1_cond_targs [] = { 0, 0 ,  };
+	private static byte  _empty1_cond_actions [] = { 0, 0 ,  };
+	private static byte  _empty1_nfa_targs [] = { 0, 0 ,  };
+	private static byte  _empty1_nfa_offsets [] = { 0, 0, 0 ,  };
+	private static byte  _empty1_nfa_push_actions [] = { 0, 0 ,  };
+	private static byte  _empty1_nfa_pop_trans [] = { 0, 0 ,  };
+	private static int  empty1_start  = 1;
+	private static int  empty1_first_final  = 2;
+	private static int  empty1_error  = 0;
+	private static int  empty1_en_main  = 1;
+	int cs;
+	
+	void init()
+	{
+		{
+			cs = (int)empty1_start;
+			
+		}
+	}
+	
+	void exec( char data[], int len )
+	{
+		char buffer [] = new char[1024];
+		int blen = 0;
+		int p = 0;
+		int pe = len;
+		
+		String _s;
+		{
+			int _trans = 0;
+			int _goto_targ = 0;
+			_goto: while ( true ) {
+				switch ( _goto_targ ) {
+					case 0:
+					if ( p == pe  )
+					{
+						_goto_targ = 3;
+						if (true)
+						continue _goto;
+					}
+					
+					if ( cs == 0  )
+					{
+						_goto_targ = 4;
+						if (true)
+						continue _goto;
+					}
+					
+					case 1:
+					_trans = (int)_empty1_index_defaults[cs];
+					{
+						_goto_targ = 2;
+						if (true)
+						continue _goto;
+					}
+					
+					case 2:
+					cs = (int)_empty1_cond_targs[_trans];
+					if ( cs == 0  )
+					{
+						_goto_targ = 4;
+						if (true)
+						continue _goto;
+					}
+					
+					p += 1;
+					if ( p != pe  )
+					{
+						_goto_targ = 1;
+						if (true)
+						continue _goto;
+					}
+					
+					
+					case 3:
+					{
+					
+					}
+					
+					case 4:
+					{
+					
+					}
+					
+					
+				}
+				break;
+			}
+			
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= empty1_first_final )
+		System.out.println( "ACCEPT" );
+		else
+		System.out.println( "FAIL" );
+	}
+	
+	static final String inp[] = {
+		"",
+		"x",
+	};
+	
+	static final int inplen = 2;
+	
+	public static void main (String[] args)
+	{
+		empty1_java machine = new empty1_java();
+		for ( int i = 0; i < inplen; i++ ) {
+			machine.init();
+			machine.exec( inp[i].toCharArray(), inp[i].length() );
+			machine.finish();
+		}
+	}
+}
