@@ -47,6 +47,13 @@ CPPFLAGS="@SUBJECT_CPPFLAGS@"
 LDFLAGS="@SUBJECT_LDFLAGS@"
 export LD_LIBRARY_PATH="@SUBJECT_LD_LIBRARY_PATH@"
 
+# Make available to to test directories below us that are not part of this
+# repository and cannot source one dir up.
+export SUBJECT_BIN="@SUBJECT_BIN@"
+export SUBJECT_CPPFLAGS="@SUBJECT_CPPFLAGS@"
+export SUBJECT_LDFLAGS="@SUBJECT_LDFLAGS@"
+export SUBJECT_LD_LIBRARY_PATH="@SUBJECT_LD_LIBRARY_PATH@"
+
 # cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
 
