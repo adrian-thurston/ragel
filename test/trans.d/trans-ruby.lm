@@ -268,7 +268,7 @@ void rw_ruby( Output: stream )
 
 	send Output
 		"
-		"[Section]
+		"[@Section]
 		"
 		"%% write data;
 		"

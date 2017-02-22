@@ -252,7 +252,7 @@ void rw_d( Output: stream )
 
 	send Output 
 		"
-		"[Section]
+		"[@Section]
 		"
 		"%% write data;
 		"int cs;

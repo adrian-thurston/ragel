@@ -563,7 +563,7 @@ namespace ml_gen
 
 		if MO {
 			send Output
-				[MO]
+				[@MO]
 		}
 		else {
 			send stderr

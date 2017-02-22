@@ -310,7 +310,7 @@ void rw_ocaml( Output: stream )
 
 	send Output
 		"
-		"[Section]
+		"[@Section]
 		"
 		"
 		"%% write data;

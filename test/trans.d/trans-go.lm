@@ -256,7 +256,7 @@ void rw_go( Output: stream )
 		Action = parse ragel::action_block[$Out->tree]
 	}
 
-	prints( Output, '\n', Section, '\n' )
+	send Output ['\n' @Section '\n']
 
 	send Output
 		"var cs int;

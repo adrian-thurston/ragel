@@ -266,7 +266,7 @@ void rw_java( Output: stream )
 
 	send Output
 		"
-		"[Section]
+		"[@Section]
 		"
 		"%% write data;
 		"int cs;

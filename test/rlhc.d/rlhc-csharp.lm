@@ -463,7 +463,7 @@ namespace csharp_gen
 
 		if CSO {
 			send Output
-				[CSO]
+				[@CSO]
 		}
 		else {
 			send stderr

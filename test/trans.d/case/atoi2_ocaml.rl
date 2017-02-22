@@ -16,13 +16,13 @@ value := 0;
 	action see_neg {neg := 1;
 }
 
-	action add_digit {value := value .contents * 10  + ( fc - 48 )
+	action add_digit {value := value .contents * 10 + ( fc - 48 )
 ;
 }
 
-	action finish {if neg .contents != 0  then
+	action finish {if neg .contents != 0 then
 begin
-	value := -1  * value.contents;
+	value := -1 * value.contents;
 
 end 
 ;

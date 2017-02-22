@@ -20,7 +20,7 @@ let k = ref 0
 	action three {print_string( "  three\n" );
 }
 
-	action seti {if fc == 48  then
+	action seti {if fc == 48 then
 begin
 	i := 0;
 
@@ -32,7 +32,7 @@ begin
 end
 ;
 }
-	action setj {if fc == 48  then
+	action setj {if fc == 48 then
 begin
 	j := 0;
 
@@ -44,7 +44,7 @@ begin
 end
 ;
 }
-	action setk {if fc == 48  then
+	action setk {if fc == 48 then
 begin
 	k := 0;
 
