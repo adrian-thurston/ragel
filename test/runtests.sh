@@ -10,6 +10,8 @@
 #    by extracting section. Does not work with translated test cases.
 # 
 
+TRANS=./trans
+
 # Make available to to test directories below us that are not part of this
 # repository and cannot source one dir up.
 export SUBJECT_BIN="@SUBJECT_BIN@"
