@@ -114,6 +114,8 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope
 		}
 
 		ObjectDef *searchObjDef = qualUT->objectDef();
+		if ( searchObjDef == 0 )
+			error(qi->loc) << "left hand side of qual has no object defintion" << endp;
 		searchScope = searchObjDef->rootScope;
 	}
 
