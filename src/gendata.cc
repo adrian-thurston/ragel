@@ -1510,11 +1510,32 @@ void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 	red->id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
 }
 
+void CodeGenData::writeClear()
+{
+	clear();
+
+	/* Delete all the nodes in the action list. Will cause all the
+	 * string data that represents the actions to be deallocated. */
+	red->fsm->ctx->actionList.empty();
+
+	delete red->fsm;
+	red->fsm = 0;
+
+	// red->pd->graphDict.empty();
+
+	cleared = true;
+}
+
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		std::vector<std::string> &args, bool generateDot, const HostLang *hostLang )
 {
 	/* Start write generation on a fresh line. */
 	out << '\n';
+
+	if ( cleared ) {
+		red->id->error(loc) << "write statement following a clear is invalid" << std::endl;
+		return;
+	}
 
 	if ( args[0] == "data" ) {
 		for ( int i = 1; i < nargs; i++ ) {
@@ -1573,6 +1594,11 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		for ( int i = 1; i < nargs; i++ )
 			write_option_error( loc, args[i] );
 		writeError();
+	}
+	else if ( args[0] == "clear" ) {
+		for ( int i = 1; i < nargs; i++ )
+			write_option_error( loc, args[i] );
+		writeClear();
 	}
 	else {
 		/* EMIT An error here. */

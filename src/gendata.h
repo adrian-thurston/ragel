@@ -382,7 +382,8 @@ struct CodeGenData
 		noFinal(false),
 		noError(false),
 		noCS(false),
-		lineDirectives(args.lineDirectives)
+		lineDirectives(args.lineDirectives),
+		cleared(false)
 	{
 	}
 
@@ -400,6 +401,7 @@ struct CodeGenData
 	virtual void writeStart() {};
 	virtual void writeFirstFinal() {};
 	virtual void writeError() {};
+	virtual void writeClear();
 
 	/* Show some stats after a write data. */
 	virtual void statsSummary() = 0;
@@ -441,6 +443,7 @@ protected:
 	void write_option_error( InputLoc &loc, std::string arg );
 
 	bool lineDirectives;
+	bool cleared;
 };
 
 /* Selects and constructs the codegen based on the output options. */
