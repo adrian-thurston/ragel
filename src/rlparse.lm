@@ -136,20 +136,5 @@ else if ( Cmd == 'toplevel-reduce-str' ) {
 	reduce TopLevel start[ Data ]
 	RagelError = error
 }
-else if ( Cmd == 'section-reduce-file' ) {
-	GblSectionPass = true
-
-	Stream: stream = open( FileName, "r" )
-	reduce SectionPass start[ Stream ]
-	RagelError = error
-}
-else if ( Cmd == 'section-reduce-str' ) {
-	GblSectionPass = true
-
-	A = argv->pop_head_el()
-	Data: str = A->value
-	reduce SectionPass start[ Data ]
-	RagelError = error
-}
 
 include 'reducer.lm'

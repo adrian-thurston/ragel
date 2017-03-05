@@ -52,11 +52,11 @@ struct IncludePass;
 
 struct TopLevel
 {
-	TopLevel( InputData *id, SectionPass *sectionPass, const HostLang *hostLang,
+	TopLevel( InputData *id, const HostLang *hostLang,
 			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
 		id(id),
-		sectionPass(sectionPass),
+		section(0),
 		pd(0),
 		machineSpec(0),
 		machineName(0),
@@ -75,7 +75,7 @@ struct TopLevel
 	}
 
 	InputData *id;
-	
+	Section *section;
 	SectionPass *sectionPass;
 	ParseData *pd;
 	char *machineSpec;
@@ -113,26 +113,6 @@ struct TopLevel
 
 	void loadIncludeData( IncludeRec *el, IncludePass &includePass, const string &fileName );
 	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
-};
-
-struct SectionPass
-{
-	SectionPass( InputData *id )
-	:
-		id(id),
-		section(0)
-	{
-	}
-
-	InputData *id;
-	Section *section;
-
-	void reduceFile( const char *inputFileName );
-	void reduceStr( const char *inputFileName, const char *input );
-
-	/* Generated and called by colm. */
-	void commit_reduce_forward( program_t *prg, tree_t **root,
-			struct pda_run *pda_run, parse_tree_t *pt );
 };
 
 struct IncludePass

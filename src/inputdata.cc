@@ -348,19 +348,6 @@ bool InputData::checkLastRef( InputItem *ii )
 			/* Flush out. */
 			writeOutput( lastFlush );
 
-			/* If this is the last reference to a pd, we can now clear the
-			 * memory for it. */
-			if ( lastFlush->pd != 0 && lastFlush->section->lastReference == lastFlush ) {
-				if ( lastFlush->pd->instanceList.length() > 0 ) {
-					lastFlush->pd->clear();
-
-#ifdef WITH_RAGEL_KELBT
-					if ( lastFlush->parser != 0 )
-						lastFlush->parser->clear();
-#endif
-				}
-			}
-
 			lastFlush = lastFlush->next;
 		}
 	}
@@ -389,6 +376,13 @@ void InputData::terminateAllParsers( )
 
 void InputData::flushRemaining()
 {
+	InputItem *item = inputItems.head;
+
+	while ( item != 0 ) {
+		checkLastRef( item );
+		item = item->next;
+	}
+
 	/* Flush remaining items. */
 	while ( lastFlush != 0 ) {
 		/* Flush out. */
@@ -494,8 +488,7 @@ bool InputData::parseReduce()
 	 * Colm-based reduction parser introduced in ragel 7. 
 	 */
 
-	SectionPass *sectionPass = new SectionPass( this );
-	TopLevel *topLevel = new TopLevel( this, sectionPass, hostLang,
+	TopLevel *topLevel = new TopLevel( this, hostLang,
 			minimizeLevel, minimizeOpt );
 
 	if ( ! inLibRagel ) {
@@ -510,16 +503,11 @@ bool InputData::parseReduce()
 		}
 	}
 
-	makeFirstInputItem();
-
-	if ( inLibRagel )
-		sectionPass->reduceStr( inputFileName, input );
-	else
-		sectionPass->reduceFile( inputFileName );
-	
 	if ( errorCount )
 		return false;
 
+	makeFirstInputItem();
+	
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
@@ -534,8 +522,6 @@ bool InputData::parseReduce()
 	bool success = topLevel->success;
 
 	delete topLevel;
-	delete sectionPass;
-
 	return success;
 }
 

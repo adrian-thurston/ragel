@@ -4,6 +4,22 @@ reduction TopLevel
 	#	[`machine word `;] :MachineName
 	ragel::machine_name :MachineName
 	{
+		{
+			if ( includeDepth == 0 ) {
+				string machine( $word->data, $word->length );
+
+				SectionDictEl *sdEl = id->sectionDict.find( machine );
+				if ( sdEl == 0 ) {
+					sdEl = new SectionDictEl( machine );
+					sdEl->value = new Section( machine );
+					id->sectionDict.insert( sdEl );
+					id->sectionList.append( sdEl->value );
+				}
+
+				section = sdEl->value;
+			}
+		}
+
 		InputLoc sectionLoc;
 		string machine( $word->data, $word->length );
 
@@ -263,6 +279,15 @@ reduction TopLevel
 	ragel::statement :Write
 	{
 		if ( includeDepth == 0 ) {
+			{
+				InputItem *inputItem = new InputItem;
+				inputItem->type = InputItem::Write;
+				inputItem->loc = @Cmd;
+				inputItem->name = section->sectionName;
+				inputItem->section = section;
+
+				id->inputItems.append( inputItem );
+			}
 			id->curItem = id->curItem->next;
 			InputItem *inputItem = id->curItem;
 
@@ -2602,78 +2627,38 @@ reduction TopLevel
 	c_host::section :MultiLine
 	{
 		if ( includeDepth == 0 ) {
-			id->curItem = id->curItem->next;
-			id->curItem->pd = pd;
-			bool success = id->checkLastRef( id->curItem );
-			if ( ! success ) {
-				pda_run->fail_parsing = 1;
-				this->success = false;
+			{
+				InputItem *inputItem = new InputItem;
+				inputItem->type = InputItem::EndSection;
+				inputItem->loc = @3;
+				id->inputItems.append( inputItem );
+
+				if ( section != 0 ) {
+					inputItem->section = section;
+					section->lastReference = inputItem;
+				}
+
+				/* The end section may include a newline on the end, so
+				 * we use the last line, which will count the newline. */
+				inputItem = new InputItem;
+				inputItem->type = InputItem::HostData;
+				inputItem->loc = @3;
+				if ( inputItem->loc.fileName == 0 )
+					inputItem->loc = @1;
+						
+				id->inputItems.append( inputItem );
 			}
 
+			/* Record the parse data and move over the end section. */
+			id->curItem = id->curItem->next;
+			id->curItem->pd = pd;
+
+			/* Move over the host data. */
 			id->curItem = id->curItem->next;
 		}
 	}
 end 
 
-#
-# The section pass will collect the list of input items and the unique
-# sections. This allows us to free compilation resources as we go forward with
-# the parsing pass. We can identify the last known reference to a particular
-# section.
-#
-# In the parsing pass we iterate the input item list created here.
-#
-
-reduction SectionPass
-	ragel::machine_name :MachineName
-	{
-		string machine( $word->data, $word->length );
-
-		SectionDictEl *sdEl = id->sectionDict.find( machine );
-		if ( sdEl == 0 ) {
-			sdEl = new SectionDictEl( machine );
-			sdEl->value = new Section( machine );
-			id->sectionDict.insert( sdEl );
-			id->sectionList.append( sdEl->value );
-		}
-
-		section = sdEl->value;
-	}
-
-	ragel::statement :Write
-	{
-		InputItem *inputItem = new InputItem;
-		inputItem->type = InputItem::Write;
-		inputItem->loc = @Cmd;
-		inputItem->name = section->sectionName;
-		inputItem->section = section;
-
-		id->inputItems.append( inputItem );
-	}
-
-	c_host::section :MultiLine
-	{
-		InputItem *inputItem = new InputItem;
-		inputItem->type = InputItem::EndSection;
-		inputItem->loc = @3;
-		id->inputItems.append( inputItem );
-
-		if ( section != 0 ) {
-			inputItem->section = section;
-			section->lastReference = inputItem;
-		}
-
-		/* The end section may include a newline on the end, so
-		 * we use the last line, which will count the newline. */
-		inputItem = new InputItem;
-		inputItem->type = InputItem::HostData;
-		inputItem->loc = @3;
-		if ( inputItem->loc.fileName == 0 )
-			inputItem->loc = @1;
-				
-		id->inputItems.append( inputItem );
-	}
-end
 
 reduction IncludePass
 	ragel::machine_name :MachineName

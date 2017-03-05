@@ -282,54 +282,6 @@ void TopLevel::reduceStr( const char *inputFileName, const char *input )
 	curFileName = prevCurFileName;
 }
 
-
-void SectionPass::reduceFile( const char *inputFileName )
-{
-	const char *argv[5];
-	argv[0] = "rlparse";
-	argv[1] = "section-reduce-file";
-	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = 0;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 4, argv );
-	id->streamFileNames.append( colm_extract_fns( program ) );
-
-	int length = 0;
-	const char *err = colm_error( program, &length );
-	if ( err != 0 )
-		id->error_plain() << string( err, length ) << std::endl;
-
-	colm_delete_program( program );
-}
-
-void SectionPass::reduceStr( const char *inputFileName, const char *input )
-{
-	const char *argv[6];
-	argv[0] = "rlparse";
-	argv[1] = "section-reduce-str";
-	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = input;
-	argv[5] = 0;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 5, argv );
-	id->streamFileNames.append( colm_extract_fns( program ) );
-
-	int length = 0;
-	const char *err = colm_error( program, &length );
-	if ( err != 0 )
-		id->error_plain() << string( err, length ) << std::endl;
-
-	colm_delete_program( program );
-}
-
 void IncludePass::reduceFile( const char *inputFileName, const HostLang *hostLang )
 {
 	const char *argv[5];
