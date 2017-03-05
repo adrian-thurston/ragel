@@ -73,9 +73,6 @@ libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 EXTRA_DIST = \
 	ragel.lm \
 	ragel-c.lm \
-	ragel-crack.lm \
-	ragel-ruby.lm \
-	ragel-ocaml.lm \
 	rlparse.lm \
 	reducer.lm \
 	rlscan.rl \
@@ -90,10 +87,7 @@ endif
 
 RAGEL_LM = \
 	ragel.lm \
-	ragel-c.lm \
-	ragel-ruby.lm \
-	ragel-ocaml.lm \
-	ragel-crack.lm
+	ragel-c.lm
 
 parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -b rlparse_object -o $@ -m commit.cc $<

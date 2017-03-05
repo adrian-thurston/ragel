@@ -120,20 +120,10 @@ end
 lex
 	token select /''/
 	{
-		if Lang == "ruby"
-			input->push( make_token( typeid<ruby_select>, '' ) )
-		elsif Lang == "ocaml"
-			input->push( make_token( typeid<ocaml_select>, '' ) )
-		elsif Lang == "crack"
-			input->push( make_token( typeid<crack_select>, '' ) )
-		else
-			input->push( make_token( typeid<c_select>, '' ) )
+		input->push( make_token( typeid<c_select>, '' ) )
 	}
 
 	token c_select //
-	token ruby_select //
-	token ocaml_select //
-	token crack_select //
 end
 
 
@@ -268,16 +258,10 @@ namespace ragel
 	|	[word] :Base
 
 	def action_expr
-		[`{ c_select     CInlineExpr: c_inline::inline_expr c_inline::`}] :C
-	|	[`{ ruby_select  RubyInlineExpr: ruby_inline::inline_expr ruby_inline::`}]
-	|	[`{ ocaml_select OCamlInlineExpr: ocaml_inline::inline_expr ocaml_inline::`}]
-	|	[`{ crack_select CrackInlineExpr: crack_inline::inline_expr crack_inline::`}]
+		[`{ c_select CInlineExpr: c_inline::inline_expr c_inline::`}] :C
 
 	def action_block
-		[`{ c_select     CInlineBlock: c_inline::inline_block c_inline::`}] :C
-	|	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
-	|	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
-	|	[`{ crack_select CrackInlineBlock: crack_inline::inline_block crack_inline::`}]
+		[`{ c_select CInlineBlock: c_inline::inline_block c_inline::`}] :C
 
 	def action_arg_list
 		[action_arg_list `, action_ref] :Rec
