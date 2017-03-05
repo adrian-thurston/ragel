@@ -4,10 +4,20 @@ reduction TopLevel
 	#	[`machine word `;] :MachineName
 	ragel::machine_name :MachineName
 	{
-		{
-			if ( includeDepth == 0 ) {
-				string machine( $word->data, $word->length );
+		string machine( $ign_word->data, $ign_word->length );
 
+//		if ( includeDepth > 0 ) {
+//			if ( machine == std::string(targetMachine) ) {
+//				std::cout << "found target" << std::endl;
+//			}
+//			else {
+//
+//			}
+//
+//		}
+//		else  {
+
+//			if ( includeDepth == 0 ) {
 				SectionDictEl *sdEl = id->sectionDict.find( machine );
 				if ( sdEl == 0 ) {
 					sdEl = new SectionDictEl( machine );
@@ -17,34 +27,36 @@ reduction TopLevel
 				}
 
 				section = sdEl->value;
+//			}
+
+			InputLoc sectionLoc;
+
+			if ( includeDepth > 0 ) {
+				/* Check if the the machine is the one we are searching for. If
+				 * not, reset pd. Otherwise, rename it to target machine because we
+				 * are drawing the statements into target. */
+				if ( machine == searchMachine ) {
+					machine = targetMachine;
+					//std::cout << "adding content to: " << machine << std::endl;
+				}
 			}
-		}
 
-		InputLoc sectionLoc;
-		string machine( $word->data, $word->length );
+			sdEl = id->sectionDict.find( machine.c_str() );
+			assert( sdEl != 0 );
 
-		if ( includeDepth > 0 ) {
-			/* Check if the the machine is the one we are searching for. If
-			 * not, reset pd. Otherwise, rename it to target machine because we
-			 * are drawing the statements into target. */
-			if ( machine == searchMachine )
-				machine = targetMachine;
-		}
+			ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
+			if ( pdEl == 0 ) {
+				pdEl = new ParseDataDictEl( machine );
+				pdEl->value = new ParseData( id, machine,
+						id->nextMachineId++, sectionLoc, hostLang,
+						minimizeLevel, minimizeOpt );
+				id->parseDataDict.insert( pdEl );
+				id->parseDataList.append( pdEl->value );
+			}
 
-		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
-		assert( sdEl != 0 );
-
-		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
-		if ( pdEl == 0 ) {
-			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( id, machine,
-					id->nextMachineId++, sectionLoc, hostLang,
-					minimizeLevel, minimizeOpt );
-			id->parseDataDict.insert( pdEl );
-			id->parseDataList.append( pdEl->value );
-		}
-
-		pd = pdEl->value;
+			pd = pdEl->value;
+//		}
+		//std::cout << "machine-name reduced: " << pd << std::endl;
 	}
 
 	# def statement
@@ -2626,6 +2638,18 @@ reduction TopLevel
 
 	c_host::section :MultiLine
 	{
+//		if ( sectionMachine.size() > 0 && sectionMachine == targetMachine ) {
+//			IncItem *incItem = new IncItem;
+//			incItem->loc = @1;
+//
+//			/* The locations are token starts. Include the trailing }%% token. */
+//			incItem->start = @1->byte;
+//			incItem->end = @3->byte + $3->length;
+//			incItem->length = incItem->end - incItem->start;
+//
+//			incItem->section = section;
+//			incItems.append( incItem );
+//		}
 		if ( includeDepth == 0 ) {
 			{
 				InputItem *inputItem = new InputItem;
@@ -2663,7 +2687,7 @@ end
 reduction IncludePass
 	ragel::machine_name :MachineName
 	{
-		sectionMachine = string( $word->data, $word->length );
+		sectionMachine = string( $ign_word->data, $ign_word->length );
 	}
 
 	c_host::section :MultiLine

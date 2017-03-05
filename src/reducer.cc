@@ -136,24 +136,27 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	/* Stash the current section name and pd. */
 	string sectionName = pd->sectionName;
 	ParseData *pd0 = pd;
+	std::string foundFileName;
 
-	IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );
-	if ( el == 0 ) {
-		el = new IncludeRec( fileName, machine );
+	// std::cout << "searching for " << fileName << std::endl;
+
+//	IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );
+//	if ( el == 0 ) {
+//		el = new IncludeRec( fileName, machine );
 
 		const char **includeChecks = 0;
 		long found = 0;
 
-		/* First collect the locations of the text using an include pass. */
-		IncludePass includePass( id, machine );
-		if ( id->inLibRagel && !fileSpecified ) {
-			el->foundFileName = curFileName;
-
-			/* In LibRagel and no file was specified in the include statement.
-			 * In this case we run the include pass on the input text supplied. */
-			includePass.reduceStr( fileName.c_str(), id->hostLang, id->input );
-		}
-		else {
+//		/* First collect the locations of the text using an include pass. */
+//		IncludePass includePass( id, machine );
+//		if ( id->inLibRagel && !fileSpecified ) {
+//			el->foundFileName = curFileName;
+//
+//			/* In LibRagel and no file was specified in the include statement.
+//			 * In this case we run the include pass on the input text supplied. */
+//			includePass.reduceStr( fileName.c_str(), id->hostLang, id->input );
+//		}
+//		else {
 			const char *inclSectionName = machine.c_str();
 
 			/* Implement defaults for the input file and section name. */
@@ -181,31 +184,31 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 			}
 			else {
 				delete inFile;
-				el->foundFileName = curFileName;
+				foundFileName = curFileName;
 
-				/* Don't include anything that's already been included. */
-				if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
-					pd->includeHistory.push_back( IncludeHistoryItem( 
-							includeChecks[found], inclSectionName ) );
-
-					/* Either we are not in the lib, or a file was specifed, use the
-					 * file-based include pass. */
-					includePass.reduceFile( includeChecks[found], id->hostLang );
-				}
+//				/* Don't include anything that's already been included. */
+//				if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
+//					pd->includeHistory.push_back( IncludeHistoryItem( 
+//							includeChecks[found], inclSectionName ) );
+//
+//					/* Either we are not in the lib, or a file was specifed, use the
+//					 * file-based include pass. */
+//					includePass.reduceFile( includeChecks[found], id->hostLang );
+//				}
 			}
-		}
+//		}
 
-		if ( includePass.incItems.length() == 0 ) {
-			pd->id->error(incLoc) << "could not find machine " << machine <<
-					" in " << fileName << endp;
-		}
-		else {
-			/* Load the data into include el. Save in the dict. */
-			loadIncludeData( el, includePass, includeChecks[found] );
-			id->includeDict.insert( el );
-			includePass.incItems.empty();
-		}
-	}
+//		if ( includePass.incItems.length() == 0 ) {
+//			pd->id->error(incLoc) << "could not find machine " << machine <<
+//					" in " << fileName << endp;
+//		}
+//		else {
+//			/* Load the data into include el. Save in the dict. */
+//			loadIncludeData( el, includePass, includeChecks[found] );
+//			id->includeDict.insert( el );
+//			includePass.incItems.empty();
+//		}
+//	}
 
 	const char *targetMachine0 = targetMachine;
 	const char *searchMachine0 = searchMachine;
@@ -216,7 +219,9 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	targetMachine = sectionName.c_str();
 	searchMachine = machine.c_str();
 
-	reduceStr( el->foundFileName.c_str(), el->data );
+	// std::cout << "reducing: " << includeChecks[found] << " d: " << includeDepth << std::endl;
+	reduceFile( includeChecks[found] );
+	// std::cout << "include complete d: " << includeDepth << std::endl;
 
 	pd = pd0;
 	includeDepth -= 1;
@@ -227,12 +232,18 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 
 void TopLevel::reduceFile( const char *inputFileName )
 {
-	const char *argv[5];
+	char idstr[64];
+	sprintf( idstr, "%d", includeDepth );
+	const char *argv[8];
+
 	argv[0] = "rlparse";
 	argv[1] = "toplevel-reduce-file";
 	argv[2] = inputFileName;
 	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = 0;
+	argv[4] = idstr;
+	argv[5] = targetMachine == 0 ? "" : targetMachine;
+	argv[6] = searchMachine == 0 ? "" : searchMachine;
+	argv[7] = 0;
 
 	const char *prevCurFileName = curFileName;
 	curFileName = inputFileName;
@@ -240,17 +251,23 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 4, argv );
+	colm_run_program( program, 7, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
+
+	// std::cout << "colm-program done" << std::endl;
 
 	int length = 0;
 	const char *err = colm_error( program, &length );
-	if ( err != 0 )
+	if ( err != 0 ) {
+		// std::cout << "error" << std::endl;
 		id->error_plain() << string( err, length ) << std::endl;
+	}
 
 	colm_delete_program( program );
 
 	curFileName = prevCurFileName;
+
+	// std::cout << "reduceFile complete" << std::endl;
 }
 
 void TopLevel::reduceStr( const char *inputFileName, const char *input )

@@ -70,6 +70,52 @@ global MachineMap: map<str, machine> = new map<str, machine>()
 global CurMachine: machine
 
 global Lang: str
+global IncludeDepth: int = 0
+global TargetMachine: str = ""
+global SearchMachine: str = ""
+global Want: bool = false
+
+lex
+	token ign_select /''/
+	{
+		if Want {
+			#print "sending want
+			input->push( make_token( typeid<ign_want>, '' ) )
+		}
+		else {
+			#print "sending ignore
+			input->push( make_token( typeid<ign_ignore>, '' ) )
+		}
+	}
+
+	token ign_want //
+	token ign_ignore //
+end
+	
+lex
+	token ign_word / [a-zA-Z_][a-zA-Z0-9_]* /
+	{
+		S: str = input->pull(match_length)
+		IgnWord: ign_word = make_token( typeid<ign_word>, S )
+		input->push( IgnWord )
+
+		if ( SearchMachine != "" ) {
+			#print "checking [S] vs [SearchMachine]
+			if ( S != SearchMachine ) {
+				#print "deciding ignore
+				Want = false
+			}
+			else  {
+				#print "deciding want
+				Want = true
+			}
+		}
+		else {
+			#print "deciding want
+			Want = true
+		}
+	}
+end
 
 lex
 	token select /''/
@@ -518,19 +564,24 @@ namespace ragel
 		[word] :Word
 
 	def machine_name
-		[`machine word `;] :MachineName
+		[`machine ign_word `;] :MachineName
 		{
-			Machine: machine = MachineMap->find( $lhs.word )
+			Name: str = $lhs.ign_word
+			if TargetMachine != ""
+				Name = TargetMachine
+
+			Machine: machine = MachineMap->find( Name )
 
 			if !Machine
 			{
 				Machine = new machine()
-				Machine->Name = $lhs.word
+				Machine->Name = Name
 				Machine->ActionParams = new map<str, str>()
 				MachineMap->insert( Machine->Name, Machine )
 			}
 
 			CurMachine = Machine
+
 		}
 
 	def statement
@@ -550,10 +601,61 @@ namespace ragel
 	|	[`nfaprepush action_block] :NfaPrePush commit
 	|	[`nfapostpop action_block] :NfaPostPop commit
 
+
 	def opt_machine_name
 		[machine_name] :MachineName
 	|	[] :Empty
 
 	def ragel_start
-		[opt_machine_name statement*]
+		[opt_machine_name ign_want statement*]
+	|	[opt_machine_name ign_ignore tok*]
+
+	lex
+		ignore /[\t\n ]+/
+		ignore /'#' any* :> '\n'/
+
+		token c_word / [a-zA-Z_][a-zA-Z0-9_]* /
+		token c_uint / number /
+		token c_hex / hex_number /
+
+		token c_string /
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'? |
+			"[" ( [^\]\\] | '\\' any )* "]" 'i'? |
+			"/" ( [^\/\\] | '\\' any )* "/" 'i'?
+		/
+
+		token c_sym / [();:=|&\.@*] /
+
+		token c_open  /'{'/ -ni
+		token c_close ni- /'}'/
+
+	end
+
+	lex 
+		ignore /[\t\n ]+/
+
+		token c_h_string /
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'?
+		/
+
+		token c_h_word / [a-zA-Z_][a-zA-Z0-9_]* /
+		token c_h_close /'}'/
+		token c_h_sym / [$<>;()] /
+	end
+
+	def c_host_tok
+		[c_h_word]
+	|	[c_h_string]
+	|	[c_h_sym]
+
+	# Garbling up a machine, no interpretation
+	def tok
+		[c_word]
+	|	[c_uint]
+	|	[c_hex]
+	|	[c_string]
+	|	[c_sym]
+	|	[c_open c_host_tok* c_h_close]
 end

@@ -126,9 +126,25 @@ else if ( Cmd == 'include-reduce-str' ) {
 	RagelError = error
 }
 else if ( Cmd == 'toplevel-reduce-file' ) {
+	# IncludeDepth
+	A = argv->pop_head_el()
+	IncludeDepth = atoi( A->value )
+
+	# TargetMachine
+	A = argv->pop_head_el()
+	TargetMachine = A->value
+
+	# SearchMachine
+	A = argv->pop_head_el()
+	SearchMachine = A->value
+
+	#print "toplevel-reduce-file search for: [SearchMachine]
+
 	Stream: stream = open( FileName, "r" )
 	reduce TopLevel start[ Stream ]
 	RagelError = error
+
+	#print "toplevel-reduce-file complete
 }
 else if ( Cmd == 'toplevel-reduce-str' ) {
 	A = argv->pop_head_el()
