@@ -1,5 +1,5 @@
 include 'ragel.lm'
-include 'ragel-c.lm'
+include 'host.lm'
 
 lex
 	token selectt /''/
@@ -11,14 +11,14 @@ lex
 end
 
 def start
-	[c_select_section SectionList: c_host::section*]
+	[c_select_section SectionList: host::section*]
 
 def import_val
-	[c_host::number] :Number
-|	[c_host::string] :String
+	[host::number] :Number
+|	[host::string] :String
 
 def import
-	[Name: c_host::ident Val: import_val] :Import
+	[Name: host::ident Val: import_val] :Import
 
 export RagelTree: start
 export RagelError: str
@@ -28,36 +28,36 @@ import* import( FileName: str, Start: start )
 {
 	ImportList: import* = cons import* []
 
-	for Pref: c_host::section* in RagelTree { 
+	for Pref: host::section* in RagelTree { 
 		if match Pref [
-			"#define " Word: c_host::ident c_host::whitespace
-			Number: c_host::number c_host::section*
+			"#define " Word: host::ident host::whitespace
+			Number: host::number host::section*
 		]
 		{
 			ImportList = cons import*[ Word Number ImportList ]
 		}
 
 		if match Pref [
-			Word: c_host::ident c_host::whitespace
-			"=" c_host::whitespace
-			Number: c_host::number c_host::section*
+			Word: host::ident host::whitespace
+			"=" host::whitespace
+			Number: host::number host::section*
 		]
 		{
 			ImportList = cons import*[ Word Number ImportList ]
 		}
 
 		if match Pref [
-			"#define " Word: c_host::ident c_host::whitespace
-			String: c_host::string c_host::section*
+			"#define " Word: host::ident host::whitespace
+			String: host::string host::section*
 		]
 		{
 			ImportList = cons import*[ Word String ImportList ]
 		}
 
 		if match Pref [
-			Word: c_host::ident c_host::whitespace
-			"=" c_host::whitespace
-			String: c_host::string c_host::section*
+			Word: host::ident host::whitespace
+			"=" host::whitespace
+			String: host::string host::section*
 		]
 		{
 			ImportList = cons import*[ Word String ImportList ]

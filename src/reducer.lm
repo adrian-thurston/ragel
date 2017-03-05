@@ -902,7 +902,7 @@ reduction TopLevel
 
 
 	# def action_block
-	#	[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
+	#	[`{ c_select     CInlineBlock: inline::inline_block `}] :C
 	# |	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
 	# |	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
 	# |	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
@@ -931,7 +931,7 @@ reduction TopLevel
 	}
 
 	# def action_expr
-	#	[`{ c_select     CInlineExpr: c_inline::inline_expr `}] :C
+	#	[`{ c_select     CInlineExpr: inline::inline_expr `}] :C
 	# |	[`{ ruby_select  RubyInlineExpr: ruby_inline::inline_expr ruby_inline::`}]
 	# |	[`{ ocaml_select OCamlInlineExpr: ocaml_inline::inline_expr ocaml_inline::`}]
 	# |	[`{ crack_select CrackInlineExpr: crack_inline::inline_expr crack_inline::`}]
@@ -949,12 +949,12 @@ reduction TopLevel
 
 	# def inline_block
 	#	[block_item_list] :List
-	c_inline::inline_block
+	inline::inline_block
 	{
 		InlineList *inlineList;
 	}
 
-	c_inline::inline_block :List
+	inline::inline_block :List
 	{
 		$$->inlineList = $block_item_list->inlineList;
 	}
@@ -962,12 +962,12 @@ reduction TopLevel
 	# def block_item_list
 	# 	[block_item block_item_list] :Rec
 	# |	[] :Base
-	c_inline::block_item_list
+	inline::block_item_list
 	{
 		InlineList *inlineList;
 	}
 
-	c_inline::block_item_list :Rec
+	inline::block_item_list :Rec
 	{
 		$$->inlineList = $_block_item_list->inlineList;
 
@@ -979,7 +979,7 @@ reduction TopLevel
 		}
 	}
 
-	c_inline::block_item_list :Base
+	inline::block_item_list :Base
 	{
 		$$->inlineList = new InlineList;
 	}
@@ -989,28 +989,28 @@ reduction TopLevel
 	# |	[block_symbol] :BlockSymbol
 	# |	[block_interpret] :BlockInterpret
 	# |	[`{ inline_block `}] :RecBlock
-	c_inline::block_item
+	inline::block_item
 	{
 		InlineItem *inlineItem;
 		InlineList *inlineList;
 	}
 
-	c_inline::block_item :ExprAny
+	inline::block_item :ExprAny
 	{
 		$$->inlineItem = $expr_any->inlineItem;
 	}
 
-	c_inline::block_item :BlockSymbol
+	inline::block_item :BlockSymbol
 	{
 		$$->inlineItem = $block_symbol->inlineItem;
 	}
 
-	c_inline::block_item :BlockInterpret
+	inline::block_item :BlockInterpret
 	{
 		$$->inlineItem = $block_interpret->inlineItem;
 	}
 
-	c_inline::block_item :RecBlock
+	inline::block_item :RecBlock
 	{
 		$$->inlineList = $inline_block->inlineList;
 		$$->inlineList->prepend( new InlineItem( @1, "{", InlineItem::Text ) );
@@ -1026,48 +1026,48 @@ reduction TopLevel
 	#|	[hex_number] :Hex
 	#|	[ident] :Ident
 	#|	[c_any] :Any
-	c_inline::expr_any
+	inline::expr_any
 	{
 		InlineItem *inlineItem;
 	}
 
-	c_inline::expr_any :WS
+	inline::expr_any :WS
 	{
 		string data( $whitespace->data, $whitespace->length );
 		$$->inlineItem = new InlineItem( @whitespace, data, InlineItem::Text );
 	}
 		
-	c_inline::expr_any :Comment
+	inline::expr_any :Comment
 	{
 		string data( $comment->data, $comment->length );
 		$$->inlineItem = new InlineItem( @comment, data, InlineItem::Text );
 	}
 
-	c_inline::expr_any :String
+	inline::expr_any :String
 	{
 		string data( $string->data, $string->length );
 		$$->inlineItem = new InlineItem( @string, data, InlineItem::Text );
 	}
 
-	c_inline::expr_any :Number
+	inline::expr_any :Number
 	{
 		string data( $number->data, $number->length );
 		$$->inlineItem = new InlineItem( @number, data, InlineItem::Text );
 	}
 
-	c_inline::expr_any :Hex
+	inline::expr_any :Hex
 	{
 		string data( $hex_number->data, $hex_number->length );
 		$$->inlineItem = new InlineItem( @hex_number, data, InlineItem::Text );
 	}
 
-	c_inline::expr_any :Ident
+	inline::expr_any :Ident
 	{
 		string data( $ident->data, $ident->length );
 		$$->inlineItem = new InlineItem( @ident, data, InlineItem::Text );
 	}
 
-	c_inline::expr_any :Any
+	inline::expr_any :Any
 	{
 		string data( $c_any->data, $c_any->length );
 		$$->inlineItem = new InlineItem( @c_any, data, InlineItem::Text );
@@ -1075,42 +1075,42 @@ reduction TopLevel
 
 	# def block_symbol
 	#	[`,] :B1 | [`;] :B2 | [`(] :B3 | [`)] :B4 | [`*] :B5 | [`::] :B6
-	c_inline::block_symbol
+	inline::block_symbol
 	{
 		InlineItem *inlineItem;
 	}
 
-	c_inline::block_symbol :B1
+	inline::block_symbol :B1
 	{
 		string data( $1->data, $1->length );
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
 	}
 
-	c_inline::block_symbol :B2
+	inline::block_symbol :B2
 	{
 		string data( $1->data, $1->length );
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
 	}
 
-	c_inline::block_symbol :B3
+	inline::block_symbol :B3
 	{
 		string data( $1->data, $1->length );
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
 	}
 
-	c_inline::block_symbol :B4
+	inline::block_symbol :B4
 	{
 		string data( $1->data, $1->length );
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
 	}
 
-	c_inline::block_symbol :B5
+	inline::block_symbol :B5
 	{
 		string data( $1->data, $1->length );
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
 	}
 
-	c_inline::block_symbol :B6
+	inline::block_symbol :B6
 	{
 		string data( $1->data, $1->length );
 		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
@@ -1118,12 +1118,12 @@ reduction TopLevel
 
 	# def state_ref
 	# 	[opt_name_sep state_ref_names] :Ref
-	c_inline::state_ref
+	inline::state_ref
 	{
 		NameRef *nameRef;
 	}
 
-	c_inline::state_ref :Ref
+	inline::state_ref :Ref
 	{
 		$$->nameRef = $state_ref_names->nameRef;
 		if ( $opt_name_sep->nameSep )
@@ -1133,17 +1133,17 @@ reduction TopLevel
 	# def opt_name_sep
 	# 	[srlex::`::] :ColonColon
 	# |	[] :Empty
-	c_inline::opt_name_sep
+	inline::opt_name_sep
 	{
 		bool nameSep;
 	}
 
-	c_inline::opt_name_sep :ColonColon
+	inline::opt_name_sep :ColonColon
 	{
 		$$->nameSep = true;
 	}
 
-	c_inline::opt_name_sep :Empty
+	inline::opt_name_sep :Empty
 	{
 		$$->nameSep = false;
 	}
@@ -1151,18 +1151,18 @@ reduction TopLevel
 	# def state_ref_names
 	# 	[state_ref_names srlex::`:: srlex::word] :Rec
 	# |	[srlex::word] :Base
-	c_inline::state_ref_names
+	inline::state_ref_names
 	{
 		NameRef *nameRef;
 	}
 
-	c_inline::state_ref_names :Rec
+	inline::state_ref_names :Rec
 	{
 		$$->nameRef = $_state_ref_names->nameRef;
 		$$->nameRef->append( string( $word->data, $word->length ) );
 	}
 
-	c_inline::state_ref_names :Base
+	inline::state_ref_names :Base
 	{
 		$$->nameRef = new NameRef;
 		$$->nameRef->append( string( $word->data, $word->length ) );
@@ -1184,90 +1184,90 @@ reduction TopLevel
 	# |	[`fnret `;] :Fnret
 	# |	[`fbreak `;] :Fbreak
 	# |	[`fnbreak `;] :Fnbreak
-	c_inline::block_interpret
+	inline::block_interpret
 	{
 		InlineItem *inlineItem;
 	}
 
-	c_inline::block_interpret :Fhold
+	inline::block_interpret :Fhold
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Hold );
 	}
-	c_inline::block_interpret :FgotoExpr
+	inline::block_interpret :FgotoExpr
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::GotoExpr );
 		$$->inlineItem->children = $inline_expr->inlineList;
 	}
-	c_inline::block_interpret :FnextExpr
+	inline::block_interpret :FnextExpr
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::NextExpr );
 		$$->inlineItem->children = $inline_expr->inlineList;
 	}
-	c_inline::block_interpret :FcallExpr
+	inline::block_interpret :FcallExpr
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::CallExpr );
 		$$->inlineItem->children = $inline_expr->inlineList;
 	}
-	c_inline::block_interpret :FncallExpr
+	inline::block_interpret :FncallExpr
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::NcallExpr );
 		$$->inlineItem->children = $inline_expr->inlineList;
 	}
-	c_inline::block_interpret :Fexec
+	inline::block_interpret :Fexec
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Exec );
 		$$->inlineItem->children = $inline_expr->inlineList;
 	}
-	c_inline::block_interpret :FgotoSr
+	inline::block_interpret :FgotoSr
 	{
 		$$->inlineItem = new InlineItem( @1,
 				$state_ref->nameRef, InlineItem::Goto );
 	}
-	c_inline::block_interpret :FnextSr
+	inline::block_interpret :FnextSr
 	{
 		$$->inlineItem = new InlineItem( @1,
 				$state_ref->nameRef, InlineItem::Next );
 	}
-	c_inline::block_interpret :FcallSr
+	inline::block_interpret :FcallSr
 	{
 		$$->inlineItem = new InlineItem( @1,
 				$state_ref->nameRef, InlineItem::Call );
 	}
-	c_inline::block_interpret :FncallSr
+	inline::block_interpret :FncallSr
 	{
 		$$->inlineItem = new InlineItem( @1,
 				$state_ref->nameRef, InlineItem::Ncall );
 	}
-	c_inline::block_interpret :Fret
+	inline::block_interpret :Fret
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Ret );
 	}
-	c_inline::block_interpret :Fnret
+	inline::block_interpret :Fnret
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Nret );
 	}
-	c_inline::block_interpret :Fbreak
+	inline::block_interpret :Fbreak
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Break );
 	}
-	c_inline::block_interpret :Fnbreak
+	inline::block_interpret :Fnbreak
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Nbreak );
 	}
 
-	c_inline::block_interpret :ExprInterpret
+	inline::block_interpret :ExprInterpret
 	{
 		$$->inlineItem = $expr_interpret->inlineItem;
 	}
 
 	# def inline_expr
 	# 	[expr_item_list] :List
-	c_inline::inline_expr
+	inline::inline_expr
 	{
 		InlineList *inlineList;
 	}
 
-	c_inline::inline_expr :List
+	inline::inline_expr :List
 	{
 		$$->inlineList = $expr_item_list->inlineList;
 	}
@@ -1275,18 +1275,18 @@ reduction TopLevel
 	# def expr_item_list
 	#	[expr_item_list expr_item] :Rec
 	# |	[] :Empty
-	c_inline::expr_item_list
+	inline::expr_item_list
 	{
 		InlineList *inlineList;
 	}
 
-	c_inline::expr_item_list :Rec
+	inline::expr_item_list :Rec
 	{
 		$$->inlineList = $_expr_item_list->inlineList;
 		$$->inlineList->append( $expr_item->inlineItem );
 	}
 
-	c_inline::expr_item_list :Empty
+	inline::expr_item_list :Empty
 	{
 		$$->inlineList = new InlineList;
 	}
@@ -1295,42 +1295,42 @@ reduction TopLevel
 	# 	[expr_any] :ExprAny
 	# |	[expr_symbol] :ExprSymbol
 	# |	[expr_interpret] :ExprInterpret
-	c_inline::expr_item
+	inline::expr_item
 	{
 		InlineItem *inlineItem;
 	}
 
-	c_inline::expr_item :ExprAny
+	inline::expr_item :ExprAny
 	{
 		$$->inlineItem = $expr_any->inlineItem;
 	}
-	c_inline::expr_item :ExprSymbol
+	inline::expr_item :ExprSymbol
 	{
 		string sym( $expr_symbol->sym );
 		$$->inlineItem = new InlineItem( &$expr_symbol->loc, sym, InlineItem::Text );
 	}
-	c_inline::expr_item :ExprInterpret
+	inline::expr_item :ExprInterpret
 	{
 		$$->inlineItem = $expr_interpret->inlineItem;
 	}
 
 	# def expr_symbol
 	#	[`,] | [`(] | [`)] | [`*] | [`::]
-	c_inline::expr_symbol
+	inline::expr_symbol
 	{
 		const char *sym;
 		colm_location loc;
 	}
 
-	c_inline::expr_symbol :Comma 
+	inline::expr_symbol :Comma 
 		{ $$->loc = *@1; $$->sym = ","; }
-	c_inline::expr_symbol :Open 
+	inline::expr_symbol :Open 
 		{ $$->loc = *@1; $$->sym = "("; }
-	c_inline::expr_symbol :Close 
+	inline::expr_symbol :Close 
 		{ $$->loc = *@1; $$->sym = ")"; }
-	c_inline::expr_symbol :Star 
+	inline::expr_symbol :Star 
 		{ $$->loc = *@1; $$->sym = "*"; }
-	c_inline::expr_symbol :DoubleColon
+	inline::expr_symbol :DoubleColon
 		{ $$->loc = *@1; $$->sym = "::"; }
 
 
@@ -1341,37 +1341,37 @@ reduction TopLevel
 	# |	[`ftargs]  :Ftargs
 	# |	[`fentry `( state_ref srlex::`)] :Fentry
 	# |	[var_ref] :VarRef
-	c_inline::expr_interpret
+	inline::expr_interpret
 	{
 		InlineItem *inlineItem;
 	}
 
-	c_inline::expr_interpret :Fpc
+	inline::expr_interpret :Fpc
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::PChar );
 	}
 
-	c_inline::expr_interpret :Fc
+	inline::expr_interpret :Fc
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Char );
 	}
 
-	c_inline::expr_interpret :Fcurs
+	inline::expr_interpret :Fcurs
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Curs );
 	}
 
-	c_inline::expr_interpret :Ftargs
+	inline::expr_interpret :Ftargs
 	{
 		$$->inlineItem = new InlineItem( @1, InlineItem::Targs );
 	}
 
-	c_inline::expr_interpret :Fentry
+	inline::expr_interpret :Fentry
 	{
 		$$->inlineItem = new InlineItem( @1, $state_ref->nameRef, InlineItem::Entry );
 	}
 
-	c_inline::expr_interpret :VarRef
+	inline::expr_interpret :VarRef
 	{
 		string data( $1->data + 1, $1->length - 1 );
 		$$->inlineItem = new InlineItem( @1, InlineItem::Subst );
@@ -2548,7 +2548,7 @@ reduction TopLevel
 	# |	[whitespace] :Whitespace
 	# |	[c_any] :Any
 
-	c_host::tok  :ImportDefNum
+	host::tok  :ImportDefNum
 	{
 		if ( includeDepth == 0 ) {
 			id->curItem->data.write( "define ", 7 );
@@ -2557,7 +2557,7 @@ reduction TopLevel
 			id->curItem->data.write( $number->data, $number->length );
 		}
 	}
-	c_host::tok  :ImportDefStr
+	host::tok  :ImportDefStr
 	{
 		if ( includeDepth == 0 ) {
 			id->curItem->data.write( "define ", 7 );
@@ -2566,7 +2566,7 @@ reduction TopLevel
 			id->curItem->data.write( $string->data, $string->length );
 		}
 	}
-	c_host::tok  :ImportAssignNum
+	host::tok  :ImportAssignNum
 	{
 		if ( includeDepth == 0 ) {
 			id->curItem->data.write( $ident->data, $ident->length );
@@ -2574,7 +2574,7 @@ reduction TopLevel
 			id->curItem->data.write( $number->data, $number->length );
 		}
 	}
-	c_host::tok  :ImportAssignStr
+	host::tok  :ImportAssignStr
 	{
 		if ( includeDepth == 0 ) {
 			id->curItem->data.write( $ident->data, $ident->length );
@@ -2582,61 +2582,61 @@ reduction TopLevel
 			id->curItem->data.write( $string->data, $string->length );
 		}
 	}
-	c_host::tok  :Def
+	host::tok  :Def
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( "define", 6 );
 
 	}
-	c_host::tok  :Eq
+	host::tok  :Eq
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( "=", 1 );
 	}
 
-	c_host::tok :Ident
+	host::tok :Ident
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $ident->data, $ident->length );
 	}
 
-	c_host::tok :Number
+	host::tok :Number
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $number->data, $number->length );
 	}
 
-	c_host::tok :HexNumber
+	host::tok :HexNumber
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $hex_number->data, $hex_number->length );
 	}
 
-	c_host::tok :Comment
+	host::tok :Comment
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $comment->data, $comment->length );
 	}
 
-	c_host::tok :String
+	host::tok :String
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $string->data, $string->length );
 	}
 
-	c_host::tok :Whitespace
+	host::tok :Whitespace
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $whitespace->data, $whitespace->length );
 	}
 
-	c_host::tok :Any
+	host::tok :Any
 	{
 		if ( includeDepth == 0 )
 			id->curItem->data.write( $c_any->data, $c_any->length );
 	}
 
-	c_host::section :MultiLine
+	host::section :MultiLine
 	{
 //		if ( sectionMachine.size() > 0 && sectionMachine == targetMachine ) {
 //			IncItem *incItem = new IncItem;
@@ -2690,7 +2690,7 @@ reduction IncludePass
 		sectionMachine = string( $ign_word->data, $ign_word->length );
 	}
 
-	c_host::section :MultiLine
+	host::section :MultiLine
 	{
 		if ( sectionMachine.size() > 0 && sectionMachine == targetMachine ) {
 			IncItem *incItem = new IncItem;
@@ -2708,7 +2708,7 @@ reduction IncludePass
 end
 
 reduction Import
-	c_host::tok :ImportDefNum
+	host::tok :ImportDefNum
 	{
 		Literal *lit = new Literal( @number,
 				false /* $number->neg */, $number->data,
@@ -2718,7 +2718,7 @@ reduction Import
 		import( @ident, name, lit );
 	}
 
-	c_host::tok :ImportDefStr
+	host::tok :ImportDefStr
 	{
 		Literal *lit = new Literal( @string, false,
 				$string->data, $string->length, Literal::LitString );
@@ -2726,7 +2726,7 @@ reduction Import
 		import( @ident, name, lit );
 	}
 
-	c_host::tok :ImportAssignNum
+	host::tok :ImportAssignNum
 	{
 		Literal *lit = new Literal( @number,
 				false /*$number->neg */, $number->data,
@@ -2735,7 +2735,7 @@ reduction Import
 		import( @ident, name, lit );
 	}
 
-	c_host::tok :ImportAssignStr
+	host::tok :ImportAssignStr
 	{
 		Literal *lit = new Literal( @string, false,
 				$string->data, $string->length, Literal::LitString );

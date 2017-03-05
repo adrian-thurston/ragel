@@ -1,4 +1,4 @@
-namespace c_inline
+namespace inline
 	lex 
 		literal `fpc `fc  `fcurs `ftargs
 			`fentry `fhold `fexec `fgoto `fnext
@@ -120,7 +120,7 @@ namespace c_inline
 end
 
 
-namespace c_host
+namespace host
 	lex 
 		literal `%%{
 

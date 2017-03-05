@@ -126,6 +126,60 @@ lex
 	token c_select //
 end
 
+#
+# Consuming ragel defintions without parsing. Used for included sections we
+# don't want and import (TODO).
+#
+namespace consume
+	lex
+		ignore /[\t\n ]+/
+		ignore /'#' any* :> '\n'/
+
+		token word / [a-zA-Z_][a-zA-Z0-9_]* /
+		token uint / number /
+		token hex / hex_number /
+
+		token string /
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'? |
+			"[" ( [^\]\\] | '\\' any )* "]" 'i'? |
+			"/" ( [^\/\\] | '\\' any )* "/" 'i'?
+		/
+
+		token sym / [();:=|&\.@*] /
+
+		token open  /'{'/ -ni
+		token close ni- /'}'/
+
+	end
+
+	lex 
+		ignore /[\t\n ]+/
+
+		token h_string /
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'?
+		/
+
+		token h_word / [a-zA-Z_][a-zA-Z0-9_]* /
+		token h_close /'}'/
+		token h_sym / [$<>;()] /
+	end
+
+	def host_tok
+		[h_word]
+	|	[h_string]
+	|	[h_sym]
+
+	# Garbling up a machine, no interpretation
+	def tok
+		[word]
+	|	[uint]
+	|	[hex]
+	|	[string]
+	|	[sym]
+	|	[open host_tok* h_close]
+end
 
 namespace ragel
 	lex
@@ -258,10 +312,10 @@ namespace ragel
 	|	[word] :Base
 
 	def action_expr
-		[`{ c_select CInlineExpr: c_inline::inline_expr c_inline::`}] :C
+		[`{ c_select CInlineExpr: inline::inline_expr inline::`}] :C
 
 	def action_block
-		[`{ c_select CInlineBlock: c_inline::inline_block c_inline::`}] :C
+		[`{ c_select CInlineBlock: inline::inline_block inline::`}] :C
 
 	def action_arg_list
 		[action_arg_list `, action_ref] :Rec
@@ -592,54 +646,6 @@ namespace ragel
 
 	def ragel_start
 		[opt_machine_name ign_want statement*]
-	|	[opt_machine_name ign_ignore tok*]
-
-	lex
-		ignore /[\t\n ]+/
-		ignore /'#' any* :> '\n'/
-
-		token c_word / [a-zA-Z_][a-zA-Z0-9_]* /
-		token c_uint / number /
-		token c_hex / hex_number /
-
-		token c_string /
-			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
-			"'" ( [^'\\] | '\\' any )* "'" 'i'? |
-			"[" ( [^\]\\] | '\\' any )* "]" 'i'? |
-			"/" ( [^\/\\] | '\\' any )* "/" 'i'?
-		/
-
-		token c_sym / [();:=|&\.@*] /
-
-		token c_open  /'{'/ -ni
-		token c_close ni- /'}'/
-
-	end
-
-	lex 
-		ignore /[\t\n ]+/
-
-		token c_h_string /
-			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
-			"'" ( [^'\\] | '\\' any )* "'" 'i'?
-		/
-
-		token c_h_word / [a-zA-Z_][a-zA-Z0-9_]* /
-		token c_h_close /'}'/
-		token c_h_sym / [$<>;()] /
-	end
-
-	def c_host_tok
-		[c_h_word]
-	|	[c_h_string]
-	|	[c_h_sym]
-
-	# Garbling up a machine, no interpretation
-	def tok
-		[c_word]
-	|	[c_uint]
-	|	[c_hex]
-	|	[c_string]
-	|	[c_sym]
-	|	[c_open c_host_tok* c_h_close]
+	|	[opt_machine_name ign_ignore consume::tok*]
 end
+
