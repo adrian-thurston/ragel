@@ -68,7 +68,8 @@ struct TopLevel
 		targetMachine(0),
 		searchMachine(0),
 		paramList(0),
-		success(true)
+		success(true),
+		isImport(false)
 	{
 		exportContext.append( false );
 	}
@@ -101,11 +102,16 @@ struct TopLevel
 			struct pda_run *pda_run, parse_tree_t *pt );
 
 	void loadMachineName( string data );
-	void tryMachineDef( InputLoc &loc, std::string name, 
+	void tryMachineDef( const InputLoc &loc, std::string name, 
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
 	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
-	void reduceFile( const char *inputFileName );
+	void reduceFile( const char *inputFileName, bool import );
+
+	void import( const InputLoc &loc, std::string name, Literal *literal );
+	void importFile( std::string fileName );
+
+	bool isImport;
 };
 
 struct Import
@@ -116,10 +122,8 @@ struct Import
 	ParseData *pd;
 	const char *curFileName;
 
-	void import( const InputLoc &loc, std::string name, Literal *literal );
 	void tryMachineDef( const InputLoc &loc, std::string name, MachineDef *machineDef, bool isInstance );
 	void import( Literal *literal );
-	void reduceImport( std::string fileName );
 
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,

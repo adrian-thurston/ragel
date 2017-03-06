@@ -14,6 +14,7 @@ global IncludeDepth: int = 0
 global TargetMachine: str = ""
 global SearchMachine: str = ""
 global Want: bool = false
+global Import: bool = false
 
 bool action_params_find( Machine: str, Action: str )
 	= cc_action_params_find
@@ -82,7 +83,9 @@ lex
 		IgnWord: ign_word = make_token( typeid<ign_word>, S )
 		input->push( IgnWord )
 
-		if ( SearchMachine != "" ) {
+		if ( Import )
+			Want = false
+		else if ( SearchMachine != "" ) {
 			#print "checking [S] vs [SearchMachine]
 			if ( S != SearchMachine ) {
 				#print "deciding ignore
@@ -153,10 +156,11 @@ namespace consume
 			#"/" ( [^\/\\] | '\\' any )* "/" 'i'?
 		/
 
-		token sym / [();:=|&\.@*] /
 
 		token open  /'{'/ -ni
 		token close ni- /'}'/
+
+		token c_any / any /
 
 	end
 
@@ -167,8 +171,8 @@ namespace consume
 	|	[uint]
 	|	[hex]
 	|	[string]
-	|	[sym]
 	|	[open host_tok* h_close]
+	|	[c_any]
 end
 
 namespace ragel

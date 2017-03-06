@@ -290,7 +290,7 @@ reduction TopLevel
 	# |	[`write Cmd: word ArgList: write_arg* `;] :Write commit
 	ragel::statement :Write
 	{
-		if ( includeDepth == 0 ) {
+		if ( !isImport && includeDepth == 0 ) {
 			{
 				InputItem *inputItem = new InputItem;
 				inputItem->type = InputItem::Write;
@@ -357,8 +357,7 @@ reduction TopLevel
 					fileName.c_str(), fileName.size(),
 					length, caseInsensitive );
 
-		Import import( id, pd );
-		import.reduceImport( unescaped );
+		importFile( unescaped );
 	}
 
 	# def statement
@@ -2550,95 +2549,139 @@ reduction TopLevel
 
 	host::tok  :ImportDefNum
 	{
-		if ( includeDepth == 0 ) {
-			id->curItem->data.write( "define ", 7 );
-			id->curItem->data.write( $ident->data, $ident->length );
-			id->curItem->data.write( " ", 1 );
-			id->curItem->data.write( $number->data, $number->length );
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @number,
+					false /* $number->neg */, $number->data,
+					$number->length, Literal::Number );
+
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( "define ", 7 );
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( " ", 1 );
+				id->curItem->data.write( $number->data, $number->length );
+			}
 		}
 	}
 	host::tok  :ImportDefStr
 	{
-		if ( includeDepth == 0 ) {
-			id->curItem->data.write( "define ", 7 );
-			id->curItem->data.write( $ident->data, $ident->length );
-			id->curItem->data.write( " ", 1 );
-			id->curItem->data.write( $string->data, $string->length );
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @string, false,
+					$string->data, $string->length, Literal::LitString );
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( "define ", 7 );
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( " ", 1 );
+				id->curItem->data.write( $string->data, $string->length );
+			}
 		}
 	}
 	host::tok  :ImportAssignNum
 	{
-		if ( includeDepth == 0 ) {
-			id->curItem->data.write( $ident->data, $ident->length );
-			id->curItem->data.write( "=", 1 );
-			id->curItem->data.write( $number->data, $number->length );
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @number,
+					false /*$number->neg */, $number->data,
+					$number->length, Literal::Number );
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( "=", 1 );
+				id->curItem->data.write( $number->data, $number->length );
+			}
 		}
 	}
 	host::tok  :ImportAssignStr
 	{
-		if ( includeDepth == 0 ) {
-			id->curItem->data.write( $ident->data, $ident->length );
-			id->curItem->data.write( "=", 1 );
-			id->curItem->data.write( $string->data, $string->length );
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @string, false,
+					$string->data, $string->length, Literal::LitString );
+
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( "=", 1 );
+				id->curItem->data.write( $string->data, $string->length );
+			}
 		}
 	}
 	host::tok  :Def
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( "define", 6 );
 
 	}
 	host::tok  :Eq
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( "=", 1 );
 	}
 
 	host::tok :Ident
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $ident->data, $ident->length );
 	}
 
 	host::tok :Number
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $number->data, $number->length );
 	}
 
 	host::tok :HexNumber
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $hex_number->data, $hex_number->length );
 	}
 
 	host::tok :Comment
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $comment->data, $comment->length );
 	}
 
 	host::tok :String
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $string->data, $string->length );
 	}
 
 	host::tok :Whitespace
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $whitespace->data, $whitespace->length );
 	}
 
 	host::tok :Any
 	{
-		if ( includeDepth == 0 )
+		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $c_any->data, $c_any->length );
 	}
 
 	host::section :MultiLine
 	{
-		if ( includeDepth == 0 ) {
+		if ( !isImport && includeDepth == 0 ) {
 			InputItem *inputItem = new InputItem;
 			inputItem->type = InputItem::EndSection;
 			inputItem->loc = @5;
@@ -2668,41 +2711,3 @@ reduction TopLevel
 		}
 	}
 end 
-
-reduction Import
-	host::tok :ImportDefNum
-	{
-		Literal *lit = new Literal( @number,
-				false /* $number->neg */, $number->data,
-				$number->length, Literal::Number );
-
-		string name( $ident->data, $ident->length );
-		import( @ident, name, lit );
-	}
-
-	host::tok :ImportDefStr
-	{
-		Literal *lit = new Literal( @string, false,
-				$string->data, $string->length, Literal::LitString );
-		string name( $ident->data, $ident->length );
-		import( @ident, name, lit );
-	}
-
-	host::tok :ImportAssignNum
-	{
-		Literal *lit = new Literal( @number,
-				false /*$number->neg */, $number->data,
-				$number->length, Literal::Number );
-		string name( $ident->data, $ident->length );
-		import( @ident, name, lit );
-	}
-
-	host::tok :ImportAssignStr
-	{
-		Literal *lit = new Literal( @string, false,
-				$string->data, $string->length, Literal::LitString );
-
-		string name( $ident->data, $ident->length );
-		import( @ident, name, lit );
-	}
-end

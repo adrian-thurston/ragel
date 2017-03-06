@@ -88,11 +88,6 @@ if ( Cmd == 'import-file' ) {
 	RagelImport = import( FileName, RagelTree )
 	RagelError = error
 }
-else if ( Cmd == 'reduce-import' ) {
-	Stream: stream = open( FileName, "r" )
-	reduce Import start[ Stream ]
-	RagelError = error
-}
 else if ( Cmd == 'parse-file' ) {
 	Stream: stream = open( FileName, "r" )
 	RagelTree = parse start[ Stream ]
@@ -110,6 +105,10 @@ else if ( Cmd == 'toplevel-reduce-file' ) {
 	# SearchMachine
 	A = argv->pop_head_el()
 	SearchMachine = A->value
+
+	# Import
+	A = argv->pop_head_el()
+	Import = atoi( A->value ) != 0
 
 	#print "toplevel-reduce-file search for: [SearchMachine]
 

@@ -508,7 +508,7 @@ bool InputData::parseReduce()
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
-	topLevel->reduceFile( inputFileName );
+	topLevel->reduceFile( inputFileName, false );
 
 	if ( errorCount )
 		return false;

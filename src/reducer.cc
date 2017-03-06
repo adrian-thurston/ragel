@@ -47,7 +47,7 @@ void TopLevel::loadMachineName( string data )
 	pd->curDefLocalErrKey = localErrDictEl->value;
 }
 
-void TopLevel::tryMachineDef( InputLoc &loc, std::string name, 
+void TopLevel::tryMachineDef( const InputLoc &loc, std::string name, 
 		MachineDef *machineDef, bool isInstance )
 {
 	GraphDictEl *newEl = pd->graphDict.insert( name );
@@ -155,7 +155,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	targetMachine = sectionName.c_str();
 	searchMachine = machine.c_str();
 
-	reduceFile( includeChecks[found] );
+	reduceFile( includeChecks[found], false );
 
 //	if ( includePass.incItems.length() == 0 ) {
 //		pd->id->error(incLoc) << "could not find machine " << machine <<
@@ -175,12 +175,13 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	searchMachine = searchMachine0;
 }
 
-void TopLevel::reduceFile( const char *inputFileName )
+void TopLevel::reduceFile( const char *inputFileName, bool import )
 {
-	char idstr[64];
+	char idstr[64], imstr[64];
 	sprintf( idstr, "%d", includeDepth );
-	const char *argv[8];
+	sprintf( imstr, "%d", import );
 
+	const char *argv[9];
 	argv[0] = "rlparse";
 	argv[1] = "toplevel-reduce-file";
 	argv[2] = inputFileName;
@@ -188,7 +189,8 @@ void TopLevel::reduceFile( const char *inputFileName )
 	argv[4] = idstr;
 	argv[5] = targetMachine == 0 ? "" : targetMachine;
 	argv[6] = searchMachine == 0 ? "" : searchMachine;
-	argv[7] = 0;
+	argv[7] = imstr;
+	argv[8] = 0;
 
 	const char *prevCurFileName = curFileName;
 	curFileName = inputFileName;
@@ -196,10 +198,8 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 7, argv );
+	colm_run_program( program, 8, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
-
-	// std::cout << "colm-program done" << std::endl;
 
 	int length = 0;
 	const char *err = colm_error( program, &length );
@@ -211,8 +211,13 @@ void TopLevel::reduceFile( const char *inputFileName )
 	colm_delete_program( program );
 
 	curFileName = prevCurFileName;
+}
 
-	// std::cout << "reduceFile complete" << std::endl;
+void TopLevel::importFile( std::string file )
+{
+	isImport = true;
+	reduceFile( file.c_str(), true );
+	isImport = false;
 }
 
 void Import::tryMachineDef( const InputLoc &loc, std::string name, 
@@ -236,7 +241,7 @@ void Import::tryMachineDef( const InputLoc &loc, std::string name,
 	}
 }
 
-void Import::import( const InputLoc &loc, std::string name, Literal *literal )
+void TopLevel::import( const InputLoc &loc, std::string name, Literal *literal )
 {
 	MachineDef *machineDef = new MachineDef(
 			new Join(
@@ -257,6 +262,7 @@ void Import::import( const InputLoc &loc, std::string name, Literal *literal )
 	machineDef->join->loc = loc;
 }
 
+#if 0
 void Import::reduceImport( std::string fileName )
 {
 	const char *argv[5];
@@ -284,3 +290,4 @@ void Import::reduceImport( std::string fileName )
 
 	curFileName = prevCurFileName;
 }
+#endif
