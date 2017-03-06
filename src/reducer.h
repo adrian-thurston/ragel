@@ -104,13 +104,8 @@ struct TopLevel
 	void tryMachineDef( InputLoc &loc, std::string name, 
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
-	void include( const InputLoc &incLoc, string fileName, string machine );
-
-	void reduceFile( const char *inputFileName );
-	void reduceStr( const char *inputFileName, const char *input );
-	void topReduce( const char *inputFileName );
-
 	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
+	void reduceFile( const char *inputFileName );
 };
 
 struct Import

@@ -1021,7 +1021,7 @@ struct FsmGbl
 	:
 		printStatistics(false),
 		errorCount(0),
-		inLibRagel(false),
+		//inLibRagel(false),
 		displayPrintables(false),
 		stringTables(false),
 		checkPriorInteraction(0),
@@ -1058,7 +1058,7 @@ struct FsmGbl
 	std::stringstream libcout;
 
 	int errorCount;
-	bool inLibRagel;
+	//bool inLibRagel;
 	void abortCompile( int code );
 	bool displayPrintables;
 

@@ -14,14 +14,10 @@ if BUILD_PROGRAM
 
 bin_PROGRAMS = ragel
 
-# Libragel includes the ragel parsers. It is the programm wrapped up with a
-# libragel call in place of main.
-lib_LTLIBRARIES += libragel.la
-
 endif
 
 include_HEADERS = \
-	libragel.h action.h fsmgraph.h ragel.h common.h \
+	action.h fsmgraph.h ragel.h common.h \
 	gendata.h redfsm.h dot.h
 
 nodist_include_HEADERS = config.h
@@ -62,10 +58,6 @@ version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
-nodist_libragel_la_SOURCES = $(nodist_ragel_SOURCES)
-libragel_la_SOURCES = $(ragel_SOURCES)
-libragel_la_CPPFLAGS = -Dmain=main_lib -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
-
 nodist_libfsm_la_SOURCES = version.h
 libfsm_la_SOURCES = $(LIBFSM_SRC)
 libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
@@ -101,16 +93,6 @@ ragel-if.$(OBJEXT): parse.c
 ragel-load.$(OBJEXT): parse.c
 ragel-commit.$(OBJEXT): parse.c
 ragel-reducer.$(OBJEXT): parse.c
-
-# Use a var for the LO extension otherwise automake will think that we are
-# specifying the build rules for the files. This doesn't appear to be a problem
-# for o files.
-LOEXT = lo
-
-libragel_la-if.$(LOEXT): parse.c
-libragel_la-load.$(LOEXT): parse.c
-libragel_la-commit.$(LOEXT): parse.c
-libragel_la-reducer.$(LOEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \

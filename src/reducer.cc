@@ -232,35 +232,6 @@ void TopLevel::reduceFile( const char *inputFileName )
 	// std::cout << "reduceFile complete" << std::endl;
 }
 
-void TopLevel::reduceStr( const char *inputFileName, const char *input )
-{
-	const char *argv[6];
-	argv[0] = "rlparse";
-	argv[1] = "toplevel-reduce-str";
-	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = input;
-	argv[5] = 0;
-
-	const char *prevCurFileName = curFileName;
-	curFileName = inputFileName;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 5, argv );
-	id->streamFileNames.append( colm_extract_fns( program ) );
-
-	int length = 0;
-	const char *err = colm_error( program, &length );
-	if ( err != 0 )
-		id->error_plain() << string( err, length ) << std::endl;
-
-	colm_delete_program( program );
-
-	curFileName = prevCurFileName;
-}
-
 void Import::tryMachineDef( const InputLoc &loc, std::string name, 
 		MachineDef *machineDef, bool isInstance )
 {

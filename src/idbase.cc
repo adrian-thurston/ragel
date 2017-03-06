@@ -348,7 +348,7 @@ void FsmGbl::abortCompile( int code )
 /* Print the opening to a warning in the input, then return the error ostream. */
 ostream &FsmGbl::warning( const InputLoc &loc )
 {
-	ostream &err = inLibRagel ? libcerr : std::cerr;
+	ostream &err = std::cerr;
 	err << loc << ": warning: ";
 	return err;
 }
@@ -357,7 +357,7 @@ ostream &FsmGbl::warning( const InputLoc &loc )
 ostream &FsmGbl::error()
 {
 	errorCount += 1;
-	ostream &err = inLibRagel ? libcerr : std::cerr;
+	ostream &err = std::cerr;
 	err << PROGNAME ": ";
 	return err;
 }
@@ -365,7 +365,7 @@ ostream &FsmGbl::error()
 ostream &FsmGbl::error( const InputLoc &loc )
 {
 	errorCount += 1;
-	ostream &err = inLibRagel ? libcerr : std::cerr;
+	ostream &err = std::cerr;
 	err << loc << ": ";
 	return err;
 }
@@ -373,20 +373,20 @@ ostream &FsmGbl::error( const InputLoc &loc )
 ostream &FsmGbl::error_plain()
 {
 	errorCount += 1;
-	ostream &err = inLibRagel ? libcerr : std::cerr;
+	ostream &err = std::cerr;
 	return err;
 }
 
 
 std::ostream &FsmGbl::stats()
 {
-	return inLibRagel ? libcout : std::cout;
+	return std::cout;
 }
 
 /* Requested info. */
 std::ostream &FsmGbl::info()
 {
-	return inLibRagel ? libcout : std::cout;
+	return std::cout;
 }
 
 ostream &operator<<( ostream &out, const InputLoc &loc )

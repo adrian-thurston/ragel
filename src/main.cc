@@ -607,40 +607,6 @@ void InputData::checkArgs()
 	}
 }
 
-/*
- * result: analysis output
- * out: contents of stdout
- * err: contents of stderr
- * argc, argv: ragel arguments, input file ignored
- * input: input file contents
- */
-extern "C"
-int libragel( char **result, char **out, char **err, int argc, const char **argv, const char *input )
-{
-	InputData id;
-
-	try {
-		id.inLibRagel = true;
-
-		id.parseArgs( argc, argv );
-		id.checkArgs();
-		id.input = input;
-		id.frontend = ReduceBased;
-		id.process();
-	}
-	catch ( const AbortCompile &ac ) {
-		*result = strdup( "" );
-	}
-
-	if ( result != 0 )
-		*result = strdup( id.comm.c_str() );
-	if ( out != 0 )
-		*out = strdup( id.libcout.str().c_str() );
-	if ( err != 0 )
-		*err = strdup( id.libcerr.str().c_str() );
-	return 0;
-}
-
 char *InputData::readInput( const char *inputFileName )
 {
 	struct stat st;
@@ -677,20 +643,8 @@ int main( int argc, const char **argv )
 		id.parseArgs( argc, argv );
 		id.checkArgs();
 
-		if ( id.forceLibRagel ) {
-			id.inLibRagel = true;
-			id.input = id.readInput( id.inputFileName );
-			if ( id.input != 0 ) {
-				id.frontend = ReduceBased;
-				if ( !id.process() )
-					id.abortCompile( 1 );
-			}
-
-		}
-		else {
-			if ( !id.process() )
-				id.abortCompile( 1 );
-		}
+		if ( !id.process() )
+			id.abortCompile( 1 );
 	}
 	catch ( const AbortCompile &ac ) {
 		code = ac.code;
@@ -708,12 +662,6 @@ int main( int argc, const char **argv )
 		}
 	}
 
-	if ( id.forceLibRagel ) {
-		std::cerr << id.libcerr.str();
-		std::cout << id.libcout.str();
-		std::cerr.flush();
-		std::cout.flush();
-	}
 	return code;
 }
 

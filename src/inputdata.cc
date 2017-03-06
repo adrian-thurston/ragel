@@ -490,16 +490,14 @@ bool InputData::parseReduce()
 	TopLevel *topLevel = new TopLevel( this, hostLang,
 			minimizeLevel, minimizeOpt );
 
-	if ( ! inLibRagel ) {
-		/* Check input file. File is actually opened by colm code. We don't
-		 * need to perform the check if in libragel since it comes in via a
-		 * string. */
-		if ( input == 0 ) {
-			ifstream *inFile = new ifstream( inputFileName );
-			if ( ! inFile->is_open() )
-				error() << "could not open " << inputFileName << " for reading" << endp;
-			delete inFile;
-		}
+	/* Check input file. File is actually opened by colm code. We don't
+	 * need to perform the check if in libragel since it comes in via a
+	 * string. */
+	if ( input == 0 ) {
+		ifstream *inFile = new ifstream( inputFileName );
+		if ( ! inFile->is_open() )
+			error() << "could not open " << inputFileName << " for reading" << endp;
+		delete inFile;
 	}
 
 	if ( errorCount )
@@ -510,10 +508,7 @@ bool InputData::parseReduce()
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
-	if ( inLibRagel )
-		topLevel->reduceStr( inputFileName, input );
-	else
-		topLevel->reduceFile( inputFileName );
+	topLevel->reduceFile( inputFileName );
 
 	if ( errorCount )
 		return false;
