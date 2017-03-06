@@ -100,76 +100,50 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	/* Stash the current section name and pd. */
 	string sectionName = pd->sectionName;
 	ParseData *pd0 = pd;
-	std::string foundFileName;
 
-//	IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );
-//	if ( el == 0 ) {
-//		el = new IncludeRec( fileName, machine );
+	const char **includeChecks = 0;
+	long found = 0;
 
-		const char **includeChecks = 0;
-		long found = 0;
+	const char *inclSectionName = machine.c_str();
 
-//		/* First collect the locations of the text using an include pass. */
-//		IncludePass includePass( id, machine );
-//		if ( id->inLibRagel && !fileSpecified ) {
-//			el->foundFileName = curFileName;
+	/* Implement defaults for the input file and section name. */
+	if ( inclSectionName == 0 )
+		inclSectionName = sectionName.c_str();
+
+	/* Build the include checks. */
+	if ( fileSpecified )
+		includeChecks = pd->id->makeIncludePathChecks( curFileName, fileName.c_str() );
+	else {
+		char *test = new char[strlen(curFileName)+1];
+		strcpy( test, curFileName );
+
+		includeChecks = new const char*[2];
+
+		includeChecks[0] = test;
+		includeChecks[1] = 0;
+	}
+
+	/* Try to find the file. */
+	ifstream *inFile = pd->id->tryOpenInclude( includeChecks, found );
+	if ( inFile == 0 ) {
+		id->error(incLoc) << "include: failed to locate file" << endl;
+		const char **tried = includeChecks;
+		while ( *tried != 0 )
+			id->error(incLoc) << "include: attempted: \"" << *tried++ << '\"' << endl;
+
+		return;
+	}
+
+	delete inFile;
+
+//	/* Don't include anything that's already been included. */
+//	if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
+//		pd->includeHistory.push_back( IncludeHistoryItem( 
+//				includeChecks[found], inclSectionName ) );
 //
-//			/* In LibRagel and no file was specified in the include statement.
-//			 * In this case we run the include pass on the input text supplied. */
-//			includePass.reduceStr( fileName.c_str(), id->hostLang, id->input );
-//		}
-//		else {
-			const char *inclSectionName = machine.c_str();
-
-			/* Implement defaults for the input file and section name. */
-			if ( inclSectionName == 0 )
-				inclSectionName = sectionName.c_str();
-
-			if ( fileSpecified )
-				includeChecks = pd->id->makeIncludePathChecks( curFileName, fileName.c_str() );
-			else {
-				char *test = new char[strlen(curFileName)+1];
-				strcpy( test, curFileName );
-
-				includeChecks = new const char*[2];
-
-				includeChecks[0] = test;
-				includeChecks[1] = 0;
-			}
-
-			ifstream *inFile = pd->id->tryOpenInclude( includeChecks, found );
-			if ( inFile == 0 ) {
-				id->error(incLoc) << "include: failed to locate file" << endl;
-				const char **tried = includeChecks;
-				while ( *tried != 0 )
-					id->error(incLoc) << "include: attempted: \"" << *tried++ << '\"' << endl;
-			}
-			else {
-				delete inFile;
-				foundFileName = curFileName;
-
-//				/* Don't include anything that's already been included. */
-//				if ( !pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
-//					pd->includeHistory.push_back( IncludeHistoryItem( 
-//							includeChecks[found], inclSectionName ) );
-//
-//					/* Either we are not in the lib, or a file was specifed, use the
-//					 * file-based include pass. */
-//					includePass.reduceFile( includeChecks[found], id->hostLang );
-//				}
-			}
-//		}
-
-//		if ( includePass.incItems.length() == 0 ) {
-//			pd->id->error(incLoc) << "could not find machine " << machine <<
-//					" in " << fileName << endp;
-//		}
-//		else {
-//			/* Load the data into include el. Save in the dict. */
-//			loadIncludeData( el, includePass, includeChecks[found] );
-//			id->includeDict.insert( el );
-//			includePass.incItems.empty();
-//		}
+//		/* Either we are not in the lib, or a file was specifed, use the
+//		 * file-based include pass. */
+//		includePass.reduceFile( includeChecks[found], id->hostLang );
 //	}
 
 	const char *targetMachine0 = targetMachine;
@@ -181,9 +155,18 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	targetMachine = sectionName.c_str();
 	searchMachine = machine.c_str();
 
-	// std::cout << "reducing: " << includeChecks[found] << " d: " << includeDepth << std::endl;
 	reduceFile( includeChecks[found] );
-	// std::cout << "include complete d: " << includeDepth << std::endl;
+
+//	if ( includePass.incItems.length() == 0 ) {
+//		pd->id->error(incLoc) << "could not find machine " << machine <<
+//				" in " << fileName << endp;
+//	}
+//	else {
+//		/* Load the data into include el. Save in the dict. */
+//		loadIncludeData( el, includePass, includeChecks[found] );
+//		id->includeDict.insert( el );
+//		includePass.incItems.empty();
+//	}
 
 	pd = pd0;
 	includeDepth -= 1;
