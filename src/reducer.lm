@@ -4,7 +4,7 @@ reduction TopLevel
 	#	[`machine word `;] :MachineName
 	ragel::machine_name :MachineName
 	{
-		string machine( $ign_word->data, $ign_word->length );
+		string machine( $mn_word->data, $mn_word->length );
 
 		SectionDictEl *sdEl = id->sectionDict.find( machine );
 		if ( sdEl == 0 ) {
@@ -1100,12 +1100,12 @@ reduction TopLevel
 
 	# def state_ref
 	# 	[opt_name_sep state_ref_names] :Ref
-	inline::state_ref
+	state_ref::state_ref
 	{
 		NameRef *nameRef;
 	}
 
-	inline::state_ref :Ref
+	state_ref::state_ref :Ref
 	{
 		$$->nameRef = $state_ref_names->nameRef;
 		if ( $opt_name_sep->nameSep )
@@ -1115,17 +1115,17 @@ reduction TopLevel
 	# def opt_name_sep
 	# 	[srlex::`::] :ColonColon
 	# |	[] :Empty
-	inline::opt_name_sep
+	state_ref::opt_name_sep
 	{
 		bool nameSep;
 	}
 
-	inline::opt_name_sep :ColonColon
+	state_ref::opt_name_sep :ColonColon
 	{
 		$$->nameSep = true;
 	}
 
-	inline::opt_name_sep :Empty
+	state_ref::opt_name_sep :Empty
 	{
 		$$->nameSep = false;
 	}
@@ -1133,18 +1133,18 @@ reduction TopLevel
 	# def state_ref_names
 	# 	[state_ref_names srlex::`:: srlex::word] :Rec
 	# |	[srlex::word] :Base
-	inline::state_ref_names
+	state_ref::state_ref_names
 	{
 		NameRef *nameRef;
 	}
 
-	inline::state_ref_names :Rec
+	state_ref::state_ref_names :Rec
 	{
 		$$->nameRef = $_state_ref_names->nameRef;
 		$$->nameRef->append( string( $word->data, $word->length ) );
 	}
 
-	inline::state_ref_names :Base
+	state_ref::state_ref_names :Base
 	{
 		$$->nameRef = new NameRef;
 		$$->nameRef->append( string( $word->data, $word->length ) );

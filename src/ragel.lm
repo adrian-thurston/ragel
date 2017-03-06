@@ -6,15 +6,13 @@ struct machine
 	ActionParams: map<str, str>
 end
 
-global MachineMap: map<str, machine> = new map<str, machine>()
-global CurMachine: machine
-
-global Lang: str
-global IncludeDepth: int = 0
-global TargetMachine: str = ""
-global SearchMachine: str = ""
-global Want: bool = false
-global Import: bool = false
+global GblMachineMap: map<str, machine> = new map<str, machine>()
+global GblCurMachine: machine
+global GblIncludeDepth: int = 0
+global GblTargetMachine: str = ""
+global GblSearchMachine: str = ""
+global GblWantSection: bool = false
+global GblImport: bool = false
 
 bool action_params_find( Machine: str, Action: str )
 	= cc_action_params_find
@@ -33,20 +31,6 @@ rl hex_number
 
 rl hex_char
 	/ '0x' [0-9a-fA-F]{2}  /
-
-## Optimization for hex chars that appear near to each other. Converts the
-## string of 2-digit hex chars into a single string. The parse tree walker
-## concatenates the chars.
-#rl hex_string /
-#	hex_char
-#	(
-#		(
-#			[\t\n ]+ |
-#			[\t\n ]* '.' [\t\n ]*
-#		)
-#		hex_char
-#	)+
-#/
 
 rl NL / '\n' /
 
@@ -67,41 +51,6 @@ rl d_literal
 
 rl host_re_literal
 	/ '/' ([^/\\] | NL | '\\' (any | NL))* '/' /
-
-namespace srlex
-	lex
-		ignore /[\t\n ]+/
-		literal `:: `; `)
-		token word /[a-zA-Z_][a-zA-Z0-9_]*/
-	end
-end
-
-lex
-	token ign_word / [a-zA-Z_][a-zA-Z0-9_]* /
-	{
-		S: str = input->pull(match_length)
-		IgnWord: ign_word = make_token( typeid<ign_word>, S )
-		input->push( IgnWord )
-
-		if ( Import )
-			Want = false
-		else if ( SearchMachine != "" ) {
-			#print "checking [S] vs [SearchMachine]
-			if ( S != SearchMachine ) {
-				#print "deciding ignore
-				Want = false
-			}
-			else  {
-				#print "deciding want
-				Want = true
-			}
-		}
-		else {
-			#print "deciding want
-			Want = true
-		}
-	}
-end
 
 #
 # Consuming ragel defintions without parsing. Used for included sections we
@@ -175,6 +124,27 @@ namespace consume
 	|	[c_any]
 end
 
+# State reference.
+namespace state_ref
+	lex
+		ignore /[\t\n ]+/
+		literal `:: `; `)
+		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+	end
+
+	def state_ref
+		[opt_name_sep state_ref_names] :Ref
+
+	def opt_name_sep
+		[`::] :ColonColon
+	|	[] :Empty
+
+	# List of names separated by ::
+	def state_ref_names
+		[state_ref_names `:: word] :Rec
+	|	[word] :Base
+end
+
 namespace ragel
 	lex
 		literal `}%% -ni
@@ -212,8 +182,6 @@ namespace ragel
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
 			"'" ( [^'\\] | '\\' any )* "'" 'i'?
 		/
-
-		# token hex_string / hex_string /
 
 		token lex_regex_open /'/'/ -ni
 		token lex_sqopen_pos /'['/ -ni
@@ -253,24 +221,45 @@ namespace ragel
 
 	# This region is for deciding if we want to parse a ragel section, or if we
 	# want to consume it without interpreting. Consuming is for included
-	# sections we don't want and
+	# sections we don't want and all sections in an imported file.
 	lex
 		token ign_select /''/
 		{
-			if Want {
-				#print "sending want
+			if GblWantSection
 				input->push( make_token( typeid<ign_want>, '' ) )
-			}
-			else {
-				#print "sending ignore
+			else
 				input->push( make_token( typeid<ign_ignore>, '' ) )
-			}
 		}
 
 		token ign_want //
 		token ign_ignore //
 	end
-	
+
+	#
+	# Machine name word. We inspect it to determine if we are interested in the
+	# section.
+	#
+	lex
+		token mn_word / [a-zA-Z_][a-zA-Z0-9_]* /
+		{
+			S: str = input->pull(match_length)
+			IgnWord: mn_word = make_token( typeid<mn_word>, S )
+			input->push( IgnWord )
+
+			if ( GblImport )
+				GblWantSection = false
+			else if ( GblSearchMachine != "" ) {
+				if ( S != GblSearchMachine )
+					GblWantSection = false
+				else 
+					GblWantSection = true
+			}
+			else {
+				GblWantSection = true
+			}
+		}
+	end
+
 
 	def inline_expr_reparse
 		[_inline_expr_reparse] :Reparse
@@ -344,14 +333,14 @@ namespace ragel
 		[word] :Plain
 		{
 			if ! GblSectionPass {
-				if action_params_find( CurMachine->Name, $lhs.word )
+				if action_params_find( GblCurMachine->Name, $lhs.word )
 					reject
 			}
 		}
 	|	[word `( opt_action_arg_list `)] :Args
 		{
 			if ! GblSectionPass {
-				if ! action_params_find( CurMachine->Name, $lhs.word )
+				if ! action_params_find( GblCurMachine->Name, $lhs.word )
 					reject
 			}
 		}
@@ -465,7 +454,6 @@ namespace ragel
 		[alphabet_num] :AlphabetNum
 	|	[word] :Word
 	|	[string] :String
-	#|	[hex_string] :HexString
 	|	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
 	|	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
 	|	[lex_regex_open regex re_close] :Regex
@@ -560,7 +548,7 @@ namespace ragel
 				# Track that this action has params so we can parse appropriately
 				# when reducing.
 				# CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
-				action_params_insert( CurMachine->Name, $lhs.word )
+				action_params_insert( GblCurMachine->Name, $lhs.word )
 			}
 
 			# Reset after parsing the block. 
@@ -617,24 +605,23 @@ namespace ragel
 		[word] :Word
 
 	def machine_name
-		[`machine ign_word `;] :MachineName
+		[`machine mn_word `;] :MachineName
 		{
-			Name: str = $lhs.ign_word
-			if TargetMachine != ""
-				Name = TargetMachine
+			Name: str = $lhs.mn_word
+			if GblTargetMachine != ""
+				Name = GblTargetMachine
 
-			Machine: machine = MachineMap->find( Name )
+			Machine: machine = GblMachineMap->find( Name )
 
 			if !Machine
 			{
 				Machine = new machine()
 				Machine->Name = Name
 				Machine->ActionParams = new map<str, str>()
-				MachineMap->insert( Machine->Name, Machine )
+				GblMachineMap->insert( Machine->Name, Machine )
 			}
 
-			CurMachine = Machine
-
+			GblCurMachine = Machine
 		}
 
 	def statement

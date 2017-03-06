@@ -78,51 +78,27 @@ FileName: str = A->value
 
 # Language.
 A = argv->pop_head_el()
-Lang = A->value
 
 GblSectionPass = false
 
-if ( Cmd == 'import-file' ) {
-	Stream: stream = open( FileName, "r" )
-	RagelTree = parse start[ Stream ]
-	RagelImport = import( FileName, RagelTree )
-	RagelError = error
-}
-else if ( Cmd == 'parse-file' ) {
-	Stream: stream = open( FileName, "r" )
-	RagelTree = parse start[ Stream ]
-	RagelError = error
-}
-else if ( Cmd == 'toplevel-reduce-file' ) {
-	# IncludeDepth
-	A = argv->pop_head_el()
-	IncludeDepth = atoi( A->value )
+# IncludeDepth
+A = argv->pop_head_el()
+GblIncludeDepth = atoi( A->value )
 
-	# TargetMachine
-	A = argv->pop_head_el()
-	TargetMachine = A->value
+# TargetMachine
+A = argv->pop_head_el()
+GblTargetMachine = A->value
 
-	# SearchMachine
-	A = argv->pop_head_el()
-	SearchMachine = A->value
+# SearchMachine
+A = argv->pop_head_el()
+GblSearchMachine = A->value
 
-	# Import
-	A = argv->pop_head_el()
-	Import = atoi( A->value ) != 0
+# Import
+A = argv->pop_head_el()
+GblImport = atoi( A->value ) != 0
 
-	#print "toplevel-reduce-file search for: [SearchMachine]
-
-	Stream: stream = open( FileName, "r" )
-	reduce TopLevel start[ Stream ]
-	RagelError = error
-
-	#print "toplevel-reduce-file complete
-}
-else if ( Cmd == 'toplevel-reduce-str' ) {
-	A = argv->pop_head_el()
-	Data: str = A->value
-	reduce TopLevel start[ Data ]
-	RagelError = error
-}
+Stream: stream = open( FileName, "r" )
+reduce TopLevel start[ Stream ]
+RagelError = error
 
 include 'reducer.lm'

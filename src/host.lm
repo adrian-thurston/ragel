@@ -71,20 +71,8 @@ namespace inline
 	|	[`fc] :Fc
 	|	[`fcurs] :Fcurs
 	|	[`ftargs]  :Ftargs
-	|	[`fentry `( state_ref srlex::`)] :Fentry
+	|	[`fentry `( state_ref::state_ref state_ref::`)] :Fentry
 	|	[var_ref] :VarRef
-
-	def state_ref
-		[opt_name_sep state_ref_names] :Ref
-
-	def opt_name_sep
-		[srlex::`::] :ColonColon
-	|	[] :Empty
-
-	# List of names separated by ::
-	def state_ref_names
-		[state_ref_names srlex::`:: srlex::word] :Rec
-	|	[srlex::word] :Base
 
 	def inline_block
 		[block_item_list] :List
@@ -110,10 +98,10 @@ namespace inline
 	|	[`fcall whitespace? `* inline_expr `;] :FcallExpr
 	|	[`fncall whitespace? `* inline_expr `;] :FncallExpr
 	|	[`fexec inline_expr `;] :Fexec
-	|	[`fgoto state_ref srlex::`;] :FgotoSr
-	|	[`fnext state_ref srlex::`;] :FnextSr
-	|	[`fcall state_ref srlex::`;] :FcallSr
-	|	[`fncall state_ref srlex::`;] :FncallSr
+	|	[`fgoto state_ref::state_ref state_ref::`;] :FgotoSr
+	|	[`fnext state_ref::state_ref state_ref::`;] :FnextSr
+	|	[`fcall state_ref::state_ref state_ref::`;] :FcallSr
+	|	[`fncall state_ref::state_ref state_ref::`;] :FncallSr
 	|	[`fret `;] :Fret
 	|	[`fnret `;] :Fnret
 	|	[`fbreak `;] :Fbreak
