@@ -95,52 +95,12 @@ long TopLevel::tryLongScan( const InputLoc &loc, const char *data )
 	return priorityNum;
 }
 
-#if 0
-void TopLevel::loadIncludeData( IncludeRec *el, IncludePass &includePass, const string &fileName )
-{
-	/* Count bytes. */
-	size_t len = 0;
-	for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next )
-		len += ii->length;
-
-	/* Store bytes. */
-	el->data = new char[len+1];
-	len = 0;
-
-	if ( id->inLibRagel ) {
-		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-			memcpy( el->data + len, id->input + ii->start, ii->length );
-			len += ii->length;
-		}
-	}
-	else {
-		for ( IncItem *ii = includePass.incItems.head; ii != 0; ii = ii->next ) {
-			std::ifstream f( fileName.c_str() );
-
-			f.seekg( ii->start, std::ios::beg );
-			f.read( el->data + len, ii->length );
-			size_t read = f.gcount();
-			if ( read != ii->length ) {
-				pd->id->error(ii->loc) << "unexpected length in read of included file: "
-						"possible change to file" << endp;
-			}
-			len += read;
-		}
-	}
-
-	el->data[len] = 0;
-	el->len = len;
-}
-#endif
-
 void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine )
 {
 	/* Stash the current section name and pd. */
 	string sectionName = pd->sectionName;
 	ParseData *pd0 = pd;
 	std::string foundFileName;
-
-	// std::cout << "searching for " << fileName << std::endl;
 
 //	IncludeRec *el = id->includeDict.find( FnMachine( fileName, machine ) );
 //	if ( el == 0 ) {

@@ -7,6 +7,7 @@ namespace inline
 		token ident /ident/
 		token number /digit+/
 		token hex_number /'0x' [0-9a-fA-F]+/
+		token dec_number /'0x' [0-9a-fA-F]+/
 
 		token comment
 			/ c_comment | cpp_comment /
@@ -176,8 +177,9 @@ namespace host
 	|	[c_any] :Any
 
 	def section
-		[`%%{ ragel::ragel_start ragel::`}%%] :MultiLine
-	|	[tok] :Tok
+		[`%%{ ragel::opt_machine_name ragel::ign_want ragel::statement* ragel::`}%%] :MultiLine
+	|	[`%%{ ragel::opt_machine_name ragel::ign_ignore consume::tok* consume::`}%%] :Consume
+	|	[tok] :Token
 end
 
 

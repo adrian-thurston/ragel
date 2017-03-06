@@ -40,7 +40,6 @@ using std::ios;
 
 InputData::~InputData()
 {
-	includeDict.empty();
 	inputItems.empty();
 	parseDataList.empty();
 	sectionList.empty();

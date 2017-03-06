@@ -165,8 +165,6 @@ struct IncludeRec
 
 };
 
-typedef AvlTree<IncludeRec, FnMachine, CmpFnMachine> IncludeDict;
-
 struct InputData
 :
 	public FsmGbl
@@ -287,8 +285,6 @@ struct InputData
 	bool checkBreadth;
 
 	bool varBackend;
-
-	IncludeDict includeDict;
 
 	const char *histogramFn;
 	double *histogram;

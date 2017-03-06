@@ -48,7 +48,6 @@ char *unescape( const char *s, int slen );
 char *unescape( const char *s );
 
 struct SectionPass;
-struct IncludePass;
 
 struct TopLevel
 {
@@ -111,7 +110,6 @@ struct TopLevel
 	void reduceStr( const char *inputFileName, const char *input );
 	void topReduce( const char *inputFileName );
 
-	void loadIncludeData( IncludeRec *el, IncludePass &includePass, const string &fileName );
 	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
 };
 
