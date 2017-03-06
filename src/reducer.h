@@ -115,31 +115,6 @@ struct TopLevel
 	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
 };
 
-struct IncludePass
-{
-	IncludePass( InputData *id, const string targetMachine )
-	:
-		id(id),
-		targetMachine(targetMachine),
-		section(0)
-	{
-	}
-
-	InputData *id;
-	const string targetMachine;
-	string sectionMachine;
-	Section *section;
-	IncItemList incItems;
-	SectionDict sectionDict2;
-
-	void reduceFile( const char *inputFileName, const HostLang *hostLang );
-	void reduceStr( const char *inputFileName, const HostLang *hostLang, const char *input );
-
-	/* Generated and called by colm. */
-	void commit_reduce_forward( program_t *prg, tree_t **root,
-			struct pda_run *pda_run, parse_tree_t *pt );
-};
-
 struct Import
 {
 	Import( InputData *id, ParseData *pd ) : id(id), pd(pd), curFileName(0) {}
