@@ -114,20 +114,4 @@ struct TopLevel
 	bool isImport;
 };
 
-struct Import
-{
-	Import( InputData *id, ParseData *pd ) : id(id), pd(pd), curFileName(0) {}
-
-	InputData *id;
-	ParseData *pd;
-	const char *curFileName;
-
-	void tryMachineDef( const InputLoc &loc, std::string name, MachineDef *machineDef, bool isInstance );
-	void import( Literal *literal );
-
-	/* Generated and called by colm. */
-	void commit_reduce_forward( program_t *prg, tree_t **root,
-			struct pda_run *pda_run, parse_tree_t *pt );
-};
-
 #endif

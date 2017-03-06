@@ -175,70 +175,11 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	searchMachine = searchMachine0;
 }
 
-void TopLevel::reduceFile( const char *inputFileName, bool import )
-{
-	char idstr[64], imstr[64];
-	sprintf( idstr, "%d", includeDepth );
-	sprintf( imstr, "%d", import );
-
-	const char *argv[9];
-	argv[0] = "rlparse";
-	argv[1] = "toplevel-reduce-file";
-	argv[2] = inputFileName;
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = idstr;
-	argv[5] = targetMachine == 0 ? "" : targetMachine;
-	argv[6] = searchMachine == 0 ? "" : searchMachine;
-	argv[7] = imstr;
-	argv[8] = 0;
-
-	const char *prevCurFileName = curFileName;
-	curFileName = inputFileName;
-
-	colm_program *program = colm_new_program( &rlparse_object );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 8, argv );
-	id->streamFileNames.append( colm_extract_fns( program ) );
-
-	int length = 0;
-	const char *err = colm_error( program, &length );
-	if ( err != 0 ) {
-		// std::cout << "error" << std::endl;
-		id->error_plain() << string( err, length ) << std::endl;
-	}
-
-	colm_delete_program( program );
-
-	curFileName = prevCurFileName;
-}
-
 void TopLevel::importFile( std::string file )
 {
 	isImport = true;
 	reduceFile( file.c_str(), true );
 	isImport = false;
-}
-
-void Import::tryMachineDef( const InputLoc &loc, std::string name, 
-		MachineDef *machineDef, bool isInstance )
-{
-	GraphDictEl *newEl = pd->graphDict.insert( name );
-	if ( newEl != 0 ) {
-		/* New element in the dict, all good. */
-		newEl->value = new VarDef( name, machineDef );
-		newEl->isInstance = isInstance;
-		newEl->loc = loc;
-		newEl->value->isExport = false; //exportContext[exportContext.length()-1];
-
-		/* It it is an instance, put on the instance list. */
-		if ( isInstance )
-			pd->instanceList.append( newEl );
-	}
-	else {
-		// Recover by ignoring the duplicate.
-		pd->id->error(loc) << "fsm \"" << name << "\" previously defined" << endl;
-	}
 }
 
 void TopLevel::import( const InputLoc &loc, std::string name, Literal *literal )
@@ -262,32 +203,40 @@ void TopLevel::import( const InputLoc &loc, std::string name, Literal *literal )
 	machineDef->join->loc = loc;
 }
 
-#if 0
-void Import::reduceImport( std::string fileName )
+void TopLevel::reduceFile( const char *inputFileName, bool import )
 {
-	const char *argv[5];
+	char idstr[64], imstr[64];
+	sprintf( idstr, "%d", includeDepth );
+	sprintf( imstr, "%d", import );
+
+	const char *argv[7];
 	argv[0] = "rlparse";
-	argv[1] = "reduce-import";
-	argv[2] = fileName.c_str();
-	argv[3] = id->hostLang->rlhcArg;
-	argv[4] = 0;
+	argv[1] = inputFileName;
+	argv[2] = imstr; // Import 
+	argv[3] = idstr; // IncludeDepth
+	argv[4] = targetMachine == 0 ? "" : targetMachine;
+	argv[5] = searchMachine == 0 ? "" : searchMachine;
+	argv[6] = 0;
 
 	const char *prevCurFileName = curFileName;
-	curFileName = fileName.c_str();
+	curFileName = inputFileName;
 
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 4, argv );
+	colm_run_program( program, 6, argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
 	int length = 0;
 	const char *err = colm_error( program, &length );
-	if ( err != 0 )
+	if ( err != 0 ) {
+		// std::cout << "error" << std::endl;
 		id->error_plain() << string( err, length ) << std::endl;
+	}
 
 	colm_delete_program( program );
 
 	curFileName = prevCurFileName;
 }
-#endif
+
+

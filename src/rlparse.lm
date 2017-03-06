@@ -67,19 +67,16 @@ import* import( FileName: str, Start: start )
 	return ImportList
 }
 
-# Command.
-A: list_el<str> = argv->pop_head_el()
-Cmd: str = A->value
+A: list_el<str>
 
-# File name. The open is expected to succeed. The open is tested before the
-# colm program is called.
+# File name. The open is expected to succeed. It is tested before the colm
+# program is called.
 A = argv->pop_head_el()
 FileName: str = A->value
 
-# Language.
+# Import
 A = argv->pop_head_el()
-
-GblSectionPass = false
+GblImport = atoi( A->value ) != 0
 
 # IncludeDepth
 A = argv->pop_head_el()
@@ -92,10 +89,6 @@ GblTargetMachine = A->value
 # SearchMachine
 A = argv->pop_head_el()
 GblSearchMachine = A->value
-
-# Import
-A = argv->pop_head_el()
-GblImport = atoi( A->value ) != 0
 
 Stream: stream = open( FileName, "r" )
 reduce TopLevel start[ Stream ]
