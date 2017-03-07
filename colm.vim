@@ -110,16 +110,16 @@ syntax match redNumber "false" contained
 
 syntax match redIdentifier "[a-zA-Z_][a-zA-Z_0-9]*" contained
 
-syntax keyword redType unsigned signed void char short int long float double bool
-syntax keyword redType inline static extern register const volatile auto
-syntax keyword redType union enum struct class typedef
-syntax keyword redType namespace template typename mutable
-syntax keyword redKeyword break continue default do else for
-syntax keyword redKeyword goto if return switch while
-syntax keyword redKeyword new delete this using friend public private protected sizeof
-syntax keyword redKeyword throw try catch operator typeid
-syntax keyword redKeyword and bitor xor compl bitand and_eq or_eq xor_eq not not_eq
-syntax keyword redKeyword static_cast dynamic_cast
+syntax keyword redType unsigned signed void char short int long float double bool contained
+syntax keyword redType inline static extern register const volatile auto contained
+syntax keyword redType union enum struct class typedef contained
+syntax keyword redType namespace template typename mutable contained
+syntax keyword redKeyword break continue default do else for contained
+syntax keyword redKeyword goto if return switch while contained
+syntax keyword redKeyword new delete this using friend public private protected sizeof contained
+syntax keyword redKeyword throw try catch operator typeid contained
+syntax keyword redKeyword and bitor xor compl bitand and_eq or_eq xor_eq not not_eq contained
+syntax keyword redKeyword static_cast dynamic_cast contained
 
 syntax sync match colmSyncPat grouphere NONE "([{}]|\<reduction\>|\<token\>|\<ignore\>|\<def\>)"
 
