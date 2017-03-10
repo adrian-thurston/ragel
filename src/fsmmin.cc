@@ -797,6 +797,108 @@ void FsmAp::compressTransitions()
 	}
 }
 
+bool FsmAp::elimCondBits()
+{
+	bool modified = false;
+	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
+		restart:
+		for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
+			if ( !trans->plain() ) {
+				CondSpace *cs = trans->condSpace;
+
+				for ( CondSet::Iter csi = cs->condSet; csi.lte(); csi++ ) {
+					long bit = 1 << csi.pos();
+
+					/* Sort into on and off lists. */
+					CondList on;
+					CondList off;
+					TransCondAp *tcap = trans->tcap();
+					while ( tcap->condList.length() > 0 ) {
+						CondAp *cond = tcap->condList.detachFirst();
+						if ( cond->key.getVal() & bit ) {
+							cond->key = CondKey( cond->key.getVal() & ~bit );
+							on.append( cond );
+						}
+						else {
+							off.append( cond );
+						}
+					}
+
+					bool merge = false;
+					if ( on.length() > 0 && on.length() == off.length() ) {
+						/* test if the same */
+						int cmpRes = compareCondListBitElim( on, off );
+						if ( cmpRes == 0 )
+							merge = true;
+					}
+
+					if ( merge ) {
+						if ( cs->condSet.length() == 1 ) {
+							/* clear out the on-list. */
+							while ( on.length() > 0 ) {
+								CondAp *cond = on.detachFirst();
+								detachTrans( st, cond->toState, cond );
+							}
+
+							/* turn back into a plain transition. */
+							CondAp *cond = off.detachFirst();
+							TransAp *n = convertToTransAp( st, cond );
+							TransAp *before = trans->prev;
+							st->outList.detach( trans );
+							st->outList.addAfter( before, n );
+							modified = true;
+							goto restart;
+						}
+						else 
+						{
+							CondSet newSet = cs->condSet;
+							newSet.Vector<Action*>::remove( csi.pos(), 1 );
+							trans->condSpace = addCondSpace( newSet );
+
+							/* clear out the on-list. */
+							while ( on.length() > 0 ) {
+								CondAp *cond = on.detachFirst();
+								detachTrans( st, cond->toState, cond );
+							}
+						}
+					}
+
+					/* Turn back into a single list. */
+					while ( on.length() > 0 || off.length() > 0 ) {
+						if ( on.length() == 0 ) {
+							while ( off.length() > 0 )
+								tcap->condList.append( off.detachFirst() );
+						}
+						else if ( off.length() == 0 ) {
+							while ( on.length() > 0 ) {
+								CondAp *cond = on.detachFirst();
+								cond->key = CondKey( cond->key.getVal() | bit );
+								tcap->condList.append( cond );
+							}
+						}
+						else {
+							if ( off.head->key.getVal() < ( on.head->key.getVal() | bit ) ) {
+								tcap->condList.append( off.detachFirst() );
+							}
+							else {
+								CondAp *cond = on.detachFirst();
+								cond->key = CondKey( cond->key.getVal() | bit );
+								tcap->condList.append( cond );
+							}
+						}
+					}
+
+					if ( merge ) {
+						modified = true;
+						goto restart;
+					}
+				}
+			}
+		}
+	}
+	return modified;
+}
+
 /* Perform minimization after an operation according 
  * to the command line args. */
 void FsmAp::afterOpMinimize( bool lastInSeq )
