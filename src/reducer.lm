@@ -6,31 +6,31 @@ reduction TopLevel
 	{
 		string machine( $mn_word->data, $mn_word->length );
 
-		SectionDictEl *sdEl = id->sectionDict.find( machine );
-		if ( sdEl == 0 ) {
-			sdEl = new SectionDictEl( machine );
-			sdEl->value = new Section( machine );
-			id->sectionDict.insert( sdEl );
-			id->sectionList.append( sdEl->value );
+		if ( includeDepth == 0 ) {
+			/* Maintain section dict, section list and the cur section pointer
+			 * if we are in the top level. */
+			SectionDictEl *sdEl = id->sectionDict.find( machine );
+			if ( sdEl == 0 ) {
+				sdEl = new SectionDictEl( machine );
+				sdEl->value = new Section( machine );
+				id->sectionDict.insert( sdEl );
+				id->sectionList.append( sdEl->value );
+			}
+
+			section = sdEl->value;
 		}
 
-		section = sdEl->value;
-
-		InputLoc sectionLoc;
-
 		if ( includeDepth > 0 ) {
-			/* Check if the the machine is the one we are searching for. If
-			 * not, reset pd. Otherwise, rename it to target machine because we
-			 * are drawing the statements into target. */
+			/* If including, check if the the machine is the one we are
+			 * searching for. If not, reset pd. Otherwise, rename it to target
+			 * machine because we are drawing the statements into target. */
 			if ( machine == searchMachine )
 				machine = targetMachine;
 		}
 
-		sdEl = id->sectionDict.find( machine.c_str() );
-		assert( sdEl != 0 );
-
 		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
 		if ( pdEl == 0 ) {
+			InputLoc sectionLoc = @1;
 			pdEl = new ParseDataDictEl( machine );
 			pdEl->value = new ParseData( id, machine,
 					id->nextMachineId++, sectionLoc, hostLang,

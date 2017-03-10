@@ -209,7 +209,7 @@ void InputData::verifyWriteHasData( InputItem *ii )
 {
 	if ( ii->type == InputItem::Write ) {
 		if ( ii->pd->cgd == 0 )
-			error( ii->loc ) << "no machine instantiations to write" << endl;
+			error( ii->loc ) << ii->pd->sectionName << ": no machine instantiations to write" << endl;
 	}
 }
 
