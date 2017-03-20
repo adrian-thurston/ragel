@@ -29,8 +29,8 @@
 
 bool IpGotoCodeGen::useAgainLabel()
 {
-	return redFsm->anyRegActionRets() || 
-			redFsm->anyRegActionByValControl() || 
+	return redFsm->anyActionRets() || 
+			redFsm->anyActionByValControl() || 
 			redFsm->anyRegNextStmt();
 }
 

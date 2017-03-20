@@ -838,6 +838,10 @@ void CodeGenData::analyzeAction( GenAction *act, GenInlineList *inlineList )
 				redFsm->bAnyActionCalls = true;
 			else if ( item->type == GenInlineItem::Ret )
 				redFsm->bAnyActionRets = true;
+
+			if ( item->type == GenInlineItem::CallExpr || item->type == GenInlineItem::GotoExpr )
+				redFsm->bAnyActionByValControl = true;
+
 		}
 
 		/* Check for various things in regular actions. */
