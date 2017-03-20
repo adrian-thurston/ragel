@@ -24,49 +24,6 @@ export RagelTree: start
 export RagelError: str
 export RagelImport: import*
 
-import* import( FileName: str, Start: start )
-{
-	ImportList: import* = cons import* []
-
-	for Pref: host::section* in RagelTree { 
-		if match Pref [
-			"#define " Word: host::ident host::whitespace
-			Number: host::number host::section*
-		]
-		{
-			ImportList = cons import*[ Word Number ImportList ]
-		}
-
-		if match Pref [
-			Word: host::ident host::whitespace
-			"=" host::whitespace
-			Number: host::number host::section*
-		]
-		{
-			ImportList = cons import*[ Word Number ImportList ]
-		}
-
-		if match Pref [
-			"#define " Word: host::ident host::whitespace
-			String: host::string host::section*
-		]
-		{
-			ImportList = cons import*[ Word String ImportList ]
-		}
-
-		if match Pref [
-			Word: host::ident host::whitespace
-			"=" host::whitespace
-			String: host::string host::section*
-		]
-		{
-			ImportList = cons import*[ Word String ImportList ]
-		}
-	}
-
-	return ImportList
-}
-
 A: list_el<str>
 
 # File name. The open is expected to succeed. It is tested before the colm
