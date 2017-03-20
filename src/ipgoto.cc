@@ -74,8 +74,8 @@ void IpGoto::genAnalysis()
 
 bool IpGoto::useAgainLabel()
 {
-	return redFsm->anyRegActionRets() || 
-			redFsm->anyRegActionByValControl() || 
+	return redFsm->anyActionRets() || 
+			redFsm->anyActionByValControl() ||
 			redFsm->anyRegNextStmt();
 }
 
