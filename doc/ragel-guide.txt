@@ -3425,7 +3425,7 @@ used.
 
 New in ragel 7 is a construct designed to simplify the use of conditions to
 control repetition. While possible to count properly using condition embedding
-operators, there is a corner case that prove difficult. If the zero-width case
+operators, there is a corner case that proves difficult. If the zero-width case
 is to be accepted properly, some knowledge of what is before and after is
 necessary and tests need to be embedded there. The `:cond()` operator is
 designed to solve this problem, automatically embedding actions such that a

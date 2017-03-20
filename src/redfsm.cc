@@ -74,6 +74,7 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx, int machineId )
 	bAnyActionNcalls(false),
 	bAnyActionRets(false),
 	bAnyActionNrets(false),
+	bAnyActionByValControl(false),
 	bAnyRegActionRets(false),
 	bAnyRegActionByValControl(false),
 	bAnyRegNextStmt(false),

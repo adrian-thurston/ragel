@@ -1259,7 +1259,7 @@ void Reducer::analyzeAction( GenAction *act, GenInlineList *inlineList )
 				redFsm->bUsingAct = true;
 			}
 
-			/* Any by value control in regular actions? */
+			/* Any by value control in all actions? */
 			if ( item->type == GenInlineItem::CallExpr || item->type == GenInlineItem::GotoExpr )
 				redFsm->bAnyActionByValControl = true;
 		}
