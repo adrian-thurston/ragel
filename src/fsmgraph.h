@@ -643,7 +643,7 @@ struct TransCondAp
 		condList.empty();
 	}
 
-	/* Cond trans list. */
+	/* Cond trans list. Sorted by key value. */
 	CondList condList;
 };
 
@@ -2133,6 +2133,9 @@ public:
 	void expandCondKeys( CondKeySet &condKeys, CondSpace *fromSpace,
 			CondSpace *mergedSpace );
 
+	/* Back to trans ap (minimmization) */
+	TransDataAp *convertToTransAp( StateAp *from, CondAp *cond );
+
 	/* Cross a src transition with one that is already occupying a spot. */
 	TransCondAp *convertToCondAp( StateAp *state, TransDataAp *trans );
 	CondSpace *expandCondSpace( TransAp *destTrans, TransAp *srcTrans );
@@ -2174,6 +2177,10 @@ public:
 	/*
 	 * Transition Comparison.
 	 */
+
+	template< class Trans > int compareCondBitElim( Trans *trans1, Trans *trans2 );
+	template< class Trans > int compareCondBitElimPtr( Trans *trans1, Trans *trans2 );
+	int compareCondListBitElim( const CondList &condList1, const CondList &condList2 );
 
 	/* Compare priority and function table of transitions. */
 	static int compareTransData( TransAp *trans1, TransAp *trans2 );
@@ -2447,6 +2454,8 @@ public:
 	/* Check if a machine defines a single character. This is useful in
 	 * validating ranges and machines to export. */
 	bool checkSingleCharMachine( );
+
+	bool elimCondBits();
 };
 
 /* Callback invoked when another trans (or possibly this) is added into this
@@ -2483,6 +2492,23 @@ template< class Trans > int FsmAp::compareCondDataPtr( Trans *trans1, Trans *tra
 	else if ( trans1 != 0 ) {
 		/* Both of the transition pointers are set. */
 		int compareRes = compareCondData( trans1, trans2 );
+		if ( compareRes != 0 )
+			return compareRes;
+	}
+	return 0;
+}
+
+/* Compares two transition pointers according to priority and functions.
+ * Either pointer may be null. Does not consider to state or from state. */
+template< class Trans > int FsmAp::compareCondBitElimPtr( Trans *trans1, Trans *trans2 )
+{
+	if ( trans1 == 0 && trans2 != 0 )
+		return -1;
+	else if ( trans1 != 0 && trans2 == 0 )
+		return 1;
+	else if ( trans1 != 0 ) {
+		/* Both of the transition pointers are set. */
+		int compareRes = compareCondBitElim( trans1, trans2 );
 		if ( compareRes != 0 )
 			return compareRes;
 	}

@@ -260,6 +260,26 @@ CondSpace *FsmAp::addCondSpace( const CondSet &condSet )
 	return condSpace;
 }
 
+TransDataAp *FsmAp::convertToTransAp( StateAp *from, CondAp *cond )
+{
+	TransDataAp *newTrans = new TransDataAp();
+	newTrans->lowKey = cond->transAp->lowKey;
+	newTrans->highKey = cond->transAp->highKey;
+
+	newTrans->lmActionTable.setActions( cond->lmActionTable );
+	newTrans->actionTable.setActions( cond->actionTable );
+	newTrans->priorTable.setPriors( cond->priorTable );
+
+	attachTrans( from, cond->toState, newTrans );
+
+	/* Detach in list. */
+	detachTrans( from, cond->toState, cond );
+	delete cond->transAp;
+	delete cond;
+
+	return newTrans;
+}
+
 TransCondAp *FsmAp::convertToCondAp( StateAp *from, TransDataAp *trans )
 {
 	TransCondAp *newTrans = new TransCondAp();

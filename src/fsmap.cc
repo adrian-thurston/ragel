@@ -945,6 +945,34 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
 	return 0;
 }
 
+int FsmAp::compareCondListBitElim( const CondList &condList1, const CondList &condList2 )
+{
+	ValPairIter< PiList<CondAp> > outPair( condList1, condList2 );
+	for ( ; !outPair.end(); outPair++ ) {
+		switch ( outPair.userState ) {
+		case ValPairIter<CondAp>::RangeInS1: {
+			int compareRes = FsmAp::compareCondBitElimPtr<CondAp>( outPair.s1Tel.trans, 0 );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+		case ValPairIter<CondAp>::RangeInS2: {
+			int compareRes = FsmAp::compareCondBitElimPtr<CondAp>( 0, outPair.s2Tel.trans );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}
+		case ValPairIter<CondAp>::RangeOverlap: {
+			int compareRes = FsmAp::compareCondBitElimPtr<CondAp>( 
+					outPair.s1Tel.trans, outPair.s2Tel.trans );
+			if ( compareRes != 0 )
+				return compareRes;
+			break;
+		}}
+	}
+	return 0;
+}
+
 /* Compares two transitions according to priority and functions. Pointers
  * should not be null. Does not consider to state or from state.  Compare two
  * transitions according to the data contained in the transitions.  Data means
@@ -998,6 +1026,35 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
  * the base transition has no data, the default is to return equal. */
 template< class Trans > int FsmAp::compareCondData( Trans *trans1, Trans *trans2 )
 {
+	/* Compare the prior table. */
+	int cmpRes = CmpPriorTable::compare( trans1->priorTable, 
+			trans2->priorTable );
+	if ( cmpRes != 0 )
+		return cmpRes;
+
+	/* Compare longest match action tables. */
+	cmpRes = CmpLmActionTable::compare(trans1->lmActionTable, 
+			trans2->lmActionTable);
+	if ( cmpRes != 0 )
+		return cmpRes;
+	
+	/* Compare action tables. */
+	return CmpActionTable::compare(trans1->actionTable, 
+			trans2->actionTable);
+}
+
+/* Compares two transitions according to priority and functions. Pointers
+ * should not be null. Does not consider to state or from state.  Compare two
+ * transitions according to the data contained in the transitions.  Data means
+ * any properties added to user transitions that may differentiate them. Since
+ * the base transition has no data, the default is to return equal. */
+template< class Trans > int FsmAp::compareCondBitElim( Trans *trans1, Trans *trans2 )
+{
+	if ( trans1->toState < trans2->toState )
+		return -1;
+	else if ( trans1->toState > trans2->toState )
+		return 1;
+
 	/* Compare the prior table. */
 	int cmpRes = CmpPriorTable::compare( trans1->priorTable, 
 			trans2->priorTable );
