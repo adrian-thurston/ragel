@@ -188,6 +188,10 @@ protected:
 	string ARR_REF( const TableArray &ta )
 		{ return ta.ref(); }
 
+	void INLINE_EXPR( ostream &ret, GenInlineList *inlineList );
+	void INLINE_BLOCK( ostream &ret, GenInlineExpr *inlineExpr );
+	void INLINE_PLAIN( ostream &ret, GenInlineExpr *inlineExpr );
+
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;

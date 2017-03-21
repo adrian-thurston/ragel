@@ -627,6 +627,25 @@ void CodeGen::GEN_EXPR( ostream &ret, GenInlineItem *item,
 	}
 }
 
+void CodeGen::INLINE_EXPR( ostream &ret, GenInlineList *inlineList )
+{
+	ret << OPEN_HOST_EXPR();
+	INLINE_LIST( ret, inlineList, 0, false, false );
+	ret << CLOSE_HOST_EXPR();
+}
+
+void CodeGen::INLINE_BLOCK( ostream &ret, GenInlineExpr *inlineExpr )
+{
+	out << OPEN_HOST_BLOCK( inlineExpr );
+	INLINE_LIST( out, inlineExpr->inlineList, 0, false, false );
+	out << CLOSE_HOST_BLOCK();
+}
+
+void CodeGen::INLINE_PLAIN( ostream &ret, GenInlineExpr *inlineExpr )
+{
+}
+
+
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
 void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
