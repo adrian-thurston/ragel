@@ -149,6 +149,11 @@ int rw_c_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"fwrite ( ts , 1 , te - ts , stdout );" 
 	}
+	else if match Stmt [`print_off `;]
+	{
+		send Out
+			"printf( \"%d\", (int)(p - data) );"
+	}
 }
 
 int rw_c_ragel_stmt( Stmt: indep::ragel_stmt )
