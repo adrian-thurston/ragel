@@ -618,15 +618,22 @@ std::ostream &CSharpTabCodeGen::TRANS_ACTIONS_WI()
 
 void CSharpTabCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << gotoDest << "; " << 
-			CTRL_FLOW() << "goto _again;}";
+	ret << "{" << vCS() << " = " << gotoDest << ";";
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 }
 
 void CSharpTabCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << "{" << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << ");";
+	
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 }
 
 void CSharpTabCodeGen::CURS( ostream &ret, bool inFinish )
@@ -658,8 +665,13 @@ void CSharpTabCodeGen::CALL( ostream &ret, int callDest, int targState, bool inF
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
-			callDest << "; " << CTRL_FLOW() << "goto _again;}";
+	ret << "{";
+
+	ret << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << callDest << ";";
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -672,9 +684,15 @@ void CSharpTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targS
 		INLINE_LIST( ret, prePushExpr, 0, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
+	ret << "{";
+
+	ret << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << ");";
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -682,8 +700,9 @@ void CSharpTabCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targS
 
 void CSharpTabCodeGen::RET( ostream &ret, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << STACK() << "[--" << 
-			TOP() << "]; ";
+	ret << "{";
+
+	ret << vCS() << " = " << STACK() << "[--" << TOP() << "]; ";
 
 	if ( postPopExpr != 0 ) {
 		ret << "{";
@@ -691,7 +710,9 @@ void CSharpTabCodeGen::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << CTRL_FLOW() <<  "goto _again;}";
+	ret << CTRL_FLOW() <<  "goto _again;";
+
+	ret << "}";
 }
 
 void CSharpTabCodeGen::BREAK( ostream &ret, int targState )

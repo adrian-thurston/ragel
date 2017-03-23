@@ -131,6 +131,8 @@ protected:
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
 	string CTXDATA() { return DATA_PREFIX() + "ctxdata"; }
 
+	void EOF_CHECK( ostream &ret );
+
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;

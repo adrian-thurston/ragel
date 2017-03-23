@@ -543,15 +543,32 @@ std::ostream &GotoCodeGen::FINISH_CASES()
 
 void GotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << vCS() << " = " << gotoDest << "; " << 
-			CTRL_FLOW() << "goto _again;}";
+	ret << "{";
+
+	ret << vCS() << " = " << gotoDest << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 }
 
 void GotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
-	ret << "{" << vCS() << " = (";
+	ret << "{";
+
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << ");";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 }
 
 void GotoCodeGen::CURS( ostream &ret, bool inFinish )
@@ -583,8 +600,16 @@ void GotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << 
-			callDest << "; " << CTRL_FLOW() << "goto _again;}";
+	ret << "{";
+
+	ret << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = " << callDest << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -597,9 +622,18 @@ void GotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
+	ret << "{";
+
+	ret << STACK() << "[" << TOP() << "++] = " << vCS() << "; " << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << "); " << CTRL_FLOW() << "goto _again;}";
+	ret << ");";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << CTRL_FLOW() << "goto _again;";
+
+	ret << "}";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -615,7 +649,11 @@ void GotoCodeGen::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << CTRL_FLOW() << "goto _again;}";
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << CTRL_FLOW() << "goto _again;";
+	ret << "}";
 }
 
 void GotoCodeGen::BREAK( ostream &ret, int targState, bool csForced )
