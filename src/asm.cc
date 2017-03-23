@@ -1266,13 +1266,19 @@ unsigned int AsmCodeGen::EOF_ACTION( RedStateAp *state )
 
 bool AsmCodeGen::useAgainLabel()
 {
-	return redFsm->anyRegActionRets() || 
-			redFsm->anyRegActionByValControl() || 
+	return redFsm->anyActionRets() || 
+			redFsm->anyActionByValControl() ||
 			redFsm->anyRegNextStmt();
 }
 
 void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
+	if ( inFinish && !noEnd ) {
+		out <<
+			"	cmpq	" << P() << ", " << PE() << "\n"
+			"	je	" << LABEL( "test_eof", gotoDest ) << "\n";
+	}
+
 	ret <<
 		"	jmp		" << LABEL( "st", gotoDest ) << "\n";
 }
@@ -1288,6 +1294,16 @@ void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 		"	movq	$" << targState << ", (%rax, %rcx, 8)\n"
 		"	addq	$1, %rcx\n"
 		"	movq	%rcx, " << TOP() << "\n"
+	;
+
+	if ( inFinish && !noEnd ) {
+		out <<
+			"	cmpq	" << P() << ", " << PE() << "\n"
+			"	je	" << LABEL( "test_eof", callDest ) << "\n";
+	}
+
+
+	ret <<
 		"	jmp		" << LABEL( "st", callDest ) << "\n";
 	;
 }
@@ -1309,6 +1325,16 @@ void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 		"	addq	$1, %rcx\n"
 		"	movq	%rcx, " << TOP() << "\n"
 		"	movq	%rdx, " << vCS() << "\n"
+	;
+
+	if ( inFinish && !noEnd ) {
+		out <<
+			"	cmpq	" << P() << ", " << PE() << "\n"
+			"	je	" << LABEL( "test_eof" ) << "\n";
+	}
+
+
+	ret <<
 		"	jmp		" << LABEL( "again" ) << "\n";
 }
 
@@ -1325,6 +1351,12 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 	if ( red->postPopExpr != 0 )
 		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 
+	if ( inFinish && !noEnd ) {
+		out <<
+			"	cmpq	" << P() << ", " << PE() << "\n"
+			"	je	" << LABEL( "test_eof" ) << "\n";
+	}
+
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
 }
@@ -1334,6 +1366,12 @@ void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	ret << "	movq	";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ", " << vCS() << "\n";
+
+	if ( inFinish && !noEnd ) {
+		out <<
+			"	cmpq	" << P() << ", " << PE() << "\n"
+			"	je	" << LABEL( "test_eof" ) << "\n";
+	}
 
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
@@ -1817,6 +1855,13 @@ void AsmCodeGen::setLabelsNeeded()
 
 		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
 			setLabelsNeeded( &cond->p );
+
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			if ( st->eofAction != 0 ) {
+				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+					setLabelsNeeded( item->value->inlineList );
+			}
+		}
 	}
 
 	if ( !noEnd ) {

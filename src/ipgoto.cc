@@ -88,7 +88,6 @@ void IpGoto::EOF_CHECK( ostream &ret, int gotoDest )
 	testEofUsed = true;
 }
 
-
 void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
@@ -677,14 +676,6 @@ void IpGoto::setLabelsNeeded()
 			if ( st->eofAction != 0 ) {
 				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
 					setLabelsNeeded( item->value->inlineList );
-			}
-
-			if ( st->eofTrans != 0 ) {
-				long condsFullSize = st->eofTrans->condFullSize();
-				for ( int c = 0; c < condsFullSize; c++ ) {
-					RedCondPair *pair = st->eofTrans->outCond( c );
-					setLabelsNeeded( pair );
-				}
 			}
 		}
 	}
