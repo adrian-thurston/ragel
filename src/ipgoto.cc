@@ -79,16 +79,42 @@ bool IpGoto::useAgainLabel()
 			redFsm->anyRegNextStmt();
 }
 
+void IpGoto::EOF_CHECK( ostream &ret, int gotoDest )
+{
+	ret << 
+		"       if ( " << P() << " == " << PE() << " )\n"
+		"               goto _test_eof" << gotoDest << ";\n";
+
+	testEofUsed = true;
+}
+
+
 void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << OPEN_GEN_BLOCK() << "goto st" << gotoDest << ";" << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK();
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret, gotoDest );
+
+	ret << "goto st" << gotoDest << ";";
+
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << CLOSE_HOST_EXPR() << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_HOST_EXPR() << ";";
+
+	/* Since we are setting CS above and can select on it, call the all-state
+	 * test_eof. */
+	if ( inFinish && !noEnd )
+		CodeGen::EOF_CHECK( ret );
+	
+	ret << " goto _again;";
+	
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -102,8 +128,14 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	}
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << 
-			"; " << TOP() << "+= 1; " << "goto st" << callDest << ";" <<
-			CLOSE_GEN_BLOCK();
+			"; " << TOP() << "+= 1; ";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret, callDest );
+
+	ret << "goto st" << callDest << ";";
+
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -134,7 +166,16 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 	ret << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "+= 1;" <<
 			vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << CLOSE_HOST_EXPR() << "; goto _again;" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_HOST_EXPR() << ";";
+
+	/* Since we are setting CS above and can select on it, call the all-state
+	 * test_eof. */
+	if ( inFinish && !noEnd )
+		CodeGen::EOF_CHECK( ret );
+
+	ret << " goto _again;";
+	
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -163,6 +204,9 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
+
+	if ( inFinish && !noEnd )
+		CodeGen::EOF_CHECK( ret );
 
 	ret << "goto _again;" << CLOSE_GEN_BLOCK();
 }
@@ -610,8 +654,8 @@ void IpGoto::setLabelsNeeded( RedCondPair *pair )
 /* Set up labelNeeded flag for each state. */
 void IpGoto::setLabelsNeeded()
 {
-	/* If we use the _again label, then we the _again switch, which uses all
-	 * labels. */
+	/* If we use the _again label, then we generate the _again switch, which
+	 * uses all labels. */
 	if ( useAgainLabel() ) {
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
 			st->labelNeeded = true;
@@ -628,6 +672,21 @@ void IpGoto::setLabelsNeeded()
 
 		for ( CondApSet::Iter cond = redFsm->condSet; cond.lte(); cond++ )
 			setLabelsNeeded( &cond->p );
+
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			if ( st->eofAction != 0 ) {
+				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+					setLabelsNeeded( item->value->inlineList );
+			}
+
+			if ( st->eofTrans != 0 ) {
+				long condsFullSize = st->eofTrans->condFullSize();
+				for ( int c = 0; c < condsFullSize; c++ ) {
+					RedCondPair *pair = st->eofTrans->outCond( c );
+					setLabelsNeeded( pair );
+				}
+			}
+		}
 	}
 
 	if ( !noEnd ) {
@@ -635,6 +694,7 @@ void IpGoto::setLabelsNeeded()
 			if ( st != redFsm->errState )
 				st->outNeeded = st->labelNeeded;
 		}
+
 	}
 }
 

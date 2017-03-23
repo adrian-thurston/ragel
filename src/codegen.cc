@@ -643,8 +643,8 @@ void CodeGen::INLINE_BLOCK( ostream &ret, GenInlineExpr *inlineExpr )
 
 void CodeGen::INLINE_PLAIN( ostream &ret, GenInlineExpr *inlineExpr )
 {
-}
 
+}
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
  * to virtual functions than handle language specific items in the tree. */
@@ -777,6 +777,15 @@ string CodeGen::LDIR_PATH( char *path )
 			ret << *pc;
 	}
 	return ret.str();
+}
+
+void CodeGen::EOF_CHECK( ostream &ret )
+{
+	ret << 
+		"	if ( " << P() << " == " << PE() << " )\n"
+		"		goto _test_eof;\n";
+
+	testEofUsed = true;
 }
 
 void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )

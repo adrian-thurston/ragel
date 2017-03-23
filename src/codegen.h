@@ -192,6 +192,8 @@ protected:
 	void INLINE_BLOCK( ostream &ret, GenInlineExpr *inlineExpr );
 	void INLINE_PLAIN( ostream &ret, GenInlineExpr *inlineExpr );
 
+	void EOF_CHECK( ostream &ret );
+
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;

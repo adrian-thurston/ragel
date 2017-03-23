@@ -69,6 +69,8 @@ public:
 protected:
 	bool useAgainLabel();
 
+	void EOF_CHECK( ostream &ret, int gotoDest );
+
 	/* Called from Goto::STATE_GOTOS just before writing the gotos for
 	 * each state. */
 	bool IN_TRANS_ACTIONS( RedStateAp *state );

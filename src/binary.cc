@@ -945,15 +945,26 @@ void Binary::LOCATE_COND()
 
 void Binary::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest <<	
-		"; goto _again;" << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest <<	";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << " goto _again;" << CLOSE_GEN_BLOCK();
 }
 
 void Binary::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << CLOSE_HOST_EXPR() << "; goto _again;" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_HOST_EXPR() << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+	
+	ret << " goto _again;";
+	
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void Binary::CURS( ostream &ret, bool inFinish )
@@ -990,7 +1001,14 @@ void Binary::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 
 	ret << STACK() << "[" << TOP() << "] = " <<
 			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
-			callDest << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
+			callDest << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << " goto _again;";
+
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
@@ -1007,7 +1025,14 @@ void Binary::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 			vCS() << "; " << TOP() << " += 1;" << vCS() <<
 			" = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-	ret << CLOSE_HOST_EXPR() << "; " << "goto _again;" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_HOST_EXPR() << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << " goto _again;";
+
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void Binary::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -1051,6 +1076,9 @@ void Binary::RET( ostream &ret, bool inFinish )
 		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
 
 	ret << "goto _again;" << CLOSE_GEN_BLOCK();
 }

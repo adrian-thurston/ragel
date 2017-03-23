@@ -1108,6 +1108,22 @@ void Reducer::resolveTargetStates()
 {
 	for ( GenActionList::Iter a = actionList; a.lte(); a++ )
 		resolveTargetStates( a->inlineList );
+
+#if 0
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			if ( st->eofAction != 0 ) {
+				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+					setLabelsNeeded( item->value->inlineList );
+			}
+
+			if ( st->eofTrans != 0 ) {
+				long condsFullSize = st->eofTrans->condFullSize();
+				for ( int c = 0; c < condsFullSize; c++ ) {
+					RedCondPair *pair = st->eofTrans->outCond( c );
+					setLabelsNeeded( pair );
+				}
+			}
+#endif	
 }
 
 bool Reducer::setAlphType( const HostLang *hostLang, const char *data )
