@@ -19,7 +19,7 @@ dnl   along with Ragel; if not, write to the Free Software
 dnl   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
   
 AC_INIT(ragel, 6.10)
-PUBDATE="August 2016"
+PUBDATE="March 2017"
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)

@@ -1,3 +1,21 @@
+Ragel 6.10 - Mar 24, 2017
+=========================
+ -C codegen: test P vs PE in goto/call/ret statements in EOF actions, just
+  before re-entering. If at the end of the input block then the EOF check is
+  jumped to. This change prevents overrunning the buffer if control flow is
+  issued in an EOF action without fixing the input pointer first. If a program
+  properly issues an fhold before the control flow the program won't be
+  affected.
+ -Updated action label generation. The previous set of conditions for
+  generating the label didn't cover actions coming from the eofAction pointer
+  (eof trans covered since it points into the set of transitions).
+ -Use separate signed/unsigned values for host type min/max. Using separate
+  values avoids the need to type cast before the data goes into FsmCtx structs.
+  Keep it in native types until it is used.
+ -Optionally do not generate entry point variables. Adds noentry write option
+  for data.
+ -Various warning elimination and build updates.
+
 Ragel 6.9 - Oct 13, 2014
 ========================
  -updated command-line synopsis
