@@ -117,8 +117,8 @@ cat > conftest.m <<EOF
 int main() { return 0; }
 EOF
 GOBJC=""
-if gcc -x objective-c conftest.m -o conftest.bin 2>/dev/null; then
-	GOBJC="gcc -x objective-c"
+if "$CC" -x objective-c conftest.m -o conftest.bin 2>/dev/null; then
+	GOBJC="$CC -x objective-c"
 	AC_MSG_RESULT([yes])
 else
 	AC_MSG_RESULT([no])
