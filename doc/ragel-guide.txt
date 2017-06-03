@@ -2329,15 +2329,19 @@ across invocations of the machine when the data is broken into blocks that are
 processed independently. This variable may be modified from outside the
 execution loop, but not from within.
 
-* `p` - Data pointer. In C/D code this variable is expected to be a
+* `p` - Data pointer. In C/C++/D code this variable is expected to be a
 pointer to the character data to process. It should be initialized to the
-beginning of the data block on every run of the machine. In Go, Java, Ruby and OCaml
-it is used as an offset to `data` and must be an integer. In this case it should
-be initialized to zero on every run of the machine.
+beginning of the data block on every run of the machine. In C++ it is possible
+to use an object for the data pointers. The object should support comparison,
+dereferencing, and pre/post increment/decrement operations. In Go, Java, Ruby
+and OCaml it is used as an offset to `data` and must be an integer. In this
+case it should be initialized to zero on every run of the machine.
 
 * `pe` - Data end pointer. This should be initialized to `p` plus
-the data length on every run of the machine. In Go, Java, Ruby and OCaml code this should
-be initialized to the data length.
+the data length on every run of the machine. In C++ this can be defined as one
+increment operation past the last valid value. Or in the case of a zero-length
+input buffer the initial value of `p`. A In Go, Java, Ruby and OCaml code this
+should be initialized to the data length.
 
 * `eof` - End of file pointer. This should be set to `pe` when
 the buffer block being processed is the last one, otherwise it should be set to
