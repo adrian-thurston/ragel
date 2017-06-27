@@ -18,28 +18,20 @@ reduction TopLevel
 			}
 
 			section = sdEl->value;
-		}
 
-		if ( includeDepth > 0 ) {
-			/* If including, check if the the machine is the one we are
-			 * searching for. If not, reset pd. Otherwise, rename it to target
-			 * machine because we are drawing the statements into target. */
-			if ( machine == searchMachine )
-				machine = targetMachine;
-		}
+			ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
+			if ( pdEl == 0 ) {
+				InputLoc sectionLoc = @1;
+				pdEl = new ParseDataDictEl( machine );
+				pdEl->value = new ParseData( id, machine,
+						id->nextMachineId++, sectionLoc, hostLang,
+						minimizeLevel, minimizeOpt );
+				id->parseDataDict.insert( pdEl );
+				id->parseDataList.append( pdEl->value );
+			}
 
-		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
-		if ( pdEl == 0 ) {
-			InputLoc sectionLoc = @1;
-			pdEl = new ParseDataDictEl( machine );
-			pdEl->value = new ParseData( id, machine,
-					id->nextMachineId++, sectionLoc, hostLang,
-					minimizeLevel, minimizeOpt );
-			id->parseDataDict.insert( pdEl );
-			id->parseDataList.append( pdEl->value );
+			pd = pdEl->value;
 		}
-
-		pd = pdEl->value;
 	}
 
 	# def statement
@@ -343,63 +335,16 @@ reduction TopLevel
 		importFile( unescaped );
 	}
 
-	# def statement
-	#   [`include include_spec `;] :Include commit
-	ragel::statement :Include
+	ragel::open_inc :OpenInc
 	{
-		string fileName = id->inputFileName;
-		string machine = pd->sectionName;
-		bool fileSpecified = false;
-
-		if ( $include_spec->file.data != 0 ) {
-			fileName = string( $include_spec->file.data, $include_spec->file.length );
-
-			InputLoc loc = $include_spec->file.loc;
-			long length;
-			bool caseInsensitive;
-			char *unescaped = prepareLitString( pd->id, loc, fileName.c_str(), fileName.size(),
-					length, caseInsensitive );
-			fileName = unescaped;
-
-			fileSpecified = true;
-		}
-
-		if ( $include_spec->machine.data != 0 )
-			machine = string( $include_spec->machine.data, $include_spec->machine.length );
-
-		include( @1, fileSpecified, fileName, machine );
+		includeDepth += 1;
 	}
 
-	# def include_spec
-	#	[word] :Machine
-	# |	[string] :File
-	# |	[word string] :MachineFile
-
-	ragel::include_spec 
+	ragel::close_inc :CloseInc
 	{
-		RedToken machine;
-		RedToken file;
-	}
-
-	ragel::include_spec :Machine
-	{
-		$$->machine.set( $word, @word );
-		$$->file.data = 0;
-	}
-
-	ragel::include_spec :File
-	{
-		$$->file.set( $string, @string );
-		$$->machine.data = 0;
-	}
-
-	ragel::include_spec :MachineFile
-	{
-		$$->machine.set( $word, @word );
-		$$->file.set( $string, @string );
+		includeDepth -= 1;
 	}
 	
-
 	# def join
 	#	[join `, expression] :Rec
 	# |	[expression] :Base

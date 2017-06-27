@@ -113,6 +113,18 @@ namespace host
 	lex 
 		literal `%%{
 
+		token close_inc /'}--%%'/
+		{
+			input->push( make_token( typeid<close_inc>, input->pull( match_length ) ) )
+
+			GblFileName = SavedFileName
+			GblImport = SavedImport 
+			GblIncludeDepth = SavedIncludeDepth 
+			GblTargetMachine = SavedTargetMachine
+			GblSearchMachine = SavedSearchMachine
+			GblWantSection = SavedWantSection
+		}
+
 		token slr / '%%' [^{] [^\n]* '\n' /
 		{
 			# Translates single line to multi-line

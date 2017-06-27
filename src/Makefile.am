@@ -38,7 +38,7 @@ LIBFSM_SRC = \
 
 ragel_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
-	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc actparams.cc main.cc \
+	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc \
 	$(LIBFSM_SRC)
 
 nodist_ragel_SOURCES = version.h

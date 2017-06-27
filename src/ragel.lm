@@ -23,11 +23,18 @@ global GblImport: bool = false
 global GblFileName: str = ""
 global GblIncludePaths: list<str> = new list<str>()
 
-bool action_params_find( Machine: str, Action: str )
-	= cc_action_params_find
+bool action_params_find( Machine: machine, Action: str )
+{
+	if ( Machine->ActionParams->find( Action ) )
+		return true
+	return false
+}
 
-bool action_params_insert( Machine: str, Action: str )
-	= cc_action_params_insert
+bool action_params_insert( Machine: machine, Action: str )
+{
+	Machine->ActionParams->insert( Action, Action )
+	return true
+}
 
 rl ident
 	/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -63,7 +70,7 @@ rl host_re_literal
 
 #
 # Consuming ragel defintions without parsing. Used for included sections we
-# don't want and import (TODO).
+# don't want and for import (TODO).
 #
 namespace consume
 	lex 
@@ -181,9 +188,35 @@ namespace ragel
 		literal `>^ `$^ `%^ `<^ `@^ `<>^ 
 		literal `<>
 
+		literal `%%--{
+
+		token include_tok
+			/'include'/
+			{
+				# Take off the include token.
+				input->pull( match_length )
+
+				# Parse the include details, up to the the ';' and stop there.
+				parse_stop Spec: include_spec[input]
+
+				Fn: str
+				Machine: str
+				if Spec.string
+					Fn = $Spec.string
+				if Spec.word
+					Machine = $Spec.word
+
+				Stream: stream = ragelInclude( Fn, Machine )
+
+				input->push( "}--%%" )
+				input->push_stream( Stream )
+				input->push( "%%--{" )
+			}
+
+
 		literal `machine `action `variable `alphtype
 				`access `write `getkey `export `import
-				`include `prepush `postpop `nfaprepush `nfapostpop
+				`prepush `postpop `nfaprepush `nfapostpop
 
 		literal `:nfa `:cond `:condplus `:condstar `):
 
@@ -200,6 +233,11 @@ namespace ragel
 		token uint / number /
 		token hex / hex_number /
 	end 
+
+	def include_spec
+		[word `;]
+	|	[string `;]
+	|	[word string `;]
 
 	lex
 		token re_dot / '.' /
@@ -266,6 +304,24 @@ namespace ragel
 			else {
 				GblWantSection = true
 			}
+
+			Name: str = S #$lhs.mn_word
+			if GblTargetMachine != ""
+				Name = GblTargetMachine
+
+			Machine: machine = GblMachineMap->find( Name )
+
+			if !Machine
+			{
+				Machine = new machine()
+				Machine->Name = Name
+				Machine->ActionParams = new map<str, str>()
+				GblMachineMap->insert( Machine->Name, Machine )
+			}
+
+			GblCurMachine = Machine
+
+			# print "want section: [GblWantSection]
 		}
 	end
 
@@ -342,14 +398,14 @@ namespace ragel
 		[word] :Plain
 		{
 			if ! GblSectionPass {
-				if action_params_find( GblCurMachine->Name, $lhs.word )
+				if action_params_find( GblCurMachine, $lhs.word )
 					reject
 			}
 		}
 	|	[word `( opt_action_arg_list `)] :Args
 		{
 			if ! GblSectionPass {
-				if ! action_params_find( GblCurMachine->Name, $lhs.word )
+				if ! action_params_find( GblCurMachine, $lhs.word )
 					reject
 			}
 		}
@@ -557,7 +613,7 @@ namespace ragel
 				# Track that this action has params so we can parse appropriately
 				# when reducing.
 				# CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
-				action_params_insert( GblCurMachine->Name, $lhs.word )
+				action_params_insert( GblCurMachine, $lhs.word )
 			}
 
 			# Reset after parsing the block. 
@@ -601,11 +657,6 @@ namespace ragel
 		[W1: word] :One
 	|	[W1: word W2: word] :Two
 
-	def include_spec
-		[word] :Machine
-	|	[string] :File
-	|	[word string] :MachineFile
-
 	def opt_export
 		[`export] :Export
 	|	[] :Base
@@ -615,23 +666,15 @@ namespace ragel
 
 	def machine_name
 		[`machine mn_word `;] :MachineName
-		{
-			Name: str = $lhs.mn_word
-			if GblTargetMachine != ""
-				Name = GblTargetMachine
 
-			Machine: machine = GblMachineMap->find( Name )
+	def open_inc
+		[`%%--{] :OpenInc
 
-			if !Machine
-			{
-				Machine = new machine()
-				Machine->Name = Name
-				Machine->ActionParams = new map<str, str>()
-				GblMachineMap->insert( Machine->Name, Machine )
-			}
+	def close_inc
+		[host::close_inc] :CloseInc
 
-			GblCurMachine = Machine
-		}
+	def include_statement
+		[open_inc host::section* close_inc] :IncPost commit
 
 	def statement
 		[assignment] :Assignment
@@ -646,7 +689,7 @@ namespace ragel
 	|	[`write Cmd: word ArgList: write_arg* `;] :Write commit
 	|	[`getkey inline_expr_reparse] :GetKey commit
 	|	[`import string `;] :Import commit
-	|	[`include include_spec `;] :Include commit
+	|	[include_statement] :Include commit
 	|	[`nfaprepush action_block] :NfaPrePush commit
 	|	[`nfapostpop action_block] :NfaPostPop commit
 
