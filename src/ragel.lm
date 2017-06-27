@@ -653,3 +653,73 @@ namespace ragel
 	|	[opt_machine_name ign_ignore consume::tok*]
 end
 
+str prepareLitString( Str: str )
+{
+	# TODO: escape sequences
+	return suffix( prefix( Str, Str.length - 1 ), 1 )
+}
+
+bool isAbsolutePath( Path: str )
+{
+	# TODO: implement this
+	return false
+}
+
+namespace path
+	lex
+		token slash /'/'/
+		token chars /[^\/]+/
+	end
+
+	def path
+		[Abs: slash? DirList: dir* File: chars]
+
+	def dir
+		[chars slash]
+
+	dir *concat_dir( Dir1: dir*, Dir2: dir* )
+	{
+		for D: dir* in Dir1 {
+			if match D [] {
+				D = Dir2
+				break
+			}
+		}
+		return Dir1
+	}
+end
+
+
+list<str> makeIncludePathChecks( CurFileName: str, IncFileName: str )
+{
+	new L: list<str>()
+
+	parse CurPath: path::path[ CurFileName ]
+	parse IncPath: path::path[ IncFileName ]
+
+	if match CurPath.Abs [slash] {
+		L->push_tail( IncFileName )
+	}
+	else {
+		# First add the location of current file
+		if match CurPath.DirList []
+			L->push_tail( IncFileName )
+		else {
+			# Current file path + Include Path + Include File
+			cons NewPath: path::path [
+				path::concat_dir( CurPath.DirList, IncPath.DirList )
+				IncPath.File
+			]
+
+			L->push_tail( $NewPath )
+		}
+
+		# Next add include file locations.
+		for Path: str in GblIncludePaths {
+			parse IncPath: path::path[ CurFileName ]
+			L->push_tail( "[Path]/[IncFileName]" )
+		}
+	}
+	return L
+}
+
