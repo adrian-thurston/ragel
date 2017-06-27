@@ -106,7 +106,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 
 	const char *inclSectionName = machine.c_str();
 
-	/* Implement defaults for the input file and section name. */
+	/* Default the section name to the current section name. */
 	if ( inclSectionName == 0 )
 		inclSectionName = sectionName.c_str();
 
@@ -209,14 +209,16 @@ void TopLevel::reduceFile( const char *inputFileName, bool import )
 	sprintf( idstr, "%d", includeDepth );
 	sprintf( imstr, "%d", import );
 
-	const char *argv[7];
+	const char **argv = new const char*[6 + id->includePaths.length() + 1];
 	argv[0] = "rlparse";
 	argv[1] = inputFileName;
 	argv[2] = imstr; // Import 
 	argv[3] = idstr; // IncludeDepth
 	argv[4] = targetMachine == 0 ? "" : targetMachine;
 	argv[5] = searchMachine == 0 ? "" : searchMachine;
-	argv[6] = 0;
+	for ( int i = 0; i < id->includePaths.length(); i++ )
+		argv[6 + i] = id->includePaths.data[i];
+	argv[6 + id->includePaths.length()] = 0;
 
 	const char *prevCurFileName = curFileName;
 	curFileName = inputFileName;
@@ -224,7 +226,7 @@ void TopLevel::reduceFile( const char *inputFileName, bool import )
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 6, argv );
+	colm_run_program( program, 6 + id->includePaths.length(), argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
 	int length = 0;
@@ -237,6 +239,8 @@ void TopLevel::reduceFile( const char *inputFileName, bool import )
 	colm_delete_program( program );
 
 	curFileName = prevCurFileName;
+
+	delete[] argv;
 }
 
 

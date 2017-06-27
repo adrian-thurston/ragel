@@ -47,6 +47,12 @@ GblTargetMachine = A->value
 A = argv->pop_head_el()
 GblSearchMachine = A->value
 
+# Remaining items are include paths.
+while ( argv->length > 0 ) {
+	A = argv->pop_head_el()
+	GblIncludePaths->push_tail_el( A )
+}
+
 Stream: stream = open( GblFileName, "r" )
 reduce TopLevel start[ Stream ]
 RagelError = error
