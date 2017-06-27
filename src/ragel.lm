@@ -188,7 +188,7 @@ namespace ragel
 		literal `>^ `$^ `%^ `<^ `@^ `<>^ 
 		literal `<>
 
-		literal `%%--{
+		literal `%%--{ -ni `%%++{ -ni
 
 		token include_tok
 			/'include'/
@@ -213,10 +213,30 @@ namespace ragel
 				input->push( "%%--{" )
 			}
 
+		token import_tok
+			/'import'/
+			{
+				# Take off the include token.
+				input->pull( match_length )
+
+				# Parse the import details, up to the the ';' and stop there.
+				parse_stop Spec: import_spec[input]
+
+				Fn: str
+				if Spec.string
+					Fn = $Spec.string
+
+				Stream: stream = ragelImport( Fn )
+
+				input->push( "}++%%" )
+				input->push_stream( Stream )
+				input->push( "%%++{" )
+			}
+
 
 		literal `machine `action `variable `alphtype
-				`access `write `getkey `export `import
-				`prepush `postpop `nfaprepush `nfapostpop
+				`access `write `getkey `export `prepush
+				`postpop `nfaprepush `nfapostpop
 
 		literal `:nfa `:cond `:condplus `:condstar `):
 
@@ -238,6 +258,9 @@ namespace ragel
 		[word `;]
 	|	[string `;]
 	|	[word string `;]
+
+	def import_spec
+		[string `;]
 
 	lex
 		token re_dot / '.' /
@@ -676,6 +699,15 @@ namespace ragel
 	def include_statement
 		[open_inc host::section* close_inc] :IncPost commit
 
+	def open_imp
+		[`%%++{] :OpenImp
+
+	def close_imp
+		[host::close_imp] :CloseImp
+
+	def import_statement
+		[open_imp host::section* close_imp] :ImpPost commit
+
 	def statement
 		[assignment] :Assignment
 	|	[instantiation] :Instantiation
@@ -688,11 +720,10 @@ namespace ragel
 	|	[`access inline_expr_reparse] :Access commit
 	|	[`write Cmd: word ArgList: write_arg* `;] :Write commit
 	|	[`getkey inline_expr_reparse] :GetKey commit
-	|	[`import string `;] :Import commit
+	|	[import_statement] :Import commit
 	|	[include_statement] :Include commit
 	|	[`nfaprepush action_block] :NfaPrePush commit
 	|	[`nfapostpop action_block] :NfaPostPop commit
-
 
 	def opt_machine_name
 		[machine_name] :MachineName
@@ -821,6 +852,47 @@ stream ragelInclude( IncFileName: str, Machine: str )
 		GblSearchMachine = GblCurMachine->Name
 		
 	GblTargetMachine = GblCurMachine->Name
+
+	return Stream
+}
+
+stream ragelImport( IncFileName: str )
+{
+	if IncFileName 
+		IncFileName = prepareLitString( IncFileName )
+
+	Checks: list<str>
+	if IncFileName
+		Checks = makeIncludePathChecks( GblFileName, IncFileName )
+	else {
+		Checks = new list<str>()
+		Checks->push_tail( GblFileName )
+	}
+
+	Stream: stream
+	OpenedName: str
+	for P: str in Checks {
+		Stream = open( P, "r" )
+		if Stream {
+			OpenedName = P
+			break
+		}
+	}
+
+	if !Stream {
+		print "error: could not open [IncFileName]
+		return nil
+	}
+
+	SavedFileName = GblFileName
+	SavedImport = GblImport
+	SavedIncludeDepth = GblIncludeDepth
+	SavedTargetMachine = GblTargetMachine
+	SavedSearchMachine = GblSearchMachine
+	SavedWantSection = GblWantSection
+
+	GblImport = true
+	GblFileName = OpenedName
 
 	return Stream
 }

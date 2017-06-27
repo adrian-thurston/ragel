@@ -125,6 +125,18 @@ namespace host
 			GblWantSection = SavedWantSection
 		}
 
+		token close_imp /'}++%%'/
+		{
+			input->push( make_token( typeid<close_imp>, input->pull( match_length ) ) )
+
+			GblFileName = SavedFileName
+			GblImport = SavedImport 
+			GblIncludeDepth = SavedIncludeDepth 
+			GblTargetMachine = SavedTargetMachine
+			GblSearchMachine = SavedSearchMachine
+			GblWantSection = SavedWantSection
+		}
+
 		token slr / '%%' [^{] [^\n]* '\n' /
 		{
 			# Translates single line to multi-line

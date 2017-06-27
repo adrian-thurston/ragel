@@ -315,24 +315,9 @@ reduction TopLevel
 
 	# def statement
 	# |	[`getkey inline_expr_reparse] :GetKey commit
-	# |	[`import string `;] :Import commit
 	ragel::statement :GetKey
 	{
 		pd->fsmCtx->getKeyExpr = $inline_expr_reparse->inlineList;
-	}
-
-	ragel::statement :Import
-	{
-		InputLoc loc = @string;
-		std::string fileName( $string->data, $string->length );
-
-		long length;
-		bool caseInsensitive;
-		char *unescaped = prepareLitString( pd->id, loc,
-					fileName.c_str(), fileName.size(),
-					length, caseInsensitive );
-
-		importFile( unescaped );
 	}
 
 	ragel::open_inc :OpenInc
@@ -343,6 +328,16 @@ reduction TopLevel
 	ragel::close_inc :CloseInc
 	{
 		includeDepth -= 1;
+	}
+
+	ragel::open_imp :OpenImp
+	{
+		isImport = true;
+	}
+
+	ragel::close_imp :CloseImp
+	{
+		isImport = false;
 	}
 	
 	# def join
