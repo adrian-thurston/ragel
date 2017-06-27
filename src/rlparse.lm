@@ -13,39 +13,17 @@ end
 def start
 	[c_select_section SectionList: host::section*]
 
-def import_val
-	[host::number] :Number
-|	[host::string] :String
-
-def import
-	[Name: host::ident Val: import_val] :Import
-
-export RagelTree: start
 export RagelError: str
-export RagelImport: import*
 
-A: list_el<str>
+GblImport = false
+GblIncludeDepth = 0
+GblTargetMachine = ""
+GblSearchMachine = ""
 
 # File name. The open is expected to succeed. It is tested before the colm
 # program is called.
-A = argv->pop_head_el()
+A: list_el<str> = argv->pop_head_el()
 GblFileName = A->value
-
-# Import
-A = argv->pop_head_el()
-GblImport = atoi( A->value ) != 0
-
-# IncludeDepth
-A = argv->pop_head_el()
-GblIncludeDepth = atoi( A->value )
-
-# TargetMachine
-A = argv->pop_head_el()
-GblTargetMachine = A->value
-
-# SearchMachine
-A = argv->pop_head_el()
-GblSearchMachine = A->value
 
 # Remaining items are include paths.
 while ( argv->length > 0 ) {

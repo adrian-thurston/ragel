@@ -205,20 +205,13 @@ void TopLevel::import( const InputLoc &loc, std::string name, Literal *literal )
 
 void TopLevel::reduceFile( const char *inputFileName, bool import )
 {
-	char idstr[64], imstr[64];
-	sprintf( idstr, "%d", includeDepth );
-	sprintf( imstr, "%d", import );
-
-	const char **argv = new const char*[6 + id->includePaths.length() + 1];
+	const int baseN = 2;
+	const char **argv = new const char*[baseN + id->includePaths.length() + 1];
 	argv[0] = "rlparse";
 	argv[1] = inputFileName;
-	argv[2] = imstr; // Import 
-	argv[3] = idstr; // IncludeDepth
-	argv[4] = targetMachine == 0 ? "" : targetMachine;
-	argv[5] = searchMachine == 0 ? "" : searchMachine;
 	for ( int i = 0; i < id->includePaths.length(); i++ )
-		argv[6 + i] = id->includePaths.data[i];
-	argv[6 + id->includePaths.length()] = 0;
+		argv[baseN + i] = id->includePaths.data[i];
+	argv[baseN + id->includePaths.length()] = 0;
 
 	const char *prevCurFileName = curFileName;
 	curFileName = inputFileName;
@@ -226,7 +219,7 @@ void TopLevel::reduceFile( const char *inputFileName, bool import )
 	colm_program *program = colm_new_program( &rlparse_object );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 6 + id->includePaths.length(), argv );
+	colm_run_program( program, baseN + id->includePaths.length(), argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
 
 	int length = 0;
