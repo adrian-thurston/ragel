@@ -13,6 +13,7 @@ global GblTargetMachine: str = ""
 global GblSearchMachine: str = ""
 global GblWantSection: bool = false
 global GblImport: bool = false
+global GblFileName: str = ""
 
 bool action_params_find( Machine: str, Action: str )
 	= cc_action_params_find
