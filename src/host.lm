@@ -116,23 +116,13 @@ namespace host
 		token close_inc /'}--%%'/
 		{
 			input->push( make_token( typeid<close_inc>, input->pull( match_length ) ) )
-
-			GblFileName = SavedFileName
-			GblTargetMachine = SavedTargetMachine
-			GblSearchMachine = SavedSearchMachine
-			GblWantSection = SavedWantSection
-
-			GblIncludeDepth = GblIncludeDepth - 1
+			restoreGlobals()
 		}
 
 		token close_imp /'}++%%'/
 		{
 			input->push( make_token( typeid<close_imp>, input->pull( match_length ) ) )
-
-			GblFileName = SavedFileName
-			GblWantSection = SavedWantSection
-
-			GblImport = false
+			restoreGlobals()
 		}
 
 		token slr / '%%' [^{] [^\n]* '\n' /

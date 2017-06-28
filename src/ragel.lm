@@ -2,20 +2,50 @@
 global GblActionParams: bool = false
 global GblMachineMap: map<str, machine> = new map<str, machine>()
 global GblCurMachine: machine
-global GblIncludeDepth: int = 0
 global GblTargetMachine: str = ""
 global GblSearchMachine: str = ""
 global GblWantSection: bool = false
+global GblIncludeDepth: int = 0
 global GblImport: bool = false
 global GblFileName: str = ""
 global GblIncludePaths: list<str> = new list<str>()
 
-global SavedFileName: str
-global SavedImport: bool
-global SavedIncludeDepth: int
-global SavedTargetMachine: str
-global SavedSearchMachine: str
-global SavedWantSection: bool
+struct saved_globals
+	FileName: str
+	TargetMachine: str
+	SearchMachine: str
+	WantSection: bool
+	IncludeDepth: int
+	Import: bool
+end
+
+global GblSavedGlobals: list<saved_globals> = new list<saved_globals>()
+
+void saveGlobals()
+{
+	new SG: saved_globals()
+
+	SG->FileName = GblFileName
+	SG->TargetMachine = GblTargetMachine
+	SG->SearchMachine = GblSearchMachine
+	SG->WantSection = GblWantSection
+	SG->Import = GblImport
+	SG->IncludeDepth = GblIncludeDepth
+
+	GblSavedGlobals->push_tail( SG )
+}
+
+void restoreGlobals()
+{
+	SG: saved_globals = GblSavedGlobals->pop_tail()
+
+	GblFileName = SG->FileName
+	GblTargetMachine = SG->TargetMachine
+	GblSearchMachine = SG->SearchMachine
+	GblWantSection = SG->WantSection
+	GblImport = SG->Import
+	GblIncludeDepth = SG->IncludeDepth
+}
 
 struct machine
 	Name: str
@@ -813,10 +843,7 @@ stream ragelInclude( IncFileName: str, Machine: str )
 		return nil
 	}
 
-	SavedFileName = GblFileName
-	SavedTargetMachine = GblTargetMachine
-	SavedSearchMachine = GblSearchMachine
-	SavedWantSection = GblWantSection
+	saveGlobals()
 
 	GblIncludeDepth = GblIncludeDepth + 1
 	GblFileName = OpenedName
@@ -862,8 +889,7 @@ stream ragelImport( IncFileName: str )
 		return nil
 	}
 
-	SavedFileName = GblFileName
-	SavedWantSection = GblWantSection
+	saveGlobals()
 
 	GblFileName = OpenedName
 	GblImport = true
