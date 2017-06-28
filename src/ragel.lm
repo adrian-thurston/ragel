@@ -1,5 +1,14 @@
+
 global GblActionParams: bool = false
-global GblSectionPass: bool = false
+global GblMachineMap: map<str, machine> = new map<str, machine>()
+global GblCurMachine: machine
+global GblIncludeDepth: int = 0
+global GblTargetMachine: str = ""
+global GblSearchMachine: str = ""
+global GblWantSection: bool = false
+global GblImport: bool = false
+global GblFileName: str = ""
+global GblIncludePaths: list<str> = new list<str>()
 
 global SavedFileName: str
 global SavedImport: bool
@@ -13,28 +22,6 @@ struct machine
 	ActionParams: map<str, str>
 end
 
-global GblMachineMap: map<str, machine> = new map<str, machine>()
-global GblCurMachine: machine
-global GblIncludeDepth: int = 0
-global GblTargetMachine: str = ""
-global GblSearchMachine: str = ""
-global GblWantSection: bool = false
-global GblImport: bool = false
-global GblFileName: str = ""
-global GblIncludePaths: list<str> = new list<str>()
-
-bool action_params_find( Machine: machine, Action: str )
-{
-	if ( Machine->ActionParams->find( Action ) )
-		return true
-	return false
-}
-
-bool action_params_insert( Machine: machine, Action: str )
-{
-	Machine->ActionParams->insert( Action, Action )
-	return true
-}
 
 rl ident
 	/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -420,17 +407,13 @@ namespace ragel
 	def named_action_ref
 		[word] :Plain
 		{
-			if ! GblSectionPass {
-				if action_params_find( GblCurMachine, $lhs.word )
-					reject
-			}
+			if ( GblCurMachine->ActionParams->find( $lhs.word ) )
+				reject
 		}
 	|	[word `( opt_action_arg_list `)] :Args
 		{
-			if ! GblSectionPass {
-				if ! action_params_find( GblCurMachine, $lhs.word )
-					reject
-			}
+			if ( ! GblCurMachine->ActionParams->find( $lhs.word ) )
+				reject
 		}
 
 	def action_ref 
@@ -632,12 +615,9 @@ namespace ragel
 	def action_spec
 		[`action word action_params action_block] :ActionSpecParams commit
 		{
-			if ! GblSectionPass {
-				# Track that this action has params so we can parse appropriately
-				# when reducing.
-				# CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
-				action_params_insert( GblCurMachine, $lhs.word )
-			}
+			# Track that this action has params so we can parse appropriately
+			# when reducing.
+			GblCurMachine->ActionParams->insert( $lhs.word, $lhs.word )
 
 			# Reset after parsing the block. 
 			GblActionParams = false
@@ -834,8 +814,6 @@ stream ragelInclude( IncFileName: str, Machine: str )
 	}
 
 	SavedFileName = GblFileName
-	SavedImport = GblImport
-	SavedIncludeDepth = GblIncludeDepth
 	SavedTargetMachine = GblTargetMachine
 	SavedSearchMachine = GblSearchMachine
 	SavedWantSection = GblWantSection
@@ -885,14 +863,10 @@ stream ragelImport( IncFileName: str )
 	}
 
 	SavedFileName = GblFileName
-	SavedImport = GblImport
-	SavedIncludeDepth = GblIncludeDepth
-	SavedTargetMachine = GblTargetMachine
-	SavedSearchMachine = GblSearchMachine
 	SavedWantSection = GblWantSection
 
-	GblImport = true
 	GblFileName = OpenedName
+	GblImport = true
 
 	return Stream
 }

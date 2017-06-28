@@ -118,11 +118,11 @@ namespace host
 			input->push( make_token( typeid<close_inc>, input->pull( match_length ) ) )
 
 			GblFileName = SavedFileName
-			GblImport = SavedImport 
-			GblIncludeDepth = SavedIncludeDepth 
 			GblTargetMachine = SavedTargetMachine
 			GblSearchMachine = SavedSearchMachine
 			GblWantSection = SavedWantSection
+
+			GblIncludeDepth = GblIncludeDepth - 1
 		}
 
 		token close_imp /'}++%%'/
@@ -130,11 +130,9 @@ namespace host
 			input->push( make_token( typeid<close_imp>, input->pull( match_length ) ) )
 
 			GblFileName = SavedFileName
-			GblImport = SavedImport 
-			GblIncludeDepth = SavedIncludeDepth 
-			GblTargetMachine = SavedTargetMachine
-			GblSearchMachine = SavedSearchMachine
 			GblWantSection = SavedWantSection
+
+			GblImport = false
 		}
 
 		token slr / '%%' [^{] [^\n]* '\n' /
