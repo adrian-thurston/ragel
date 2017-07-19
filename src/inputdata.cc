@@ -407,23 +407,14 @@ void InputData::parseKelbt()
 	 * Ragel Parser from ragel 6.
 	 */
 	ifstream *inFileStream;
-	stringstream *inStringStream;
 	istream *inStream;
 
-	if ( inLibRagel ) {
-		/* Open the input file for reading. */
-		assert( inputFileName != 0 );
-		inStringStream = new stringstream( string( input ) );
-		inStream = inStringStream;
-	}
-	else {
-		/* Open the input file for reading. */
-		assert( inputFileName != 0 );
-		inFileStream = new ifstream( inputFileName );
-		if ( ! inFileStream->is_open() )
-			error() << "could not open " << inputFileName << " for reading" << endp;
-		inStream = inFileStream;
-	}
+	/* Open the input file for reading. */
+	assert( inputFileName != 0 );
+	inFileStream = new ifstream( inputFileName );
+	if ( ! inFileStream->is_open() )
+		error() << "could not open " << inputFileName << " for reading" << endp;
+	inStream = inFileStream;
 
 	makeFirstInputItem();
 
@@ -448,10 +439,7 @@ void InputData::parseKelbt()
 	if ( errorCount > 0 )
 		abortCompile( 1 );
 	
-	if ( inLibRagel )
-		delete inStringStream;
-	else
-		delete inFileStream;
+	delete inFileStream;
 }
 
 void InputData::processKelbt()
