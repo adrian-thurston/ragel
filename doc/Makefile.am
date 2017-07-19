@@ -39,9 +39,13 @@ CLEANFILES = $(OUT_FILES)
 
 EXTRA_DIST = $(IN_FILES)
 
+if BUILD_MANUAL
+
 doc_DATA = $(OUT_FILES)
 
 SUFFIXES = .html .adoc
 
 .adoc.html:
 	$(ASCIIDOC) -b $(OUTPUT) $(OPTIONS) -o $@ $<
+
+endif
