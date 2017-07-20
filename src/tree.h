@@ -370,6 +370,8 @@ str_t *string_suffix( program_t *prg, str_t *str, long pos );
 head_t *string_alloc_full( struct colm_program *prg, const char *data, long length );
 tree_t *construct_string( struct colm_program *prg, head_t *s );
 
+void free_kid_list( program_t *prg, kid_t *kid );
+
 #if defined(__cplusplus)
 }
 #endif
