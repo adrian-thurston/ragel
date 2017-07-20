@@ -415,7 +415,7 @@ void compileOutputCommand( const char *command )
 		error() << "there was a problem compiling the output" << endl;
 }
 
-void compileOutput( const char *argv0, const bool installed )
+void compileOutput( const char *argv0, const bool installed, char *srcLocation )
 {
 	/* Find the location of the colm program that is executing. */
 	char *location = strdup( argv0 );
@@ -452,7 +452,7 @@ void compileOutput( const char *argv0, const bool installed )
 		" -o %s" \
 		" %s"
 	char *command = new char[length];
-	if ( installed) {
+	if ( installed ) {
 		sprintf( command,
 				COMPILE_COMMAND_STRING
 				" -I" PREFIX "/include"
@@ -464,8 +464,10 @@ void compileOutput( const char *argv0, const bool installed )
 				COMPILE_COMMAND_STRING
 				" -I%s/../aapl"
 				" -I%s/include"
-				" -L%s",
-				binaryFn, intermedFn, location, location, location );
+				" -L%s"
+				" -Wl,-rpath=%s",
+				binaryFn, intermedFn, srcLocation,
+				srcLocation, location, location );
 	}
 #undef COMPILE_COMMAND_STRING
 	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
@@ -487,21 +489,38 @@ void compileOutput( const char *argv0, const bool installed )
 	delete[] command;
 }
 
-bool inSourceTree( const char *argv0 )
+bool inSourceTree( const char *argv0, char *&location )
 {
 	const char *lastSlash = strrchr( argv0, '/' );
 	if ( lastSlash != 0 ) {
-		int rootLen = lastSlash - argv0 + 1;
+		/* Take off the file name. */
+		int rootLen = lastSlash - argv0;
+
+		/* Create string for dir. */
 		char *mainPath = new char[rootLen + 16];
 		memcpy( mainPath, argv0, rootLen );
-		strcpy( mainPath + rootLen, "main.cc" );
+		mainPath[rootLen] = 0;
+
+		/* If built using ldconfig then there will be a .libs dir. */
+		lastSlash = strrchr( mainPath, '/' );
+		if ( lastSlash != 0 ) {
+			if ( strlen( lastSlash ) >= 6 && memcmp( lastSlash, "/.libs", 7 ) == 0 ) {
+				rootLen = lastSlash - mainPath;
+				mainPath[rootLen] = 0;
+			}
+		}
+
+		strcpy( mainPath + rootLen, "/main.cc" );
 
 		struct stat sb;
 		int res = stat( mainPath, &sb );
-		delete[] mainPath;
-
-		if ( res == 0 && S_ISREG( sb.st_mode ) )
+		if ( res == 0 && S_ISREG( sb.st_mode ) ) {
+			mainPath[rootLen] = 0;
+			location = mainPath;
 			return true;
+		}
+
+		delete[] mainPath;
 	}
 
 	return false;
@@ -744,10 +763,11 @@ int main(int argc, const char **argv)
 			delete outStream;
 
 		if ( !gblLibrary ) {
-			if ( inSourceTree( argv[0] ) )
-				compileOutput( argv[0], false );
+			char *location = 0;
+			if ( inSourceTree( argv[0], location ) )
+				compileOutput( argv[0], false, location );
 			else
-				compileOutput( argv[0], true );
+				compileOutput( argv[0], true, location );
 		}
 
 		if ( exportHeaderFn != 0 ) {
