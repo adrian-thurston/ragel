@@ -434,6 +434,11 @@ void colm_print_tree_args( program_t *prg, tree_t **sp,
 	}
 }
 
+void colm_print_null( program_t *prg, tree_t **sp,
+		struct colm_print_args *args, kid_t *parent, kid_t *kid )
+{
+}
+
 void colm_print_term_tree( program_t *prg, tree_t **sp,
 		struct colm_print_args *print_args, kid_t *kid )
 {
@@ -479,13 +484,40 @@ void colm_print_term_tree( program_t *prg, tree_t **sp,
 		impl->level -= 1;
 }
 
-
-void colm_print_null( program_t *prg, tree_t **sp,
-		struct colm_print_args *args, kid_t *parent, kid_t *kid )
+void colm_print_tree_collect( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
 {
+	struct colm_print_args print_args = {
+			collect, true, false, trim, &append_collect, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
-void open_tree_xml( program_t *prg, tree_t **sp, struct colm_print_args *args,
+void colm_print_tree_collect_a( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			collect, true, true, trim, &append_collect, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+
+void colm_print_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
+		tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			impl, true, false, trim, &append_file, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+
+static void xml_open( program_t *prg, tree_t **sp, struct colm_print_args *args,
 		kid_t *parent, kid_t *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
@@ -508,7 +540,7 @@ void open_tree_xml( program_t *prg, tree_t **sp, struct colm_print_args *args,
 	args->out( args, ">", 1 );
 }
 
-void print_term_xml( program_t *prg, tree_t **sp,
+static void xml_term( program_t *prg, tree_t **sp,
 	struct colm_print_args *print_args, kid_t *kid )
 {
 	//kid_t *child;
@@ -534,8 +566,7 @@ void print_term_xml( program_t *prg, tree_t **sp,
 	}
 }
 
-
-void close_tree_xml( program_t *prg, tree_t **sp,
+static void xml_close( program_t *prg, tree_t **sp,
 		struct colm_print_args *args, kid_t *parent, kid_t *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
@@ -558,56 +589,23 @@ void close_tree_xml( program_t *prg, tree_t **sp,
 	args->out( args, ">", 1 );
 }
 
-void print_tree_collect( program_t *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim )
-{
-	struct colm_print_args print_args = {
-			collect, true, false, trim, &append_collect, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null
-	};
-
-	colm_print_tree_args( prg, sp, &print_args, tree );
-}
-
-void print_tree_collect_a( program_t *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim )
-{
-	struct colm_print_args print_args = {
-			collect, true, true, trim, &append_collect, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null
-	};
-
-	colm_print_tree_args( prg, sp, &print_args, tree );
-}
-
-void print_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
-		tree_t *tree, int trim )
-{
-	struct colm_print_args print_args = {
-			impl, true, false, trim, &append_file, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null
-	};
-
-	colm_print_tree_args( prg, sp, &print_args, tree );
-}
-
-void print_xml_stdout( program_t *prg, tree_t **sp,
+void colm_print_xml_stdout( program_t *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree,
 		int comm_attr, int trim )
 {
 	struct colm_print_args print_args = {
 			impl, comm_attr, comm_attr, trim, &append_file, 
-			&open_tree_xml, &print_term_xml, &close_tree_xml };
+			&xml_open, &xml_term, &xml_close };
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
-void open_tree_dump( program_t *prg, tree_t **sp, struct colm_print_args *args,
+static void postfix_open( program_t *prg, tree_t **sp, struct colm_print_args *args,
 		kid_t *parent, kid_t *kid )
 {
 }
 
-void print_term_dump( program_t *prg, tree_t **sp,
-	struct colm_print_args *print_args, kid_t *kid )
+static void postfix_term( program_t *prg, tree_t **sp,
+		struct colm_print_args *print_args, kid_t *kid )
 {
 	//kid_t *child;
 
@@ -636,8 +634,7 @@ void print_term_dump( program_t *prg, tree_t **sp,
 	}
 }
 
-
-void close_tree_dump( program_t *prg, tree_t **sp,
+static void postfix_close( program_t *prg, tree_t **sp,
 		struct colm_print_args *args, kid_t *parent, kid_t *kid )
 {
 	/* Skip the terminal that is for forcing trailing ignores out. */
@@ -655,24 +652,23 @@ void close_tree_dump( program_t *prg, tree_t **sp,
 	}
 }
 
-
-void dump_tree_collect( program_t *prg, tree_t **sp,
+void colm_postfix_tree_collect( program_t *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			collect, true, false, false, &append_collect, 
-			&open_tree_dump, &print_term_dump, &close_tree_dump
+		collect, true, false, false, &append_collect, 
+		&postfix_open, &postfix_term, &postfix_close
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
-void dump_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
+void colm_postfix_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
 		tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
 			impl, true, false, false, &append_file, 
-			&open_tree_dump, &print_term_dump, &close_tree_dump
+			&postfix_open, &postfix_term, &postfix_close
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );

@@ -139,9 +139,9 @@ static head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim,
 	init_str_collect( &collect );
 
 	if ( attrs )
-		print_tree_collect_a( prg, sp, &collect, tree, trim );
+		colm_print_tree_collect_a( prg, sp, &collect, tree, trim );
 	else
-		print_tree_collect( prg, sp, &collect, tree, trim );
+		colm_print_tree_collect( prg, sp, &collect, tree, trim );
 
 	/* Set up the input stream. */
 	head_t *ret = string_alloc_full( prg, collect.data, collect.length );
@@ -160,7 +160,7 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, t
 		/* Collect the tree data. */
 		StrCollect collect;
 		init_str_collect( &collect );
-		print_tree_collect( prg, sp, &collect, input, false );
+		colm_print_tree_collect( prg, sp, &collect, input, false );
 
 		/* Load it into the input. */
 		impl->funcs->append_data( impl, collect.data, collect.length );
@@ -235,7 +235,7 @@ static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tr
 		/* Collect the tree data. */
 		StrCollect collect;
 		init_str_collect( &collect );
-		print_tree_collect( prg, sp, &collect, tree, false );
+		colm_print_tree_collect( prg, sp, &collect, tree, false );
 
 		colm_stream_push_text( in, collect.data, collect.length );
 		long length = collect.length;
@@ -674,7 +674,7 @@ again:
 				arg[i] = vm_pop_tree();
 
 			for ( i = 0; i < n; i++ )
-				print_tree_file( prg, sp, prg->stdout_val->impl, arg[i], false );
+				colm_print_tree_file( prg, sp, prg->stdout_val->impl, arg[i], false );
 
 			for ( i = 0; i < n; i++ )
 				colm_tree_downref( prg, sp, arg[i] );
@@ -693,9 +693,9 @@ again:
 
 			for ( i = 0; i < n; i++ ) {
 				if ( si->file != 0 )
-					print_tree_file( prg, sp, si, arg[i], false );
+					colm_print_tree_file( prg, sp, si, arg[i], false );
 				else if ( si->collect != 0 )
-					print_tree_collect( prg, sp, si->collect, arg[i], false );
+					colm_print_tree_collect( prg, sp, si->collect, arg[i], false );
 			}
 
 			for ( i = 0; i < n; i++ )
@@ -715,7 +715,7 @@ again:
 				arg[i] = vm_pop_tree();
 
 			for ( i = 0; i < n; i++ )
-				print_xml_stdout( prg, sp, prg->stdout_val->impl, arg[i], true, true );
+				colm_print_xml_stdout( prg, sp, prg->stdout_val->impl, arg[i], true, true );
 
 			for ( i = 0; i < n; i++ )
 				colm_tree_downref( prg, sp, arg[i] );
@@ -733,7 +733,7 @@ again:
 				arg[i] = vm_pop_tree();
 
 			for ( i = 0; i < n; i++ )
-				print_xml_stdout( prg, sp, prg->stdout_val->impl, arg[i], false, true );
+				colm_print_xml_stdout( prg, sp, prg->stdout_val->impl, arg[i], false, true );
 
 			for ( i = 0; i < n; i++ )
 				colm_tree_downref( prg, sp, arg[i] );
@@ -752,9 +752,9 @@ again:
 
 			for ( i = 0; i < n; i++ ) {
 				if ( si->file != 0 )
-					dump_tree_file( prg, sp, si, arg[i], false );
+					colm_postfix_tree_file( prg, sp, si, arg[i], false );
 				else if ( si->collect != 0 )
-					dump_tree_collect( prg, sp, si->collect, arg[i], false );
+					colm_postfix_tree_collect( prg, sp, si->collect, arg[i], false );
 			}
 
 			for ( i = 0; i < n; i++ )

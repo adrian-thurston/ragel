@@ -300,20 +300,20 @@ void str_collect_append( StrCollect *collect, const char *data, long len );
 void str_collect_clear( StrCollect *collect );
 tree_t *tree_trim( struct colm_program *prg, tree_t **sp, tree_t *tree );
 
-void print_tree_collect( struct colm_program *prg, tree_t **sp,
+void colm_print_tree_collect( struct colm_program *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim );
 
-void print_tree_collect_a( struct colm_program *prg, tree_t **sp,
+void colm_print_tree_collect_a( struct colm_program *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim );
 
-void print_tree_file( struct colm_program *prg, tree_t **sp,
+void colm_print_tree_file( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int trim );
-void print_xml_stdout( struct colm_program *prg, tree_t **sp,
+void colm_print_xml_stdout( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int comm_attr, int trim );
 
-void dump_tree_collect( struct colm_program *prg, tree_t **sp,
+void colm_postfix_tree_collect( struct colm_program *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim );
-void dump_tree_file( struct colm_program *prg, tree_t **sp,
+void colm_postfix_tree_file( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int trim );
 
 /*
