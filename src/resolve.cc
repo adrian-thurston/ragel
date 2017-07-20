@@ -622,7 +622,8 @@ void LangStmt::resolve( Compiler *pd ) const
 		case PrintType: 
 		case PrintXMLACType:
 		case PrintXMLType:
-		case PrintStreamType: {
+		case PrintStreamType:
+		case PrintDumpType: {
 			/* Push the args backwards. */
 			for ( CallArgVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
 				(*pex)->expr->resolve( pd );

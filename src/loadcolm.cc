@@ -1279,6 +1279,9 @@ struct LoadColm
 			case print_stmt::XmlAc:
 				type = LangStmt::PrintXMLACType;
 				break;
+			case print_stmt::Dump:
+				type = LangStmt::PrintDumpType;
+				break;
 			case print_stmt::Accum:
 				/* unreachable (see above) */
 				break;

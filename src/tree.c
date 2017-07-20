@@ -2198,3 +2198,81 @@ void print_xml_stdout( program_t *prg, tree_t **sp,
 			&open_tree_xml, &print_term_xml, &close_tree_xml };
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
+
+void open_tree_dump( program_t *prg, tree_t **sp, struct colm_print_args *args,
+		kid_t *parent, kid_t *kid )
+{
+}
+
+void print_term_dump( program_t *prg, tree_t **sp,
+	struct colm_print_args *print_args, kid_t *kid )
+{
+	//kid_t *child;
+
+	/*child = */ tree_child( prg, kid->tree );
+	if ( kid->tree->id == LEL_ID_PTR ) {
+		//char ptr[INT_SZ];
+		//sprintf( ptr, "%lx", ((pointer_t*)kid->tree)->value );
+		//print_args->out( print_args, ptr, strlen(ptr) );
+		print_args->out( print_args, "p\n", 2 );
+	}
+	else if ( kid->tree->id == LEL_ID_STR ) {
+		//head_t *head = (head_t*) ((str_t*)kid->tree)->value;
+
+		//xml_escape_data( print_args, (char*)(head->data), head->length );
+		print_args->out( print_args, "s\n", 2 );
+	}
+	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->first_non_term_id &&
+			kid->tree->id != LEL_ID_IGNORE &&
+			kid->tree->tokdata != 0 && 
+			string_length( kid->tree->tokdata ) > 0 )
+	{
+		print_args->out( print_args, "t ", 2 );
+		xml_escape_data( print_args, string_data( kid->tree->tokdata ), 
+				string_length( kid->tree->tokdata ) );
+		print_args->out( print_args, "\n", 1 );
+	}
+}
+
+
+void close_tree_dump( program_t *prg, tree_t **sp,
+		struct colm_print_args *args, kid_t *parent, kid_t *kid )
+{
+	/* Skip the terminal that is for forcing trailing ignores out. */
+	if ( kid->tree->id == 0 )
+		return;
+
+	if ( kid->tree->id >= prg->rtd->first_non_term_id ) {
+		struct lang_el_info *lel_info = prg->rtd->lel_info;
+
+		const char *name = lel_info[kid->tree->id].xml_tag;
+
+		args->out( args, "r ", 2 );
+		args->out( args, name, strlen( name ) );
+		args->out( args, "\n", 1 );
+	}
+}
+
+
+void dump_tree_collect( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			collect, true, false, false, &append_collect, 
+			&open_tree_dump, &print_term_dump, &close_tree_dump
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+
+void dump_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
+		tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			impl, true, false, false, &append_file, 
+			&open_tree_dump, &print_term_dump, &close_tree_dump
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+

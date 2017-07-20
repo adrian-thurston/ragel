@@ -739,6 +739,28 @@ again:
 				colm_tree_downref( prg, sp, arg[i] );
 			break;
 		}
+		case IN_PRINT_DUMP: {
+			int n, i;
+			read_byte( n );
+			debug( prg, REALM_BYTECODE, "IN_PRINT_DUMP %d\n", n );
+
+			tree_t *arg[n];
+			for ( i = n-1; i >= 0; i-- )
+				arg[i] = vm_pop_tree();
+			stream_t *stream = vm_pop_stream();
+			struct stream_impl *si = stream_to_impl( stream );
+
+			for ( i = 0; i < n; i++ ) {
+				if ( si->file != 0 )
+					dump_tree_file( prg, sp, si, arg[i], false );
+				else if ( si->collect != 0 )
+					dump_tree_collect( prg, sp, si->collect, arg[i], false );
+			}
+
+			for ( i = 0; i < n; i++ )
+				colm_tree_downref( prg, sp, arg[i] );
+			break;
+		}
 
 		/*
 		 * LOAD_GLOBAL

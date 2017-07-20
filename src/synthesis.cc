@@ -2513,6 +2513,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 		case PrintType: 
 		case PrintXMLACType:
 		case PrintXMLType:
+		case PrintDumpType:
 		case PrintStreamType: {
 			UniqueType **types = new UniqueType*[exprPtrVect->length()];
 			
@@ -2545,6 +2546,11 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			else if ( type == PrintStreamType ) {
 				/* Minus one because the first arg is the stream. */
 				code.append( IN_PRINT_STREAM );
+				code.append( exprPtrVect->length() - 1 );
+			}
+			else if ( type == PrintDumpType ) {
+				/* Minus one because the first arg is the stream. */
+				code.append( IN_PRINT_DUMP );
 				code.append( exprPtrVect->length() - 1 );
 			}
 

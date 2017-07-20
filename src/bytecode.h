@@ -231,6 +231,7 @@ typedef unsigned char uchar;
 #define IN_PRINT_XML_AC          0x88
 #define IN_PRINT_XML             0x89
 #define IN_PRINT_STREAM          0x8a
+#define IN_PRINT_DUMP            0xf6
 
 #define IN_HOST                  0xea
 

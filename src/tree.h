@@ -311,6 +311,11 @@ void print_tree_file( struct colm_program *prg, tree_t **sp,
 void print_xml_stdout( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int comm_attr, int trim );
 
+void dump_tree_collect( struct colm_program *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim );
+void dump_tree_file( struct colm_program *prg, tree_t **sp,
+		struct stream_impl *impl, tree_t *tree, int trim );
+
 /*
  * Iterators.
  */

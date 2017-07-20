@@ -10,6 +10,7 @@ lex
 	token PRINTS / 'prints' /
 	token PRINT_XML / 'print_xml' /
 	token PRINT_XML_AC / 'print_xml_ac' /
+	token PRINT_DUMP / 'print_dump' /
 	token PARSE / 'parse' /
 	token REDUCE / 'reduce' /
 	token PARSE_TREE / 'parse_tree' /
@@ -576,6 +577,7 @@ def print_stmt
 |	[PRINTS POPEN call_arg_list PCLOSE] :PrintStream
 |	[PRINT_XML POPEN call_arg_list PCLOSE] :Xml
 |	[PRINT_XML_AC POPEN call_arg_list PCLOSE] :XmlAc
+|	[PRINT_DUMP POPEN call_arg_list PCLOSE] :Dump
 |	[PRINT accumulate] :Accum
 
 def expr_stmt

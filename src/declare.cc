@@ -545,6 +545,7 @@ void LangStmt::declare( Compiler *pd ) const
 		case PrintXMLType:
 		case PrintStreamType:
 		case PrintAccum:
+		case PrintDumpType:
 			break;
 		case ExprType:
 			break;

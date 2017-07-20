@@ -3228,6 +3228,7 @@ struct LangStmt
 		PrintXMLType,
 		PrintStreamType,
 		PrintAccum,
+		PrintDumpType,
 		ExprType,
 		IfType,
 		ElseType,
