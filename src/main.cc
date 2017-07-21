@@ -415,13 +415,19 @@ void compileOutputCommand( const char *command )
 		error() << "there was a problem compiling the output" << endl;
 }
 
-void compileOutput( const char *argv0, const bool installed, char *srcLocation )
+void compileOutput( const char *argv0, const bool inSource, char *srcLocation )
 {
 	/* Find the location of the colm program that is executing. */
 	char *location = strdup( argv0 );
 	char *last;
 	int length = 1024 + strlen( intermedFn ) + strlen( binaryFn );
-	if ( installed ) {
+	if ( inSource ) {
+		last = strrchr( location, '/' );
+		assert( last != 0 );
+		last[0] = 0;
+		length += 3 * strlen( location );
+	}
+	else {
 		last = location + strlen( location ) - 1;
 		while ( true ) {
 			if ( last == location ) {
@@ -435,11 +441,6 @@ void compileOutput( const char *argv0, const bool installed, char *srcLocation )
 			}
 			last -= 1;
 		}
-	} else {
-		last = strrchr( location, '/' );
-		assert( last != 0 );
-		last[0] = 0;
-		length += 3 * strlen( location );
 	}
 	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ )
 		length += strlen( *af ) + 2;
@@ -452,14 +453,7 @@ void compileOutput( const char *argv0, const bool installed, char *srcLocation )
 		" -o %s" \
 		" %s"
 	char *command = new char[length];
-	if ( installed ) {
-		sprintf( command,
-				COMPILE_COMMAND_STRING
-				" -I" PREFIX "/include"
-				" -L" PREFIX "/lib",
-				binaryFn, intermedFn );
-	}
-	else {
+	if ( inSource ) {
 		sprintf( command,
 				COMPILE_COMMAND_STRING
 				" -I%s/../aapl"
@@ -468,6 +462,13 @@ void compileOutput( const char *argv0, const bool installed, char *srcLocation )
 				" -Wl,-rpath=%s",
 				binaryFn, intermedFn, srcLocation,
 				srcLocation, location, location );
+	}
+	else {
+		sprintf( command,
+				COMPILE_COMMAND_STRING
+				" -I" PREFIX "/include"
+				" -L" PREFIX "/lib",
+				binaryFn, intermedFn );
 	}
 #undef COMPILE_COMMAND_STRING
 	for ( ArgsVector::Iter af = additionalCodeFiles; af.lte(); af++ ) {
@@ -764,10 +765,8 @@ int main(int argc, const char **argv)
 
 		if ( !gblLibrary ) {
 			char *location = 0;
-			if ( inSourceTree( argv[0], location ) )
-				compileOutput( argv[0], false, location );
-			else
-				compileOutput( argv[0], true, location );
+			bool inSource = inSourceTree( argv[0], location );
+			compileOutput( argv[0], inSource, location );
 		}
 
 		if ( exportHeaderFn != 0 ) {
