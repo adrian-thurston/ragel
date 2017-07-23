@@ -34,7 +34,7 @@
 
 #define BUFFER_INITIAL_SIZE 4096
 
-void xml_escape_data( struct colm_print_args *print_args, const char *data, long len )
+static void xml_escape_data( struct colm_print_args *print_args, const char *data, long len )
 {
 	int i;
 	for ( i = 0; i < len; i++ ) {
@@ -604,8 +604,24 @@ static void postfix_open( program_t *prg, tree_t **sp, struct colm_print_args *a
 {
 }
 
+static void postfix_term_data( struct colm_print_args *args, const char *data, long len )
+{
+	int i;
+	for ( i = 0; i < len; i++ ) {
+		if ( data[i] == '\\' )
+			args->out( args, "\\\\", 2 );
+		else if ( 33 <= data[i] && data[i] <= 126 )
+			args->out( args, &data[i], 1 );
+		else {
+			char out[64];
+			sprintf( out, "\\%02x", ((unsigned char)data[i]) );
+			args->out( args, out, strlen(out) );
+		}
+	}
+}
+
 static void postfix_term( program_t *prg, tree_t **sp,
-		struct colm_print_args *print_args, kid_t *kid )
+		struct colm_print_args *args, kid_t *kid )
 {
 	//kid_t *child;
 
@@ -613,24 +629,38 @@ static void postfix_term( program_t *prg, tree_t **sp,
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		//char ptr[INT_SZ];
 		//sprintf( ptr, "%lx", ((pointer_t*)kid->tree)->value );
-		//print_args->out( print_args, ptr, strlen(ptr) );
-		print_args->out( print_args, "p\n", 2 );
+		//args->out( args, ptr, strlen(ptr) );
+		args->out( args, "p\n", 2 );
 	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
 		//head_t *head = (head_t*) ((str_t*)kid->tree)->value;
 
-		//xml_escape_data( print_args, (char*)(head->data), head->length );
-		print_args->out( print_args, "s\n", 2 );
+		//xml_escape_data( args, (char*)(head->data), head->length );
+		args->out( args, "s\n", 2 );
 	}
 	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->first_non_term_id &&
 			kid->tree->id != LEL_ID_IGNORE &&
 			kid->tree->tokdata != 0 && 
 			string_length( kid->tree->tokdata ) > 0 )
 	{
-		print_args->out( print_args, "t ", 2 );
-		xml_escape_data( print_args, string_data( kid->tree->tokdata ), 
-				string_length( kid->tree->tokdata ) );
-		print_args->out( print_args, "\n", 1 );
+		char buf[512];
+		struct lang_el_info *lel_info = prg->rtd->lel_info;
+		const char *name = lel_info[kid->tree->id].xml_tag;
+		struct colm_data *tokdata = kid->tree->tokdata;
+		struct colm_location *loc = tokdata->location;
+
+		sprintf( buf, "%ld %ld %ld", loc->line, loc->column, loc->byte );
+
+		args->out( args, "t ", 2 );
+		args->out( args, name, strlen( name ) );
+		args->out( args, " ", 1 );
+		args->out( args, buf, strlen( buf ) );
+		args->out( args, " ", 1 );
+
+		postfix_term_data( args,
+				string_data( tokdata ), string_length( tokdata ) );
+
+		args->out( args, "\n", 1 );
 	}
 }
 
@@ -642,12 +672,17 @@ static void postfix_close( program_t *prg, tree_t **sp,
 		return;
 
 	if ( kid->tree->id >= prg->rtd->first_non_term_id ) {
+		char buf[512];
 		struct lang_el_info *lel_info = prg->rtd->lel_info;
 
 		const char *name = lel_info[kid->tree->id].xml_tag;
 
+		sprintf( buf, "%ld", kid->tree->prod_num );
+
 		args->out( args, "r ", 2 );
 		args->out( args, name, strlen( name ) );
+		args->out( args, " ", 1 );
+		args->out( args, buf, strlen( buf ) );
 		args->out( args, "\n", 1 );
 	}
 }
