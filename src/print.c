@@ -639,26 +639,44 @@ static void postfix_term( program_t *prg, tree_t **sp,
 		args->out( args, "s\n", 2 );
 	}
 	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->first_non_term_id &&
-			kid->tree->id != LEL_ID_IGNORE &&
-			kid->tree->tokdata != 0 && 
-			string_length( kid->tree->tokdata ) > 0 )
+			kid->tree->id != LEL_ID_IGNORE //&&
+			//kid->tree->tokdata != 0 && 
+			//string_length( kid->tree->tokdata ) > 0 )
+			)
 	{
 		char buf[512];
 		struct lang_el_info *lel_info = prg->rtd->lel_info;
 		const char *name = lel_info[kid->tree->id].xml_tag;
-		struct colm_data *tokdata = kid->tree->tokdata;
-		struct colm_location *loc = tokdata->location;
-
-		sprintf( buf, "%ld %ld %ld", loc->line, loc->column, loc->byte );
 
 		args->out( args, "t ", 2 );
 		args->out( args, name, strlen( name ) );
-		args->out( args, " ", 1 );
-		args->out( args, buf, strlen( buf ) );
-		args->out( args, " ", 1 );
 
-		postfix_term_data( args,
-				string_data( tokdata ), string_length( tokdata ) );
+		/* id. */
+		sprintf( buf, " %d", kid->tree->id );
+		args->out( args, buf, strlen( buf ) );
+
+		/* location. */
+		if ( kid->tree->tokdata == 0 ) {
+			args->out( args, " 0 0 0 -", 8 );
+		}
+		else {
+			struct colm_data *tokdata = kid->tree->tokdata;
+			struct colm_location *loc = tokdata->location;
+			if ( loc == 0 ) {
+				args->out( args, " 0 0 0 ", 7 );
+			}
+			else {
+				sprintf( buf, " %ld %ld %ld ", loc->line, loc->column, loc->byte );
+				args->out( args, buf, strlen( buf ) );
+			}
+
+			if ( string_length( tokdata ) == 0 ) {
+				args->out( args, "-", 1 );
+			}
+			else {
+				postfix_term_data( args, string_data( tokdata ), string_length( tokdata ) );
+			}
+		}
 
 		args->out( args, "\n", 1 );
 	}
@@ -674,15 +692,30 @@ static void postfix_close( program_t *prg, tree_t **sp,
 	if ( kid->tree->id >= prg->rtd->first_non_term_id ) {
 		char buf[512];
 		struct lang_el_info *lel_info = prg->rtd->lel_info;
-
 		const char *name = lel_info[kid->tree->id].xml_tag;
-
-		sprintf( buf, "%ld", kid->tree->prod_num );
 
 		args->out( args, "r ", 2 );
 		args->out( args, name, strlen( name ) );
-		args->out( args, " ", 1 );
+
+		/* id. */
+		sprintf( buf, " %d", kid->tree->id );
 		args->out( args, buf, strlen( buf ) );
+
+		/* Production number. */
+		sprintf( buf, " %d", kid->tree->prod_num );
+		args->out( args, buf, strlen( buf ) );
+
+		/* Child count. */
+		int children = 0;
+		kid_t *child = tree_child( prg, kid->tree );
+		while ( child != 0 ) {
+			child = child->next;
+			children += 1;
+		}
+
+		sprintf( buf, " %d", children );
+		args->out( args, buf, strlen( buf ) );
+
 		args->out( args, "\n", 1 );
 	}
 }
@@ -691,7 +724,7 @@ void colm_postfix_tree_collect( program_t *prg, tree_t **sp,
 		StrCollect *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-		collect, true, false, false, &append_collect, 
+		collect, false, false, false, &append_collect, 
 		&postfix_open, &postfix_term, &postfix_close
 	};
 
@@ -702,7 +735,7 @@ void colm_postfix_tree_file( program_t *prg, tree_t **sp, struct stream_impl *im
 		tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			impl, true, false, false, &append_file, 
+			impl, false, false, false, &append_file, 
 			&postfix_open, &postfix_term, &postfix_close
 	};
 

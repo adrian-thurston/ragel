@@ -1036,7 +1036,7 @@ struct Compiler
 
 	void initReductionNeeds( Reduction *reduction );
 	void loadRefs( Reduction *reduction, Production *production,
-			const ReduceTextItemList &list );
+			const ReduceTextItemList &list, bool read );
 
 	void writeHostCall();
 	void writeNeeds();

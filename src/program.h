@@ -112,6 +112,7 @@ struct colm_sections
 	void (*init_need)();
 	int (*reducer_need_tok)( program_t *prg, struct pda_run *pda_run, int id );
 	int (*reducer_need_ign)( program_t *prg, struct pda_run *pda_run );
+	void (*read_reduce)( program_t *prg, int reducer );
 };
 
 struct heap_list

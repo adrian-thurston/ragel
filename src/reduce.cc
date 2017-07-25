@@ -42,12 +42,13 @@ void Compiler::writeCommitStub()
 				"struct pda_run *pda_run, int id ) { return COLM_RN_BOTH; }\n"
 		"int " << objectName << "_reducer_need_ign( program_t *prg, "
 				"struct pda_run *pda_run ) { return COLM_RN_BOTH; }\n"
-		"\n";
+		"\n"
+		"void " << objectName << "_read_reduce( program_t *prg, int reducer ) {}\n"
 	;
 }
 
 void Compiler::loadRefs( Reduction *reduction, Production *production,
-		const ReduceTextItemList &list )
+		const ReduceTextItemList &list, bool read )
 {
 	ObjectDef *objectDef = production->prodName->objectDef;
 	Vector<ProdEl*> rhsUsed;
@@ -93,10 +94,16 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 	}
 
 	if ( lhsUsed ) {
-		*outStream <<
-			"	lel_" << production->prodName->fullName << " *_lhs = "
-				"&((commit_reduce_union*)(lel+1))->" <<
-				production->prodName->fullName << ";\n";
+		*outStream << "	lel_" << production->prodName->fullName << " *_lhs = ";
+
+		if ( read ) {
+			*outStream <<
+				"&node->u." << production->prodName->fullName << ";\n";
+		}
+		else {
+			*outStream <<
+				"&((commit_reduce_union*)(lel+1))->" << production->prodName->fullName << ";\n";
+		}
 	}
 
 	/*
@@ -116,8 +123,14 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 	if ( useCursor ) {
 		int cursorPos = 0;
 
-		*outStream <<
-				"	struct colm_parse_tree *_pt_cursor = lel->child;\n";
+		if ( read ) {
+			*outStream <<
+					"	struct read_reduce_node *_pt_cursor = node->child;\n";
+		}
+		else {
+			*outStream <<
+					"	struct colm_parse_tree *_pt_cursor = lel->child;\n";
+		}
 
 		/* Same length, can concurrently walk with one test. */
 		Vector<ProdEl*>::Iter rhs = rhsUsed;
@@ -136,10 +149,14 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 				if ( prodEl->production == production ) {
 					if ( prodEl->langEl->type != LangEl::Term ) {
 						*outStream <<
-								"lel_" << prodEl->langEl->fullName << " *"
-								"_rhs" << rhs.pos() << " = &((commit_reduce_union*)"
-								"(_pt_cursor+1))->" <<
-								prodEl->langEl->fullName << ";\n";
+								"lel_" << prodEl->langEl->fullName << " *" "_rhs" << rhs.pos() << " = ";
+
+						if ( read ) {
+							*outStream << "&_pt_cursor->u." << prodEl->langEl->fullName << ";\n";
+						}
+						else {
+							*outStream << "&((commit_reduce_union*)(_pt_cursor+1))->" << prodEl->langEl->fullName << ";\n";
+						}
 					}
 				}
 
@@ -170,8 +187,14 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 	if ( useCursor ) {
 		int cursorPos = 0;
 
-		*outStream <<
-				"	kid_t *_tree_cursor = kid->tree->child;\n";
+		if ( read ) {
+			*outStream <<
+					"	read_reduce_node *_tree_cursor = node->child;\n";
+		}
+		else {
+			*outStream <<
+					"	kid_t *_tree_cursor = kid->tree->child;\n";
+		}
 
 		/* Same length, can concurrently walk with one test. */
 		Vector<ProdEl*>::Iter rhs = rhsUsed;
@@ -185,14 +208,22 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 				if ( prodEl->production == production ) {
 					if ( prodEl->langEl->type == LangEl::Term ) {
 
-			while ( cursorPos < rhs.pos() ) {
-				*outStream <<
-					"	_tree_cursor = _tree_cursor->next;\n";
-				cursorPos += 1;
-			}
-						*outStream <<
-							"	colm_data *_rhs" << rhs.pos() << " = "
-								"_tree_cursor->tree->tokdata;\n";
+						while ( cursorPos < rhs.pos() ) {
+							*outStream <<
+								"	_tree_cursor = _tree_cursor->next;\n";
+							cursorPos += 1;
+						}
+
+						*outStream << "	colm_data *_rhs" << rhs.pos() << " = ";
+
+						if ( read ) {
+							*outStream <<
+									"&_tree_cursor->data;\n";
+						}
+						else {
+							*outStream <<
+									"_tree_cursor->tree->tokdata;\n";
+						}
 
 						reduction->needData[prodEl->langEl->id] = true;
 					}
@@ -204,15 +235,22 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 			if ( locEl != 0 ) {
 				if ( locEl->production == production ) {
 
-			while ( cursorPos < rhs.pos() ) {
-				*outStream <<
-					"	_tree_cursor = _tree_cursor->next;\n";
-				cursorPos += 1;
-			}
+					while ( cursorPos < rhs.pos() ) {
+						*outStream <<
+							"	_tree_cursor = _tree_cursor->next;\n";
+						cursorPos += 1;
+					}
 
 					*outStream <<
-						"	colm_location *_loc" << loc.pos() << " = "
+						"	colm_location *_loc" << loc.pos() << " = ";
+
+					if ( read ) {
+						*outStream << "&_tree_cursor->loc;\n";
+					}
+					else {
+						*outStream <<
 							"colm_find_location( prg, _tree_cursor->tree );\n";
+					}
 
 					reduction->needLoc[locEl->langEl->id] = true;
 				}
@@ -546,10 +584,10 @@ void Compiler::writeCommit()
 			*outStream << 
 				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
 
-			loadRefs( reduction, action->production, action->itemList );
+			loadRefs( reduction, action->production, action->itemList, false );
 
 			*outStream <<
-				"#line " << action->loc.line << "\"" << action->loc.fileName << "\"\n";
+				"#line " << action->loc.line << " \"" << action->loc.fileName << "\"\n";
 
 			writeHostItemList( action->production, action->itemList );
 
@@ -584,4 +622,163 @@ void Compiler::writeCommit()
 	}
 
 	writeNeeds();
+
+/* READ REDUCE */
+
+	*outStream <<
+		"extern \"C\" void " << objectName << "_read_reduce( program_t *prg, int reducer )\n"
+		"{\n"
+		"	switch ( reducer ) {\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+		*outStream <<
+			"	case " << reduction->id << ":\n"
+			"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg );\n"
+			"		break;\n";
+	}
+
+	*outStream <<
+		"	}\n"
+		"}\n"
+		"\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+		initReductionNeeds( reduction );
+
+		*outStream <<
+			"struct read_reduce_node\n"
+			"{\n"
+			"	std::string name;\n"
+			"	int id;\n"
+			"	int prod_num;\n"
+			"	colm_location loc;\n"
+			"	colm_data data;\n"
+			"	commit_reduce_union u;\n"
+			"	read_reduce_node *next;\n"
+			"	read_reduce_node *child;\n"
+			"};\n"
+			"\n"
+			"void " << reduction->name << "::read_reduce_forward( program_t *prg )\n"
+			"{\n"
+			"	std::ifstream in( \"postfix.txt\" );\n"
+			"	std::string type, tok, text;\n"
+			"	long _id, line, column, byte, prod_num, children;\n"
+			"	read_reduce_node sentinal;\n"
+			"	sentinal.next = 0;\n"
+			"	read_reduce_node *stack = &sentinal, *last = 0;\n"
+			"	while ( in >> type ) {\n"
+			"		/* read. */\n"
+			"		if ( type == \"t\" ) {\n"
+			"			in >> tok >> _id >> line >> column >> byte >> text;\n"
+			"			read_reduce_node *node = new read_reduce_node;\n"
+			"			node->name = tok;\n"
+			"			node->id = _id;\n"
+			"			node->loc.name = \"<>\";\n"
+			"			node->loc.line = line;\n"
+			"			node->loc.column = column;\n"
+			"			node->loc.byte = byte;\n"
+			"			node->data.data = strdup( text.c_str() );\n"
+			"			node->data.length = text.size();\n"
+			"\n"
+			"			node->next = stack;\n"
+			"			node->child = 0;\n"
+			"			stack = node;\n"
+			"		}\n"
+			"		else if ( type == \"r\" ) {\n"
+			"			in >> tok >> _id >> prod_num >> children;\n"
+			"			std::cout << \"reducing: \" << tok << std::endl;\n"
+			"			read_reduce_node *node = new read_reduce_node;\n"
+			"			memset( &node->loc, 0, sizeof(colm_location) );\n"
+			"			memset( &node->data, 0, sizeof(colm_data) );\n"
+			"			node->name = tok;\n"
+			"			node->id = _id;\n"
+			"			node->prod_num = prod_num;\n"
+			"			node->child = 0;\n"
+			"			while ( children-- > 0 ) {\n"
+			"				last = stack;\n"
+			"				stack = stack->next;\n"
+			"				last->next = node->child;\n"
+			"				node->child = last;\n"
+			"			}\n"
+			"\n"
+			"			node->next = stack;\n"
+			"			stack = node;\n"
+			"\n"
+			"			{ switch ( node->id ) {\n";
+
+		/* Populate a vector with the reduce actions. */
+		Vector<ReduceAction*> actions;
+		actions.setAsNew( reduction->reduceActions.length() );
+		long pos = 0;
+		for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
+			actions[pos++] = rdi;
+
+		/* Sort it by lhs id, then prod num. */
+		MergeSort<ReduceAction*, CmpReduceAction> sortActions;
+		sortActions.sort( actions.data, actions.length() );
+
+		ReduceAction *last = 0;
+
+		for ( Vector<ReduceAction*>::Iter rdi = actions; rdi.lte(); rdi++ ) {
+			ReduceAction *action = *rdi;
+			int lelId = action->production->prodName->id;
+			int prodNum = action->production->prodNum;
+
+			/* Maybe close off the last prod. */
+			if ( last != 0 && 
+					last->production->prodName != action->production->prodName )
+			{
+				*outStream <<
+				"			break;\n"
+				"		}\n";
+					
+			}
+
+			/* Maybe open a new prod. */
+			if ( last == 0 || 
+					last->production->prodName != action->production->prodName )
+			{
+				*outStream <<
+					"		case " << lelId << ": {\n";
+			}
+
+			*outStream << 
+				"			if ( node->prod_num == " << prodNum << " ) {\n";
+
+			loadRefs( reduction, action->production, action->itemList, true );
+
+			*outStream <<
+				"#line " << action->loc.line << "\"" << action->loc.fileName << "\"\n";
+
+			writeHostItemList( action->production, action->itemList );
+
+			*outStream << 
+				"			}\n";
+
+			last = action;
+		}
+
+		if ( last != 0 ) {
+			*outStream <<
+				"			break;\n"
+				"		}\n";
+		}
+
+
+		*outStream <<
+			"			} }\n"
+			"			/* delete the children */\n"
+			"			last = node->child;\n"
+			"			while ( last != 0 ) {\n"
+			"				read_reduce_node *next = last->next;\n"
+			"				delete last;\n"
+			"				last = next;\n"
+			"			}\n"
+			"		}\n"
+			"	}\n"
+			"}\n"
+			"\n";
+	}
 }
