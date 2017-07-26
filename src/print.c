@@ -609,7 +609,7 @@ static void postfix_term_data( struct colm_print_args *args, const char *data, l
 	int i;
 	for ( i = 0; i < len; i++ ) {
 		if ( data[i] == '\\' )
-			args->out( args, "\\\\", 2 );
+			args->out( args, "\\5c", 3 );
 		else if ( 33 <= data[i] && data[i] <= 126 )
 			args->out( args, &data[i], 1 );
 		else {
