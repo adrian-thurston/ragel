@@ -691,7 +691,7 @@ LangExpr *BaseParser::send( const InputLoc &loc, LangVarRef *varRef,
 		ConsItemList *list, bool eof )
 {
 	ParserText *parserText = ParserText::cons( loc,
-			curNspace(), list, true, false, "" );
+			curNspace(), list, true, false, false, "" );
 	pd->parserTextList.append( parserText );
 
 	return LangExpr::cons( LangTerm::consSend( loc, varRef,
@@ -702,7 +702,7 @@ LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef,
 		ConsItemList *list, bool eof )
 {
 	ParserText *parserText = ParserText::cons( loc,
-			curNspace(), list, true, false, "" );
+			curNspace(), list, true, false, false, "" );
 	pd->parserTextList.append( parserText );
 
 	return LangExpr::cons( LangTerm::consSendTree( loc, varRef,
@@ -711,7 +711,7 @@ LangExpr *BaseParser::sendTree( const InputLoc &loc, LangVarRef *varRef,
 
 LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 		ObjectField *objField, TypeRef *typeRef, FieldInitVect *fieldInitVect,
-		ConsItemList *list, bool used, bool reduce, const String &reducer )
+		ConsItemList *list, bool used, bool reduce, bool read, const String &reducer )
 {
 	LangExpr *expr = 0;
 
@@ -733,7 +733,7 @@ LangExpr *BaseParser::parseCmd( const InputLoc &loc, bool tree, bool stop,
 		used = true;
 
 	ParserText *parserText = ParserText::cons( loc, curNspace(),
-			list, used, reduce, reducer );
+			list, used, reduce, read, reducer );
 	pd->parserTextList.append( parserText );
 
 	LangTerm::Type langTermType = stop ? LangTerm::ParseStopType : ( tree ? 

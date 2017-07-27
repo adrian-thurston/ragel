@@ -43,7 +43,7 @@ void Compiler::writeCommitStub()
 		"int " << objectName << "_reducer_need_ign( program_t *prg, "
 				"struct pda_run *pda_run ) { return COLM_RN_BOTH; }\n"
 		"\n"
-		"void " << objectName << "_read_reduce( program_t *prg, int reducer ) {}\n"
+		"void " << objectName << "_read_reduce( program_t *prg, int reducer, stream_t *stream ) {}\n"
 	;
 }
 
@@ -438,6 +438,9 @@ void Compiler::writeCommit()
 		"#include <errno.h>\n"
 		"\n"
 		"#include <iostream>\n"
+		"#include <ext/stdio_filebuf.h>\n"
+		"#include <fstream>\n"
+		"\n"
 		"using std::endl;\n"
 		"\n"
 		"#include \"reducer.h\"\n"
@@ -626,7 +629,7 @@ void Compiler::writeCommit()
 /* READ REDUCE */
 
 	*outStream <<
-		"extern \"C\" void " << objectName << "_read_reduce( program_t *prg, int reducer )\n"
+		"extern \"C\" void " << objectName << "_read_reduce( program_t *prg, int reducer, stream_t *stream )\n"
 		"{\n"
 		"	switch ( reducer ) {\n";
 
@@ -634,7 +637,7 @@ void Compiler::writeCommit()
 		Reduction *reduction = *r;
 		*outStream <<
 			"	case " << reduction->id << ":\n"
-			"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg );\n"
+			"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg, stream->impl->file );\n"
 			"		break;\n";
 	}
 
@@ -685,9 +688,10 @@ void Compiler::writeCommit()
 			"	*dest = 0;\n"
 			"}\n"
 			"\n"
-			"void " << reduction->name << "::read_reduce_forward( program_t *prg )\n"
+			"void " << reduction->name << "::read_reduce_forward( program_t *prg, FILE *file )\n"
 			"{\n"
-			"	std::ifstream in( \"postfix.txt\" );\n"
+			"	__gnu_cxx::stdio_filebuf<char> fbuf( file, std::ios::in|std::ios::out|std::ios::app );\n"
+			"	std::iostream in( &fbuf );\n"
 			"	std::string type, tok, text;\n"
 			"	long _id, line, column, byte, prod_num, children;\n"
 			"	read_reduce_node sentinal;\n"

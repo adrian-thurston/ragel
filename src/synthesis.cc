@@ -1404,9 +1404,42 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 	}
 }
 
+UniqueType *LangTerm::evaluateReadReduce( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *parserUT = typeRef->uniqueType;
+	UniqueType *targetUT = parserUT->generic->elUt;
+
+	/* Should be one arg and it should be a stream. */
+
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		switch ( item->type ) {
+		case ConsItem::LiteralType: {
+			break;
+		}
+		case ConsItem::InputText: {
+			break;
+		}
+		case ConsItem::ExprType: {
+			item->expr->evaluate( pd, code );
+			break;
+		}}
+	}	
+
+	code.append( IN_READ_REDUCE );
+	code.appendHalf( parserUT->generic->id );
+	code.appendHalf( parserText->reducerId );
+
+	return targetUT;
+}
+
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		bool tree, bool stop ) const
 {
+	if ( parserText->reduce && parserText->read ) {
+		return evaluateReadReduce( pd, code );
+	}
+
 	UniqueType *parserUT = typeRef->uniqueType;
 	UniqueType *targetUT = parserUT->generic->elUt;
 
@@ -1493,7 +1526,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			code.appendWord( mapEl->value );
 			break;
 		}
-		case ConsItem::ExprType:
+		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
 			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
@@ -1515,7 +1548,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				code.append( IN_TREE_TO_STR_TRIM );
 			}
 			break;
-		}
+		}}
 
 		if ( isStream ) {
 			if ( pd->revertOn )

@@ -1800,7 +1800,7 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.PARSE().loc(), false, false, objField,
-					typeRef, init, list, used, false, "" );
+					typeRef, init, list, used, false, false, "" );
 			break;
 		}
 		case code_factor::ParseTree: {
@@ -1812,7 +1812,7 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.PARSE_TREE().loc(), true, false, objField,
-					typeRef, init, list, used, false, "" );
+					typeRef, init, list, used, false, false, "" );
 			break;
 		}
 		case code_factor::ParseStop: {
@@ -1824,7 +1824,7 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.PARSE_STOP().loc(), false, true, objField,
-					typeRef, init, list, used, false, "" );
+					typeRef, init, list, used, false, false, "" );
 			break;
 		}
 		case code_factor::Reduce: {
@@ -1838,7 +1838,21 @@ struct LoadColm
 			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
 
 			expr = parseCmd( codeFactor.REDUCE().loc(), false, false, 0,
-					typeRef, init, list, used, true, reducer );
+					typeRef, init, list, used, true, false, reducer );
+			break;
+		}
+		case code_factor::ReadReduce: {
+			/* The reducer name. */
+			String reducer = codeFactor.id().data();
+
+			/* The type we are parsing. */
+			type_ref typeRefTree = codeFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
+
+			expr = parseCmd( codeFactor.READ_REDUCE().loc(), false, false, 0,
+					typeRef, init, list, used, true, true, reducer );
 			break;
 		}
 		case code_factor::Cons: {

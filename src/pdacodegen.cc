@@ -450,7 +450,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 				"struct pda_run *pda_run, int id );\n"
 		"int " << objectName << "_reducer_need_ign( program_t *prg, "
 				"struct pda_run *pda_run );\n"
-		"void " << objectName << "_read_reduce( program_t *prg, int reducer );\n"
+		"void " << objectName << "_read_reduce( program_t *prg, int reducer, stream_t *stream );\n"
 		"\n";
 
 	out <<

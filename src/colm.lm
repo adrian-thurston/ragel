@@ -13,6 +13,7 @@ lex
 	token PRINT_DUMP / 'print_dump' /
 	token PARSE / 'parse' /
 	token REDUCE / 'reduce' /
+	token READ_REDUCE /'read_reduce'/
 	token PARSE_TREE / 'parse_tree' /
 	token PARSE_STOP / 'parse_stop' /
 	token CONS / 'construct' | 'cons' /
@@ -634,6 +635,7 @@ def code_factor
 |	[PARSE_TREE opt_capture type_ref opt_field_init accumulate] :ParseTree
 |	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
 |	[REDUCE id type_ref opt_field_init accumulate] :Reduce
+|	[READ_REDUCE id type_ref opt_field_init accumulate] :ReadReduce
 |	[CONS opt_capture type_ref opt_field_init constructor] :Cons
 |	[MATCH var_ref pattern] :Match
 |	[string] :String

@@ -762,6 +762,23 @@ again:
 			break;
 		}
 
+		case IN_READ_REDUCE: {
+			half_t generic_id;
+			half_t reducer_id;
+			read_half( generic_id );
+			read_half( reducer_id );
+
+			stream_t *stream = vm_pop_stream();
+
+			debug( prg, REALM_BYTECODE, "IN_READ_REDUCE %hd %hd\n", generic_id, reducer_id );
+
+			prg->rtd->read_reduce( prg, reducer_id, stream );
+
+			vm_push_tree( 0 );
+
+			break;
+		}
+
 		/*
 		 * LOAD_GLOBAL
 		 */

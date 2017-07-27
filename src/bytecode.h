@@ -209,6 +209,7 @@ typedef unsigned char uchar;
 #define IN_GET_VLIST_MEM_BKT     0x5c
 
 #define IN_CONS_REDUCER          0x76
+#define IN_READ_REDUCE           0x69
 
 #define IN_DONE                  0x78
 

@@ -1866,7 +1866,8 @@ struct ParserText
 {
 	static ParserText *cons( const InputLoc &loc,
 			Namespace *nspace, ConsItemList *list,
-			bool used, bool reduce, const String &reducer )
+			bool used, bool reduce, bool read,
+			const String &reducer )
 	{
 		ParserText *p = new ParserText;
 		p->loc = loc;
@@ -1878,6 +1879,7 @@ struct ParserText
 		p->parse = true;
 		p->used = used;
 		p->reduce = reduce;
+		p->read = read;
 		p->reducer = reducer;
 		p->reducerId = -1;
 		return p;
@@ -1892,6 +1894,7 @@ struct ParserText
 	bool parse;
 	bool used;
 	bool reduce;
+	bool read;
 	String reducer;
 	int reducerId;
 
@@ -3094,6 +3097,7 @@ struct LangTerm
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const;
+	UniqueType *evaluateReadReduce( Compiler *pd, CodeVect &code ) const;
 	void evaluateSendStream( Compiler *pd, CodeVect &code ) const;
 	void evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const;
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;

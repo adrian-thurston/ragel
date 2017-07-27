@@ -740,5 +740,8 @@ void colm_postfix_tree_file( program_t *prg, tree_t **sp, struct stream_impl *im
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
+
+	//struct stream_impl *impl = (struct stream_impl*) args->arg;
+	fflush( impl->file );
 }
 
