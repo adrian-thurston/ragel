@@ -52,7 +52,7 @@ TRANS_DEPS = \
 	$(RAGEL_SRC)/ragel.lm \
 	trans-c.lm trans-asm.lm 
 
-trans_SOURCES = trans.c $(RAGEL_SRC)/actparams.cc main.c
+trans_SOURCES = trans.c main.c
 trans_LDADD = -lcolm
 
 trans.c: trans.lm $(TRANS_DEPS)
