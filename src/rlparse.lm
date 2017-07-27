@@ -35,4 +35,15 @@ Stream: stream = open( GblFileName, "r" )
 reduce TopLevel start[ Stream ]
 RagelError = error
 
+#
+#parse Start: start[ Stream ]
+#PF: stream = open( "postfix.txt", "w" )
+#print_dump( PF, Start )
+#PF->close()
+#
+#PF = open( "postfix.txt", "r" )
+#
+#read_reduce TopLevel start[ PF ]
+#
+
 include 'reducer.lm'
