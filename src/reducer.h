@@ -100,6 +100,7 @@ struct TopLevel
 	/* Generated and called by colm. */
 	void commit_reduce_forward( program_t *prg, tree_t **root,
 			struct pda_run *pda_run, parse_tree_t *pt );
+	void read_reduce_forward( program_t *prg, FILE *file );
 
 	void loadMachineName( string data );
 	void tryMachineDef( const InputLoc &loc, std::string name, 
