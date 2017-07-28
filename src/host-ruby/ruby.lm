@@ -1,0 +1,8 @@
+include 'ragel.lm'
+include 'host.lm'
+include 'reducer.lm'
+include 'rlcommon.lm'
+
+Stream: stream = open( GblFileName, "r" )
+parse Start: start[ Stream ]
+print_dump( stdout, Start )

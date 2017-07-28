@@ -1,35 +1,8 @@
 include 'ragel.lm'
 include 'host.lm'
+include 'reducer.lm'
+include 'rlcommon.lm'
 
-lex
-	token selectt /''/
-	{
-		input->push( make_token( typeid<c_select_section>, '' ) )
-	}
-
-	token c_select_section //
-end
-
-def start
-	[c_select_section SectionList: host::section*]
-
-export RagelError: str
-
-GblImport = false
-GblIncludeDepth = 0
-GblTargetMachine = ""
-GblSearchMachine = ""
-
-# File name. The open is expected to succeed. It is tested before the colm
-# program is called.
-A: list_el<str> = argv->pop_head_el()
-GblFileName = A->value
-
-# Remaining items are include paths.
-while ( argv->length > 0 ) {
-	A = argv->pop_head_el()
-	GblIncludePaths->push_tail_el( A )
-}
 
 Stream: stream = open( GblFileName, "r" )
 reduce TopLevel start[ Stream ]
@@ -46,4 +19,3 @@ RagelError = error
 #read_reduce TopLevel start[ PF ]
 #
 
-include 'reducer.lm'

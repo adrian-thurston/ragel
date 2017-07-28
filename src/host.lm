@@ -182,4 +182,16 @@ namespace host
 	|	[tok] :Token
 end
 
+lex
+	token selectt /''/
+	{
+		input->push( make_token( typeid<c_select_section>, '' ) )
+	}
+
+	token c_select_section //
+end
+
+def start
+	[c_select_section SectionList: host::section*]
+
 
