@@ -47,16 +47,15 @@ void Compiler::writeCommitStub()
 	;
 }
 
-void Compiler::loadRefs( Reduction *reduction, Production *production,
-		const ReduceTextItemList &list, bool read )
+void Compiler::findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed,
+		Vector<ProdEl*> &locUsed, Reduction *reduction, Production *production,
+		const ReduceTextItemList &list )
 {
 	ObjectDef *objectDef = production->prodName->objectDef;
-	Vector<ProdEl*> rhsUsed;
-	Vector<ProdEl*> locUsed;
+
 	rhsUsed.setAsNew( production->prodElList->length() );
 	locUsed.setAsNew( production->prodElList->length() );
 
-	bool lhsUsed = false;
 	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
 		if ( i->type == ReduceTextItem::LhsRef ) {
 			lhsUsed = true;
@@ -64,6 +63,7 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 
 		if ( i->type == ReduceTextItem::RhsRef || i->type == ReduceTextItem::RhsLoc ) {
 			if ( i->n > 0 ) {
+				/* Numbered. */
 				ProdEl *prodEl = production->prodElList->head;
 				int adv = i->n - 1;
 				while ( adv > 0 ) {
@@ -77,6 +77,7 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 					rhsUsed[i->n-1] = prodEl;
 			}
 			else {
+				/* Named. */
 				String name( i->txt.data + 1, i->txt.length() - 1 );
 				ObjectField *field = objectDef->rootScope->findField( name );
 				if ( field != 0 ) {
@@ -92,6 +93,42 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 			}
 		}
 	}
+}
+
+void Compiler::computeNeeded( Reduction *reduction, Production *production,
+		const ReduceTextItemList &list )
+{
+	bool lhsUsed = false;
+	Vector<ProdEl*> rhsUsed;
+	Vector<ProdEl*> locUsed;
+
+	findRhsRefs( lhsUsed, rhsUsed, locUsed, reduction, production, list );
+
+	/* Same length, can concurrently walk with one test. */
+	Vector<ProdEl*>::Iter rhs = rhsUsed;
+	Vector<ProdEl*>::Iter loc = locUsed;
+		
+	for ( ; rhs.lte(); rhs++, loc++ ) {
+		ProdEl *prodEl = *rhs;
+		if ( prodEl != 0 ) {
+			if ( prodEl->production == production && prodEl->langEl->type == LangEl::Term )
+				reduction->needData[prodEl->langEl->id] = true;
+		}
+
+		ProdEl *locEl = *loc;
+		if ( locEl != 0 && locEl->production == production )
+			reduction->needLoc[locEl->langEl->id] = true;
+	}
+}
+
+void Compiler::loadRefs( Reduction *reduction, Production *production,
+		const ReduceTextItemList &list, bool read )
+{
+	bool lhsUsed = false;
+	Vector<ProdEl*> rhsUsed;
+	Vector<ProdEl*> locUsed;
+
+	findRhsRefs( lhsUsed, rhsUsed, locUsed, reduction, production, list );
 
 	if ( lhsUsed ) {
 		*outStream << "	lel_" << production->prodName->fullName << " *_lhs = ";
@@ -144,7 +181,6 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 						"	_pt_cursor = _pt_cursor->next;\n";
 					cursorPos += 1;
 				}
-
 
 				if ( prodEl->production == production ) {
 					if ( prodEl->langEl->type != LangEl::Term ) {
@@ -224,8 +260,6 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 							*outStream <<
 									"_tree_cursor->tree->tokdata;\n";
 						}
-
-						reduction->needData[prodEl->langEl->id] = true;
 					}
 				}
 
@@ -251,8 +285,6 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 						*outStream <<
 							"colm_find_location( prg, _tree_cursor->tree );\n";
 					}
-
-					reduction->needLoc[locEl->langEl->id] = true;
 				}
 			}
 		}
@@ -358,6 +390,7 @@ void Compiler::initReductionNeeds( Reduction *reduction )
 
 void Compiler::writeNeeds()
 {
+
 	*outStream <<
 		"struct reduction_info\n"
 		"{\n"
@@ -420,34 +453,8 @@ void Compiler::writeNeeds()
 		"}\n";
 }
 
-void Compiler::writeCommit()
+void Compiler::writeReduceStructs()
 {
-	*outStream <<
-		"#include <colm/pdarun.h>\n"
-		"#include <colm/bytecode.h>\n"
-		"#include <colm/defs.h>\n"
-		"#include <colm/input.h>\n"
-		"#include <colm/tree.h>\n"
-		"#include <colm/program.h>\n"
-		"#include <colm/colm.h>\n"
-		"\n"
-		"#include <stdio.h>\n"
-		"#include <stdlib.h>\n"
-		"#include <string.h>\n"
-		"#include <assert.h>\n"
-		"#include <errno.h>\n"
-		"\n"
-		"#include <iostream>\n"
-		"#include <ext/stdio_filebuf.h>\n"
-		"#include <fstream>\n"
-		"\n"
-		"using std::endl;\n"
-		"\n"
-		"#include \"reducer.h\"\n"
-		"\n";
-
-	*outStream << "\n";
-
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		for ( ReduceNonTermList::Iter rdi = (*r)->reduceNonTerms; rdi.lte(); rdi++ ) {
 			*outStream <<
@@ -487,6 +494,48 @@ void Compiler::writeCommit()
 		"}\n";
 
 	*outStream <<
+		"struct read_reduce_node\n"
+		"{\n"
+		"	std::string name;\n"
+		"	int id;\n"
+		"	int prod_num;\n"
+		"	colm_location loc;\n"
+		"	colm_data data;\n"
+		"	commit_reduce_union u;\n"
+		"	read_reduce_node *next;\n"
+		"	read_reduce_node *child;\n"
+		"};\n"
+		"\n"
+		"static void unescape( colm_data *tokdata )\n"
+		"{\n"
+		"	unsigned char *src = (unsigned char*)tokdata->data, *dest = (unsigned char*)tokdata->data;\n"
+		"	while ( *src != 0 ) {\n"
+		"		if ( *src == '\\\\' ) {\n"
+		"			unsigned int i;\n"
+		"			char buf[3];\n"
+		"\n"
+		"			src += 1;\n"
+		"			buf[0] = *src++;\n"
+		"			buf[1] = *src++;\n"
+		"			buf[2] = 0;\n"
+		"\n"
+		"			sscanf( buf, \"%x\", &i );\n"
+		"			*dest++ = (unsigned char)i;\n"
+		"\n"
+		"			tokdata->length -= 2;\n"
+		"		}\n"
+		"		else {\n"
+		"			*dest++ = *src++;\n"
+		"		}\n"
+		"	}\n"
+		"	*dest = 0;\n"
+		"}\n"
+		"\n";
+}
+
+void Compiler::writeReduceDispatchers()
+{
+	*outStream <<
 		"\n"
 		"extern \"C\" void " << objectName << "_commit_reduce_forward( program_t *prg, tree_t **root,\n"
 		"		struct pda_run *pda_run, parse_tree_t *pt )\n"
@@ -507,9 +556,40 @@ void Compiler::writeCommit()
 		"}\n"
 		"\n";
 
+	*outStream <<
+		"extern \"C\" void " << objectName << "_read_reduce( program_t *prg, int reducer, stream_t *stream )\n"
+		"{\n"
+		"	switch ( reducer ) {\n";
+
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
+		*outStream <<
+			"	case " << reduction->id << ":\n"
+			"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg, stream->impl->file );\n"
+			"		break;\n";
+	}
+
+	*outStream <<
+		"	}\n"
+		"}\n"
+		"\n";
+}
+
+void Compiler::computeNeeded()
+{
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
 		initReductionNeeds( reduction );
+
+		for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
+			computeNeeded( reduction, rdi->production, rdi->itemList );
+	}
+}
+
+void Compiler::writeParseReduce()
+{
+	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
+		Reduction *reduction = *r;
 
 		*outStream <<
 			"void " << reduction->name << "::commit_reduce_forward( program_t *prg, \n"
@@ -587,6 +667,7 @@ void Compiler::writeCommit()
 			*outStream << 
 				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
 
+
 			loadRefs( reduction, action->production, action->itemList, false );
 
 			*outStream <<
@@ -623,71 +704,14 @@ void Compiler::writeCommit()
 			"}\n"
 			"\n";
 	}
+}
 
-	writeNeeds();
-
-/* READ REDUCE */
-
-	*outStream <<
-		"extern \"C\" void " << objectName << "_read_reduce( program_t *prg, int reducer, stream_t *stream )\n"
-		"{\n"
-		"	switch ( reducer ) {\n";
-
+void Compiler::writePostfixReduce()
+{
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
-		*outStream <<
-			"	case " << reduction->id << ":\n"
-			"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg, stream->impl->file );\n"
-			"		break;\n";
-	}
-
-	*outStream <<
-		"	}\n"
-		"}\n"
-		"\n";
-
-	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
-		Reduction *reduction = *r;
-		initReductionNeeds( reduction );
 
 		*outStream <<
-			"struct read_reduce_node\n"
-			"{\n"
-			"	std::string name;\n"
-			"	int id;\n"
-			"	int prod_num;\n"
-			"	colm_location loc;\n"
-			"	colm_data data;\n"
-			"	commit_reduce_union u;\n"
-			"	read_reduce_node *next;\n"
-			"	read_reduce_node *child;\n"
-			"};\n"
-			"\n"
-			"void unescape( colm_data *tokdata )\n"
-			"{\n"
-			"	unsigned char *src = (unsigned char*)tokdata->data, *dest = (unsigned char*)tokdata->data;\n"
-			"	while ( *src != 0 ) {\n"
-			"		if ( *src == '\\\\' ) {\n"
-			"			unsigned int i;\n"
-			"			char buf[3];\n"
-			"\n"
-			"			src += 1;\n"
-			"			buf[0] = *src++;\n"
-			"			buf[1] = *src++;\n"
-			"			buf[2] = 0;\n"
-			"\n"
-			"			sscanf( buf, \"%x\", &i );\n"
-			"			*dest++ = (unsigned char)i;\n"
-			"\n"
-			"			tokdata->length -= 2;\n"
-			"		}\n"
-			"		else {\n"
-			"			*dest++ = *src++;\n"
-			"		}\n"
-			"	}\n"
-			"	*dest = 0;\n"
-			"}\n"
-			"\n"
 			"void " << reduction->name << "::read_reduce_forward( program_t *prg, FILE *file )\n"
 			"{\n"
 			"	__gnu_cxx::stdio_filebuf<char> fbuf( file, std::ios::in|std::ios::out|std::ios::app );\n"
@@ -762,7 +786,6 @@ void Compiler::writeCommit()
 				*outStream <<
 				"			break;\n"
 				"		}\n";
-					
 			}
 
 			/* Maybe open a new prod. */
@@ -795,7 +818,6 @@ void Compiler::writeCommit()
 				"		}\n";
 		}
 
-
 		*outStream <<
 			"			} }\n"
 			"			/* delete the children */\n"
@@ -810,4 +832,43 @@ void Compiler::writeCommit()
 			"}\n"
 			"\n";
 	}
+}
+
+void Compiler::writeCommit()
+{
+	*outStream <<
+		"#include <colm/pdarun.h>\n"
+		"#include <colm/bytecode.h>\n"
+		"#include <colm/defs.h>\n"
+		"#include <colm/input.h>\n"
+		"#include <colm/tree.h>\n"
+		"#include <colm/program.h>\n"
+		"#include <colm/colm.h>\n"
+		"\n"
+		"#include <stdio.h>\n"
+		"#include <stdlib.h>\n"
+		"#include <string.h>\n"
+		"#include <assert.h>\n"
+		"#include <errno.h>\n"
+		"\n"
+		"#include <iostream>\n"
+		"#include <ext/stdio_filebuf.h>\n"
+		"#include <fstream>\n"
+		"\n"
+		"using std::endl;\n"
+		"\n"
+		"#include \"reducer.h\"\n"
+		"\n";
+
+	computeNeeded();
+
+	writeReduceStructs();
+	
+	writeReduceDispatchers();
+
+	writePostfixReduce();
+
+	writeParseReduce();
+
+	writeNeeds();
 }

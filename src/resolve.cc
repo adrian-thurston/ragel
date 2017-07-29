@@ -937,6 +937,13 @@ void Compiler::resolveReducers()
 			}
 
 			pt->reducerId = reduction->id;
+			
+			/* Indicate which type of reducing we need. Parser based, or
+			 * postfix. */
+			if ( pt->read )
+				reduction->postfixBased = true;
+			else
+				reduction->parserBased = true;
 		}
 	}
 }

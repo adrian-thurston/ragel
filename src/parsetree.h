@@ -986,7 +986,9 @@ struct Reduction
 	Reduction( const InputLoc &loc, String name )
 	:
 		loc(loc), name(name),
-		needData(0), needLoc(0)
+		needData(0), needLoc(0),
+		postfixBased(false),
+		parserBased(false)
 	{
 		static int nextId = 1;	
 		id = nextId++;
@@ -1001,6 +1003,9 @@ struct Reduction
 
 	bool *needData;
 	bool *needLoc;
+
+	bool postfixBased;
+	bool parserBased;
 
 	ReduceActionList reduceActions;
 	ReduceNonTermList reduceNonTerms;

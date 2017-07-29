@@ -1035,12 +1035,27 @@ struct Compiler
 	void declareReVars();
 
 	void initReductionNeeds( Reduction *reduction );
+
+	void findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed,
+			Vector<ProdEl*> &locUsed, Reduction *reduction, Production *production,
+			const ReduceTextItemList &list );
+
+	void computeNeeded( Reduction *reduction, Production *production,
+			const ReduceTextItemList &list );
+	void computeNeeded();
+
 	void loadRefs( Reduction *reduction, Production *production,
 			const ReduceTextItemList &list, bool read );
+
+	void writeParseReduce();
+	void writePostfixReduce();
 
 	void writeHostCall();
 	void writeNeeds();
 	void writeCommit();
+	void writeReduceStructs();
+	void writeReduceDispatchers();
+
 	void writeLhsRef( Production *production, ReduceTextItem *i );
 	void writeRhsRef( Production *production, ReduceTextItem *i );
 	void writeRhsLoc( Production *production, ReduceTextItem *i );
