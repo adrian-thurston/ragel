@@ -544,11 +544,13 @@ void Compiler::writeReduceDispatchers()
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
-		*outStream <<
-			"	case " << reduction->id << ":\n"
-			"		((" << reduction->name << "*)prg->red_ctx)->commit_reduce_forward( "
-						"prg, root, pda_run, pt );\n"
-			"		break;\n";
+		if ( reduction->parserBased ) {
+			*outStream <<
+				"	case " << reduction->id << ":\n"
+				"		((" << reduction->name << "*)prg->red_ctx)->commit_reduce_forward( "
+							"prg, root, pda_run, pt );\n"
+				"		break;\n";
+		}
 	}
 
 	*outStream <<
@@ -563,10 +565,12 @@ void Compiler::writeReduceDispatchers()
 
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
-		*outStream <<
-			"	case " << reduction->id << ":\n"
-			"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg, stream->impl->file );\n"
-			"		break;\n";
+		if ( reduction->postfixBased ) {
+			*outStream <<
+				"	case " << reduction->id << ":\n"
+				"		((" << reduction->name << "*)prg->red_ctx)->read_reduce_forward( prg, stream->impl->file );\n"
+				"		break;\n";
+		}
 	}
 
 	*outStream <<
@@ -586,251 +590,262 @@ void Compiler::computeNeeded()
 	}
 }
 
+void Compiler::writeParseReduce( Reduction *reduction )
+{
+	*outStream <<
+		"void " << reduction->name << "::commit_reduce_forward( program_t *prg, \n"
+		"		tree_t **root, struct pda_run *pda_run, parse_tree_t *pt )\n"
+		"{\n"
+		"	tree_t **sp = root;\n"
+		"\n"
+		"	parse_tree_t *lel = pt;\n"
+		"	kid_t *kid = pt->shadow;\n"
+		"\n"
+		"recurse:\n"
+		"\n"
+		"	if ( lel->child != 0 ) {\n"
+		"		/* There are children. Must process all children first. */\n"
+		"		vm_push_ptree( lel );\n"
+		"		vm_push_kid( kid );\n"
+		"\n"
+		"		lel = lel->child;\n"
+		"		kid = tree_child( prg, kid->tree );\n"
+		"		while ( lel != 0 ) {\n"
+		"			goto recurse;\n"
+		"			resume:\n"
+		"			lel = lel->next;\n"
+		"			kid = kid->next;\n"
+		"		}\n"
+		"\n"
+		"		kid = vm_pop_kid();\n"
+		"		lel = vm_pop_ptree();\n"
+		"	}\n"
+		"\n"
+		"	if ( !( lel->flags & PF_COMMITTED ) ) {\n"
+		"		/* Now can execute the reduction action. */\n"
+		"		{\n";
+
+
+	*outStream <<
+		"		{ switch ( kid->tree->id ) {\n";
+
+	/* Populate a vector with the reduce actions. */
+	Vector<ReduceAction*> actions;
+	actions.setAsNew( reduction->reduceActions.length() );
+	long pos = 0;
+	for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
+		actions[pos++] = rdi;
+
+	/* Sort it by lhs id, then prod num. */
+	MergeSort<ReduceAction*, CmpReduceAction> sortActions;
+	sortActions.sort( actions.data, actions.length() );
+
+	ReduceAction *last = 0;
+
+	for ( Vector<ReduceAction*>::Iter rdi = actions; rdi.lte(); rdi++ ) {
+		ReduceAction *action = *rdi;
+		int lelId = action->production->prodName->id;
+		int prodNum = action->production->prodNum;
+
+		/* Maybe close off the last prod. */
+		if ( last != 0 && 
+				last->production->prodName != action->production->prodName )
+		{
+			*outStream <<
+			"			break;\n"
+			"		}\n";
+				
+		}
+
+		/* Maybe open a new prod. */
+		if ( last == 0 || 
+				last->production->prodName != action->production->prodName )
+		{
+			*outStream <<
+				"		case " << lelId << ": {\n";
+		}
+
+		*outStream << 
+			"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
+
+
+		loadRefs( reduction, action->production, action->itemList, false );
+
+		*outStream <<
+			"#line " << action->loc.line << " \"" << action->loc.fileName << "\"\n";
+
+		writeHostItemList( action->production, action->itemList );
+
+		*outStream << 
+			"			}\n";
+
+		last = action;
+	}
+
+	if ( last != 0 ) {
+		*outStream <<
+			"			break;\n"
+			"		}\n";
+	}
+
+	*outStream <<
+		"		} }\n"
+		"		}\n"
+		"	}\n"
+		"\n"
+		"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
+		"	commit_clear_kid_list( prg, sp, kid->tree->child );\n"
+		"	kid->tree->child = 0;\n"
+		"	kid->tree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );\n"
+		"	lel->child = 0;\n"
+		"\n"
+		"	if ( sp != root )\n"
+		"		goto resume;\n"
+		"	pt->flags |= PF_COMMITTED;\n"
+		"}\n"
+		"\n";
+
+}
+
 void Compiler::writeParseReduce()
 {
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
-
-		*outStream <<
-			"void " << reduction->name << "::commit_reduce_forward( program_t *prg, \n"
-			"		tree_t **root, struct pda_run *pda_run, parse_tree_t *pt )\n"
-			"{\n"
-			"	tree_t **sp = root;\n"
-			"\n"
-			"	parse_tree_t *lel = pt;\n"
-			"	kid_t *kid = pt->shadow;\n"
-			"\n"
-			"recurse:\n"
-			"\n"
-			"	if ( lel->child != 0 ) {\n"
-			"		/* There are children. Must process all children first. */\n"
-			"		vm_push_ptree( lel );\n"
-			"		vm_push_kid( kid );\n"
-			"\n"
-			"		lel = lel->child;\n"
-			"		kid = tree_child( prg, kid->tree );\n"
-			"		while ( lel != 0 ) {\n"
-			"			goto recurse;\n"
-			"			resume:\n"
-			"			lel = lel->next;\n"
-			"			kid = kid->next;\n"
-			"		}\n"
-			"\n"
-			"		kid = vm_pop_kid();\n"
-			"		lel = vm_pop_ptree();\n"
-			"	}\n"
-			"\n"
-			"	if ( !( lel->flags & PF_COMMITTED ) ) {\n"
-			"		/* Now can execute the reduction action. */\n"
-			"		{\n";
-
-
-		*outStream <<
-			"		{ switch ( kid->tree->id ) {\n";
-
-		/* Populate a vector with the reduce actions. */
-		Vector<ReduceAction*> actions;
-		actions.setAsNew( reduction->reduceActions.length() );
-		long pos = 0;
-		for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
-			actions[pos++] = rdi;
-
-		/* Sort it by lhs id, then prod num. */
-		MergeSort<ReduceAction*, CmpReduceAction> sortActions;
-		sortActions.sort( actions.data, actions.length() );
-
-		ReduceAction *last = 0;
-
-		for ( Vector<ReduceAction*>::Iter rdi = actions; rdi.lte(); rdi++ ) {
-			ReduceAction *action = *rdi;
-			int lelId = action->production->prodName->id;
-			int prodNum = action->production->prodNum;
-
-			/* Maybe close off the last prod. */
-			if ( last != 0 && 
-					last->production->prodName != action->production->prodName )
-			{
-				*outStream <<
-				"			break;\n"
-				"		}\n";
-					
-			}
-
-			/* Maybe open a new prod. */
-			if ( last == 0 || 
-					last->production->prodName != action->production->prodName )
-			{
-				*outStream <<
-					"		case " << lelId << ": {\n";
-			}
-
-			*outStream << 
-				"			if ( kid->tree->prod_num == " << prodNum << " ) {\n";
-
-
-			loadRefs( reduction, action->production, action->itemList, false );
-
-			*outStream <<
-				"#line " << action->loc.line << " \"" << action->loc.fileName << "\"\n";
-
-			writeHostItemList( action->production, action->itemList );
-
-			*outStream << 
-				"			}\n";
-
-			last = action;
-		}
-
-		if ( last != 0 ) {
-			*outStream <<
-				"			break;\n"
-				"		}\n";
-		}
-
-		*outStream <<
-			"		} }\n"
-			"		}\n"
-			"	}\n"
-			"\n"
-			"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
-			"	commit_clear_kid_list( prg, sp, kid->tree->child );\n"
-			"	kid->tree->child = 0;\n"
-			"	kid->tree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );\n"
-			"	lel->child = 0;\n"
-			"\n"
-			"	if ( sp != root )\n"
-			"		goto resume;\n"
-			"	pt->flags |= PF_COMMITTED;\n"
-			"}\n"
-			"\n";
+		if ( reduction->parserBased )
+			writeParseReduce( reduction );
 	}
+}
+
+void Compiler::writePostfixReduce( Reduction *reduction )
+{
+	*outStream <<
+		"void " << reduction->name << "::read_reduce_forward( program_t *prg, FILE *file )\n"
+		"{\n"
+		"	__gnu_cxx::stdio_filebuf<char> fbuf( file, std::ios::in|std::ios::out|std::ios::app );\n"
+		"	std::iostream in( &fbuf );\n"
+		"	std::string type, tok, text;\n"
+		"	long _id, line, column, byte, prod_num, children;\n"
+		"	read_reduce_node sentinal;\n"
+		"	sentinal.next = 0;\n"
+		"	read_reduce_node *stack = &sentinal, *last = 0;\n"
+		"	while ( in >> type ) {\n"
+		"		/* read. */\n"
+		"		if ( type == \"t\" ) {\n"
+		"			in >> tok >> _id >> line >> column >> byte >> text;\n"
+		"			read_reduce_node *node = new read_reduce_node;\n"
+		"			node->name = tok;\n"
+		"			node->id = _id;\n"
+		"			node->loc.name = \"<>\";\n"
+		"			node->loc.line = line;\n"
+		"			node->loc.column = column;\n"
+		"			node->loc.byte = byte;\n"
+		"			node->data.data = strdup( text.c_str() );\n"
+		"			node->data.length = text.size();\n"
+		"			unescape( &node->data );\n"
+		"\n"
+		"			node->next = stack;\n"
+		"			node->child = 0;\n"
+		"			stack = node;\n"
+		"		}\n"
+		"		else if ( type == \"r\" ) {\n"
+		"			in >> tok >> _id >> prod_num >> children;\n"
+		"			read_reduce_node *node = new read_reduce_node;\n"
+		"			memset( &node->loc, 0, sizeof(colm_location) );\n"
+		"			memset( &node->data, 0, sizeof(colm_data) );\n"
+		"			node->name = tok;\n"
+		"			node->id = _id;\n"
+		"			node->prod_num = prod_num;\n"
+		"			node->child = 0;\n"
+		"			while ( children-- > 0 ) {\n"
+		"				last = stack;\n"
+		"				stack = stack->next;\n"
+		"				last->next = node->child;\n"
+		"				node->child = last;\n"
+		"			}\n"
+		"\n"
+		"			node->next = stack;\n"
+		"			stack = node;\n"
+		"\n"
+		"			{ switch ( node->id ) {\n";
+
+	/* Populate a vector with the reduce actions. */
+	Vector<ReduceAction*> actions;
+	actions.setAsNew( reduction->reduceActions.length() );
+	long pos = 0;
+	for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
+		actions[pos++] = rdi;
+
+	/* Sort it by lhs id, then prod num. */
+	MergeSort<ReduceAction*, CmpReduceAction> sortActions;
+	sortActions.sort( actions.data, actions.length() );
+
+	ReduceAction *last = 0;
+
+	for ( Vector<ReduceAction*>::Iter rdi = actions; rdi.lte(); rdi++ ) {
+		ReduceAction *action = *rdi;
+		int lelId = action->production->prodName->id;
+		int prodNum = action->production->prodNum;
+
+		/* Maybe close off the last prod. */
+		if ( last != 0 && 
+				last->production->prodName != action->production->prodName )
+		{
+			*outStream <<
+			"			break;\n"
+			"		}\n";
+		}
+
+		/* Maybe open a new prod. */
+		if ( last == 0 || 
+				last->production->prodName != action->production->prodName )
+		{
+			*outStream <<
+				"		case " << lelId << ": {\n";
+		}
+
+		*outStream << 
+			"			if ( node->prod_num == " << prodNum << " ) {\n";
+
+		loadRefs( reduction, action->production, action->itemList, true );
+
+		*outStream <<
+			"#line " << action->loc.line << "\"" << action->loc.fileName << "\"\n";
+
+		writeHostItemList( action->production, action->itemList );
+
+		*outStream << 
+			"			}\n";
+
+		last = action;
+	}
+
+	if ( last != 0 ) {
+		*outStream <<
+			"			break;\n"
+			"		}\n";
+	}
+
+	*outStream <<
+		"			} }\n"
+		"			/* delete the children */\n"
+		"			last = node->child;\n"
+		"			while ( last != 0 ) {\n"
+		"				read_reduce_node *next = last->next;\n"
+		"				delete last;\n"
+		"				last = next;\n"
+		"			}\n"
+		"		}\n"
+		"	}\n"
+		"}\n"
+		"\n";
 }
 
 void Compiler::writePostfixReduce()
 {
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
-
-		*outStream <<
-			"void " << reduction->name << "::read_reduce_forward( program_t *prg, FILE *file )\n"
-			"{\n"
-			"	__gnu_cxx::stdio_filebuf<char> fbuf( file, std::ios::in|std::ios::out|std::ios::app );\n"
-			"	std::iostream in( &fbuf );\n"
-			"	std::string type, tok, text;\n"
-			"	long _id, line, column, byte, prod_num, children;\n"
-			"	read_reduce_node sentinal;\n"
-			"	sentinal.next = 0;\n"
-			"	read_reduce_node *stack = &sentinal, *last = 0;\n"
-			"	while ( in >> type ) {\n"
-			"		/* read. */\n"
-			"		if ( type == \"t\" ) {\n"
-			"			in >> tok >> _id >> line >> column >> byte >> text;\n"
-			"			read_reduce_node *node = new read_reduce_node;\n"
-			"			node->name = tok;\n"
-			"			node->id = _id;\n"
-			"			node->loc.name = \"<>\";\n"
-			"			node->loc.line = line;\n"
-			"			node->loc.column = column;\n"
-			"			node->loc.byte = byte;\n"
-			"			node->data.data = strdup( text.c_str() );\n"
-			"			node->data.length = text.size();\n"
-			"			unescape( &node->data );\n"
-			"\n"
-			"			node->next = stack;\n"
-			"			node->child = 0;\n"
-			"			stack = node;\n"
-			"		}\n"
-			"		else if ( type == \"r\" ) {\n"
-			"			in >> tok >> _id >> prod_num >> children;\n"
-			"			read_reduce_node *node = new read_reduce_node;\n"
-			"			memset( &node->loc, 0, sizeof(colm_location) );\n"
-			"			memset( &node->data, 0, sizeof(colm_data) );\n"
-			"			node->name = tok;\n"
-			"			node->id = _id;\n"
-			"			node->prod_num = prod_num;\n"
-			"			node->child = 0;\n"
-			"			while ( children-- > 0 ) {\n"
-			"				last = stack;\n"
-			"				stack = stack->next;\n"
-			"				last->next = node->child;\n"
-			"				node->child = last;\n"
-			"			}\n"
-			"\n"
-			"			node->next = stack;\n"
-			"			stack = node;\n"
-			"\n"
-			"			{ switch ( node->id ) {\n";
-
-		/* Populate a vector with the reduce actions. */
-		Vector<ReduceAction*> actions;
-		actions.setAsNew( reduction->reduceActions.length() );
-		long pos = 0;
-		for ( ReduceActionList::Iter rdi = reduction->reduceActions; rdi.lte(); rdi++ )
-			actions[pos++] = rdi;
-
-		/* Sort it by lhs id, then prod num. */
-		MergeSort<ReduceAction*, CmpReduceAction> sortActions;
-		sortActions.sort( actions.data, actions.length() );
-
-		ReduceAction *last = 0;
-
-		for ( Vector<ReduceAction*>::Iter rdi = actions; rdi.lte(); rdi++ ) {
-			ReduceAction *action = *rdi;
-			int lelId = action->production->prodName->id;
-			int prodNum = action->production->prodNum;
-
-			/* Maybe close off the last prod. */
-			if ( last != 0 && 
-					last->production->prodName != action->production->prodName )
-			{
-				*outStream <<
-				"			break;\n"
-				"		}\n";
-			}
-
-			/* Maybe open a new prod. */
-			if ( last == 0 || 
-					last->production->prodName != action->production->prodName )
-			{
-				*outStream <<
-					"		case " << lelId << ": {\n";
-			}
-
-			*outStream << 
-				"			if ( node->prod_num == " << prodNum << " ) {\n";
-
-			loadRefs( reduction, action->production, action->itemList, true );
-
-			*outStream <<
-				"#line " << action->loc.line << "\"" << action->loc.fileName << "\"\n";
-
-			writeHostItemList( action->production, action->itemList );
-
-			*outStream << 
-				"			}\n";
-
-			last = action;
-		}
-
-		if ( last != 0 ) {
-			*outStream <<
-				"			break;\n"
-				"		}\n";
-		}
-
-		*outStream <<
-			"			} }\n"
-			"			/* delete the children */\n"
-			"			last = node->child;\n"
-			"			while ( last != 0 ) {\n"
-			"				read_reduce_node *next = last->next;\n"
-			"				delete last;\n"
-			"				last = next;\n"
-			"			}\n"
-			"		}\n"
-			"	}\n"
-			"}\n"
-			"\n";
+		if ( reduction->postfixBased )
+			writePostfixReduce( reduction );
 	}
 }
 

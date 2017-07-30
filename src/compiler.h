@@ -1047,6 +1047,9 @@ struct Compiler
 	void loadRefs( Reduction *reduction, Production *production,
 			const ReduceTextItemList &list, bool read );
 
+	void writePostfixReduce( Reduction *reduction );
+	void writeParseReduce( Reduction *reduction );
+
 	void writeParseReduce();
 	void writePostfixReduce();
 
