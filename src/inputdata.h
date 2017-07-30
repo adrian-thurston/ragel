@@ -202,7 +202,8 @@ struct InputData
 		histogramFn(0),
 		histogram(0),
 		input(0),
-		forceLibRagel(false)
+		forceLibRagel(false),
+		postfix(false)
 	{}
 
 	~InputData();
@@ -293,6 +294,9 @@ struct InputData
 
 	Vector<const char**> streamFileNames;
 
+	bool forceLibRagel;
+	bool postfix;
+
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
 
@@ -337,8 +341,6 @@ struct InputData
 	bool parseReduce();
 
 	char *readInput( const char *inputFileName );
-
-	bool forceLibRagel;
 
 	const char **makeIncludePathChecks( const char *curFileName, const char *fileName );
 	std::ifstream *tryOpenInclude( const char **pathChecks, long &found );

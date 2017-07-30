@@ -207,7 +207,7 @@ void TopLevel::reduceFile( const char *inputFileName, bool import )
 {
 	const int baseN = 2;
 	const char **argv = new const char*[baseN + id->includePaths.length() + 1];
-	argv[0] = "rlparse";
+	argv[0] = id->postfix ? "rlpostfix" : "rlparse";
 	argv[1] = inputFileName;
 	for ( int i = 0; i < id->includePaths.length(); i++ )
 		argv[baseN + i] = id->includePaths.data[i];

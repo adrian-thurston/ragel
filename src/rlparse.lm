@@ -1,21 +1,19 @@
 include 'ragel.lm'
 include 'host.lm'
 include 'reducer.lm'
+
+# Loads the args. 
 include 'rlcommon.lm'
 
+print "arg0: [arg0]
 
-Stream: stream = open( GblFileName, "r" )
-reduce TopLevel start[ Stream ]
-RagelError = error
-
-#
-#parse Start: start[ Stream ]
-#PF: stream = open( "postfix.txt", "w" )
-#print_dump( PF, Start )
-#PF->close()
-#
-#PF = open( "postfix.txt", "r" )
-#
-#read_reduce TopLevel start[ PF ]
-#
-
+if ( arg0 == "rlparse" ) {
+	Stream: stream = open( GblFileName, "r" )
+	reduce TopLevel start[ Stream ]
+	RagelError = error
+}
+elsif ( arg0 == "rlpostfix" ) {
+	Stream: stream = open( GblFileName, "r" )
+	read_reduce TopLevel start[ Stream ]
+	RagelError = error
+}
