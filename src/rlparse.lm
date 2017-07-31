@@ -2,8 +2,18 @@ include 'ragel.lm'
 include 'host.lm'
 include 'reducer.lm'
 
-# Loads the args. 
-include 'rlcommon.lm'
+export RagelError: str
+
+# File name. The open is expected to succeed. It is tested before the colm
+# program is called.
+A: list_el<str> = argv->pop_head_el()
+GblFileName = A->value
+
+# Remaining items are include paths.
+while ( argv->length > 0 ) {
+	A = argv->pop_head_el()
+	GblIncludePaths->push_tail_el( A )
+}
 
 print "arg0: [arg0]
 

@@ -1,8 +1,25 @@
 include 'ragel.lm'
 include 'host.lm'
 include 'reducer.lm'
-include 'rlcommon.lm'
 
-Stream: stream = open( GblFileName, "r" )
+A: list_el<str> = argv->pop_head_el()
+OutputFn: str = A->value
+
+A = argv->pop_head_el()
+InputFn: str = A->value
+
+# Remaining items are include paths.
+while ( argv->length > 0 ) {
+	A = argv->pop_head_el()
+	GblIncludePaths->push_tail_el( A )
+}
+
+GblFileName = InputFn
+
+Stream: stream = open( InputFn, "r" )
 parse Start: start[ Stream ]
-print_dump( stdout, Start )
+Stream->close()
+
+Stream = open( OutputFn, "w" )
+print_dump( Stream, Start )
+Stream->close()
