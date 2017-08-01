@@ -1,7 +1,10 @@
 COLM        = @COLM@
 
-noinst_PROGRAMS = ruby
+noinst_PROGRAMS = ruby rlhc
 
-ruby: ruby.lm
+ruby$(EXEEXT): ruby.lm
 	$(COLM) -I.. $<
+
+rlhc$(EXEEXT): rlhc.lm rlhc-host.lm rlhc-ruby.lm
+	$(COLM) $<
 

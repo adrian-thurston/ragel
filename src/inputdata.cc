@@ -174,41 +174,47 @@ void InputData::jsDefaultFileName( const char *inputFile )
 
 void InputData::makeDefaultFileName()
 {
-	switch ( hostLang->lang ) {
-		case HostLang::C:
-		case HostLang::D:
-			cdDefaultFileName( inputFileName );
-			break;
-		case HostLang::Java:
-			javaDefaultFileName( inputFileName );
-			break;
-		case HostLang::Go:
-			goDefaultFileName( inputFileName );
-			break;
-		case HostLang::Ruby:
-			rubyDefaultFileName( inputFileName );
-			break;
-		case HostLang::CSharp:
-			csharpDefaultFileName( inputFileName );
-			break;
-		case HostLang::OCaml:
-			ocamlDefaultFileName( inputFileName );
-			break;
-		case HostLang::Crack:
-			crackDefaultFileName( inputFileName );
-			break;
-		case HostLang::Asm:
-			asmDefaultFileName( inputFileName );
-			break;
-		case HostLang::Rust:
-			rustDefaultFileName( inputFileName );
-			break;
-		case HostLang::Julia:
-			juliaDefaultFileName( inputFileName );
-			break;
-		case HostLang::JS:
-			jsDefaultFileName( inputFileName );
-			break;
+	if ( backend == Translated ) {
+		if ( outputFileName == 0 )
+			outputFileName = fileNameFromStem( inputFileName, ".ri" );
+	}
+	else {
+		switch ( hostLang->lang ) {
+			case HostLang::C:
+			case HostLang::D:
+				cdDefaultFileName( inputFileName );
+				break;
+			case HostLang::Java:
+				javaDefaultFileName( inputFileName );
+				break;
+			case HostLang::Go:
+				goDefaultFileName( inputFileName );
+				break;
+			case HostLang::Ruby:
+				rubyDefaultFileName( inputFileName );
+				break;
+			case HostLang::CSharp:
+				csharpDefaultFileName( inputFileName );
+				break;
+			case HostLang::OCaml:
+				ocamlDefaultFileName( inputFileName );
+				break;
+			case HostLang::Crack:
+				crackDefaultFileName( inputFileName );
+				break;
+			case HostLang::Asm:
+				asmDefaultFileName( inputFileName );
+				break;
+			case HostLang::Rust:
+				rustDefaultFileName( inputFileName );
+				break;
+			case HostLang::Julia:
+				juliaDefaultFileName( inputFileName );
+				break;
+			case HostLang::JS:
+				jsDefaultFileName( inputFileName );
+				break;
+		}
 	}
 }
 
@@ -633,7 +639,7 @@ bool InputData::processReduce()
 	}
 	else {
 		makeDefaultFileName();
-		makeTranslateOutputFileName();
+		//makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
 

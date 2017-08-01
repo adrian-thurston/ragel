@@ -43,5 +43,5 @@ root=${output%.*}
 set -x
 
 ./$lang $root.rfi $input $include
-../ragel -P -o $output $root.rfi
-#./-$lang -o $output root.rbi
+../ragel --colm-backend -P -o $root.rbi $root.rfi
+./rlhc $output $root.rbi
