@@ -193,6 +193,8 @@ struct InputData
 		rlhcShowCmd(false),
 		noIntermediate(false),
 		frontendSpecified(false),
+		backendSpecified(false),
+		featureSpecified(false),
 		saveTemps(false),
 		condsCheckDepth(-1),
 		transSpanDepth(6),
@@ -279,6 +281,10 @@ struct InputData
 	bool frontendSpecified;
 	RagelFrontend frontend;
 
+	bool backendSpecified;
+
+	bool featureSpecified;
+
 	bool saveTemps;
 	long condsCheckDepth;
 	long transSpanDepth;
@@ -322,6 +328,7 @@ struct InputData
 
 	void parseKelbt();
 	void processDot();
+	void processCodeEarly();
 
 	void writeDot( std::ostream &out );
 
@@ -333,7 +340,6 @@ struct InputData
 	void terminateParser( Parser6 *parser );
 	void terminateAllParsers();
 
-	void runRlhc();
 	void processKelbt();
 	void processColm();
 	bool processReduce();

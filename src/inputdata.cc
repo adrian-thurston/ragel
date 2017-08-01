@@ -229,16 +229,25 @@ void InputData::writeOutput( InputItem *ii )
 			break;
 		}
 		case InputItem::HostData: {
-			if ( hostLang->lang == HostLang::C ) {
-				if ( ii->loc.fileName != 0 ) {
-					if ( !noLineDirectives ) {
-						*outStream << "\n#line " << ii->loc.line <<
-								" \"" << ii->loc.fileName << "\"\n";
+			switch ( backend ) {
+				case Direct:
+					if ( hostLang->lang == HostLang::C ) {
+						if ( ii->loc.fileName != 0 ) {
+							if ( !noLineDirectives ) {
+								*outStream << "\n#line " << ii->loc.line <<
+										" \"" << ii->loc.fileName << "\"\n";
+							}
+						}
 					}
-				}
+						
+					*outStream << ii->data.str();
+					break;
+				case Translated:
+					openHostBlock( '@', this, *outStream, inputFileName, ii->loc.line );
+					translatedHostData( *outStream, ii->data.str() );
+					*outStream << "}@";
+					break;
 			}
-					
-			*outStream << ii->data.str();
 			break;
 		}
 		case InputItem::EndSection: {
@@ -393,7 +402,7 @@ void InputData::flushRemaining()
 
 void InputData::makeTranslateOutputFileName()
 {
-	if ( false ) {
+	if ( backend == Translated ) {
 		origOutputFileName = outputFileName;
 		outputFileName = fileNameFromStem( inputFileName, ".ri" );
 		genOutputFileName = outputFileName;
@@ -528,6 +537,7 @@ bool InputData::processReduce()
 
 		if ( !success && outputFileName != 0 )
 			unlink( outputFileName );
+
 		return success;
 	}
 }

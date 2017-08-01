@@ -93,41 +93,75 @@ void TableArray::valueAnalyze( long long v )
 
 void TableArray::finishAnalyze()
 {
-	/* Calculate the type if it is not already set. */
-	if ( type.empty() ) {
-		if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
-			type = "char";
-			width = sizeof(char);
+	if ( codeGen.backend == Direct ) {
+		/* Calculate the type if it is not already set. */
+		if ( type.empty() ) {
+			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
+				type = "char";
+				width = sizeof(char);
+			}
+			else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
+				type = "short";
+				width = sizeof(short);
+			}
+			else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
+				type = "int";
+				width = sizeof(int);
+			}
+			else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
+				type = "long";
+				width = sizeof(long);
+			}
+			else  {
+				type = "long long";
+				width = sizeof(long long);
+			}
 		}
-		else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
-			type = "short";
-			width = sizeof(short);
-		}
-		else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
-			type = "int";
-			width = sizeof(int);
-		}
-		else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
-			type = "long";
-			width = sizeof(long);
-		}
-		else  {
-			type = "long long";
-			width = sizeof(long long);
+	}
+	else {
+		/* Calculate the type if it is not already set. */
+		if ( type.empty() ) {
+			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
+				type = "s8";
+				width = sizeof(char);
+			}
+			else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {
+				type = "s16";
+				width = sizeof(short);
+			}
+			else if ( min >= S32BIT_MIN && max <= S32BIT_MAX ) {
+				type = "s32";
+				width = sizeof(int);
+			}
+			else if ( min >= S64BIT_MAX && max <= S64BIT_MAX ) {
+				type = "s64";
+				width = sizeof(long);
+			}
+			else  {
+				type = "s128";
+				width = sizeof(long long);
+			}
 		}
 	}
 }
 
 void TableArray::startGenerate()
 {
-	if ( stringTables ) {
-		out << "static const char S_" << codeGen.DATA_PREFIX() << name <<
-			"[] __attribute__((aligned (16))) = \n\t\"";
+	if ( codeGen.backend == Direct ) {
+		if ( stringTables ) {
+			out << "static const char S_" << codeGen.DATA_PREFIX() << name <<
+				"[] __attribute__((aligned (16))) = \n\t\"";
+		}
+		else {
+			out << "static const " << type << " " << 
+				"_" << codeGen.DATA_PREFIX() << name << 
+				"[] = {\n\t";
+		}
 	}
 	else {
-		out << "static const " << type << " " << 
+		out << "array " << type << " " << 
 			"_" << codeGen.DATA_PREFIX() << name << 
-			"[] = {\n\t";
+			"( " << min << ", " << max << " ) = { ";
 	}
 }
 
@@ -179,46 +213,67 @@ void TableArray::stringGenerate( long long value )
 
 void TableArray::valueGenerate( long long v )
 {
-	if ( stringTables ) {
-		stringGenerate( v );
+	if ( codeGen.backend == Direct ) {
+		if ( stringTables ) {
+			stringGenerate( v );
 
-		if ( ++ln % iall == 0 ) {
-			out << "\"\n\t\"";
-			ln = 0;
+			if ( ++ln % iall == 0 ) {
+				out << "\"\n\t\"";
+				ln = 0;
+			}
+		}
+		else {
+			if ( isChar )
+				out << "c(" << v << ")";
+			else if ( !isSigned )
+				out << v << "u";
+			else
+				out << v;
+
+			if ( ( ++ln % iall ) == 0 ) {
+				out << ",\n\t";
+				ln = 0;
+			}
+			else {
+				out << ", ";
+			}
 		}
 	}
 	else {
 		if ( isChar )
 			out << "c(" << v << ")";
 		else if ( !isSigned )
-			out << v << "u";
+			out << "u(" << v << ")";
 		else
 			out << v;
-
-		if ( ( ++ln % iall ) == 0 ) {
-			out << ",\n\t";
-			ln = 0;
-		}
-		else {
-			out << ", ";
-		}
+		out << ", ";
 	}
 }
 
 void TableArray::finishGenerate()
 {
-	if ( stringTables ) {
-		out << "\";\nconst " << type << " *_" << codeGen.DATA_PREFIX() << name <<
-				" = (const " << type << "*) S_" << codeGen.DATA_PREFIX() << name << ";\n\n";
+	if ( codeGen.backend == Direct ) {
+		if ( stringTables ) {
+	        out << "\";\nconst " << type << " *_" << codeGen.DATA_PREFIX() << name <<
+	                " = (const " << type << "*) S_" << codeGen.DATA_PREFIX() << name << ";\n\n";
 
+		}
+		else {
+			if ( isChar )
+				out << "c(0)\n};\n\n";
+			else if ( !isSigned )
+				out << "0u\n};\n\n";
+			else
+				out << "0\n};\n\n";
+		}
 	}
 	else {
 		if ( isChar )
-			out << "c(0)\n};\n\n";
+			out << "c(0) };\n\n";
 		else if ( !isSigned )
-			out << "0u\n};\n\n";
+			out << "u(0) };\n\n";
 		else
-			out << "0\n};\n\n";
+			out << "0 };\n\n";
 	}
 
 	if ( codeGen.red->id->printStatistics ) {
@@ -276,6 +331,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
 	tableData( 0 ),
+	backend( args.id->backend ),
 	stringTables( args.id->stringTables )
 {
 }
@@ -289,7 +345,10 @@ void CodeGen::statsSummary()
 
 string CodeGen::CAST( string type )
 {
-	return "(" + type + ")";
+	if ( backend == Direct )
+		return "(" + type + ")";
+	else
+		return "cast(" + type + ")";
 }
 
 /* Write out the fsm name. */
@@ -468,14 +527,26 @@ string CodeGen::TABS( int level )
  * signed. */
 string CodeGen::KEY( Key key )
 {
-	ostringstream ret;
-	if ( alphType->isChar )
-		ret << "c(" << (unsigned long) key.getVal() << ")";
-	else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
-		ret << key.getVal();
-	else
-		ret << (unsigned long) key.getVal() << "u";
-	return ret.str();
+	if ( backend == Direct ) {
+		ostringstream ret;
+		if ( alphType->isChar )
+			ret << "c(" << (unsigned long) key.getVal() << ")";
+		else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
+			ret << key.getVal();
+		else
+			ret << (unsigned long) key.getVal() << "u";
+		return ret.str();
+	}
+	else {
+		ostringstream ret;
+		if ( alphType->isChar )
+			ret << "c(" << (unsigned long) key.getVal() << ")";
+		else if ( keyOps->isSigned || !keyOps->explicitUnsigned )
+			ret << key.getVal();
+		else
+			ret << "u(" << (unsigned long) key.getVal() << ")";
+		return ret.str();
+	}
 }
 
 bool CodeGen::isAlphTypeSigned()
@@ -926,7 +997,10 @@ string CodeGen::ALPH_TYPE()
 
 void CodeGen::VALUE( string type, string name, string value )
 {
-	out << "static const " << type << " " << name << " = " << value << ";\n";
+	if ( backend == Direct )
+		out << "static const " << type << " " << name << " = " << value << ";\n";
+	else
+		out << "value " << type << " " << name << " = " << value << ";\n";
 }
 
 string CodeGen::STR( int v )

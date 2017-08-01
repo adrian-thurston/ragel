@@ -410,6 +410,18 @@ void InputData::parseArgs( int argc, const char **argv )
 					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )
 					hostLang = &hostLangAsm;
+				else if ( strcmp( arg, "direct" ) == 0 ) {
+					backend = Direct;
+					backendSpecified = true;
+				}
+				else if ( strcmp( arg, "direct-backend" ) == 0 ) {
+					backend = Direct;
+					backendSpecified = true;
+				}
+				else if ( strcmp( arg, "colm-backend" ) == 0 ) {
+					backend = Translated;
+					backendSpecified = true;
+				}
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )
@@ -602,6 +614,13 @@ void InputData::checkArgs()
 
 	if ( !frontendSpecified )
 		frontend = ReduceBased;
+
+	if ( !backendSpecified ) {
+		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
+			backend = Direct;
+		else
+			backend = Translated;
+	}
 
 	if ( checkBreadth ) {
 		if ( histogramFn != 0 )

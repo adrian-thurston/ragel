@@ -42,11 +42,12 @@
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
+	FsmGbl *id = args.id;
 	CodeGenData *codeGen = 0;
 	if ( hostLang->lang == HostLang::Asm ) {
 		codeGen = new AsmCodeGen( args );
 	}
-	else {
+	else if ( id->backend == Direct ) {
 		switch ( args.codeStyle ) {
 		case GenBinaryLoop:
 			codeGen = new BinaryLoopGoto( args );
@@ -70,6 +71,34 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 			break;
 		case GenIpGoto:
 			codeGen = new IpGoto( args );
+			break;
+		}
+	}
+	else {
+		switch ( args.codeStyle ) {
+		case GenBinaryLoop:
+			codeGen = new BinaryLoopGoto( args );
+			break;
+		case GenBinaryExp:
+			codeGen = new BinaryExpGoto( args );
+			break;
+
+		case GenFlatLoop:
+			codeGen = new FlatLoopGoto( args );
+			break;
+		case GenFlatExp:
+			codeGen = new FlatExpGoto( args );
+			break;
+
+		case GenSwitchLoop:
+			codeGen = new SwitchLoopGoto(args);
+			break;
+		case GenSwitchExp:
+			codeGen = new SwitchExpGoto(args);
+			break;
+
+		case GenIpGoto:
+			codeGen = new IpGoto(args);
 			break;
 		}
 	}

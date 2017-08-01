@@ -159,6 +159,7 @@ protected:
 
 	bool isAlphTypeSigned();
 	long long tableData;
+	RagelBackend backend;
 	bool stringTables;
 
 	virtual string GET_KEY();
@@ -245,23 +246,30 @@ protected:
 	void VALUE( string type, string name, string value );
 
 	string ACCESS_OPER()
-		{ return ""; }
+		{ return backend == Direct ? "" : " -> "; }
 
 	string OPEN_HOST_EXPR()
-		{ return "("; }
+		{ return backend == Direct ? "(" : "host( \"-\", 1 ) ={"; }
 
 	string OPEN_HOST_EXPR( string fileName, int line )
-		{ return "("; }
+	{
+		return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; 
+	}
 
 	string CLOSE_HOST_EXPR()
-		{ return ")"; }
+		{ return backend == Direct ? ")" : "}="; }
 
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
-		if ( lineDirectives )
-			return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
-		else
-			return "{\n";
+		if ( backend == Direct ) {
+			if ( lineDirectives )
+				return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
+			else
+				return "{\n";
+		}
+		else {
+			return "host( \"" + fileName + "\", " + STR(line) + " ) ${";
+		}
 	}
 
 	string OPEN_HOST_BLOCK( GenInlineExpr *inlineExpr )
@@ -270,93 +278,129 @@ protected:
 	}
 
 	string CLOSE_HOST_BLOCK()
-		{ return "}"; }
+		{ return backend == Direct ? "}" : "}$"; }
 
 	string OPEN_HOST_PLAIN()
-		{ return ""; }
+		{ return backend == Direct ? "" : "host( \"-\", 1 ) @{"; }
 
 	string CLOSE_HOST_PLAIN()
-		{ return ""; }
+		{ return backend == Direct ? "" : "}@"; }
 
 	string OPEN_GEN_EXPR()
-		{ return "("; }
+		{ return backend == Direct ? "(" : "={"; }
 
 	string CLOSE_GEN_EXPR()
-		{ return ")"; }
+		{ return backend == Direct ? ")" : "}="; }
 
 	string OPEN_GEN_BLOCK()
-		{ return "{"; }
+		{ return backend == Direct ? "{" : "${"; }
 
 	string CLOSE_GEN_BLOCK()
-		{ return "}"; }
+		{ return backend == Direct ? "}" : "}$"; }
 
 	string OPEN_GEN_PLAIN()
-		{ return ""; }
+		{ return backend == Direct ? "" : "@{"; }
 
 	string CLOSE_GEN_PLAIN()
-		{ return ""; }
+		{ return backend == Direct ? "" : "}@"; }
 	
 	string UINT()
-		{ return "unsigned int"; }
+		{ return backend == Direct ? "unsigned int" : "uint"; }
 
 	string INDEX( string type, string name )
 	{
-		return "const " + type + " *" + name;
+		if ( backend == Direct )
+			return "const " + type + " *" + name;
+		else
+			return "index " + type + " " + name;
 	}
 
 	string ENTRY()
 	{
-		return "";
+		if ( backend == Direct )
+			return "";
+		else
+			return "entry";
 	}
 
 	string LABEL( string name )
 	{
-		return name + ": ";
+		if ( backend == Direct )
+			return name + ": ";
+		else
+			return "label " + name;
 	}
 
 	string OFFSET( string arr, string off )
 	{
-		return "( " + arr + " + (" + off + "))";
+		if ( backend == Direct )
+			return "( " + arr + " + (" + off + "))";
+		else
+			return "offset( " + arr + ", " + off + " )";
 	}
 
 	string TRUE()
 	{
-		return "1";
+		if ( backend == Direct )
+			return "1";
+		else
+			return "TRUE";
 	}
 
 	string DEREF( string arr, string off )
 	{
-		return "(*( " + off + "))";
+		if ( backend == Direct )
+			return "(*( " + off + "))";
+		else
+			return "deref( " + arr + ", " + off + " )";
 	}
 	
 	string CASE( string val )
 	{
-		return "case " + val + ": ";
+		if ( backend == Direct )
+			return "case " + val + ": ";
+		else
+			return "case " + val;
 	}
 
 	string DEFAULT()
 	{
-		return "default:";
+		if ( backend == Direct )
+			return "default:";
+		else
+			return "default";
 	}
 
 	string CEND( )
 	{
-		return " break; ";
+		if ( backend == Direct )
+			return " break; ";
+		else
+			return " ";
 	}
 
 	string FALLTHROUGH()
 	{
-		return " ";
+		if ( backend == Direct )
+			return " ";
+		else
+			return "fallthrough;";
 	}
 
 	string NIL()
 	{
-		return "0";
+		if ( backend == Direct )
+			return "0";
+		else
+			return "nil";
 	}
 
 	string EXPORT( string type, string name, string value )
 	{
-		return "#define " + name + " " + value;
+		if ( backend == Direct )
+			return "#define " + name + " " + value;
+		else
+			return "export " + type + " " + name + " " + value + ";";
 	}
 
 public:
