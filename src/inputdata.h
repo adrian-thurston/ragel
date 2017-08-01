@@ -174,6 +174,7 @@ struct InputData
 		inputFileName(0),
 		outputFileName(0),
 		commFileName(0),
+		langDescFileName(0),
 		nextMachineId(0),
 		inStream(0),
 		outStream(0),
@@ -224,6 +225,7 @@ struct InputData
 	const char *inputFileName;
 	const char *outputFileName;
 	const char *commFileName;
+	const char *langDescFileName;
 
 	string comm;
 

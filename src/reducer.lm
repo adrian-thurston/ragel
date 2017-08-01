@@ -2634,3 +2634,15 @@ reduction TopLevel
 		}
 	}
 end 
+
+reduction LangDesc
+	lang_desc::host_type :HostType
+	{
+		std::cout << "loading host type" << std::endl;
+	}
+
+	lang_desc::desc :Root
+	{
+		std::cout << "loading lang descriptor" << std::endl;
+	}
+end

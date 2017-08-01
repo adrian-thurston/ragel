@@ -1,0 +1,35 @@
+namespace lang_desc
+	lex
+
+		ignore /'#' [^\n] '\n'/
+		ignore /[ \t\r\n]+/
+
+		literal `true `false `NIL
+		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+		token number /[0-9]+/
+	end
+
+	def boolean
+		[`true] | [`false]
+
+	def nil_word
+		[word] | [`NIL]
+
+	def num_symbol
+		[number] | [word]
+
+	def host_type
+		[
+			AlphType1: word AlphType2: nil_word
+			InternalName: word
+			IsSigned: boolean
+			IsOrd: boolean
+			IsChar: boolean
+			sMinVal: num_symbol sMaxVal: num_symbol
+			uMinVal: num_symbol uMaxVal: num_symbol
+			Size: number
+		] :HostType
+
+	def desc
+		[host_type*] :Root
+end

@@ -619,7 +619,8 @@ bool InputData::parseReduce()
 	curItem = inputItems.head;
 	lastFlush = inputItems.head;
 
-	topLevel->reduceFile( inputFileName, false );
+
+	topLevel->reduceFile( ( postfix ? "rlpostfix" : "rlparse" ), inputFileName );
 
 	if ( errorCount )
 		return false;
@@ -642,6 +643,11 @@ bool InputData::processReduce()
 		//makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
+
+		if ( langDescFileName != 0 ) {
+			LangDesc ld;
+			ld.reduceFile( "langdesc", langDescFileName );
+		}
 
 		bool success = parseReduce();
 		if ( success )

@@ -155,7 +155,7 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 	targetMachine = sectionName.c_str();
 	searchMachine = machine.c_str();
 
-	reduceFile( includeChecks[found], false );
+	// reduceFile( includeChecks[found] );
 
 //	if ( includePass.incItems.length() == 0 ) {
 //		pd->id->error(incLoc) << "could not find machine " << machine <<
@@ -173,13 +173,6 @@ void TopLevel::include( const InputLoc &incLoc, bool fileSpecified, string fileN
 
 	targetMachine = targetMachine0;
 	searchMachine = searchMachine0;
-}
-
-void TopLevel::importFile( std::string file )
-{
-	isImport = true;
-	reduceFile( file.c_str(), true );
-	isImport = false;
 }
 
 void TopLevel::import( const InputLoc &loc, std::string name, Literal *literal )
@@ -203,11 +196,11 @@ void TopLevel::import( const InputLoc &loc, std::string name, Literal *literal )
 	machineDef->join->loc = loc;
 }
 
-void TopLevel::reduceFile( const char *inputFileName, bool import )
+void TopLevel::reduceFile( const char *cmd, const char *inputFileName )
 {
 	const int baseN = 2;
 	const char **argv = new const char*[baseN + id->includePaths.length() + 1];
-	argv[0] = id->postfix ? "rlpostfix" : "rlparse";
+	argv[0] = cmd;
 	argv[1] = inputFileName;
 	for ( int i = 0; i < id->includePaths.length(); i++ )
 		argv[baseN + i] = id->includePaths.data[i];
@@ -235,5 +228,28 @@ void TopLevel::reduceFile( const char *inputFileName, bool import )
 
 	delete[] argv;
 }
+
+void LangDesc::reduceFile( const char *cmd, const char *inputFileName )
+{
+	const char *argv[3];
+	argv[0] = cmd;
+	argv[1] = inputFileName;
+	argv[2] = 0;
+
+	colm_program *program = colm_new_program( &rlparse_object );
+	colm_set_debug( program, 0 );
+	colm_set_reduce_ctx( program, this );
+	colm_run_program( program, 2, argv );
+
+	int length = 0;
+	const char *err = colm_error( program, &length );
+	if ( err != 0 ) {
+		std::cout << "error" << std::endl;
+//		id->error_plain() << string( err, length ) << std::endl;
+	}
+
+	colm_delete_program( program );
+}
+
 
 

@@ -65,10 +65,7 @@ libfsm_la_SOURCES = $(LIBFSM_SRC)
 libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 EXTRA_DIST = \
-	ragel.lm \
-	host.lm \
-	rlparse.lm \
-	reducer.lm \
+	$(RAGEL_LM) \
 	rlscan.rl \
 	rlparse.kh \
 	rlparse.kl
@@ -80,10 +77,13 @@ CLEANFILES += rlscan.cc rlparse.cc rlparse.h
 endif
 
 RAGEL_LM = \
+	rlparse.lm \
 	ragel.lm \
-	host.lm
+	host.lm \
+	reducer.lm \
+	langdesc.lm
 
-parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BINDEP)
+parse.c: $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -b rlparse_object -o $@ -m commit.cc $<
 
 commit.cc: parse.c

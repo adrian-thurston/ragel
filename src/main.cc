@@ -259,7 +259,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "Pr:o:dnmleabjkS:M:I:CDEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "PD:r:o:dnmleabjkS:M:I:CEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
 
 	bool showStylesOpt = false;
 
@@ -299,6 +299,10 @@ void InputData::parseArgs( int argc, const char **argv )
 
 			case 'P':
 				postfix = true;
+				break;
+
+			case 'D':
+				langDescFileName = pc.paramArg;
 				break;
 
 			case 'r':

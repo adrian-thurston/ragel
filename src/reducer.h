@@ -107,12 +107,19 @@ struct TopLevel
 			MachineDef *machineDef, bool isInstance );
 	long tryLongScan( const InputLoc &loc, const char *data );
 	void include( const InputLoc &incLoc, bool fileSpecified, string fileName, string machine );
-	void reduceFile( const char *inputFileName, bool import );
+	void reduceFile( const char *cmd, const char *inputFileName );
 
 	void import( const InputLoc &loc, std::string name, Literal *literal );
 	void importFile( std::string fileName );
 
 	bool isImport;
+};
+
+struct LangDesc
+{
+	void reduceFile( const char *cmd, const char *inputFileName );
+	void commit_reduce_forward( program_t *prg, tree_t **root,
+			struct pda_run *pda_run, parse_tree_t *pt );
 };
 
 #endif

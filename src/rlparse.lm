@@ -1,6 +1,7 @@
 include 'ragel.lm'
 include 'host.lm'
 include 'reducer.lm'
+include 'langdesc.lm'
 
 export RagelError: str
 
@@ -15,8 +16,6 @@ while ( argv->length > 0 ) {
 	GblIncludePaths->push_tail_el( A )
 }
 
-print "arg0: [arg0]
-
 if ( arg0 == "rlparse" ) {
 	Stream: stream = open( GblFileName, "r" )
 	reduce TopLevel start[ Stream ]
@@ -25,5 +24,10 @@ if ( arg0 == "rlparse" ) {
 elsif ( arg0 == "rlpostfix" ) {
 	Stream: stream = open( GblFileName, "r" )
 	read_reduce TopLevel start[ Stream ]
+	RagelError = error
+}
+elsif ( arg0 == "langdesc" ) {
+	Stream: stream = open( GblFileName, "r" )
+	reduce LangDesc lang_desc::desc[ Stream ]
 	RagelError = error
 }
