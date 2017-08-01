@@ -204,7 +204,18 @@ struct HostLang
 	/* Target language. */
 	enum Lang
 	{
-		C, Asm,
+		C,
+		D,
+		Go,
+		Java,
+		Ruby,
+		CSharp,
+		OCaml,
+		Crack,
+		Asm,
+		Rust,
+		Julia,
+		JS
 	};
 
 	const char *name;
@@ -219,7 +230,17 @@ struct HostLang
 };
 
 extern const HostLang hostLangC;
+extern const HostLang hostLangD;
+extern const HostLang hostLangGo;
+extern const HostLang hostLangJava;
+extern const HostLang hostLangRuby;
+extern const HostLang hostLangCSharp;
+extern const HostLang hostLangOCaml;
+extern const HostLang hostLangCrack;
 extern const HostLang hostLangAsm;
+extern const HostLang hostLangRust;
+extern const HostLang hostLangJulia;
+extern const HostLang hostLangJS;
 
 extern const HostLang *hostLangs[];
 extern const int numHostLangs;

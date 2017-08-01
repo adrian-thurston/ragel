@@ -102,6 +102,16 @@ void InputData::usage()
 "   --asm --gas-x86-64-sys-v\n"
 "                        GNU AS, x86_64, System V ABI.\n"
 "                        Generated in a code style equivalent to -G2\n"
+"   -D                   D           All code styles supported\n"
+"   -Z                   Go          All code styles supported\n"
+"   -A                   C#          -T0 -T1 -F0 -F1 -G0 -G1\n"
+"   -J                   Java        -T0 -T1 -F0 -F1\n"
+"   -R                   Ruby        -T0 -T1 -F0 -F1\n"
+"   -O                   OCaml       -T0 -T1 -F0 -F1\n"
+"   -U                   Rust        -T0 -T1 -F0 -F1\n"
+"   -Y                   Julia       -T0 -T1 -F0 -F1\n"
+"   -K                   Crack       -T0 -T1 -F0 -F1\n"
+"   -P                   JavaScript  -T0 -T1 -F0 -F1\n"
 "line directives:\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
@@ -115,7 +125,7 @@ void InputData::usage()
 "large machines:\n"
 "   --integral-tables    Use integers for table data (default)\n"
 "   --string-tables      Encode table data into strings for faster host lang\n"
-"                        compilation (C)\n"
+"                        compilation\n"
 "analysis:\n"
 "   --prior-interaction          Search for condition-based general repetitions\n"
 "                                that will not function properly due to state mod\n"
@@ -204,11 +214,28 @@ void InputData::showStyles()
 {
 	switch ( hostLang->lang ) {
 	case HostLang::C:
+	case HostLang::D:
+	case HostLang::Go:
 		info() << "-T0 -T1 -F0 -F1 -G0 -G1 -G2" << endl;
+		break;
+	case HostLang::CSharp:
+		info() << "-T0 -T1 -F0 -F1 -G0 -G1" << endl;
 		break;
 	case HostLang::Asm:
 		info() << "-G2" << endl;
 		break;
+	case HostLang::Java:
+	case HostLang::Ruby:
+	case HostLang::OCaml:
+	case HostLang::Crack:
+	case HostLang::Rust:
+	case HostLang::Julia:
+		info() << "-T0 -T1 -F0 -F1" << endl;
+		break;
+	case HostLang::JS:
+		info() << "-T0" << endl;
+		break;
+
 	}
 
 	abortCompile( 0 );
@@ -232,7 +259,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "Pr:o:dnmleabjkS:M:I:CEvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "Pr:o:dnmleabjkS:M:I:CDEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
 
 	bool showStylesOpt = false;
 
@@ -353,6 +380,36 @@ void InputData::parseArgs( int argc, const char **argv )
 			case 'C':
 				hostLang = &hostLangC;
 				break;
+//			case 'D':
+//				hostLang = &hostLangD;
+//				break;
+//			case 'Z':
+//				hostLang = &hostLangGo;
+//				break;
+//			case 'J':
+//				hostLang = &hostLangJava;
+//				break;
+//			case 'R':
+//				hostLang = &hostLangRuby;
+//				break;
+//			case 'A':
+//				hostLang = &hostLangCSharp;
+//				break;
+//			case 'O':
+//				hostLang = &hostLangOCaml;
+//				break;
+//			case 'K':
+//				hostLang = &hostLangCrack;
+//				break;
+//			case 'U':
+//				hostLang = &hostLangRust;
+//				break;
+//			case 'Y':
+//				hostLang = &hostLangJulia;
+//				break;
+//			case 'P':
+//				hostLang = &hostLangJS;
+//				break;
 
 			/* Version and help. */
 			case 'v':
@@ -555,6 +612,13 @@ void InputData::parseArgs( int argc, const char **argv )
 
 bool langSupportsGoto( const HostLang *hostLang )
 {
+	if ( hostLang->lang == HostLang::Ruby ||
+			hostLang->lang == HostLang::OCaml ||
+			hostLang->lang == HostLang::Rust ||
+			hostLang->lang == HostLang::Crack ||
+			hostLang->lang == HostLang::Julia )
+		return false;
+	
 	return true;
 }
 
