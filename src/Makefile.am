@@ -27,15 +27,15 @@ nodist_pkginclude_HEADERS = config.h
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 LIBFSM_SRC = \
-	buffer.h codegen.h binary.h binloop.h binexp.h \
-	flat.h flatloop.h flatexp.h \
-	goto.h gotoloop.h gotoexp.h \
+	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h \
+	binvarloop.h binvarexp.h flat.h flatgotoloop.h flatgotoexp.h flatvar.h \
+	flatvarloop.h flatvarexp.h goto.h gotoloop.h gotoexp.h \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
-	allocgen.cc codegen.cc binary.cc binloop.cc binexp.cc \
-	flat.cc flatloop.cc flatexp.cc \
-	goto.cc gotoloop.cc \
+	allocgen.cc codegen.cc binary.cc bingotoloop.cc bingotoexp.cc binvar.cc \
+	binvarloop.cc binvarexp.cc flat.cc flatgotoloop.cc flatgotoexp.cc \
+	flatvar.cc flatvarloop.cc flatvarexp.cc goto.cc gotoloop.cc \
 	gotoexp.cc ipgoto.cc dot.cc asm.cc
 
 ragel_SOURCES = \

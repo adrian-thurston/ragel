@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _FLATLOOP_H
-#define _FLATLOOP_H
+#ifndef FLAT_GOTO_LOOP_H
+#define FLAT_GOTO_LOOP_H
 
 #include <iostream>
 #include "flat.h"

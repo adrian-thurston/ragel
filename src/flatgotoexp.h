@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _FLATEXP_H
-#define _FLATEXP_H
+#ifndef FLAT_GOTO_EXP_H
+#define FLAT_GOTO_EXP_H
 
 #include <iostream>
 #include "flat.h"

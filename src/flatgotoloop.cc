@@ -21,7 +21,7 @@
  */
 
 #include "ragel.h"
-#include "flatloop.h"
+#include "flatgotoloop.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"

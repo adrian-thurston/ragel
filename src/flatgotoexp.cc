@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2014 Adrian Thurston <thurston@colm.net>
+ * Copyright 2004-2014 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -21,79 +21,45 @@
  */
 
 #include "ragel.h"
-#include "binexp.h"
+#include "flatgotoexp.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"
 #include "inputdata.h"
 
-BinaryExpGoto::BinaryExpGoto( const CodeGenArgs &args ) 
-:
-	Binary(args)
+void FlatExpGoto::tableDataPass()
 {
-}
+	taKeys();
+	taCharClass();
+	taFlatIndexOffset();
 
-/* Determine if we should use indicies or not. */
-void BinaryExpGoto::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-//
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-
-	useIndicies = false;
-}
-
-void BinaryExpGoto::tableDataPass()
-{
-	taKeyOffsets();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
 	taIndicies();
-
-	taTransCondSpacesWi();
-	taTransOffsetsWi();
-	taTransLengthsWi();
-
+	taIndexDefaults();
 	taTransCondSpaces();
-	taTransOffsets();
-	taTransLengths();
-
+	if ( red->condSpaceList.length() > 0 )
+		taTransOffsets();
 	taCondTargs();
 	taCondActions();
 
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
-
-	taEofTransDirect();
-	taEofTransIndexed();
-
-	taKeys();
-	taCondKeys();
-
+	taEofTrans();
 	taNfaTargs();
 	taNfaOffsets();
 	taNfaPushActions();
 	taNfaPopTrans();
 }
 
-void BinaryExpGoto::genAnalysis()
+void FlatExpGoto::genAnalysis()
 {
 	redFsm->sortByStateId();
 
 	/* Choose default transitions and the single transition. */
 	redFsm->chooseDefaultSpan();
 		
-	/* Choose single. */
-	redFsm->moveSelectTransToSingle();
+	/* Do flat expand. */
+	redFsm->makeFlatClass();
 
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( red->id->errorCount > 0 )
@@ -110,23 +76,11 @@ void BinaryExpGoto::genAnalysis()
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
 
-	/* Determine if we should use indicies. */
-	calcIndexSize();
-
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );
 }
 
-
-void BinaryExpGoto::COND_ACTION( RedCondPair *cond )
-{
-	int action = 0;
-	if ( cond->action != 0 )
-		action = cond->action->actListId+1;
-	condActions.value( action );
-}
-
-void BinaryExpGoto::TO_STATE_ACTION( RedStateAp *state )
+void FlatExpGoto::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -134,7 +88,7 @@ void BinaryExpGoto::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinaryExpGoto::FROM_STATE_ACTION( RedStateAp *state )
+void FlatExpGoto::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -142,7 +96,7 @@ void BinaryExpGoto::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinaryExpGoto::EOF_ACTION( RedStateAp *state )
+void FlatExpGoto::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -150,7 +104,15 @@ void BinaryExpGoto::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void BinaryExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatExpGoto::COND_ACTION( RedCondPair *cond )
+{
+	int action = 0;
+	if ( cond->action != 0 )
+		action = cond->action->actListId+1;
+	condActions.value( action );
+}
+
+void FlatExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -158,7 +120,7 @@ void BinaryExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void BinaryExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
+void FlatExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -169,7 +131,7 @@ void BinaryExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryExpGoto::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatExpGoto::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -178,12 +140,10 @@ std::ostream &BinaryExpGoto::TO_STATE_ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
 
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -192,7 +152,7 @@ std::ostream &BinaryExpGoto::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryExpGoto::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatExpGoto::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -201,19 +161,17 @@ std::ostream &BinaryExpGoto::FROM_STATE_ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
 
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-std::ostream &BinaryExpGoto::EOF_ACTION_SWITCH()
+std::ostream &FlatExpGoto::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -222,12 +180,10 @@ std::ostream &BinaryExpGoto::EOF_ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, true, false ) );
-				out << "\n\t";
-			}
 
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -236,7 +192,7 @@ std::ostream &BinaryExpGoto::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryExpGoto::ACTION_SWITCH()
+std::ostream &FlatExpGoto::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -245,41 +201,27 @@ std::ostream &BinaryExpGoto::ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
 
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-void BinaryExpGoto::writeData()
+void FlatExpGoto::writeData()
 {
-	taKeyOffsets();
-
 	taKeys();
+	taCharClass();
+	taFlatIndexOffset();
 
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-
-	if ( useIndicies ) {
-		taIndicies();
-		taTransCondSpacesWi();
-		taTransOffsetsWi();
-		taTransLengthsWi();
-	}
-	else {
-		taTransCondSpaces();
+	taIndicies();
+	taIndexDefaults();
+	taTransCondSpaces();
+	if ( red->condSpaceList.length() > 0 )
 		taTransOffsets();
-		taTransLengths();
-	}
-
-	taCondKeys();
 	taCondTargs();
 	taCondActions();
 
@@ -292,10 +234,8 @@ void BinaryExpGoto::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
-	if ( redFsm->anyEofTrans() ) {
-		taEofTransIndexed();
-		taEofTransDirect();
-	}
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
 
 	taNfaTargs();
 	taNfaOffsets();
@@ -305,7 +245,7 @@ void BinaryExpGoto::writeData()
 	STATE_IDS();
 }
 
-void BinaryExpGoto::NFA_FROM_STATE_ACTION_EXEC()
+void FlatExpGoto::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -316,36 +256,40 @@ void BinaryExpGoto::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-
-void BinaryExpGoto::writeExec()
+void FlatExpGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
 
 	out << 
-		"	{\n"
-		"	int _klen;\n";
+		"	{\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
+	
+	out << "	int _trans = 0;\n";
 
-	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _cpc;\n"
-		"	" << UINT() << " _trans = 0;\n"
-		"	" << UINT() << " _cond = 0;\n";
+	if ( red->condSpaceList.length() > 0 )
+		out << "	" << UINT() << " _cond = 0;\n";
+
+	if ( redFsm->classMap != 0 ) {
+		out <<
+			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+	}
+
+	if ( red->condSpaceList.length() > 0 )
+		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
 
-	out << "	" << ENTRY() << " {\n";
-
-	out << "\n";
+	out <<
+		"	" << ENTRY() << " {\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
-		out <<
+		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
 			"		goto _test_eof;\n";
 	}
@@ -357,7 +301,7 @@ void BinaryExpGoto::writeExec()
 			"		goto _out;\n";
 	}
 
-	out << LABEL( "_resume" ) << " { \n";
+	out << LABEL( "_resume" ) << " {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -371,27 +315,21 @@ void BinaryExpGoto::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "}\n";
-	out << LABEL( "_match" ) << " {\n";
+	string cond = "_cond";
+	if ( red->condSpaceList.length() == 0 )
+		cond = "_trans";
 
-	if ( useIndicies )
-		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
-
-	LOCATE_COND();
-
-	out << "}\n";
-	out << LABEL( "_match_cond" ) << " {\n";
+	out << "}\n" << LABEL( "_match_cond" ) << " {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
-	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
-		"\n";
+	out << 
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out << 
-			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
+			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] == 0 )\n"
 			"		goto _again;\n"
 			"\n";
 
@@ -399,8 +337,8 @@ void BinaryExpGoto::writeExec()
 			out << "	_nbreak = 0;\n";
 
 		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
-			ACTION_SWITCH() <<
+			"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
+			ACTION_SWITCH() << 
 			"	}\n"
 			"\n";
 
@@ -411,13 +349,13 @@ void BinaryExpGoto::writeExec()
 			outLabelUsed = true;
 		}
 
-		out << "\n";
+		out <<
+			"\n";
 	}
 
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-	out << "}\n";
-	out << LABEL( "_again" ) << " {\n";
+	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+		out << "}\n" << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -436,7 +374,7 @@ void BinaryExpGoto::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	" << P() << " += 1;\n"
+			"	" << P() << "+= 1;\n"
 			"	if ( " << P() << " != " << PE() << " )\n"
 			"		goto _resume;\n";
 	}
@@ -455,11 +393,16 @@ void BinaryExpGoto::writeExec()
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
-			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+			if ( red->condSpaceList.length() > 0 ) {
+				out <<
+					"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
+			}
+
+			out <<
 				"		goto _match_cond;\n"
 				"	}\n";
 		}
@@ -471,7 +414,7 @@ void BinaryExpGoto::writeExec()
 				"	}\n";
 		}
 
-		out << 
+		out <<
 			"	}\n"
 			"\n";
 	}
@@ -484,5 +427,5 @@ void BinaryExpGoto::writeExec()
 
 	NFA_POP();
 
-	out << "	}\n";
+	out << "}\n";
 }

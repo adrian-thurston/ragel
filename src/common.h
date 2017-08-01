@@ -461,4 +461,10 @@ enum RagelBackend
 	Translated
 };
 
+enum BackendFeature
+{
+	GotoFeature,
+	VarFeature
+};
+
 #endif

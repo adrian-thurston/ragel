@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _GOTOEXP_H
-#define _GOTOEXP_H
+#ifndef SWITCH_GOTO_EXP_H
+#define SWITCH_GOTO_EXP_H
 
 #include <iostream>
 #include "goto.h"

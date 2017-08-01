@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _FLAT_H
-#define _FLAT_H
+#ifndef _C_FLAT_H
+#define _C_FLAT_H
 
 #include <iostream>
 #include "codegen.h"

@@ -1,33 +1,55 @@
 /*
- * Copyright 2004-2014 Adrian Thurston <thurston@colm.net>
+ *  Copyright 2001-2014 Adrian Thurston <thurston@complang.org>
+ */
+
+/*  This file is part of Ragel.
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to
- * deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
  */
 
 #include "ragel.h"
-#include "flatexp.h"
+#include "flatvarexp.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"
 #include "inputdata.h"
 
-void FlatExpGoto::tableDataPass()
+FlatExpVar::FlatExpVar( const CodeGenArgs &args ) 
+:
+	FlatVar(args)
+{
+}
+
+/* Determine if we should use indicies or not. */
+void FlatExpVar::calcIndexSize()
+{
+//	long long sizeWithInds =
+//		indicies.size() +
+//		transCondSpacesWi.size() +
+//		transOffsetsWi.size() +
+//		transLengthsWi.size();
+//
+//	long long sizeWithoutInds =
+//		transCondSpaces.size() +
+//		transOffsets.size() +
+//		transLengths.size();
+//
+	useIndicies = false;
+}
+
+void FlatExpVar::tableDataPass()
 {
 	taKeys();
 	taCharClass();
@@ -51,7 +73,7 @@ void FlatExpGoto::tableDataPass()
 	taNfaPopTrans();
 }
 
-void FlatExpGoto::genAnalysis()
+void FlatExpVar::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -80,31 +102,8 @@ void FlatExpGoto::genAnalysis()
 	setTableState( TableArray::GeneratePass );
 }
 
-void FlatExpGoto::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->actListId+1;
-	toStateActions.value( act );
-}
 
-void FlatExpGoto::FROM_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->actListId+1;
-	fromStateActions.value( act );
-}
-
-void FlatExpGoto::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->actListId+1;
-	eofActions.value( act );
-}
-
-void FlatExpGoto::COND_ACTION( RedCondPair *cond )
+void FlatExpVar::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
@@ -112,7 +111,31 @@ void FlatExpGoto::COND_ACTION( RedCondPair *cond )
 	condActions.value( action );
 }
 
-void FlatExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatExpVar::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->actListId+1;
+	toStateActions.value( act );
+}
+
+void FlatExpVar::FROM_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->fromStateAction != 0 )
+		act = state->fromStateAction->actListId+1;
+	fromStateActions.value( act );
+}
+
+void FlatExpVar::EOF_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->eofAction != 0 )
+		act = state->eofAction->actListId+1;
+	eofActions.value( act );
+}
+
+void FlatExpVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -120,7 +143,7 @@ void FlatExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
+void FlatExpVar::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -131,7 +154,7 @@ void FlatExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatExpGoto::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatExpVar::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -140,10 +163,12 @@ std::ostream &FlatExpGoto::TO_STATE_ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
+				out << "\n\t";
+			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
@@ -152,7 +177,7 @@ std::ostream &FlatExpGoto::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatExpGoto::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatExpVar::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -161,17 +186,19 @@ std::ostream &FlatExpGoto::FROM_STATE_ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
+				out << "\n\t";
+			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-std::ostream &FlatExpGoto::EOF_ACTION_SWITCH()
+std::ostream &FlatExpVar::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -180,10 +207,12 @@ std::ostream &FlatExpGoto::EOF_ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, IlOpts( 0, true, false ) );
+				out << "\n\t";
+			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
@@ -192,7 +221,7 @@ std::ostream &FlatExpGoto::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatExpGoto::ACTION_SWITCH()
+std::ostream &FlatExpVar::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -201,17 +230,19 @@ std::ostream &FlatExpGoto::ACTION_SWITCH()
 			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
 			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
+				out << "\n\t";
+			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-void FlatExpGoto::writeData()
+void FlatExpVar::writeData()
 {
 	taKeys();
 	taCharClass();
@@ -245,7 +276,7 @@ void FlatExpGoto::writeData()
 	STATE_IDS();
 }
 
-void FlatExpGoto::NFA_FROM_STATE_ACTION_EXEC()
+void FlatExpVar::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -256,21 +287,47 @@ void FlatExpGoto::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void FlatExpGoto::writeExec()
+void FlatExpVar::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << 
+	if ( redFsm->anyNfaStates() ) {
+		out << 
+			"{\n"
+			"	" << UINT() << " _nfa_cont = 1;\n"
+			"	" << UINT() << " _nfa_repeat = 1;\n"
+			"	while ( _nfa_cont != 0 )\n";
+	}
+
+	out <<
 		"	{\n";
+	
+//	out <<
+//		"	int _klen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
-	
-	out << "	int _trans = 0;\n";
+
+//	out <<
+//		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+//		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
 
 	if ( red->condSpaceList.length() > 0 )
-		out << "	" << UINT() << " _cond = 0;\n";
+		out << "	int _cpc;\n";
+
+	out <<
+		"	" << UINT() << " _trans = 0;\n"
+		"	" << UINT() << " _have = 0;\n"
+		"	" << UINT() << " _cont = 1;\n";
+
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"	" << UINT() << " _cond = 0;\n";
+	}
+
+//	if ( redFsm->anyRegNbreak() )
+//		out << "	int _nbreak;\n";
 
 	if ( redFsm->classMap != 0 ) {
 		out <<
@@ -278,30 +335,71 @@ void FlatExpGoto::writeExec()
 			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
 	}
 
-	if ( red->condSpaceList.length() > 0 )
-		out << "	int _cpc;\n";
-
-	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
-
 	out <<
-		"	" << ENTRY() << " {\n";
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
+		"	while ( _cont == 1 ) {\n"
+		"\n";
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		_cont = 0;\n";
 	}
 
-	out << LABEL( "_resume" ) << " {\n";
+	out << 
+		"_have = 0;\n";
+
+	if ( !noEnd ) {
+		out << 
+			"	if ( " << P() << " == " << PE() << " ) {\n";
+
+		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+			out << 
+				"	if ( " << P() << " == " << vEOF() << " )\n"
+				"	{\n";
+
+			if ( redFsm->anyEofTrans() ) {
+				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+				if ( red->condSpaceList.length() > 0 ) {
+					out << 
+						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+				}
+
+				out <<
+					"		_have = 1;\n"
+					"	}\n";
+					matchCondLabelUsed = true;
+			}
+
+			out << "if ( _have == 0 ) {\n";
+
+			if ( redFsm->anyEofActions() ) {
+				out <<
+					"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+					EOF_ACTION_SWITCH() <<
+					"	}\n";
+			}
+
+			out << "}\n";
+			
+			out << 
+				"	}\n"
+				"\n";
+		}
+
+		out << 
+			"	if ( _have == 0 )\n"
+			"		_cont = 0;\n"
+			"	}\n";
+
+	}
+
+	out << 
+		"	if ( _cont == 1 ) {\n"
+		"	if ( _have == 0 ) {\n";
 
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -319,43 +417,24 @@ void FlatExpGoto::writeExec()
 	if ( red->condSpaceList.length() == 0 )
 		cond = "_trans";
 
-	out << "}\n" << LABEL( "_match_cond" ) << " {\n";
+	out << "}\n";
+	
+	out << "if ( _cont == 1 ) {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
-	out << 
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
+	out <<
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
+		"\n";
 
 	if ( redFsm->anyRegActions() ) {
-		out << 
-			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] == 0 )\n"
-			"		goto _again;\n"
-			"\n";
-
-		if ( redFsm->anyRegNbreak() )
-			out << "	_nbreak = 0;\n";
-
 		out <<
 			"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
-			ACTION_SWITCH() << 
+			ACTION_SWITCH() <<
 			"	}\n"
 			"\n";
-
-		if ( redFsm->anyRegNbreak() ) {
-			out <<
-				"	if ( _nbreak == 1 )\n"
-				"		goto _out;\n";
-			outLabelUsed = true;
-		}
-
-		out <<
-			"\n";
 	}
-
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "}\n" << LABEL( "_again" ) << " {\n";
 
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -369,63 +448,26 @@ void FlatExpGoto::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		_cont = 0;\n";
 	}
 
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << "+= 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
+	out << 
+		"	if ( _cont == 1 )\n"
+		"		" << P() << " += 1;\n"
+		"\n";
 
-	if ( testEofUsed )
-		out << "}\n" << LABEL( "_test_eof" ) << " { {}\n";
+	out <<
+		/* cont if. */
+		"}}\n";
 
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out <<
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-			if ( red->condSpaceList.length() > 0 ) {
-				out <<
-					"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
-			}
-
-			out <<
-				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH() <<
-				"	}\n";
-		}
-
-		out <<
-			"	}\n"
-			"\n";
-	}
-
-	if ( outLabelUsed )
-		out << "}\n" << LABEL( "_out" ) << " { {}\n";
-
-	/* The entry loop. */
-	out << "}\n}\n";
+	/* The loop. */
+	out << "}\n";
 
 	NFA_POP();
 
-	out << "}\n";
+	/* The execute block. */
+	out << "	}\n";
+
+	if ( redFsm->anyNfaStates() )
+		out << "}\n";
 }

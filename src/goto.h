@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _GOTO_H
-#define _GOTO_H
+#ifndef _C_GOTO_H
+#define _C_GOTO_H
 
 #include <iostream>
 #include "codegen.h"

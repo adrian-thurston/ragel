@@ -30,10 +30,14 @@
 /*
  * Code generators.
  */
-#include "binloop.h"
-#include "binexp.h"
-#include "flatloop.h"
-#include "flatexp.h"
+#include "binvarloop.h"
+#include "bingotoloop.h"
+#include "binvarexp.h"
+#include "bingotoexp.h"
+#include "flatgotoloop.h"
+#include "flatvarloop.h"
+#include "flatgotoexp.h"
+#include "flatvarexp.h"
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"
@@ -50,25 +54,39 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 	else if ( id->backend == Direct ) {
 		switch ( args.codeStyle ) {
 		case GenBinaryLoop:
-			codeGen = new BinaryLoopGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new BinaryLoopGoto( args );
+			else
+				codeGen = new BinaryLoopVar( args );
 			break;
 		case GenBinaryExp:
-			codeGen = new BinaryExpGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new BinaryExpGoto( args );
+			else
+				codeGen = new BinaryExpVar( args );
 			break;
 
 		case GenFlatLoop:
-			codeGen = new FlatLoopGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new FlatLoopGoto( args );
+			else
+				codeGen = new FlatLoopVar( args );
 			break;
 		case GenFlatExp:
-			codeGen = new FlatExpGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new FlatExpGoto( args );
+			else
+				codeGen = new FlatExpVar( args );
 			break;
 
 		case GenSwitchLoop:
 			codeGen = new SwitchLoopGoto( args );
 			break;
+
 		case GenSwitchExp:
 			codeGen = new SwitchExpGoto( args );
 			break;
+
 		case GenIpGoto:
 			codeGen = new IpGoto( args );
 			break;
@@ -77,28 +95,49 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 	else {
 		switch ( args.codeStyle ) {
 		case GenBinaryLoop:
-			codeGen = new BinaryLoopGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new BinaryLoopGoto( args );
+			else
+				codeGen = new BinaryLoopVar( args);
 			break;
 		case GenBinaryExp:
-			codeGen = new BinaryExpGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new BinaryExpGoto( args );
+			else
+				codeGen = new BinaryExpVar( args );
 			break;
 
 		case GenFlatLoop:
-			codeGen = new FlatLoopGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new FlatLoopGoto( args );
+			else
+				codeGen = new FlatLoopVar( args );
 			break;
 		case GenFlatExp:
-			codeGen = new FlatExpGoto( args );
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new FlatExpGoto( args );
+			else
+				codeGen = new FlatExpVar( args );
 			break;
 
 		case GenSwitchLoop:
-			codeGen = new SwitchLoopGoto(args);
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new SwitchLoopGoto(args);
+			else
+				id->error() << "unsupported lang/style combination" << endp;
 			break;
 		case GenSwitchExp:
-			codeGen = new SwitchExpGoto(args);
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new SwitchExpGoto(args);
+			else
+				id->error() << "unsupported lang/style combination" << endp;
 			break;
 
 		case GenIpGoto:
-			codeGen = new IpGoto(args);
+			if ( id->backendFeature == GotoFeature )
+				codeGen = new IpGoto(args);
+			else
+				id->error() << "unsupported lang/style combination" << endp;
 			break;
 		}
 	}

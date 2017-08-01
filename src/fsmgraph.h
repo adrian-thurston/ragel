@@ -1025,6 +1025,7 @@ struct FsmGbl
 		displayPrintables(false),
 		backend(Direct),
 		stringTables(false),
+		backendFeature(GotoFeature),
 		checkPriorInteraction(0),
 		wantDupsRemoved(true),
 		minimizeLevel(MinimizePartition2),
@@ -1065,6 +1066,7 @@ struct FsmGbl
 
 	RagelBackend backend;
 	bool stringTables;
+	BackendFeature backendFeature;
 	bool checkPriorInteraction;
 	bool wantDupsRemoved;
 

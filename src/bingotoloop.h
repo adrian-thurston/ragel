@@ -20,19 +20,24 @@
  * SOFTWARE.
  */
 
-#ifndef _BINEXP_H
-#define _BINEXP_H
+#ifndef BIN_GOTO_LOOP_H
+#define BIN_GOTO_LOOP_H
 
 #include <iostream>
 #include "binary.h"
+#include "vector.h"
 
 /* Forwards. */
 struct CodeGenData;
+struct NameInst;
+struct RedTransAp;
+struct RedStateAp;
 
-class BinaryExpGoto : public Binary
+class BinaryLoopGoto
+	: public Binary
 {
 public:
-	BinaryExpGoto( const CodeGenArgs &args );
+	BinaryLoopGoto( const CodeGenArgs &args );
 
 	void calcIndexSize();
 	void tableDataPass();
@@ -41,16 +46,15 @@ public:
 	virtual void writeData();
 	virtual void writeExec();
 
-protected:
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
-
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
+
+	std::ostream &TO_STATE_ACTION_SWITCH();
+	std::ostream &FROM_STATE_ACTION_SWITCH();
+	std::ostream &EOF_ACTION_SWITCH();
+	std::ostream &ACTION_SWITCH();
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
@@ -59,13 +63,13 @@ protected:
 
 namespace C
 {
-	class BinaryExpGoto
+	class BinaryLoopGoto
 	:
-		public ::BinaryExpGoto
+		public ::BinaryLoopGoto
 	{
 	public:
-		BinaryExpGoto( const CodeGenArgs &args )
-			: ::BinaryExpGoto( args )
+		BinaryLoopGoto( const CodeGenArgs &args )
+			: ::BinaryLoopGoto( args )
 		{}
 	};
 }

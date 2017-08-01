@@ -422,6 +422,19 @@ void InputData::parseArgs( int argc, const char **argv )
 					backend = Translated;
 					backendSpecified = true;
 				}
+				else if ( strcmp( arg, "var-backend" ) == 0 ) {
+					/* Forces variable-based backend, even if the target
+					 * language supports the goto-based backend. May require
+					 * --colm-backend depending on the target language (C for
+					 * example is direct by default). */
+					backendFeature = VarFeature;
+					featureSpecified = true;
+				}
+				else if ( strcmp( arg, "goto-backend" ) == 0 ) {
+					/* Forces goto-based based backend. */
+					backendFeature = GotoFeature;
+					featureSpecified = true;
+				}
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )
@@ -620,6 +633,13 @@ void InputData::checkArgs()
 			backend = Direct;
 		else
 			backend = Translated;
+	}
+
+	if ( !featureSpecified ) {
+		if ( langSupportsGoto( hostLang ) )
+			backendFeature = GotoFeature;
+		else
+			backendFeature = VarFeature;
 	}
 
 	if ( checkBreadth ) {

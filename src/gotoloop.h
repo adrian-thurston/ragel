@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _GOTOLOOP_H
-#define _GOTOLOOP_H
+#ifndef SWITCH_GOTO_LOOP_H
+#define SWITCH_GOTO_LOOP_H
 
 #include <iostream>
 #include "goto.h"

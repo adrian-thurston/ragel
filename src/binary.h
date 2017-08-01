@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#ifndef _BINARY_H
-#define _BINARY_H
+#ifndef _C_BINARY_H
+#define _C_BINARY_H
 
 #include <iostream>
 #include "codegen.h"
