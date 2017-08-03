@@ -2601,6 +2601,11 @@ reduction TopLevel
 		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $c_any->data, $c_any->length );
 	}
+	host::tok :Else
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $ident->data, $ident->length );
+	}
 
 	host::section :MultiLine
 	{
