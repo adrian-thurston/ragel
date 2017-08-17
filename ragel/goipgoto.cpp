@@ -80,7 +80,7 @@ void GoIpGotoCodeGen::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << "goto _again }";
+	ret << endl << "goto _again }";
 }
 
 void GoIpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
