@@ -69,22 +69,44 @@ AC_PROG_MAKE_SET
 # Checks to carry out if we are building parsers.
 if test "x$build_parsers" = "xyes"; then
 
-AC_CHECK_PROG(RAGEL, ragel, ragel)
-if test -z "$RAGEL"; then
-	echo
-	echo "error: ragel is required to build the parsers"
-	echo
-	exit 1
-fi
+dnl 
+dnl Check for ragel.
+dnl
+AC_ARG_WITH(ragel,
+		[AC_HELP_STRING([--with-ragel], [location of ragel install])],
+		[
+			RAGEL="$withval/bin/ragel"
+			AC_CHECK_FILES( [$RAGEL], [], [RAGEL=""] )
+		],
+		[
+			AC_PATH_PROG( [RAGEL], [ragel] )
+		]
+	)
 
-AC_CHECK_PROG(KELBT, kelbt, kelbt)
-if test -z "$KELBT"; then
-	echo
-	echo "error: kelbt is required to build the parsers"
-	echo
-	exit 1
-fi
+dnl
+dnl Check for kelbt.
+dnl
+AC_ARG_WITH(kelbt,
+		[AC_HELP_STRING([--with-kelbt], [location of kelbt install])],
+		[
+			KELBT="$withval/bin/kelbt"
+			AC_CHECK_FILES( [$KELBT], [], [KELBT=""] )
+		],
+		[
+			AC_PATH_PROG( [KELBT], [kelbt] )
+		]
+	)
 
+	if test -z "$RAGEL"; then
+		AC_ERROR([ragel is required to build this package])
+	fi
+
+	if test -z "$KELBT"; then
+		AC_ERROR([kelbt is required to build this package])
+	fi
+
+	AC_SUBST(RAGEL)
+	AC_SUBST(KELBT)
 fi 
 
 # Checks to carry out if we are building the manual.
