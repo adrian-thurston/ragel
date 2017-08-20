@@ -88,6 +88,7 @@ void SplitCodeGen::GOTO_HEADER( RedStateAp *state, bool stateInPartition )
 	}
 
 	/* Give the state a switch case. */
+	out << "// fall through\n";
 	out << "case " << state->id << ":\n";
 
 	if ( state->fromStateAction != 0 ) {

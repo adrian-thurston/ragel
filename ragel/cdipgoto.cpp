@@ -233,6 +233,7 @@ void IpGotoCodeGen::GOTO_HEADER( RedStateAp *state )
 	}
 
 	/* Give the state a switch case. */
+	out << "// fall through\n";
 	out << "case " << state->id << ":\n";
 
 	if ( state->fromStateAction != 0 ) {
