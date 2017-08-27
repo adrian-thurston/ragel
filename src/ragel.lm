@@ -225,9 +225,11 @@ namespace ragel
 
 				Stream: stream = ragelInclude( Fn, Machine )
 
-				input->push( "}--%%" )
-				input->push_stream( Stream )
-				input->push( "%%--{" )
+				if Stream {
+					input->push( "}--%%" )
+					input->push_stream( Stream )
+					input->push( "%%--{" )
+				}
 			}
 
 		token import_tok
@@ -245,9 +247,11 @@ namespace ragel
 
 				Stream: stream = ragelImport( Fn )
 
-				input->push( "}++%%" )
-				input->push_stream( Stream )
-				input->push( "%%++{" )
+				if Stream {
+					input->push( "}++%%" )
+					input->push_stream( Stream )
+					input->push( "%%++{" )
+				}
 			}
 
 
