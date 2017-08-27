@@ -788,7 +788,8 @@ list<str> makeIncludePathChecks( CurFileName: str, IncFileName: str )
 	parse CurPath: path::path[ CurFileName ]
 	parse IncPath: path::path[ IncFileName ]
 
-	if match CurPath.Abs [slash] {
+	if match IncPath.Abs [slash] {
+		# Included file is absolute
 		L->push_tail( IncFileName )
 	}
 	else {
