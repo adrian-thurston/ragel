@@ -803,6 +803,7 @@ list<str> makeIncludePathChecks( CurFileName: str, IncFileName: str )
 		else {
 			# Current file path + Include Path + Include File
 			cons NewPath: path::path [
+				CurPath.Abs
 				path::concat_dir( CurPath.DirList, IncPath.DirList )
 				IncPath.File
 			]
