@@ -47,6 +47,31 @@ void restoreGlobals()
 	GblIncludeDepth = SG->IncludeDepth
 }
 
+struct include_history_item
+	FileName: str
+	SectionName: str
+end
+
+global IncludeHistory: list<include_history_item> = new list<include_history_item>()
+
+bool isDuplicateInclude( FileName: str, SectionName: str )
+{
+	for Item: include_history_item in IncludeHistory {
+		if Item->FileName == FileName && Item->SectionName == SectionName {
+			return true
+		}
+	}
+	return false
+}
+
+void addIncludeItem( FileName: str, SectionName: str )
+{
+	new Item: include_history_item()
+	Item->FileName = FileName
+	Item->SectionName = SectionName
+	IncludeHistory->push_tail( Item )
+}
+
 struct machine
 	Name: str
 	ActionParams: map<str, str>
@@ -849,19 +874,23 @@ stream ragelInclude( IncFileName: str, Machine: str )
 		return nil
 	}
 
+	# Default to the current machine if none is specified.
+	if !Machine
+		Machine = GblCurMachine->Name
+
+	if isDuplicateInclude( IncFileName, Machine )
+		return nil
+
+	addIncludeItem( IncFileName, Machine )
+
 	saveGlobals()
 
 	GblIncludeDepth = GblIncludeDepth + 1
 	GblFileName = OpenedName
 
-	# Set up the search and target. If search is set then we want only that
-	# machine included in the defintions we parse. Target is the machine that
-	# the definitions get included to.
-	if Machine
-		GblSearchMachine = Machine
-	else
-		GblSearchMachine = GblCurMachine->Name
-		
+	# Set up the search and target machine names. Search is the machine we want
+	# to include and target is the machine we include to.
+	GblSearchMachine = Machine
 	GblTargetMachine = GblCurMachine->Name
 
 	return Stream
