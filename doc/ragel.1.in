@@ -288,7 +288,7 @@ Uppercase characters /[A-Z]/.
 Hexidecimal digits /[0-9A-Fa-f]/.
 .TP
 .B cntrl
-Control characters 0..31.
+Control characters 0..31, 127.
 .TP
 .B graph
 Graphical characters /[!-~]/.
