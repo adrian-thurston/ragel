@@ -743,7 +743,7 @@ alphabets.
 
 ** `xdigit` -- Hexadecimal digits. `[0-9A-Fa-f]`
 
-** `cntrl` -- Control characters. `0..31`
+** `cntrl` -- Control characters. `0..31`, `127`
 
 ** `graph` -- Graphical characters. `[!-~]`
 
