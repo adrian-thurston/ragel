@@ -39,6 +39,9 @@ doc_DATA = ragel-guide.html
 .fig.png:
 	fig2dev -L png -S 4 $< $@
 
+ragel-guide.html: ragel-guide.txt
+	asciidoc -d book $<
+
 ragel-guide.html: bmconcat.png bmregex.png dropdown.png exdoneact.png \
 	exoutact1.png exstrongsubtr.png lines2.png smallscanner.png bmnull.png \
 	comments1.png entryguard.png exinter.png exoutact2.png exsubtr.png \
