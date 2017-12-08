@@ -52,11 +52,9 @@ struct include_history_item
 	SectionName: str
 end
 
-global IncludeHistory: list<include_history_item> = new list<include_history_item>()
-
-bool isDuplicateInclude( FileName: str, SectionName: str )
+bool isDuplicateInclude( From: machine, FileName: str, SectionName: str )
 {
-	for Item: include_history_item in IncludeHistory {
+	for Item: include_history_item in From->IncludeHistory {
 		if Item->FileName == FileName && Item->SectionName == SectionName {
 			return true
 		}
@@ -64,17 +62,18 @@ bool isDuplicateInclude( FileName: str, SectionName: str )
 	return false
 }
 
-void addIncludeItem( FileName: str, SectionName: str )
+void addIncludeItem( From: machine, FileName: str, SectionName: str )
 {
 	new Item: include_history_item()
 	Item->FileName = FileName
 	Item->SectionName = SectionName
-	IncludeHistory->push_tail( Item )
+	From->IncludeHistory->push_tail( Item )
 }
 
 struct machine
 	Name: str
 	ActionParams: map<str, str>
+	IncludeHistory: list<include_history_item>
 end
 
 
@@ -385,6 +384,7 @@ namespace ragel
 				Machine = new machine()
 				Machine->Name = Name
 				Machine->ActionParams = new map<str, str>()
+				Machine->IncludeHistory = new list<include_history_item>()
 				GblMachineMap->insert( Machine->Name, Machine )
 			}
 
@@ -878,10 +878,10 @@ stream ragelInclude( IncFileName: str, Machine: str )
 	if !Machine
 		Machine = GblCurMachine->Name
 
-	if isDuplicateInclude( IncFileName, Machine )
+	if isDuplicateInclude( GblCurMachine, IncFileName, Machine )
 		return nil
 
-	addIncludeItem( IncFileName, Machine )
+	addIncludeItem( GblCurMachine, IncFileName, Machine )
 
 	saveGlobals()
 
