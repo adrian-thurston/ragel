@@ -136,10 +136,26 @@ struct Rope
 
 	void empty()
 	{
+		/* FIXME: delete data here. This is actually an abandon function. */
 		hblk = 0;
 		tblk = 0;
 		toff = 0;
 		ropeLen = 0;
+	}
+
+	void transfer( Rope &from )
+	{
+		empty();
+
+		this->hblk = from.hblk;
+		this->tblk = from.tblk;
+		this->toff = from.toff;
+		this->ropeLen = from.ropeLen;
+		this->blkHdrSz = from.blkHdrSz;
+
+		from.hblk = from.tblk = 0;
+		from.toff = 0;
+		from.ropeLen = 0;
 	}
 };
 
