@@ -133,7 +133,20 @@ struct Rope
 
 	void empty()
 	{
-		/* FIXME: delete data here. This is actually an abandon function. */
+		RopeBlock *blk = hblk;
+		while ( blk != 0 ) {
+			RopeBlock *next = blk->next;
+			delete[] (char*)blk;
+			blk = next;
+		}
+
+		hblk = 0;
+		tblk = 0;
+		ropeLen = 0;
+	}
+
+	void abandon()
+	{
 		hblk = 0;
 		tblk = 0;
 		ropeLen = 0;
