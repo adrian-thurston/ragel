@@ -31,11 +31,13 @@ struct RopeBlock
 
 	RopeBlock()
 	:
-		size(BLOCK_SZ)
+		size(BLOCK_SZ),
+		toff(0)
 	{
 	}
 
-	long size;
+	int size;
+	int toff;
 	RopeBlock *next;
 };
 
@@ -45,7 +47,6 @@ struct Rope
 	:
 		hblk(0),
 		tblk(0),
-		toff(0),
 		ropeLen(0)
 	{
 	}
@@ -54,8 +55,7 @@ struct Rope
 	RopeBlock *hblk;
 	RopeBlock *tblk;
 
-	/* Head and tail offset. */
-	int toff;
+	/* Number of bytes in rope. */
 	int ropeLen;
 
 	RopeBlock *allocateBlock( int supporting )
@@ -64,6 +64,7 @@ struct Rope
 		char *bd = new char[sizeof(RopeBlock) + size];
 		RopeBlock *block = (RopeBlock*) bd;
 		block->size = size;
+		block->toff = 0;
 		block->next = 0;
 		return block;
 	}
@@ -72,38 +73,35 @@ struct Rope
 		{ return (char*)rb + sizeof( RopeBlock ); }
 
 	int length( RopeBlock *rb )
-		{ return rb->next != 0 ? rb->size : toff; }
+		{ return rb->toff; }
 	
 	int length()
-	{
-		return ropeLen;
-	}
+		{ return ropeLen; }
+
+	int available( RopeBlock *rb )
+		{ return rb->size - rb->toff; }
 
 	char *append( const char *src, int len )
 	{
 		if ( tblk == 0 ) {
 			/* There are no blocks. */
 			hblk = tblk = allocateBlock( len );
-			toff = 0;
+			hblk->toff = 0;
 		}
 		else {
-			int avail = tblk->size - toff;
+			int avail = available( tblk );
 
 			/* Move to the next block? */
 			if ( len > avail ) {
-				/* Terminate the existing tail block by setting the size to the
-				 * farthest we got in. */
-				tblk->size = toff;
-
 				RopeBlock *block = allocateBlock( len );
 				tblk->next = block;
 				tblk = block;
-				toff = 0;
+				tblk->toff = 0;
 			}
 		}
 
-		char *ret = data(tblk) + toff;
-		toff += len;
+		char *ret = data(tblk) + tblk->toff;
+		tblk->toff += len;
 		ropeLen += len;
 
 		if ( src != 0 )
@@ -118,17 +116,13 @@ struct Rope
 			hblk = tblk = allocateBlock( len );
 		}
 		else {
-			/* Terminate the existing tail block by setting the size to the
-			 * farthest we got in. */
-			tblk->size = toff;
-
 			RopeBlock *block = allocateBlock( len );
 			tblk->next = block;
 			tblk = block;
 		}
 
 		char *ret = data(tblk);
-		toff = len;
+		tblk->toff = len;
 		ropeLen += len;
 		return ret;
 	}
@@ -138,7 +132,6 @@ struct Rope
 		/* FIXME: delete data here. This is actually an abandon function. */
 		hblk = 0;
 		tblk = 0;
-		toff = 0;
 		ropeLen = 0;
 	}
 
@@ -148,11 +141,9 @@ struct Rope
 
 		this->hblk = from.hblk;
 		this->tblk = from.tblk;
-		this->toff = from.toff;
 		this->ropeLen = from.ropeLen;
 
 		from.hblk = from.tblk = 0;
-		from.toff = 0;
 		from.ropeLen = 0;
 	}
 };
