@@ -131,6 +131,24 @@ struct Rope
 		return ret;
 	}
 
+	/* Transfer data from other. Leaves it empty. */
+	void append( Rope &other )
+	{
+		if ( hblk == 0 ) {
+			transfer( other );
+		}
+		else if ( other.hblk == 0 ) {
+			/* nothing to do, other list empty. */
+		}
+		else {
+			tblk->next = other.hblk;
+			tblk = other.tblk;
+			ropeLen += other.ropeLen;
+		}
+
+		other.abandon();
+	}
+
 	void empty()
 	{
 		RopeBlock *blk = hblk;
