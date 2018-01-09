@@ -32,11 +32,13 @@ struct RopeBlock
 	RopeBlock()
 	:
 		size(BLOCK_SZ),
+		hoff(0),
 		toff(0)
 	{
 	}
 
 	int size;
+	int hoff;
 	int toff;
 	RopeBlock *next;
 };
@@ -64,16 +66,20 @@ struct Rope
 		char *bd = new char[sizeof(RopeBlock) + size];
 		RopeBlock *block = (RopeBlock*) bd;
 		block->size = size;
+		block->hoff = 0;
 		block->toff = 0;
 		block->next = 0;
 		return block;
 	}
 
 	char *data( RopeBlock *rb )
-		{ return (char*)rb + sizeof( RopeBlock ); }
+		{ return (char*)rb + sizeof( RopeBlock ) + rb->hoff; }
+	
+	char *writeTo( RopeBlock *rb )
+		{ return (char*)rb + sizeof( RopeBlock ) + rb->toff; }
 
 	int length( RopeBlock *rb )
-		{ return rb->toff; }
+		{ return rb->toff - rb->hoff; }
 	
 	int length()
 		{ return ropeLen; }
@@ -86,7 +92,6 @@ struct Rope
 		if ( tblk == 0 ) {
 			/* There are no blocks. */
 			hblk = tblk = allocateBlock( len );
-			hblk->toff = 0;
 		}
 		else {
 			int avail = available( tblk );
@@ -96,11 +101,10 @@ struct Rope
 				RopeBlock *block = allocateBlock( len );
 				tblk->next = block;
 				tblk = block;
-				tblk->toff = 0;
 			}
 		}
 
-		char *ret = data(tblk) + tblk->toff;
+		char *ret = writeTo(tblk);
 		tblk->toff += len;
 		ropeLen += len;
 
@@ -121,8 +125,8 @@ struct Rope
 			tblk = block;
 		}
 
-		char *ret = data(tblk);
-		tblk->toff = len;
+		char *ret = writeTo(tblk);
+		tblk->toff += len;
 		ropeLen += len;
 		return ret;
 	}
