@@ -43,7 +43,10 @@ struct Rope
 {
 	Rope()
 	:
-		hblk(0), tblk(0), toff(0), ropeLen(0), blkHdrSz(0)
+		hblk(0),
+		tblk(0),
+		toff(0),
+		ropeLen(0)
 	{
 	}
 
@@ -55,14 +58,10 @@ struct Rope
 	int toff;
 	int ropeLen;
 
-	/* This lets the user put some data at the head of a block to use how they
-	 * please. */
-	int blkHdrSz;
-
 	RopeBlock *allocateBlock( int supporting )
 	{
 		int size = ( supporting > RopeBlock::BLOCK_SZ ) ? supporting : RopeBlock::BLOCK_SZ;
-		char *bd = new char[sizeof(RopeBlock) + blkHdrSz + size];
+		char *bd = new char[sizeof(RopeBlock) + size];
 		RopeBlock *block = (RopeBlock*) bd;
 		block->size = size;
 		block->next = 0;
@@ -70,7 +69,7 @@ struct Rope
 	}
 
 	char *data( RopeBlock *rb )
-		{ return (char*)rb + sizeof( RopeBlock ) + blkHdrSz; }
+		{ return (char*)rb + sizeof( RopeBlock ); }
 
 	int length( RopeBlock *rb )
 		{ return rb->next != 0 ? rb->size : toff; }
@@ -151,7 +150,6 @@ struct Rope
 		this->tblk = from.tblk;
 		this->toff = from.toff;
 		this->ropeLen = from.ropeLen;
-		this->blkHdrSz = from.blkHdrSz;
 
 		from.hblk = from.tblk = 0;
 		from.toff = 0;
