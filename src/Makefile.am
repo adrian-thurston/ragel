@@ -10,7 +10,7 @@ RAGEL       = @RAGEL@
 # Libfsm contains only the FSM construction code and the backend code
 # generators. It is useful for building code generators in programs not
 # connected to the ragel language.
-lib_LTLIBRARIES = libfsm.la
+lib_LTLIBRARIES = libfsm.la libragel.la
 
 if BUILD_PROGRAM
 
@@ -24,9 +24,11 @@ pkginclude_HEADERS = \
 
 nodist_pkginclude_HEADERS = config.h
 
-ragel_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
+libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+ragel_CPPFLAGS = -I$(top_srcdir)/aapl
 
-LIBFSM_SRC = \
+dist_libfsm_la_SOURCES = \
 	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h \
 	binvarloop.h binvarexp.h flat.h flatgotoloop.h flatgotoexp.h flatvar.h \
 	flatvarloop.h flatvarexp.h goto.h gotoloop.h gotoexp.h \
@@ -38,34 +40,37 @@ LIBFSM_SRC = \
 	flatvar.cc flatvarloop.cc flatvarexp.cc goto.cc gotoloop.cc \
 	gotoexp.cc ipgoto.cc dot.cc asm.cc
 
-ragel_SOURCES = \
-	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
-	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc
+nodist_libfsm_la_SOURCES = \
+	version.h
 
-nodist_ragel_SOURCES = version.h
-BUILT_SOURCES = version.h
+libragel_la_SOURCES = \
+	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
+	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc
+
+dist_ragel_SOURCES = \
+	main.cc
+
+nodist_ragel_SOURCES = \
+	parse.c commit.cc
+
+BUILT_SOURCES = \
+	version.h \
+	parse.c commit.cc
 
 if WITH_RAGEL_KELBT
 nodist_ragel_SOURCES += \
 	rlscan.cc rlparse.cc rlparse.h 
-endif
-
-nodist_ragel_SOURCES += \
-	parse.c commit.cc
 
 BUILT_SOURCES += \
-	parse.c commit.cc
+	rlscan.cc rlparse.cc rlparse.h 
+endif
 
-ragel_LDADD = libfsm.la $(COLM_LD)
+ragel_LDADD = libragel.la libfsm.la $(COLM_LD)
 ragel_DEPENDENCIES = $(COLM_LIBDEP)
 
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
-
-nodist_libfsm_la_SOURCES = version.h
-libfsm_la_SOURCES = $(LIBFSM_SRC)
-libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 EXTRA_DIST = \
 	$(RAGEL_LM) \

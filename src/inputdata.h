@@ -361,6 +361,7 @@ struct InputData
 
 	const char **makeIncludePathChecks( const char *curFileName, const char *fileName );
 	std::ifstream *tryOpenInclude( const char **pathChecks, long &found );
+	int main( int argc, const char **argv );
 };
 
 
