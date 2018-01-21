@@ -46,10 +46,14 @@ nodist_ragel_SOURCES = version.h
 BUILT_SOURCES = version.h
 
 if WITH_RAGEL_KELBT
-nodist_ragel_SOURCES += rlscan.cc rlparse.cc rlparse.h 
+nodist_ragel_SOURCES += \
+	rlscan.cc rlparse.cc rlparse.h 
 endif
 
 nodist_ragel_SOURCES += \
+	parse.c commit.cc
+
+BUILT_SOURCES += \
 	parse.c commit.cc
 
 ragel_LDADD = libfsm.la $(COLM_LD)
@@ -86,14 +90,6 @@ parse.c: $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -b rlparse_object -o $@ -m commit.cc $<
 
 commit.cc: parse.c
-
-# These are necessary because we are not using built sources. They create the
-# dependency on the colm run for the objects that that require its output. Must
-# create them for every target.
-ragel-if.$(OBJEXT): parse.c
-ragel-load.$(OBJEXT): parse.c
-ragel-commit.$(OBJEXT): parse.c
-ragel-reducer.$(OBJEXT): parse.c
 
 RLHC = \
 	rlhc-host.lm \
