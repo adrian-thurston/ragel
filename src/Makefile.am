@@ -40,8 +40,7 @@ LIBFSM_SRC = \
 
 ragel_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
-	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc \
-	$(LIBFSM_SRC)
+	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc main.cc
 
 nodist_ragel_SOURCES = version.h
 BUILT_SOURCES = version.h
@@ -53,7 +52,7 @@ endif
 nodist_ragel_SOURCES += \
 	parse.c commit.cc
 
-ragel_LDADD = $(COLM_LD)
+ragel_LDADD = libfsm.la $(COLM_LD)
 ragel_DEPENDENCIES = $(COLM_LIBDEP)
 
 version.h: Makefile
