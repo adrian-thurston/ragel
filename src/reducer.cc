@@ -29,7 +29,7 @@
 
 using std::endl;
 using std::ifstream;
-extern colm_sections rlparse_object;
+extern colm_sections rl_parse;
 
 void TopLevel::loadMachineName( string data )
 {
@@ -209,7 +209,7 @@ void TopLevel::reduceFile( const char *cmd, const char *inputFileName )
 	const char *prevCurFileName = curFileName;
 	curFileName = inputFileName;
 
-	colm_program *program = colm_new_program( &rlparse_object );
+	colm_program *program = colm_new_program( &rl_parse );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, baseN + id->includePaths.length(), argv );
@@ -236,7 +236,7 @@ void LangDesc::reduceFile( const char *cmd, const char *inputFileName )
 	argv[1] = inputFileName;
 	argv[2] = 0;
 
-	colm_program *program = colm_new_program( &rlparse_object );
+	colm_program *program = colm_new_program( &rl_parse );
 	colm_set_debug( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, 2, argv );

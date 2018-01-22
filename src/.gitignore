@@ -19,7 +19,9 @@
 
 # Parsing
 /parse.c
-/commit.cc
+/rlreduce.cc
+/ldparse.c
+/ldreduce.cc
 
 # Common testing file.
 /tmp.rl

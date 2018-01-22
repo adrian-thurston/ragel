@@ -33,3 +33,23 @@ namespace lang_desc
 	def desc
 		[host_type*] :Root
 end
+
+reduction LangDesc
+	lang_desc::host_type :HostType
+	{
+		std::cout << "loading host type" << std::endl;
+	}
+
+	lang_desc::desc :Root
+	{
+		std::cout << "loading lang descriptor" << std::endl;
+	}
+end
+
+# File name. The open is expected to succeed. It is tested before the colm
+# program is called.
+A: list_el<str> = argv->pop_head_el()
+global GblFileName: str = A->value
+
+Stream: stream = open( GblFileName, "r" )
+reduce LangDesc lang_desc::desc[ Stream ]

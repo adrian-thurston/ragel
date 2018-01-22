@@ -1,7 +1,7 @@
 include 'ragel.lm'
 include 'host.lm'
 include 'reducer.lm'
-include 'langdesc.lm'
+include 'hostred.lm'
 
 A: list_el<str> = argv->pop_head_el()
 OutputFn: str = A->value

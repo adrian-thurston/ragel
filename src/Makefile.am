@@ -28,6 +28,10 @@ libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 ragel_CPPFLAGS = -I$(top_srcdir)/aapl
 
+#
+# libfsm
+#
+
 dist_libfsm_la_SOURCES = \
 	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h \
 	binvarloop.h binvarexp.h flat.h flatgotoloop.h flatgotoexp.h flatvar.h \
@@ -43,19 +47,32 @@ dist_libfsm_la_SOURCES = \
 nodist_libfsm_la_SOURCES = \
 	version.h
 
-libragel_la_SOURCES = \
+#
+# libragel: ragel program minus host-specific code
+#
+dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
 	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc
 
+nodist_libragel_la_SOURCES = \
+	ldparse.c ldreduce.cc
+
+#
+# ragel program.
+#
 dist_ragel_SOURCES = \
 	main.cc
 
 nodist_ragel_SOURCES = \
-	parse.c commit.cc
+	parse.c rlreduce.cc
+
+ragel_LDADD = libragel.la libfsm.la $(COLM_LD)
+ragel_DEPENDENCIES = $(COLM_LIBDEP)
 
 BUILT_SOURCES = \
 	version.h \
-	parse.c commit.cc
+	parse.c rlreduce.cc \
+	ldparse.c ldreduce.cc
 
 if WITH_RAGEL_KELBT
 nodist_ragel_SOURCES += \
@@ -65,15 +82,13 @@ BUILT_SOURCES += \
 	rlscan.cc rlparse.cc rlparse.h 
 endif
 
-ragel_LDADD = libragel.la libfsm.la $(COLM_LD)
-ragel_DEPENDENCIES = $(COLM_LIBDEP)
-
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
 
 EXTRA_DIST = \
 	$(RAGEL_LM) \
+	langdesc.lm \
 	rlscan.rl \
 	rlparse.kh \
 	rlparse.kl
@@ -88,13 +103,17 @@ RAGEL_LM = \
 	rlparse.lm \
 	ragel.lm \
 	host.lm \
-	reducer.lm \
-	langdesc.lm
+	reducer.lm
 
 parse.c: $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM) -c -b rlparse_object -o $@ -m commit.cc $<
+	$(COLM) -c -b rl_parse -o $@ -m rlreduce.cc $<
 
-commit.cc: parse.c
+rlreduce.cc: parse.c
+
+ldparse.c: langdesc.lm $(COLM_BINDEP)
+	$(COLM) -c -b ld_parse -o $@ -m ldreduce.cc $<
+
+ldreduce.cc: ldparse.c
 
 RLHC = \
 	rlhc-host.lm \
