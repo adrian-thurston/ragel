@@ -2,6 +2,8 @@
 /Makefile
 /.deps
 /.libs
-/rbrl
+/rlrb
 /rlparse.c
 /rlreduce.cc
+/rlhc
+/rlhc.c

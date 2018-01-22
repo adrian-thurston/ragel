@@ -1,13 +1,13 @@
 include 'ragel.lm'
-include 'host.lm'
 include 'reducer.lm'
-include 'hostred.lm'
+include 'ragel-ruby.lm'
 
+export RagelError: str
+
+# File name. The open is expected to succeed. It is tested before the colm
+# program is called.
 A: list_el<str> = argv->pop_head_el()
-OutputFn: str = A->value
-
-A = argv->pop_head_el()
-InputFn: str = A->value
+GblFileName = A->value
 
 # Remaining items are include paths.
 while ( argv->length > 0 ) {
@@ -15,12 +15,13 @@ while ( argv->length > 0 ) {
 	GblIncludePaths->push_tail_el( A )
 }
 
-GblFileName = InputFn
-
-Stream: stream = open( InputFn, "r" )
-parse Start: start[ Stream ]
-Stream->close()
-
-Stream = open( OutputFn, "w" )
-print_dump( Stream, Start )
-Stream->close()
+if ( arg0 == "rlparse" ) {
+	Stream: stream = open( GblFileName, "r" )
+	reduce TopLevel start[ Stream ]
+	RagelError = error
+}
+elsif ( arg0 == "rlpostfix" ) {
+	Stream: stream = open( GblFileName, "r" )
+	read_reduce TopLevel start[ Stream ]
+	RagelError = error
+}
