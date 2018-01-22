@@ -1,8 +1,7 @@
 /Makefile.in
 /Makefile
 /.deps
-
-/ruby
-/ruby.c
-/rlhc
-/rlhc.c
+/.libs
+/rbrl
+/rlparse.c
+/rlreduce.cc

@@ -1,15 +1,22 @@
 COLM        = @COLM@
+COLM_LD     = @COLM_LD@
+COLM_LIBDEP = @COLM_LIBDEP@
+COLM_BINDEP = @COLM_BINDEP@
 
-noinst_PROGRAMS = ruby rlhc
+noinst_PROGRAMS = rbrl
 
-ruby_SOURCES =
-rlhc_SOURCES =
+rbrl_CPPFLAGS = -I$(top_srcdir)/aapl
 
-EXTRA_DIST = ruby.lm rlhc.lm rlhc-host.lm rlhc-ruby.lm
+dist_rbrl_SOURCES = main.cc
 
-ruby$(EXEEXT): ruby.lm
-	$(COLM) -I.. $<
+nodist_rbrl_SOURCES = \
+	rlparse.c rlreduce.cc
 
-rlhc$(EXEEXT): rlhc.lm rlhc-host.lm rlhc-ruby.lm
-	$(COLM) $<
+rbrl_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
+BUILT_SOURCES = rlparse.c rlreduce.cc
+
+rlparse.c: ruby.lm $(COLM_BINDEP)
+	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
+
+rlreduce.cc: rlparse.c

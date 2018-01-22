@@ -1,4 +1,4 @@
-SUBDIRS = host-ruby
+DIST_SUBDIRS = host-ruby
 
 COLM        = @COLM@
 COLM_LD     = @COLM_LD@
@@ -24,13 +24,11 @@ pkginclude_HEADERS = \
 
 nodist_pkginclude_HEADERS = config.h
 
-libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
-libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
-ragel_CPPFLAGS = -I$(top_srcdir)/aapl
 
 #
 # libfsm
 #
+libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 dist_libfsm_la_SOURCES = \
 	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h \
@@ -50,6 +48,8 @@ nodist_libfsm_la_SOURCES = \
 #
 # libragel: ragel program minus host-specific code
 #
+libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+
 dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
 	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc
@@ -60,6 +60,8 @@ nodist_libragel_la_SOURCES = \
 #
 # ragel program.
 #
+ragel_CPPFLAGS = -I$(top_srcdir)/aapl
+
 dist_ragel_SOURCES = \
 	main.cc
 
