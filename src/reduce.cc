@@ -400,7 +400,7 @@ void Compiler::writeNeeds()
 		"\n";
 
 	*outStream <<
-		"struct reduction_info ri[" << rootNamespace->reductions.length() + 1 << "];\n"
+		"static struct reduction_info ri[" << rootNamespace->reductions.length() + 1 << "];\n"
 		"\n";
 
 	*outStream <<
