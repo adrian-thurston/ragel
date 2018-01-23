@@ -1,3 +1,6 @@
+include 'ragel.lm'
+include 'reducer.lm'
+
 namespace inline
 	lex 
 		literal `fpc `fc  `fcurs `ftargs
@@ -107,7 +110,6 @@ namespace inline
 	|	[`fbreak `;] :Fbreak
 	|	[`fnbreak `;] :Fnbreak
 end
-
 
 namespace host
 	lex 
@@ -787,3 +789,27 @@ reduction TopLevel
 	}
 
 end
+
+export RagelError: str
+
+# File name. The open is expected to succeed. It is tested before the colm
+# program is called.
+A: list_el<str> = argv->pop_head_el()
+GblFileName = A->value
+
+# Remaining items are include paths.
+while ( argv->length > 0 ) {
+	A = argv->pop_head_el()
+	GblIncludePaths->push_tail_el( A )
+}
+
+if ( arg0 == "rlparse" ) {
+	Stream: stream = open( GblFileName, "r" )
+	reduce TopLevel start[ Stream ]
+	RagelError = error
+}
+elsif ( arg0 == "rlpostfix" ) {
+	Stream: stream = open( GblFileName, "r" )
+	read_reduce TopLevel start[ Stream ]
+	RagelError = error
+}

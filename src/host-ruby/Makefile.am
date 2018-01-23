@@ -16,11 +16,11 @@ rlrb_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc
 
-rlparse.c: ruby.lm $(COLM_BINDEP)
+rlparse.c: rlrb.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: rlparse.c
 
-rlhc$(EXEEXT): rlhc.lm rlhc-host.lm rlhc-ruby.lm
-	$(COLM) $<
+rlhc$(EXEEXT): rlhc.lm
+	$(COLM) -I .. -o $@ $<
 
