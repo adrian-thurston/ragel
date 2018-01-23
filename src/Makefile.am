@@ -69,7 +69,7 @@ nodist_ragel_SOURCES = \
 	parse.c rlreduce.cc
 
 ragel_LDADD = libragel.la libfsm.la $(COLM_LD)
-ragel_DEPENDENCIES = $(COLM_LIBDEP)
+ragel_DEPENDENCIES = libragel.la libfsm.la $(COLM_LIBDEP)
 
 BUILT_SOURCES = \
 	version.h \
