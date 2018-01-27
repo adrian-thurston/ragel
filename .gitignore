@@ -16,3 +16,9 @@
 /test-driver
 /build
 /m4
+
+/CMakeCache.txt
+/CMakeFiles
+/cmake_install.cmake
+/install_manifest.txt
+/*.user

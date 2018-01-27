@@ -23,7 +23,9 @@
 #include <colm/bytecode.h>
 
 #include <sys/types.h>
+#if defined(HAVE_SYS_WAIT_H)
 #include <sys/wait.h>
+#endif
 #include <assert.h>
 #include <string.h>
 #include <stdbool.h>
@@ -3740,9 +3742,13 @@ again:
 
 			free( cmd0 );
 
+#if defined(HAVE_SYS_WAIT_H)
 			if ( WIFSIGNALED( res ) )
 				raise( WTERMSIG( res ) );
 			res = WEXITSTATUS( res );
+#else
+            // WARNING: Check result
+#endif
 
 			colm_tree_downref( prg, sp, (tree_t*)cmd );
 

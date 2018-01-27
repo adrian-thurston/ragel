@@ -1,0 +1,8 @@
+/* defs.h Generated from defs.h.cmake.in by cmake */
+
+#ifndef _COLM_DEFS_H
+#define _COLM_DEFS_H
+
+#cmakedefine SIZEOF_LONG @SIZEOF_LONG@
+
+#endif /* _COLM_DEFS_H */

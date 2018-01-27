@@ -32,6 +32,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER([src/config.h src/defs.h])
+AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 
 dnl Choose a default for the build_manual var. If the dist file is present in
 dnl the root then default to no, otherwise go for it.

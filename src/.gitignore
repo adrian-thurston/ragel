@@ -32,3 +32,9 @@
 /gen
 
 /libprog.a
+
+/CMakeFiles
+/cmake_install.cmake
+/*-config.cmake
+/*-config-version.cmake
+/*.exe

@@ -1,0 +1,14 @@
+/* config.h Generated from config.h.cmake.in by cmake */
+
+#ifndef _COLM_CONFIG_H
+#define _COLM_CONFIG_H
+
+#cmakedefine DEBUG 1
+
+#cmakedefine HAVE_SYS_MMAN_H 1
+#cmakedefine HAVE_SYS_WAIT_H 1
+#cmakedefine HAVE_UNISTD_H 1
+
+#cmakedefine SIZEOF_LONG @SIZEOF_LONG@
+
+#endif /* _COLM_CONFIG_H */

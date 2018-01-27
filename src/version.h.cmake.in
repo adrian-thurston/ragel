@@ -1,0 +1,9 @@
+/* version.h Generated from version.h.cmake.in by cmake */
+
+#ifndef _COLM_VERSION_H
+#define _COLM_VERSION_H
+
+#cmakedefine VERSION "@VERSION@"
+#cmakedefine PUBDATE "@PUBDATE@"
+
+#endif /* _COLM_VERSION_H */

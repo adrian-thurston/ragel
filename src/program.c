@@ -20,7 +20,9 @@
  * SOFTWARE.
  */
 
+#if defined(HAVE_SYS_MMAN_H)
 #include <sys/mman.h>
+#endif
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
