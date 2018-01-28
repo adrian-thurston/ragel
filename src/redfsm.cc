@@ -26,6 +26,7 @@
 #include "fsmgraph.h"
 #include <iostream>
 #include <sstream>
+#include <ctime>
 
 using std::ostringstream;
 
@@ -441,7 +442,7 @@ void RedFsmAp::randomizedOrdering()
 
 	for ( int i = nextStateId; i > 0; i-- ) {
 		/* Pick one from 0 ... i (how many are left). */
-		int nth = random() % i;
+		int nth = rand() % i;
 
 		/* Go forward through the list adding the nth. Need to scan because
 		 * there are items already added in the list. */

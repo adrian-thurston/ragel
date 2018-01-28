@@ -1,0 +1,3 @@
+# @_PACKAGE_NAME@-config.cmake Generated from ragel-config.cmake.in by cmake
+
+include("${CMAKE_CURRENT_LIST_DIR}/@_PACKAGE_NAME@-targets.cmake")

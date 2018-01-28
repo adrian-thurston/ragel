@@ -45,6 +45,13 @@
 /util.cmi
 /util.cmx
 
+/libragel.a
 /libragel.la
+/libfsm.a
 /libfsm.la
 /.libs
+
+/CMakeFiles
+/cmake_install.cmake
+/*-config.cmake
+/*-config-version.cmake
