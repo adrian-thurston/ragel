@@ -55,8 +55,10 @@ DEPS = $(STRESS:%.cpp=.deps/%.d) $(TEST:%.cpp=.deps/%.d) .deps/util.d
 # Rules.
 main: $(STRESS_TARGS) $(TEST_TARGS)
 
-$(TARGS): %.tst: %.cpp util.o
-	@test -d .deps || mkdir .deps
+.deps:
+	mkdir .deps
+
+$(TARGS): %.tst: %.cpp util.o .deps
 	@$(CXX) -M $(CFLAGS) $< \
 		| sed 's/^\([a-zA-Z0-9_-]*\)\.o:/\1.tst:/;' > .deps/$*.d
 	$(CXX) $(CFLAGS) -o $@ $< util.o $(LIBS)
