@@ -627,7 +627,6 @@ template<class T> void StrTmpl<T>::setSpace( long length )
 	data = (char*) (head+1);
 }
 
-
 /* Append a c-style string to the end of this string. Returns a reference to
  * this */
 template<class T> StrTmpl<T> &StrTmpl<T>::operator+=( const char *s )
@@ -694,38 +693,44 @@ template<class T> StrTmpl<T> &StrTmpl<T>::operator+=( const StrTmpl &s )
 /* Make space for a string of length len to be appended. */
 template<class T> char *StrTmpl<T>::appendSpace( long len )
 {
-	/* Find the length of this and the string appended. */
-	Head *head = (((Head*)data) - 1);
-	long thisLen = head->length;
-
-	if ( head->refCount == 1 ) {
-		/* No other string is using the space, grow this space. */
-		head = (Head*) realloc( head, 
-				sizeof(Head) + thisLen + len + 1 );
-		if ( head == 0 )
-			throw std::bad_alloc();
-		data = (char*) (head+1);
-
-		/* Adjust the length. */
-		head->length += len;
+	if ( data == 0 ) {
+		initSpace( len );
+		return data;
 	}
 	else {
-		/* Another string is using this space, make new space. */
-		head->refCount -= 1;
-		Head *newHead = (Head*) malloc(
-				sizeof(Head) + thisLen + len + 1 );
-		if ( newHead == 0 )
-			throw std::bad_alloc();
-		data = (char*) (newHead+1);
+		/* Find the length of this and the string appended. */
+		Head *head = (((Head*)data) - 1);
+		long thisLen = head->length;
 
-		/* Set the new header and data from this. */
-		newHead->refCount = 1;
-		newHead->length = thisLen + len;
-		memcpy( data, head+1, thisLen );
+		if ( head->refCount == 1 ) {
+			/* No other string is using the space, grow this space. */
+			head = (Head*) realloc( head, 
+					sizeof(Head) + thisLen + len + 1 );
+			if ( head == 0 )
+				throw std::bad_alloc();
+			data = (char*) (head+1);
+
+			/* Adjust the length. */
+			head->length += len;
+		}
+		else {
+			/* Another string is using this space, make new space. */
+			head->refCount -= 1;
+			Head *newHead = (Head*) malloc(
+					sizeof(Head) + thisLen + len + 1 );
+			if ( newHead == 0 )
+				throw std::bad_alloc();
+			data = (char*) (newHead+1);
+
+			/* Set the new header and data from this. */
+			newHead->refCount = 1;
+			newHead->length = thisLen + len;
+			memcpy( data, head+1, thisLen );
+		}
+
+		/* Return writing position. */
+		return data + thisLen;
 	}
-
-	/* Return writing position. */
-	return data + thisLen;
 }
 
 /*  Concatenate a String and a c-style string. */
