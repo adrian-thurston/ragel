@@ -24,6 +24,8 @@
 #define _AAPL_ROPE_H
 
 #include <string.h>
+#include <iostream>
+#include <stdio.h>
 
 struct RopeBlock
 {
@@ -182,6 +184,54 @@ struct Rope
 		from.ropeLen = 0;
 	}
 };
+
+
+/*
+ * StringStream for appending to streams with an ostream.
+ */
+struct RopeOutBuf
+:
+	public std::streambuf
+{
+	RopeOutBuf( Rope &r )
+	:
+		r(r)
+	{
+	}
+
+	int_type overflow( int_type c )
+	{
+		if ( c != EOF ) {
+			char z = c;
+			r.append( &z, 1 );
+		}
+		return c;
+	}
+
+	std::streamsize xsputn( const char *data, std::streamsize num )
+	{
+		r.append( data, num );
+		return num;
+	}
+
+	Rope &r;
+};
+
+struct RopeStream
+:
+	public std::ostream
+{
+	RopeStream( Rope &r )
+	:
+		std::ostream( 0 ),
+		buf( r )
+	{
+		rdbuf( &buf );
+	}
+
+	RopeOutBuf buf;
+};
+
 
 #endif
 
