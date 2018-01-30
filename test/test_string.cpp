@@ -40,7 +40,7 @@ void testString1()
 	cout << final << endl;
 	cout << fmt << " " << fmt.length() << endl;
 
-	String str4 = "";
+	String str4;
 	StringStream ss( str4 );
 
 	ss << 0.0000000011111111 << endl;
