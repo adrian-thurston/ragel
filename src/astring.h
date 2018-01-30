@@ -804,6 +804,51 @@ template <class T> inline std::ostream &operator<<( std::ostream &o, const StrTm
 
 typedef StrTmpl<char> String;
 
+/*
+ * StringStream for appending to streams with an ostream.
+ */
+struct StringOutBuf
+:
+	public std::streambuf
+{
+	StringOutBuf( String &s )
+	:
+		s(s)
+	{
+	}
+
+	int_type overflow( int_type c )
+	{
+		if ( c != EOF ) {
+			char z = c;
+			s.append( &z, 1 );
+		}
+		return c;
+	}
+
+	std::streamsize xsputn( const char *data, std::streamsize num )
+	{
+		s.append( data, num );
+		return num;
+	}
+
+	String &s;
+};
+
+struct StringStream
+:
+	public std::ostream
+{
+	StringStream( String &s )
+	:
+		std::ostream( 0 ),
+		buf( s )
+	{
+		rdbuf( &buf );
+	}
+
+	StringOutBuf buf;
+};
 
 #ifdef AAPL_NAMESPACE
 }
