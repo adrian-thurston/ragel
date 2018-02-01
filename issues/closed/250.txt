@@ -1,9 +1,0 @@
-Id: 250 
-Subject: renaming of data variable doesn't work in C#  
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 6.7 
-Created-On: Wed Apr 06 15:13:47 -0700 2011 
-Updated-On: Sun May 22 11:15:12 -0700 2011 
- 
-Reported by Denis Naumov. 

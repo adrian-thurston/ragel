@@ -1,9 +1,0 @@
-Id: 11 
-Subject: from-state and to-state actions in graphviz output 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Thu Mar 18 10:16:46 -0700 2010 
-Updated-On: Thu Mar 18 10:17:03 -0700 2010 
- 
-these are not drawn in such a way to reflect when they are actually exectued, they just get glued onto the action list for the transition 

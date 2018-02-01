@@ -1,9 +1,0 @@
-Id: 254 
-Subject: support win32-style paths in includes and include directories 
-Tracker: Bug 
-Status: New 
-Fixed-Version: 7.0 
-Created-On: Thu Apr 07 13:13:05 -0700 2011 
-Updated-On: Sun Jul 17 19:40:38 -0700 2011 
- 
-The usual string parsing causes backslash to escape, rather than path-separate. 

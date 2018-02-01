@@ -1,9 +1,0 @@
-Id: 10 
-Subject: issue from Josh Stern 2010-03-01 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 6.7 
-Created-On: Sat Mar 13 18:04:48 -0800 2010 
-Updated-On: Sun May 22 10:46:29 -0700 2011 
- 
-I'm writing to submit a small errata:   while compiling generated code with the default C++ binary search based lookup using Visual C++ with 64 bit address model, the compiler correctly warns about some pointer arithmetic where the difference between pointers, of type ptrdiff_t which is 64 bits, is added - e.g.  "     _trans += (_mid - _keys); "    Clearly this won't lead to any problems in practice, but it would be nice to eliminate the warnings with an explicit cast.  

@@ -1,9 +1,0 @@
-Id: 319 
-Subject: generate graphviz off of the FSM graph 
-Tracker: Feature 
-Status: New 
-Fixed-Version: 7.0 
-Created-On: Mon Sep 05 20:21:17 -0700 2011 
-Updated-On: Mon Sep 05 20:21:17 -0700 2011 
- 
-Graphviz code generation was implemented off of the reduced machine because of the split between frontend and backend. Now that split is gone, and graphviz code generation forces us to consider making machines that are not complete, which complicates the reduced machine. We should just generate graphviz based off the FSM graph. Doing this naively will mean that the default transition will go away. This may turn out to be better ... not sure yet. 

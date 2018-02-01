@@ -1,9 +1,0 @@
-Id: 3 
-Subject: add ferror 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Wed Mar 03 22:40:04 -0800 2010 
-Updated-On: Sat Mar 13 18:05:04 -0800 2010 
- 
-This ragel statement should put the machine into the error state and then break out. It has been started, but needs to be finished. 

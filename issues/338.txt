@@ -1,9 +1,0 @@
-Id: 338 
-Subject: merge crack language support 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Mon Dec 12 14:15:12 -0800 2011 
-Updated-On: Mon Dec 12 14:15:12 -0800 2011 
- 
-http://www.complang.org/pipermail/ragel-users/2011-December/002755.html 

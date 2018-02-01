@@ -1,9 +1,0 @@
-Id: 302 
-Subject: keywords to, from, eof missing from 2.2 of the manual 
-Tracker: Bug 
-Status: New 
-Fixed-Version: 7.0 
-Created-On: Wed Jun 29 18:43:15 -0700 2011 
-Updated-On: Sun Jul 17 19:41:02 -0700 2011 
- 
- 

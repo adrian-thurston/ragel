@@ -1,9 +1,0 @@
-Id: 1 
-Subject: C# code generator uses ARRAY_TYPE for single index values 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Thu Feb 18 23:21:21 -0800 2010 
-Updated-On: Thu Feb 18 23:23:49 -0800 2010 
- 
-Due to a bug there is a type that is too small (reported by Atilla). Should just use int since size does not matter. 

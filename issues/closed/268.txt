@@ -1,9 +1,0 @@
-Id: 268 
-Subject: Apply syntax highlighting patch from Ismael Luceno 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 6.7 
-Created-On: Tue Apr 12 17:15:49 -0700 2011 
-Updated-On: Tue Apr 12 17:16:52 -0700 2011 
- 
-http://www.complang.org/pipermail/ragel-users/2010-November/002479.html 

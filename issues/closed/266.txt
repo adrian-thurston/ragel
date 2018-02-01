@@ -1,9 +1,0 @@
-Id: 266 
-Subject: arithmetic overflow in generated C# code 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 6.7 
-Created-On: Tue Apr 12 17:09:13 -0700 2011 
-Updated-On: Tue Apr 12 17:10:06 -0700 2011 
- 
-http://www.complang.org/pipermail/ragel-users/2010-January/002374.html 

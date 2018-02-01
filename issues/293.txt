@@ -1,9 +1,0 @@
-Id: 293 
-Subject: add D2 to the test suite 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Fri May 20 15:39:57 -0700 2011 
-Updated-On: Fri May 20 15:39:57 -0700 2011 
- 
- 

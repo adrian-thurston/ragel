@@ -1,9 +1,0 @@
-Id: 264 
-Subject: Add a configure option for specifying if the manual should be built 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 6.7 
-Created-On: Tue Apr 12 16:44:45 -0700 2011 
-Updated-On: Tue Apr 12 16:45:32 -0700 2011 
- 
-Useful for building in places where the required programs are not installed and the manual isn't needed. 

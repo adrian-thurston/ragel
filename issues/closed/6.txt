@@ -1,9 +1,0 @@
-Id: 6 
-Subject: vim file needs to support LL on the end of numbers 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 6.7 
-Created-On: Wed Mar 03 22:44:33 -0800 2010 
-Updated-On: Tue Apr 12 16:43:26 -0700 2011 
- 
- 
