@@ -1,9 +1,0 @@
-Id: 243 
-Subject: add 'dist' target to the makefile 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 0.1 
-Created-On: Wed Mar 23 17:07:37 -0700 2011 
-Updated-On: Tue May 17 20:12:32 -0700 2011 
- 
-Need this for initial release. 

@@ -1,9 +1,0 @@
-Id: 26 
-Subject: regex subexpression capture 
-Tracker: Research 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:47:55 -0700 2010 
-Updated-On: Sat Mar 20 10:47:55 -0700 2010 
- 
-This may be finished. Need to investigate. 

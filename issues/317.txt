@@ -1,9 +1,0 @@
-Id: 317 
-Subject: single literal strings cannot be concatenated 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Sun Aug 07 10:41:07 -0700 2011 
-Updated-On: Tue Nov 15 17:43:08 -0800 2011 
- 
-Single literal strings cannot be concatenated because they are not LitPat tokens. They are Literals, and parsed differently in productions and patterns. But they are available in code. This inconsistency is somewhat confusing. 

@@ -1,9 +1,0 @@
-Id: 331 
-Subject: parse errors should not cause errors to be printed to stderr/stdout 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.3 
-Created-On: Mon Oct 31 00:01:32 -0700 2011 
-Updated-On: Tue Nov 15 17:41:53 -0800 2011 
- 
-Cannot assume it is okay to use output. Store the error for access. 

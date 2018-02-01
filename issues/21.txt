@@ -1,9 +1,0 @@
-Id: 21 
-Subject: eradicate the use of replItemList 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:46:12 -0700 2010 
-Updated-On: Sat Mar 20 10:46:12 -0700 2010 
- 
-The replacement, accumulator, and string concat sections of the grammar all use this global (to Parser). This is problematic in the face of recursion. It should be replaced with code that passes the list up through the productions. 

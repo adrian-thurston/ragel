@@ -1,9 +1,0 @@
-Id: 29 
-Subject: Need to support all arguments, not just argv1. 
-Tracker: Feature 
-Status: Closed 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:48:36 -0700 2010 
-Updated-On: Sat Mar 20 10:48:36 -0700 2010 
- 
- 

@@ -1,9 +1,0 @@
-Id: 313 
-Subject: allow the ending ' of single literal strings to be omitted, ending at newline 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 0.3 
-Created-On: Mon Aug 01 22:49:26 -0700 2011 
-Updated-On: Mon Aug 01 22:53:23 -0700 2011 
- 
-This will make single literal strings consistent with ~ and " strings. 

@@ -1,9 +1,0 @@
-Id: 297 
-Subject: the check for installed vs source based running doesn't cover a common case. 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.2 
-Created-On: Fri Jun 03 00:29:57 -0700 2011 
-Updated-On: Wed Jul 27 19:57:36 -0700 2011 
- 
-Doesn't work when we specify the full path to the binary. 

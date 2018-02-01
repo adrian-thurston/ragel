@@ -1,9 +1,0 @@
-Id: 15 
-Subject: mutually recursive functions are not possible 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:43:17 -0700 2010 
-Updated-On: Sat Mar 20 10:43:17 -0700 2010 
- 
-This needs to be fixed. 

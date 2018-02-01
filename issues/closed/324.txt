@@ -1,9 +1,0 @@
-Id: 324 
-Subject: exit cannot call c exit function 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.3 
-Created-On: Sat Oct 08 22:21:02 -0700 2011 
-Updated-On: Tue Nov 15 17:41:02 -0800 2011 
- 
-must break out of the execution loop, then any loops higher up. 

@@ -1,9 +1,0 @@
-Id: 13 
-Subject: put position information in the Head struct 
-Tracker: Research 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:42:24 -0700 2010 
-Updated-On: Sat Mar 20 10:42:24 -0700 2010 
- 
-This may be a good place for it, rather than in all trees. Heads represent strings, which are the entities that have the position information. 

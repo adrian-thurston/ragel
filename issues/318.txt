@@ -1,9 +1,0 @@
-Id: 318 
-Subject: function for stripping ignore tokens 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Sun Aug 07 22:34:44 -0700 2011 
-Updated-On: Tue Nov 15 17:44:03 -0800 2011 
- 
- 

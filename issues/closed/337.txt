@@ -1,9 +1,0 @@
-Id: 337 
-Subject: need a reverse execution 'deck' 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.4 
-Created-On: Sun Dec 04 12:59:11 -0800 2011 
-Updated-On: Sat Jan 21 14:04:18 -0800 2012 
- 
-This concept will allow us to disassociate reverse execution from tokens, which is currently binding us somewhat. 

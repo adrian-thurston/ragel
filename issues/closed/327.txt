@@ -1,9 +1,0 @@
-Id: 327 
-Subject: parse error cannot cause fatal error 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.3 
-Created-On: Fri Oct 21 20:29:08 -0700 2011 
-Updated-On: Tue Nov 15 17:41:23 -0800 2011 
- 
-generally there can be none, but parsing is critical 

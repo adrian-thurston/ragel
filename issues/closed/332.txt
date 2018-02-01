@@ -1,9 +1,0 @@
-Id: 332 
-Subject: eliminate possibility of recursive calls to bytecode execution 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.3 
-Created-On: Sun Nov 06 20:16:04 -0800 2011 
-Updated-On: Tue Nov 15 17:40:48 -0800 2011 
- 
-requires factoring out the reduction and token generation actions. 

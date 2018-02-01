@@ -1,9 +1,0 @@
-Id: 336 
-Subject: eliminate notoken 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.4 
-Created-On: Fri Dec 02 19:49:10 -0800 2011 
-Updated-On: Sat Jan 21 14:04:13 -0800 2012 
- 
-Wasteful. Can probably be removed with more careful computation of steps (formally consumed). 

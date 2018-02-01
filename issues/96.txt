@@ -1,9 +1,0 @@
-Id: 96 
-Subject: need to fix construct with ignore lists 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Sun May 09 11:28:08 -0700 2010 
-Updated-On: Thu Dec 30 21:20:31 -0800 2010 
- 
-broken with new ignore storage format  

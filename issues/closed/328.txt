@@ -1,9 +1,0 @@
-Id: 328 
-Subject: embeddable in other programs 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 0.3 
-Created-On: Sat Oct 22 10:45:07 -0700 2011 
-Updated-On: Sun Nov 20 14:36:00 -0800 2011 
- 
-Should be possible to link a colm program into another C/C++ program. 

@@ -1,9 +1,0 @@
-Id: 309 
-Subject: the -v option should print the version 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.2 
-Created-On: Sun Jul 31 10:08:31 -0700 2011 
-Updated-On: Sun Jul 31 10:13:09 -0700 2011 
- 
- 

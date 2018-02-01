@@ -1,9 +1,0 @@
-Id: 27 
-Subject: optimize longest match operator 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:48:12 -0700 2010 
-Updated-On: Sat Mar 20 11:02:42 -0700 2010 
- 
-forget what this means 

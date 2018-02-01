@@ -1,9 +1,0 @@
-Id: 41 
-Subject: some colm parse errors take a really long time to be known 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:53:24 -0700 2010 
-Updated-On: Sat Mar 20 10:53:24 -0700 2010 
- 
- 

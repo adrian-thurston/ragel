@@ -1,9 +1,0 @@
-Id: 241 
-Subject: all variable declarations to be in pattern style "Name: type" 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 0.1 
-Created-On: Wed Mar 23 17:04:36 -0700 2011 
-Updated-On: Tue May 17 20:12:08 -0700 2011 
- 
-It can be difficult to move from looking at variable declarations in patterns then to local variables and function arguments because the name and type change order. Make them all pattern-style in the name of consistency. 

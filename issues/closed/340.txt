@@ -1,9 +1,0 @@
-Id: 340 
-Subject: eliminate sharing of buffer space between FSM run and input stream 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 0.4 
-Created-On: Tue Dec 27 12:33:55 -0800 2011 
-Updated-On: Sat Jan 21 14:04:25 -0800 2012 
- 
-Copy data into the FSM run. Consume it in the input stream when tokens are produced. This implementation will be more robust. 

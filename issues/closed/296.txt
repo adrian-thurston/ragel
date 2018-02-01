@@ -1,9 +1,0 @@
-Id: 296 
-Subject: config.h.in is checked in, but also generated, stop generation 
-Tracker: Bug 
-Status: Fixed 
-Fixed-Version: 0.2 
-Created-On: Sat May 28 18:39:26 -0700 2011 
-Updated-On: Wed Jul 27 19:56:53 -0700 2011 
- 
-fails the build 

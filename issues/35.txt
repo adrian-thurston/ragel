@@ -1,9 +1,0 @@
-Id: 35 
-Subject: can't match against a terminal 
-Tracker: Bug 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:51:24 -0700 2010 
-Updated-On: Sat Mar 20 10:51:24 -0700 2010 
- 
-need this 

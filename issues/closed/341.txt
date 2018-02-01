@@ -1,9 +1,0 @@
-Id: 341 
-Subject: split input stream into two: wrapper and implementation streams 
-Tracker: Feature 
-Status: Completed 
-Fixed-Version: 0.4 
-Created-On: Thu Dec 29 10:35:27 -0800 2011 
-Updated-On: Sat Jan 21 14:04:30 -0800 2012 
- 
-The wrapper act as a stream of streams. The implementation stream (source stream) will provide data. Both need a refcounted tree struct so they can be stored in multiple accumulators, which will happen mostly due to sub-parsers. 

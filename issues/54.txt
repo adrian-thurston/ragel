@@ -1,9 +1,0 @@
-Id: 54 
-Subject: need a syntax for constructing tokens with a str 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 27 11:17:52 -0700 2010 
-Updated-On: Sat Mar 27 11:17:52 -0700 2010 
- 
-Currently using parse, which is just way too much overhead for just a token. 

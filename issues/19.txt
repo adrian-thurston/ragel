@@ -1,9 +1,0 @@
-Id: 19 
-Subject: embedding a colm program into a host C/C++ program 
-Tracker: Feature 
-Status: New 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:45:20 -0700 2010 
-Updated-On: Sat Mar 20 10:45:20 -0700 2010 
- 
-This is a desirable feature. Requires returning a tree providing some means of walking the returned tree. 

@@ -1,9 +1,0 @@
-Id: 14 
-Subject: include needs to honour the path of the source file 
-Tracker: Bug 
-Status: Closed 
-Fixed-Version:  
-Created-On: Sat Mar 20 10:42:54 -0700 2010 
-Updated-On: Sat Mar 20 10:42:54 -0700 2010 
- 
-Include needs to honour the path of the source file as a prefix when searching for the file to include. This allows colm to be called with a CWD that is not the one the source is in. 
