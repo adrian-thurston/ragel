@@ -1,5 +1,5 @@
 dnl 
-dnl Copyright 2006-2016 Adrian Thurston <thurston@colm.net>
+dnl Copyright 2006-2018 Adrian Thurston <thurston@colm.net>
 dnl
 
 dnl Permission is hereby granted, free of charge, to any person obtaining a copy

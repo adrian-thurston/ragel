@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2016 Adrian Thurston <thurston@colm.net>
+ * Copyright 2006-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -201,7 +201,7 @@ void usage()
 void version()
 {
 	cout << "Colm version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2007-2016 by Adrian D. Thurston" << endl;
+			"Copyright (c) 2007-2018 by Adrian D. Thurston" << endl;
 }
 
 /* Scans a string looking for the file extension. If there is a file

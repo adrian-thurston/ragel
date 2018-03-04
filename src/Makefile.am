@@ -1,5 +1,5 @@
 #
-# Copyright 2007-2013 Adrian Thurston <thurston@complang.org>
+# Copyright 2007-2018 Adrian Thurston <thurston@colm.net>
 #
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
