@@ -373,7 +373,7 @@ struct CmpReduceAction
 		else {
 			if ( ra1->production->prodNum < ra2->production->prodNum )
 				return -1;
-			else if ( ra1->production->prodNum < ra2->production->prodNum )
+			else if ( ra1->production->prodNum > ra2->production->prodNum )
 				return 1;
 		}
 		return 0;
