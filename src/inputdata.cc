@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2016 Adrian Thurston <thurston@colm.net>
+ * Copyright 2008-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -802,7 +802,7 @@ void InputData::usage()
 void InputData::version()
 {
 	info() << "Ragel State Machine Compiler version " VERSION << " " PUBDATE << endl <<
-			"Copyright (c) 2001-2015 by Adrian Thurston" << endl;
+			"Copyright (c) 2001-2018 by Adrian Thurston" << endl;
 	abortCompile( 0 );
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 Adrian Thurston <thurston@colm.net>
+ * Copyright 2002-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to

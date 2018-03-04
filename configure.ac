@@ -1,5 +1,5 @@
 dnl 
-dnl Copyright 2001-2016 Adrian Thurston <thurston@colm.net>
+dnl Copyright 2001-2018 Adrian Thurston <thurston@colm.net>
 dnl
 dnl Permission is hereby granted, free of charge, to any person obtaining a copy
 dnl of this software and associated documentation files (the "Software"), to
