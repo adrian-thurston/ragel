@@ -497,7 +497,8 @@ def prod_list
 |	[prod] :Base
 
 def case_clause
-	[CASE pattern block_or_single] commit
+	[CASE pattern block_or_single] :Pattern commit 
+|	[CASE id block_or_single] :Id commit
 
 def default_clause
 	[DEFAULT block_or_single] commit

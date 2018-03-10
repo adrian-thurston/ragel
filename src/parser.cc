@@ -957,8 +957,16 @@ LangExpr *BaseParser::match( const InputLoc &loc, LangVarRef *varRef,
 			list, pd->nextPatConsId++ );
 	pd->patternList.append( pattern );
 
-	LangExpr *expr = LangExpr::cons( LangTerm::cons( 
-			InputLoc(), LangTerm::MatchType, varRef, pattern ) );
+	LangExpr *expr = LangExpr::cons( LangTerm::consMatch( 
+			InputLoc(), varRef, pattern ) );
+
+	return expr;
+}
+
+LangExpr *BaseParser::prodCompare( const InputLoc &loc, LangVarRef *varRef, const String &prod )
+{
+	LangExpr *expr = LangExpr::cons( LangTerm::consProdCompare( 
+			InputLoc(), varRef, prod ) );
 
 	return expr;
 }
@@ -996,8 +1004,8 @@ LangExpr *BaseParser::require( const InputLoc &loc,
 			list, pd->nextPatConsId++ );
 	pd->patternList.append( pattern );
 
-	LangExpr *expr = LangExpr::cons( LangTerm::cons(
-			InputLoc(), LangTerm::MatchType, varRef, pattern ) );
+	LangExpr *expr = LangExpr::cons( LangTerm::consMatch(
+			InputLoc(), varRef, pattern ) );
 	return expr;
 }
 

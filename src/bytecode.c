@@ -2227,6 +2227,17 @@ again:
 			break;
 		}
 
+		case IN_PROD_NUM: {
+			debug( prg, REALM_BYTECODE, "IN_PROD_NUM\n" );
+
+			tree_t *tree = vm_pop_tree();
+			colm_tree_downref( prg, sp, tree );
+
+			value_t v = tree->prod_num;
+			vm_push_value( v );
+			break;
+		}
+
 		case IN_PARSE_APPEND_WC: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WC\n" );
 

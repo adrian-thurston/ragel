@@ -152,7 +152,8 @@ struct Production
 	: 
 		prodName(0), prodElList(0), prodCommit(false), redBlock(0),
 		prodId(0), prodNum(0), fsm(0), fsmLength(0), uniqueEmptyLeader(0),
-		isLeftRec(false), localFrame(0), lhsField(0), predOf(0) {}
+		isLeftRec(false), localFrame(0), lhsField(0), predOf(0)
+	{}
 
 	static Production* cons( const InputLoc &loc, LangEl *prodName, ProdElList *prodElList, 
 			String name, bool prodCommit, CodeBlock *redBlock, int prodId, int prodNum )
@@ -160,7 +161,7 @@ struct Production
 		Production *p = new Production;
 		p->loc = loc;
 		p->prodName = prodName;
-		p->name = name;
+		p->_name = name;
 		p->prodElList = prodElList;
 		p->prodCommit = prodCommit;
 		p->redBlock = redBlock;
@@ -172,7 +173,7 @@ struct Production
 	InputLoc loc;
 	LangEl *prodName;
 	ProdElList *prodElList;
-	String name;
+	String _name;
 	bool prodCommit;
 
 	CodeBlock *redBlock;
@@ -678,6 +679,8 @@ struct Compiler
 	void resolveReductionActions();
 	void findReductionActionProds();
 	void resolveReducers();
+
+	Production *findProductionByLabel( LangEl *langEl, String label );
 
 	void declarePass();
 	void resolvePass();

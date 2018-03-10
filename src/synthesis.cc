@@ -22,9 +22,7 @@
 
 #include <assert.h>
 #include <stdbool.h>
-
 #include <iostream>
-
 #include "compiler.h"
 
 using std::cout;
@@ -1224,6 +1222,31 @@ UniqueType *LangTerm::evaluateMatch( Compiler *pd, CodeVect &code ) const
 	return ut;
 }
 
+UniqueType *LangTerm::evaluateProdCompare( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *ut = varRef->evaluate( pd, code );
+	if ( ut->typeId != TYPE_TREE && ut->typeId != TYPE_REF ) {
+		error(varRef->loc) << "expected match against a tree/ref type" << endp;
+	}
+	code.append( IN_PROD_NUM );
+
+	/* look up the production name. */
+	Production *prod = pd->findProductionByLabel( ut->langEl, this->prod );
+
+	if ( prod == 0 ) {
+		error( this->loc) << "could not find "
+				"production label: " << this->prod << endp;
+	}
+
+	unsigned int n = prod->prodNum;
+	code.append( IN_LOAD_INT );
+	code.appendWord( n );
+
+	code.append( IN_TST_EQL_VAL );
+
+	return pd->uniqueTypeInt;
+}
+
 void LangTerm::evaluateCapture( Compiler *pd, CodeVect &code, UniqueType *valUt ) const
 {
 	if ( varRef != 0 ) {
@@ -1931,6 +1954,9 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 		}
 		case MatchType:
 			retUt = evaluateMatch( pd, code );
+			break;
+		case ProdCompareType:
+			retUt = evaluateProdCompare( pd, code );
 			break;
 		case ParseType:
 			retUt = evaluateParse( pd, code, false, false );

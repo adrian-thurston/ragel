@@ -21,12 +21,11 @@
  */
 
 #include <stdbool.h>
-
 #include <iostream>
-
 #include "compiler.h"
+
 /*
- * Type Resolution.
+ * Type Resolve.
  */
 
 using std::cout;
@@ -514,6 +513,9 @@ void LangTerm::resolve( Compiler *pd )
 		case StringType:
 			break;
 
+		case ProdCompareType:
+			break;
+
 		case MatchType:
 			for ( PatternItemList::Iter item = *pattern->list; item.lte(); item++ ) {
 				switch ( item->form ) {
@@ -901,6 +903,15 @@ void Compiler::resolveReductionActions()
 	}
 }
 
+Production *Compiler::findProductionByLabel( LangEl *langEl, String label )
+{
+	for ( LelDefList::Iter ldi = langEl->defList; ldi.lte(); ldi++ ) {
+		if ( strcmp( ldi->_name, label ) == 0 )
+			return ldi;
+	}
+	return 0;
+}
+
 void Compiler::findReductionActionProds()
 {
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
@@ -908,13 +919,7 @@ void Compiler::findReductionActionProds()
 			rai->nonTerm->resolveType( this );
 			LangEl *langEl = rai->nonTerm->uniqueType->langEl;
 
-			Production *prod = 0;
-			for ( LelDefList::Iter ldi = langEl->defList; ldi.lte(); ldi++ ) {
-				if ( strcmp( ldi->name, rai->prod ) == 0 ) {
-					prod = ldi;
-					break;
-				}
-			}
+			Production *prod = findProductionByLabel( langEl, rai->prod );
 
 			if ( prod == 0 ) {
 				error(rai->loc) << "could not find production \"" <<

@@ -104,6 +104,7 @@ typedef unsigned char uchar;
 
 #define IN_REJECT                0x21
 #define IN_MATCH                 0x22
+#define IN_PROD_NUM              0x6a
 #define IN_CONSTRUCT             0x23
 #define IN_CONS_OBJECT           0xf0
 #define IN_CONS_GENERIC          0xf1
@@ -367,6 +368,7 @@ typedef unsigned char uchar;
 #define IN_CONST_STDOUT          0x11
 #define IN_CONST_STDERR          0x12
 #define IN_CONST_ARG             0x13
+
 
 
 /*

@@ -970,7 +970,6 @@ struct ReduceAction
 	String prod;
 	ReduceTextItemList itemList;
 
-
 	Production *production;
 
 	ReduceAction *prev, *next;
@@ -1810,6 +1809,16 @@ struct ConsItemList
 
 struct Pattern
 {
+	Pattern()
+	:
+		nspace(0),
+		list(0),
+		patRepId(0),
+		langEl(0),
+		pdaRun(0),
+		nextBindId(1)
+	{}
+	
 	static Pattern *cons( const InputLoc &loc, Namespace *nspace,
 			PatternItemList *list, int patRepId )
 	{
@@ -1818,12 +1827,9 @@ struct Pattern
 		p->nspace = nspace;
 		p->list = list;
 		p->patRepId = patRepId;
-		p->langEl = 0;
-		p->pdaRun = 0;
-		p->nextBindId = 1;
 		return p;
 	}
-	
+
 	InputLoc loc;
 	Namespace *nspace;
 	PatternItemList *list;
@@ -2879,6 +2885,7 @@ struct LangTerm
 		NumberType,
 		StringType,
 		MatchType,
+		ProdCompareType,
 		NewType,
 		ConstructType,
 		TypeIdType,
@@ -2972,6 +2979,28 @@ struct LangTerm
 		t->varRef = 0;
 		t->typeRef = typeRef;
 		t->expr = langExpr;
+		return t;
+	}
+
+	static LangTerm *consMatch( const InputLoc &loc,
+			LangVarRef *varRef, Pattern *pattern )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = MatchType;
+		t->loc = loc;
+		t->varRef = varRef;
+		t->pattern = pattern;
+		return t;
+	}
+
+	static LangTerm *consProdCompare( const InputLoc &loc,
+			LangVarRef *varRef, const String &prod )
+	{
+		LangTerm *t = new LangTerm;
+		t->type = ProdCompareType;
+		t->loc = loc;
+		t->varRef = varRef;
+		t->prod = prod;
 		return t;
 	}
 
@@ -3108,6 +3137,7 @@ struct LangTerm
 	UniqueType *evaluateSend( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateSendTree( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateMatch( Compiler *pd, CodeVect &code ) const;
+	UniqueType *evaluateProdCompare( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluate( Compiler *pd, CodeVect &code ) const;
 	void assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const;
 	UniqueType *evaluateMakeToken( Compiler *pd, CodeVect &code ) const;
@@ -3126,6 +3156,7 @@ struct LangTerm
 	ObjectField *objField;
 	TypeRef *typeRef;
 	Pattern *pattern;
+	String prod;
 	FieldInitVect *fieldInitArgs;
 	GenericType *generic;
 	Constructor *constructor;
@@ -3339,14 +3370,6 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( Type type, StmtList *stmtList )
-	{
-		LangStmt *s = new LangStmt;
-		s->type = type;
-		s->stmtList = stmtList;
-		return s;
-	}
-
 	static LangStmt *cons( Type type, LangExpr *expr, StmtList *stmtList, LangStmt *elsePart )
 	{
 		LangStmt *s = new LangStmt;
@@ -3356,6 +3379,20 @@ struct LangStmt
 		s->elsePart = elsePart;
 		return s;
 	}
+
+	void setElsePart( LangStmt *elsePart )
+	{
+		this->elsePart = elsePart;
+	}
+
+	static LangStmt *cons( Type type, StmtList *stmtList )
+	{
+		LangStmt *s = new LangStmt;
+		s->type = type;
+		s->stmtList = stmtList;
+		return s;
+	}
+
 
 	static LangStmt *cons( const InputLoc &loc, Type type )
 	{

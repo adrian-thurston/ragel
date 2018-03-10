@@ -1200,8 +1200,10 @@ void Compiler::compile()
 	beginProcessing();
 	initKeyOps();
 
+	/* Declare types. */
 	declarePass();
 
+	/* Resolve type references. */
 	resolvePass();
 
 	makeTerminalWrappers();
@@ -1225,7 +1227,7 @@ void Compiler::compile()
 	/* Compile bytecode. */
 	compileByteCode();
 
-	/* Make the reduced fsm. */
+	/* Make the reduced scanner. */
 	RedFsmBuild reduce( this, fsmGraph );
 	redFsm = reduce.reduceMachine();
 

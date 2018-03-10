@@ -156,9 +156,11 @@ struct BaseParser
 			ConsItemList *list, TypeRef *typeRef, FieldInitVect *fieldInitVect );
 	LangExpr *match( const InputLoc &loc, LangVarRef *varRef,
 			PatternItemList *list );
+	LangExpr *prodCompare( const InputLoc &loc, LangVarRef *varRef, const String &prod );
 	LangStmt *varDef( ObjectField *objField,
 			LangExpr *expr, LangStmt::Type assignType );
 	LangStmt *exportStmt( ObjectField *objField, LangStmt::Type assignType, LangExpr *expr );
+
 
 	LangExpr *require( const InputLoc &loc, LangVarRef *varRef, PatternItemList *list );
 	void structVarDef( const InputLoc &loc, ObjectField *objField );

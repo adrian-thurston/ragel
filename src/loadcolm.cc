@@ -2160,40 +2160,47 @@ struct LoadColm
 		return stmt;
 	}
 
+	LangStmt *walkCaseClause( case_clause CaseClause, var_ref VarRef )
+	{
+		pushScope();
+
+		LangVarRef *varRef = walkVarRef( VarRef );
+
+		LangExpr *expr = 0;
+
+		if ( CaseClause.prodName() == case_clause::Pattern ) {
+			/* A match pattern. */
+			PatternItemList *list = walkPattern( CaseClause.pattern(), varRef );
+			expr = match( CaseClause.loc(), varRef, list );
+		}
+		else {
+			/* An identifier to be interpreted as a production name. */
+			String prod = CaseClause.id().text().c_str();
+			expr = prodCompare( CaseClause.loc(), varRef, prod );
+		}
+
+		StmtList *stmtList = walkBlockOrSingle( CaseClause.block_or_single() );
+
+		popScope();
+
+		return LangStmt::cons( LangStmt::IfType, expr, stmtList );
+	}
+
 	LangStmt *walkCaseClauseList( case_clause_list CaseClauseList, var_ref VarRef )
 	{
 		LangStmt *stmt = 0;
 		switch ( CaseClauseList.prodName() ) {
 			case case_clause_list::Recursive: {
-				pushScope();
-
-				LangVarRef *varRef = walkVarRef( VarRef );
-				PatternItemList *list = walkPattern( CaseClauseList.case_clause().pattern(), varRef );
-				LangExpr *expr = match( CaseClauseList.loc(), varRef, list );
-
-				StmtList *stmtList = walkBlockOrSingle(
-						CaseClauseList.case_clause().block_or_single() );
-
-				popScope();
+				stmt = walkCaseClause( CaseClauseList.case_clause(), VarRef );
 
 				LangStmt *recList = walkCaseClauseList(
 						CaseClauseList._case_clause_list(), VarRef );
 
-				stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, recList );
+				stmt->setElsePart( recList );
 				break;
 			}
 			case case_clause_list::BaseCase: {
-				pushScope();
-
-				LangVarRef *varRef = walkVarRef( VarRef );
-				PatternItemList *list = walkPattern(
-						CaseClauseList.case_clause().pattern(), varRef );
-				LangExpr *expr = match( CaseClauseList.loc(), varRef, list );
-
-				StmtList *stmtList = walkBlockOrSingle(
-						CaseClauseList.case_clause().block_or_single() );
-				popScope();
-				stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList, 0 );
+				stmt = walkCaseClause( CaseClauseList.case_clause(), VarRef );
 				break;
 			}
 			case case_clause_list::BaseDefault: {
