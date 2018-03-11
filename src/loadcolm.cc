@@ -202,11 +202,6 @@ struct LoadColm
 			stmt = walkPrintStmt( printStmt );
 			break;
 		}
-		case statement::Expr: {
-			expr_stmt exprStmt = Statement.expr_stmt();
-			stmt = walkExprStmt( exprStmt );
-			break;
-		}
 		case statement::VarDef: {
 			ObjectField *objField = walkVarDef( Statement.var_def(),
 					ObjectField::UserLocalType );
@@ -279,7 +274,34 @@ struct LoadColm
 		case statement::Reject: {
 			stmt = LangStmt::cons( Statement.REJECT().loc(), LangStmt::RejectType );
 			break;
-		}}
+		}
+		case statement::Call: {
+			LangVarRef *langVarRef = walkVarRef( Statement.var_ref() );
+			CallArgVect *exprVect = walkCallArgList( Statement.call_arg_list() );
+			LangTerm *term = LangTerm::cons( langVarRef->loc, langVarRef, exprVect );
+			LangExpr *expr = LangExpr::cons( term );
+			stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
+			break;
+		}
+		case statement::StmtOrFactor: {
+			LangExpr *expr = walkStmtOrFactor( Statement.stmt_or_factor() );
+			stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
+			break;
+		}
+		case statement::BareSend: {
+			NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+			QualItemVect *qualItemVect = new QualItemVect;
+			String id = "Output";
+			LangVarRef *varRef = LangVarRef::cons( InputLoc(),
+					curNspace(), curStruct(), curScope(), nspaceQual, qualItemVect, id );
+
+			ConsItemList *list = walkAccumulate( Statement.accumulate() );
+			bool eof = walkOptEos( Statement.opt_eos() );
+			LangExpr *expr = send( InputLoc(), varRef, list, eof );
+			stmt = LangStmt::cons( expr->loc, LangStmt::ExprType, expr );
+			break;
+		}
+		}
 		return stmt;
 	}
 
@@ -1766,6 +1788,148 @@ struct LoadColm
 		return list;
 	}
 
+	LangExpr *walkStmtOrFactor( stmt_or_factor StmtOrFactor )
+	{
+		LangExpr *expr = 0;
+		switch ( StmtOrFactor.prodName() ) {
+		case stmt_or_factor::Parse: {
+			/* The type we are parsing. */
+			type_ref typeRefTree = StmtOrFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( StmtOrFactor.opt_capture() );
+			FieldInitVect *init = walkOptFieldInit( StmtOrFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+
+			expr = parseCmd( StmtOrFactor.PARSE().loc(), false, false, objField,
+					typeRef, init, list, true, false, false, "" );
+			break;
+		}
+		case stmt_or_factor::ParseTree: {
+			/* The type we are parsing. */
+			type_ref typeRefTree = StmtOrFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( StmtOrFactor.opt_capture() );
+			FieldInitVect *init = walkOptFieldInit( StmtOrFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+
+			expr = parseCmd( StmtOrFactor.PARSE_TREE().loc(), true, false, objField,
+					typeRef, init, list, true, false, false, "" );
+			break;
+		}
+		case stmt_or_factor::ParseStop: {
+			/* The type we are parsing. */
+			type_ref typeRefTree = StmtOrFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( StmtOrFactor.opt_capture() );
+			FieldInitVect *init = walkOptFieldInit( StmtOrFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+
+			expr = parseCmd( StmtOrFactor.PARSE_STOP().loc(), false, true, objField,
+					typeRef, init, list, true, false, false, "" );
+			break;
+		}
+		case stmt_or_factor::Reduce: {
+			/* The reducer name. */
+			String reducer = StmtOrFactor.id().data();
+
+			/* The type we are parsing. */
+			type_ref typeRefTree = StmtOrFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			FieldInitVect *init = walkOptFieldInit( StmtOrFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+
+			expr = parseCmd( StmtOrFactor.REDUCE().loc(), false, false, 0,
+					typeRef, init, list, true, true, false, reducer );
+			break;
+		}
+		case stmt_or_factor::ReadReduce: {
+			/* The reducer name. */
+			String reducer = StmtOrFactor.id().data();
+
+			/* The type we are parsing. */
+			type_ref typeRefTree = StmtOrFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			FieldInitVect *init = walkOptFieldInit( StmtOrFactor.opt_field_init() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+
+			expr = parseCmd( StmtOrFactor.READ_REDUCE().loc(), false, false, 0,
+					typeRef, init, list, true, true, true, reducer );
+			break;
+		}
+		case stmt_or_factor::Send: {
+			LangVarRef *varRef = walkVarRef( StmtOrFactor.var_ref() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+			bool eof = walkOptEos( StmtOrFactor.opt_eos() );
+			expr = send( StmtOrFactor.SEND().loc(), varRef, list, eof );
+			break;
+		}
+		case stmt_or_factor::SendTree: {
+			LangVarRef *varRef = walkVarRef( StmtOrFactor.var_ref() );
+			ConsItemList *list = walkAccumulate( StmtOrFactor.accumulate() );
+			bool eof = walkOptEos( StmtOrFactor.opt_eos() );
+			expr = sendTree( StmtOrFactor.SEND_TREE().loc(), varRef, list, eof );
+			break;
+		}
+		case stmt_or_factor::MakeTree: {
+			CallArgVect *exprList = walkCallArgList( StmtOrFactor.call_arg_list() );
+			expr = LangExpr::cons( LangTerm::cons( StmtOrFactor.loc(),
+					LangTerm::MakeTreeType, exprList ) );
+			break;
+		}
+		case stmt_or_factor::MakeToken: {
+			CallArgVect *exprList = walkCallArgList( StmtOrFactor.call_arg_list() );
+			expr = LangExpr::cons( LangTerm::cons( StmtOrFactor.loc(),
+					LangTerm::MakeTokenType, exprList ) );
+			break;
+		}
+		case stmt_or_factor::Cons: {
+			/* The type we are parsing. */
+			type_ref typeRefTree = StmtOrFactor.type_ref();
+			TypeRef *typeRef = walkTypeRef( typeRefTree );
+			ObjectField *objField = walkOptCapture( StmtOrFactor.opt_capture() );
+			ConsItemList *list = walkConstructor( StmtOrFactor.constructor(), typeRef );
+			FieldInitVect *init = walkOptFieldInit( StmtOrFactor.opt_field_init() );
+
+			expr = construct( StmtOrFactor.CONS().loc(), objField, list, typeRef, init );
+			break;
+		}
+		case stmt_or_factor::Match: {
+			LangVarRef *varRef = walkVarRef( StmtOrFactor.var_ref() );
+			PatternItemList *list = walkPattern( StmtOrFactor.pattern(), varRef );
+			expr = match( StmtOrFactor.loc(), varRef, list );
+			break;
+		}
+		case stmt_or_factor::New: {
+			TypeRef *typeRef = walkTypeRef( StmtOrFactor.type_ref() );
+
+			ObjectField *captureField = walkOptCapture( StmtOrFactor.opt_capture() );
+			FieldInitVect *init = walkFieldInit( StmtOrFactor.FieldInitList() );
+
+			LangVarRef *captureVarRef = 0;
+			if ( captureField != 0 ) {
+				captureVarRef = LangVarRef::cons( captureField->loc,
+						curNspace(), curStruct(), curScope(), captureField->name );
+			}
+
+			expr = LangExpr::cons( LangTerm::consNew(
+					StmtOrFactor.loc(), typeRef, captureVarRef, init ) );
+
+			/* Check for redeclaration. */
+			if ( captureField != 0 ) {
+				if ( curScope()->checkRedecl( captureField->name ) != 0 ) {
+					error( captureField->loc ) << "variable " <<
+							captureField->name << " redeclared" << endp;
+				}
+
+				/* Insert it into the field map. */
+				captureField->typeRef = typeRef;
+				curScope()->insertField( captureField->name, captureField );
+			}
+			break;
+		}}
+		return expr;
+	}
+
 	LangExpr *walkCodeFactor( code_factor codeFactor, bool used = true )
 	{
 		LangExpr *expr = 0;
@@ -1791,93 +1955,8 @@ struct LoadColm
 			expr = LangExpr::cons( term );
 			break;
 		}
-		case code_factor::Parse: {
-			/* The type we are parsing. */
-			type_ref typeRefTree = codeFactor.type_ref();
-			TypeRef *typeRef = walkTypeRef( typeRefTree );
-			ObjectField *objField = walkOptCapture( codeFactor.opt_capture() );
-			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-
-			expr = parseCmd( codeFactor.PARSE().loc(), false, false, objField,
-					typeRef, init, list, used, false, false, "" );
-			break;
-		}
-		case code_factor::ParseTree: {
-			/* The type we are parsing. */
-			type_ref typeRefTree = codeFactor.type_ref();
-			TypeRef *typeRef = walkTypeRef( typeRefTree );
-			ObjectField *objField = walkOptCapture( codeFactor.opt_capture() );
-			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-
-			expr = parseCmd( codeFactor.PARSE_TREE().loc(), true, false, objField,
-					typeRef, init, list, used, false, false, "" );
-			break;
-		}
-		case code_factor::ParseStop: {
-			/* The type we are parsing. */
-			type_ref typeRefTree = codeFactor.type_ref();
-			TypeRef *typeRef = walkTypeRef( typeRefTree );
-			ObjectField *objField = walkOptCapture( codeFactor.opt_capture() );
-			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-
-			expr = parseCmd( codeFactor.PARSE_STOP().loc(), false, true, objField,
-					typeRef, init, list, used, false, false, "" );
-			break;
-		}
-		case code_factor::Reduce: {
-			/* The reducer name. */
-			String reducer = codeFactor.id().data();
-
-			/* The type we are parsing. */
-			type_ref typeRefTree = codeFactor.type_ref();
-			TypeRef *typeRef = walkTypeRef( typeRefTree );
-			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-
-			expr = parseCmd( codeFactor.REDUCE().loc(), false, false, 0,
-					typeRef, init, list, used, true, false, reducer );
-			break;
-		}
-		case code_factor::ReadReduce: {
-			/* The reducer name. */
-			String reducer = codeFactor.id().data();
-
-			/* The type we are parsing. */
-			type_ref typeRefTree = codeFactor.type_ref();
-			TypeRef *typeRef = walkTypeRef( typeRefTree );
-			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-
-			expr = parseCmd( codeFactor.READ_REDUCE().loc(), false, false, 0,
-					typeRef, init, list, used, true, true, reducer );
-			break;
-		}
-		case code_factor::Cons: {
-			/* The type we are parsing. */
-			type_ref typeRefTree = codeFactor.type_ref();
-			TypeRef *typeRef = walkTypeRef( typeRefTree );
-			ObjectField *objField = walkOptCapture( codeFactor.opt_capture() );
-			ConsItemList *list = walkConstructor( codeFactor.constructor(), typeRef );
-			FieldInitVect *init = walkOptFieldInit( codeFactor.opt_field_init() );
-
-			expr = construct( codeFactor.CONS().loc(), objField, list, typeRef, init );
-			break;
-		}
-		case code_factor::Send: {
-			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-			bool eof = walkOptEos( codeFactor.opt_eos() );
-			expr = send( codeFactor.SEND().loc(), varRef, list, eof );
-			break;
-		}
-		case code_factor::SendTree: {
-			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
-			ConsItemList *list = walkAccumulate( codeFactor.accumulate() );
-			bool eof = walkOptEos( codeFactor.opt_eos() );
-			expr = sendTree( codeFactor.SEND_TREE().loc(), varRef, list, eof );
+		case code_factor::StmtOrFactor: {
+			expr = walkStmtOrFactor( codeFactor.stmt_or_factor() );
 			break;
 		}
 		case code_factor::Nil: {
@@ -1904,12 +1983,6 @@ struct LoadColm
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.string().loc(), list ) );
 			break;
 		}
-		case code_factor::Match: {
-			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
-			PatternItemList *list = walkPattern( codeFactor.pattern(), varRef );
-			expr = match( codeFactor.loc(), varRef, list );
-			break;
-		}
 		case code_factor::In: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 			LangVarRef *varRef = walkVarRef( codeFactor.var_ref() );
@@ -1917,50 +1990,10 @@ struct LoadColm
 					LangTerm::SearchType, typeRef, varRef ) );
 			break;
 		}
-		case code_factor::MakeTree: {
-			CallArgVect *exprList = walkCallArgList( codeFactor.call_arg_list() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::MakeTreeType, exprList ) );
-			break;
-		}
-		case code_factor::MakeToken: {
-			CallArgVect *exprList = walkCallArgList( codeFactor.call_arg_list() );
-			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
-					LangTerm::MakeTokenType, exprList ) );
-			break;
-		}
 		case code_factor::TypeId: {
 			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
 			expr = LangExpr::cons( LangTerm::cons( codeFactor.loc(),
 					LangTerm::TypeIdType, typeRef ) );
-			break;
-		}
-		case code_factor::New: {
-			TypeRef *typeRef = walkTypeRef( codeFactor.type_ref() );
-
-			ObjectField *captureField = walkOptCapture( codeFactor.opt_capture() );
-			FieldInitVect *init = walkFieldInit( codeFactor.FieldInitList() );
-
-			LangVarRef *captureVarRef = 0;
-			if ( captureField != 0 ) {
-				captureVarRef = LangVarRef::cons( captureField->loc,
-						curNspace(), curStruct(), curScope(), captureField->name );
-			}
-
-			expr = LangExpr::cons( LangTerm::consNew(
-					codeFactor.loc(), typeRef, captureVarRef, init ) );
-
-			/* Check for redeclaration. */
-			if ( captureField != 0 ) {
-				if ( curScope()->checkRedecl( captureField->name ) != 0 ) {
-					error( captureField->loc ) << "variable " <<
-							captureField->name << " redeclared" << endp;
-				}
-
-				/* Insert it into the field map. */
-				captureField->typeRef = typeRef;
-				curScope()->insertField( captureField->name, captureField );
-			}
 			break;
 		}
 		case code_factor::Cast: {

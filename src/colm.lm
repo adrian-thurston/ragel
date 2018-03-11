@@ -516,7 +516,6 @@ def case_clause_list
 
 def statement
 	[print_stmt] :Print commit
-|	[expr_stmt] :Expr commit
 |	[var_def opt_def_init] :VarDef commit
 |	[FOR id COLON type_ref IN iter_call block_or_single] :For commit
 |	[IF code_expr block_or_single elsif_list] :If commit
@@ -528,6 +527,9 @@ def statement
 |	[RETURN code_expr] :Return commit
 |	[BREAK] :Break commit
 |	[REJECT] :Reject commit
+|	[var_ref POPEN call_arg_list PCLOSE] :Call
+|	[stmt_or_factor] :StmtOrFactor
+|	[accumulate opt_eos] :BareSend
 
 def elsif_list
 	[elsif_clause elsif_list] :Clause
@@ -630,22 +632,11 @@ def code_factor
 |	[TRUE] :True
 |	[FALSE] :False
 |	[POPEN code_expr PCLOSE] :Paren
-|	[SEND var_ref accumulate opt_eos] :Send
-|	[SEND_TREE var_ref accumulate opt_eos] :SendTree
-|	[PARSE opt_capture type_ref opt_field_init accumulate] :Parse
-|	[PARSE_TREE opt_capture type_ref opt_field_init accumulate] :ParseTree
-|	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
-|	[REDUCE id type_ref opt_field_init accumulate] :Reduce
-|	[READ_REDUCE id type_ref opt_field_init accumulate] :ReadReduce
-|	[CONS opt_capture type_ref opt_field_init constructor] :Cons
-|	[MATCH var_ref pattern] :Match
 |	[string] :String
 |	[type_ref IN var_ref] :In
-|	[MAKE_TREE POPEN call_arg_list PCLOSE] :MakeTree
-|	[MAKE_TOKEN POPEN call_arg_list PCLOSE] :MakeToken
 |	[TYPEID LT type_ref GT] :TypeId
-|	[NEW opt_capture type_ref POPEN FieldInitList: field_init* PCLOSE] :New
 |	[CAST LT type_ref GT code_factor] :Cast
+|	[stmt_or_factor] :StmtOrFactor
 
 def type_ref
 	[region_qual id opt_repeat] :Id
@@ -678,6 +669,19 @@ def opt_field_init
 def field_init
 	[code_expr]
 
+def stmt_or_factor
+	[PARSE opt_capture type_ref opt_field_init accumulate] :Parse
+|	[PARSE_TREE opt_capture type_ref opt_field_init accumulate] :ParseTree
+|	[PARSE_STOP opt_capture type_ref opt_field_init accumulate] :ParseStop
+|	[REDUCE id type_ref opt_field_init accumulate] :Reduce
+|	[READ_REDUCE id type_ref opt_field_init accumulate] :ReadReduce
+|	[SEND var_ref accumulate opt_eos] :Send
+|	[SEND_TREE var_ref accumulate opt_eos] :SendTree
+|	[MAKE_TREE POPEN call_arg_list PCLOSE] :MakeTree
+|	[MAKE_TOKEN POPEN call_arg_list PCLOSE] :MakeToken
+|	[CONS opt_capture type_ref opt_field_init constructor] :Cons
+|	[MATCH var_ref pattern] :Match
+|	[NEW opt_capture type_ref POPEN FieldInitList: field_init* PCLOSE] :New
 
 #
 # Pattern
