@@ -2201,15 +2201,26 @@ struct LoadColm
 
 		LangExpr *expr = 0;
 
-		if ( CaseClause.prodName() == case_clause::Pattern ) {
-			/* A match pattern. */
-			PatternItemList *list = walkPattern( CaseClause.pattern(), varRef );
-			expr = match( CaseClause.loc(), varRef, list );
-		}
-		else {
-			/* An identifier to be interpreted as a production name. */
-			String prod = CaseClause.id().text().c_str();
-			expr = prodCompare( CaseClause.loc(), varRef, prod );
+		switch ( CaseClause.prodName() ) {
+			case case_clause::Pattern: {
+				/* A match pattern. */
+				PatternItemList *list = walkPattern( CaseClause.pattern(), varRef );
+				expr = match( CaseClause.loc(), varRef, list );
+				break;
+			}
+			case case_clause::Id: {
+				/* An identifier to be interpreted as a production name. */
+				String prod = CaseClause.id().text().c_str();
+				expr = prodCompare( CaseClause.loc(), varRef, prod, 0 );
+				break;
+			}
+			case case_clause::IdPat: {
+				String prod = CaseClause.id().text().c_str();
+				PatternItemList *list = walkPattern( CaseClause.pattern(), varRef );
+				LangExpr *matchExpr = match( CaseClause.loc(), varRef, list );
+				expr = prodCompare( CaseClause.loc(), varRef, prod, matchExpr );
+				break;
+			}
 		}
 
 		StmtList *stmtList = walkBlockOrSingle( CaseClause.block_or_single() );

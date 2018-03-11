@@ -514,6 +514,9 @@ void LangTerm::resolve( Compiler *pd )
 			break;
 
 		case ProdCompareType:
+			/* If it has a match expression go into that. */
+			if ( expr != 0 )
+				expr->resolve( pd );
 			break;
 
 		case MatchType:

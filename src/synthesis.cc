@@ -1244,6 +1244,26 @@ UniqueType *LangTerm::evaluateProdCompare( Compiler *pd, CodeVect &code ) const
 
 	code.append( IN_TST_EQL_VAL );
 
+	if ( expr != 0 ) {
+		code.append( IN_DUP_VAL );
+
+		/* Test: jump past the match if the production test failed. We don't have
+		 * the distance yet. */
+		long jumpFalse = code.length();
+		code.append( IN_JMP_FALSE_VAL );
+		code.appendHalf( 0 );
+
+		code.append( IN_POP_VAL );
+
+		expr->evaluate( pd, code );
+
+		/* Set the jump false distance. */
+		long falseDist = code.length() - jumpFalse - 3;
+		code.setHalf( jumpFalse+1, falseDist );
+
+		return ut;
+	}
+
 	return pd->uniqueTypeInt;
 }
 

@@ -2994,13 +2994,14 @@ struct LangTerm
 	}
 
 	static LangTerm *consProdCompare( const InputLoc &loc,
-			LangVarRef *varRef, const String &prod )
+			LangVarRef *varRef, const String &prod, LangExpr *matchExpr )
 	{
 		LangTerm *t = new LangTerm;
 		t->type = ProdCompareType;
 		t->loc = loc;
 		t->varRef = varRef;
 		t->prod = prod;
+		t->expr = matchExpr;
 		return t;
 	}
 

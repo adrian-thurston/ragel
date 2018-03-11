@@ -963,10 +963,11 @@ LangExpr *BaseParser::match( const InputLoc &loc, LangVarRef *varRef,
 	return expr;
 }
 
-LangExpr *BaseParser::prodCompare( const InputLoc &loc, LangVarRef *varRef, const String &prod )
+LangExpr *BaseParser::prodCompare( const InputLoc &loc, LangVarRef *varRef,
+		const String &prod, LangExpr *matchExpr )
 {
 	LangExpr *expr = LangExpr::cons( LangTerm::consProdCompare( 
-			InputLoc(), varRef, prod ) );
+			InputLoc(), varRef, prod, matchExpr ) );
 
 	return expr;
 }
