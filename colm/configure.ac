@@ -20,12 +20,15 @@ AC_ARG_WITH(subject,
 		SUBJECT_LD_LIBRARY_PATH="$withval/lib"
 	],
 	[
-		SUBJECT_BIN="\${abs_top_builddir}/../colm/src/colm"
-		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../colm/src/include"
-		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../colm/src/.libs"
-		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../colm/src/.libs"
+		SUBJECT_BIN="\${abs_top_builddir}/../src/colm"
+		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../src/include"
+		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../src/.libs"
+		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../src/.libs"
 	]
 )
+
+dnl Can't do this due to lack of recursive substitution
+dnl -- AC_CHECK_FILE($SUBJECT_BIN, [], [AC_ERROR([subject not found: $SUBJECT_BIN])])
 
 AC_SUBST(SUBJECT_BIN)
 AC_SUBST(SUBJECT_CPPFLAGS)
