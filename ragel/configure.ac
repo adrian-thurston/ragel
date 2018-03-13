@@ -5,7 +5,7 @@ dnl
 AC_INIT(ragel-suite, 1.0.1)
 PUBDATE="November 2014"
 
-EXPECTED_VER=0.13.0.4
+EXPECTED_VER=0.13.0.5
 
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
