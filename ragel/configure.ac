@@ -52,7 +52,7 @@ AC_SUBST(SUBJECT_LD_LIBRARY_PATH)
 AC_ARG_WITH(ragel-src,
 	[AC_HELP_STRING([--with-ragel-src], [location of ragel src code])],
 		[RAGEL_SRC="$withval"],
-		[RAGEL_SRC="\${abs_top_builddir}/../src"] )
+		[RAGEL_SRC="$HOME/devel/ragel/src"] )
 
 AC_SUBST(RAGEL_SRC)
 
