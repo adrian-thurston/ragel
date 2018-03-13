@@ -1,0 +1,190 @@
+#include <string.h>
+#include <stdio.h>
+
+int target ;
+int top ;
+int stack [32];
+
+
+
+
+
+static const char  _call4_trans_keys [] = { 1, 0, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 0, 3, 1, 0, 1, 0, 1, 0, 0 ,  };
+static const char  _call4_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 ,  };
+static const char  _call4_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0 ,  };
+static const char  _call4_indicies [] = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 ,  };
+static const char  _call4_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _call4_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _call4_cond_targs [] = { 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0 ,  };
+static const char  _call4_cond_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 3, 4, 0 ,  };
+static const char  _call4_nfa_targs [] = { 0, 0 ,  };
+static const char  _call4_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _call4_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _call4_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  call4_start  = 13;
+static const int  call4_first_final  = 13;
+static const int  call4_error  = 0;
+static const int  call4_en_unused  = 1;
+static const int  call4_en_one  = 7;
+static const int  call4_en_two  = 10;
+static const int  call4_en_main  = 13;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) call4_start;
+		top = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _trans = 0;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _call4_trans_keys + (cs<<1);
+		_inds = _call4_indicies + _call4_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 119 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _call4_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _call4_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _call4_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _call4_cond_targs[_trans];
+		if ( _call4_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		switch ( _call4_cond_actions[_trans] ) {
+			case 1 :
+			{
+				printf( "%s", "one\n" );
+				{
+					top -= 1;
+					cs = stack[top];
+					goto _again;
+				}
+				
+			}
+			
+			break;
+			case 2 :
+			{
+				printf( "%s", "two\n" );
+				{
+					top -= 1;
+					cs = stack[top];
+					goto _again;
+				}
+				
+			}
+			
+			break;
+			case 3 :
+			{
+				target = 7;
+				{
+					stack[top] = cs;
+					top += 1;
+					cs = (target);
+					goto _again;
+				}
+				
+			}
+			
+			break;
+			case 4 :
+			{
+				target = 10;
+				{
+					stack[top] = cs;
+					top += 1;
+					cs = (target);
+					goto _again;
+				}
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= call4_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"1one2two1one\n",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

@@ -1,0 +1,141 @@
+host( "working/erract8.rl", 1 ) @{/*
+	* @@LANG: java
+	*/
+	
+	class erract8
+	{
+		
+		
+	}@
+	array char _erract8_trans_keys( 0, 3 ) = { u(1), u(0), u(3), u(3), u(2), u(2), u(0), u(0), u(0), u(0), u(0), u(0), u(1), u(0), u(0) };
+	
+	array s8 _erract8_char_class( 0, 3 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 0 };
+	
+	array s8 _erract8_index_offsets( 0, 5 ) = { 0, 0, 1, 2, 3, 4, 5, 0 };
+	
+	array s8 _erract8_indicies( 0, 5 ) = { 1, 2, 3, 4, 5, 0 };
+	
+	array s8 _erract8_index_defaults( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _erract8_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _erract8_cond_targs( 0, 6 ) = { 0, 2, 3, 4, 5, 6, 0 };
+	
+	array s8 _erract8_cond_actions( 0, 3 ) = { 2, 3, 3, 3, 3, 3, 0 };
+	
+	array s8 _erract8_to_state_actions( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 0 };
+	
+	array s8 _erract8_eof_actions( 0, 2 ) = { 0, 2, 2, 2, 2, 2, 0, 0 };
+	
+	array s8 _erract8_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _erract8_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _erract8_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _erract8_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int erract8_start = 1;
+	value int erract8_first_final = 6;
+	value int erract8_error = 0;
+	
+	value int erract8_en_main = 1;
+	
+	host( "working/erract8.rl", 18 ) @{
+		
+		static void test( char data[] )
+		{
+			int cs, p = 0, pe = data.length;
+			int eof = pe;
+			int top;
+			
+		}@
+		{
+			cs = cast(int)erract8_start;
+		}
+		host( "working/erract8.rl", 26 ) @{
+		}@
+		{
+			int _trans = 0;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_keys = offset( _erract8_trans_keys, (cs<<1) );
+					_inds = offset( _erract8_indicies, _erract8_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 104 && ( deref( data, p )) >= 88 )
+					{
+						int _ic = cast(int)_erract8_char_class[cast(int)( deref( data, p )) - 88];
+						if ( _ic <= cast(int)deref( _erract8_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _erract8_trans_keys, _keys ) )
+						_trans = cast(int)deref( _erract8_indicies, _inds + cast(int)( _ic - cast(int)deref( _erract8_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_erract8_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_erract8_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_erract8_cond_targs[_trans];
+					
+					if ( _erract8_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					switch ( _erract8_cond_actions[_trans] ) {
+						case 3 {
+							host( "working/erract8.rl", 10 ) ${ System.out.println("char: " + data[p]); }$
+						}
+						case 2 {
+							host( "working/erract8.rl", 11 ) ${ System.out.println("err: " + data[p]); }$
+						}
+					}
+					
+					
+				}
+				label _again {
+					switch ( _erract8_to_state_actions[cs] ) {
+						case 1 {
+							host( "working/erract8.rl", 12 ) ${ System.out.println("to state: " + data[p]); }$
+						}
+					}
+					
+					if ( cs == 0 )
+					goto _out;
+					p+= 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+					if ( p == eof )
+					{
+						switch ( _erract8_eof_actions[cs] ) {
+							case 2 {
+								host( "working/erract8.rl", 11 ) ${ System.out.println("err: " + data[p]); }$
+							}
+						}
+					}
+					
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/erract8.rl", 27 ) @{
+			
+			System.out.println("rest: " + data[p] + data[p+1] + data[p+2]);
+		}
+		
+		public static void main( String args[] )
+		{
+			test( "hello".toCharArray() );
+		}
+	}
+	
+}@

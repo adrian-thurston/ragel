@@ -1,0 +1,284 @@
+host( "working/gotocallret1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var comm  byte ;
+	var top  int ;
+	var stack [32] int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _GotoCallRet_actions( 0, 7 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 2, 0, 1, 0 };
+
+array s8 _GotoCallRet_eof_actions( 0, 15 ) = { 0, 15, 15, 5, 5, 7, 7, 0, 5, 0, 0, 0 };
+
+array s8 _GotoCallRet_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _GotoCallRet_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int GotoCallRet_start = 7;
+value int GotoCallRet_first_final = 7;
+value int GotoCallRet_error = 0;
+
+value int GotoCallRet_en_garble_line = 3;
+value int GotoCallRet_en_alp_comm = 5;
+value int GotoCallRet_en_dig_comm = 6;
+value int GotoCallRet_en_main = 7;
+
+host( "working/gotocallret1_go.rl", 72 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)GotoCallRet_start;
+		top = 0;
+	}
+	host( "working/gotocallret1_go.rl", 75 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 7:
+			if ( ( deref( data, p )) > 57 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr10;
+				}
+			} else if ( ( deref( data, p )) >= 48 ) {
+				goto ctr10;
+			}
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ( deref( data, p )) == 32 ) {
+				goto ctr1;
+			}
+			{
+				goto ctr0;
+			}
+			case 2:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr0;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr3;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr5;
+			}
+			case 8:
+			{
+				goto ctr11;
+			}
+			case 5:
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr8;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr7;
+			}
+			case 9:
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr8;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr7;
+			}
+			case 6:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr9;
+			}
+			{
+				goto ctr7;
+			}
+			case 10:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr9;
+			}
+			{
+				goto ctr7;
+			}
+		}
+		
+		ctr11: cs = 0; goto _again;
+		ctr0: cs = 0; goto f0;
+		ctr7: cs = 0; goto f7;
+		ctr10: cs = 1; goto f8;
+		ctr1: cs = 2; goto f1;
+		ctr5: cs = 4; goto _again;
+		ctr3: cs = 4; goto f4;
+		ctr2: cs = 7; goto f2;
+		ctr4: cs = 8; goto f5;
+		ctr6: cs = 8; goto f6;
+		ctr8: cs = 9; goto _again;
+		ctr9: cs = 10; goto _again;
+		
+		f4: _acts = offset( _GotoCallRet_actions, 1 ); goto execFuncs;
+		f6: _acts = offset( _GotoCallRet_actions, 3 ); goto execFuncs;
+		f7: _acts = offset( _GotoCallRet_actions, 7 ); goto execFuncs;
+		f1: _acts = offset( _GotoCallRet_actions, 9 ); goto execFuncs;
+		f8: _acts = offset( _GotoCallRet_actions, 11 ); goto execFuncs;
+		f2: _acts = offset( _GotoCallRet_actions, 13 ); goto execFuncs;
+		f0: _acts = offset( _GotoCallRet_actions, 15 ); goto execFuncs;
+		f5: _acts = offset( _GotoCallRet_actions, 17 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _GotoCallRet_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _GotoCallRet_actions, _acts ) ) {
+				case 0{
+					host( "working/gotocallret1_go.rl", 20 ) ${fmt.Print( "error: garbling line\n" );}$
+				}
+				case 1{
+					host( "working/gotocallret1_go.rl", 21 ) ${${cs = 7; goto _again;}$}$
+				}
+				case 3{
+					host( "working/gotocallret1_go.rl", 32 ) ${${p = p - 1; }$ 
+						${top-= 1;cs = stack[top];goto _again;}$
+					}$
+				}
+				case 4{
+					host( "working/gotocallret1_go.rl", 42 ) ${if ( comm >= 'a' ) {
+							${stack[top] = cs; top += 1;cs = 5; goto _again;}$} else {
+							${stack[top] = cs; top += 1;cs = 6; goto _again;}$}
+					}$
+				}
+				case 5{
+					host( "working/gotocallret1_go.rl", 55 ) ${comm = ={( deref( data, p ))}=;
+					}$
+				}
+				case 6{
+					host( "working/gotocallret1_go.rl", 57 ) ${fmt.Print( "correct command\n" );}$
+				}
+				case 7{
+					host( "working/gotocallret1_go.rl", 61 ) ${${p = p - 1; }$
+						${cs = 3; goto _again;}$}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			index s8 __acts;
+			uint __nacts;
+			__acts = offset( _GotoCallRet_actions, _GotoCallRet_eof_actions[cs] );
+			__nacts = cast(uint)deref( _GotoCallRet_actions, __acts ); __acts += 1;
+			while ( __nacts > 0 ) {
+				switch ( deref( _GotoCallRet_actions, __acts ) ) {
+					case 2{
+						host( "working/gotocallret1_go.rl", 23 ) ${fmt.Print( "error: failed to recover\n" );}$
+					}
+					case 3{
+						host( "working/gotocallret1_go.rl", 32 ) ${${p = p - 1; }$ 
+							${top-= 1;cs = stack[top];goto _again;}$
+						}$
+					}
+					case 7{
+						host( "working/gotocallret1_go.rl", 61 ) ${${p = p - 1; }$
+							${cs = 3; goto _again;}$}$
+					}
+				}
+				__acts += 1;
+				__nacts -= 1;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/gotocallret1_go.rl", 82 ) @{
+	}
+	func finish() {
+		if cs >= GotoCallRet_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"lkajsdf\n",
+		"2134\n",
+		"(\n",
+		"\n",
+		"*234234()0909 092 -234aslkf09`1 11\n",
+		"1\n",
+		"909\n",
+		"1 a\n",
+		"11 1\n",
+		"a 1\n",
+		"aa a\n",
+		"1 1\n",
+		"1 123456\n",
+		"a a\n",
+		"a abcdef\n",
+		"h",
+		"a aa1",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

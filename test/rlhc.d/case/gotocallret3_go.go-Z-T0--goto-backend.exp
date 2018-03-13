@@ -1,0 +1,357 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _gotocallret_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 5, 1, 7, 1, 8, 2, 0, 1, 2, 4, 6, 0  }
+var _gotocallret_key_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 8, 10, 14, 14, 18, 0  }
+var _gotocallret_trans_keys [] byte  = [] byte  { 32, 10, 10, 10, 65, 90, 97, 122, 48, 57, 48, 57, 97, 122, 65, 90, 97, 122, 48, 57, 0 }
+var _gotocallret_single_lengths [] int8  = [] int8  { 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0  }
+var _gotocallret_range_lengths [] int8  = [] int8  { 0, 0, 0, 0, 0, 2, 1, 2, 0, 2, 1, 0  }
+var _gotocallret_index_offsets [] int8  = [] int8  { 0, 0, 2, 4, 6, 8, 11, 13, 16, 17, 20, 0  }
+var _gotocallret_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _gotocallret_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0  }
+var _gotocallret_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _gotocallret_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _gotocallret_cond_targs [] int8  = [] int8  { 2, 0, 7, 0, 8, 4, 8, 4, 9, 9, 0, 10, 0, 1, 1, 0, 0, 9, 9, 0, 10, 0, 0  }
+var _gotocallret_cond_actions [] int8  = [] int8  { 18, 13, 11, 13, 15, 1, 3, 0, 0, 0, 7, 0, 7, 9, 9, 13, 0, 0, 0, 7, 0, 7, 0  }
+var _gotocallret_eof_actions [] int8  = [] int8  { 0, 13, 13, 5, 5, 7, 7, 0, 5, 0, 0, 0  }
+var _gotocallret_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _gotocallret_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _gotocallret_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _gotocallret_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var gotocallret_start  int  = 7
+var gotocallret_first_final  int  = 7
+var gotocallret_error  int  = 0
+var gotocallret_en_garble_line  int  = 3
+var gotocallret_en_alp_comm  int  = 5
+var gotocallret_en_dig_comm  int  = 6
+var gotocallret_en_main  int  = 7
+func prepare() {
+
+	{
+		cs = int(gotocallret_start);
+		top = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _klen int 
+		var  _trans  uint   = 0
+		var  _cond  uint   = 0
+		var  _acts int
+		var  _nacts uint 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_keys = int(_gotocallret_key_offsets[cs] );
+		_trans = uint(_gotocallret_index_offsets[cs]);
+		_klen = int(_gotocallret_single_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + _klen - 1;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + ((_upper-_lower) >> 1);
+						switch {
+							case ( data[p ]) < _gotocallret_trans_keys[_mid ]:
+							_upper = _mid - 1;
+							
+							case ( data[p ]) > _gotocallret_trans_keys[_mid ]:
+							_lower = _mid + 1;
+							
+							default:
+							{
+								_trans += uint((_mid - _keys));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_keys += _klen;
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		_klen = int(_gotocallret_range_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + (_klen<<1) - 2;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+						switch {
+							case ( data[p ]) < _gotocallret_trans_keys[_mid ]:
+							_upper = _mid - 2;
+							
+							case ( data[p ]) > _gotocallret_trans_keys[_mid + 1 ]:
+							_lower = _mid + 2;
+							
+							default:
+							{
+								_trans += uint(((_mid - _keys)>>1));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		
+		_match :
+		_ckeys = int(_gotocallret_trans_offsets[_trans] );
+		_klen = int(_gotocallret_trans_lengths[_trans]);
+		_cond = uint(_gotocallret_trans_offsets[_trans]);
+		_cpc = 0;
+		{
+			var  _lower int
+			var  _mid int
+			var  _upper int
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			for {
+				{
+					if _upper < _lower  {
+						break;
+						
+						
+					}
+					_mid = _lower + ((_upper-_lower) >> 1);
+					switch {
+						case _cpc < int(_gotocallret_cond_keys[_mid ]):
+						_upper = _mid - 1;
+						
+						case _cpc > int(_gotocallret_cond_keys[_mid ]):
+						_lower = _mid + 1;
+						
+						default:
+						{
+							_cond += uint((_mid - _ckeys));
+							goto _match_cond;
+						}
+						
+					}
+				}
+				
+			}
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = int(_gotocallret_cond_targs[_cond]);
+		if _gotocallret_cond_actions[_cond] == 0  {
+			goto _again;
+			
+			
+		}
+		_acts = int(_gotocallret_cond_actions[_cond] );
+		_nacts = uint(_gotocallret_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _gotocallret_actions[_acts ] {
+					case 0 :
+					{fmt.Print( "error: garbling line\n" );}
+					
+					break;
+					case 1 :
+					{{cs = 7;
+						}}
+					
+					break;
+					case 3 :
+					{{p = p - 1;
+						} 
+						{top-= 1;
+							cs = stack[top];
+						}
+					}
+					
+					break;
+					case 4 :
+					{if ( comm >= 97 ) {
+							{stack[top] = cs;
+								top += 1;
+								cs = 5;
+							}} else {
+							{stack[top] = cs;
+								top += 1;
+								cs = 6;
+							}}
+					}
+					
+					break;
+					case 5 :
+					{comm = (( data[p ]));
+					}
+					
+					break;
+					case 6 :
+					{fmt.Print( "prints\n" );}
+					
+					break;
+					case 7 :
+					{fmt.Print( "correct command\n" );}
+					
+					break;
+					case 8 :
+					{{p = p - 1;
+						}
+						{cs = 3;
+						}}
+					
+					break;
+					
+				}
+				_nacts -= 1;
+				_acts += 1;
+			}
+			
+			
+			
+		}
+		
+		_again :
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		if p == eof  {
+			{
+				var  __acts int
+				var  __nacts uint 
+				__acts = int(_gotocallret_eof_actions[cs] );
+				__nacts = uint(_gotocallret_actions[__acts ]);
+				__acts += 1;
+				for __nacts > 0  {
+					{
+						switch _gotocallret_actions[__acts ] {
+							case 2 :
+							{fmt.Print( "error: failed to recover\n" );}
+							
+							break;
+							case 3 :
+							{{p = p - 1;
+								} 
+								{top-= 1;
+									cs = stack[top];
+								}
+							}
+							
+							break;
+							case 8 :
+							{{p = p - 1;
+								}
+								{cs = 3;
+								}}
+							
+							break;
+							
+						}
+						__nacts -= 1;
+						__acts += 1;
+					}
+					
+				}
+			}
+			
+			
+		}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= gotocallret_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"lkajsdf\n",
+	"2134\n",
+	"(\n",
+	"\n",
+	"*234234()0909 092 -234aslkf09`1 11\n",
+	"1\n",
+	"909\n",
+	"1 a\n",
+	"11 1\n",
+	"a 1\n",
+	"aa a\n",
+	"1 1\n",
+	"1 123456\n",
+	"a a\n",
+	"a abcdef\n",
+	"h",
+	"a aa1",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

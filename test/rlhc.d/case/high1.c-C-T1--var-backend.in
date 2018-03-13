@@ -1,0 +1,502 @@
+host( "working/high1.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@PROHIBIT_GENFLAGS: -F0 -F1
+	*/
+	
+	/**
+	* Test a high character to make sure signedness 
+	* isn't messing us up.
+	*/
+	
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	
+	struct high
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _high_key_offsets( 0, 0 ) = { 0, 0 };
+
+array unsigned int _high_trans_keys( 0, 4294967295 ) = { u(4026531840), u(0), u(31), u(32), u(511), u(4026531841), u(4261412864), u(4261412865), u(4294967295), u(0) };
+
+array s8 _high_single_lengths( 0, 1 ) = { 1, 0 };
+
+array s8 _high_range_lengths( 0, 4 ) = { 4, 0 };
+
+array s8 _high_index_offsets( 0, 0 ) = { 0, 0 };
+
+array s8 _high_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _high_trans_offsets( 0, 5 ) = { 0, 1, 2, 3, 4, 5, 0 };
+
+array s8 _high_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _high_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _high_cond_targs( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _high_cond_actions( 0, 5 ) = { 4, 1, 2, 5, 1, 3, 0 };
+
+array s8 _high_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _high_nfa_offsets( 0, 0 ) = { 0, 0 };
+
+array s8 _high_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _high_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int high_start = 0;
+value int high_first_final = 0;
+value int high_error = -1;
+
+value int high_en_main = 0;
+
+host( "working/high1.rl", 36 ) @{
+	
+	void high_init( struct high *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)high_start;
+	}
+	host( "working/high1.rl", 40 ) @{
+	}
+	
+	void high_execute( struct high *fsm, const unsigned int *_data, int _len )
+	{
+		const unsigned int *p = _data;
+		const unsigned int *pe = _data+_len;
+		
+	}@
+	{
+		int _klen;
+		index unsigned int _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans;
+		uint _cond = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		while ( _cont == 1 ) {
+			
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _high_trans_keys, _high_key_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+					_trans = cast(uint)_high_index_offsets[host( "-", 1 ) ={ fsm->cs}=];
+					_have = 0;
+					
+					_klen = cast(int)_high_single_lengths[host( "-", 1 ) ={ fsm->cs}=];
+					if ( _klen > 0 ) {
+						index unsigned int _lower;
+						index unsigned int _mid;
+						index unsigned int _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0 ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _high_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _high_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					if ( _have == 0 ) {
+						_klen = cast(int)_high_range_lengths[host( "-", 1 ) ={ fsm->cs}=];
+						if ( _klen > 0 ) {
+							index unsigned int _lower;
+							index unsigned int _mid;
+							index unsigned int _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _high_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _high_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 )
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					_ckeys = offset( _high_cond_keys, _high_trans_offsets[_trans] );
+					_klen = cast(int)_high_trans_lengths[_trans];
+					_cond = cast(uint)_high_trans_offsets[_trans];
+					_have = 0;
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _high_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _high_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							host( "-", 1 ) ={ fsm->cs}= = -1;
+							_cont = 0;
+						}
+					}
+				}
+				if ( _cont == 1 ) {
+					host( "-", 1 ) ={ fsm->cs}= = cast(int)_high_cond_targs[_cond];
+					
+					switch ( _high_cond_actions[_cond] ) {
+						case 2 {
+							host( "working/high1.rl", 28 ) ${printf("gothigh1\n");}$
+						}
+						case 5 {
+							host( "working/high1.rl", 30 ) ${printf("gothigh2\n");}$
+						}
+						case 1 {
+							host( "working/high1.rl", 31 ) ${printf("else\n");}$
+						}
+						case 3 {
+							host( "working/high1.rl", 28 ) ${printf("gothigh1\n");}$
+							host( "working/high1.rl", 30 ) ${printf("gothigh2\n");}$
+						}
+						case 4 {
+							host( "working/high1.rl", 29 ) ${printf("gothigh1\n");}$
+							host( "working/high1.rl", 30 ) ${printf("gothigh2\n");}$
+						}
+					}
+					
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/high1.rl", 48 ) @{
+	}
+	
+	int high_finish( struct high *fsm )
+	{
+		if ( fsm->cs == high_error )
+		return -1;
+		if ( fsm->cs >= high_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct high high;
+	
+	#define BUFSIZE 1024
+	char cbuf[BUFSIZE];
+	unsigned int buf[BUFSIZE];
+	int buflen = 0;
+	char numbuf[9];
+	int numlen = 0;
+	
+	struct tokenizer
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _tokenizer_key_offsets( 0, 7 ) = { 0, 0, 7, 0 };
+
+array char _tokenizer_trans_keys( 0, 102 ) = { 32, 9, 13, 48, 57, 97, 102, 32, 9, 13, 48, 57, 97, 102, 0 };
+
+array s8 _tokenizer_single_lengths( 0, 1 ) = { 0, 1, 1, 0 };
+
+array s8 _tokenizer_range_lengths( 0, 3 ) = { 0, 3, 3, 0 };
+
+array s8 _tokenizer_index_offsets( 0, 5 ) = { 0, 0, 5, 0 };
+
+array s8 _tokenizer_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _tokenizer_trans_offsets( 0, 9 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+
+array s8 _tokenizer_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _tokenizer_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _tokenizer_cond_targs( 0, 2 ) = { 1, 1, 2, 2, 0, 1, 1, 2, 2, 0, 0 };
+
+array s8 _tokenizer_cond_actions( 0, 4 ) = { 0, 0, 2, 2, 0, 4, 4, 2, 2, 0, 0 };
+
+array s8 _tokenizer_eof_actions( 0, 3 ) = { 0, 1, 3, 0 };
+
+array s8 _tokenizer_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _tokenizer_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _tokenizer_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _tokenizer_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int tokenizer_start = 1;
+value int tokenizer_first_final = 1;
+value int tokenizer_error = 0;
+
+value int tokenizer_en_main = 1;
+
+host( "working/high1.rl", 110 ) @{
+	
+	void tokenizer_init( struct tokenizer *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)tokenizer_start;
+	}
+	host( "working/high1.rl", 114 ) @{
+	}
+	
+	void tokenizer_execute( struct tokenizer *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		const char *eof = pe;
+		
+	}@
+	{
+		int _klen;
+		index char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans;
+		uint _cond = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		while ( _cont == 1 ) {
+			
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( p == eof )
+				{
+					if ( _have == 0 ) {
+						switch ( _tokenizer_eof_actions[host( "-", 1 ) ={ fsm->cs}=] ) {
+							case 1 {
+								host( "working/high1.rl", 96 ) ${
+									if ( buflen > 0 )
+									high_execute( &high, buf, buflen );
+									if ( high_finish( &high ) > 0 )
+									printf("ACCEPT\n");
+									else
+									printf("FAIL\n");
+								}$
+							}
+							case 3 {
+								host( "working/high1.rl", 82 ) ${
+									/* Null terminate the buffer storing the number and reset. */
+									numbuf[numlen] = 0;
+									numlen = 0;
+									
+									/* Store the number in the buf. If the buf is full then 
+									* flush and reset the buffer. */
+									buf[buflen++] = strtoul( numbuf, 0, 16 );
+									if ( buflen == BUFSIZE ) {
+										high_execute( &high, buf, BUFSIZE );
+										buflen = 0;
+									}
+								}$
+								host( "working/high1.rl", 96 ) ${
+									if ( buflen > 0 )
+									high_execute( &high, buf, buflen );
+									if ( high_finish( &high ) > 0 )
+									printf("ACCEPT\n");
+									else
+									printf("FAIL\n");
+								}$
+							}
+						}
+					}
+				}
+				
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _tokenizer_trans_keys, _tokenizer_key_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+					_trans = cast(uint)_tokenizer_index_offsets[host( "-", 1 ) ={ fsm->cs}=];
+					_have = 0;
+					
+					_klen = cast(int)_tokenizer_single_lengths[host( "-", 1 ) ={ fsm->cs}=];
+					if ( _klen > 0 ) {
+						index char _lower;
+						index char _mid;
+						index char _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0 ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _tokenizer_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _tokenizer_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					if ( _have == 0 ) {
+						_klen = cast(int)_tokenizer_range_lengths[host( "-", 1 ) ={ fsm->cs}=];
+						if ( _klen > 0 ) {
+							index char _lower;
+							index char _mid;
+							index char _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _tokenizer_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _tokenizer_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 )
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					_ckeys = offset( _tokenizer_cond_keys, _tokenizer_trans_offsets[_trans] );
+					_klen = cast(int)_tokenizer_trans_lengths[_trans];
+					_cond = cast(uint)_tokenizer_trans_offsets[_trans];
+					_have = 0;
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _tokenizer_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _tokenizer_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							host( "-", 1 ) ={ fsm->cs}= = 0;
+							_cont = 0;
+						}
+					}
+				}
+				if ( _cont == 1 ) {
+					host( "-", 1 ) ={ fsm->cs}= = cast(int)_tokenizer_cond_targs[_cond];
+					
+					switch ( _tokenizer_cond_actions[_cond] ) {
+						case 2 {
+							host( "working/high1.rl", 77 ) ${
+								if ( numlen < 8 )
+								numbuf[numlen++] = ={( deref( data, p ))}=;
+							}$
+						}
+						case 4 {
+							host( "working/high1.rl", 82 ) ${
+								/* Null terminate the buffer storing the number and reset. */
+								numbuf[numlen] = 0;
+								numlen = 0;
+								
+								/* Store the number in the buf. If the buf is full then 
+								* flush and reset the buffer. */
+								buf[buflen++] = strtoul( numbuf, 0, 16 );
+								if ( buflen == BUFSIZE ) {
+									high_execute( &high, buf, BUFSIZE );
+									buflen = 0;
+								}
+							}$
+						}
+					}
+					
+					if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/high1.rl", 123 ) @{
+	}
+	
+	int tokenizer_finish( struct tokenizer *fsm )
+	{
+		if ( fsm->cs == tokenizer_error )
+		return -1;
+		if ( fsm->cs >= tokenizer_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct tokenizer tok;
+	
+	void test( char *cbuf )
+	{
+		int len = strlen( cbuf );
+		high_init( &high );
+		tokenizer_init( &tok );
+		tokenizer_execute( &tok, cbuf, len );
+		if ( tokenizer_finish( &tok ) <= 0 )
+		printf("Tokenizer FAIL\n");
+	}
+	
+	char data[] =
+	"10 20 30 40 50 200 300 400 \n"
+	"d0000000 f0000000 fd000000 fe000000\n"
+	"ff000000 ffffffffffffffffffffffffff\n"
+	"ff\n";
+	
+	int main()
+	{
+		test( data );
+		return 0;
+	}
+	
+}@

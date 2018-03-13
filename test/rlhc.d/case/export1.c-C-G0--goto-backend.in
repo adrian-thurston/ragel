@@ -1,0 +1,179 @@
+host( "working/export1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	
+	
+}@
+export char test_ex_c1 99;
+export char test_ex_c2 122;
+export char test_ex_c3 116;
+
+host( "working/export1.rl", 25 ) @{
+}@
+array s8 _test_actions( 0, 2 ) = { 0, 1, 0, 1, 1, 1, 2, 0 };
+
+array s8 _test_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _test_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _test_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _test_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int test_start = 4;
+value int test_first_final = 4;
+value int test_error = 0;
+
+value int test_en_commands = 5;
+value int test_en_some_other = 4;
+
+host( "working/export1.rl", 26 ) @{
+	
+	int test( const char *data, int len )
+	{
+		int cs = test_en_commands;
+		const char *p = data, *pe = data + len;
+		
+	}@
+	{
+	}
+	host( "working/export1.rl", 33 ) @{
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 4:
+			{
+				goto ctr7;
+			}
+			case 5:
+			switch( ( deref( data, p )) ) {
+				case 99: {
+					goto ctr2;
+				}
+				case 116: {
+					goto ctr4;
+				}
+				case 122: {
+					goto ctr6;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr0;
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 2:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr3;
+				}
+				case 46: {
+					goto ctr4;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr5;
+			}
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr6;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr2: cs = 1; goto _again;
+		ctr4: cs = 2; goto _again;
+		ctr6: cs = 3; goto _again;
+		ctr7: cs = 4; goto _again;
+		ctr0: cs = 5; goto f0;
+		ctr3: cs = 5; goto f1;
+		ctr5: cs = 5; goto f2;
+		
+		f0: _acts = offset( _test_actions, 1 ); goto execFuncs;
+		f2: _acts = offset( _test_actions, 3 ); goto execFuncs;
+		f1: _acts = offset( _test_actions, 5 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _test_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _test_actions, _acts ) ) {
+				case 0{
+					host( "working/export1.rl", 16 ) ${ printf( "c1\n" );}$
+				}
+				case 1{
+					host( "working/export1.rl", 17 ) ${ printf( "c2\n" );}$
+				}
+				case 2{
+					host( "working/export1.rl", 18 ) ${ printf( "c3\n" );}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/export1.rl", 34 ) @{
+		
+		if ( cs >= test_first_final )
+		printf("ACCEPT\n");
+		else
+		printf("ERROR\n");
+		return 0;
+	}
+	
+	char data[] = { 
+		test_ex_c1, '1', '2', '\n', 
+		test_ex_c2, 'a', 'b', '\n', 
+		test_ex_c3, '.', '.', '\n', 0 
+	};
+	
+	int main()
+	{
+		test( data, strlen( data ) );
+		return 0;
+	}
+	
+}@

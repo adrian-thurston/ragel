@@ -1,0 +1,171 @@
+host( "working/element2.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	
+	struct LangEl
+	{
+		int key;
+		char *name;
+	};
+	
+	struct fsm
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _fsm_actions( 0, 1 ) = { 0, 1, 0, 1, 1, 0 };
+
+array s8 _fsm_eof_actions( 0, 3 ) = { 0, 0, 0, 3, 0 };
+
+array s8 _fsm_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _fsm_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _fsm_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _fsm_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int fsm_start = 1;
+value int fsm_first_final = 3;
+value int fsm_error = 0;
+
+value int fsm_en_main = 1;
+
+host( "working/element2.rl", 34 ) @{
+	
+	void fsm_init( struct fsm *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)fsm_start;
+	}
+	host( "working/element2.rl", 38 ) @{
+	}
+	
+	void fsm_execute( struct fsm *fsm,  struct LangEl *_data, int _len )
+	{
+		struct LangEl *p = _data;
+		struct LangEl *pe = _data+_len;
+		struct LangEl *eof = pe;
+		
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		_resume:
+		switch ( host( "-", 1 ) ={ fsm->cs}= ) {
+			case 1:
+			if ( host( "-", 1 ) ={p->key}= == 1 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch( host( "-", 1 ) ={p->key}= ) {
+				case 2: {
+					goto ctr0;
+				}
+				case 3: {
+					goto ctr2;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: host( "-", 1 ) ={ fsm->cs}= = 0; goto _again;
+		ctr0: host( "-", 1 ) ={ fsm->cs}= = 2; goto f0;
+		ctr2: host( "-", 1 ) ={ fsm->cs}= = 3; goto f0;
+		
+		f0: _acts = offset( _fsm_actions, 1 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _fsm_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _fsm_actions, _acts ) ) {
+				case 0{
+					host( "working/element2.rl", 29 ) ${printf("%s\n", p->name);}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			index s8 __acts;
+			uint __nacts;
+			__acts = offset( _fsm_actions, _fsm_eof_actions[host( "-", 1 ) ={ fsm->cs}=] );
+			__nacts = cast(uint)deref( _fsm_actions, __acts ); __acts += 1;
+			while ( __nacts > 0 ) {
+				switch ( deref( _fsm_actions, __acts ) ) {
+					case 1{
+						host( "working/element2.rl", 30 ) ${printf("accept\n");}$
+					}
+				}
+				__acts += 1;
+				__nacts -= 1;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/element2.rl", 47 ) @{
+	}
+	
+	int fsm_finish( struct fsm *fsm )
+	{
+		if ( fsm->cs == fsm_error )
+		return -1;
+		if ( fsm->cs >= fsm_first_final )
+		return 1;
+		return 0;
+	}
+	
+	int main()
+	{
+		static struct fsm fsm;
+		static struct LangEl lel[] = { 
+			{1, "one"}, 
+			{2, "two-a"}, 
+			{2, "two-b"}, 
+			{2, "two-c"}, 
+			{3, "three"}
+		};
+		
+		fsm_init( &fsm );
+		fsm_execute( &fsm, lel, 5 );
+		fsm_finish( &fsm );
+		
+		return 0;
+	}
+	
+}@

@@ -1,0 +1,85 @@
+#!/bin/bash
+#
+
+SUBDIRS=""
+
+TESTS="
+	ambig1.lm
+	backtrack1.lm
+	backtrack2.lm
+	backtrack3.lm
+	binary1.lm
+	accum1.lm
+	accum2.lm
+	accum3.lm
+	accumbt1.lm
+	accumbt2.lm
+	accumbt3.lm
+	mutualrec.lm
+	argv1.lm
+	argv2.lm
+	exit1.lm
+	exit2.lm
+	rubyhere.lm
+	translate1.lm
+	translate2.lm
+	construct1.lm
+	construct2.lm
+	construct3.lm
+	generate1.lm
+	generate2.lm
+	lookup1.lm
+	treecmp1.lm
+	context1.lm
+	context2.lm
+	context3.lm
+	undofrag1.lm
+	undofrag2.lm
+	undofrag3.lm
+	nestedcomm.lm
+	reparse.lm
+	btscan1.lm
+	btscan2.lm
+	island.lm
+	func.lm
+	travs1.lm
+	constructex.lm
+	rediv.lm
+	liftattrs.lm
+	mailbox.lm
+	string.lm
+	repeat1.lm
+	repeat2.lm
+	ragelambig1.lm
+	ragelambig2.lm
+	ragelambig3.lm
+	ragelambig4.lm
+	counting1.lm
+	counting2.lm
+	counting3.lm
+	counting4.lm
+	til.lm
+	matchex.lm
+	maxlen.lm
+	multiregion1.lm
+	multiregion2.lm
+	superid.lm
+	tags1.lm
+	tags2.lm
+	tags3.lm
+	heredoc.lm
+	commitbt.lm
+	sprintf.lm
+	div.lm
+	scope1.lm
+	export1.lm
+	lhs1.lm
+	rhsref1.lm
+	order1.lm
+	order2.lm
+	concat1.lm
+	concat2.lm
+	ignore1.lm
+	ignore2.lm
+	ignore3.lm
+"

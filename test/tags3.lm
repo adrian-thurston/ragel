@@ -1,0 +1,321 @@
+context tags
+
+	#
+	# Regular Definitions
+	#
+	rl def_name_char /[\-A-Za-z0-9._:?]/
+	rl def_name /[A-Za-z_:] def_name_char*/
+	rl def_system_literal /'"' [^"]* '"' | "'" [^']* "'"/
+
+	#
+	# Scanner for tag names.
+	#
+	lex
+		ignore /space+/
+		token tag_id /def_name/
+	end
+
+	#
+	# Scanner for attributes names
+	#
+	lex
+		ignore  /space+/
+		token attr_name /def_name_char+/
+		literal `=
+	end
+
+	# Scanner for attribute values.
+	lex
+		ignore  /space+/
+		token dquote_val /'"' ([^"] | '\\' any)* '"'/
+		token squote_val /"'" ([^'] | '\\' any)* "'"/
+		token unq_val /[^ \t\r\n<>"'] [^ \t\r\n<>]*/
+	end
+
+	literal `> `/>
+
+	#
+	# Tokens
+	#
+
+	lex
+		ignore /space+/
+		literal `< `</ `<!DOCTYPE
+		token doc_data /[^<]+/
+		token comment /"<!--" any* :>> "-->"/
+	end
+
+	#
+	# Tags
+	#
+
+	# This scanner is just for the id in close tags. The id needs to be looked up
+	# in the tag stack so we can determine if it is a stray. 
+	lex
+		# Ignore whitespace.
+		ignore /space+/
+
+		token stray_close_id //
+		token close_id /def_name/
+		{
+			# If it is in the tag stack then it is a close_id. If not then it's a
+			# stray_close_id.
+			send_id: int = typeid<stray_close_id>
+
+			LocalTagStack: tag_stack = TagStack
+			for Tag: tag_id in LocalTagStack {
+				T: tag_id = Tag
+				if match_text == T.data {
+					send_id = typeid<close_id>
+					break
+				}
+			}
+
+			input->push( make_token( send_id, input->pull(match_length) ) )
+		}
+	end
+
+	#
+	# Tag Stack
+	#
+
+	def tag_stack 
+		[tag_id tag_stack]
+	|	[]
+
+	TagStack: tag_stack
+
+	#
+	# Document Type
+	#
+	# This scanner handles inside DOCTYPE tags (except keywords).
+	lex 
+		ignore /space+/
+		token dt_name /def_name/
+		token dt_literal /def_system_literal/
+		token dt_bl /"[" [^\]]* "]"/
+	end
+
+	token dt_close /'>'/
+
+	# Using a separate scanner for the keywords in DOCTYPE prevents them from
+	# covering dt_name
+	lex 
+		ignore /space+/
+		literal `SYSTEM `PUBLIC
+	end
+
+	def DOCTYPE [`<!DOCTYPE dt_name external_id dt_bl? dt_close]
+
+	def external_id
+		[`SYSTEM dt_literal?]
+	|	[`PUBLIC dt_literal dt_literal?]
+
+	#
+	# Tags, with optionanal close.
+	#
+
+	def tag 
+		[open_tag item* opt_close_tag]
+
+	def open_tag 
+		[`< tag_id attr* `>]
+		{
+			TagStack = construct tag_stack 
+				[r2 TagStack]
+		}
+
+	def opt_close_tag
+		[`</ close_id `>]
+		{
+			match TagStack [Top:tag_id Rest:tag_stack] 
+			if r2.data == Top.data
+				TagStack = Rest
+			else
+				reject
+		}
+
+	|	[]
+		{
+			match TagStack [Top:tag_id Rest:tag_stack] 
+			TagStack = Rest
+		}
+
+	#
+	# Empty tags
+	#
+	def empty_tag 
+		[`< tag_id attr* `/>]
+
+	#
+	# Stray close tags
+	#
+	def stray_close 
+		[`</ stray_close_id `>]
+
+
+	#
+	# Attributes
+	#
+
+	def attr
+		[attr_name eql_attr_val?]
+
+	def eql_attr_val [`= attr_val]
+
+	def attr_val
+		[squote_val]
+	|	[dquote_val]
+	|	[unq_val]
+	|	[]
+
+	#
+	# Items
+	#
+
+	def item 
+		[DOCTYPE]
+	|	[tag]
+	|	[empty_tag]
+	|	[stray_close]
+	|	[doc_data]
+	|	[comment]
+
+
+	token trailing /any*/
+
+	def start 
+		[item* trailing]
+
+	#
+	# END GRAMMAR
+	#
+
+	int addDefaultAltTags( Start: ref<start> )
+	{
+		for T: open_tag in Start {
+			require T 
+				["<img" AttrList: attr* ">"]
+			
+			haveAlt: bool = false
+			for A: attr in T {
+				if match A ["alt=" attr_val]
+					haveAlt = true
+			}
+
+			if !haveAlt {
+				for AL: attr* in T {
+					if match AL [] {
+						AL = construct attr* 
+							[" alt=\"default alt\""]
+						break
+					}
+				}
+			}
+		}
+	}
+
+	int printLinks( Start: start )
+	{
+		for A:tag in Start {
+			require A
+				["<a" AttrList: attr* ">" I: item* "</a>"]
+
+			for Attr: attr in AttrList {
+				if match Attr ["href = " AttrVal: attr_val]
+					print( 'link: ', I, '\ntarget: ', AttrVal, '\n\n' )
+			}
+		}
+	}
+
+
+	bool should_close( TI: tag_id )
+	{
+		return true
+	}
+
+	bool should_flatten( TI: tag_id )
+	{
+		return true
+	}
+
+	# Finds unclosed tags and puts the content after the tag. Afterwards
+	# all unclosed tags will be empty 'inside'.
+	int flatten( Start: ref<start> )
+	{
+		for TL: item* in Start {
+			require TL
+				[OT: open_tag Inside: item* Trailing: item*]
+
+			match OT 
+				['<' TagId: tag_id attr* '>']
+
+			if should_flatten( TagId )
+			{
+				require Inside
+					[item item*]
+				
+				# Put Trailing at the end of inside.
+				for END: item* in Inside {
+					if match END [] {
+						END = Trailing
+						break
+					}
+				}
+
+				EmptyCloseTag: opt_close_tag = 
+					construct opt_close_tag []
+
+				# Close the tag and put inside after it.
+				TL = construct item*
+					[OT EmptyCloseTag Inside]
+			}
+		}
+	}
+
+#	int close( Start: ref<start> )
+#	{
+#		for TL: item in Start {
+#			require TL
+#				[OpenTag: open_tag Inside: item*]
+#
+#			match OpenTag 
+#				['<' TagId: tag_id attr* '>']
+#
+#			if should_close( TagId )
+#			{
+#				parse CloseId: close_id[ TagId.data ]
+#
+#				CloseTag: opt_close_tag = 
+#					construct opt_close_tag ['</' CloseId '>']
+#
+#				# Close the tag and put inside after it.
+#				TL = construct item
+#					[OpenTag Inside CloseTag]
+#			}
+#		}
+#	}
+end # tags
+
+Tags: tags = new tags()
+Tags->TagStack = construct tags::tag_stack []
+
+parse HTML_P: tags::start(Tags)[ stdin ]
+HTML: tags::start = HTML_P
+tags::flatten( HTML )
+print_xml( HTML )
+tags::printLinks( HTML )
+##### IN #####
+<t1>
+
+  <t2>
+  <a href="foo">FOO</a>
+  <t3>
+  </t3>
+
+</t1>
+##### EXP #####
+<tags::start><tags::_repeat_item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>t1</tags::tag_id><tags::_repeat_attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>t2</tags::tag_id><tags::_repeat_attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item></tags::_repeat_item><tags::opt_close_tag></tags::opt_close_tag></tags::tag></tags::item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>a</tags::tag_id><tags::_repeat_attr><tags::attr><tags::attr_name>href</tags::attr_name><tags::_opt_eql_attr_val><tags::eql_attr_val><tags::_literal_0009>=</tags::_literal_0009><tags::attr_val><tags::dquote_val>"foo"</tags::dquote_val></tags::attr_val></tags::eql_attr_val></tags::_opt_eql_attr_val></tags::attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item><tags::item><tags::doc_data>FOO</tags::doc_data></tags::item></tags::_repeat_item><tags::opt_close_tag><tags::_literal_001b>&lt;/</tags::_literal_001b><tags::close_id>a</tags::close_id><tags::_literal_0013>&gt;</tags::_literal_0013></tags::opt_close_tag></tags::tag></tags::item><tags::item><tags::tag><tags::open_tag><tags::_literal_0019>&lt;</tags::_literal_0019><tags::tag_id>t3</tags::tag_id><tags::_repeat_attr></tags::_repeat_attr><tags::_literal_0013>&gt;</tags::_literal_0013></tags::open_tag><tags::_repeat_item></tags::_repeat_item><tags::opt_close_tag><tags::_literal_001b>&lt;/</tags::_literal_001b><tags::close_id>t3</tags::close_id><tags::_literal_0013>&gt;</tags::_literal_0013></tags::opt_close_tag></tags::tag></tags::item></tags::_repeat_item><tags::opt_close_tag><tags::_literal_001b>&lt;/</tags::_literal_001b><tags::close_id>t1</tags::close_id><tags::_literal_0013>&gt;</tags::_literal_0013></tags::opt_close_tag></tags::tag></tags::item></tags::_repeat_item><tags::trailing>
+</tags::trailing></tags::start>link: FOO
+target: "foo"
+

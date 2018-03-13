@@ -1,0 +1,765 @@
+context generate
+	# Regular definitions
+	rl ident_char /[a-zA-Z_]/
+
+	# List used as a stack of indentations.
+	IndentStack: list<int>
+
+	# Has a newline been sent for this '\n' .. whitespace match. 
+	newline_sent: int
+
+	# Tokens. 
+	lex
+		# Python keywords.
+		literal `and `del `from `not `while `as `elif `global `or
+			`with `assert `else `if `pass `yield `break `except
+			`import `print `class `exec `in `raise `continue
+			`finally `is `return `def `for `lambda `try
+
+		# Identifiers
+		rl lowercase /'a'..'z'/
+		rl uppercase /'A'..'Z'/
+		rl letter /lowercase | uppercase/
+		token identifier /(letter|'_') (letter | digit | '_')*/
+
+		# Literals
+		rl escapeseq /'\\' any /
+		rl longstringchar /[^\\]/
+		rl shortstringchar_s /[^\\\n']/
+		rl shortstringchar_d /[^\\\n"]/
+		rl longstringitem /longstringchar | escapeseq/
+		rl shortstringitem_s /shortstringchar_s | escapeseq/
+		rl shortstringitem_d /shortstringchar_d | escapeseq/
+		rl longstring /"'''" longstringitem* :>> "'''" | '"""' longstringitem* :>> '"""'/
+		rl shortstring /"'" shortstringitem_s* "'" | '"' shortstringitem_d* '"'/
+		rl stringprefix /"r" | "u" | "ur" | "R" | "U" | "UR" | "Ur" | "uR"/
+		token stringliteral /stringprefix? (shortstring | longstring)/
+
+		# Integers
+		rl hexdigit /digit | 'a'..'f' | 'A'..'F'/
+		rl octdigit /'0'..'7'/
+		rl nonzerodigit /'1'..'9'/
+		rl hexinteger /'0' ('x' | 'X') hexdigit+/
+		rl octinteger /'0' octdigit+/
+		rl decimalinteger /nonzerodigit digit* | '0'/
+		token integer /decimalinteger | octinteger | hexinteger/
+		token longinteger /integer ('l' | 'L')/
+
+		# Floats.
+		rl exponent /('e' | 'E') ('+' | '-')? digit+/
+		rl fraction /'.' digit+/
+		rl intpart /digit+/
+		rl pointfloat /intpart? fraction | intpart '.'/
+		rl exponentfloat /(intpart | pointfloat) exponent/
+		token floatnumber /pointfloat | exponentfloat/
+
+		# Imaginaries.
+		token imagnumber /(floatnumber | intpart) ("j" | "J")/
+
+		# Operators.
+		literal `+ `- `* `** `/ `// `% `<< `>> `& `| `^
+			`~ `< `> `<= `>= `== `!= `<>
+		
+		# Delimiters
+		literal `( `) `[ `] `{ `} `@ `, `: `. `` `= `;
+			`+= `-= `*= `/= `//= `%= `&= `|= `^= `>>= `<<=
+			`**=
+		
+		literal `...
+
+		# In general whitespace is ignored.
+		ignore WS /' '+/
+
+		# Find and ignore entire blank lines.
+		token BLANK_LINE 
+			/ '\n' [ \t]* ('#' [^\n]*)? '\n' /
+			{
+				# Need to shorten to take off the newline.
+				# Turn it into ignore.
+				input->push_ignore( make_token( typeid<WS>, input->pull(match_length - 1) ) )
+			}
+
+		# Find and ignore comments.
+		token COMMENT 
+			/ '#' [^\n]* '\n' /
+			{
+				# Need to shorten to take off the newline. Turn it into ignore.
+				input->push_ignore( make_token( typeid<WS>, input->pull(match_length - 1) ) )
+			}
+
+		# These tokens are generated
+		token INDENT //
+		token DEDENT //
+		token NEWLINE //
+		ignore IND_WS //
+
+		token INDENTATION 
+			/'\n' [ \t]*/
+			{
+				# We have squared up INDENTs and DEDENTs. Ignore the entire match.
+				input->push_ignore( make_token( typeid<WS>, input->pull(match_length) ) )
+
+				# We have already sent the newline, compute the indentation level.
+				data_length: int = match_length - 1
+
+				Top: int = IndentStack->top
+				if data_length > Top {
+					# The indentation level is more than the level on the top
+					# of the stack. This is an indent event. Send as an INDENT.
+					input->push( make_token( typeid<INDENT>, '' ) )
+
+					# Push to the stack as per python manual.
+					IndentStack->push( data_length )
+				} else {
+					while data_length < Top {
+						# The indentation level is less than the level on the top of
+						# the stack. Pop the level and send one dedent. This flow of
+						# control will execute until we find the right indentation level
+						# to match up with.
+						IndentStack->pop()
+
+						# Send as a DEDENT
+						input->push( make_token( typeid<DEDENT>, '' ) )
+
+						Top = IndentStack->top
+					}
+				}
+
+				# FIXME: if data.length is now > top of stack then error. This
+				# means the outdent does not match anything.
+
+				# First the newline.
+				input->push( make_token( typeid<NEWLINE>, '' ) )
+			}
+	end
+
+	# Blank lines or comment lines at the beginning of the file.
+	token LEADER / ( [ \t]* ('#' [^\n]*)? '\n' )* /
+
+	# Ordering productions for resolving ambiguities.
+	def O1 []
+	def O2 []
+
+	def start 
+		[file_input]
+
+	def file_input 
+		[file_input_forms*]
+
+	def file_input_forms 
+		[statement]
+	|	[NEWLINE]
+
+	def statement 
+		[stmt_list NEWLINE]
+	|	[compound_stmt]
+
+	def stmt_list 
+		[simple_stmt another_stmt* opt_semi]
+
+	def another_stmt 
+		[`; simple_stmt]
+
+	def opt_semi 
+		[`;]
+	|	[]
+
+	def suite 
+		[stmt_list NEWLINE]
+	|	[NEWLINE INDENT statement_seq DEDENT]
+
+	def statement_seq 
+		[statement_seq statement]
+	|	[statement]
+
+	def compound_stmt 
+		[if_stmt]
+	|	[while_stmt]
+	|	[for_stmt]
+	|	[funcdef]
+
+	def if_stmt 
+		[`if expression `: suite elif_part* opt_else_part]
+
+	def elif_part 
+		[`elif expression `: suite]
+
+	def opt_else_part 
+		[`else `: suite]
+	|	[]
+
+	def while_stmt 
+		[`while expression `: suite opt_else_part]
+
+	def for_stmt 
+		[`for target_list `in expression_list `: suite opt_else_part]
+
+	def funcdef 
+		[`def funcname `( opt_parameter_list `) `: suite]
+
+	def funcname 
+		[identifier]
+
+	def dotted_name 
+		[dotted_name `. identifier]
+	|	[identifier]
+
+	def opt_parameter_list 
+		[parameter_list]
+	|	[]
+
+	def parameter_list 
+		[defparameter_list defparameter opt_comma]
+
+	def defparameter_list 
+		[defparameter_list defparameter `,]
+	|	[]
+	  
+	def defparameter 
+		[parameter]
+	|	[parameter `= expression]
+	  
+	def sublist 
+		[sublist_pl opt_comma]
+
+	def sublist_pl 
+		[sublist_pl `, parameter]
+	|	[parameter]
+	  
+	def parameter 
+		[identifier]
+	|	[`( sublist `)]
+	  
+	def classname 
+		[identifier]
+
+	def simple_stmt 
+		[expression_stmt]
+	|	[assignment_stmt]
+	|	[print_stmt]
+
+	def expression_stmt 
+		[expression_list]
+
+	def assignment_stmt 
+		[target_equals_list expression_list]
+
+	def target_equals_list 
+		[target_equals_list target_equals]
+	|	[target_equals]
+
+	def target_equals 
+		[target_list `=]
+
+	def target_list 
+		[target_list_core opt_comma]
+
+	def target_list_core 
+		[target_list_core `, target]
+	|	[target]
+
+	def target 
+		[target_atom target_ext_rep]
+
+	def target_atom
+		[identifier]
+	|	[`( target_list `)]
+	|	[`[ target_list `]]
+
+	def target_ext_rep 
+		[target_ext target_ext_rep]
+	|	[]
+
+	def target_ext
+		[attributeref]
+	|	[O1 subscription]
+	|	[O2 slicing]
+
+	def print_stmt 
+		[`print opt_expression_list]
+
+	def opt_expression_list 
+		[expression_list]
+	|	[]
+
+	def expression_list 
+		[expression_list_core opt_comma]
+
+	def expression_list_core 
+		[expression_list_core `, expression]
+	|	[expression]
+
+	def opt_comma 
+		[`,]
+	|	[]
+
+	def expression 
+		[or_test `if or_test `else test]
+	|	[or_test]
+	|	[lambda_form]
+
+	def or_test 
+		[or_test `or and_test]
+	|	[and_test]
+	  
+	def and_test 
+		[and_test `and not_test]
+	|	[not_test]
+	  
+	def not_test 
+		[comparison]
+	|	[`not not_test]
+
+	def lambda_form 
+		[`lambda opt_parameter_list `: expression]
+
+	def test 
+		[or_test]
+	|	[lambda_form]
+
+	def comparison 
+		[or_expr comparison_part*]
+
+	def comparison_part 
+		[comp_operator or_expr]
+
+	def comp_operator 
+		[`<] | [`>] | [`==] | [`>=] | [`<=] | [`<>] | [`!=] | [`is] |
+		[`is `not] | [`in] | [`not `in]
+
+	def or_expr 
+		[primary]
+
+	def primary 
+		[atom primary_ext_rep]
+
+	def atom 
+		[identifier]
+	|	[pyliteral]
+	|	[enclosure]
+
+	def primary_ext_rep
+		[primary_ext primary_ext_rep]
+	|	[]
+
+	def primary_ext
+		[attributeref]
+	|	[O1 subscription]
+	|	[O2 slicing]
+	|	[call]
+
+	def pyliteral 
+		[stringliteral]
+	|	[integer]
+	|	[longinteger]
+	|	[floatnumber]
+	|	[imagnumber]
+
+	def enclosure 
+		[parenth_form]
+	|	[list_display]
+	|	[generator_expression]
+	|	[dict_display]
+	|	[string_conversion]
+
+	def parenth_form 
+		[`( opt_expression_list `)]
+
+	def list_display 
+		[`[ opt_listmaker `]]
+
+	def opt_listmaker 
+		[listmaker]
+	|	[]
+
+	def listmaker 
+		[expression list_for]
+	|	[expression listmaker_ext* opt_comma]
+
+	def listmaker_ext
+		[`, expression]
+
+	def opt_list_iter 
+		[list_iter]
+	|	[]
+
+	def list_iter 
+		[list_for] 
+	|	[list_if]
+
+	def list_if 
+		[`if test opt_list_iter]
+
+	def list_for 
+		[`for expression_list `in testlist opt_list_iter]
+
+	def testlist 
+		[test testlist_ext* opt_comma]
+
+	def testlist_ext 
+		[`, test ]
+
+	def generator_expression 
+		[`( test genexpr_for `)]
+
+	def genexpr_for 
+		[`for expression_list `in test opt_genexpr_iter]
+
+	def opt_genexpr_iter 
+		[genexpr_iter] 
+	|	[] 
+
+	def genexpr_iter 
+		[genexpr_for] 
+	|	[genexpr_if]
+	  
+	def genexpr_if 
+		[`if test opt_genexpr_iter]
+
+	def dict_display 
+		[`{ opt_key_datum_list `}]
+
+	def opt_key_datum_list 
+		[key_datum_list]
+	|	[]
+
+	def key_datum_list 
+		[key_datum key_datum_list_ext* opt_comma]
+
+	def key_datum_list_ext 
+		[`, key_datum]
+
+	def key_datum 
+		[expression `: expression]
+
+	def string_conversion 
+		[`` expression_list ``]
+
+	def attributeref 
+		[`. identifier]
+
+	def subscription 
+		[`[ expression_list `]]
+
+	# The natural ordered choice does not suffice here. Must force it.
+
+	def slicing 
+		[simple_slicing]
+	|	[extended_slicing]
+
+	def simple_slicing 
+		[`[ short_slice `]]
+
+	def extended_slicing 
+		[`[ slice_list `]]
+
+	def slice_list 
+		[slice_item slice_list_ext* opt_comma]
+
+	def slice_list_ext 
+		[`, slice_item]
+	  
+	def slice_item 
+		[expression]
+	|	[proper_slice]
+	|	[ellipsis]
+	  
+	def proper_slice 
+		[short_slice]
+	|	[long_slice]
+	  
+	def short_slice 
+		[`:]
+	|	[`: upper_bound]
+	|	[lower_bound `:]
+	|	[lower_bound `: upper_bound]
+	  
+	def long_slice 
+		[short_slice `: stride]
+	|	[short_slice `:]
+	  
+	def lower_bound 
+		[expression]
+	  
+	def upper_bound 
+		[expression]
+	  
+	def stride 
+		[expression]
+
+	def ellipsis 
+		[`...]
+
+	def call 
+		[`( opt_argument_list `)]
+
+	def opt_argument_list 
+		[argument_list opt_comma]
+	|	[]
+	  
+	def argument_list 
+		[positional_arguments opt_comma_keyword_arguments]
+	|	[keyword_arguments]
+
+	def positional_arguments 
+		[positional_arguments `, expression]
+	|	[expression]
+	  
+	def opt_comma_keyword_arguments 
+		[`, keyword_arguments]
+	|	[]
+
+	def keyword_arguments 
+		[keyword_arguments `, keyword_item]
+	|	[keyword_item]
+
+	def keyword_item 
+		[identifier `= expression]
+
+end # generate
+
+int print_stmts( S: generate::start )
+{
+	for Stmt: generate::statement in S
+		print[ 'STMT: ' ^Stmt '\n' ]
+}
+
+int print_target_subscriptions_and_slicings( Start: generate::start )
+{
+	for TI: generate::target_ext in Start {
+		if match TI [generate::subscription] {
+			print[ 'TARGET SUBSCRIPTION: ' ^TI '\n' ]
+		}
+
+		if match TI [generate::simple_slicing] {
+			print[ 'TARGET SIMPLE SLICING: ' ^TI '\n' ]
+		}
+
+		if match TI [generate::extended_slicing] {
+			print[ 'TARGET EXTENDED SLICING: ' ^TI '\n' ]
+		}
+	}
+	
+}
+
+int print_primary_subscriptions_and_slicings( Start: generate::start )
+{
+	for PI: generate::primary_ext in Start {
+		if match PI [generate::subscription] {
+			print[ 'PRIMARY SUBSCRIPTION: ' ^PI '\n' ]
+		}
+
+		if match PI [generate::simple_slicing] {
+			print[ 'PRIMARY SIMPLE SLICING: ' ^PI '\n' ]
+		}
+
+		if match PI [generate::extended_slicing] {
+			print[ 'PRIMARY EXTENDED SLICING: ' ^PI '\n' ]
+		}
+	}
+}
+
+Generate: generate = new generate()
+
+# List used as a stack of indentations.
+Generate->IndentStack = new list<int>()
+Generate->IndentStack->push( 0 )
+
+# Has a newline been sent for this '\n' .. whitespace match. 
+Generate->newline_sent = 0
+
+parse S: generate::start(Generate)[ stdin ]
+
+print[ '*** SUCCESS ***\n' ]
+print[ ^S '\n' ]
+print[ '***\n' ]
+print_stmts( S )
+print_target_subscriptions_and_slicings( S )
+print_primary_subscriptions_and_slicings( S )
+print( '*** SUCCESS ***\n' )
+##### IN #####
+
+# dude, this is a comment
+ # some more
+hello
+def dude():
+    yes
+    awesome;
+
+    # Here we have a comment
+    def realy_awesome(): # hi there
+      in_more
+
+      same_level 
+      def one_liner(): first; second # both inside one_liner
+
+    back_down
+
+last_statement
+
+# dude, this is a comment
+ # some more
+hello
+if 1:
+    yes
+    awesome;
+
+    # Here we have a comment
+    if ('hello'): # hi there
+      in_more
+
+      same_level 
+      if ['dude', 'dudess'].horsie(): first; second # both inside one_liner
+      1
+
+    back_down
+
+last_statement
+
+hello = 1.1(20);
+
+# subscription
+a[1] = b[2];
+
+# simple slicing
+c[1:1] = d[2:2];
+
+# simple slicing
+e[1:1, 2:2] = f[3:3, 4:4];
+##### EXP #####
+*** SUCCESS ***
+
+hello
+def dude():
+    yes
+    awesome;
+
+    # Here we have a comment
+    def realy_awesome(): # hi there
+      in_more
+
+      same_level 
+      def one_liner(): first; second # both inside one_liner
+
+    back_down
+
+last_statement
+
+# dude, this is a comment
+ # some more
+hello
+if 1:
+    yes
+    awesome;
+
+    # Here we have a comment
+    if ('hello'): # hi there
+      in_more
+
+      same_level 
+      if ['dude', 'dudess'].horsie(): first; second # both inside one_liner
+      1
+
+    back_down
+
+last_statement
+
+hello = 1.1(20);
+
+# subscription
+a[1] = b[2];
+
+# simple slicing
+c[1:1] = d[2:2];
+
+# simple slicing
+e[1:1, 2:2] = f[3:3, 4:4];
+***
+STMT: hello
+STMT: def dude():
+    yes
+    awesome;
+
+    # Here we have a comment
+    def realy_awesome(): # hi there
+      in_more
+
+      same_level 
+      def one_liner(): first; second # both inside one_liner
+
+    back_down
+
+STMT: yes
+STMT: awesome;
+
+    # Here we have a comment
+STMT: def realy_awesome(): # hi there
+      in_more
+
+      same_level 
+      def one_liner(): first; second # both inside one_liner
+
+STMT: in_more
+
+STMT: same_level 
+STMT: def one_liner(): first; second # both inside one_liner
+
+STMT: back_down
+
+STMT: last_statement
+
+# dude, this is a comment
+ # some more
+STMT: hello
+STMT: if 1:
+    yes
+    awesome;
+
+    # Here we have a comment
+    if ('hello'): # hi there
+      in_more
+
+      same_level 
+      if ['dude', 'dudess'].horsie(): first; second # both inside one_liner
+      1
+
+    back_down
+
+STMT: yes
+STMT: awesome;
+
+    # Here we have a comment
+STMT: if ('hello'): # hi there
+      in_more
+
+      same_level 
+      if ['dude', 'dudess'].horsie(): first; second # both inside one_liner
+      1
+
+STMT: in_more
+
+STMT: same_level 
+STMT: if ['dude', 'dudess'].horsie(): first; second # both inside one_liner
+STMT: 1
+
+STMT: back_down
+
+STMT: last_statement
+
+STMT: hello = 1.1(20);
+
+# subscription
+STMT: a[1] = b[2];
+
+# simple slicing
+STMT: c[1:1] = d[2:2];
+
+# simple slicing
+STMT: e[1:1, 2:2] = f[3:3, 4:4];
+TARGET SUBSCRIPTION: [1]
+TARGET SIMPLE SLICING: [1:1]
+TARGET EXTENDED SLICING: [1:1, 2:2]
+PRIMARY SUBSCRIPTION: [2]
+PRIMARY SIMPLE SLICING: [2:2]
+PRIMARY EXTENDED SLICING: [3:3, 4:4]
+*** SUCCESS ***

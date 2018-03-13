@@ -1,0 +1,1990 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+#define TK_Dlit 192
+#define TK_Slit 193
+#define TK_Float 194
+#define TK_Id 195
+#define TK_NameSep 197
+#define TK_Arrow 211
+#define TK_PlusPlus 212
+#define TK_MinusMinus 213
+#define TK_ArrowStar 214
+#define TK_DotStar 215
+#define TK_ShiftLeft 216
+#define TK_ShiftRight 217
+#define TK_IntegerDecimal 218
+#define TK_IntegerOctal 219
+#define TK_IntegerHex 220
+#define TK_EqualsEquals 223
+#define TK_NotEquals 224
+#define TK_AndAnd 225
+#define TK_OrOr 226
+#define TK_MultAssign 227
+#define TK_DivAssign 228
+#define TK_PercentAssign 229
+#define TK_PlusAssign 230
+#define TK_MinusAssign 231
+#define TK_AmpAssign 232
+#define TK_CaretAssign 233
+#define TK_BarAssign 234
+#define TK_DotDotDot 240
+#define TK_Whitespace 241
+#define TK_Comment 242
+
+#define BUFSIZE 4096
+
+char buf[BUFSIZE];
+
+struct Scanner
+{
+	int cs, act;
+	const char *ts, *te;
+	
+	void token( int tok );
+	void run();
+	
+	void init( );
+	void execute( const char *data, int len );
+	int finish( );
+};
+
+
+
+static const char  _Scanner_to_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Scanner_start  = 12;
+static const int  Scanner_first_final  = 12;
+static const int  Scanner_error  = 0;
+static const int  Scanner_en_main  = 12;
+void Scanner::init( )
+{
+
+	{
+		cs = ( int ) Scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+/* Returns the count of bytes still in the buffer 
+* (shifted to the biginning) */
+void Scanner::execute( const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( _Scanner_from_state_actions[cs] ) {
+			case 10:
+			{
+				{
+					ts = p;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		switch ( cs  ) {
+			case 12:
+			switch ( ((*( p  ))
+			) ) {
+				case 33:
+				{
+					goto ctr30;
+				}
+				case 34:
+				{
+					goto ctr2;
+				}
+				case 37:
+				{
+					goto ctr32;
+				}
+				case 38:
+				{
+					goto ctr33;
+				}
+				case 39:
+				{
+					goto ctr7;
+				}
+				case 42:
+				{
+					goto ctr34;
+				}
+				case 43:
+				{
+					goto ctr35;
+				}
+				case 45:
+				{
+					goto ctr36;
+				}
+				case 46:
+				{
+					goto ctr37;
+				}
+				case 47:
+				{
+					goto ctr38;
+				}
+				case 48:
+				{
+					goto ctr39;
+				}
+				case 58:
+				{
+					goto ctr41;
+				}
+				case 61:
+				{
+					goto ctr42;
+				}
+				case 76:
+				{
+					goto ctr44;
+				}
+				case 94:
+				{
+					goto ctr45;
+				}
+				case 95:
+				{
+					goto ctr43;
+				}
+				case 124:
+				{
+					goto ctr46;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( ((*( p  ))
+				)< 49  )
+				{
+					if ( 35 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 44  )
+					{
+						goto ctr31;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)> 57  )
+				{
+					if ( 59 <= ((*( p  ))
+					) )
+					{
+						goto ctr31;
+					}
+					
+				} 
+				else
+				{
+					goto ctr40;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( ((*( p  ))
+				)< 97  )
+				{
+					{
+						goto ctr31;
+					}
+				} 
+				else if ( ((*( p  ))
+				)> 122  )
+				{
+					if ( ((*( p  ))
+					)<= 126  )
+					{
+						goto ctr31;
+					}
+					
+				} 
+				else
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else
+			{
+				goto ctr43;
+			}
+			
+			{
+				goto ctr29;
+			}
+			case 13:
+			if ( 33 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 126  )
+			{
+				goto ctr48;
+			}
+			
+			{
+				goto ctr29;
+			}
+			case 14:
+			if ( ((*( p  ))
+			)== 61  )
+			{
+				goto ctr51;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 1:
+			switch ( ((*( p  ))
+			) ) {
+				case 10:
+				{
+					goto ctr17;
+				}
+				case 34:
+				{
+					goto ctr3;
+				}
+				case 92:
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr2;
+			}
+			case 2:
+			{
+				goto ctr2;
+			}
+			case 15:
+			if ( ((*( p  ))
+			)== 61  )
+			{
+				goto ctr53;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 16:
+			switch ( ((*( p  ))
+			) ) {
+				case 38:
+				{
+					goto ctr55;
+				}
+				case 61:
+				{
+					goto ctr56;
+				}
+				
+			}
+			{
+				goto ctr109;
+			}
+			case 3:
+			switch ( ((*( p  ))
+			) ) {
+				case 10:
+				{
+					goto ctr17;
+				}
+				case 39:
+				{
+					goto ctr8;
+				}
+				case 92:
+				{
+					goto ctr9;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			{
+				goto ctr7;
+			}
+			case 17:
+			if ( ((*( p  ))
+			)== 61  )
+			{
+				goto ctr58;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 18:
+			switch ( ((*( p  ))
+			) ) {
+				case 43:
+				{
+					goto ctr60;
+				}
+				case 61:
+				{
+					goto ctr61;
+				}
+				
+			}
+			{
+				goto ctr109;
+			}
+			case 19:
+			switch ( ((*( p  ))
+			) ) {
+				case 45:
+				{
+					goto ctr63;
+				}
+				case 61:
+				{
+					goto ctr64;
+				}
+				case 62:
+				{
+					goto ctr65;
+				}
+				
+			}
+			{
+				goto ctr109;
+			}
+			case 20:
+			if ( ((*( p  ))
+			)== 42  )
+			{
+				goto ctr68;
+			}
+			
+			{
+				goto ctr67;
+			}
+			case 21:
+			switch ( ((*( p  ))
+			) ) {
+				case 42:
+				{
+					goto ctr70;
+				}
+				case 46:
+				{
+					goto ctr71;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr72;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 46  )
+			{
+				goto ctr13;
+			}
+			
+			{
+				goto ctr23;
+			}
+			case 22:
+			switch ( ((*( p  ))
+			) ) {
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 70:
+				{
+					goto ctr76;
+				}
+				case 76:
+				{
+					goto ctr76;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 102:
+				{
+					goto ctr76;
+				}
+				case 108:
+				{
+					goto ctr76;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr72;
+			}
+			
+			{
+				goto ctr77;
+			}
+			case 6:
+			switch ( ((*( p  ))
+			) ) {
+				case 43:
+				{
+					goto ctr15;
+				}
+				case 45:
+				{
+					goto ctr15;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr17;
+			}
+			case 7:
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr17;
+			}
+			case 23:
+			switch ( ((*( p  ))
+			) ) {
+				case 70:
+				{
+					goto ctr76;
+				}
+				case 76:
+				{
+					goto ctr76;
+				}
+				case 102:
+				{
+					goto ctr76;
+				}
+				case 108:
+				{
+					goto ctr76;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr16;
+			}
+			
+			{
+				goto ctr77;
+			}
+			case 24:
+			switch ( ((*( p  ))
+			) ) {
+				case 42:
+				{
+					goto ctr19;
+				}
+				case 47:
+				{
+					goto ctr24;
+				}
+				case 61:
+				{
+					goto ctr79;
+				}
+				
+			}
+			{
+				goto ctr109;
+			}
+			case 8:
+			if ( ((*( p  ))
+			)== 42  )
+			{
+				goto ctr20;
+			}
+			
+			{
+				goto ctr19;
+			}
+			case 9:
+			switch ( ((*( p  ))
+			) ) {
+				case 42:
+				{
+					goto ctr20;
+				}
+				case 47:
+				{
+					goto ctr22;
+				}
+				
+			}
+			{
+				goto ctr19;
+			}
+			case 10:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr25;
+			}
+			
+			{
+				goto ctr24;
+			}
+			case 25:
+			switch ( ((*( p  ))
+			) ) {
+				case 46:
+				{
+					goto ctr72;
+				}
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 76:
+				{
+					goto ctr83;
+				}
+				case 85:
+				{
+					goto ctr83;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 108:
+				{
+					goto ctr83;
+				}
+				case 117:
+				{
+					goto ctr83;
+				}
+				case 120:
+				{
+					goto ctr84;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr82;
+			}
+			
+			{
+				goto ctr99;
+			}
+			case 26:
+			switch ( ((*( p  ))
+			) ) {
+				case 46:
+				{
+					goto ctr72;
+				}
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 76:
+				{
+					goto ctr87;
+				}
+				case 85:
+				{
+					goto ctr87;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 108:
+				{
+					goto ctr87;
+				}
+				case 117:
+				{
+					goto ctr87;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr82;
+			}
+			
+			{
+				goto ctr88;
+			}
+			case 27:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr89;
+				}
+				case 85:
+				{
+					goto ctr89;
+				}
+				case 108:
+				{
+					goto ctr89;
+				}
+				case 117:
+				{
+					goto ctr89;
+				}
+				
+			}
+			{
+				goto ctr88;
+			}
+			case 28:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr91;
+				}
+				case 85:
+				{
+					goto ctr91;
+				}
+				case 108:
+				{
+					goto ctr91;
+				}
+				case 117:
+				{
+					goto ctr91;
+				}
+				
+			}
+			{
+				goto ctr99;
+			}
+			case 29:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr93;
+				}
+				case 85:
+				{
+					goto ctr93;
+				}
+				case 108:
+				{
+					goto ctr93;
+				}
+				case 117:
+				{
+					goto ctr93;
+				}
+				
+			}
+			{
+				goto ctr99;
+			}
+			case 11:
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr28;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 70  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 102  )
+				{
+					goto ctr28;
+				}
+				
+			} 
+			else
+			{
+				goto ctr28;
+			}
+			
+			{
+				goto ctr27;
+			}
+			case 30:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr96;
+				}
+				case 85:
+				{
+					goto ctr96;
+				}
+				case 108:
+				{
+					goto ctr96;
+				}
+				case 117:
+				{
+					goto ctr96;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr28;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 70  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 102  )
+				{
+					goto ctr28;
+				}
+				
+			} 
+			else
+			{
+				goto ctr28;
+			}
+			
+			{
+				goto ctr97;
+			}
+			case 31:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr98;
+				}
+				case 85:
+				{
+					goto ctr98;
+				}
+				case 108:
+				{
+					goto ctr98;
+				}
+				case 117:
+				{
+					goto ctr98;
+				}
+				
+			}
+			{
+				goto ctr97;
+			}
+			case 32:
+			switch ( ((*( p  ))
+			) ) {
+				case 46:
+				{
+					goto ctr72;
+				}
+				case 69:
+				{
+					goto ctr75;
+				}
+				case 76:
+				{
+					goto ctr83;
+				}
+				case 85:
+				{
+					goto ctr83;
+				}
+				case 101:
+				{
+					goto ctr75;
+				}
+				case 108:
+				{
+					goto ctr83;
+				}
+				case 117:
+				{
+					goto ctr83;
+				}
+				
+			}
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr40;
+			}
+			
+			{
+				goto ctr99;
+			}
+			case 33:
+			if ( ((*( p  ))
+			)== 58  )
+			{
+				goto ctr101;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 34:
+			if ( ((*( p  ))
+			)== 61  )
+			{
+				goto ctr103;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 35:
+			if ( ((*( p  ))
+			)== 95  )
+			{
+				goto ctr43;
+			}
+			
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else
+			{
+				goto ctr43;
+			}
+			
+			{
+				goto ctr106;
+			}
+			case 36:
+			switch ( ((*( p  ))
+			) ) {
+				case 34:
+				{
+					goto ctr2;
+				}
+				case 39:
+				{
+					goto ctr7;
+				}
+				case 95:
+				{
+					goto ctr43;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 65  )
+			{
+				if ( 48 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 57  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr43;
+				}
+				
+			} 
+			else
+			{
+				goto ctr43;
+			}
+			
+			{
+				goto ctr106;
+			}
+			case 37:
+			if ( ((*( p  ))
+			)== 61  )
+			{
+				goto ctr108;
+			}
+			
+			{
+				goto ctr109;
+			}
+			case 38:
+			switch ( ((*( p  ))
+			) ) {
+				case 61:
+				{
+					goto ctr110;
+				}
+				case 124:
+				{
+					goto ctr111;
+				}
+				
+			}
+			{
+				goto ctr109;
+			}
+			case 0:
+			goto _out;
+			
+		}
+		ctr2: cs = 1;
+		goto _again;
+		ctr4: cs = 2;
+		goto _again;
+		ctr7: cs = 3;
+		goto _again;
+		ctr9: cs = 4;
+		goto _again;
+		ctr71: cs = 5;
+		goto _again;
+		ctr75: cs = 6;
+		goto _again;
+		ctr15: cs = 7;
+		goto _again;
+		ctr19: cs = 8;
+		goto _again;
+		ctr20: cs = 9;
+		goto _again;
+		ctr24: cs = 10;
+		goto _again;
+		ctr84: cs = 11;
+		goto _again;
+		ctr17: cs = 12;
+		goto f0;
+		ctr3: cs = 12;
+		goto f1;
+		ctr8: cs = 12;
+		goto f2;
+		ctr23: cs = 12;
+		goto f3;
+		ctr13: cs = 12;
+		goto f4;
+		ctr22: cs = 12;
+		goto f5;
+		ctr25: cs = 12;
+		goto f6;
+		ctr27: cs = 12;
+		goto f7;
+		ctr31: cs = 12;
+		goto f10;
+		ctr48: cs = 12;
+		goto f14;
+		ctr109: cs = 12;
+		goto f15;
+		ctr51: cs = 12;
+		goto f16;
+		ctr53: cs = 12;
+		goto f17;
+		ctr55: cs = 12;
+		goto f18;
+		ctr56: cs = 12;
+		goto f19;
+		ctr58: cs = 12;
+		goto f20;
+		ctr60: cs = 12;
+		goto f21;
+		ctr61: cs = 12;
+		goto f22;
+		ctr63: cs = 12;
+		goto f23;
+		ctr64: cs = 12;
+		goto f24;
+		ctr67: cs = 12;
+		goto f25;
+		ctr68: cs = 12;
+		goto f26;
+		ctr70: cs = 12;
+		goto f27;
+		ctr77: cs = 12;
+		goto f29;
+		ctr76: cs = 12;
+		goto f30;
+		ctr79: cs = 12;
+		goto f31;
+		ctr99: cs = 12;
+		goto f32;
+		ctr88: cs = 12;
+		goto f34;
+		ctr89: cs = 12;
+		goto f35;
+		ctr93: cs = 12;
+		goto f36;
+		ctr97: cs = 12;
+		goto f37;
+		ctr98: cs = 12;
+		goto f38;
+		ctr101: cs = 12;
+		goto f39;
+		ctr103: cs = 12;
+		goto f40;
+		ctr106: cs = 12;
+		goto f41;
+		ctr108: cs = 12;
+		goto f42;
+		ctr110: cs = 12;
+		goto f43;
+		ctr111: cs = 12;
+		goto f44;
+		ctr29: cs = 13;
+		goto _again;
+		ctr30: cs = 14;
+		goto _again;
+		ctr32: cs = 15;
+		goto _again;
+		ctr33: cs = 16;
+		goto _again;
+		ctr34: cs = 17;
+		goto _again;
+		ctr35: cs = 18;
+		goto _again;
+		ctr36: cs = 19;
+		goto _again;
+		ctr65: cs = 20;
+		goto _again;
+		ctr37: cs = 21;
+		goto f11;
+		ctr72: cs = 22;
+		goto f28;
+		ctr16: cs = 23;
+		goto _again;
+		ctr38: cs = 24;
+		goto f11;
+		ctr39: cs = 25;
+		goto f12;
+		ctr82: cs = 26;
+		goto f33;
+		ctr87: cs = 27;
+		goto _again;
+		ctr83: cs = 28;
+		goto _again;
+		ctr91: cs = 29;
+		goto _again;
+		ctr28: cs = 30;
+		goto _again;
+		ctr96: cs = 31;
+		goto _again;
+		ctr40: cs = 32;
+		goto f12;
+		ctr41: cs = 33;
+		goto _again;
+		ctr42: cs = 34;
+		goto _again;
+		ctr43: cs = 35;
+		goto _again;
+		ctr44: cs = 36;
+		goto f13;
+		ctr45: cs = 37;
+		goto _again;
+		ctr46: cs = 38;
+		goto _again;
+		
+		f11:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		
+		goto _again;
+		f2:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_Slit );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f1:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_Dlit );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f30:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_Float );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f36:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_IntegerDecimal );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f35:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_IntegerOctal );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f38:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_IntegerHex );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f39:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_NameSep );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f40:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_EqualsEquals );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f16:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_NotEquals );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f18:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_AndAnd );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f44:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_OrOr );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f20:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_MultAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f31:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_DivAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f17:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_PercentAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f22:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_PlusAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f24:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_MinusAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f19:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_AmpAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f42:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_CaretAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f43:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_BarAssign );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f21:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_PlusPlus );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f23:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_MinusMinus );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f26:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_ArrowStar );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f27:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_DotStar );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f4:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_DotDotDot );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f10:
+		{
+			{
+				te = p+1;
+				{
+					token( ts[0] );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f5:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_Comment );
+					
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f6:
+		{
+			{
+				te = p+1;
+				{
+					token( TK_Comment );
+					
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f41:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_Id );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f29:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_Float );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f32:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_IntegerDecimal );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f34:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_IntegerOctal );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f37:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_IntegerHex );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f25:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_Arrow );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f15:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( ts[0] );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f14:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token( TK_Whitespace );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f7:
+		{
+			{
+				p = ((te))-1;
+				{
+					token( TK_IntegerDecimal );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f3:
+		{
+			{
+				p = ((te))-1;
+				{
+					token( ts[0] );
+				}
+				
+			}
+			
+		}
+		
+		goto _again;
+		f0:
+		{
+			{
+				switch ( act  ) {
+					case 0 :
+					{
+						{
+							cs = 0;
+							goto _again;
+						}
+						
+					}
+					
+					break;
+					case 3 :
+					p = ((te))-1;
+					{
+						token( TK_Id );
+					}
+					
+					break;
+					case 4 :
+					p = ((te))-1;
+					{
+						token( TK_Float );
+					}
+					
+					break;
+					case 5 :
+					p = ((te))-1;
+					{
+						token( TK_IntegerDecimal );
+					}
+					
+					break;
+					case 6 :
+					p = ((te))-1;
+					{
+						token( TK_IntegerOctal );
+					}
+					
+					break;
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		goto _again;
+		f13:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 3;
+				
+			}
+			
+		}
+		
+		goto _again;
+		f28:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 4;
+				
+			}
+			
+		}
+		
+		goto _again;
+		f12:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 5;
+				
+			}
+			
+		}
+		
+		goto _again;
+		f33:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 6;
+				
+			}
+			
+		}
+		
+		goto _again;
+		
+		_again:
+		switch ( _Scanner_to_state_actions[cs] ) {
+			case 9:
+			{
+				{
+					ts = 0;
+					
+				}
+				
+			}
+			{
+				{
+					act = 0;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 13:
+				goto ctr48;
+				case 14:
+				goto ctr109;
+				case 1:
+				goto ctr17;
+				case 2:
+				goto ctr17;
+				case 15:
+				goto ctr109;
+				case 16:
+				goto ctr109;
+				case 3:
+				goto ctr17;
+				case 4:
+				goto ctr17;
+				case 17:
+				goto ctr109;
+				case 18:
+				goto ctr109;
+				case 19:
+				goto ctr109;
+				case 20:
+				goto ctr67;
+				case 21:
+				goto ctr109;
+				case 5:
+				goto ctr23;
+				case 22:
+				goto ctr77;
+				case 6:
+				goto ctr17;
+				case 7:
+				goto ctr17;
+				case 23:
+				goto ctr77;
+				case 24:
+				goto ctr109;
+				case 8:
+				goto ctr23;
+				case 9:
+				goto ctr23;
+				case 10:
+				goto ctr23;
+				case 25:
+				goto ctr99;
+				case 26:
+				goto ctr88;
+				case 27:
+				goto ctr88;
+				case 28:
+				goto ctr99;
+				case 29:
+				goto ctr99;
+				case 11:
+				goto ctr27;
+				case 30:
+				goto ctr97;
+				case 31:
+				goto ctr97;
+				case 32:
+				goto ctr99;
+				case 33:
+				goto ctr109;
+				case 34:
+				goto ctr109;
+				case 35:
+				goto ctr106;
+				case 36:
+				goto ctr106;
+				case 37:
+				goto ctr109;
+				case 38:
+				goto ctr109;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	cout << "P: " << (p - data) << endl;
+}
+
+int Scanner::finish( )
+{
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+
+void Scanner::token( int tok )
+{
+	const char *data = ts;
+	int len = te - ts;
+	cout << "<" << tok << "> ";
+	for ( int i = 0; i < len; i++ )
+	cout << data[i];
+	cout << '\n';
+}
+
+void test( const char *buf )
+{
+	int len = strlen( buf );
+	std::ios::sync_with_stdio(false);
+	Scanner scanner;
+	scanner.init();
+	
+	scanner.execute( buf, len );
+	if ( scanner.cs == Scanner_error ) {
+		/* Machine failed before finding a token. */
+		cout << "PARSE ERROR" << endl;
+	}
+	
+	/* FIXME: Last token may get lost. */
+	scanner.finish();
+}
+
+int main()
+{
+	test(
+	"\"\\\"hi\" /*\n"
+	"*/\n"
+	"44 .44\n"
+	"44. 44\n"
+	"44 . 44\n"
+	"44.44\n"
+	"_hithere22"
+	);
+	
+	test(
+	"'\\''\"\\n\\d'\\\"\"\n"
+	"hi\n"
+	"99\n"
+	".99\n"
+	"99e-4\n"
+	"->*\n"
+	"||\n"
+	"0x98\n"
+	"0x\n"
+	"//\n"
+	"/* * */"
+	);
+	
+	test(
+	"'\n"
+	"'\n"
+	);
+	
+}
+

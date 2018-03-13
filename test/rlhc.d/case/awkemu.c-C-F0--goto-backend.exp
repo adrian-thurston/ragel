@@ -1,0 +1,207 @@
+#include <stdio.h>
+#include <string.h>
+
+#define LINEBUF 2048
+static char lineBuf[LINEBUF];
+static char blineBuf[LINEBUF];
+static int lineLen;
+static int blineLen;
+static int words;
+
+void finishLine();
+
+struct awkemu
+{
+	int cs;
+};
+
+
+
+void finishLine()
+{
+	int i;
+	char *pword = blineBuf;
+	lineBuf[lineLen] = 0;
+	printf("endline(%i): %s\n", words, lineBuf );
+	for ( i = 0; i < words; i++ ) {
+		printf("  word: %s\n", pword );
+		pword += strlen(pword) + 1;
+	}
+}
+
+static const char  _awkemu_actions [] = { 0, 1, 3, 1, 4, 2, 0, 3, 2, 0, 4, 2, 1, 3, 2, 2, 3, 2, 2, 4, 3, 0, 1, 3, 0 ,  };
+static const char  _awkemu_trans_keys [] = { 0, 1, 0, 1, 0, 1, 0 ,  };
+static const char  _awkemu_char_class [] = { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0 ,  };
+static const char  _awkemu_index_offsets [] = { 0, 2, 4, 0 ,  };
+static const char  _awkemu_indicies [] = { 1, 2, 3, 4, 6, 7, 0 ,  };
+static const char  _awkemu_index_defaults [] = { 0, 0, 5, 0 ,  };
+static const char  _awkemu_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _awkemu_cond_targs [] = { 0, 1, 2, 1, 2, 0, 1, 2, 0 ,  };
+static const char  _awkemu_cond_actions [] = { 11, 14, 17, 1, 3, 20, 5, 8, 0 ,  };
+static const char  _awkemu_nfa_targs [] = { 0, 0 ,  };
+static const char  _awkemu_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _awkemu_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _awkemu_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  awkemu_start  = 2;
+static const int  awkemu_first_final  = 2;
+static const int  awkemu_error  = -1;
+static const int  awkemu_en_main  = 2;
+void awkemu_init( struct awkemu *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) awkemu_start;
+	}
+}
+
+void awkemu_execute( struct awkemu *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	{
+		int _trans = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		_resume :
+		_keys = _awkemu_trans_keys + ((fsm->cs)<<1);
+		_inds = _awkemu_indicies + _awkemu_index_offsets[(fsm->cs)];
+		if ( ((*( p  ))
+		)<= 32 && ((*( p  ))
+		)>= 9  )
+		{
+			int _ic = ( int ) _awkemu_char_class[( int ) ((*( p  ))
+			)- 9];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _awkemu_index_defaults[(fsm->cs)];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _awkemu_index_defaults[(fsm->cs)];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		(fsm->cs) = ( int ) _awkemu_cond_targs[_trans];
+		if ( _awkemu_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		_acts = _awkemu_actions + _awkemu_cond_actions[_trans];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					lineLen = 0;	
+					blineLen = 0;	
+					words = 0;
+					
+				}
+				
+				break;
+				case 1 :
+				{
+					blineBuf[blineLen++] = (((*( p  ))
+					));
+					
+				}
+				
+				break;
+				case 2 :
+				{
+					blineBuf[blineLen++] = 0;
+					words += 1;
+					
+				}
+				
+				break;
+				case 3 :
+				{
+					lineBuf[lineLen++] = (((*( p  ))
+					));
+					
+				}
+				
+				break;
+				case 4 :
+				{
+					finishLine(); 
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+	}
+}
+
+int awkemu_finish( struct awkemu *fsm )
+{
+	if ( fsm->cs == awkemu_error ) 
+	return -1;
+	if ( fsm->cs >= awkemu_first_final ) 
+	return 1;
+	return 0;
+}
+
+#include <stdio.h>
+#define BUFSIZE 2048
+
+struct awkemu fsm;
+char buf[BUFSIZE];
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	awkemu_init( &fsm );
+	awkemu_execute( &fsm, buf, len );
+	if ( awkemu_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+int main()
+{
+	test( "" );
+	test( "one line with no newline" );
+	test( "one line\n" );
+	return 0;
+}
+

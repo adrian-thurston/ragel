@@ -1,0 +1,37 @@
+lex
+	literal `-
+	token file /^('-'|0)(^0)*/
+end
+
+token word /(^0)+/
+token zero /0/ 
+
+lex
+	token single /[qvh]/
+	token with_opt /[oi]/
+end
+
+def item
+	[file zero]
+|	[`- single* zero]
+|	[`- with_opt zero? word zero]
+
+def args 
+	[item*]
+
+ArgParser: parser<args> = new parser<args>()
+
+A: list_el<str> = argv->head_el
+while ( A ) {
+	send ArgParser [A->value '\0']
+	A = A->next
+}
+
+Args: args = ArgParser->finish() 
+
+print_xml( Args )
+print( '\n' )
+##### ARGS #####
+-qv -h -o output sdf -i eth0 file
+##### EXP #####
+<args><_repeat_item><item><_literal_0001>-</_literal_0001><_repeat_single><single>q</single><single>v</single></_repeat_single><zero>&#0;</zero></item><item><_literal_0001>-</_literal_0001><_repeat_single><single>h</single></_repeat_single><zero>&#0;</zero></item><item><_literal_0001>-</_literal_0001><with_opt>o</with_opt><_opt_zero><zero>&#0;</zero></_opt_zero><word>output</word><zero>&#0;</zero></item><item><file>sdf</file><zero>&#0;</zero></item><item><_literal_0001>-</_literal_0001><with_opt>i</with_opt><_opt_zero><zero>&#0;</zero></_opt_zero><word>eth0</word><zero>&#0;</zero></item><item><file>file</file><zero>&#0;</zero></item></_repeat_item></args>

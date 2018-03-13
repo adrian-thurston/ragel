@@ -1,0 +1,192 @@
+package main
+import "fmt"
+
+var neg  int ;
+var value  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _atoi_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _atoi_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0  }
+var _atoi_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _atoi_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var atoi_start  int  = 1
+var atoi_first_final  int  = 4
+var atoi_error  int  = 0
+var atoi_en_main  int  = 1
+func prepare() {
+	value = 0;
+	neg = 0;
+	
+	{
+		cs = int(atoi_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch cs  {
+			case 1:
+			switch ( data[p ])  {
+				case 43:
+				{
+					goto ctr0;
+				}
+				case 45:
+				{
+					goto ctr2;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( data[p ]) == 10  {
+				{
+					goto ctr5;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto f0;
+		ctr2: cs = 2;
+		goto f1;
+		ctr3: cs = 3;
+		goto f2;
+		ctr4: cs = 3;
+		goto f3;
+		ctr5: cs = 4;
+		goto f4;
+		
+		f0:
+		{neg = 0;
+			value = 0;
+		}
+		
+		goto _again;
+		f3:
+		{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+			;
+		}
+		
+		goto _again;
+		f1:
+		{neg = 0;
+			value = 0;
+		}
+		{neg = 1;
+		}
+		
+		goto _again;
+		f2:
+		{neg = 0;
+			value = 0;
+		}
+		{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+			;
+		}
+		
+		goto _again;
+		f4:
+		{if ( neg != 0 ) {
+				value = -1 * value;
+				
+			}
+		}
+		{fmt.Print( value );fmt.Print( "\n" );}
+		
+		goto _again;
+		
+		_again:
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= atoi_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"1\n",
+	"12\n",
+	"222222\n",
+	"+2123\n",
+	"213 3213\n",
+	"-12321\n",
+	"--123\n",
+	"-99\n",
+	" -3000\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

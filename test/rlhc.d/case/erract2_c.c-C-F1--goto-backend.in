@@ -1,0 +1,202 @@
+host( "working/erract2_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	
+	
+	
+	
+	
+}@
+array char _erract_trans_keys( 0, 5 ) = { 1, 0, 3, 3, 2, 2, 4, 4, 4, 4, 5, 5, 0, 0, 1, 0, 0 };
+
+array s8 _erract_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 0 };
+
+array s8 _erract_index_offsets( 0, 6 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 0 };
+
+array s8 _erract_indicies( 0, 8 ) = { 1, 3, 4, 5, 6, 8, 0 };
+
+array s8 _erract_index_defaults( 0, 9 ) = { 0, 0, 2, 2, 2, 2, 7, 9, 0 };
+
+array s8 _erract_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _erract_cond_targs( 0, 7 ) = { 0, 2, 0, 3, 4, 5, 6, 0, 7, 0, 0 };
+
+array s8 _erract_cond_actions( 0, 6 ) = { 2, 0, 4, 0, 0, 0, 0, 6, 0, 0, 0 };
+
+array s8 _erract_eof_actions( 0, 5 ) = { 0, 1, 3, 3, 3, 3, 5, 0, 0 };
+
+array s8 _erract_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _erract_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _erract_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _erract_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int erract_start = 1;
+value int erract_first_final = 7;
+value int erract_error = 0;
+
+value int erract_en_main = 1;
+
+host( "working/erract2_c.rl", 42 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)erract_start;
+	}
+	host( "working/erract2_c.rl", 49 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		char *eof = pe;
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _erract_trans_keys, (cs<<1) );
+				_inds = offset( _erract_indicies, _erract_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_erract_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _erract_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _erract_trans_keys, _keys ) )
+					_trans = cast(int)deref( _erract_indicies, _inds + cast(int)( _ic - cast(int)deref( _erract_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_erract_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_erract_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_erract_cond_targs[_trans];
+				
+				if ( _erract_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _erract_cond_actions[_trans] ) {
+					case 2 {
+						host( "working/erract2_c.rl", 15 ) ${printf( "%s", "err_start\n" );
+						}$	host( "working/erract2_c.rl", 17 ) ${printf( "%s", "err_all\n" );
+						}$
+					}
+					case 4 {
+						host( "working/erract2_c.rl", 17 ) ${printf( "%s", "err_all\n" );
+						}$	host( "working/erract2_c.rl", 19 ) ${printf( "%s", "err_middle\n" );
+						}$
+					}
+					case 6 {
+						host( "working/erract2_c.rl", 17 ) ${printf( "%s", "err_all\n" );
+						}$	host( "working/erract2_c.rl", 21 ) ${printf( "%s", "err_out\n" );
+						}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					switch ( _erract_eof_actions[cs] ) {
+						case 1 {
+							host( "working/erract2_c.rl", 15 ) ${printf( "%s", "err_start\n" );
+							}$	host( "working/erract2_c.rl", 24 ) ${printf( "%s", "eof_start\n" );
+							}$	host( "working/erract2_c.rl", 17 ) ${printf( "%s", "err_all\n" );
+							}$	host( "working/erract2_c.rl", 26 ) ${printf( "%s", "eof_all\n" );
+							}$
+						}
+						case 3 {
+							host( "working/erract2_c.rl", 17 ) ${printf( "%s", "err_all\n" );
+							}$	host( "working/erract2_c.rl", 19 ) ${printf( "%s", "err_middle\n" );
+							}$	host( "working/erract2_c.rl", 26 ) ${printf( "%s", "eof_all\n" );
+							}$	host( "working/erract2_c.rl", 28 ) ${printf( "%s", "eof_middle\n" );
+							}$
+						}
+						case 5 {
+							host( "working/erract2_c.rl", 17 ) ${printf( "%s", "err_all\n" );
+							}$	host( "working/erract2_c.rl", 21 ) ${printf( "%s", "err_out\n" );
+							}$	host( "working/erract2_c.rl", 26 ) ${printf( "%s", "eof_all\n" );
+							}$	host( "working/erract2_c.rl", 30 ) ${printf( "%s", "eof_out\n" );
+							}$
+						}
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/erract2_c.rl", 57 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= erract_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"",
+		"h",
+		"x",
+		"he",
+		"hx",
+		"hel",
+		"hex",
+		"hell",
+		"helx",
+		"hello",
+		"hellx",
+		"hello\n",
+		"hellox",
+	};
+	
+	int inplen = 13;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

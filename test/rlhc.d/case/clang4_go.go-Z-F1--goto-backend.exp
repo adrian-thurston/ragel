@@ -1,0 +1,355 @@
+package main
+import "fmt"
+
+var pos  int ;
+var line  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _clang_trans_keys [] byte  = [] byte  { 1, 0, 0, 12, 0, 12, 0, 0, 0, 2, 0, 7, 0, 0, 8, 9, 8, 10, 0, 0, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 0 }
+var _clang_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 4, 4, 4, 4, 4, 4, 4, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 4, 12, 4, 4, 11, 4, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 13, 11, 11, 4, 4, 4, 4, 0  }
+var _clang_index_offsets [] int16  = [] int16  { 0, 0, 13, 26, 27, 30, 38, 39, 41, 44, 45, 59, 73, 87, 101, 115, 129, 143, 157, 0  }
+var _clang_indicies [] int8  = [] int8  { 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 3, 5, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 6, 5, 8, 7, 9, 8, 7, 9, 7, 7, 7, 7, 10, 12, 13, 13, 15, 15, 15, 1, 12, 10, 16, 17, 16, 18, 16, 19, 20, 21, 22, 22, 16, 22, 24, 23, 25, 26, 25, 27, 25, 28, 29, 30, 31, 31, 25, 31, 33, 32, 34, 35, 34, 36, 34, 37, 38, 39, 40, 40, 34, 40, 24, 23, 7, 26, 25, 27, 25, 11, 29, 30, 31, 31, 25, 31, 42, 41, 43, 44, 43, 45, 46, 47, 48, 48, 49, 49, 43, 50, 52, 51, 53, 54, 53, 55, 53, 56, 13, 13, 57, 57, 53, 57, 59, 58, 60, 61, 60, 62, 60, 63, 64, 64, 64, 64, 60, 64, 42, 41, 43, 44, 43, 45, 46, 47, 48, 48, 49, 49, 43, 49, 66, 65, 67, 68, 67, 69, 67, 70, 71, 71, 71, 72, 67, 72, 0  }
+var _clang_index_defaults [] int8  = [] int8  { 0, 0, 4, 4, 7, 7, 11, 14, 14, 0, 10, 23, 32, 23, 41, 51, 58, 41, 65, 0  }
+var _clang_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _clang_cond_targs [] int8  = [] int8  { 1, 1, 12, 9, 2, 2, 3, 4, 4, 5, 10, 6, 10, 15, 0, 18, 11, 1, 2, 13, 14, 17, 16, 10, 10, 11, 1, 2, 13, 14, 17, 16, 10, 10, 11, 1, 2, 13, 14, 17, 16, 10, 10, 11, 1, 2, 7, 13, 17, 16, 8, 10, 10, 11, 1, 2, 13, 16, 10, 10, 11, 1, 2, 13, 16, 10, 10, 11, 1, 2, 13, 18, 16, 0  }
+var _clang_cond_actions [] int8  = [] int8  { 1, 2, 0, 0, 1, 2, 0, 0, 3, 0, 0, 0, 3, 1, 0, 4, 4, 5, 5, 4, 4, 4, 4, 6, 7, 8, 9, 9, 8, 8, 8, 8, 10, 11, 12, 13, 13, 12, 12, 12, 12, 14, 15, 16, 17, 17, 1, 16, 1, 16, 0, 18, 19, 20, 21, 21, 20, 20, 22, 23, 24, 25, 25, 24, 1, 26, 27, 28, 29, 29, 28, 1, 28, 0  }
+var _clang_eof_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 10, 6, 14, 18, 22, 14, 26, 0  }
+var _clang_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _clang_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _clang_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _clang_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var clang_start  int  = 10
+var clang_first_final  int  = 10
+var clang_error  int  = 0
+var clang_en_main  int  = 10
+func prepare() {
+	pos = 0;
+	line = 1;
+	
+	{
+		cs = int(clang_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _trans  int   = 0
+		var  _keys int
+		var  _inds int
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_keys = int((cs<<1) );
+		_inds = int(_clang_index_offsets[cs] );
+		switch {
+			case ( data[p ]) <= 126 && ( data[p ]) >= 10 :
+			{
+				var  _ic  int   = int(_clang_char_class[int(( data[p ]) )- 10])
+				switch {
+					case _ic <= int(_clang_trans_keys[_keys+1 ])&& _ic >= int(_clang_trans_keys[_keys ]):
+					_trans = int(_clang_indicies[_inds + int(( _ic - int(_clang_trans_keys[_keys ]))  )]);
+					
+					default:
+					_trans = int(_clang_index_defaults[cs]);
+					
+				}
+			}
+			
+			default:
+			{
+				_trans = int(_clang_index_defaults[cs]);
+			}
+			
+			
+		}
+		goto _match_cond;
+		
+		_match_cond :
+		cs = int(_clang_cond_targs[_trans]);
+		if _clang_cond_actions[_trans] == 0  {
+			goto _again;
+			
+			
+		}
+		switch _clang_cond_actions[_trans]  {
+			case 1 :
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 5 :
+			{blen = 0;
+			}
+			
+			break;
+			case 3 :
+			{line = line + 1;
+			}
+			
+			break;
+			case 22 :
+			{fmt.Print( "ident(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			
+			break;
+			case 10 :
+			{fmt.Print( "literal(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			
+			break;
+			case 18 :
+			{fmt.Print( "float(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			
+			break;
+			case 14 :
+			{fmt.Print( "int(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			
+			break;
+			case 26 :
+			{fmt.Print( "hex(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			
+			break;
+			case 6 :
+			{fmt.Print( "symbol(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			
+			break;
+			case 2 :
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			{line = line + 1;
+			}
+			
+			break;
+			case 4 :
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 25 :
+			{fmt.Print( "ident(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			
+			break;
+			case 23 :
+			{fmt.Print( "ident(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{line = line + 1;
+			}
+			
+			break;
+			case 13 :
+			{fmt.Print( "literal(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			
+			break;
+			case 11 :
+			{fmt.Print( "literal(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{line = line + 1;
+			}
+			
+			break;
+			case 21 :
+			{fmt.Print( "float(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			
+			break;
+			case 19 :
+			{fmt.Print( "float(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{line = line + 1;
+			}
+			
+			break;
+			case 17 :
+			{fmt.Print( "int(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			
+			break;
+			case 15 :
+			{fmt.Print( "int(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{line = line + 1;
+			}
+			
+			break;
+			case 29 :
+			{fmt.Print( "hex(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			
+			break;
+			case 27 :
+			{fmt.Print( "hex(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{line = line + 1;
+			}
+			
+			break;
+			case 9 :
+			{fmt.Print( "symbol(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			
+			break;
+			case 7 :
+			{fmt.Print( "symbol(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{line = line + 1;
+			}
+			
+			break;
+			case 24 :
+			{fmt.Print( "ident(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 12 :
+			{fmt.Print( "literal(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 20 :
+			{fmt.Print( "float(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 16 :
+			{fmt.Print( "int(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 28 :
+			{fmt.Print( "hex(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			case 8 :
+			{fmt.Print( "symbol(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+			{blen = 0;
+			}
+			{buffer[blen] = (( data[p ]));
+				blen += 1;
+				buffer[blen] = 0;
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		if p == eof  {
+			{
+				switch _clang_eof_actions[cs]  {
+					case 22 :
+					{fmt.Print( "ident(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+					
+					break;
+					case 10 :
+					{fmt.Print( "literal(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+					
+					break;
+					case 18 :
+					{fmt.Print( "float(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+					
+					break;
+					case 14 :
+					{fmt.Print( "int(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+					
+					break;
+					case 26 :
+					{fmt.Print( "hex(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+					
+					break;
+					case 6 :
+					{fmt.Print( "symbol(" );fmt.Print( line );fmt.Print( "," );fmt.Print( blen );fmt.Print( "): " );fmt.Print( string ( buffer[:blen] ) );fmt.Print( "\n" );}
+					
+					break;
+					
+				}
+			}
+			
+			
+		}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= clang_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n",
+	"wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

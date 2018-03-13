@@ -1,0 +1,894 @@
+/*
+ *  Copyright 2006-2007 Adrian Thurston <thurston@complang.org>
+ *  Copyright 2011 Josef Goettgens
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+#include <iostream>
+#include <fstream>
+#include <string.h>
+
+#include "ragel.h"
+#include "rlscan.h"
+#include "inputdata.h"
+
+//#define LOG_TOKENS
+
+using std::ifstream;
+using std::istream;
+using std::ostream;
+using std::endl;
+
+enum InlineBlockType
+{
+	CurlyDelimited,
+	SemiTerminated
+};
+
+char *newTokdata( int toklen )
+{
+	char *tokdata = new char[sizeof(TokHead) + toklen + 1];
+	return tokdata + sizeof(TokHead);
+}
+
+void deleteTokdata( char *tokdata )
+{
+	if ( tokdata )
+		delete[] ( tokdata - sizeof(TokHead) );
+}
+
+void linkTokdata( Parser6 *parser, char *tokdata )
+{
+	TokHead *head = (TokHead*)( tokdata - sizeof(TokHead) );
+	head->next = parser->tokHead;
+	parser->tokHead = head;
+}
+
+void clearTokdata( Parser6 *parser )
+{
+	while ( parser->tokHead != 0 ) {
+		TokHead *next = parser->tokHead->next;
+		delete[] (char*)parser->tokHead;
+		parser->tokHead = next;
+	}
+}
+
+/*
+ * The Scanner for Importing
+ */
+
+
+
+
+
+write: data
+
+
+void Scanner::flushImport()
+{
+	int *p = token_data;
+	int *pe = token_data + cur_token;
+	int *eof = 0;
+
+	
+write: init
+write: exec
+
+
+	if ( tok_ts == 0 )
+		cur_token = 0;
+	else {
+		cur_token = pe - tok_ts;
+		int ts_offset = tok_ts - token_data;
+		memmove( token_data, token_data+ts_offset, cur_token*sizeof(token_data[0]) );
+		memmove( token_strings, token_strings+ts_offset, cur_token*sizeof(token_strings[0]) );
+		memmove( token_lens, token_lens+ts_offset, cur_token*sizeof(token_lens[0]) );
+	}
+}
+
+void Scanner::directToParser( Parser6 *toParser, const char *tokFileName, int tokLine, 
+		int tokColumn, int type, char *tokdata, int toklen )
+{
+	InputLoc loc;
+
+	#ifdef LOG_TOKENS
+	cerr << "scanner:" << tokLine << ":" << tokColumn << 
+			": sending token to the parser " << Parser6_lelNames[type];
+	cerr << " " << toklen;
+	if ( tokdata != 0 )
+		cerr << " " << tokdata;
+	cerr << endl;
+	#endif
+
+	loc.fileName = tokFileName;
+	loc.line = tokLine;
+	loc.col = tokColumn;
+
+	toParser->token( loc, type, tokdata, toklen );
+}
+
+void Scanner::importToken( int token, char *start, char *end )
+{
+	if ( cur_token == max_tokens )
+		flushImport();
+
+	token_data[cur_token] = token;
+	if ( start == 0 ) {
+		token_strings[cur_token] = 0;
+		token_lens[cur_token] = 0;
+	}
+	else {
+		int toklen = end-start;
+		token_lens[cur_token] = toklen;
+		token_strings[cur_token] = new char[toklen+1];
+		memcpy( token_strings[cur_token], start, toklen );
+		token_strings[cur_token][toklen] = 0;
+	}
+	cur_token++;
+}
+
+void Scanner::pass()
+{
+	if ( sectionPass )
+		return;
+
+	updateCol();
+
+	/* If no errors and we are at the bottom of the include stack (the
+	 * source file listed on the command line) then write out the data. */
+	if ( includeDepth == 0 && id->machineSpec == 0 && id->machineName == 0 )
+		id->curItem->data.write( ts, te-ts );
+}
+
+void Scanner::pass( int token, char *start, char *end )
+{
+	if ( sectionPass )
+		return;
+
+	if ( importMachines )
+		importToken( token, start, end );
+
+	pass();
+}
+
+/*
+ * The scanner for processing sections, includes, imports, etc.
+ */
+
+
+write: data
+
+
+void Scanner::init( )
+{
+	
+write: init
+
+}
+
+bool Scanner::active()
+{
+	if ( ignoreSection )
+		return false;
+
+	if ( parser == 0 && ! parserExistsError ) {
+		id->error(scan_loc()) << "this specification has no name, nor does any previous"
+			" specification" << endl;
+		parserExistsError = true;
+	}
+
+	if ( parser == 0 )
+		return false;
+
+	return true;
+}
+
+InputLoc Scanner::scan_loc()
+{
+	return makeInputLoc( fileName, line, column );
+}
+
+void Scanner::updateCol()
+{
+	char *from = lastnl;
+	if ( from == 0 )
+		from = ts;
+	column += te - from;
+	lastnl = 0;
+}
+
+void Scanner::handleMachine()
+{
+	if ( sectionPass ) {
+		/* Assign a name to the machine. */
+		char *machine = word;
+
+		SectionDictEl *sdEl = id->sectionDict.find( machine );
+		if ( sdEl == 0 ) {
+			sdEl = new SectionDictEl( machine );
+			sdEl->value = new Section( machine );
+			id->sectionDict.insert( sdEl );
+		}
+
+		section = sdEl->value;
+	}
+	else {
+
+		/* Assign a name to the machine. */
+		char *machine = word;
+
+		if ( !importMachines && inclSectionTarg == 0 ) {
+			ignoreSection = false;
+
+			ParserDictEl *pdEl = id->parserDict.find( machine );
+			if ( pdEl == 0 ) {
+				pdEl = new ParserDictEl( machine );
+				pdEl->value = new Parser6( id, fileName, machine, sectionLoc,
+						id->hostLang, id->minimizeLevel, id->minimizeOpt );
+				pdEl->value->init();
+				id->parserDict.insert( pdEl );
+				id->parserList.append( pdEl->value );
+
+				/* Also into the parse data dict. This is the new style. */
+				ParseDataDictEl *pddEl = new ParseDataDictEl( machine );
+				pddEl->value = pdEl->value->pd;
+				id->parseDataDict.insert( pddEl );
+				id->parseDataList.append( pddEl->value );
+			}
+
+			parser = pdEl->value;
+		}
+		else if ( !importMachines && strcmp( inclSectionTarg, machine ) == 0 ) {
+			/* found include target */
+			ignoreSection = false;
+			parser = inclToParser;
+		}
+		else {
+			/* ignoring section */
+			ignoreSection = true;
+			parser = 0;
+		}
+	}
+}
+
+void Scanner::handleInclude()
+{
+	if ( sectionPass )
+		return;
+
+	if ( active() ) {
+		char *inclSectionName = word;
+		const char **includeChecks = 0;
+
+		/* Implement defaults for the input file and section name. */
+		if ( inclSectionName == 0 )
+			inclSectionName = parser->sectionName;
+
+		if ( lit != 0 ) {
+			long length = 0;
+			bool caseInsensitive = false;
+			char *data = prepareLitString( id, InputLoc(), lit, lit_len, length, caseInsensitive );
+
+			includeChecks = parser->pd->id->makeIncludePathChecks( fileName, data );
+		}
+		else {
+			char *test = new char[strlen(fileName)+1];
+			strcpy( test, fileName );
+
+			includeChecks = new const char*[2];
+
+			includeChecks[0] = test;
+			includeChecks[1] = 0;
+		}
+
+		long found = 0;
+		ifstream *inFile = parser->pd->id->tryOpenInclude( includeChecks, found );
+		if ( inFile == 0 ) {
+			id->error(scan_loc()) << "include: failed to locate file" << endl;
+			const char **tried = includeChecks;
+			while ( *tried != 0 )
+				id->error(scan_loc()) << "include: attempted: \"" << *tried++ << '\"' << endl;
+		}
+		else {
+			/* Don't include anything that's already been included. */
+			if ( !parser->pd->duplicateInclude( includeChecks[found], inclSectionName ) ) {
+				parser->pd->includeHistory.push_back( IncludeHistoryItem( 
+						includeChecks[found], inclSectionName ) );
+
+				Scanner scanner( id, includeChecks[found], *inFile, parser,
+						inclSectionName, includeDepth+1, false );
+				scanner.do_scan( );
+			}
+
+			delete inFile;
+		}
+	}
+}
+
+void Scanner::handleImport()
+{
+	if ( sectionPass )
+		return;
+
+	if ( active() ) {
+		long length = 0;
+		bool caseInsensitive = false;
+		char *data = prepareLitString( id, InputLoc(), lit, lit_len, length, caseInsensitive );
+
+		const char **importChecks = parser->pd->id->makeIncludePathChecks( fileName, data );
+
+		/* Open the input file for reading. */
+		long found = 0;
+		ifstream *inFile = parser->pd->id->tryOpenInclude( importChecks, found );
+		if ( inFile == 0 ) {
+			id->error(scan_loc()) << "import: could not open import file " <<
+					"for reading" << endl;
+			const char **tried = importChecks;
+			while ( *tried != 0 )
+				id->error(scan_loc()) << "import: attempted: \"" << *tried++ << '\"' << endl;
+		}
+
+		Scanner scanner( id, importChecks[found], *inFile, parser,
+				0, includeDepth+1, true );
+		scanner.do_scan( );
+		scanner.importToken( 0, 0, 0 );
+		scanner.flushImport();
+		delete inFile;
+	}
+}
+
+
+
+
+void Scanner::token( int type, char c )
+{
+	token( type, &c, &c + 1 );
+}
+
+void Scanner::token( int type )
+{
+	token( type, 0, 0 );
+}
+
+
+void Scanner::token( int type, char *start, char *end )
+{
+	char *tokdata = 0;
+	int toklen = 0;
+	if ( start != 0 ) {
+		toklen = end-start;
+		tokdata = newTokdata( toklen + 1 );
+		memcpy( tokdata, start, toklen );
+		tokdata[toklen] = 0;
+	}
+
+	processToken( type, tokdata, toklen );
+}
+
+void Scanner::processToken( int type, char *tokdata, int toklen )
+{
+	int *p, *pe, *eof;
+
+	if ( type < 0 )
+		p = pe = eof = 0;
+	else {
+		p = &type;
+		pe = &type + 1;
+		eof = 0;
+	}
+
+	
+write: exec
+
+
+	updateCol();
+
+	/* Record the last token for use in controlling the scan of subsequent
+	 * tokens. */
+	lastToken = type;
+}
+
+void Scanner::startSection( )
+{
+	parserExistsError = false;
+
+	sectionLoc.fileName = fileName;
+	sectionLoc.line = line;
+	sectionLoc.col = column;
+}
+
+void Scanner::endSection( )
+{
+	/* Execute the eof actions for the section parser. */
+	processToken( -1, 0, 0 );
+
+	if ( sectionPass ) {
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::EndSection;
+		inputItem->loc.fileName = fileName;
+		inputItem->loc.line = line;
+		inputItem->loc.col = column;
+		id->inputItems.append( inputItem );
+		if ( section != 0 ) {
+			inputItem->section = section;
+			section->lastReference = inputItem;
+		}
+
+		if ( includeDepth == 0 ) {
+			if ( id->machineSpec == 0 && id->machineName == 0 ) {
+				/* The end section may include a newline on the end, so
+				 * we use the last line, which will count the newline. */
+				InputItem *inputItem = new InputItem;
+				inputItem->type = InputItem::HostData;
+				inputItem->loc.fileName = fileName;
+				inputItem->loc.line = line;
+				inputItem->loc.col = column;
+				id->inputItems.append( inputItem );
+			}
+		}
+	}
+	else {
+		/* Close off the section with the parser. */
+		if ( includeDepth == 0 && active() ) {
+			InputLoc loc;
+			loc.fileName = fileName;
+			loc.line = line;
+			loc.col = column;
+
+			parser->token( loc, TK_EndSection, 0, 0 );
+
+			id->curItem = id->curItem->next;
+
+			if ( parser != 0 ) {
+				id->curItem->pd = parser->pd;
+				id->curItem->parser = parser;
+			}
+
+			id->checkLastRef( id->curItem );
+		}
+
+		if ( includeDepth == 0 ) {
+			if ( id->machineSpec == 0 && id->machineName == 0 ) {
+				id->curItem = id->curItem->next;
+				id->checkLastRef( id->curItem );
+			}
+		}
+	}
+}
+
+
+
+
+
+write: data
+
+
+void Scanner::do_scan()
+{
+	int bufsize = 8;
+	char *buf = new char[bufsize];
+	int cs, act, have = 0;
+	int top;
+
+	/* The stack is two deep, one level for going into ragel defs from the main
+	 * machines which process outside code, and another for going into or literals
+	 * from either a ragel spec, or a regular expression. */
+	int stack[2];
+	int curly_count = 0;
+	bool execute = true;
+	bool singleLineSpec = false;
+	InlineBlockType inlineBlockType = CurlyDelimited;
+
+	line = 1;
+	column = 1;
+	lastnl = 0;
+
+	/* Init the section parser and the character scanner. */
+	init();
+	
+write: init
+
+
+	/* Set up the start state. FIXME: After 5.20 is released the nocs write
+	 * init option should be used, the main machine eliminated and this statement moved
+	 * above the write init. */
+	cs = rlscan_en_main;
+	
+	while ( execute ) {
+		char *p = buf + have;
+		int space = bufsize - have;
+
+		if ( space == 0 ) {
+			/* We filled up the buffer trying to scan a token. Grow it. */
+			bufsize = bufsize * 2;
+			char *newbuf = new char[bufsize];
+
+			/* Recompute p and space. */
+			p = newbuf + have;
+			space = bufsize - have;
+
+			/* Patch up pointers possibly in use. */
+			if ( ts != 0 )
+				ts = newbuf + ( ts - buf );
+			te = newbuf + ( te - buf );
+
+			/* Copy the new buffer in. */
+			memcpy( newbuf, buf, have );
+			delete[] buf;
+			buf = newbuf;
+		}
+
+		input.read( p, space );
+		int len = input.gcount();
+		char *pe = p + len;
+
+		/* If we see eof then append the eof var. */
+		char *eof = 0;
+	 	if ( len == 0 ) {
+			eof = pe;
+			execute = false;
+		}
+
+		
+write: exec
+
+
+		/* Check if we failed. */
+		if ( cs == rlscan_error ) {
+			/* Machine failed before finding a token. I'm not yet sure if this
+			 * is reachable. */
+			id->error(scan_loc()) << "scanner error" << endl;
+			id->abortCompile( 1 );
+		}
+
+		/* Decide if we need to preserve anything. */
+		char *preserve = ts;
+
+		/* Now set up the prefix. */
+		if ( preserve == 0 )
+			have = 0;
+		else {
+			/* There is data that needs to be shifted over. */
+			have = pe - preserve;
+			memmove( buf, preserve, have );
+			unsigned int shiftback = preserve - buf;
+			if ( ts != 0 )
+				ts -= shiftback;
+			te -= shiftback;
+
+			preserve = buf;
+		}
+	}
+
+	delete[] buf;
+}
+
+machine name: inline_token_scan
+IL_Comment = F
+IL_Literal = F
+IL_Symbol = F
+IL_WhiteSpace = F
+IMP_Define = F
+IMP_Literal = F
+IMP_UInt = F
+IMP_Word = F
+KW_Access = F
+KW_Action = F
+KW_AlphType = F
+KW_Break = F
+KW_Call = F
+KW_Char = F
+KW_CurState = F
+KW_Entry = F
+KW_Eof = F
+KW_Err = F
+KW_Exec = F
+KW_Export = F
+KW_From = F
+KW_GetKey = F
+KW_Goto = F
+KW_Hold = F
+KW_Import = F
+KW_InWhen = F
+KW_Include = F
+KW_Length = F
+KW_Lerr = F
+KW_Machine = F
+KW_Nbreak = F
+KW_Ncall = F
+KW_Next = F
+KW_NfaPostPop = F
+KW_NfaPrePush = F
+KW_Nret = F
+KW_OutWhen = F
+KW_PChar = F
+KW_PostPop = F
+KW_PrePush = F
+KW_Range = F
+KW_Ret = F
+KW_TargState = F
+KW_To = F
+KW_Variable = F
+KW_When = F
+KW_Write = F
+Parser6_tk_eof = F
+RE_Char = F
+RE_Dash = F
+RE_Dot = F
+RE_Slash = F
+RE_SqClose = F
+RE_SqOpen = F
+RE_SqOpenNeg = F
+RE_Star = F
+TK_AllCond = F
+TK_AllEOF = F
+TK_AllFromState = F
+TK_AllGblError = F
+TK_AllLocalError = F
+TK_AllToState = F
+TK_Arrow = F
+TK_BarEquals = F
+TK_BarStar = F
+TK_CloseColon = F
+TK_ColonCondOpen = F
+TK_ColonCondPlusOpen = F
+TK_ColonCondStarOpen = F
+TK_ColonEquals = F
+TK_ColonGt = F
+TK_ColonGtGt = F
+TK_ColonNfaOpen = F
+TK_ColonNoMaxOpen = F
+TK_DashDash = F
+TK_DotDot = F
+TK_DotDotIndep = F
+TK_DoubleArrow = F
+TK_EndSection = F
+TK_FinalEOF = F
+TK_FinalFromState = F
+TK_FinalGblError = F
+TK_FinalLocalError = F
+TK_FinalToState = F
+TK_Hex = F
+TK_LeavingCond = F
+TK_Literal = F
+TK_LtColon = F
+TK_Middle = F
+TK_MiddleEOF = F
+TK_MiddleFromState = F
+TK_MiddleGblError = F
+TK_MiddleLocalError = F
+TK_MiddleToState = F
+TK_NameSep = F
+TK_NotFinalEOF = F
+TK_NotFinalFromState = F
+TK_NotFinalGblError = F
+TK_NotFinalLocalError = F
+TK_NotFinalToState = F
+TK_NotStartEOF = F
+TK_NotStartFromState = F
+TK_NotStartGblError = F
+TK_NotStartLocalError = F
+TK_NotStartToState = F
+TK_StarStar = F
+TK_StartCond = F
+TK_StartEOF = F
+TK_StartFromState = F
+TK_StartGblError = F
+TK_StartLocalError = F
+TK_StartToState = F
+TK_SubstRef = F
+TK_UInt = F
+TK_Word = F
+alnum = builtin
+alpha = builtin
+any = builtin
+ascii = builtin
+cntrl = builtin
+digit = builtin
+empty = builtin
+extend = builtin
+graph = builtin
+lower = builtin
+main = |* F . F . F; F . F . F; F . F . F; F . F . F; F; *|
+null = builtin
+print = builtin
+punct = builtin
+space = builtin
+upper = builtin
+xdigit = builtin
+zlen = builtin
+machine name: section_parse
+IL_Comment = F
+IL_Literal = F
+IL_Symbol = F
+IL_WhiteSpace = F
+IMP_Define = F
+IMP_Literal = F
+IMP_UInt = F
+IMP_Word = F
+KW_Access = F
+KW_Action = F
+KW_AlphType = F
+KW_Break = F
+KW_Call = F
+KW_Char = F
+KW_CurState = F
+KW_Entry = F
+KW_Eof = F
+KW_Err = F
+KW_Exec = F
+KW_Export = F
+KW_From = F
+KW_GetKey = F
+KW_Goto = F
+KW_Hold = F
+KW_Import = F
+KW_InWhen = F
+KW_Include = F
+KW_Length = F
+KW_Lerr = F
+KW_Machine = F
+KW_Nbreak = F
+KW_Ncall = F
+KW_Next = F
+KW_NfaPostPop = F
+KW_NfaPrePush = F
+KW_Nret = F
+KW_OutWhen = F
+KW_PChar = F
+KW_PostPop = F
+KW_PrePush = F
+KW_Range = F
+KW_Ret = F
+KW_TargState = F
+KW_To = F
+KW_Variable = F
+KW_When = F
+KW_Write = F
+Parser6_tk_eof = F
+RE_Char = F
+RE_Dash = F
+RE_Dot = F
+RE_Slash = F
+RE_SqClose = F
+RE_SqOpen = F
+RE_SqOpenNeg = F
+RE_Star = F
+TK_AllCond = F
+TK_AllEOF = F
+TK_AllFromState = F
+TK_AllGblError = F
+TK_AllLocalError = F
+TK_AllToState = F
+TK_Arrow = F
+TK_BarEquals = F
+TK_BarStar = F
+TK_CloseColon = F
+TK_ColonCondOpen = F
+TK_ColonCondPlusOpen = F
+TK_ColonCondStarOpen = F
+TK_ColonEquals = F
+TK_ColonGt = F
+TK_ColonGtGt = F
+TK_ColonNfaOpen = F
+TK_ColonNoMaxOpen = F
+TK_DashDash = F
+TK_DotDot = F
+TK_DotDotIndep = F
+TK_DoubleArrow = F
+TK_EndSection = F
+TK_FinalEOF = F
+TK_FinalFromState = F
+TK_FinalGblError = F
+TK_FinalLocalError = F
+TK_FinalToState = F
+TK_Hex = F
+TK_LeavingCond = F
+TK_Literal = F
+TK_LtColon = F
+TK_Middle = F
+TK_MiddleEOF = F
+TK_MiddleFromState = F
+TK_MiddleGblError = F
+TK_MiddleLocalError = F
+TK_MiddleToState = F
+TK_NameSep = F
+TK_NotFinalEOF = F
+TK_NotFinalFromState = F
+TK_NotFinalGblError = F
+TK_NotFinalLocalError = F
+TK_NotFinalToState = F
+TK_NotStartEOF = F
+TK_NotStartFromState = F
+TK_NotStartGblError = F
+TK_NotStartLocalError = F
+TK_NotStartToState = F
+TK_StarStar = F
+TK_StartCond = F
+TK_StartEOF = F
+TK_StartFromState = F
+TK_StartGblError = F
+TK_StartLocalError = F
+TK_StartToState = F
+TK_SubstRef = F
+TK_UInt = F
+TK_Word = F
+alnum = builtin
+alpha = builtin
+any = builtin
+ascii = builtin
+cntrl = builtin
+digit = builtin
+empty = builtin
+everything_else = ^F
+extend = builtin
+graph = builtin
+import_stmt = F
+include_names = F
+include_stmt = F
+lower = builtin
+machine_stmt = F
+main = F*
+null = builtin
+print = builtin
+punct = builtin
+space = builtin
+upper = builtin
+write_stmt = F
+xdigit = builtin
+zlen = builtin
+machine name: rlscan
+EOF = F
+NL = F
+alnum = builtin
+alpha = builtin
+any = builtin
+ascii = builtin
+c_comment = F . F* :>> F
+c_cpp_comment = F | F
+cntrl = builtin
+cpp_comment = F . F* . F
+d_literal = F . F* . F
+digit = builtin
+empty = builtin
+extend = builtin
+graph = builtin
+hex_number = F . F+
+host_re_literal = F . F* . F
+ident = F . F*
+inline_code = |* F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F+; F; F; F; F . F . F*; F; F; F; F; F; F; *|
+lower = builtin
+main = |* F; F; F; F; F; F; F; F+; F; F; *|
+null = builtin
+number = F+
+ocaml_ident = F . F* . F?
+or_literal = |* F; F; F; F; F; F; F; F; F; F . F; F; F; F; F; *|
+parser_def = |* F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F . F?; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F; F+; F; F; F; F; *|
+pound_comment = F . F* . F
+print = builtin
+punct = builtin
+ragel_re_literal = |* F; F; F; F; F; F; F; F; F; F . F; F . F?; F; F; F; F; F; F; *|
+ruby_comment = F . F* . F
+s_literal = F . F* . F
+space = builtin
+upper = builtin
+whitespace = F | F
+write_statement = |* F; F+; F; F; *|
+xdigit = builtin
+zlen = builtin

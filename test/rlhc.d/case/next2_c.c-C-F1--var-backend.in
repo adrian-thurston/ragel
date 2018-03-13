@@ -1,0 +1,179 @@
+host( "working/next2_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	int target ;
+	int last ;
+	
+	
+	
+	
+	
+}@
+array char _next2_trans_keys( 0, 15 ) = { 1, 0, 15, 15, 13, 13, 8, 8, 13, 13, 11, 11, 6, 6, 5, 5, 9, 9, 8, 8, 6, 6, 12, 12, 14, 14, 9, 9, 12, 12, 7, 7, 10, 10, 6, 6, 6, 6, 0, 4, 1, 0, 1, 0, 1, 0, 1, 0, 0 };
+
+array s8 _next2_char_class( 0, 15 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 6, 1, 1, 7, 1, 1, 1, 1, 1, 8, 9, 1, 1, 10, 11, 12, 13, 1, 14, 15, 0 };
+
+array s8 _next2_index_offsets( 0, 23 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 23, 23, 23, 23, 0 };
+
+array s8 _next2_indicies( 0, 21 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0 };
+
+array s8 _next2_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _next2_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _next2_cond_targs( 0, 23 ) = { 19, 0, 3, 4, 5, 6, 7, 20, 9, 10, 21, 12, 13, 22, 15, 16, 17, 18, 23, 19, 19, 1, 0 };
+
+array s8 _next2_cond_actions( 0, 6 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 3, 4, 5, 6, 0 };
+
+array s8 _next2_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _next2_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _next2_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _next2_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int next2_start = 19;
+value int next2_first_final = 19;
+value int next2_error = 0;
+
+value int next2_en_unused = 2;
+value int next2_en_one = 8;
+value int next2_en_two = 11;
+value int next2_en_three = 14;
+value int next2_en_main = 19;
+
+host( "working/next2_c.rl", 54 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)next2_start;
+	}
+	host( "working/next2_c.rl", 61 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index char _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _next2_trans_keys, (cs<<1) );
+					_inds = offset( _next2_indicies, _next2_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 120 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_next2_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _next2_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _next2_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _next2_indicies, _inds + cast(int)( _ic - cast(int)deref( _next2_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_next2_index_defaults[cs];
+					}
+					else {
+						_trans = cast(uint)_next2_index_defaults[cs];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_next2_cond_targs[_trans];
+					
+					switch ( _next2_cond_actions[_trans] ) {
+						case 1 {
+							host( "working/next2_c.rl", 17 ) ${printf( "%s", "one\n" );
+								target = 19;
+								${cs = host( "-", 1 ) ={target}=;}$}$
+						}
+						case 2 {
+							host( "working/next2_c.rl", 21 ) ${printf( "%s", "two\n" );
+								target = 19;
+								${cs = host( "-", 1 ) ={target}=;}$}$
+						}
+						case 3 {
+							host( "working/next2_c.rl", 25 ) ${printf( "%s", "three\n" );
+								target = 19;
+								${cs = host( "-", 1 ) ={target}=;}$}$
+						}
+						case 4 {
+							host( "working/next2_c.rl", 30 ) ${target = 8;
+								${cs = host( "-", 1 ) ={target}=;}$last = 1;
+							}$
+						}
+						case 5 {
+							host( "working/next2_c.rl", 34 ) ${target = 11;
+								${cs = host( "-", 1 ) ={target}=;}$last = 2;
+							}$
+						}
+						case 6 {
+							host( "working/next2_c.rl", 39 ) ${if ( last == 2 )
+								{
+									target = 14;
+									${cs = host( "-", 1 ) ={target}=;}$
+								} 
+								last = 3;
+							}$
+						}
+					}
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/next2_c.rl", 68 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= next2_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"1one3x2two3three\n",
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

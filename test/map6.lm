@@ -1,0 +1,46 @@
+new M: map<str, str>()
+
+AE: list_el<str> = argv->head_el
+while AE {
+	M->insert( AE->value, toupper(AE->value) )
+	AE = AE->next
+}
+
+for A: str in argv {
+	new El: map_el<str, str>()
+
+	El->key = toupper(A)
+	El->value = A
+
+	M->insert_el( El )
+}
+
+for El: map_el<str, str> in M {
+	print "[El->key] [El->value]
+}
+
+El: map_el<str, str> = M->head_el
+while ( El ) {
+	print "[El->key] [El->value]
+	El = El->next
+}
+
+###### ARGS ######
+a b c done
+###### EXP ######
+A a
+B b
+C c
+a A
+b B
+c C
+DONE done
+done DONE
+A a
+B b
+C c
+a A
+b B
+c C
+DONE done
+done DONE

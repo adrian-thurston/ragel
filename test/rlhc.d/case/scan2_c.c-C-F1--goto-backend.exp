@@ -1,0 +1,263 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const char  _scanner_trans_keys [] = { 0, 2, 0, 1, 0, 2, 0 ,  };
+static const char  _scanner_char_class [] = { 0, 1, 2, 0 ,  };
+static const char  _scanner_index_offsets [] = { 0, 3, 5, 0 ,  };
+static const char  _scanner_indicies [] = { 1, 1, 2, 4, 5, 1, 1, 2, 0 ,  };
+static const char  _scanner_index_defaults [] = { 0, 3, 0, 0 ,  };
+static const char  _scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _scanner_cond_targs [] = { 1, 0, 1, 1, 2, 2, 0 ,  };
+static const char  _scanner_cond_actions [] = { 1, 0, 2, 5, 6, 7, 0 ,  };
+static const char  _scanner_to_state_actions [] = { 0, 3, 0, 0 ,  };
+static const char  _scanner_from_state_actions [] = { 0, 4, 0, 0 ,  };
+static const char  _scanner_eof_trans [] = { 1, 0, 1, 0 ,  };
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  scanner_start  = 1;
+static const int  scanner_first_final  = 1;
+static const int  scanner_error  = -1;
+static const int  scanner_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		int _trans = 0;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		_resume :
+		switch ( _scanner_from_state_actions[cs] ) {
+			case 4 :
+			{
+				{
+					ts = p;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		_keys = _scanner_trans_keys + (cs<<1);
+		_inds = _scanner_indicies + _scanner_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 99 && ((*( p  ))
+		)>= 97  )
+		{
+			int _ic = ( int ) _scanner_char_class[( int ) ((*( p  ))
+			)- 97];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _scanner_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _scanner_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _scanner_cond_targs[_trans];
+		if ( _scanner_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		switch ( _scanner_cond_actions[_trans] ) {
+			case 2 :
+			{
+				{
+					te = p+1;
+					{
+						printf( "%s", "pat2\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 5 :
+			{
+				{
+					te = p+1;
+					{
+						printf( "%s", "any\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 1 :
+			{
+				{
+					switch ( act  ) {
+						case 1 :
+						p = ((te))-1;
+						{
+							printf( "%s", "pat1\n" );
+							
+						}
+						
+						break;
+						case 3 :
+						p = ((te))-1;
+						{
+							printf( "%s", "any\n" );
+							
+						}
+						
+						break;
+						
+					}
+					
+				}
+				
+				
+			}
+			
+			break;
+			case 6 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 1;
+					
+				}
+				
+			}
+			
+			break;
+			case 7 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 3;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch ( _scanner_to_state_actions[cs] ) {
+			case 3 :
+			{
+				{
+					ts = 0;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			if ( _scanner_eof_trans[cs]> 0  )
+			{
+				_trans = ( int ) _scanner_eof_trans[cs]- 1;
+				goto _match_cond;
+			}
+			
+		}
+		
+		
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"a",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

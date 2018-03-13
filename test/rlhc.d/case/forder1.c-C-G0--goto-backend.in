@@ -1,0 +1,168 @@
+host( "working/forder1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct forder 
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _forder_actions( 0, 3 ) = { 0, 1, 3, 3, 2, 0, 1, 0 };
+
+array s8 _forder_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _forder_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _forder_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _forder_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int forder_start = 1;
+value int forder_first_final = 4;
+value int forder_error = 0;
+
+value int forder_en_main = 1;
+
+host( "working/forder1.rl", 31 ) @{
+	
+	void forder_init( struct forder *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)forder_start;
+	}
+	host( "working/forder1.rl", 35 ) @{
+	}
+	
+	void forder_execute( struct forder *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		_resume:
+		switch ( host( "-", 1 ) ={ fsm->cs}= ) {
+			case 1:
+			if ( ( deref( data, p )) == 97 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 98 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: host( "-", 1 ) ={ fsm->cs}= = 0; goto _again;
+		ctr0: host( "-", 1 ) ={ fsm->cs}= = 2; goto f0;
+		ctr2: host( "-", 1 ) ={ fsm->cs}= = 3; goto f1;
+		ctr3: host( "-", 1 ) ={ fsm->cs}= = 4; goto _again;
+		
+		f0: _acts = offset( _forder_actions, 1 ); goto execFuncs;
+		f1: _acts = offset( _forder_actions, 3 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _forder_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _forder_actions, _acts ) ) {
+				case 0{
+					host( "working/forder1.rl", 18 ) ${printf("enter b1\n");}$
+				}
+				case 1{
+					host( "working/forder1.rl", 19 ) ${printf("enter b2\n");}$
+				}
+				case 2{
+					host( "working/forder1.rl", 23 ) ${printf("leave a\n");}$
+				}
+				case 3{
+					host( "working/forder1.rl", 24 ) ${printf("finish a\n");}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/forder1.rl", 43 ) @{
+	}
+	
+	int forder_finish( struct forder *fsm )
+	{
+		if ( fsm->cs == forder_error )
+		return -1;
+		if ( fsm->cs >= forder_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct forder fsm;
+	
+	void test( char *buf )
+	{
+		int len = strlen(buf);
+		forder_init( &fsm );
+		forder_execute( &fsm, buf, len );
+		if ( forder_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	int main()
+	{
+		test( "ab\n");
+		test( "abx\n");
+		test( "" );
+		
+		test(
+		"ab\n"
+		"fail after newline\n"
+		);
+		
+		return 0;
+	}
+	
+}@

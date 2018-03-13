@@ -1,0 +1,13 @@
+
+new M: map<str, str>()
+
+for AE: list_el<str> in argv {
+	print "[AE->value]
+}
+
+##### ARGS #####
+a b c
+##### EXP #####
+a
+b
+c

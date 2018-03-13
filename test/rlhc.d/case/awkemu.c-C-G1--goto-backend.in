@@ -1,0 +1,233 @@
+host( "working/awkemu.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Emulate the basic parser of the awk program. Breaks lines up into
+	* words and prints the words.
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	#define LINEBUF 2048
+	static char lineBuf[LINEBUF];
+	static char blineBuf[LINEBUF];
+	static int lineLen;
+	static int blineLen;
+	static int words;
+	
+	void finishLine();
+	
+	struct awkemu
+	{
+		int cs;
+	};
+	
+	
+	
+	void finishLine()
+	{
+		int i;
+		char *pword = blineBuf;
+		lineBuf[lineLen] = 0;
+		printf("endline(%i): %s\n", words, lineBuf );
+		for ( i = 0; i < words; i++ ) {
+			printf("  word: %s\n", pword );
+			pword += strlen(pword) + 1;
+		}
+	}
+	
+}@
+array s8 _awkemu_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _awkemu_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _awkemu_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _awkemu_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int awkemu_start = 2;
+value int awkemu_first_final = 2;
+value int awkemu_error = -1;
+
+value int awkemu_en_main = 2;
+
+host( "working/awkemu.rl", 101 ) @{
+	
+	void awkemu_init( struct awkemu *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)awkemu_start;
+	}
+	host( "working/awkemu.rl", 105 ) @{
+	}
+	
+	void awkemu_execute( struct awkemu *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		_resume:
+		switch ( host( "-", 1 ) ={ fsm->cs}= ) {
+			case 2:
+			switch( ( deref( data, p )) ) {
+				case 9: {
+					goto ctr6;
+				}
+				case 10: {
+					goto ctr7;
+				}
+				case 32: {
+					goto ctr6;
+				}
+			}
+			{
+				goto ctr5;
+			}
+			case 0:
+			switch( ( deref( data, p )) ) {
+				case 9: {
+					goto ctr1;
+				}
+				case 10: {
+					goto ctr2;
+				}
+				case 32: {
+					goto ctr1;
+				}
+			}
+			{
+				goto ctr0;
+			}
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 9: {
+					goto ctr3;
+				}
+				case 10: {
+					goto ctr4;
+				}
+				case 32: {
+					goto ctr3;
+				}
+			}
+			{
+				goto ctr0;
+			}
+		}
+		
+		ctr0: host( "-", 1 ) ={ fsm->cs}= = 0; goto f0;
+		ctr5: host( "-", 1 ) ={ fsm->cs}= = 0; goto f5;
+		ctr1: host( "-", 1 ) ={ fsm->cs}= = 1; goto f1;
+		ctr3: host( "-", 1 ) ={ fsm->cs}= = 1; goto f3;
+		ctr6: host( "-", 1 ) ={ fsm->cs}= = 1; goto f6;
+		ctr2: host( "-", 1 ) ={ fsm->cs}= = 2; goto f2;
+		ctr4: host( "-", 1 ) ={ fsm->cs}= = 2; goto f4;
+		ctr7: host( "-", 1 ) ={ fsm->cs}= = 2; goto f7;
+		
+		f3:
+		host( "working/awkemu.rl", 54 ) ${
+			lineBuf[lineLen++] = ={( deref( data, p ))}=;
+		}$
+		goto _again;
+		f4:
+		host( "working/awkemu.rl", 78 ) ${ finishLine(); }$
+		goto _again;
+		f6:
+		host( "working/awkemu.rl", 33 ) ${
+			lineLen = 0;	
+			blineLen = 0;	
+			words = 0;
+		}$	host( "working/awkemu.rl", 54 ) ${
+			lineBuf[lineLen++] = ={( deref( data, p ))}=;
+		}$
+		goto _again;
+		f7:
+		host( "working/awkemu.rl", 33 ) ${
+			lineLen = 0;	
+			blineLen = 0;	
+			words = 0;
+		}$	host( "working/awkemu.rl", 78 ) ${ finishLine(); }$
+		goto _again;
+		f0:
+		host( "working/awkemu.rl", 41 ) ${
+			blineBuf[blineLen++] = ={( deref( data, p ))}=;
+		}$	host( "working/awkemu.rl", 54 ) ${
+			lineBuf[lineLen++] = ={( deref( data, p ))}=;
+		}$
+		goto _again;
+		f1:
+		host( "working/awkemu.rl", 47 ) ${
+			blineBuf[blineLen++] = 0;
+			words += 1;
+		}$	host( "working/awkemu.rl", 54 ) ${
+			lineBuf[lineLen++] = ={( deref( data, p ))}=;
+		}$
+		goto _again;
+		f2:
+		host( "working/awkemu.rl", 47 ) ${
+			blineBuf[blineLen++] = 0;
+			words += 1;
+		}$	host( "working/awkemu.rl", 78 ) ${ finishLine(); }$
+		goto _again;
+		f5:
+		host( "working/awkemu.rl", 33 ) ${
+			lineLen = 0;	
+			blineLen = 0;	
+			words = 0;
+		}$	host( "working/awkemu.rl", 41 ) ${
+			blineBuf[blineLen++] = ={( deref( data, p ))}=;
+		}$	host( "working/awkemu.rl", 54 ) ${
+			lineBuf[lineLen++] = ={( deref( data, p ))}=;
+		}$
+		goto _again;
+		
+		_again:
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+	}
+	host( "working/awkemu.rl", 112 ) @{
+	}
+	
+	int awkemu_finish( struct awkemu *fsm )
+	{
+		if ( fsm->cs == awkemu_error ) 
+		return -1;
+		if ( fsm->cs >= awkemu_first_final ) 
+		return 1;
+		return 0;
+	}
+	
+	#include <stdio.h>
+	#define BUFSIZE 2048
+	
+	struct awkemu fsm;
+	char buf[BUFSIZE];
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		awkemu_init( &fsm );
+		awkemu_execute( &fsm, buf, len );
+		if ( awkemu_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	int main()
+	{
+		test( "" );
+		test( "one line with no newline" );
+		test( "one line\n" );
+		return 0;
+	}
+	
+}@

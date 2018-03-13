@@ -1,0 +1,222 @@
+host( "working/rangei_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			
+			
+			
+			
+			
+		}@
+		array s8 _rangei_key_offsets( 0, 24 ) = { 0, 0, 4, 8, 12, 16, 22, 24, 0 };
+		
+		array char _rangei_trans_keys( 0, 125 ) = { c(65), c(90), c(97), c(122), c(65), c(90), c(97), c(122), c(60), c(93), c(97), c(122), c(65), c(90), c(94), c(125), c(65), c(69), c(86), c(101), c(118), c(122), c(60), c(125), c(0) };
+		
+		array s8 _rangei_single_lengths( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _rangei_range_lengths( 0, 3 ) = { 0, 2, 2, 2, 2, 3, 1, 0, 0 };
+		
+		array s8 _rangei_index_offsets( 0, 18 ) = { 0, 0, 3, 6, 9, 12, 16, 18, 0 };
+		
+		array s8 _rangei_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+		
+		array s8 _rangei_trans_offsets( 0, 18 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0 };
+		
+		array s8 _rangei_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+		
+		array s8 _rangei_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _rangei_cond_targs( 0, 7 ) = { 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0, 6, 6, 6, 0, 7, 0, 0, 0 };
+		
+		array s8 _rangei_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _rangei_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _rangei_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _rangei_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _rangei_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int rangei_start = 1;
+		value int rangei_first_final = 7;
+		value int rangei_error = 0;
+		
+		value int rangei_en_main = 1;
+		
+		host( "working/rangei_cs.rl", 29 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)rangei_start;
+			}
+			host( "working/rangei_cs.rl", 34 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _klen;
+				uint _trans = 0;
+				uint _cond = 0;
+				index char _keys;
+				index s8 _ckeys;
+				int _cpc;
+				entry {
+					
+					if ( p == pe )
+					goto _test_eof;
+					if ( cs == 0 )
+					goto _out;
+					label _resume {
+						_keys = offset( _rangei_trans_keys, _rangei_key_offsets[cs] );
+						_trans = cast(uint)_rangei_index_offsets[cs];
+						
+						_klen = cast(int)_rangei_single_lengths[cs];
+						if ( _klen > 0 ) {
+							index char _lower;
+							index char _mid;
+							index char _upper;
+							_lower = _keys;
+							_upper = _keys + _klen - 1;
+							while ( TRUE ) {
+								if ( _upper < _lower )
+								break;
+								
+								_mid = _lower + ((_upper-_lower) >> 1);
+								if ( ( deref( data, p )) < deref( _rangei_trans_keys, _mid ) )
+								_upper = _mid - 1;
+								else if ( ( deref( data, p )) > deref( _rangei_trans_keys, _mid ) )
+								_lower = _mid + 1;
+								else {
+									_trans += cast(uint)(_mid - _keys);
+									goto _match;
+								}
+							}
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+						
+						_klen = cast(int)_rangei_range_lengths[cs];
+						if ( _klen > 0 ) {
+							index char _lower;
+							index char _mid;
+							index char _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( TRUE ) {
+								if ( _upper < _lower )
+								break;
+								
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _rangei_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _rangei_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									goto _match;
+								}
+							}
+							_trans += cast(uint)_klen;
+						}
+						
+					}
+					label _match {
+						_ckeys = offset( _rangei_cond_keys, _rangei_trans_offsets[_trans] );
+						_klen = cast(int)_rangei_trans_lengths[_trans];
+						_cond = cast(uint)_rangei_trans_offsets[_trans];
+						
+						_cpc = 0;
+						{
+							index s8 _lower;
+							index s8 _mid;
+							index s8 _upper;
+							_lower = _ckeys;
+							_upper = _ckeys + _klen - 1;
+							while ( TRUE ) {
+								if ( _upper < _lower )
+								break;
+								
+								_mid = _lower + ((_upper-_lower) >> 1);
+								if ( _cpc < cast(int)deref( _rangei_cond_keys, _mid ) )
+								_upper = _mid - 1;
+								else if ( _cpc > cast(int)deref( _rangei_cond_keys, _mid ) )
+								_lower = _mid + 1;
+								else {
+									_cond += cast(uint)(_mid - _ckeys);
+									goto _match_cond;
+								}
+							}
+							cs = 0;
+							goto _again;
+						}
+					}
+					label _match_cond {
+						cs = cast(int)_rangei_cond_targs[_cond];
+						
+					}
+					label _again {
+						if ( cs == 0 )
+						goto _out;
+						p += 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/rangei_cs.rl", 45 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= rangei_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"AaBbAa",
+				"Aa`bAa",
+				"AaB@@Aa",
+				"AaBbMa",
+				"AaBbma",
+			};
+			
+			
+			static readonly int inplen = 5;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

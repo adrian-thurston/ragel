@@ -1,0 +1,233 @@
+host( "working/recdescent5.rl", 1 ) @{/*
+	* @@LANG: java
+	*/
+	
+	class recdescent5
+	{
+		
+		
+	}@
+	array char _recdescent_trans_keys( 0, 5 ) = { u(1), u(0), u(5), u(5), u(0), u(5), u(0), u(5), u(0), u(5), u(0) };
+	
+	array s8 _recdescent_char_class( 0, 5 ) = { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1, 5, 0 };
+	
+	array s8 _recdescent_index_offsets( 0, 13 ) = { 0, 0, 1, 7, 13, 0 };
+	
+	array s8 _recdescent_indicies( 0, 12 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9, 10, 6, 1, 11, 12, 9, 10, 0 };
+	
+	array s8 _recdescent_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 0 };
+	
+	array s8 _recdescent_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _recdescent_cond_targs( 0, 4 ) = { 2, 0, 3, 4, 1, 2, 2, 3, 4, 1, 2, 3, 4, 0 };
+	
+	array s8 _recdescent_cond_actions( 0, 7 ) = { 0, 0, 1, 1, 2, 3, 4, 0, 5, 6, 7, 5, 0, 0 };
+	
+	array s8 _recdescent_eof_actions( 0, 4 ) = { 0, 0, 0, 4, 4, 0 };
+	
+	array s8 _recdescent_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _recdescent_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _recdescent_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _recdescent_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int recdescent_start = 2;
+	value int recdescent_first_final = 2;
+	value int recdescent_error = 0;
+	
+	value int recdescent_en_main = 2;
+	
+	host( "working/recdescent5.rl", 72 ) @{
+		
+		static void test( char data[] )
+		{
+			int cs, p = 0, pe = data.length, eof = data.length, item = 0;
+			int stack[] = new int[1024];
+			int stack_size = 1;
+			int top;
+			
+		}@
+		{
+			cs = cast(int)recdescent_start;
+			top = 0;
+		}
+		host( "working/recdescent5.rl", 81 ) @{
+		}@
+		{
+			int _trans = 0;
+			index char _keys;
+			index s8 _inds;
+			int _nbreak;
+			entry {
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_keys = offset( _recdescent_trans_keys, (cs<<1) );
+					_inds = offset( _recdescent_indicies, _recdescent_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 125 && ( deref( data, p )) >= 9 )
+					{
+						int _ic = cast(int)_recdescent_char_class[cast(int)( deref( data, p )) - 9];
+						if ( _ic <= cast(int)deref( _recdescent_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _recdescent_trans_keys, _keys ) )
+						_trans = cast(int)deref( _recdescent_indicies, _inds + cast(int)( _ic - cast(int)deref( _recdescent_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_recdescent_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_recdescent_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_recdescent_cond_targs[_trans];
+					
+					if ( _recdescent_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_nbreak = 0;
+					switch ( _recdescent_cond_actions[_trans] ) {
+						case 1 {
+							host( "working/recdescent5.rl", 28 ) ${ item = p; }$
+						}
+						case 4 {
+							host( "working/recdescent5.rl", 31 ) ${
+								String item_data = new String ( data, item, p-item );
+								System.out.print( "item: " );
+								System.out.print( item_data );
+								System.out.print( "\n" );
+							}$
+						}
+						case 2 {
+							host( "working/recdescent5.rl", 39 ) ${
+								System.out.print( "calling main\n" );
+								${host( "working/recdescent5.rl", 10 ) ${ 
+										if ( top == stack_size ) {
+											System.out.print( "growing stack\n" );
+											stack_size = top * 2;
+											// Don't actually bother to resize here, but we do print messages.
+											//stack = (int*)realloc( stack, sizeof(int)*stack_size );
+										}
+									}$stack[top] = cs; top += 1;cs = 2; }$}$
+						}
+						case 3 {
+							host( "working/recdescent5.rl", 45 ) ${
+								if ( top == 0 ) {
+									System.out.print( "STRAY CLOSE\n" );
+									${p += 1;  _nbreak = 1; }$
+								}
+								else {
+									System.out.print( "returning from main\n" );
+									${p = p - 1; }$
+									${top -= 1;cs = stack[top];host( "working/recdescent5.rl", 19 ) ${ 
+											if ( stack_size > (top * 4) ) {
+												stack_size = top * 2;
+												// Don't actually bother to resize here, but we do print messages.
+												//stack = (int*)realloc( stack, sizeof(int)*stack_size );
+												System.out.print( "shrinking stack\n" );
+											}
+										}$}$
+								}
+							}$
+						}
+						case 5 {
+							host( "working/recdescent5.rl", 31 ) ${
+								String item_data = new String ( data, item, p-item );
+								System.out.print( "item: " );
+								System.out.print( item_data );
+								System.out.print( "\n" );
+							}$	host( "working/recdescent5.rl", 28 ) ${ item = p; }$
+						}
+						case 6 {
+							host( "working/recdescent5.rl", 31 ) ${
+								String item_data = new String ( data, item, p-item );
+								System.out.print( "item: " );
+								System.out.print( item_data );
+								System.out.print( "\n" );
+							}$	host( "working/recdescent5.rl", 39 ) ${
+								System.out.print( "calling main\n" );
+								${host( "working/recdescent5.rl", 10 ) ${ 
+										if ( top == stack_size ) {
+											System.out.print( "growing stack\n" );
+											stack_size = top * 2;
+											// Don't actually bother to resize here, but we do print messages.
+											//stack = (int*)realloc( stack, sizeof(int)*stack_size );
+										}
+									}$stack[top] = cs; top += 1;cs = 2; }$}$
+						}
+						case 7 {
+							host( "working/recdescent5.rl", 31 ) ${
+								String item_data = new String ( data, item, p-item );
+								System.out.print( "item: " );
+								System.out.print( item_data );
+								System.out.print( "\n" );
+							}$	host( "working/recdescent5.rl", 45 ) ${
+								if ( top == 0 ) {
+									System.out.print( "STRAY CLOSE\n" );
+									${p += 1;  _nbreak = 1; }$
+								}
+								else {
+									System.out.print( "returning from main\n" );
+									${p = p - 1; }$
+									${top -= 1;cs = stack[top];host( "working/recdescent5.rl", 19 ) ${ 
+											if ( stack_size > (top * 4) ) {
+												stack_size = top * 2;
+												// Don't actually bother to resize here, but we do print messages.
+												//stack = (int*)realloc( stack, sizeof(int)*stack_size );
+												System.out.print( "shrinking stack\n" );
+											}
+										}$}$
+								}
+							}$
+						}
+					}
+					
+					if ( _nbreak == 1 )
+					goto _out;
+					
+				}
+				label _again {
+					if ( cs == 0 )
+					goto _out;
+					p+= 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+					if ( p == eof )
+					{
+						switch ( _recdescent_eof_actions[cs] ) {
+							case 4 {
+								host( "working/recdescent5.rl", 31 ) ${
+									String item_data = new String ( data, item, p-item );
+									System.out.print( "item: " );
+									System.out.print( item_data );
+									System.out.print( "\n" );
+								}$
+							}
+						}
+					}
+					
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/recdescent5.rl", 82 ) @{
+			
+			if ( cs == recdescent_error )
+			System.out.println( "SCANNER ERROR" );
+		}
+		
+		public static void main( String args[] )
+		{
+			test( "88 foo { 99 {{{{}}}}{ } }".toCharArray() );
+			test( "76 } sadf".toCharArray() );
+	}
+}
+
+}@

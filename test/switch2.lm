@@ -1,0 +1,43 @@
+lex
+	literal `a `b `+ `-
+	ignore /[ \n]/
+end
+
+def s
+	[`a `+ `b]
+|	[`a `- `b]
+
+cons S: s "a + b
+
+switch S
+case [`a `- `b]
+	send stdout '1
+case [`a `+ `b]
+	send stdout '2
+
+switch S
+case [`a `- `b]
+	send stdout '3
+default
+	send stdout '4
+
+switch S
+case [`a `- `b]
+	send stdout '5
+case [`a `+ `b]
+	send stdout '6
+default
+	send stdout '7
+
+switch S
+case [`a `- `b]
+	send stdout '8
+case [`a `- `b]
+	send stdout '9
+default
+	send stdout '10
+##### EXP #####
+2
+4
+6
+10

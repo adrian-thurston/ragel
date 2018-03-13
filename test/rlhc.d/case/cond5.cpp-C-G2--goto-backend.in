@@ -1,0 +1,189 @@
+host( "working/cond5.rl", 1 ) @{/* 
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using std::cout;
+	using std::endl;
+	
+}@
+value int foo_start = 1;
+value int foo_first_final = 4;
+
+value int foo_en_main = 1;
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/cond5.rl", 13 ) @{
+	
+	void test( const char *str )
+	{
+		int cs = foo_start;
+		int c = 0;
+		const char *p = str;
+		const char *pe = str + strlen( str );
+		char last = '0';
+		
+		cout << "run:";
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( cs )
+		{
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 4:
+			goto st_case_4;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+		}
+		goto st_out;
+		ctr4:
+		host( "working/cond5.rl", 25 ) ${ cout << " d1"; }$
+		host( "working/cond5.rl", 31 ) ${ last = *p; cout << " d2"; }$
+		host( "working/cond5.rl", 34 ) ${cout << " |";}$
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 10 ) {
+			goto ctr0;
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			int ck = 0;
+			if ( host( "working/cond5.rl", 28 ) ={c++ < 5}= ) ck += 1;
+			if ( host( "working/cond5.rl", 32 ) ={ *p == last+1 }= ) ck += 2;
+			if ( ck < 2 ) {
+				if ( 1 <= ck )
+				{			goto ctr2;
+				}
+			} else if ( ck > 2 ) {
+				goto ctr4;
+			} else {
+				goto ctr3;
+			}
+			goto st0;
+			
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr0:
+		host( "working/cond5.rl", 26 ) ${ cout << " see_five"; }$
+		host( "working/cond5.rl", 30 ) ${ cout << " in_sequence"; }$
+		host( "working/cond5.rl", 34 ) ${cout << " |";}$
+		
+		goto st4;
+		ctr6:
+		host( "working/cond5.rl", 26 ) ${ cout << " see_five"; }$
+		host( "working/cond5.rl", 34 ) ${cout << " |";}$
+		
+		goto st4;
+		ctr7:
+		host( "working/cond5.rl", 30 ) ${ cout << " in_sequence"; }$
+		host( "working/cond5.rl", 34 ) ${cout << " |";}$
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		{
+			goto st0;
+		}
+		ctr2:
+		host( "working/cond5.rl", 25 ) ${ cout << " d1"; }$
+		host( "working/cond5.rl", 34 ) ${cout << " |";}$
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) == 10 ) {
+			goto ctr6;
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			int ck = 0;
+			if ( host( "working/cond5.rl", 28 ) ={c++ < 5}= ) ck += 1;
+			if ( 1 <= ck )
+			{		goto ctr2;
+			}
+			goto st0;
+			
+		}
+		{
+			goto st0;
+		}
+		ctr3:
+		host( "working/cond5.rl", 31 ) ${ last = *p; cout << " d2"; }$
+		host( "working/cond5.rl", 34 ) ${cout << " |";}$
+		
+		goto st3;
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		if ( ( deref( data, p )) == 10 ) {
+			goto ctr7;
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			int ck = 0;
+			if ( host( "working/cond5.rl", 32 ) ={ *p == last+1 }= ) ck += 1;
+			if ( 1 <= ck )
+			{		goto ctr3;
+			}
+			goto st0;
+			
+		}
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof1: cs = 1; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/cond5.rl", 37 ) @{
+		if ( cs < foo_first_final )
+		cout << " failure";
+		cout << endl;
+	}
+	
+	int main()
+	{
+		test( "123456789012\n" );  // fails both
+		test( "123456789\n" );  // fails five
+		test( "1234\n" );  // fails five
+		test( "13245\n" );  // fails sequence
+		test( "12345\n" );  // succeeds in both
+		return 0;
+	}
+	
+}@

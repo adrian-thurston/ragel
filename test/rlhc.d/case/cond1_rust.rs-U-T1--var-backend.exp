@@ -1,0 +1,405 @@
+static mut i : i8 = 0;
+static mut j : i8 = 0;
+static mut k : i8 = 0;
+
+
+
+
+
+static _foo_key_offsets: [i8 ; 18] = [ 0, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0 , 0 ];
+static _foo_trans_keys: [u8 ; 22] = [ 48, 49, 48, 49, 48, 49, 97, 98, 97, 98, 97, 98, 99, 10, 99, 99, 99, 99, 99, 99, 0 , 0 ];
+static _foo_single_lengths: [i8 ; 18] = [ 0, 0, 0, 0, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 , 0 ];
+static _foo_range_lengths: [i8 ; 18] = [ 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ];
+static _foo_index_offsets: [i8 ; 18] = [ 0, 0, 2, 4, 6, 9, 12, 15, 17, 19, 21, 23, 25, 27, 29, 31, 0 , 0 ];
+static _foo_trans_cond_spaces: [i8 ; 34] = [ -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 5, -1, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
+static _foo_trans_offsets: [i8 ; 34] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 0 , 0 ];
+static _foo_trans_lengths: [i8 ; 34] = [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 0 ];
+static _foo_cond_keys: [i8 ; 42] = [ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ];
+static _foo_cond_targs: [i8 ; 42] = [ 2, 0, 3, 0, 4, 0, 5, 7, 0, 6, 11, 7, 12, 9, 13, 10, 14, 0, 6, 7, 9, 10, 0, 8, 0, 15, 0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 0, 0, 0 , 0 ];
+static _foo_cond_actions: [i8 ; 42] = [ 1, 0, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0, 10, 0, 11, 0, 0, 0 , 0 ];
+static _foo_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _foo_nfa_offsets: [i8 ; 18] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ];
+static _foo_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _foo_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static foo_start : i32 = 1;
+static foo_first_final : i32 = 15;
+static foo_error : i32 = 0;
+static foo_en_main : i32 = 1;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( foo_start ) as i32;
+	}
+	
+	{
+		let mut _klen = 0;
+		let mut _keys :i32 = 0;
+		let mut _ckeys :i32 = 0;
+		let mut _cpc = 0;
+		let mut _trans = 0;
+		let mut _cond  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  ) {
+				_cont = 0;
+				
+			}
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							_keys = ( _foo_key_offsets[(cs) as usize] ) as i32;
+							_trans = ( _foo_index_offsets[(cs) as usize] ) as u32;
+							_have = 0;
+							_klen = ( _foo_single_lengths[(cs) as usize] ) as i32;
+							if ( _klen > 0  ) {
+								{
+									let mut _lower :i32 = 0;
+									let mut _mid :i32 = 0;
+									let mut _upper :i32 = 0;
+									_lower = _keys;
+									_upper = _keys + _klen - 1;
+									while ( _upper >= _lower && _have == 0  )
+									{
+										_mid = _lower + ((_upper-_lower) >> 1);
+										if ( ( data[(p ) as usize]
+										) < _foo_trans_keys[(_mid ) as usize]
+										) {
+											_upper = _mid - 1;
+											
+										}
+										else if ( ( data[(p ) as usize]
+										) > _foo_trans_keys[(_mid ) as usize]
+										) {
+											_lower = _mid + 1;
+											
+										}
+										else {
+											{
+												_trans += ( (_mid - _keys) ) as u32;
+												_have = 1;
+											}
+											
+										}
+									}
+									
+									if ( _have == 0  ) {
+										{
+											_keys += _klen;
+											_trans += ( _klen ) as u32;
+										}
+										
+									}
+								}
+								
+								
+							}
+							if ( _have == 0  ) {
+								{
+									_klen = ( _foo_range_lengths[(cs) as usize] ) as i32;
+									if ( _klen > 0  ) {
+										{
+											let mut _lower :i32 = 0;
+											let mut _mid :i32 = 0;
+											let mut _upper :i32 = 0;
+											_lower = _keys;
+											_upper = _keys + (_klen<<1) - 2;
+											while ( _have == 0 && _lower <= _upper  )
+											{
+												_mid = _lower + (((_upper-_lower) >> 1) & !1
+												);
+												if ( ( data[(p ) as usize]
+												) < _foo_trans_keys[(_mid ) as usize]
+												) {
+													_upper = _mid - 2;
+													
+												}
+												else if ( ( data[(p ) as usize]
+												) > _foo_trans_keys[(_mid + 1 ) as usize]
+												) {
+													_lower = _mid + 2;
+													
+												}
+												else {
+													{
+														_trans += ( ((_mid - _keys)>>1) ) as u32;
+														_have = 1;
+													}
+													
+												}
+											}
+											
+											if ( _have == 0  ) {
+												_trans += ( _klen ) as u32;
+												
+											}
+										}
+										
+									}
+								}
+								
+								
+							}
+							_ckeys = ( _foo_trans_offsets[(_trans) as usize] ) as i32;
+							_klen = ( _foo_trans_lengths[(_trans) as usize] ) as i32;
+							_cond = ( _foo_trans_offsets[(_trans) as usize] ) as u32;
+							_have = 0;
+							_cpc = 0;
+							match ( _foo_trans_cond_spaces[(_trans) as usize] ) {
+								0  => {
+									if ( (i != 0) ) {
+										_cpc += 1;
+										
+									}
+									
+								}
+								1  => {
+									if ( (j != 0) ) {
+										_cpc += 1;
+										
+									}
+									
+								}
+								2  => {
+									if ( (k != 0) ) {
+										_cpc += 1;
+										
+									}
+									
+								}
+								3  => {
+									if ( (i != 0) ) {
+										_cpc += 1;
+										
+									}
+									if ( (j != 0) ) {
+										_cpc += 2;
+										
+									}
+									
+								}
+								4  => {
+									if ( (j != 0) ) {
+										_cpc += 1;
+										
+									}
+									if ( (k != 0) ) {
+										_cpc += 2;
+										
+									}
+									
+								}
+								5  => {
+									if ( (i != 0) ) {
+										_cpc += 1;
+										
+									}
+									if ( (j != 0) ) {
+										_cpc += 2;
+										
+									}
+									if ( (k != 0) ) {
+										_cpc += 4;
+										
+									}
+									
+								}
+								
+								_ => {}
+							}
+							{
+								let mut _lower :i32 = 0;
+								let mut _mid :i32 = 0;
+								let mut _upper :i32 = 0;
+								_lower = _ckeys;
+								_upper = _ckeys + _klen - 1;
+								while ( _have == 0 && _lower <= _upper  )
+								{
+									_mid = _lower + ((_upper-_lower) >> 1);
+									if ( _cpc < ( _foo_cond_keys[(_mid ) as usize]
+									) as i32 ) {
+										_upper = _mid - 1;
+										
+									}
+									else if ( _cpc > ( _foo_cond_keys[(_mid ) as usize]
+									) as i32 ) {
+										_lower = _mid + 1;
+										
+									}
+									else {
+										{
+											_cond += ( (_mid - _ckeys) ) as u32;
+											_have = 1;
+										}
+										
+									}
+								}
+								
+								if ( _have == 0  ) {
+									{
+										cs = 0;
+										_cont = 0;
+									}
+									
+								}
+							}
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _foo_cond_targs[(_cond) as usize] ) as i32;
+							match ( _foo_cond_actions[(_cond) as usize] ) {
+								8  => {
+									{print!( "{}", "  one\n" );
+									}
+									
+								}
+								4  => {
+									{print!( "{}", "  two\n" );
+									}
+									
+								}
+								6  => {
+									{print!( "{}", "  three\n" );
+									}
+									
+								}
+								1  => {
+									{if ( (( data[(p ) as usize]
+										)) == 48 )
+										{
+											i = 0;
+											
+										} 
+										else {
+											i = 1;
+											
+										}
+									}
+									
+								}
+								2  => {
+									{if ( (( data[(p ) as usize]
+										)) == 48 )
+										{
+											j = 0;
+											
+										} 
+										else {
+											j = 1;
+											
+										}
+									}
+									
+								}
+								3  => {
+									{if ( (( data[(p ) as usize]
+										)) == 48 )
+										{
+											k = 0;
+											
+										} 
+										else {
+											k = 1;
+											
+										}
+									}
+									
+								}
+								5  => {
+									{{p+= 1;
+											_cont = 0;
+										}}
+									
+								}
+								9  => {
+									{print!( "{}", "  one\n" );
+									}
+									{print!( "{}", "  two\n" );
+									}
+									
+								}
+								10  => {
+									{print!( "{}", "  one\n" );
+									}
+									{print!( "{}", "  three\n" );
+									}
+									
+								}
+								7  => {
+									{print!( "{}", "  two\n" );
+									}
+									{print!( "{}", "  three\n" );
+									}
+									
+								}
+								11  => {
+									{print!( "{}", "  one\n" );
+									}
+									{print!( "{}", "  two\n" );
+									}
+									{print!( "{}", "  three\n" );
+									}
+									
+								}
+								
+								_ => {}
+							}
+							if ( cs == 0  ) {
+								_cont = 0;
+								
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= foo_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "000abc\n".to_string() ); }
+	unsafe { m( "100abc\n".to_string() ); }
+	unsafe { m( "010abc\n".to_string() ); }
+	unsafe { m( "110abc\n".to_string() ); }
+	unsafe { m( "001abc\n".to_string() ); }
+	unsafe { m( "101abc\n".to_string() ); }
+	unsafe { m( "011abc\n".to_string() ); }
+	unsafe { m( "111abc\n".to_string() ); }
+}
+

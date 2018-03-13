@@ -1,0 +1,399 @@
+host( "working/gotocallret2_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var comm  byte ;
+	var top  int ;
+	var stack [32] int ;
+	var ts  int ;
+	var te  int ;
+	var act  int ;
+	var val  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _GotoCallRet_to_state_actions( 0, 3 ) = { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0 };
+
+array s8 _GotoCallRet_from_state_actions( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0 };
+
+array s8 _GotoCallRet_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _GotoCallRet_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int GotoCallRet_start = 6;
+value int GotoCallRet_first_final = 6;
+value int GotoCallRet_error = 0;
+
+value int GotoCallRet_en_handle = 5;
+value int GotoCallRet_en_one = 10;
+value int GotoCallRet_en_two = 13;
+value int GotoCallRet_en_main = 6;
+
+host( "working/gotocallret2_go.rl", 84 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)GotoCallRet_start;
+		top = 0;
+		ts = nil;
+		te = nil;
+	}
+	host( "working/gotocallret2_go.rl", 87 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( _GotoCallRet_from_state_actions[cs] ) {
+			case 5{
+				host( "NONE", 1 ) ${${ts = p;}$}$
+			}
+		}
+		
+		switch ( cs ) {
+			case 6:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr10;
+				}
+				case 32: {
+					goto ctr12;
+				}
+				case 91: {
+					goto ctr13;
+				}
+				case 123: {
+					goto ctr15;
+				}
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr14;
+			}
+			{
+				goto ctr11;
+			}
+			case 0:
+			goto _out;
+			case 7:
+			if ( ( deref( data, p )) == 32 ) {
+				goto ctr18;
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr19;
+			}
+			{
+				goto ctr20;
+			}
+			case 1:
+			if ( ( deref( data, p )) == 102 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr7;
+			}
+			case 2:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr7;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 105 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr7;
+			}
+			case 8:
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr19;
+			}
+			{
+				goto ctr20;
+			}
+			case 5:
+			{
+				goto ctr9;
+			}
+			case 9:
+			{
+				goto ctr11;
+			}
+			case 10:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					goto ctr21;
+				}
+				case 91: {
+					goto ctr22;
+				}
+				case 123: {
+					goto ctr24;
+				}
+				case 125: {
+					goto ctr25;
+				}
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr23;
+			}
+			{
+				goto ctr11;
+			}
+			case 11:
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr23;
+			}
+			{
+				goto ctr27;
+			}
+			case 12:
+			if ( ( deref( data, p )) == 32 ) {
+				goto ctr25;
+			}
+			{
+				goto ctr29;
+			}
+			case 13:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					goto ctr30;
+				}
+				case 91: {
+					goto ctr31;
+				}
+				case 93: {
+					goto ctr32;
+				}
+				case 123: {
+					goto ctr34;
+				}
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr33;
+			}
+			{
+				goto ctr11;
+			}
+			case 14:
+			if ( ( deref( data, p )) == 32 ) {
+				goto ctr32;
+			}
+			{
+				goto ctr36;
+			}
+			case 15:
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto ctr33;
+			}
+			{
+				goto ctr38;
+			}
+		}
+		
+		ctr11: cs = 0; goto _again;
+		ctr18: cs = 1; goto _again;
+		ctr2: cs = 2; goto _again;
+		ctr4: cs = 3; goto _again;
+		ctr6: cs = 4; goto _again;
+		ctr7: cs = 6; goto f0;
+		ctr8: cs = 6; goto f1;
+		ctr10: cs = 6; goto f5;
+		ctr12: cs = 6; goto f6;
+		ctr13: cs = 6; goto f7;
+		ctr15: cs = 6; goto f9;
+		ctr20: cs = 6; goto f10;
+		ctr14: cs = 7; goto f8;
+		ctr19: cs = 8; goto _again;
+		ctr9: cs = 9; goto f3;
+		ctr21: cs = 10; goto f11;
+		ctr22: cs = 10; goto f12;
+		ctr24: cs = 10; goto f13;
+		ctr27: cs = 10; goto f14;
+		ctr29: cs = 10; goto f15;
+		ctr23: cs = 11; goto _again;
+		ctr25: cs = 12; goto _again;
+		ctr30: cs = 13; goto f16;
+		ctr31: cs = 13; goto f17;
+		ctr34: cs = 13; goto f18;
+		ctr36: cs = 13; goto f19;
+		ctr38: cs = 13; goto f20;
+		ctr32: cs = 14; goto _again;
+		ctr33: cs = 15; goto _again;
+		
+		f3:
+		host( "working/gotocallret2_go.rl", 22 ) ${fmt.Print( "handle " );${p = p - 1; }$ 
+			
+			if ( val == 1 ) {
+				cs = (10); 
+				
+			}
+			if ( val == 2 ) {
+				cs = (13); 
+				
+			}
+			if ( val == 3 ) {
+				cs = 6;}
+		}$
+		goto _again;
+		f8:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		goto _again;
+		f13:
+		host( "working/gotocallret2_go.rl", 39 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 39 ) ${fmt.Print( "{ " );${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={10}=; goto _again;}$ 
+					}$}$}$
+			goto _again;
+			f12:
+			host( "working/gotocallret2_go.rl", 41 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 41 ) ${fmt.Print( "[ " );${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={13}=; goto _again;}$ 
+					}$}$}$
+			goto _again;
+			f11:
+			host( "working/gotocallret2_go.rl", 48 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 48 ) ${fmt.Print( "space " );}$}$}$
+			goto _again;
+			f15:
+			host( "working/gotocallret2_go.rl", 43 ) ${${te = p;p = p - 1;host( "working/gotocallret2_go.rl", 43 ) ${fmt.Print( "} " );${top-= 1;cs = stack[top];goto _again;}$ 
+				}$}$}$
+		goto _again;
+		f14:
+		host( "working/gotocallret2_go.rl", 45 ) ${${te = p;p = p - 1;host( "working/gotocallret2_go.rl", 45 ) ${fmt.Print( "word " );val = 1;
+					${cs = host( "-", 1 ) ={5}=; goto _again;}$ 
+				}$}$}$
+		goto _again;
+		f18:
+		host( "working/gotocallret2_go.rl", 52 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 52 ) ${fmt.Print( "{ " );${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={10}=; goto _again;}$ 
+					}$}$}$
+			goto _again;
+			f17:
+			host( "working/gotocallret2_go.rl", 54 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 54 ) ${fmt.Print( "[ " );${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={13}=; goto _again;}$ 
+					}$}$}$
+			goto _again;
+			f16:
+			host( "working/gotocallret2_go.rl", 61 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 61 ) ${fmt.Print( "space " );}$}$}$
+			goto _again;
+			f19:
+			host( "working/gotocallret2_go.rl", 56 ) ${${te = p;p = p - 1;host( "working/gotocallret2_go.rl", 56 ) ${fmt.Print( "] " );${top-= 1;cs = stack[top];goto _again;}$ 
+					}$}$}$
+			goto _again;
+			f20:
+			host( "working/gotocallret2_go.rl", 58 ) ${${te = p;p = p - 1;host( "working/gotocallret2_go.rl", 58 ) ${fmt.Print( "word " );val = 2;
+						${cs = host( "-", 1 ) ={5}=; goto _again;}$ 
+					}$}$}$
+			goto _again;
+			f9:
+			host( "working/gotocallret2_go.rl", 65 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 65 ) ${fmt.Print( "{ " );${stack[top] = cs; top += 1;cs = 10; goto _again;}$}$}$}$
+				goto _again;
+				f7:
+				host( "working/gotocallret2_go.rl", 67 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 67 ) ${fmt.Print( "[ " );${stack[top] = cs; top += 1;cs = 13; goto _again;}$}$}$}$
+				goto _again;
+				f1:
+				host( "working/gotocallret2_go.rl", 72 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 72 ) ${fmt.Print( "this is the foil" );}$}$}$
+				goto _again;
+				f6:
+				host( "working/gotocallret2_go.rl", 73 ) ${${te = p+1;host( "working/gotocallret2_go.rl", 73 ) ${fmt.Print( "space " );}$}$}$
+				goto _again;
+				f5:
+				host( "working/gotocallret2_go.rl", 74 ) ${${te = p+1;}$}$
+				goto _again;
+				f10:
+				host( "working/gotocallret2_go.rl", 69 ) ${${te = p;p = p - 1;host( "working/gotocallret2_go.rl", 69 ) ${fmt.Print( "word " );val = 3;
+							${cs = 5; goto _again;}$}$}$}$
+				goto _again;
+				f0:
+				host( "working/gotocallret2_go.rl", 69 ) ${${p = ((te))-1;
+						host( "working/gotocallret2_go.rl", 69 ) ${fmt.Print( "word " );val = 3;
+							${cs = 5; goto _again;}$}$}$}$
+				goto _again;
+				
+				_again:
+				switch ( _GotoCallRet_to_state_actions[cs] ) {
+					case 3{
+						host( "NONE", 1 ) ${${ts = nil;}$}$
+					}
+				}
+				
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				if ( p == eof )
+				{
+					switch ( cs ) {
+						case 7: goto ctr20;
+						case 1: goto ctr7;
+						case 2: goto ctr7;
+						case 3: goto ctr7;
+						case 4: goto ctr7;
+						case 8: goto ctr20;
+						case 11: goto ctr27;
+						case 12: goto ctr29;
+						case 14: goto ctr36;
+						case 15: goto ctr38;
+					}
+				}
+				
+				_out: {}
+			}
+			host( "working/gotocallret2_go.rl", 94 ) @{
+			}
+			func finish() {
+				if cs >= GotoCallRet_first_final {
+					fmt.Println("ACCEPT")
+				} else {
+					fmt.Println("FAIL")
+				}
+			}
+			var inp []string = []string {
+				"{a{b[c d]d}c}\n",
+				"[a{b[c d]d}c}\n",
+			"[a[b]c]d{ef{g{h}i}j}l\n",
+			"{{[]}}\n",
+			"a b c\n",
+			"{a b c}\n",
+			"[a b c]\n",
+			"{]\n",
+				"{{}\n",
+					"[[[[[[]]]]]]\n",
+					"[[[[[[]]}]]]\n",
+			};
+			
+			func main() {
+				for _, data := range inp {
+					prepare()
+					exec(data)
+					finish()
+				}
+			}
+		}@

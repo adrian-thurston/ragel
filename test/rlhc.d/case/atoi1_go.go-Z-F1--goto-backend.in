@@ -1,0 +1,175 @@
+host( "working/atoi1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var neg  int ;
+	var value  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array byte _atoi_trans_keys( 0, 4 ) = { u(1), u(0), u(2), u(4), u(4), u(4), u(0), u(4), u(1), u(0), u(0) };
+
+array s8 _atoi_char_class( 0, 4 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 3, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0 };
+
+array s8 _atoi_index_offsets( 0, 9 ) = { 0, 0, 3, 4, 9, 0 };
+
+array s8 _atoi_indicies( 0, 5 ) = { 0, 2, 3, 4, 5, 1, 1, 1, 4, 0 };
+
+array s8 _atoi_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 0 };
+
+array s8 _atoi_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _atoi_cond_targs( 0, 4 ) = { 2, 0, 2, 3, 3, 4, 0 };
+
+array s8 _atoi_cond_actions( 0, 5 ) = { 1, 0, 2, 3, 4, 5, 0 };
+
+array s8 _atoi_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 4;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/atoi1_go.rl", 46 ) @{
+	
+	func prepare() {
+		value = 0;
+		neg = 0;
+	}@
+	{
+		cs = cast(int)atoi_start;
+	}
+	host( "working/atoi1_go.rl", 51 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		int _trans = 0;
+		index byte _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _atoi_trans_keys, (cs<<1) );
+				_inds = offset( _atoi_indicies, _atoi_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_atoi_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _atoi_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _atoi_trans_keys, _keys ) )
+					_trans = cast(int)deref( _atoi_indicies, _inds + cast(int)( _ic - cast(int)deref( _atoi_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_atoi_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_atoi_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_atoi_cond_targs[_trans];
+				
+				if ( _atoi_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _atoi_cond_actions[_trans] ) {
+					case 1 {
+						host( "working/atoi1_go.rl", 15 ) ${neg = 0;
+							value = 0;
+						}$
+					}
+					case 4 {
+						host( "working/atoi1_go.rl", 22 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+							;
+						}$
+					}
+					case 2 {
+						host( "working/atoi1_go.rl", 15 ) ${neg = 0;
+							value = 0;
+						}$	host( "working/atoi1_go.rl", 19 ) ${neg = 1;
+						}$
+					}
+					case 3 {
+						host( "working/atoi1_go.rl", 15 ) ${neg = 0;
+							value = 0;
+						}$	host( "working/atoi1_go.rl", 22 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+							;
+						}$
+					}
+					case 5 {
+						host( "working/atoi1_go.rl", 26 ) ${if ( neg != 0 ) {
+								value = -1 * value;
+								
+							}
+						}$	host( "working/atoi1_go.rl", 31 ) ${fmt.Print( value );fmt.Print( "\n" );}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/atoi1_go.rl", 57 ) @{
+	}
+	func finish() {
+		if cs >= atoi_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1\n",
+		"12\n",
+		"222222\n",
+		"+2123\n",
+		"213 3213\n",
+		"-12321\n",
+		"--123\n",
+		"-99\n",
+		" -3000\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

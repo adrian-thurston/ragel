@@ -1,0 +1,1046 @@
+#include <string.h>
+#include <stdio.h>
+
+int neg ;
+long value ;
+
+struct nfa_bp_rec
+{
+	long state;
+	char *p;
+	int pop;
+};
+
+struct nfa_bp_rec nfa_bp[1024];
+long nfa_len = 0;
+long nfa_count = 0;
+
+
+
+static const int  atoi_start  = 1;
+static const int  atoi_first_final  = 19;
+static const int  atoi_error  = 0;
+static const int  atoi_en_main  = 1;
+static const char  _atoi_nfa_targs [] = { 0, 2, 3, 9, 0 ,  };
+static const char  _atoi_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _atoi_nfa_push_actions [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _atoi_nfa_pop_trans [] = { 0, 0, 0, 0, 0 ,  };
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+	value = 0;
+	neg = 0;
+	
+	{
+		cs = ( int ) atoi_start;
+		nfa_len = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 19:
+			goto st_case_19;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 17:
+			goto st_case_17;
+			case 18:
+			goto st_case_18;
+			
+		}
+		goto st_out;
+		st_case_1:
+		if ( _atoi_nfa_offsets[1] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[1]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[1]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		switch ( ((*( p  ))
+		) ) {
+			case 43:
+			{
+				goto ctr0;
+			}
+			case 45:
+			{
+				goto ctr2;
+			}
+			case 48:
+			{
+				goto ctr3;
+			}
+			
+		}
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr4;
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr0:
+		{
+			neg = 0;
+			value = 0;
+			
+		}
+		
+		
+		goto st2;
+		ctr2:
+		{
+			neg = 0;
+			value = 0;
+			
+		}
+		{
+			neg = 1;
+			
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		if ( _atoi_nfa_offsets[2] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[2]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[2]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr5;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr5:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st3;
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( _atoi_nfa_offsets[3] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[3]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[3]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr6;
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr5;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr6:
+		{
+			if ( neg != 0 ) { value = -1 * value; }
+			
+		}
+		{
+			printf( "%ld", value );
+			printf( "%s", "\n" );
+			
+		}
+		
+		
+		goto st19;
+		ctr16:
+		{
+			printf( "saw 80808080\n" );
+			
+		}
+		
+		
+		goto st19;
+		st19:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof19;
+		
+		st_case_19:
+		if ( _atoi_nfa_offsets[19] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[19]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[19]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		{
+			goto st0;
+		}
+		ctr3:
+		{
+			neg = 0;
+			value = 0;
+			
+		}
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st4;
+		ctr22:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		if ( _atoi_nfa_offsets[4] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[4]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[4]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr6;
+			}
+			case 48:
+			{
+				goto ctr7;
+			}
+			
+		}
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr8;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr7:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st5;
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		if ( _atoi_nfa_offsets[5] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[5]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[5]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr6;
+			}
+			case 48:
+			{
+				goto ctr9;
+			}
+			
+		}
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr8;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr9:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st6;
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		if ( _atoi_nfa_offsets[6] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[6]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[6]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr6;
+			}
+			case 48:
+			{
+				goto ctr10;
+			}
+			
+		}
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr8;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr10:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st7;
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		if ( _atoi_nfa_offsets[7] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[7]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[7]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr6;
+			}
+			case 48:
+			{
+				goto ctr11;
+			}
+			
+		}
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr8;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr11:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st8;
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( _atoi_nfa_offsets[8] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[8]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[8]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		if ( _atoi_nfa_offsets[9] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[9]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[9]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st10;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		if ( _atoi_nfa_offsets[10] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[10]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[10]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st11;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		if ( _atoi_nfa_offsets[11] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[11]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[11]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st12;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		if ( _atoi_nfa_offsets[12] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[12]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[12]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr16;
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st12;
+		}
+		
+		{
+			goto st0;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		if ( _atoi_nfa_offsets[13] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[13]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[13]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st14;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof14;
+		
+		st_case_14:
+		if ( _atoi_nfa_offsets[14] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[14]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[14]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st15;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof15;
+		
+		st_case_15:
+		if ( _atoi_nfa_offsets[15] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[15]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[15]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st16;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st16:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof16;
+		
+		st_case_16:
+		if ( _atoi_nfa_offsets[16] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[16]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[16]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st17;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		st17:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof17;
+		
+		st_case_17:
+		if ( _atoi_nfa_offsets[17] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[17]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[17]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		if ( ((*( p  ))
+		)== 48  )
+		{
+			goto st9;
+		}
+		
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st13;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr4:
+		{
+			neg = 0;
+			value = 0;
+			
+		}
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st18;
+		ctr8:
+		{
+			value = value * 10 + ( int ) ( (((*( p  ))
+			)) - 48 );
+			
+		}
+		
+		
+		goto st18;
+		st18:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof18;
+		
+		st_case_18:
+		if ( _atoi_nfa_offsets[18] )
+		{
+			int alt = 0; 
+			int new_recs = _atoi_nfa_targs[( int ) _atoi_nfa_offsets[18]];
+			while ( alt < new_recs  )
+			{ 
+				nfa_bp[nfa_len].state 
+				= _atoi_nfa_targs[( int ) _atoi_nfa_offsets[18]+ 1 + alt];
+				nfa_bp[nfa_len].p 
+				= p;
+				nfa_len += 1;
+				alt += 1;
+			}
+			
+		}
+		
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr6;
+			}
+			case 48:
+			{
+				goto ctr22;
+			}
+			
+		}
+		if ( 49 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr8;
+		}
+		
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof19: cs = 19;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof14: cs = 14;
+		goto _test_eof; 
+		_test_eof15: cs = 15;
+		goto _test_eof; 
+		_test_eof16: cs = 16;
+		goto _test_eof; 
+		_test_eof17: cs = 17;
+		goto _test_eof; 
+		_test_eof18: cs = 18;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+		if ( nfa_len > 0  )
+		{
+			nfa_count += 1;
+			nfa_len -= 1;
+			p = nfa_bp[nfa_len].p;
+			cs = nfa_bp[nfa_len].state;
+			goto _resume;
+			goto _out;
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= atoi_first_final )
+	printf( "-> accept\n\n" );
+	else
+	printf( "-> fail\n\n" );
+}
+
+char *inp[] = {
+	"1\n",
+	"12\n",
+	"1002000000002\n",
+	"222222\n",
+	"+2123\n",
+	"-12321\n",
+	"-99\n",
+	"213 3213\n",
+	"--123\n",
+	" -3000\n",
+};
+
+int inplen = 10;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

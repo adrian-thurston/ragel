@@ -1,0 +1,196 @@
+const _scanner_actions = Int8[0, 1, 0, 1, 1, 1, 6, 2, 2, 3, 2, 2, 4, 2, 2, 5, 0 , ]
+const _scanner_trans_keys = UInt8[1, 0, 0, 1, 1, 0, 0 , ]
+const _scanner_char_class = Int8[0, 1, 0 , ]
+const _scanner_index_offsets = Int8[0, 0, 2, 0 , ]
+const _scanner_indicies = Int8[0, 2, 0 , ]
+const _scanner_index_defaults = Int8[0, 1, 4, 0 , ]
+const _scanner_trans_cond_spaces = Int8[-1, -1, -1, -1, -1, 0 , ]
+const _scanner_cond_targs = Int8[2, 0, 2, 1, 2, 0 , ]
+const _scanner_cond_actions = Int8[7, 0, 10, 5, 13, 0 , ]
+const _scanner_to_state_actions = Int8[0, 1, 0, 0 , ]
+const _scanner_from_state_actions = Int8[0, 3, 0, 0 , ]
+const _scanner_eof_trans = Int8[0, 0, 4, 0 , ]
+const _scanner_nfa_targs = Int8[0, 0 , ]
+const _scanner_nfa_offsets = Int8[0, 0, 0, 0 , ]
+const _scanner_nfa_push_actions = Int8[0, 0 , ]
+const _scanner_nfa_pop_trans = Int8[0, 0 , ]
+const scanner_start  = 1
+const scanner_first_final  = 1
+const scanner_error  = 0
+const scanner_en_main  = 1
+function m( data::AbstractString )
+	p = 0
+	pe = length(data)
+	eof = length(data)
+	cs = 0
+	buffer = ""
+	ts = 0;
+	te = 0;
+	act = 0;
+	token = 0;
+	
+	cs = convert(Int, scanner_start )
+	ts = 0
+	te = 0
+	act = 0
+	_trans = 0;
+	_have = 0;
+	_cont = 1;
+	_acts = 0;
+	_nacts= 0
+	;
+	_keys = 0;
+	_inds = 0;
+	while _cont == 1 
+		if cs == 0 
+			_cont = 0
+			
+		end
+		_have = 0
+		if p == pe 
+			if p == eof 
+				if _scanner_eof_trans[1+(cs)]> 0 
+					_trans = convert(UInt, _scanner_eof_trans[1+(cs)] )- 1
+					_have = 1
+					
+				end
+				if _have == 0 
+					
+				end
+				
+			end
+			if _have == 0 
+				_cont = 0
+				
+			end
+			
+		end
+		if _cont == 1 
+			if _have == 0 
+				_acts = _scanner_from_state_actions[1+(cs)]
+				_nacts = convert(UInt, _scanner_actions[1+(_acts )] )
+				_acts += 1
+				while _nacts > 0 
+					if _scanner_actions[1+(_acts )] == 1 
+						{
+							ts = p
+							
+						}
+						
+					end
+					_nacts -= 1
+					_acts += 1
+					
+				end
+				_keys = (cs<<1)
+				_inds = _scanner_index_offsets[1+(cs)]
+				if (data[1+(p )])<= 98 && (data[1+(p )])>= 97 
+					_ic = convert(Int, _scanner_char_class[1+(convert(Int, (data[1+(p )]) )- 97)] );
+					if _ic <= convert(Int, _scanner_trans_keys[1+(_keys+1 )] )&& _ic >= convert(Int, _scanner_trans_keys[1+(_keys )] )
+						_trans = convert(UInt, _scanner_indicies[1+(_inds + convert(Int, (_ic - convert(Int, _scanner_trans_keys[1+(_keys )] )) ))] )
+						
+					else
+						_trans = convert(UInt, _scanner_index_defaults[1+(cs)] )
+						
+					end
+					
+				else
+					_trans = convert(UInt, _scanner_index_defaults[1+(cs)] )
+					
+				end
+				
+			end
+			if _cont == 1 
+				cs = convert(Int, _scanner_cond_targs[1+(_trans)] )
+				if _scanner_cond_actions[1+(_trans)]!= 0 
+					_acts = _scanner_cond_actions[1+(_trans)]
+					_nacts = convert(UInt, _scanner_actions[1+(_acts )] )
+					_acts += 1
+					while _nacts > 0 
+						if _scanner_actions[1+(_acts )] == 2 
+							{
+								te = p+1
+								
+							}
+							
+						elseif _scanner_actions[1+(_acts )] == 3 
+							{
+								act = 1
+								
+							}
+							
+						elseif _scanner_actions[1+(_acts )] == 4 
+							{
+								act = 2
+								
+							}
+							
+						elseif _scanner_actions[1+(_acts )] == 5 
+							{
+								act = 3
+								
+							}
+							
+						elseif _scanner_actions[1+(_acts )] == 6 
+							{
+								if act  == 1 
+									p = ((te))-1
+									print( "pat1\n" );
+									
+								elseif act  == 2 
+									p = ((te))-1
+									print( "pat2\n" );
+									
+								elseif act  == 3 
+									p = ((te))-1
+									print( "pat3\n" );
+									
+								end
+								
+							}
+							
+							
+						end
+						_nacts -= 1
+						_acts += 1
+						
+					end
+					
+				end
+				_acts = _scanner_to_state_actions[1+(cs)]
+				_nacts = convert(UInt, _scanner_actions[1+(_acts )] )
+				_acts += 1
+				while _nacts > 0 
+					if _scanner_actions[1+(_acts )] == 0 
+						{
+							ts = 0
+							
+						}
+						
+					end
+					_nacts -= 1
+					_acts += 1
+					
+				end
+				if cs == 0 
+					_cont = 0
+					
+				end
+				if _cont == 1 
+					p += 1
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	if ( cs >= scanner_first_final )
+		println( "ACCEPT" );
+	else
+		println( "FAIL" );
+	end
+end
+
+m( "ab89" );

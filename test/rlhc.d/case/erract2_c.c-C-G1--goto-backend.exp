@@ -1,0 +1,284 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+
+static const char  _erract_eof_actions [] = { 0, 1, 3, 3, 3, 3, 5, 0, 0 ,  };
+static const char  _erract_nfa_targs [] = { 0, 0 ,  };
+static const char  _erract_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _erract_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _erract_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  erract_start  = 1;
+static const int  erract_first_final  = 7;
+static const int  erract_error  = 0;
+static const int  erract_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) erract_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 104  )
+			{
+				goto ctr1;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 101  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr2;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 108  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr2;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 108  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr2;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr2;
+			}
+			case 6:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr8;
+			}
+			
+			{
+				goto ctr7;
+			}
+			case 7:
+			{
+				goto ctr9;
+			}
+			
+		}
+		ctr9: cs = 0;
+		goto _again;
+		ctr0: cs = 0;
+		goto f1;
+		ctr2: cs = 0;
+		goto f3;
+		ctr7: cs = 0;
+		goto f5;
+		ctr1: cs = 2;
+		goto _again;
+		ctr3: cs = 3;
+		goto _again;
+		ctr4: cs = 4;
+		goto _again;
+		ctr5: cs = 5;
+		goto _again;
+		ctr6: cs = 6;
+		goto _again;
+		ctr8: cs = 7;
+		goto _again;
+		
+		f1:
+		{
+			printf( "%s", "err_start\n" );
+			
+		}
+		{
+			printf( "%s", "err_all\n" );
+			
+		}
+		
+		goto _again;
+		f3:
+		{
+			printf( "%s", "err_all\n" );
+			
+		}
+		{
+			printf( "%s", "err_middle\n" );
+			
+		}
+		
+		goto _again;
+		f5:
+		{
+			printf( "%s", "err_all\n" );
+			
+		}
+		{
+			printf( "%s", "err_out\n" );
+			
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( _erract_eof_actions[cs] ) {
+				case 1:
+				{
+					printf( "%s", "err_start\n" );
+					
+				}
+				{
+					printf( "%s", "eof_start\n" );
+					
+				}
+				{
+					printf( "%s", "err_all\n" );
+					
+				}
+				{
+					printf( "%s", "eof_all\n" );
+					
+				}
+				
+				break;
+				case 3:
+				{
+					printf( "%s", "err_all\n" );
+					
+				}
+				{
+					printf( "%s", "err_middle\n" );
+					
+				}
+				{
+					printf( "%s", "eof_all\n" );
+					
+				}
+				{
+					printf( "%s", "eof_middle\n" );
+					
+				}
+				
+				break;
+				case 5:
+				{
+					printf( "%s", "err_all\n" );
+					
+				}
+				{
+					printf( "%s", "err_out\n" );
+					
+				}
+				{
+					printf( "%s", "eof_all\n" );
+					
+				}
+				{
+					printf( "%s", "eof_out\n" );
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= erract_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"",
+	"h",
+	"x",
+	"he",
+	"hx",
+	"hel",
+	"hex",
+	"hell",
+	"helx",
+	"hello",
+	"hellx",
+	"hello\n",
+	"hellox",
+};
+
+int inplen = 13;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

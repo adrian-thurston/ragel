@@ -1,0 +1,210 @@
+package main
+import "fmt"
+
+var ts  int ;
+var te  int ;
+var act  int ;
+var token  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _scanner_to_state_actions [] int8  = [] int8  { 0, 3, 0, 0  }
+var _scanner_from_state_actions [] int8  = [] int8  { 0, 4, 0, 0  }
+var _scanner_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0  }
+var _scanner_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var scanner_start  int  = 1
+var scanner_first_final  int  = 1
+var scanner_error  int  = -1
+var scanner_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(scanner_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		_resume:
+		switch _scanner_from_state_actions[cs]  {
+			case 4:
+			{{ts = p;
+				}}
+			
+			break;
+			
+		}
+		switch cs  {
+			case 1:
+			switch ( data[p ])  {
+				case 97:
+				{
+					goto ctr5;
+				}
+				case 98:
+				{
+					goto ctr6;
+				}
+				
+			}
+			{
+				goto ctr4;
+			}
+			case 2:
+			if ( data[p ]) == 99  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 98  {
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			case 0:
+			if ( data[p ]) == 99  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 98  {
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr7;
+			}
+			
+		}
+		ctr2: cs = 0;
+		goto _again;
+		ctr7: cs = 1;
+		goto f0;
+		ctr3: cs = 1;
+		goto f1;
+		ctr4: cs = 1;
+		goto f4;
+		ctr5: cs = 2;
+		goto f5;
+		ctr6: cs = 2;
+		goto f6;
+		
+		f1:
+		{{te = p+1;
+				{fmt.Print( "pat2\n" );}
+			}}
+		
+		goto _again;
+		f4:
+		{{te = p+1;
+				{fmt.Print( "any\n" );}
+			}}
+		
+		goto _again;
+		f0:
+		{{switch act  {
+					case 1 :
+					p = ((te))-1;
+					{fmt.Print( "pat1\n" );}
+					
+					break;
+					case 3 :
+					p = ((te))-1;
+					{fmt.Print( "any\n" );}
+					
+					break;
+					
+				}
+			}
+		}
+		
+		goto _again;
+		f5:
+		{{te = p+1;
+			}}
+		{{act = 1;
+			}}
+		
+		goto _again;
+		f6:
+		{{te = p+1;
+			}}
+		{{act = 3;
+			}}
+		
+		goto _again;
+		
+		_again:
+		switch _scanner_to_state_actions[cs]  {
+			case 3:
+			{{ts = 0;
+				}}
+			
+			break;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 2:
+					goto ctr7;
+					case 0:
+					goto ctr7;
+					
+				}
+			}
+			
+			
+		}
+	}
+}
+func finish() {
+	if cs >= scanner_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"a",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

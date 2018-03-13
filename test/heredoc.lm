@@ -1,0 +1,58 @@
+context heredoc
+	rl ident_char /[a-zA-Z_]/
+
+	lex
+		# Tokens
+		token other /(^(ident_char|0|'\n'))+/
+
+		token here_close //
+		token id 
+			/ident_char+/
+			{
+				if HereId && HereId == match_text {
+					input->push( make_token( 
+						typeid<here_close>,
+						input->pull(match_length - 1) ) )
+				}
+				else {
+					input->push( make_token( typeid<id>, input->pull(match_length) ) )
+				}
+			}
+
+		token nl /'\n'/
+	end
+
+	def here_name 
+		[id]
+		{
+			HereId = $r1
+		}
+
+	HereId: str
+
+	def here_data 
+		[here_data_item*]
+
+	def here_data_item 
+		[id]
+	|	[other]
+	|	[nl]
+
+	def start 
+		[here_name here_data here_close id nl]
+end # heredoc
+
+HereDoc: heredoc = new heredoc()
+
+parse S: heredoc::start(HereDoc)[stdin]
+print_xml(S)
+print( '\n' )
+##### IN #####
+hello
+random 9392af j9 stuff
+hello
+##### EXP #####
+<heredoc::start><heredoc::here_name><heredoc::id>hello</heredoc::id></heredoc::here_name><heredoc::here_data><heredoc::_repeat_here_data_item><heredoc::here_data_item><heredoc::nl>
+</heredoc::nl></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>random</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other> 9392</heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>af</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other> </heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>j</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::other>9 </heredoc::other></heredoc::here_data_item><heredoc::here_data_item><heredoc::id>stuff</heredoc::id></heredoc::here_data_item><heredoc::here_data_item><heredoc::nl>
+</heredoc::nl></heredoc::here_data_item></heredoc::_repeat_here_data_item></heredoc::here_data><heredoc::here_close>hell</heredoc::here_close><heredoc::id>o</heredoc::id><heredoc::nl>
+</heredoc::nl></heredoc::start>

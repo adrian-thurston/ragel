@@ -1,0 +1,336 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int pos;
+		int line;
+		
+		
+		
+		
+		static readonly sbyte  []_clang_actions = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 2, 0, 2, 2, 1, 0, 2, 3, 1, 2, 3, 2, 2, 4, 1, 2, 4, 2, 2, 5, 1, 2, 5, 2, 2, 6, 1, 2, 6, 2, 2, 7, 1, 2, 7, 2, 2, 8, 1, 2, 8, 2, 3, 3, 1, 0, 3, 4, 1, 0, 3, 5, 1, 0, 3, 6, 1, 0, 3, 7, 1, 0, 3, 8, 1, 0, 0,  };
+		static readonly short  []_clang_key_offsets = { 0, 0, 5, 10, 13, 17, 22, 25, 27, 33, 36, 56, 76, 96, 117, 138, 157, 176, 196, 0,  };
+		static readonly char  []_clang_trans_keys = { '\u000a', '\u0022', '\u005c', '\u0000', '\u00ff', '\u000a', '\u0027', '\u005c', '\u0000', '\u00ff', '\u000a', '\u0000', '\u00ff', '\u000a', '\u0021', '\u0000', '\u00ff', '\u000a', '\u0021', '\u002f', '\u0000', '\u00ff', '\u000a', '\u0000', '\u00ff', '\u0030', '\u0039', '\u0030', '\u0039', '\u0041', '\u0046', '\u0061', '\u0066', '\u000a', '\u0000', '\u00ff', '\u000a', '\u0022', '\u0027', '\u002f', '\u0030', '\u005f', '\u0021', '\u002e', '\u0031', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002f', '\u0030', '\u005f', '\u0021', '\u002e', '\u0031', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002f', '\u0030', '\u005f', '\u0021', '\u002e', '\u0031', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0021', '\u0022', '\u0027', '\u002f', '\u0030', '\u005f', '\u0023', '\u002e', '\u0031', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002e', '\u002f', '\u005f', '\u0078', '\u0021', '\u002d', '\u0030', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002f', '\u005f', '\u0021', '\u002e', '\u0030', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002f', '\u005f', '\u0021', '\u002e', '\u0030', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002e', '\u002f', '\u005f', '\u0021', '\u002d', '\u0030', '\u0039', '\u003a', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u000a', '\u0022', '\u0027', '\u002f', '\u005f', '\u0021', '\u002e', '\u0030', '\u0039', '\u003a', '\u0040', '\u0041', '\u0046', '\u0047', '\u005a', '\u005b', '\u0060', '\u0061', '\u0066', '\u0067', '\u007a', '\u007b', '\u007e', '\u0000',  };
+		static readonly sbyte  []_clang_single_lengths = { 0, 3, 3, 1, 2, 3, 1, 0, 0, 1, 6, 6, 6, 7, 7, 5, 5, 6, 5, 0,  };
+		static readonly sbyte  []_clang_range_lengths = { 0, 1, 1, 1, 1, 1, 1, 1, 3, 1, 7, 7, 7, 7, 7, 7, 7, 7, 9, 0,  };
+		static readonly short  []_clang_index_offsets = { 0, 0, 5, 10, 13, 17, 22, 25, 27, 31, 34, 48, 62, 76, 91, 106, 119, 132, 146, 0,  };
+		static readonly sbyte  []_clang_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
+		static readonly short  []_clang_trans_offsets = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 0,  };
+		static readonly sbyte  []_clang_trans_lengths = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  };
+		static readonly sbyte  []_clang_cond_keys = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_clang_cond_targs = { 1, 12, 9, 1, 0, 2, 12, 3, 2, 0, 2, 2, 0, 4, 5, 4, 0, 4, 5, 10, 4, 0, 10, 6, 0, 15, 0, 18, 18, 18, 0, 1, 1, 0, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 4, 1, 2, 6, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 7, 13, 16, 8, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 15, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 16, 11, 16, 11, 16, 11, 10, 10, 1, 2, 7, 13, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 18, 11, 18, 16, 11, 18, 16, 11, 10, 0,  };
+		static readonly sbyte  []_clang_cond_actions = { 19, 0, 0, 1, 0, 19, 0, 0, 1, 0, 19, 1, 0, 5, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 1, 0, 22, 22, 22, 0, 19, 1, 0, 5, 3, 3, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 0, 58, 55, 55, 81, 81, 81, 81, 81, 81, 81, 81, 81, 81, 17, 34, 31, 31, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 9, 58, 0, 55, 55, 0, 81, 81, 81, 81, 81, 81, 81, 81, 81, 17, 46, 43, 43, 1, 73, 73, 0, 73, 1, 73, 73, 73, 73, 73, 13, 40, 37, 37, 69, 69, 69, 1, 69, 69, 69, 69, 69, 11, 28, 25, 25, 61, 1, 61, 1, 61, 1, 61, 1, 61, 7, 46, 43, 43, 1, 73, 73, 73, 1, 73, 73, 73, 73, 73, 13, 52, 49, 49, 77, 77, 77, 1, 77, 1, 77, 77, 1, 77, 77, 15, 0,  };
+		static readonly sbyte  []_clang_eof_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 9, 17, 13, 11, 7, 13, 15, 0,  };
+		static readonly sbyte  []_clang_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_clang_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_clang_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_clang_nfa_pop_trans = { 0, 0,  };
+		static readonly int  clang_start  = 10;
+		static readonly int  clang_first_final  = 10;
+		static readonly int  clang_error  = 0;
+		static readonly int  clang_en_main  = 10;
+		int cs;
+		
+		void init()
+		{
+			pos = 0;
+			line = 1;
+			
+			{
+				cs = (int)clang_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _klen;
+				uint _trans = 0;
+				uint _cond = 0;
+				int _acts;
+				uint _nacts;
+				int _keys;
+				int _ckeys;
+				int _cpc;
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume :
+				_keys = _clang_key_offsets[cs] ;
+				_trans = (uint )_clang_index_offsets[cs];
+				_klen = (int)_clang_single_lengths[cs];
+				if ( _klen > 0 )
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( data[p ]) < _clang_trans_keys[_mid ] )
+						_upper = _mid - 1;
+						
+						else if ( ( data[p ]) > _clang_trans_keys[_mid ] )
+						_lower = _mid + 1;
+						
+						else
+						{
+							_trans += (uint )(_mid - _keys);
+							goto _match;
+						}
+						
+					}
+					
+					_keys += _klen;
+					_trans += (uint )_klen;
+				}
+				
+				
+				_klen = (int)_clang_range_lengths[cs];
+				if ( _klen > 0 )
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( data[p ]) < _clang_trans_keys[_mid ] )
+						_upper = _mid - 2;
+						
+						else if ( ( data[p ]) > _clang_trans_keys[_mid + 1] )
+						_lower = _mid + 2;
+						
+						else
+						{
+							_trans += (uint )((_mid - _keys)>>1);
+							goto _match;
+						}
+						
+					}
+					
+					_trans += (uint )_klen;
+				}
+				
+				
+				
+				_match :
+				_ckeys = _clang_trans_offsets[_trans] ;
+				_klen = (int)_clang_trans_lengths[_trans];
+				_cond = (uint )_clang_trans_offsets[_trans];
+				_cpc = 0;
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < (int)_clang_cond_keys[_mid ] )
+						_upper = _mid - 1;
+						
+						else if ( _cpc > (int)_clang_cond_keys[_mid ] )
+						_lower = _mid + 1;
+						
+						else
+						{
+							_cond += (uint )(_mid - _ckeys);
+							goto _match_cond;
+						}
+						
+					}
+					
+					cs = 0;
+					goto _again;
+				}
+				
+				_match_cond :
+				cs = (int)_clang_cond_targs[_cond];
+				if ( _clang_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				
+				_acts = _clang_cond_actions[_cond] ;
+				_nacts = (uint )_clang_actions[_acts ];
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( _clang_actions[_acts ] ) {
+						case 0:
+						{buffer[blen++] = (( data[p ]));
+						}
+						
+						break;
+						case 1:
+						{blen = 0;
+						}
+						
+						break;
+						case 2:
+						{line = line + 1;
+						}
+						
+						break;
+						case 3:
+						{Console.Write( "ident(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+							);Console.Write( "\n" );}
+						
+						break;
+						case 4:
+						{Console.Write( "literal(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+							);Console.Write( "\n" );}
+						
+						break;
+						case 5:
+						{Console.Write( "float(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+							);Console.Write( "\n" );}
+						
+						break;
+						case 6:
+						{Console.Write( "int(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+							);Console.Write( "\n" );}
+						
+						break;
+						case 7:
+						{Console.Write( "hex(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+							);Console.Write( "\n" );}
+						
+						break;
+						case 8:
+						{Console.Write( "symbol(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+							);Console.Write( "\n" );}
+						
+						break;
+						
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+				
+				
+				_again :
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				
+				_test_eof :
+				{}
+				if ( p == eof  )
+				{
+					int __acts;
+					uint __nacts;
+					__acts = _clang_eof_actions[cs] ;
+					__nacts = (uint )_clang_actions[__acts ];
+					__acts += 1;
+					while ( __nacts > 0 )
+					{
+						switch ( _clang_actions[__acts ] ) {
+							case 3:
+							{Console.Write( "ident(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+								);Console.Write( "\n" );}
+							
+							break;
+							case 4:
+							{Console.Write( "literal(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+								);Console.Write( "\n" );}
+							
+							break;
+							case 5:
+							{Console.Write( "float(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+								);Console.Write( "\n" );}
+							
+							break;
+							case 6:
+							{Console.Write( "int(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+								);Console.Write( "\n" );}
+							
+							break;
+							case 7:
+							{Console.Write( "hex(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+								);Console.Write( "\n" );}
+							
+							break;
+							case 8:
+							{Console.Write( "symbol(" );Console.Write( line );Console.Write( "," );Console.Write( blen );Console.Write( "): " );Console.Write( new String( buffer, 0, blen )
+								);Console.Write( "\n" );}
+							
+							break;
+							
+						}
+						__nacts -= 1;
+						__acts += 1;
+					}
+					
+				}
+				
+				
+				
+				_out :
+				{}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= clang_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n",
+			"wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n",
+		};
+		
+		
+		static readonly int inplen = 2;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

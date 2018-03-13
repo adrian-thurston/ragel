@@ -1,0 +1,1442 @@
+#include <string.h>
+#include <stdio.h>
+
+char comm ;
+int top ;
+int stack [32];
+char * ts ;
+char * te ;
+int act ;
+int value ;
+
+
+
+
+
+static const int  patact_start  = 17;
+static const int  patact_first_final  = 17;
+static const int  patact_error  = 0;
+static const int  patact_en_other  = 21;
+static const int  patact_en_exec_test  = 24;
+static const int  patact_en_semi  = 28;
+static const int  patact_en_main  = 17;
+static const char  _patact_nfa_targs [] = { 0, 0 ,  };
+static const char  _patact_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _patact_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _patact_nfa_pop_trans [] = { 0, 0 ,  };
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) patact_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 17:
+			goto st_case_17;
+			case 0:
+			goto st_case_0;
+			case 18:
+			goto st_case_18;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 19:
+			goto st_case_19;
+			case 20:
+			goto st_case_20;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 21:
+			goto st_case_21;
+			case 22:
+			goto st_case_22;
+			case 23:
+			goto st_case_23;
+			case 24:
+			goto st_case_24;
+			case 25:
+			goto st_case_25;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 26:
+			goto st_case_26;
+			case 27:
+			goto st_case_27;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 28:
+			goto st_case_28;
+			
+		}
+		goto st_out;
+		ctr43:
+		{
+			{
+				switch ( act  ) {
+					case 15 :
+					p = ((te))-1;
+					{
+						printf( "%s", "num (w/switch)\n" );
+						
+					}
+					
+					break;
+					case 16 :
+					p = ((te))-1;
+					{
+						printf( "%s", "num (w/switch)\n" );
+						{
+							p = p - 1;
+							
+						}
+						{
+							goto st21;
+						}
+						
+					}
+					
+					break;
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		
+		goto st17;
+		ctr8:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "num (c/switch)\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr16:
+		{
+			{
+				p = ((te))-1;
+				{
+					printf( "%s", "word (w/lbh)\n" );
+					{
+						p = p - 1;
+						
+					}
+					{
+						goto st21;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr17:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "word (c/lbh)\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr36:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "space\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr38:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "immdiate\n" );
+					{
+						goto st24;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr41:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "going to semi\n" );
+					{
+						p = p - 1;
+						
+					}
+					{
+						goto st28;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr46:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					printf( "%s", "num (w/switch)\n" );
+					{
+						p = p - 1;
+						
+					}
+					{
+						goto st21;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		ctr49:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					printf( "%s", "word (w/lbh)\n" );
+					{
+						p = p - 1;
+						
+					}
+					{
+						goto st21;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st17;
+		st17:
+		{
+			{
+				ts = 0;
+				
+			}
+			
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof17;
+		
+		st_case_17:
+		{
+			{
+				ts = p;
+				
+			}
+			
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr36;
+			}
+			case 32:
+			{
+				goto ctr36;
+			}
+			case 33:
+			{
+				goto ctr38;
+			}
+			case 50:
+			{
+				goto ctr40;
+			}
+			case 59:
+			{
+				goto ctr41;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)> 57  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto ctr42;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)>= 48  )
+		{
+			goto ctr39;
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr39:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 16;
+				
+			}
+			
+		}
+		
+		
+		goto st18;
+		ctr47:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 15;
+				
+			}
+			
+		}
+		
+		
+		goto st18;
+		st18:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof18;
+		
+		st_case_18:
+		if ( ((*( p  ))
+		)== 32  )
+		{
+			goto st1;
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr39;
+		}
+		
+		{
+			goto ctr43;
+		}
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		if ( ((*( p  ))
+		)== 102  )
+		{
+			goto st2;
+		}
+		
+		{
+			goto ctr43;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		if ( ((*( p  ))
+		)== 111  )
+		{
+			goto st3;
+		}
+		
+		{
+			goto ctr43;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		if ( ((*( p  ))
+		)== 105  )
+		{
+			goto st4;
+		}
+		
+		{
+			goto ctr43;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		if ( ((*( p  ))
+		)== 108  )
+		{
+			goto ctr8;
+		}
+		
+		{
+			goto ctr43;
+		}
+		ctr40:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 16;
+				
+			}
+			
+		}
+		
+		
+		goto st19;
+		st19:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof19;
+		
+		st_case_19:
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				goto st1;
+			}
+			case 50:
+			{
+				goto ctr47;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr39;
+		}
+		
+		{
+			goto ctr46;
+		}
+		ctr42:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		
+		
+		goto st20;
+		st20:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof20;
+		
+		st_case_20:
+		if ( ((*( p  ))
+		)== 32  )
+		{
+			goto st5;
+		}
+		
+		if ( 97 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 122  )
+		{
+			goto ctr42;
+		}
+		
+		{
+			goto ctr49;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		if ( ((*( p  ))
+		)== 102  )
+		{
+			goto st6;
+		}
+		
+		{
+			goto ctr16;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		if ( ((*( p  ))
+		)== 111  )
+		{
+			goto st7;
+		}
+		
+		{
+			goto ctr16;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		if ( ((*( p  ))
+		)== 105  )
+		{
+			goto st8;
+		}
+		
+		{
+			goto ctr16;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( ((*( p  ))
+		)== 108  )
+		{
+			goto ctr17;
+		}
+		
+		{
+			goto ctr16;
+		}
+		ctr51:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "space\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st21;
+		ctr55:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					printf( "%s", "num\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st21;
+		ctr57:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					printf( "%s", "word\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st21;
+		st21:
+		{
+			{
+				ts = 0;
+				
+			}
+			
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof21;
+		
+		st_case_21:
+		{
+			{
+				ts = p;
+				
+			}
+			
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr51;
+			}
+			case 32:
+			{
+				goto ctr51;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)> 57  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto st23;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)>= 48  )
+		{
+			goto st22;
+		}
+		
+		{
+			goto st0;
+		}
+		st22:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof22;
+		
+		st_case_22:
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st22;
+		}
+		
+		{
+			goto ctr55;
+		}
+		st23:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof23;
+		
+		st_case_23:
+		if ( 97 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 122  )
+		{
+			goto st23;
+		}
+		
+		{
+			goto ctr57;
+		}
+		ctr63:
+		{
+			{
+				switch ( act  ) {
+					case 7 :
+					p = ((te))-1;
+					{
+						printf( "%s", "num (w/switch)\n" );
+						
+					}
+					
+					break;
+					case 8 :
+					p = ((te))-1;
+					{
+						printf( "%s", "num (w/switch)\n" );
+						{
+							p = ((te-1))-1;
+							
+						}
+						
+						{
+							goto st21;
+						}
+						
+					}
+					
+					break;
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		
+		goto st24;
+		ctr26:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "num (c/switch)\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		ctr34:
+		{
+			{
+				p = ((te))-1;
+				{
+					printf( "%s", "word (w/lbh)\n" );
+					{
+						p = ((te-1))-1;
+						
+					}
+					
+					{
+						goto st21;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		ctr35:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "word (c/lbh)\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		ctr58:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "space\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		ctr59:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		ctr66:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					printf( "%s", "num (w/switch)\n" );
+					{
+						p = ((te-1))-1;
+						
+					}
+					
+					{
+						goto st21;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		ctr69:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					printf( "%s", "word (w/lbh)\n" );
+					{
+						p = ((te-1))-1;
+						
+					}
+					
+					{
+						goto st21;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		st24:
+		{
+			{
+				ts = 0;
+				
+			}
+			
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof24;
+		
+		st_case_24:
+		{
+			{
+				ts = p;
+				
+			}
+			
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr58;
+			}
+			case 32:
+			{
+				goto ctr58;
+			}
+			case 33:
+			{
+				goto ctr59;
+			}
+			case 50:
+			{
+				goto ctr61;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)> 57  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto ctr62;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)>= 48  )
+		{
+			goto ctr60;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr60:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 8;
+				
+			}
+			
+		}
+		
+		
+		goto st25;
+		ctr67:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 7;
+				
+			}
+			
+		}
+		
+		
+		goto st25;
+		st25:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof25;
+		
+		st_case_25:
+		if ( ((*( p  ))
+		)== 32  )
+		{
+			goto st9;
+		}
+		
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr60;
+		}
+		
+		{
+			goto ctr63;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		if ( ((*( p  ))
+		)== 102  )
+		{
+			goto st10;
+		}
+		
+		{
+			goto ctr63;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		if ( ((*( p  ))
+		)== 111  )
+		{
+			goto st11;
+		}
+		
+		{
+			goto ctr63;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		if ( ((*( p  ))
+		)== 105  )
+		{
+			goto st12;
+		}
+		
+		{
+			goto ctr63;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		if ( ((*( p  ))
+		)== 108  )
+		{
+			goto ctr26;
+		}
+		
+		{
+			goto ctr63;
+		}
+		ctr61:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 8;
+				
+			}
+			
+		}
+		
+		
+		goto st26;
+		st26:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof26;
+		
+		st_case_26:
+		switch ( ((*( p  ))
+		) ) {
+			case 32:
+			{
+				goto st9;
+			}
+			case 50:
+			{
+				goto ctr67;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr60;
+		}
+		
+		{
+			goto ctr66;
+		}
+		ctr62:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		
+		
+		goto st27;
+		st27:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof27;
+		
+		st_case_27:
+		if ( ((*( p  ))
+		)== 32  )
+		{
+			goto st13;
+		}
+		
+		if ( 97 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 122  )
+		{
+			goto ctr62;
+		}
+		
+		{
+			goto ctr69;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		if ( ((*( p  ))
+		)== 102  )
+		{
+			goto st14;
+		}
+		
+		{
+			goto ctr34;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof14;
+		
+		st_case_14:
+		if ( ((*( p  ))
+		)== 111  )
+		{
+			goto st15;
+		}
+		
+		{
+			goto ctr34;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof15;
+		
+		st_case_15:
+		if ( ((*( p  ))
+		)== 105  )
+		{
+			goto st16;
+		}
+		
+		{
+			goto ctr34;
+		}
+		st16:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof16;
+		
+		st_case_16:
+		if ( ((*( p  ))
+		)== 108  )
+		{
+			goto ctr35;
+		}
+		
+		{
+			goto ctr34;
+		}
+		ctr71:
+		{
+			{
+				te = p+1;
+				{
+					printf( "%s", "in semi\n" );
+					{
+						goto st17;
+					}
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st28;
+		st28:
+		{
+			{
+				ts = 0;
+				
+			}
+			
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof28;
+		
+		st_case_28:
+		{
+			{
+				ts = p;
+				
+			}
+			
+		}
+		if ( ((*( p  ))
+		)== 59  )
+		{
+			goto ctr71;
+		}
+		
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof17: cs = 17;
+		goto _test_eof; 
+		_test_eof18: cs = 18;
+		goto _test_eof; 
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof19: cs = 19;
+		goto _test_eof; 
+		_test_eof20: cs = 20;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof21: cs = 21;
+		goto _test_eof; 
+		_test_eof22: cs = 22;
+		goto _test_eof; 
+		_test_eof23: cs = 23;
+		goto _test_eof; 
+		_test_eof24: cs = 24;
+		goto _test_eof; 
+		_test_eof25: cs = 25;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		_test_eof26: cs = 26;
+		goto _test_eof; 
+		_test_eof27: cs = 27;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof14: cs = 14;
+		goto _test_eof; 
+		_test_eof15: cs = 15;
+		goto _test_eof; 
+		_test_eof16: cs = 16;
+		goto _test_eof; 
+		_test_eof28: cs = 28;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 18:
+				goto ctr43;
+				case 1:
+				goto ctr43;
+				case 2:
+				goto ctr43;
+				case 3:
+				goto ctr43;
+				case 4:
+				goto ctr43;
+				case 19:
+				goto ctr46;
+				case 20:
+				goto ctr49;
+				case 5:
+				goto ctr16;
+				case 6:
+				goto ctr16;
+				case 7:
+				goto ctr16;
+				case 8:
+				goto ctr16;
+				case 22:
+				goto ctr55;
+				case 23:
+				goto ctr57;
+				case 25:
+				goto ctr63;
+				case 9:
+				goto ctr63;
+				case 10:
+				goto ctr63;
+				case 11:
+				goto ctr63;
+				case 12:
+				goto ctr63;
+				case 26:
+				goto ctr66;
+				case 27:
+				goto ctr69;
+				case 13:
+				goto ctr34;
+				case 14:
+				goto ctr34;
+				case 15:
+				goto ctr34;
+				case 16:
+				goto ctr34;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= patact_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"abcd foix\n",
+	"abcd\nanother\n",
+	"123 foix\n",
+	"!abcd foix\n",
+	"!abcd\nanother\n",
+	"!123 foix\n",
+	";",
+};
+
+int inplen = 7;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

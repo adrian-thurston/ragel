@@ -1,0 +1,285 @@
+#include <string.h>
+#include <stdio.h>
+
+int target ;
+
+
+
+
+
+static const char  _next1_key_offsets [] = { 0, 0, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15, 15, 15, 0 ,  };
+static const char  _next1_trans_keys [] = { 10, 49, 50, 117, 110, 117, 115, 101, 100, 111, 110, 101, 116, 119, 111, 0 ,  };
+static const char  _next1_single_lengths [] = { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_range_lengths [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_index_offsets [] = { 0, 0, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 29, 30, 31, 0 ,  };
+static const char  _next1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _next1_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 0 ,  };
+static const char  _next1_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _next1_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_cond_targs [] = { 14, 14, 14, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 15, 0, 9, 0, 10, 0, 16, 0, 12, 0, 13, 0, 17, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_cond_actions [] = { 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_nfa_targs [] = { 0, 0 ,  };
+static const char  _next1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _next1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _next1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  next1_start  = 1;
+static const int  next1_first_final  = 14;
+static const int  next1_error  = 0;
+static const int  next1_en_unused  = 2;
+static const int  next1_en_one  = 8;
+static const int  next1_en_two  = 11;
+static const int  next1_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) next1_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _next1_trans_keys + _next1_key_offsets[cs];
+					_trans = ( unsigned int  ) _next1_index_offsets[cs];
+					_have = 0;
+					_klen = ( int ) _next1_single_lengths[cs];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( ((*( p  ))
+							)< (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( ((*( p  ))
+							)> (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _next1_range_lengths[cs];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( ((*( p  ))
+								)< (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( ((*( p  ))
+								)> (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _next1_cond_keys + _next1_trans_offsets[_trans];
+					_klen = ( int ) _next1_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _next1_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _next1_cond_targs[_cond];
+					switch ( _next1_cond_actions[_cond] ) {
+						case 3 :
+						{
+							printf( "%s", "one\n" );
+							target = 1;
+							{
+								cs = (target);
+								
+							}
+							
+						}
+						
+						break;
+						case 4 :
+						{
+							printf( "%s", "two\n" );
+							target = 1;
+							{
+								cs = (target);
+								
+							}
+							
+						}
+						
+						break;
+						case 1 :
+						{
+							target = 8;
+							{
+								cs = (target);
+								
+							}
+							
+						}
+						
+						break;
+						case 2 :
+						{
+							target = 11;
+							{
+								cs = (target);
+								
+							}
+							
+						}
+						
+						break;
+						
+					}
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= next1_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"1one2two1one\n",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

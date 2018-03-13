@@ -1,0 +1,1047 @@
+host( "working/cond10.rl", 1 ) @{/*
+	* @@LANG: c++
+	*
+	* This test case exercises repetition of a machine that accepts zero-length
+	* string. It is very ambiguous and not useful as a pattern. 
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	
+	using std::cout;
+	using std::endl;
+	
+	
+	
+}@
+array s8 _foo_from_state_actions( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 5, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 13;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/cond10.rl", 55 ) @{
+	
+	void test( const char *str )
+	{
+		int cs = foo_start;
+		const char *p = str;
+		const char *pe = str + strlen( str );
+		int match = 0;
+		
+		long q_4 = 0, q_5 = 0, q_6 = 0;
+		
+		cout << "run:" << endl;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( _foo_from_state_actions[cs] ) {
+			case 5{
+				host( "working/cond10.rl", 28 ) ${ q_4 = 0; }$	host( "working/cond10.rl", 34 ) ${ q_5 = 0; }$
+			}
+			case 1{
+				host( "working/cond10.rl", 28 ) ${ q_4 = 0; }$	host( "working/cond10.rl", 34 ) ${ q_5 = 0; }$	host( "working/cond10.rl", 40 ) ${ q_6 = 0; }$
+			}
+		}
+		
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) == 60 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 47 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 115 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 116 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 121 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ( deref( data, p )) == 62 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ( deref( data, p )) == 60 ) {
+				goto ctr9;
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 15 ) {
+							if ( ck == 11 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 15 ) {
+							if ( ck == 21 ) {
+								goto ctr12;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 29 ) {
+							if ( ck == 27 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 29 ) {
+							if ( 31 <= ck )
+							{				goto ctr12;
+							}
+						} else {
+							goto ctr12;
+						}
+					} else {
+						goto ctr12;
+					}
+					goto ctr11;
+					
+				}
+				case 95: {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 18 ) {
+							if ( ck > 13 ) {
+								if ( ck == 15 ) {
+									goto ctr10;
+								}
+							} else if ( ck >= 13 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 18 ) {
+							if ( ck > 19 ) {
+								if ( 22 <= ck )
+								{					goto ctr13;
+								}
+							} else {
+								goto ctr13;
+							}
+						} else {
+							goto ctr13;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 29 ) {
+							if ( ck > 26 ) {
+								if ( ck <= 27 ) {
+									goto ctr13;
+								}
+							} else if ( ck >= 26 ) {
+								goto ctr13;
+							}
+						} else if ( ck > 29 ) {
+							if ( ck > 30 ) {
+								goto ctr13;
+							} else {
+								goto ctr13;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else {
+						goto ctr13;
+					}
+					goto ctr11;
+					
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 18 ) {
+							if ( ck > 13 ) {
+								if ( ck == 15 ) {
+									goto ctr10;
+								}
+							} else if ( ck >= 13 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 18 ) {
+							if ( ck > 19 ) {
+								if ( 22 <= ck )
+								{					goto ctr13;
+								}
+							} else {
+								goto ctr13;
+							}
+						} else {
+							goto ctr13;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 29 ) {
+							if ( ck > 26 ) {
+								if ( ck <= 27 ) {
+									goto ctr13;
+								}
+							} else if ( ck >= 26 ) {
+								goto ctr13;
+							}
+						} else if ( ck > 29 ) {
+							if ( ck > 30 ) {
+								goto ctr13;
+							} else {
+								goto ctr13;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else {
+						goto ctr13;
+					}
+					goto ctr11;
+					
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 18 ) {
+							if ( ck > 13 ) {
+								if ( ck == 15 ) {
+									goto ctr10;
+								}
+							} else if ( ck >= 13 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 18 ) {
+							if ( ck > 19 ) {
+								if ( 22 <= ck )
+								{					goto ctr13;
+								}
+							} else {
+								goto ctr13;
+							}
+						} else {
+							goto ctr13;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 29 ) {
+							if ( ck > 26 ) {
+								if ( ck <= 27 ) {
+									goto ctr13;
+								}
+							} else if ( ck >= 26 ) {
+								goto ctr13;
+							}
+						} else if ( ck > 29 ) {
+							if ( ck > 30 ) {
+								goto ctr13;
+							} else {
+								goto ctr13;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else {
+						goto ctr13;
+					}
+					goto ctr11;
+					
+				}
+			} else {
+				int ck = 0;
+				if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+				if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+				if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+				if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+				if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+				if ( ck < 23 ) {
+					if ( ck < 18 ) {
+						if ( ck > 13 ) {
+							if ( ck == 15 ) {
+								goto ctr10;
+							}
+						} else if ( ck >= 13 ) {
+							goto ctr10;
+						}
+					} else if ( ck > 18 ) {
+						if ( ck > 19 ) {
+							if ( 22 <= ck )
+							{					goto ctr13;
+							}
+						} else {
+							goto ctr13;
+						}
+					} else {
+						goto ctr13;
+					}
+				} else if ( ck > 23 ) {
+					if ( ck < 29 ) {
+						if ( ck > 26 ) {
+							if ( ck <= 27 ) {
+								goto ctr13;
+							}
+						} else if ( ck >= 26 ) {
+							goto ctr13;
+						}
+					} else if ( ck > 29 ) {
+						if ( ck > 30 ) {
+							goto ctr13;
+						} else {
+							goto ctr13;
+						}
+					} else {
+						goto ctr10;
+					}
+				} else {
+					goto ctr13;
+				}
+				goto ctr11;
+				
+			}
+			{
+				int ck = 0;
+				if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+				if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 2;
+				if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 4;
+				if ( 7 <= ck )
+				{		goto ctr10;
+				}
+				goto ctr11;
+				
+			}
+			case 13:
+			{
+				goto ctr1;
+			}
+			case 11:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 15 ) {
+						if ( ck < 7 ) {
+							if ( ck < 5 ) {
+								if ( 4 <= ck )
+								{					goto ctr14;
+								}
+							} else if ( ck > 5 ) {
+								goto ctr14;
+							} else {
+								goto ctr14;
+							}
+						} else if ( ck > 7 ) {
+							if ( ck < 12 ) {
+								if ( 11 <= ck )
+								{					goto ctr10;
+								}
+							} else if ( ck > 12 ) {
+								if ( ck > 13 ) {
+									goto ctr14;
+								} else {
+									goto ctr14;
+								}
+							} else {
+								goto ctr14;
+							}
+						} else {
+							goto ctr14;
+						}
+					} else if ( ck > 15 ) {
+						if ( ck < 27 ) {
+							if ( ck < 21 ) {
+								if ( 20 <= ck )
+								{					goto ctr14;
+								}
+							} else if ( ck > 21 ) {
+								if ( ck > 22 ) {
+									if ( ck <= 23 ) {
+										goto ctr14;
+									}
+								} else {
+									goto ctr14;
+								}
+							} else {
+								goto ctr14;
+							}
+						} else if ( ck > 27 ) {
+							if ( ck < 29 ) {
+								goto ctr14;
+							} else if ( ck > 29 ) {
+								if ( ck > 30 ) {
+									goto ctr14;
+								} else {
+									goto ctr14;
+								}
+							} else {
+								goto ctr14;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else {
+						goto ctr14;
+					}
+					goto ctr11;
+					
+				}
+				case 95: {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 15 ) {
+							if ( ck == 13 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 15 ) {
+							if ( 22 <= ck )
+							{				goto ctr13;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 30 ) {
+							if ( 29 <= ck )
+							{				goto ctr10;
+							}
+						} else if ( ck > 30 ) {
+							goto ctr10;
+						} else {
+							goto ctr13;
+						}
+					} else {
+						goto ctr13;
+					}
+					goto ctr11;
+					
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 15 ) {
+							if ( ck == 13 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 15 ) {
+							if ( 22 <= ck )
+							{				goto ctr13;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 30 ) {
+							if ( 29 <= ck )
+							{				goto ctr10;
+							}
+						} else if ( ck > 30 ) {
+							goto ctr10;
+						} else {
+							goto ctr13;
+						}
+					} else {
+						goto ctr13;
+					}
+					goto ctr11;
+					
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 23 ) {
+						if ( ck < 15 ) {
+							if ( ck == 13 ) {
+								goto ctr10;
+							}
+						} else if ( ck > 15 ) {
+							if ( 22 <= ck )
+							{				goto ctr13;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else if ( ck > 23 ) {
+						if ( ck < 30 ) {
+							if ( 29 <= ck )
+							{				goto ctr10;
+							}
+						} else if ( ck > 30 ) {
+							goto ctr10;
+						} else {
+							goto ctr13;
+						}
+					} else {
+						goto ctr13;
+					}
+					goto ctr11;
+					
+				}
+			} else {
+				int ck = 0;
+				if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+				if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+				if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+				if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+				if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+				if ( ck < 23 ) {
+					if ( ck < 15 ) {
+						if ( ck == 13 ) {
+							goto ctr10;
+						}
+					} else if ( ck > 15 ) {
+						if ( 22 <= ck )
+						{				goto ctr13;
+						}
+					} else {
+						goto ctr10;
+					}
+				} else if ( ck > 23 ) {
+					if ( ck < 30 ) {
+						if ( 29 <= ck )
+						{				goto ctr10;
+						}
+					} else if ( ck > 30 ) {
+						goto ctr10;
+					} else {
+						goto ctr13;
+					}
+				} else {
+					goto ctr13;
+				}
+				goto ctr11;
+				
+			}
+			{
+				int ck = 0;
+				if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+				if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 2;
+				if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 4;
+				if ( 7 <= ck )
+				{		goto ctr10;
+				}
+				goto ctr11;
+				
+			}
+			case 12:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 37 ) ={ q_5 < 5 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 15 ) {
+						if ( ck < 7 ) {
+							if ( ck == 5 ) {
+								goto ctr14;
+							}
+						} else if ( ck > 7 ) {
+							if ( ck > 11 ) {
+								if ( ck == 13 ) {
+									goto ctr14;
+								}
+							} else if ( ck >= 11 ) {
+								goto ctr10;
+							}
+						} else {
+							goto ctr14;
+						}
+					} else if ( ck > 15 ) {
+						if ( ck < 27 ) {
+							if ( ck > 21 ) {
+								if ( ck == 23 ) {
+									goto ctr14;
+								}
+							} else if ( ck >= 21 ) {
+								goto ctr14;
+							}
+						} else if ( ck > 27 ) {
+							if ( ck > 29 ) {
+								if ( 31 <= ck )
+								{					goto ctr14;
+								}
+							} else if ( ck >= 29 ) {
+								goto ctr14;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else {
+						goto ctr14;
+					}
+					goto ctr11;
+					
+				}
+				case 95: {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 15 ) {
+						if ( ck < 7 ) {
+							if ( ck < 3 ) {
+								if ( 2 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 3 ) {
+								if ( 6 <= ck )
+								{					goto ctr15;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else if ( ck > 7 ) {
+							if ( ck < 11 ) {
+								if ( 10 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 11 ) {
+								if ( ck > 13 ) {
+									goto ctr15;
+								} else if ( ck >= 13 ) {
+									goto ctr10;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else if ( ck > 15 ) {
+						if ( ck < 26 ) {
+							if ( ck < 19 ) {
+								if ( 18 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 19 ) {
+								if ( ck > 22 ) {
+									if ( ck <= 23 ) {
+										goto ctr15;
+									}
+								} else if ( ck >= 22 ) {
+									goto ctr15;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else if ( ck > 26 ) {
+							if ( ck < 29 ) {
+								if ( ck <= 27 ) {
+									goto ctr15;
+								}
+							} else if ( ck > 29 ) {
+								if ( ck > 30 ) {
+									goto ctr15;
+								} else {
+									goto ctr15;
+								}
+							} else {
+								goto ctr10;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else {
+						goto ctr15;
+					}
+					goto ctr11;
+					
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 15 ) {
+						if ( ck < 7 ) {
+							if ( ck < 3 ) {
+								if ( 2 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 3 ) {
+								if ( 6 <= ck )
+								{					goto ctr15;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else if ( ck > 7 ) {
+							if ( ck < 11 ) {
+								if ( 10 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 11 ) {
+								if ( ck > 13 ) {
+									goto ctr15;
+								} else if ( ck >= 13 ) {
+									goto ctr10;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else if ( ck > 15 ) {
+						if ( ck < 26 ) {
+							if ( ck < 19 ) {
+								if ( 18 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 19 ) {
+								if ( ck > 22 ) {
+									if ( ck <= 23 ) {
+										goto ctr15;
+									}
+								} else if ( ck >= 22 ) {
+									goto ctr15;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else if ( ck > 26 ) {
+							if ( ck < 29 ) {
+								if ( ck <= 27 ) {
+									goto ctr15;
+								}
+							} else if ( ck > 29 ) {
+								if ( ck > 30 ) {
+									goto ctr15;
+								} else {
+									goto ctr15;
+								}
+							} else {
+								goto ctr10;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else {
+						goto ctr15;
+					}
+					goto ctr11;
+					
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					int ck = 0;
+					if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+					if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+					if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+					if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+					if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+					if ( ck < 15 ) {
+						if ( ck < 7 ) {
+							if ( ck < 3 ) {
+								if ( 2 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 3 ) {
+								if ( 6 <= ck )
+								{					goto ctr15;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else if ( ck > 7 ) {
+							if ( ck < 11 ) {
+								if ( 10 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 11 ) {
+								if ( ck > 13 ) {
+									goto ctr15;
+								} else if ( ck >= 13 ) {
+									goto ctr10;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else if ( ck > 15 ) {
+						if ( ck < 26 ) {
+							if ( ck < 19 ) {
+								if ( 18 <= ck )
+								{					goto ctr15;
+								}
+							} else if ( ck > 19 ) {
+								if ( ck > 22 ) {
+									if ( ck <= 23 ) {
+										goto ctr15;
+									}
+								} else if ( ck >= 22 ) {
+									goto ctr15;
+								}
+							} else {
+								goto ctr15;
+							}
+						} else if ( ck > 26 ) {
+							if ( ck < 29 ) {
+								if ( ck <= 27 ) {
+									goto ctr15;
+								}
+							} else if ( ck > 29 ) {
+								if ( ck > 30 ) {
+									goto ctr15;
+								} else {
+									goto ctr15;
+								}
+							} else {
+								goto ctr10;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else {
+						goto ctr15;
+					}
+					goto ctr11;
+					
+				}
+			} else {
+				int ck = 0;
+				if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+				if ( host( "working/cond10.rl", 31 ) ={ q_4 < 25 }= ) ck += 2;
+				if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 4;
+				if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 8;
+				if ( host( "working/cond10.rl", 43 ) ={ q_6 < 100 }= ) ck += 16;
+				if ( ck < 15 ) {
+					if ( ck < 7 ) {
+						if ( ck < 3 ) {
+							if ( 2 <= ck )
+							{					goto ctr15;
+							}
+						} else if ( ck > 3 ) {
+							if ( 6 <= ck )
+							{					goto ctr15;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else if ( ck > 7 ) {
+						if ( ck < 11 ) {
+							if ( 10 <= ck )
+							{					goto ctr15;
+							}
+						} else if ( ck > 11 ) {
+							if ( ck > 13 ) {
+								goto ctr15;
+							} else if ( ck >= 13 ) {
+								goto ctr10;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else {
+						goto ctr15;
+					}
+				} else if ( ck > 15 ) {
+					if ( ck < 26 ) {
+						if ( ck < 19 ) {
+							if ( 18 <= ck )
+							{					goto ctr15;
+							}
+						} else if ( ck > 19 ) {
+							if ( ck > 22 ) {
+								if ( ck <= 23 ) {
+									goto ctr15;
+								}
+							} else if ( ck >= 22 ) {
+								goto ctr15;
+							}
+						} else {
+							goto ctr15;
+						}
+					} else if ( ck > 26 ) {
+						if ( ck < 29 ) {
+							if ( ck <= 27 ) {
+								goto ctr15;
+							}
+						} else if ( ck > 29 ) {
+							if ( ck > 30 ) {
+								goto ctr15;
+							} else {
+								goto ctr15;
+							}
+						} else {
+							goto ctr10;
+						}
+					} else {
+						goto ctr15;
+					}
+				} else {
+					goto ctr15;
+				}
+				goto ctr11;
+				
+			}
+			{
+				int ck = 0;
+				if ( host( "working/cond10.rl", 30 ) ={ q_4 >= 1 }= ) ck += 1;
+				if ( host( "working/cond10.rl", 36 ) ={ q_5 >= 1 }= ) ck += 2;
+				if ( host( "working/cond10.rl", 42 ) ={ q_6 >= 100 }= ) ck += 4;
+				if ( 7 <= ck )
+				{		goto ctr10;
+				}
+				goto ctr11;
+				
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr2: cs = 3; goto _again;
+		ctr3: cs = 4; goto _again;
+		ctr4: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		ctr6: cs = 7; goto _again;
+		ctr7: cs = 8; goto _again;
+		ctr8: cs = 9; goto _again;
+		ctr9: cs = 10; goto _again;
+		ctr11: cs = 0; goto _again;
+		ctr12: cs = 11; goto f2;
+		ctr14: cs = 11; goto f5;
+		ctr13: cs = 12; goto f3;
+		ctr15: cs = 12; goto f6;
+		ctr10: cs = 13; goto f1;
+		
+		f6:
+		host( "working/cond10.rl", 29 ) ${ q_4++; }$
+		goto _again;
+		f5:
+		host( "working/cond10.rl", 35 ) ${ q_5++; }$
+		goto _again;
+		f3:
+		host( "working/cond10.rl", 29 ) ${ q_4++; }$	host( "working/cond10.rl", 41 ) ${ q_6++; }$
+		goto _again;
+		f2:
+		host( "working/cond10.rl", 41 ) ${ q_6++; }$	host( "working/cond10.rl", 35 ) ${ q_5++; }$
+		goto _again;
+		f1:
+		host( "working/cond10.rl", 41 ) ${ q_6++; }$	host( "working/cond10.rl", 49 ) ${ match = 1; }$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/cond10.rl", 67 ) @{
+		if ( match )
+		cout << "  success" << endl;
+		else
+		cout << "  failure" << endl;
+		cout << endl;
+	}
+	
+	int main()
+	{
+		return 0;
+	}
+	
+}@

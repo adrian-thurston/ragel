@@ -1,0 +1,362 @@
+host( "working/call4_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var target  int ;
+	var top  int ;
+	var stack [32] int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+value int call4_start = 13;
+value int call4_first_final = 13;
+value int call4_error = 0;
+
+value int call4_en_unused = 1;
+value int call4_en_one = 7;
+value int call4_en_two = 10;
+value int call4_en_main = 13;
+
+array s8 _call4_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _call4_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _call4_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _call4_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/call4_go.rl", 43 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)call4_start;
+		top = 0;
+	}
+	host( "working/call4_go.rl", 46 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		goto _resume;
+		
+		_again:
+		switch ( cs ) {
+			case 13: goto st13;
+			case 0: goto st0;
+			case 1: goto st1;
+			case 2: goto st2;
+			case 3: goto st3;
+			case 4: goto st4;
+			case 5: goto st5;
+			case 6: goto st6;
+			case 14: goto st14;
+			case 7: goto st7;
+			case 8: goto st8;
+			case 9: goto st9;
+			case 15: goto st15;
+			case 10: goto st10;
+			case 11: goto st11;
+			case 12: goto st12;
+			case 16: goto st16;
+		}
+		
+		_resume:
+		switch ( cs )
+		{
+			case 13:
+			goto st_case_13;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 14:
+			goto st_case_14;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 15:
+			goto st_case_15;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 16:
+			goto st_case_16;
+		}
+		goto st_out;
+		ctr14:
+		host( "working/call4_go.rl", 27 ) ${target = 7;
+			${stack[top] = 13; top+= 1;cs = host( "-", 1 ) ={target}=; goto _again;}$ 
+		}$
+		
+		goto st13;
+		ctr15:
+		host( "working/call4_go.rl", 30 ) ${target = 10;
+			${stack[top] = 13; top+= 1;cs = host( "-", 1 ) ={target}=; goto _again;}$ 
+		}$
+		
+		goto st13;
+		st13:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof13;
+		st_case_13:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st13;
+			}
+			case 49: {
+				goto ctr14;
+			}
+			case 50: {
+				goto ctr15;
+			}
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 117 ) {
+			goto st2;
+		}
+		{
+			goto st0;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) == 110 ) {
+			goto st3;
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		if ( ( deref( data, p )) == 117 ) {
+			goto st4;
+		}
+		{
+			goto st0;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		if ( ( deref( data, p )) == 115 ) {
+			goto st5;
+		}
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		if ( ( deref( data, p )) == 101 ) {
+			goto st6;
+		}
+		{
+			goto st0;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		if ( ( deref( data, p )) == 100 ) {
+			goto st14;
+		}
+		{
+			goto st0;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof14;
+		st_case_14:
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		if ( ( deref( data, p )) == 111 ) {
+			goto st8;
+		}
+		{
+			goto st0;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof8;
+		st_case_8:
+		if ( ( deref( data, p )) == 110 ) {
+			goto st9;
+		}
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof9;
+		st_case_9:
+		if ( ( deref( data, p )) == 101 ) {
+			goto ctr9;
+		}
+		{
+			goto st0;
+		}
+		ctr9:
+		host( "working/call4_go.rl", 18 ) ${fmt.Print( "one\n" );${top -= 1;cs = stack[top];goto _again;}$
+			
+		}$
+		
+		goto st15;
+		st15:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof15;
+		st_case_15:
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof10;
+		st_case_10:
+		if ( ( deref( data, p )) == 116 ) {
+			goto st11;
+		}
+		{
+			goto st0;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof11;
+		st_case_11:
+		if ( ( deref( data, p )) == 119 ) {
+			goto st12;
+		}
+		{
+			goto st0;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof12;
+		st_case_12:
+		if ( ( deref( data, p )) == 111 ) {
+			goto ctr12;
+		}
+		{
+			goto st0;
+		}
+		ctr12:
+		host( "working/call4_go.rl", 22 ) ${fmt.Print( "two\n" );${top -= 1;cs = stack[top];goto _again;}$
+			
+		}$
+		
+		goto st16;
+		st16:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof16;
+		st_case_16:
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof13: cs = 13; goto _test_eof; 
+		_test_eof1: cs = 1; goto _test_eof; 
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof5: cs = 5; goto _test_eof; 
+		_test_eof6: cs = 6; goto _test_eof; 
+		_test_eof14: cs = 14; goto _test_eof; 
+		_test_eof7: cs = 7; goto _test_eof; 
+		_test_eof8: cs = 8; goto _test_eof; 
+		_test_eof9: cs = 9; goto _test_eof; 
+		_test_eof15: cs = 15; goto _test_eof; 
+		_test_eof10: cs = 10; goto _test_eof; 
+		_test_eof11: cs = 11; goto _test_eof; 
+		_test_eof12: cs = 12; goto _test_eof; 
+		_test_eof16: cs = 16; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/call4_go.rl", 52 ) @{
+	}
+	func finish() {
+		if cs >= call4_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1one2two1one\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

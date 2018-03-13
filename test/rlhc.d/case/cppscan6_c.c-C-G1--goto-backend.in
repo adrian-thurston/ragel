@@ -1,0 +1,1132 @@
+host( "working/cppscan6_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char * ts ;
+	char * te ;
+	int act ;
+	int token ;
+	
+	
+	
+	
+	
+}@
+array s8 _scanner_to_state_actions( 0, 9 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_from_state_actions( 0, 10 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int scanner_start = 12;
+value int scanner_first_final = 12;
+value int scanner_error = 0;
+
+value int scanner_en_main = 12;
+
+host( "working/cppscan6_c.rl", 235 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/cppscan6_c.rl", 242 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		char *eof = pe;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( _scanner_from_state_actions[cs] ) {
+			case 10{
+				host( "NONE", 1 ) ${${ts = p;}$}$
+			}
+		}
+		
+		switch ( cs ) {
+			case 12:
+			switch( ( deref( data, p )) ) {
+				case 33: {
+					goto ctr30;
+				}
+				case 34: {
+					goto ctr2;
+				}
+				case 37: {
+					goto ctr32;
+				}
+				case 38: {
+					goto ctr33;
+				}
+				case 39: {
+					goto ctr7;
+				}
+				case 42: {
+					goto ctr34;
+				}
+				case 43: {
+					goto ctr35;
+				}
+				case 45: {
+					goto ctr36;
+				}
+				case 46: {
+					goto ctr37;
+				}
+				case 47: {
+					goto ctr38;
+				}
+				case 48: {
+					goto ctr39;
+				}
+				case 58: {
+					goto ctr41;
+				}
+				case 61: {
+					goto ctr42;
+				}
+				case 76: {
+					goto ctr44;
+				}
+				case 94: {
+					goto ctr45;
+				}
+				case 95: {
+					goto ctr43;
+				}
+				case 124: {
+					goto ctr46;
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( ( deref( data, p )) < 49 ) {
+					if ( 35 <= ( deref( data, p )) && ( deref( data, p )) <= 44 ) {
+						goto ctr31;
+					}
+				} else if ( ( deref( data, p )) > 57 ) {
+					if ( 59 <= ( deref( data, p )) ) {
+						goto ctr31;
+					}
+				} else {
+					goto ctr40;
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( ( deref( data, p )) < 97 ) {
+					{
+						goto ctr31;
+					}
+				} else if ( ( deref( data, p )) > 122 ) {
+					if ( ( deref( data, p )) <= 126 ) {
+						goto ctr31;
+					}
+				} else {
+					goto ctr43;
+				}
+			} else {
+				goto ctr43;
+			}
+			{
+				goto ctr29;
+			}
+			case 13:
+			if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+				goto ctr48;
+			}
+			{
+				goto ctr29;
+			}
+			case 14:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr51;
+			}
+			{
+				goto ctr101;
+			}
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr17;
+				}
+				case 34: {
+					goto ctr3;
+				}
+				case 92: {
+					goto ctr4;
+				}
+			}
+			{
+				goto ctr2;
+			}
+			case 2:
+			{
+				goto ctr2;
+			}
+			case 15:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr53;
+			}
+			{
+				goto ctr101;
+			}
+			case 16:
+			switch( ( deref( data, p )) ) {
+				case 38: {
+					goto ctr55;
+				}
+				case 61: {
+					goto ctr56;
+				}
+			}
+			{
+				goto ctr101;
+			}
+			case 3:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr17;
+				}
+				case 39: {
+					goto ctr8;
+				}
+				case 92: {
+					goto ctr9;
+				}
+			}
+			{
+				goto ctr7;
+			}
+			case 4:
+			{
+				goto ctr7;
+			}
+			case 17:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr58;
+			}
+			{
+				goto ctr101;
+			}
+			case 18:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr60;
+				}
+				case 61: {
+					goto ctr61;
+				}
+			}
+			{
+				goto ctr101;
+			}
+			case 19:
+			switch( ( deref( data, p )) ) {
+				case 45: {
+					goto ctr63;
+				}
+				case 61: {
+					goto ctr64;
+				}
+				case 62: {
+					goto ctr65;
+				}
+			}
+			{
+				goto ctr101;
+			}
+			case 20:
+			if ( ( deref( data, p )) == 42 ) {
+				goto ctr68;
+			}
+			{
+				goto ctr67;
+			}
+			case 21:
+			switch( ( deref( data, p )) ) {
+				case 42: {
+					goto ctr70;
+				}
+				case 46: {
+					goto ctr71;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr72;
+			}
+			{
+				goto ctr101;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 46 ) {
+				goto ctr13;
+			}
+			{
+				goto ctr23;
+			}
+			case 22:
+			switch( ( deref( data, p )) ) {
+				case 69: {
+					goto ctr75;
+				}
+				case 70: {
+					goto ctr76;
+				}
+				case 76: {
+					goto ctr76;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 102: {
+					goto ctr76;
+				}
+				case 108: {
+					goto ctr76;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr72;
+			}
+			{
+				goto ctr77;
+			}
+			case 6:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr15;
+				}
+				case 45: {
+					goto ctr15;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr17;
+			}
+			case 7:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr17;
+			}
+			case 23:
+			switch( ( deref( data, p )) ) {
+				case 70: {
+					goto ctr76;
+				}
+				case 76: {
+					goto ctr76;
+				}
+				case 102: {
+					goto ctr76;
+				}
+				case 108: {
+					goto ctr76;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr77;
+			}
+			case 24:
+			switch( ( deref( data, p )) ) {
+				case 33: {
+					goto ctr19;
+				}
+				case 47: {
+					goto ctr24;
+				}
+				case 61: {
+					goto ctr79;
+				}
+			}
+			{
+				goto ctr101;
+			}
+			case 8:
+			if ( ( deref( data, p )) == 33 ) {
+				goto ctr20;
+			}
+			{
+				goto ctr19;
+			}
+			case 9:
+			switch( ( deref( data, p )) ) {
+				case 33: {
+					goto ctr20;
+				}
+				case 47: {
+					goto ctr22;
+				}
+			}
+			{
+				goto ctr19;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr25;
+			}
+			{
+				goto ctr24;
+			}
+			case 25:
+			switch( ( deref( data, p )) ) {
+				case 46: {
+					goto ctr72;
+				}
+				case 69: {
+					goto ctr75;
+				}
+				case 76: {
+					goto ctr83;
+				}
+				case 85: {
+					goto ctr83;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 108: {
+					goto ctr83;
+				}
+				case 117: {
+					goto ctr83;
+				}
+				case 120: {
+					goto ctr84;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr82;
+			}
+			{
+				goto ctr91;
+			}
+			case 26:
+			switch( ( deref( data, p )) ) {
+				case 46: {
+					goto ctr72;
+				}
+				case 69: {
+					goto ctr75;
+				}
+				case 76: {
+					goto ctr87;
+				}
+				case 85: {
+					goto ctr87;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 108: {
+					goto ctr87;
+				}
+				case 117: {
+					goto ctr87;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr82;
+			}
+			{
+				goto ctr86;
+			}
+			case 11:
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr28;
+				}
+			} else if ( ( deref( data, p )) > 70 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+					goto ctr28;
+				}
+			} else {
+				goto ctr28;
+			}
+			{
+				goto ctr27;
+			}
+			case 27:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr90;
+				}
+				case 85: {
+					goto ctr90;
+				}
+				case 108: {
+					goto ctr90;
+				}
+				case 117: {
+					goto ctr90;
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr28;
+				}
+			} else if ( ( deref( data, p )) > 70 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+					goto ctr28;
+				}
+			} else {
+				goto ctr28;
+			}
+			{
+				goto ctr89;
+			}
+			case 28:
+			switch( ( deref( data, p )) ) {
+				case 46: {
+					goto ctr72;
+				}
+				case 69: {
+					goto ctr75;
+				}
+				case 76: {
+					goto ctr83;
+				}
+				case 85: {
+					goto ctr83;
+				}
+				case 101: {
+					goto ctr75;
+				}
+				case 108: {
+					goto ctr83;
+				}
+				case 117: {
+					goto ctr83;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr40;
+			}
+			{
+				goto ctr91;
+			}
+			case 29:
+			if ( ( deref( data, p )) == 58 ) {
+				goto ctr93;
+			}
+			{
+				goto ctr101;
+			}
+			case 30:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr95;
+			}
+			{
+				goto ctr101;
+			}
+			case 31:
+			if ( ( deref( data, p )) == 95 ) {
+				goto ctr43;
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr43;
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr43;
+				}
+			} else {
+				goto ctr43;
+			}
+			{
+				goto ctr98;
+			}
+			case 32:
+			switch( ( deref( data, p )) ) {
+				case 34: {
+					goto ctr2;
+				}
+				case 39: {
+					goto ctr7;
+				}
+				case 95: {
+					goto ctr43;
+				}
+			}
+			if ( ( deref( data, p )) < 65 ) {
+				if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+					goto ctr43;
+				}
+			} else if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr43;
+				}
+			} else {
+				goto ctr43;
+			}
+			{
+				goto ctr98;
+			}
+			case 33:
+			if ( ( deref( data, p )) == 61 ) {
+				goto ctr100;
+			}
+			{
+				goto ctr101;
+			}
+			case 34:
+			switch( ( deref( data, p )) ) {
+				case 61: {
+					goto ctr102;
+				}
+				case 124: {
+					goto ctr103;
+				}
+			}
+			{
+				goto ctr101;
+			}
+			case 0:
+			goto _out;
+		}
+		
+		ctr2: cs = 1; goto _again;
+		ctr4: cs = 2; goto _again;
+		ctr7: cs = 3; goto _again;
+		ctr9: cs = 4; goto _again;
+		ctr71: cs = 5; goto _again;
+		ctr75: cs = 6; goto _again;
+		ctr15: cs = 7; goto _again;
+		ctr19: cs = 8; goto _again;
+		ctr20: cs = 9; goto _again;
+		ctr24: cs = 10; goto _again;
+		ctr84: cs = 11; goto _again;
+		ctr17: cs = 12; goto f0;
+		ctr3: cs = 12; goto f1;
+		ctr8: cs = 12; goto f2;
+		ctr23: cs = 12; goto f3;
+		ctr13: cs = 12; goto f4;
+		ctr22: cs = 12; goto f5;
+		ctr25: cs = 12; goto f6;
+		ctr27: cs = 12; goto f7;
+		ctr31: cs = 12; goto f10;
+		ctr48: cs = 12; goto f14;
+		ctr101: cs = 12; goto f15;
+		ctr51: cs = 12; goto f16;
+		ctr53: cs = 12; goto f17;
+		ctr55: cs = 12; goto f18;
+		ctr56: cs = 12; goto f19;
+		ctr58: cs = 12; goto f20;
+		ctr60: cs = 12; goto f21;
+		ctr61: cs = 12; goto f22;
+		ctr63: cs = 12; goto f23;
+		ctr64: cs = 12; goto f24;
+		ctr67: cs = 12; goto f25;
+		ctr68: cs = 12; goto f26;
+		ctr70: cs = 12; goto f27;
+		ctr77: cs = 12; goto f29;
+		ctr76: cs = 12; goto f30;
+		ctr79: cs = 12; goto f31;
+		ctr91: cs = 12; goto f32;
+		ctr83: cs = 12; goto f34;
+		ctr86: cs = 12; goto f35;
+		ctr87: cs = 12; goto f36;
+		ctr89: cs = 12; goto f37;
+		ctr90: cs = 12; goto f38;
+		ctr93: cs = 12; goto f39;
+		ctr95: cs = 12; goto f40;
+		ctr98: cs = 12; goto f41;
+		ctr100: cs = 12; goto f42;
+		ctr102: cs = 12; goto f43;
+		ctr103: cs = 12; goto f44;
+		ctr29: cs = 13; goto _again;
+		ctr30: cs = 14; goto _again;
+		ctr32: cs = 15; goto _again;
+		ctr33: cs = 16; goto _again;
+		ctr34: cs = 17; goto _again;
+		ctr35: cs = 18; goto _again;
+		ctr36: cs = 19; goto _again;
+		ctr65: cs = 20; goto _again;
+		ctr37: cs = 21; goto f11;
+		ctr72: cs = 22; goto f28;
+		ctr16: cs = 23; goto _again;
+		ctr38: cs = 24; goto f11;
+		ctr39: cs = 25; goto f12;
+		ctr82: cs = 26; goto f33;
+		ctr28: cs = 27; goto _again;
+		ctr40: cs = 28; goto f12;
+		ctr41: cs = 29; goto _again;
+		ctr42: cs = 30; goto _again;
+		ctr43: cs = 31; goto _again;
+		ctr44: cs = 32; goto f13;
+		ctr45: cs = 33; goto _again;
+		ctr46: cs = 34; goto _again;
+		
+		f11:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		goto _again;
+		f2:
+		host( "working/cppscan6_c.rl", 29 ) ${${te = p+1;host( "working/cppscan6_c.rl", 29 ) ${token = 193;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f1:
+		host( "working/cppscan6_c.rl", 36 ) ${${te = p+1;host( "working/cppscan6_c.rl", 36 ) ${token = 192;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f30:
+		host( "working/cppscan6_c.rl", 59 ) ${${te = p+1;host( "working/cppscan6_c.rl", 59 ) ${token = 194;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f34:
+		host( "working/cppscan6_c.rl", 68 ) ${${te = p+1;host( "working/cppscan6_c.rl", 68 ) ${token = 218;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f36:
+		host( "working/cppscan6_c.rl", 77 ) ${${te = p+1;host( "working/cppscan6_c.rl", 77 ) ${token = 219;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f38:
+		host( "working/cppscan6_c.rl", 86 ) ${${te = p+1;host( "working/cppscan6_c.rl", 86 ) ${token = 220;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f39:
+		host( "working/cppscan6_c.rl", 94 ) ${${te = p+1;host( "working/cppscan6_c.rl", 94 ) ${token = 197;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f40:
+		host( "working/cppscan6_c.rl", 100 ) ${${te = p+1;host( "working/cppscan6_c.rl", 100 ) ${token = 223;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f16:
+		host( "working/cppscan6_c.rl", 106 ) ${${te = p+1;host( "working/cppscan6_c.rl", 106 ) ${token = 224;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f18:
+		host( "working/cppscan6_c.rl", 112 ) ${${te = p+1;host( "working/cppscan6_c.rl", 112 ) ${token = 225;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f44:
+		host( "working/cppscan6_c.rl", 118 ) ${${te = p+1;host( "working/cppscan6_c.rl", 118 ) ${token = 226;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f20:
+		host( "working/cppscan6_c.rl", 124 ) ${${te = p+1;host( "working/cppscan6_c.rl", 124 ) ${token = 227;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f31:
+		host( "working/cppscan6_c.rl", 130 ) ${${te = p+1;host( "working/cppscan6_c.rl", 130 ) ${token = 228;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f17:
+		host( "working/cppscan6_c.rl", 136 ) ${${te = p+1;host( "working/cppscan6_c.rl", 136 ) ${token = 229;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f22:
+		host( "working/cppscan6_c.rl", 142 ) ${${te = p+1;host( "working/cppscan6_c.rl", 142 ) ${token = 230;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f24:
+		host( "working/cppscan6_c.rl", 148 ) ${${te = p+1;host( "working/cppscan6_c.rl", 148 ) ${token = 231;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f19:
+		host( "working/cppscan6_c.rl", 154 ) ${${te = p+1;host( "working/cppscan6_c.rl", 154 ) ${token = 232;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f42:
+		host( "working/cppscan6_c.rl", 160 ) ${${te = p+1;host( "working/cppscan6_c.rl", 160 ) ${token = 233;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f43:
+		host( "working/cppscan6_c.rl", 166 ) ${${te = p+1;host( "working/cppscan6_c.rl", 166 ) ${token = 234;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f21:
+		host( "working/cppscan6_c.rl", 172 ) ${${te = p+1;host( "working/cppscan6_c.rl", 172 ) ${token = 212;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f23:
+		host( "working/cppscan6_c.rl", 178 ) ${${te = p+1;host( "working/cppscan6_c.rl", 178 ) ${token = 213;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f26:
+		host( "working/cppscan6_c.rl", 190 ) ${${te = p+1;host( "working/cppscan6_c.rl", 190 ) ${token = 214;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f27:
+		host( "working/cppscan6_c.rl", 196 ) ${${te = p+1;host( "working/cppscan6_c.rl", 196 ) ${token = 215;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f4:
+		host( "working/cppscan6_c.rl", 204 ) ${${te = p+1;host( "working/cppscan6_c.rl", 204 ) ${token = 240;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f10:
+		host( "working/cppscan6_c.rl", 212 ) ${${te = p+1;host( "working/cppscan6_c.rl", 212 ) ${token = ( int ) ( ts[0] )
+					;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f5:
+		host( "working/cppscan6_c.rl", 17 ) ${${te = p+1;host( "working/cppscan6_c.rl", 17 ) ${token = 242;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f6:
+		host( "working/cppscan6_c.rl", 17 ) ${${te = p+1;host( "working/cppscan6_c.rl", 17 ) ${token = 242;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f41:
+		host( "working/cppscan6_c.rl", 45 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 45 ) ${token = 195;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f29:
+		host( "working/cppscan6_c.rl", 59 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 59 ) ${token = 194;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f32:
+		host( "working/cppscan6_c.rl", 68 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 68 ) ${token = 218;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f35:
+		host( "working/cppscan6_c.rl", 77 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 77 ) ${token = 219;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f37:
+		host( "working/cppscan6_c.rl", 86 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 86 ) ${token = 220;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f25:
+		host( "working/cppscan6_c.rl", 184 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 184 ) ${token = 211;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f15:
+		host( "working/cppscan6_c.rl", 212 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 212 ) ${token = ( int ) ( ts[0] )
+					;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f14:
+		host( "working/cppscan6_c.rl", 223 ) ${${te = p;p = p - 1;host( "working/cppscan6_c.rl", 223 ) ${token = 241;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f7:
+		host( "working/cppscan6_c.rl", 68 ) ${${p = ((te))-1;
+				host( "working/cppscan6_c.rl", 68 ) ${token = 218;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f3:
+		host( "working/cppscan6_c.rl", 212 ) ${${p = ((te))-1;
+				host( "working/cppscan6_c.rl", 212 ) ${token = ( int ) ( ts[0] )
+					;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+				}$}$}$
+		goto _again;
+		f0:
+		host( "NONE", 1 ) ${${switch( act ) {
+					case 0 {
+						host( "NONE", 1 ) ${${cs = 0; goto _again;}$}$ }
+					case 3 {
+						p = ((te))-1;
+						host( "working/cppscan6_c.rl", 45 ) ${token = 195;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						}$ }
+					case 4 {
+						p = ((te))-1;
+						host( "working/cppscan6_c.rl", 59 ) ${token = 194;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						}$ }
+					case 5 {
+						p = ((te))-1;
+						host( "working/cppscan6_c.rl", 68 ) ${token = 218;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						}$ }
+					case 6 {
+						p = ((te))-1;
+						host( "working/cppscan6_c.rl", 77 ) ${token = 219;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						}$ }
+				}}$
+		}$
+		goto _again;
+		f13:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan6_c.rl", 45 ) ${${act = 3;}$}$
+		goto _again;
+		f28:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan6_c.rl", 59 ) ${${act = 4;}$}$
+		goto _again;
+		f12:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan6_c.rl", 68 ) ${${act = 5;}$}$
+		goto _again;
+		f33:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/cppscan6_c.rl", 77 ) ${${act = 6;}$}$
+		goto _again;
+		
+		_again:
+		switch ( _scanner_to_state_actions[cs] ) {
+			case 9{
+				host( "NONE", 1 ) ${${ts = nil;}$}$	host( "NONE", 1 ) ${${act = 0;}$}$
+			}
+		}
+		
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( cs ) {
+				case 13: goto ctr48;
+				case 14: goto ctr101;
+				case 1: goto ctr17;
+				case 2: goto ctr17;
+				case 15: goto ctr101;
+				case 16: goto ctr101;
+				case 3: goto ctr17;
+				case 4: goto ctr17;
+				case 17: goto ctr101;
+				case 18: goto ctr101;
+				case 19: goto ctr101;
+				case 20: goto ctr67;
+				case 21: goto ctr101;
+				case 5: goto ctr23;
+				case 22: goto ctr77;
+				case 6: goto ctr17;
+				case 7: goto ctr17;
+				case 23: goto ctr77;
+				case 24: goto ctr101;
+				case 8: goto ctr23;
+				case 9: goto ctr23;
+				case 10: goto ctr23;
+				case 25: goto ctr91;
+				case 26: goto ctr86;
+				case 11: goto ctr27;
+				case 27: goto ctr89;
+				case 28: goto ctr91;
+				case 29: goto ctr101;
+				case 30: goto ctr101;
+				case 31: goto ctr98;
+				case 32: goto ctr98;
+				case 33: goto ctr101;
+				case 34: goto ctr101;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/cppscan6_c.rl", 250 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= scanner_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+		"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+		"'\n'\n",
+	};
+	
+	int inplen = 3;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

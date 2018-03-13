@@ -1,0 +1,16 @@
+int f1( i: int, j: int )
+{
+	return i + j
+}
+
+int main()
+{
+	print( f1( 
+		f1( f1( 1, 1 ), f1( 1, 1 ) ),
+		f1( f1( 1, 1 ), f1( 1, 1 ) )
+	), '\n' )
+}
+
+main()
+##### EXP #####
+8

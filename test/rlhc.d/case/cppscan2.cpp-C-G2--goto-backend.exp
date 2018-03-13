@@ -1,0 +1,2216 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+#define TK_Dlit 192
+#define TK_Slit 193
+#define TK_Float 194
+#define TK_Id 195
+#define TK_NameSep 197
+#define TK_Arrow 211
+#define TK_PlusPlus 212
+#define TK_MinusMinus 213
+#define TK_ArrowStar 214
+#define TK_DotStar 215
+#define TK_ShiftLeft 216
+#define TK_ShiftRight 217
+#define TK_IntegerDecimal 218
+#define TK_IntegerOctal 219
+#define TK_IntegerHex 220
+#define TK_EqualsEquals 223
+#define TK_NotEquals 224
+#define TK_AndAnd 225
+#define TK_OrOr 226
+#define TK_MultAssign 227
+#define TK_DivAssign 228
+#define TK_PercentAssign 229
+#define TK_PlusAssign 230
+#define TK_MinusAssign 231
+#define TK_AmpAssign 232
+#define TK_CaretAssign 233
+#define TK_BarAssign 234
+#define TK_DotDotDot 240
+#define TK_Whitespace 241
+#define TK_Comment 242
+
+#define BUFSIZE 4096
+
+int tok;
+char buf[BUFSIZE];
+const char *ts, *te;
+void token( const char *data, int len );
+bool discard = false;
+
+struct Scanner
+{
+	int cs;
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	int init( );
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	int execute( const char *data, int len );
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	int finish( );
+};
+
+
+
+static const int  Scanner_start  = 1;
+static const int  Scanner_first_final  = 13;
+static const int  Scanner_error  = 0;
+static const int  Scanner_en_main  = 1;
+static const char  _Scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_pop_trans [] = { 0, 0 ,  };
+int Scanner::init( )
+{
+	tok = 0;
+	ts = 0;
+	te = 0;
+	
+	
+	{
+		cs = ( int ) Scanner_start;
+	}
+	return 1;
+}
+
+int Scanner::execute( const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 13:
+			goto st_case_13;
+			case 0:
+			goto st_case_0;
+			case 14:
+			goto st_case_14;
+			case 15:
+			goto st_case_15;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 16:
+			goto st_case_16;
+			case 17:
+			goto st_case_17;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 18:
+			goto st_case_18;
+			case 19:
+			goto st_case_19;
+			case 20:
+			goto st_case_20;
+			case 21:
+			goto st_case_21;
+			case 22:
+			goto st_case_22;
+			case 6:
+			goto st_case_6;
+			case 23:
+			goto st_case_23;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 24:
+			goto st_case_24;
+			case 25:
+			goto st_case_25;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 26:
+			goto st_case_26;
+			case 27:
+			goto st_case_27;
+			case 28:
+			goto st_case_28;
+			case 29:
+			goto st_case_29;
+			case 30:
+			goto st_case_30;
+			case 12:
+			goto st_case_12;
+			case 31:
+			goto st_case_31;
+			case 32:
+			goto st_case_32;
+			case 33:
+			goto st_case_33;
+			case 34:
+			goto st_case_34;
+			case 35:
+			goto st_case_35;
+			case 36:
+			goto st_case_36;
+			case 37:
+			goto st_case_37;
+			case 38:
+			goto st_case_38;
+			case 39:
+			goto st_case_39;
+			
+		}
+		goto st_out;
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		switch ( ((*( p  ))
+		) ) {
+			case 33:
+			{
+				goto ctr1;
+			}
+			case 34:
+			{
+				goto ctr2;
+			}
+			case 37:
+			{
+				goto ctr4;
+			}
+			case 38:
+			{
+				goto ctr5;
+			}
+			case 39:
+			{
+				goto ctr6;
+			}
+			case 42:
+			{
+				goto ctr7;
+			}
+			case 43:
+			{
+				goto ctr8;
+			}
+			case 45:
+			{
+				goto ctr9;
+			}
+			case 46:
+			{
+				goto ctr10;
+			}
+			case 47:
+			{
+				goto ctr11;
+			}
+			case 48:
+			{
+				goto ctr12;
+			}
+			case 58:
+			{
+				goto ctr14;
+			}
+			case 61:
+			{
+				goto ctr15;
+			}
+			case 76:
+			{
+				goto ctr17;
+			}
+			case 94:
+			{
+				goto ctr18;
+			}
+			case 95:
+			{
+				goto ctr16;
+			}
+			case 124:
+			{
+				goto ctr19;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 49  )
+			{
+				if ( 35 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 44  )
+				{
+					goto ctr3;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( 59 <= ((*( p  ))
+				) )
+				{
+					goto ctr3;
+				}
+				
+			} 
+			else
+			{
+				goto ctr13;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr3;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr3;
+				}
+				
+			} 
+			else
+			{
+				goto ctr16;
+			}
+			
+		} 
+		else
+		{
+			goto ctr16;
+		}
+		
+		{
+			goto ctr0;
+		}
+		ctr0:
+		{
+			ts=p;
+		}
+		{
+			discard = true;
+			
+		}
+		{
+			tok = TK_Whitespace;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st13;
+		ctr36:
+		{
+			tok = TK_Whitespace;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st13;
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		if ( 33 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 126  )
+		{
+			goto ctr21;
+		}
+		
+		{
+			goto ctr36;
+		}
+		ctr21:
+		{
+			if ( tok != 0 ) {
+				const char *rst_data;
+				
+				if ( tok == TK_Comment || tok == TK_Whitespace ) {
+					/* Reset comment status, don't send. */
+					discard = false;
+					
+					/* Restart right at the error point if consuming whitespace or
+					* a comment. Consume may have spanned multiple buffers. */
+					rst_data = p;
+				}
+				else {
+					/* Send the token. */
+					token( ts, te - ts + 1 );
+					
+					/* Restart right after the token. */
+					rst_data = te+1;
+				}
+				
+				ts = 0;
+				{
+					p = ((rst_data))-1;
+					
+				}
+				
+				
+				{
+					goto st1;
+				}
+			}
+			
+		}
+		
+		
+		goto st0;
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr1:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st14;
+		st14:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof14;
+		
+		st_case_14:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr37;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr3:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr22:
+		{
+			tok = TK_Dlit;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr25:
+		{
+			tok = TK_Slit;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr27:
+		{
+			tok = TK_DotDotDot;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr52:
+		{
+			tok = TK_Float;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr32:
+		{
+			tok = TK_Comment;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr34:
+		{
+			tok = TK_Comment;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr64:
+		{
+			tok = TK_IntegerHex;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr37:
+		{
+			tok = TK_NotEquals;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr38:
+		{
+			tok = TK_PercentAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr39:
+		{
+			tok = TK_AndAnd;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr40:
+		{
+			tok = TK_AmpAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr41:
+		{
+			tok = TK_MultAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr42:
+		{
+			tok = TK_PlusPlus;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr43:
+		{
+			tok = TK_PlusAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr44:
+		{
+			tok = TK_MinusMinus;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr45:
+		{
+			tok = TK_MinusAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr47:
+		{
+			tok = TK_ArrowStar;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr48:
+		{
+			tok = TK_DotStar;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr55:
+		{
+			tok = TK_DivAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr60:
+		{
+			tok = TK_IntegerOctal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr62:
+		{
+			tok = TK_IntegerDecimal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr66:
+		{
+			tok = TK_NameSep;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr67:
+		{
+			tok = TK_EqualsEquals;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr69:
+		{
+			tok = TK_CaretAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr70:
+		{
+			tok = TK_BarAssign;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		ctr71:
+		{
+			tok = TK_OrOr;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st15;
+		st15:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof15;
+		
+		st_case_15:
+		{
+			goto ctr21;
+		}
+		ctr2:
+		{
+			ts=p;
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr21;
+			}
+			case 34:
+			{
+				goto ctr22;
+			}
+			case 92:
+			{
+				goto st3;
+			}
+			
+		}
+		{
+			goto st2;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		{
+			goto st2;
+		}
+		ctr4:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st16;
+		st16:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof16;
+		
+		st_case_16:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr38;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr5:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st17;
+		st17:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof17;
+		
+		st_case_17:
+		switch ( ((*( p  ))
+		) ) {
+			case 38:
+			{
+				goto ctr39;
+			}
+			case 61:
+			{
+				goto ctr40;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr6:
+		{
+			ts=p;
+		}
+		
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr21;
+			}
+			case 39:
+			{
+				goto ctr25;
+			}
+			case 92:
+			{
+				goto st5;
+			}
+			
+		}
+		{
+			goto st4;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		{
+			goto st4;
+		}
+		ctr7:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st18;
+		st18:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof18;
+		
+		st_case_18:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr41;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr8:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st19;
+		st19:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof19;
+		
+		st_case_19:
+		switch ( ((*( p  ))
+		) ) {
+			case 43:
+			{
+				goto ctr42;
+			}
+			case 61:
+			{
+				goto ctr43;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr9:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st20;
+		st20:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof20;
+		
+		st_case_20:
+		switch ( ((*( p  ))
+		) ) {
+			case 45:
+			{
+				goto ctr44;
+			}
+			case 61:
+			{
+				goto ctr45;
+			}
+			case 62:
+			{
+				goto ctr46;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr46:
+		{
+			tok = TK_Arrow;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st21;
+		st21:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof21;
+		
+		st_case_21:
+		if ( ((*( p  ))
+		)== 42  )
+		{
+			goto ctr47;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr10:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st22;
+		st22:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof22;
+		
+		st_case_22:
+		switch ( ((*( p  ))
+		) ) {
+			case 42:
+			{
+				goto ctr48;
+			}
+			case 46:
+			{
+				goto st6;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr50;
+		}
+		
+		{
+			goto ctr21;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		if ( ((*( p  ))
+		)== 46  )
+		{
+			goto ctr27;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr50:
+		{
+			tok = TK_Float;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st23;
+		st23:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof23;
+		
+		st_case_23:
+		switch ( ((*( p  ))
+		) ) {
+			case 69:
+			{
+				goto st7;
+			}
+			case 70:
+			{
+				goto ctr52;
+			}
+			case 76:
+			{
+				goto ctr52;
+			}
+			case 101:
+			{
+				goto st7;
+			}
+			case 102:
+			{
+				goto ctr52;
+			}
+			case 108:
+			{
+				goto ctr52;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr50;
+		}
+		
+		{
+			goto ctr21;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		switch ( ((*( p  ))
+		) ) {
+			case 43:
+			{
+				goto st8;
+			}
+			case 45:
+			{
+				goto st8;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr29;
+		}
+		
+		{
+			goto ctr21;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr29;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr29:
+		{
+			tok = TK_Float;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st24;
+		st24:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof24;
+		
+		st_case_24:
+		switch ( ((*( p  ))
+		) ) {
+			case 70:
+			{
+				goto ctr52;
+			}
+			case 76:
+			{
+				goto ctr52;
+			}
+			case 102:
+			{
+				goto ctr52;
+			}
+			case 108:
+			{
+				goto ctr52;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr29;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr11:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st25;
+		st25:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof25;
+		
+		st_case_25:
+		switch ( ((*( p  ))
+		) ) {
+			case 42:
+			{
+				goto ctr53;
+			}
+			case 47:
+			{
+				goto ctr54;
+			}
+			case 61:
+			{
+				goto ctr55;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr53:
+		{
+			discard = true;
+			
+		}
+		
+		
+		goto st9;
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		if ( ((*( p  ))
+		)== 42  )
+		{
+			goto st10;
+		}
+		
+		{
+			goto st9;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		switch ( ((*( p  ))
+		) ) {
+			case 42:
+			{
+				goto st10;
+			}
+			case 47:
+			{
+				goto ctr32;
+			}
+			
+		}
+		{
+			goto st9;
+		}
+		ctr54:
+		{
+			discard = true;
+			
+		}
+		
+		
+		goto st11;
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr34;
+		}
+		
+		{
+			goto st11;
+		}
+		ctr12:
+		{
+			ts=p;
+		}
+		{
+			tok = TK_IntegerDecimal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st26;
+		st26:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof26;
+		
+		st_case_26:
+		switch ( ((*( p  ))
+		) ) {
+			case 46:
+			{
+				goto ctr50;
+			}
+			case 69:
+			{
+				goto st7;
+			}
+			case 76:
+			{
+				goto ctr57;
+			}
+			case 85:
+			{
+				goto ctr57;
+			}
+			case 101:
+			{
+				goto st7;
+			}
+			case 108:
+			{
+				goto ctr57;
+			}
+			case 117:
+			{
+				goto ctr57;
+			}
+			case 120:
+			{
+				goto st12;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr56;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr56:
+		{
+			tok = TK_IntegerOctal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st27;
+		st27:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof27;
+		
+		st_case_27:
+		switch ( ((*( p  ))
+		) ) {
+			case 46:
+			{
+				goto ctr50;
+			}
+			case 69:
+			{
+				goto st7;
+			}
+			case 76:
+			{
+				goto ctr59;
+			}
+			case 85:
+			{
+				goto ctr59;
+			}
+			case 101:
+			{
+				goto st7;
+			}
+			case 108:
+			{
+				goto ctr59;
+			}
+			case 117:
+			{
+				goto ctr59;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr56;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr59:
+		{
+			tok = TK_IntegerOctal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st28;
+		st28:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof28;
+		
+		st_case_28:
+		switch ( ((*( p  ))
+		) ) {
+			case 76:
+			{
+				goto ctr60;
+			}
+			case 85:
+			{
+				goto ctr60;
+			}
+			case 108:
+			{
+				goto ctr60;
+			}
+			case 117:
+			{
+				goto ctr60;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr57:
+		{
+			tok = TK_IntegerDecimal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st29;
+		st29:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof29;
+		
+		st_case_29:
+		switch ( ((*( p  ))
+		) ) {
+			case 76:
+			{
+				goto ctr61;
+			}
+			case 85:
+			{
+				goto ctr61;
+			}
+			case 108:
+			{
+				goto ctr61;
+			}
+			case 117:
+			{
+				goto ctr61;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr61:
+		{
+			tok = TK_IntegerDecimal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st30;
+		st30:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof30;
+		
+		st_case_30:
+		switch ( ((*( p  ))
+		) ) {
+			case 76:
+			{
+				goto ctr62;
+			}
+			case 85:
+			{
+				goto ctr62;
+			}
+			case 108:
+			{
+				goto ctr62;
+			}
+			case 117:
+			{
+				goto ctr62;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr35;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 70  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 102  )
+			{
+				goto ctr35;
+			}
+			
+		} 
+		else
+		{
+			goto ctr35;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr35:
+		{
+			tok = TK_IntegerHex;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st31;
+		st31:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof31;
+		
+		st_case_31:
+		switch ( ((*( p  ))
+		) ) {
+			case 76:
+			{
+				goto ctr63;
+			}
+			case 85:
+			{
+				goto ctr63;
+			}
+			case 108:
+			{
+				goto ctr63;
+			}
+			case 117:
+			{
+				goto ctr63;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr35;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 70  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 102  )
+			{
+				goto ctr35;
+			}
+			
+		} 
+		else
+		{
+			goto ctr35;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr63:
+		{
+			tok = TK_IntegerHex;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st32;
+		st32:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof32;
+		
+		st_case_32:
+		switch ( ((*( p  ))
+		) ) {
+			case 76:
+			{
+				goto ctr64;
+			}
+			case 85:
+			{
+				goto ctr64;
+			}
+			case 108:
+			{
+				goto ctr64;
+			}
+			case 117:
+			{
+				goto ctr64;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		ctr13:
+		{
+			ts=p;
+		}
+		{
+			tok = TK_IntegerDecimal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st33;
+		ctr65:
+		{
+			tok = TK_IntegerDecimal;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st33;
+		st33:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof33;
+		
+		st_case_33:
+		switch ( ((*( p  ))
+		) ) {
+			case 46:
+			{
+				goto ctr50;
+			}
+			case 69:
+			{
+				goto st7;
+			}
+			case 76:
+			{
+				goto ctr57;
+			}
+			case 85:
+			{
+				goto ctr57;
+			}
+			case 101:
+			{
+				goto st7;
+			}
+			case 108:
+			{
+				goto ctr57;
+			}
+			case 117:
+			{
+				goto ctr57;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr65;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr14:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st34;
+		st34:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof34;
+		
+		st_case_34:
+		if ( ((*( p  ))
+		)== 58  )
+		{
+			goto ctr66;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr15:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st35;
+		st35:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof35;
+		
+		st_case_35:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr67;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr16:
+		{
+			ts=p;
+		}
+		{
+			tok = TK_Id;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st36;
+		ctr68:
+		{
+			tok = TK_Id;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st36;
+		st36:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof36;
+		
+		st_case_36:
+		if ( ((*( p  ))
+		)== 95  )
+		{
+			goto ctr68;
+		}
+		
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr68;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto ctr68;
+			}
+			
+		} 
+		else
+		{
+			goto ctr68;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr17:
+		{
+			ts=p;
+		}
+		{
+			tok = TK_Id;
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st37;
+		st37:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof37;
+		
+		st_case_37:
+		switch ( ((*( p  ))
+		) ) {
+			case 34:
+			{
+				goto st2;
+			}
+			case 39:
+			{
+				goto st4;
+			}
+			case 95:
+			{
+				goto ctr68;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto ctr68;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto ctr68;
+			}
+			
+		} 
+		else
+		{
+			goto ctr68;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr18:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st38;
+		st38:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof38;
+		
+		st_case_38:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr69;
+		}
+		
+		{
+			goto ctr21;
+		}
+		ctr19:
+		{
+			ts=p;
+		}
+		{
+			tok = (((*( p  ))
+			));
+		}
+		{
+			te=p;
+		}
+		
+		
+		goto st39;
+		st39:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof39;
+		
+		st_case_39:
+		switch ( ((*( p  ))
+		) ) {
+			case 61:
+			{
+				goto ctr70;
+			}
+			case 124:
+			{
+				goto ctr71;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		st_out:
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof14: cs = 14;
+		goto _test_eof; 
+		_test_eof15: cs = 15;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof16: cs = 16;
+		goto _test_eof; 
+		_test_eof17: cs = 17;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof18: cs = 18;
+		goto _test_eof; 
+		_test_eof19: cs = 19;
+		goto _test_eof; 
+		_test_eof20: cs = 20;
+		goto _test_eof; 
+		_test_eof21: cs = 21;
+		goto _test_eof; 
+		_test_eof22: cs = 22;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof23: cs = 23;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof24: cs = 24;
+		goto _test_eof; 
+		_test_eof25: cs = 25;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof26: cs = 26;
+		goto _test_eof; 
+		_test_eof27: cs = 27;
+		goto _test_eof; 
+		_test_eof28: cs = 28;
+		goto _test_eof; 
+		_test_eof29: cs = 29;
+		goto _test_eof; 
+		_test_eof30: cs = 30;
+		goto _test_eof; 
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		_test_eof31: cs = 31;
+		goto _test_eof; 
+		_test_eof32: cs = 32;
+		goto _test_eof; 
+		_test_eof33: cs = 33;
+		goto _test_eof; 
+		_test_eof34: cs = 34;
+		goto _test_eof; 
+		_test_eof35: cs = 35;
+		goto _test_eof; 
+		_test_eof36: cs = 36;
+		goto _test_eof; 
+		_test_eof37: cs = 37;
+		goto _test_eof; 
+		_test_eof38: cs = 38;
+		goto _test_eof; 
+		_test_eof39: cs = 39;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+				case 9:
+				case 10:
+				case 11:
+				case 12:
+				{
+					if ( tok != 0 ) {
+						const char *rst_data;
+						
+						if ( tok == TK_Comment || tok == TK_Whitespace ) {
+							/* Reset comment status, don't send. */
+							discard = false;
+							
+							/* Restart right at the error point if consuming whitespace or
+							* a comment. Consume may have spanned multiple buffers. */
+							rst_data = p;
+						}
+						else {
+							/* Send the token. */
+							token( ts, te - ts + 1 );
+							
+							/* Restart right after the token. */
+							rst_data = te+1;
+						}
+						
+						ts = 0;
+						{
+							p = ((rst_data))-1;
+							
+						}
+						
+						
+						{
+							goto st1;
+						}
+					}
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+int Scanner::finish( )
+{
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+
+void token( const char *data, int len )
+{
+	cout << "<" << tok << "> ";
+	for ( int i = 0; i < len; i++ )
+	cout << data[i];
+	cout << '\n';
+}
+
+void test( const char * data )
+{
+	Scanner scanner;
+	scanner.init();
+	scanner.execute( data, strlen(data) );
+	scanner.finish();
+	if ( tok != 0 && tok != TK_Comment && tok != TK_Whitespace )
+	token( ts, te - ts + 1 );
+}
+
+int main()
+{
+	test(
+	"/*\n"
+	" *  Copyright \n"
+	" */\n"
+	"\n"
+	"\n"
+	"/* Move ranges to the singles list. */\n"
+	"void RedFsmAp::move( RedStateAp *state )\n"
+	"{\n"
+	"	RedTranst &range = state->outRange;\n"
+	"	for ( int rpos = 0; rpos < range.length(); ) {\n"
+	"		if ( can( range, rpos ) ) {\n"
+	"			while ( range[rpos].value != range[rpos+1].value ) {\n"
+	"				single.append( range[rpos+1] );\n"
+	"			}\n"
+	"			\n"
+	"			range[rpos].highKey = range[rpos+1].highKey;\n"
+	"		}\n"
+	"		else if ( keyOps->span( range[rpos].lowKey, range[rpos].highKey ) == 1 ) {\n"
+	"			single.append( range[rpos] );\n"
+	"		}\n"
+	"	}\n"
+	"}\n"
+	"\n" );
+	
+	test( 
+	"->*\n"
+	".*\n"
+	"/*\"*/\n"
+	"\"/*\"\n"
+	"L'\"'\n"
+	"L\"'\"\n"
+	"...\n" );
+}
+

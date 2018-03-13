@@ -1,0 +1,210 @@
+host( "working/conderr2.rl", 1 ) @{/* 
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	
+	
+	
+}@
+array s8 _foo_key_offsets( 0, 5 ) = { 0, 0, 2, 4, 5, 0 };
+
+array char _foo_trans_keys( 0, 120 ) = { 32, 59, 32, 59, 120, 0 };
+
+array s8 _foo_single_lengths( 0, 2 ) = { 0, 2, 2, 1, 0, 0 };
+
+array s8 _foo_range_lengths( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_index_offsets( 0, 8 ) = { 0, 0, 3, 6, 8, 0 };
+
+array s8 _foo_trans_cond_spaces( -1, 0 ) = { -1, 0, -1, -1, 0, -1, -1, -1, -1, 0 };
+
+array s8 _foo_trans_offsets( 0, 9 ) = { 0, 1, 2, 3, 4, 6, 7, 8, 9, 0 };
+
+array s8 _foo_trans_lengths( 0, 2 ) = { 1, 1, 1, 1, 2, 1, 1, 1, 1, 0 };
+
+array s8 _foo_cond_keys( 0, 1 ) = { 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
+
+array s8 _foo_cond_targs( 0, 4 ) = { 2, 2, 0, 2, 0, 2, 3, 4, 0, 0, 0 };
+
+array s8 _foo_cond_actions( 0, 2 ) = { 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0 };
+
+array s8 _foo_eof_actions( 0, 2 ) = { 0, 0, 1, 2, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 4;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/conderr2.rl", 20 ) @{
+	
+	int main()
+	{
+		char buffer[] = " ;";
+		
+		char *p = buffer;
+		char *pe = buffer + sizeof(buffer);
+		char *eof = pe;
+		int  cs = foo_start;
+		
+	}@
+	{
+		int _klen;
+		index char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans = 0;
+		uint _cond = 0;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume { 
+				_keys = offset( _foo_trans_keys, _foo_key_offsets[cs] );
+				_trans = cast(uint)_foo_index_offsets[cs];
+				
+				_klen = cast(int)_foo_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _foo_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _foo_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_foo_range_lengths[cs];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( deref( data, p )) < deref( _foo_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( ( deref( data, p )) > deref( _foo_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _foo_cond_keys, _foo_trans_offsets[_trans] );
+				_klen = cast(int)_foo_trans_lengths[_trans];
+				_cond = cast(uint)_foo_trans_offsets[_trans];
+				
+				_cpc = 0;
+				switch ( _foo_trans_cond_spaces[_trans] ) {
+					
+					case 0 {
+						if ( host( "working/conderr2.rl", 10 ) ={ 0 }= ) _cpc += 1;
+					}
+				}
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _foo_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _foo_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					cs = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				cs = cast(int)_foo_cond_targs[_cond];
+				
+				if ( _foo_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				switch ( _foo_cond_actions[_cond] ) {
+					case 1 {
+						host( "working/conderr2.rl", 13 ) ${ printf("A\n"); }$
+					}
+					case 2 {
+						host( "working/conderr2.rl", 14 ) ${ printf("B\n"); }$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					switch ( _foo_eof_actions[cs] ) {
+						case 1 {
+							host( "working/conderr2.rl", 13 ) ${ printf("A\n"); }$
+						}
+						case 2 {
+							host( "working/conderr2.rl", 14 ) ${ printf("B\n"); }$
+						}
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/conderr2.rl", 31 ) @{
+		
+		return 0;
+	} 
+	
+}@

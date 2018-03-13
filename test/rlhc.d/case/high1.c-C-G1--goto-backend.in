@@ -1,0 +1,331 @@
+host( "working/high1.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@PROHIBIT_GENFLAGS: -F0 -F1
+	*/
+	
+	/**
+	* Test a high character to make sure signedness 
+	* isn't messing us up.
+	*/
+	
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	
+	struct high
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _high_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _high_nfa_offsets( 0, 0 ) = { 0, 0 };
+
+array s8 _high_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _high_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int high_start = 0;
+value int high_first_final = 0;
+value int high_error = -1;
+
+value int high_en_main = 0;
+
+host( "working/high1.rl", 36 ) @{
+	
+	void high_init( struct high *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)high_start;
+	}
+	host( "working/high1.rl", 40 ) @{
+	}
+	
+	void high_execute( struct high *fsm, const unsigned int *_data, int _len )
+	{
+		const unsigned int *p = _data;
+		const unsigned int *pe = _data+_len;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		_resume:
+		switch ( host( "-", 1 ) ={ fsm->cs}= ) {
+			case 0:
+			if ( ( deref( data, p )) == u(4026531840) ) {
+				goto ctr3;
+			}
+			if ( ( deref( data, p )) < u(32) ) {
+				{
+					goto ctr0;
+				}
+			} else if ( ( deref( data, p )) > u(511) ) {
+				if ( ( deref( data, p )) > u(4261412864) ) {
+					{
+						goto ctr0;
+					}
+				} else if ( ( deref( data, p )) >= u(4026531841) ) {
+					goto ctr4;
+				}
+			} else {
+				goto ctr1;
+			}
+			{
+				goto ctr2;
+			}
+		}
+		
+		ctr0: host( "-", 1 ) ={ fsm->cs}= = 0; goto f0;
+		ctr1: host( "-", 1 ) ={ fsm->cs}= = 0; goto f1;
+		ctr2: host( "-", 1 ) ={ fsm->cs}= = 0; goto f2;
+		ctr3: host( "-", 1 ) ={ fsm->cs}= = 0; goto f3;
+		ctr4: host( "-", 1 ) ={ fsm->cs}= = 0; goto f4;
+		
+		f1:
+		host( "working/high1.rl", 28 ) ${printf("gothigh1\n");}$
+		goto _again;
+		f4:
+		host( "working/high1.rl", 30 ) ${printf("gothigh2\n");}$
+		goto _again;
+		f0:
+		host( "working/high1.rl", 31 ) ${printf("else\n");}$
+		goto _again;
+		f2:
+		host( "working/high1.rl", 28 ) ${printf("gothigh1\n");}$	host( "working/high1.rl", 30 ) ${printf("gothigh2\n");}$
+		goto _again;
+		f3:
+		host( "working/high1.rl", 29 ) ${printf("gothigh1\n");}$	host( "working/high1.rl", 30 ) ${printf("gothigh2\n");}$
+		goto _again;
+		
+		_again:
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+	}
+	host( "working/high1.rl", 48 ) @{
+	}
+	
+	int high_finish( struct high *fsm )
+	{
+		if ( fsm->cs == high_error )
+		return -1;
+		if ( fsm->cs >= high_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct high high;
+	
+	#define BUFSIZE 1024
+	char cbuf[BUFSIZE];
+	unsigned int buf[BUFSIZE];
+	int buflen = 0;
+	char numbuf[9];
+	int numlen = 0;
+	
+	struct tokenizer
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _tokenizer_eof_actions( 0, 3 ) = { 0, 1, 3, 0 };
+
+array s8 _tokenizer_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _tokenizer_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _tokenizer_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _tokenizer_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int tokenizer_start = 1;
+value int tokenizer_first_final = 1;
+value int tokenizer_error = 0;
+
+value int tokenizer_en_main = 1;
+
+host( "working/high1.rl", 110 ) @{
+	
+	void tokenizer_init( struct tokenizer *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)tokenizer_start;
+	}
+	host( "working/high1.rl", 114 ) @{
+	}
+	
+	void tokenizer_execute( struct tokenizer *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		const char *eof = pe;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		_resume:
+		switch ( host( "-", 1 ) ={ fsm->cs}= ) {
+			case 1:
+			if ( ( deref( data, p )) == 32 ) {
+				goto ctr0;
+			}
+			if ( ( deref( data, p )) < 48 ) {
+				if ( 9 <= ( deref( data, p )) && ( deref( data, p )) <= 13 ) {
+					goto ctr0;
+				}
+			} else if ( ( deref( data, p )) > 57 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+					goto ctr2;
+				}
+			} else {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 32 ) {
+				goto ctr3;
+			}
+			if ( ( deref( data, p )) < 48 ) {
+				if ( 9 <= ( deref( data, p )) && ( deref( data, p )) <= 13 ) {
+					goto ctr3;
+				}
+			} else if ( ( deref( data, p )) > 57 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+					goto ctr2;
+				}
+			} else {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: host( "-", 1 ) ={ fsm->cs}= = 0; goto _again;
+		ctr0: host( "-", 1 ) ={ fsm->cs}= = 1; goto _again;
+		ctr3: host( "-", 1 ) ={ fsm->cs}= = 1; goto f3;
+		ctr2: host( "-", 1 ) ={ fsm->cs}= = 2; goto f1;
+		
+		f1:
+		host( "working/high1.rl", 77 ) ${
+			if ( numlen < 8 )
+			numbuf[numlen++] = ={( deref( data, p ))}=;
+		}$
+		goto _again;
+		f3:
+		host( "working/high1.rl", 82 ) ${
+			/* Null terminate the buffer storing the number and reset. */
+			numbuf[numlen] = 0;
+			numlen = 0;
+			
+			/* Store the number in the buf. If the buf is full then 
+			* flush and reset the buffer. */
+			buf[buflen++] = strtoul( numbuf, 0, 16 );
+			if ( buflen == BUFSIZE ) {
+				high_execute( &high, buf, BUFSIZE );
+				buflen = 0;
+			}
+		}$
+		goto _again;
+		
+		_again:
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( _tokenizer_eof_actions[host( "-", 1 ) ={ fsm->cs}=] ) {
+				case 1{
+					host( "working/high1.rl", 96 ) ${
+						if ( buflen > 0 )
+						high_execute( &high, buf, buflen );
+						if ( high_finish( &high ) > 0 )
+						printf("ACCEPT\n");
+						else
+						printf("FAIL\n");
+					}$
+				}
+				case 3{
+					host( "working/high1.rl", 82 ) ${
+						/* Null terminate the buffer storing the number and reset. */
+						numbuf[numlen] = 0;
+						numlen = 0;
+						
+						/* Store the number in the buf. If the buf is full then 
+						* flush and reset the buffer. */
+						buf[buflen++] = strtoul( numbuf, 0, 16 );
+						if ( buflen == BUFSIZE ) {
+							high_execute( &high, buf, BUFSIZE );
+							buflen = 0;
+						}
+					}$	host( "working/high1.rl", 96 ) ${
+						if ( buflen > 0 )
+						high_execute( &high, buf, buflen );
+						if ( high_finish( &high ) > 0 )
+						printf("ACCEPT\n");
+						else
+						printf("FAIL\n");
+					}$
+				}
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/high1.rl", 123 ) @{
+	}
+	
+	int tokenizer_finish( struct tokenizer *fsm )
+	{
+		if ( fsm->cs == tokenizer_error )
+		return -1;
+		if ( fsm->cs >= tokenizer_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct tokenizer tok;
+	
+	void test( char *cbuf )
+	{
+		int len = strlen( cbuf );
+		high_init( &high );
+		tokenizer_init( &tok );
+		tokenizer_execute( &tok, cbuf, len );
+		if ( tokenizer_finish( &tok ) <= 0 )
+		printf("Tokenizer FAIL\n");
+	}
+	
+	char data[] =
+	"10 20 30 40 50 200 300 400 \n"
+	"d0000000 f0000000 fd000000 fe000000\n"
+	"ff000000 ffffffffffffffffffffffffff\n"
+	"ff\n";
+	
+	int main()
+	{
+		test( data );
+		return 0;
+	}
+	
+}@

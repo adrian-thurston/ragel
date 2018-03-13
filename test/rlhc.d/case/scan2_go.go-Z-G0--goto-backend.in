@@ -1,0 +1,211 @@
+host( "working/scan2_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var ts  int ;
+	var te  int ;
+	var act  int ;
+	var token  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _scanner_actions( 0, 7 ) = { 0, 1, 0, 1, 1, 1, 5, 1, 6, 1, 7, 2, 2, 3, 2, 2, 4, 0 };
+
+array s8 _scanner_to_state_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array s8 _scanner_from_state_actions( 0, 3 ) = { 0, 3, 0, 0 };
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int scanner_start = 1;
+value int scanner_first_final = 1;
+value int scanner_error = -1;
+
+value int scanner_en_main = 1;
+
+host( "working/scan2_go.rl", 34 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/scan2_go.rl", 37 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		_resume:
+		_acts = offset( _scanner_actions, _scanner_from_state_actions[cs] );
+		_nacts = cast(uint)deref( _scanner_actions, _acts ); _acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _scanner_actions, _acts ) ) {
+				case 1{
+					host( "NONE", 1 ) ${${ts = p;}$}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 97: {
+					goto ctr5;
+				}
+				case 98: {
+					goto ctr6;
+				}
+			}
+			{
+				goto ctr4;
+			}
+			case 2:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr3;
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 98 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr7;
+			}
+			case 0:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr3;
+			}
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 98 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr7;
+			}
+		}
+		
+		ctr2: cs = 0; goto _again;
+		ctr7: cs = 1; goto f0;
+		ctr3: cs = 1; goto f1;
+		ctr4: cs = 1; goto f4;
+		ctr5: cs = 2; goto f5;
+		ctr6: cs = 2; goto f6;
+		
+		f1: _acts = offset( _scanner_actions, 5 ); goto execFuncs;
+		f4: _acts = offset( _scanner_actions, 7 ); goto execFuncs;
+		f0: _acts = offset( _scanner_actions, 9 ); goto execFuncs;
+		f5: _acts = offset( _scanner_actions, 11 ); goto execFuncs;
+		f6: _acts = offset( _scanner_actions, 14 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _scanner_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _scanner_actions, _acts ) ) {
+				case 2{
+					host( "NONE", 1 ) ${${te = p+1;}$}$
+				}
+				case 3{
+					host( "working/scan2_go.rl", 20 ) ${${act = 1;}$}$
+				}
+				case 4{
+					host( "working/scan2_go.rl", 24 ) ${${act = 3;}$}$
+				}
+				case 5{
+					host( "working/scan2_go.rl", 22 ) ${${te = p+1;host( "working/scan2_go.rl", 22 ) ${fmt.Print( "pat2\n" );}$}$}$
+				}
+				case 6{
+					host( "working/scan2_go.rl", 24 ) ${${te = p+1;host( "working/scan2_go.rl", 24 ) ${fmt.Print( "any\n" );}$}$}$
+				}
+				case 7{
+					host( "NONE", 1 ) ${${switch( act ) {
+								case 1 {
+									p = ((te))-1;
+									host( "working/scan2_go.rl", 20 ) ${fmt.Print( "pat1\n" );}$ }
+								case 3 {
+									p = ((te))-1;
+									host( "working/scan2_go.rl", 24 ) ${fmt.Print( "any\n" );}$ }
+							}}$
+					}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		_acts = offset( _scanner_actions, _scanner_to_state_actions[cs] );
+		_nacts = cast(uint)deref( _scanner_actions, _acts ); _acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _scanner_actions, _acts ) ) {
+				case 0{
+					host( "NONE", 1 ) ${${ts = nil;}$}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( cs ) {
+				case 2: goto ctr7;
+				case 0: goto ctr7;
+			}
+		}
+		
+	}
+	host( "working/scan2_go.rl", 44 ) @{
+	}
+	func finish() {
+		if cs >= scanner_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"a",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

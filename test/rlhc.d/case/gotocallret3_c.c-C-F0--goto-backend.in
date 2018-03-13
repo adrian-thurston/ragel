@@ -1,0 +1,239 @@
+host( "working/gotocallret3_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char comm ;
+	int top ;
+	int stack [32];
+	
+	
+	
+	
+	
+}@
+array s8 _gotocallret_actions( 0, 8 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 5, 1, 7, 1, 8, 2, 0, 1, 2, 4, 6, 0 };
+
+array char _gotocallret_trans_keys( 0, 5 ) = { 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 5, 3, 3, 3, 5, 1, 0, 4, 5, 3, 3, 0 };
+
+array s8 _gotocallret_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0 };
+
+array s8 _gotocallret_index_offsets( 0, 12 ) = { 0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0 };
+
+array s8 _gotocallret_indicies( 0, 10 ) = { 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 };
+
+array s8 _gotocallret_index_defaults( 0, 11 ) = { 0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0 };
+
+array s8 _gotocallret_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _gotocallret_cond_targs( 0, 10 ) = { 0, 2, 7, 4, 8, 4, 8, 0, 9, 10, 1, 0, 0 };
+
+array s8 _gotocallret_cond_actions( 0, 18 ) = { 13, 18, 11, 1, 15, 0, 3, 7, 0, 0, 9, 0, 0 };
+
+array s8 _gotocallret_eof_actions( 0, 13 ) = { 0, 13, 13, 5, 5, 7, 7, 0, 5, 0, 0, 0 };
+
+array s8 _gotocallret_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _gotocallret_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _gotocallret_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _gotocallret_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int gotocallret_start = 7;
+value int gotocallret_first_final = 7;
+value int gotocallret_error = 0;
+
+value int gotocallret_en_garble_line = 3;
+value int gotocallret_en_alp_comm = 5;
+value int gotocallret_en_dig_comm = 6;
+value int gotocallret_en_main = 7;
+
+host( "working/gotocallret3_c.rl", 66 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)gotocallret_start;
+		top = 0;
+	}
+	host( "working/gotocallret3_c.rl", 73 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		char *eof = pe;
+	}@
+	{
+		int _trans = 0;
+		index s8 _acts;
+		uint _nacts;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _gotocallret_trans_keys, (cs<<1) );
+				_inds = offset( _gotocallret_indicies, _gotocallret_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_gotocallret_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _gotocallret_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _gotocallret_trans_keys, _keys ) )
+					_trans = cast(int)deref( _gotocallret_indicies, _inds + cast(int)( _ic - cast(int)deref( _gotocallret_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_gotocallret_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_gotocallret_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_gotocallret_cond_targs[_trans];
+				
+				if ( _gotocallret_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				_acts = offset( _gotocallret_actions, _gotocallret_cond_actions[_trans] );
+				_nacts = cast(uint)deref( _gotocallret_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _gotocallret_actions, _acts ) )
+					{
+						case 0 {
+							host( "working/gotocallret3_c.rl", 20 ) ${printf( "%s", "error: garbling line\n" );
+							}$
+						}
+						case 1 {
+							host( "working/gotocallret3_c.rl", 22 ) ${${cs = 7;}$}$
+						}
+						case 3 {
+							host( "working/gotocallret3_c.rl", 33 ) ${${p = p - 1; }$${top -= 1;cs = stack[top];}$}$
+						}
+						case 4 {
+							host( "working/gotocallret3_c.rl", 41 ) ${if ( comm >= 97 )
+								{
+									${stack[top] = cs; top += 1;cs = 5; }$} 
+								else {
+									${stack[top] = cs; top += 1;cs = 6; }$}
+							}$
+						}
+						case 5 {
+							host( "working/gotocallret3_c.rl", 52 ) ${comm = ={( deref( data, p ))}=;
+							}$
+						}
+						case 6 {
+							host( "working/gotocallret3_c.rl", 53 ) ${printf( "%s", "prints\n" );
+							}$
+						}
+						case 7 {
+							host( "working/gotocallret3_c.rl", 55 ) ${printf( "%s", "correct command\n" );
+							}$
+						}
+						case 8 {
+							host( "working/gotocallret3_c.rl", 60 ) ${${p = p - 1; }$${cs = 3;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					index s8 __acts;
+					uint __nacts;
+					__acts = offset( _gotocallret_actions, _gotocallret_eof_actions[cs] );
+					__nacts = cast(uint)deref( _gotocallret_actions, __acts ); __acts += 1;
+					while ( __nacts > 0 ) {
+						switch ( deref( _gotocallret_actions, __acts ) ) {
+							case 2 {
+								host( "working/gotocallret3_c.rl", 23 ) ${printf( "%s", "error: failed to recover\n" );
+								}$
+							}
+							case 3 {
+								host( "working/gotocallret3_c.rl", 33 ) ${${p = p - 1; }$${top -= 1;cs = stack[top];}$}$
+							}
+							case 8 {
+								host( "working/gotocallret3_c.rl", 60 ) ${${p = p - 1; }$${cs = 3;}$}$
+							}
+						}
+						__nacts -= 1;
+						__acts += 1;
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/gotocallret3_c.rl", 81 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= gotocallret_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"lkajsdf\n",
+		"2134\n",
+		"(\n",
+		"\n",
+		"*234234()0909 092 -234aslkf09`1 11\n",
+		"1\n",
+		"909\n",
+		"1 a\n",
+		"11 1\n",
+		"a 1\n",
+		"aa a\n",
+		"1 1\n",
+		"1 123456\n",
+		"a a\n",
+		"a abcdef\n",
+		"h",
+		"a aa1",
+	};
+	
+	int inplen = 17;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

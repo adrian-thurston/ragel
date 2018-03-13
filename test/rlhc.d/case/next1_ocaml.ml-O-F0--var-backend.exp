@@ -1,0 +1,246 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let target = ref 0
+
+
+
+
+
+
+let _next1_actions : int array = [|
+0; 1; 0; 1; 1; 1; 2; 1; 3; 0 ; 
+|]
+let _next1_trans_keys : int array = [|
+1; 0; 0; 3; 10; 10; 6; 6; 10; 10; 8; 8; 5; 5; 4; 4; 7; 7; 6; 6; 5; 5; 9; 9; 11; 11; 7; 7; 1; 0; 1; 0; 1; 0; 1; 0; 0 ; 
+|]
+let _next1_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 3; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 4; 5; 1; 1; 1; 1; 1; 1; 1; 1; 6; 7; 1; 1; 1; 8; 9; 10; 1; 11; 0 ; 
+|]
+let _next1_index_offsets : int array = [|
+0; 0; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 16; 16; 16; 0 ; 
+|]
+let _next1_indicies : int array = [|
+0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 0 ; 
+|]
+let _next1_index_defaults : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0 ; 
+|]
+let _next1_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _next1_cond_targs : int array = [|
+14; 0; 14; 14; 3; 4; 5; 6; 7; 15; 9; 10; 16; 12; 13; 17; 0 ; 
+|]
+let _next1_cond_actions : int array = [|
+0; 0; 5; 7; 0; 0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 3; 0 ; 
+|]
+let _next1_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _next1_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _next1_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _next1_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let next1_start  : int  = 1
+let next1_first_final  : int  = 14
+let next1_error  : int  = 0
+let next1_en_unused  : int  = 2
+let next1_en_one  : int  = 8
+let next1_en_two  : int  = 11
+let next1_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := next1_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _acts : int ref = ref 0 in
+	let _nacts : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _next1_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 119 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _next1_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _next1_trans_keys.( _keys.contents+1  )&& _ic.contents>= _next1_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _next1_indicies.( _inds.contents+ ( _ic.contents- _next1_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _next1_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _next1_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _next1_cond_targs.(_trans.contents);
+						if _next1_cond_actions.(_trans.contents)!= 0  then
+						begin
+							begin
+								_acts  := _next1_cond_actions.(_trans.contents);
+								_nacts  := _next1_actions.( _acts.contents );
+								_acts  := _acts.contents + 1;
+								while _nacts.contents> 0  do
+								begin
+									if _next1_actions.( _acts.contents ) = 0  then
+									begin
+										begin
+											print_string( "one\n" );
+											target := 1;
+											begin
+												cs  := (target.contents);
+												
+											end;
+											
+											
+										end;
+										
+									end
+									else if _next1_actions.( _acts.contents ) = 1  then
+									begin
+										begin
+											print_string( "two\n" );
+											target := 1;
+											begin
+												cs  := (target.contents);
+												
+											end;
+											
+											
+										end;
+										
+									end
+									else if _next1_actions.( _acts.contents ) = 2  then
+									begin
+										begin
+											target := 8;
+											begin
+												cs  := (target.contents);
+												
+											end;
+											
+											
+										end;
+										
+									end
+									else if _next1_actions.( _acts.contents ) = 3  then
+									begin
+										begin
+											target := 11;
+											begin
+												cs  := (target.contents);
+												
+											end;
+											
+											
+										end;
+										
+									end
+									;
+									_nacts  := _nacts.contents - 1;
+									_acts  := _acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= next1_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "1one2two1one\n";
+()
+;;
+

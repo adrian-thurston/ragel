@@ -1,0 +1,231 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+
+
+static const int  include_test_1_start  = 1;
+static const int  include_test_1_first_final  = 8;
+static const int  include_test_1_error  = 0;
+static const int  include_test_1_en_main  = 1;
+static const char  _include_test_1_nfa_targs [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _include_test_1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_pop_trans [] = { 0, 0 ,  };
+void test( char *p )
+{
+	int cs;
+	
+	{
+		cs = ( int ) include_test_1_start;
+	}
+	
+	{
+		int _nbreak;
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			
+		}
+		goto st_out;
+		st_case_1:
+		if ( ((*( p  ))
+		)== 97  )
+		{
+			goto ctr0;
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr0:
+		_nbreak = 0;
+		{
+			printf(" a1");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st2;
+		st2:
+		p += 1;
+		st_case_2:
+		if ( ((*( p  ))
+		)== 98  )
+		{
+			goto ctr2;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr2:
+		_nbreak = 0;
+		{
+			printf(" b1");
+		}
+		{
+			printf(" nr1");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st3;
+		st3:
+		p += 1;
+		st_case_3:
+		if ( ((*( p  ))
+		)== 97  )
+		{
+			goto ctr3;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr3:
+		_nbreak = 0;
+		{
+			printf(" a2");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st4;
+		st4:
+		p += 1;
+		st_case_4:
+		if ( ((*( p  ))
+		)== 98  )
+		{
+			goto ctr4;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr4:
+		_nbreak = 0;
+		{
+			printf(" b2");
+		}
+		{
+			printf(" nr2");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st5;
+		st5:
+		p += 1;
+		st_case_5:
+		if ( ((*( p  ))
+		)== 97  )
+		{
+			goto ctr5;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr5:
+		_nbreak = 0;
+		{
+			printf(" a3");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st6;
+		st6:
+		p += 1;
+		st_case_6:
+		if ( ((*( p  ))
+		)== 98  )
+		{
+			goto ctr6;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr6:
+		_nbreak = 0;
+		{
+			printf(" b3");
+		}
+		{
+			printf(" nr3");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st7;
+		st7:
+		p += 1;
+		st_case_7:
+		if ( ((*( p  ))
+		)== 0  )
+		{
+			goto ctr7;
+		}
+		
+		{
+			goto st0;
+		}
+		ctr7:
+		_nbreak = 0;
+		{
+			{p+= 1; cs = 8; _nbreak = 1;}
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto st8;
+		st8:
+		p += 1;
+		st_case_8:
+		{
+			goto st0;
+		}
+		st_out:
+		
+		_out: {}
+	}
+	printf("\n");
+}
+
+int main()
+{
+	test( "ababab" );
+	return 0;
+}
+

@@ -1,0 +1,232 @@
+static _zlen1_key_offsets: [i8 ; 4] = [ 0, 0, 0 , 0 ];
+static _zlen1_trans_keys: [u8 ; 2] = [ 0 , 0 ];
+static _zlen1_single_lengths: [i8 ; 4] = [ 0, 0, 0 , 0 ];
+static _zlen1_range_lengths: [i8 ; 4] = [ 0, 0, 0 , 0 ];
+static _zlen1_index_offsets: [i8 ; 4] = [ 0, 0, 0 , 0 ];
+static _zlen1_trans_cond_spaces: [i8 ; 3] = [ -1, 0 , 0 ];
+static _zlen1_trans_offsets: [i8 ; 3] = [ 0, 0 , 0 ];
+static _zlen1_trans_lengths: [i8 ; 3] = [ 1, 0 , 0 ];
+static _zlen1_cond_keys: [i8 ; 3] = [ 0, 0 , 0 ];
+static _zlen1_cond_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _zlen1_cond_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _zlen1_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _zlen1_nfa_offsets: [i8 ; 4] = [ 0, 0, 0 , 0 ];
+static _zlen1_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _zlen1_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static zlen1_start : i32 = 1;
+static zlen1_first_final : i32 = 1;
+static zlen1_error : i32 = 0;
+static zlen1_en_main : i32 = 1;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( zlen1_start ) as i32;
+	}
+	
+	{
+		let mut _klen = 0;
+		let mut _keys :i32 = 0;
+		let mut _ckeys :i32 = 0;
+		let mut _cpc = 0;
+		let mut _trans = 0;
+		let mut _cond  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  ) {
+				_cont = 0;
+				
+			}
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							_keys = ( _zlen1_key_offsets[(cs) as usize] ) as i32;
+							_trans = ( _zlen1_index_offsets[(cs) as usize] ) as u32;
+							_have = 0;
+							_klen = ( _zlen1_single_lengths[(cs) as usize] ) as i32;
+							if ( _klen > 0  ) {
+								{
+									let mut _lower :i32 = 0;
+									let mut _mid :i32 = 0;
+									let mut _upper :i32 = 0;
+									_lower = _keys;
+									_upper = _keys + _klen - 1;
+									while ( _upper >= _lower && _have == 0  )
+									{
+										_mid = _lower + ((_upper-_lower) >> 1);
+										if ( ( data[(p ) as usize]
+										) < _zlen1_trans_keys[(_mid ) as usize]
+										) {
+											_upper = _mid - 1;
+											
+										}
+										else if ( ( data[(p ) as usize]
+										) > _zlen1_trans_keys[(_mid ) as usize]
+										) {
+											_lower = _mid + 1;
+											
+										}
+										else {
+											{
+												_trans += ( (_mid - _keys) ) as u32;
+												_have = 1;
+											}
+											
+										}
+									}
+									
+									if ( _have == 0  ) {
+										{
+											_keys += _klen;
+											_trans += ( _klen ) as u32;
+										}
+										
+									}
+								}
+								
+								
+							}
+							if ( _have == 0  ) {
+								{
+									_klen = ( _zlen1_range_lengths[(cs) as usize] ) as i32;
+									if ( _klen > 0  ) {
+										{
+											let mut _lower :i32 = 0;
+											let mut _mid :i32 = 0;
+											let mut _upper :i32 = 0;
+											_lower = _keys;
+											_upper = _keys + (_klen<<1) - 2;
+											while ( _have == 0 && _lower <= _upper  )
+											{
+												_mid = _lower + (((_upper-_lower) >> 1) & !1
+												);
+												if ( ( data[(p ) as usize]
+												) < _zlen1_trans_keys[(_mid ) as usize]
+												) {
+													_upper = _mid - 2;
+													
+												}
+												else if ( ( data[(p ) as usize]
+												) > _zlen1_trans_keys[(_mid + 1 ) as usize]
+												) {
+													_lower = _mid + 2;
+													
+												}
+												else {
+													{
+														_trans += ( ((_mid - _keys)>>1) ) as u32;
+														_have = 1;
+													}
+													
+												}
+											}
+											
+											if ( _have == 0  ) {
+												_trans += ( _klen ) as u32;
+												
+											}
+										}
+										
+									}
+								}
+								
+								
+							}
+							_ckeys = ( _zlen1_trans_offsets[(_trans) as usize] ) as i32;
+							_klen = ( _zlen1_trans_lengths[(_trans) as usize] ) as i32;
+							_cond = ( _zlen1_trans_offsets[(_trans) as usize] ) as u32;
+							_have = 0;
+							_cpc = 0;
+							{
+								let mut _lower :i32 = 0;
+								let mut _mid :i32 = 0;
+								let mut _upper :i32 = 0;
+								_lower = _ckeys;
+								_upper = _ckeys + _klen - 1;
+								while ( _have == 0 && _lower <= _upper  )
+								{
+									_mid = _lower + ((_upper-_lower) >> 1);
+									if ( _cpc < ( _zlen1_cond_keys[(_mid ) as usize]
+									) as i32 ) {
+										_upper = _mid - 1;
+										
+									}
+									else if ( _cpc > ( _zlen1_cond_keys[(_mid ) as usize]
+									) as i32 ) {
+										_lower = _mid + 1;
+										
+									}
+									else {
+										{
+											_cond += ( (_mid - _ckeys) ) as u32;
+											_have = 1;
+										}
+										
+									}
+								}
+								
+								if ( _have == 0  ) {
+									{
+										cs = 0;
+										_cont = 0;
+									}
+									
+								}
+							}
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _zlen1_cond_targs[(_cond) as usize] ) as i32;
+							if ( cs == 0  ) {
+								_cont = 0;
+								
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= zlen1_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "".to_string() ); }
+	unsafe { m( "x".to_string() ); }
+}
+

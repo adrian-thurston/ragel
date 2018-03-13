@@ -1,0 +1,313 @@
+#include <string.h>
+#include <stdio.h>
+
+int neg ;
+int value ;
+
+
+
+
+static const char  _atoi_key_offsets [] = { 0, 0, 4, 6, 9, 0 ,  };
+static const char  _atoi_trans_keys [] = { 43, 45, 48, 57, 48, 57, 10, 48, 57, 0 ,  };
+static const char  _atoi_single_lengths [] = { 0, 2, 0, 1, 0, 0 ,  };
+static const char  _atoi_range_lengths [] = { 0, 1, 1, 1, 0, 0 ,  };
+static const char  _atoi_index_offsets [] = { 0, 0, 4, 6, 9, 0 ,  };
+static const char  _atoi_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _atoi_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 ,  };
+static const char  _atoi_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _atoi_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _atoi_cond_targs [] = { 2, 2, 3, 0, 3, 0, 4, 3, 0, 0, 0 ,  };
+static const char  _atoi_cond_actions [] = { 3, 4, 5, 0, 6, 0, 7, 6, 0, 0, 0 ,  };
+static const char  _atoi_to_state_actions [] = { 0, 1, 1, 1, 1, 0 ,  };
+static const char  _atoi_from_state_actions [] = { 0, 2, 2, 2, 2, 0 ,  };
+static const char  _atoi_nfa_targs [] = { 0, 0 ,  };
+static const char  _atoi_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _atoi_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _atoi_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  atoi_start  = 1;
+static const int  atoi_first_final  = 4;
+static const int  atoi_error  = 0;
+static const int  atoi_en_main  = 1;
+int cs;
+
+void init()
+{
+	value = 0;
+	neg = 0;
+	
+	{
+		cs = ( int ) atoi_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		switch ( _atoi_from_state_actions[cs] ) {
+			case 2 :
+			{
+				printf( "from on %d\n", (int)*p );
+				
+			}
+			
+			break;
+			
+		}
+		_keys = _atoi_trans_keys + _atoi_key_offsets[cs];
+		_trans = ( unsigned int  ) _atoi_index_offsets[cs];
+		_klen = ( int ) _atoi_single_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_trans += ( unsigned int  ) (_mid - _keys);
+					goto _match;
+				}
+				
+			}
+			
+			_keys += _klen;
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		_klen = ( int ) _atoi_range_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + (_klen<<1)- 2;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 2;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid + 1  ))
+				)
+				_lower = _mid + 2;
+				
+				else
+				{
+					_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+					goto _match;
+				}
+				
+			}
+			
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		
+		_match :
+		_ckeys = _atoi_cond_keys + _atoi_trans_offsets[_trans];
+		_klen = ( int ) _atoi_trans_lengths[_trans];
+		_cond = ( unsigned int  ) _atoi_trans_offsets[_trans];
+		_cpc = 0;
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( _cpc < ( int ) (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( _cpc > ( int ) (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_cond += ( unsigned int  ) (_mid - _ckeys);
+					goto _match_cond;
+				}
+				
+			}
+			
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = ( int ) _atoi_cond_targs[_cond];
+		if ( _atoi_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		switch ( _atoi_cond_actions[_cond] ) {
+			case 3 :
+			{
+				neg = 0;
+				value = 0;
+				
+			}
+			
+			break;
+			case 6 :
+			{
+				value = value * 10 + ( int ) ( (((*( p  ))
+				)) - 48 )
+				;
+				
+			}
+			
+			break;
+			case 4 :
+			{
+				neg = 0;
+				value = 0;
+				
+			}
+			{
+				neg = 1;
+				
+			}
+			
+			break;
+			case 5 :
+			{
+				neg = 0;
+				value = 0;
+				
+			}
+			{
+				value = value * 10 + ( int ) ( (((*( p  ))
+				)) - 48 )
+				;
+				
+			}
+			
+			break;
+			case 7 :
+			{
+				if ( neg != 0 ) {
+					value = -1 * value;
+				} 
+				
+			}
+			{
+				printf( "%d", value );
+				printf( "%s", "\n" );
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch ( _atoi_to_state_actions[cs] ) {
+			case 1 :
+			{
+				printf( "to on %d\n", (int)*p );
+				
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs < atoi_first_final )
+	printf( "-> FAIL\n" );
+}
+
+char *inp[] = {
+	"1\n",
+	"12\n",
+	"222222\n",
+	"+2123\n",
+	"-99\n",
+	"-12321\n",
+	"213 3213\n",
+	"--123\n",
+	" -3000\n",
+};
+
+int inplen = 9;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

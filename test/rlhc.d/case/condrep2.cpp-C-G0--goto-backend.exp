@@ -1,0 +1,223 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+
+
+static const char  _foo_actions [] = { 0, 1, 1, 2, 2, 0, 0 ,  };
+static const char  _foo_from_state_actions [] = { 0, 1, 0, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 3;
+static const int  foo_en_main  = 1;
+void test( int min, int max, const char *str )
+{
+	int cs;
+	const char *p = str;
+	const char *pe = str + strlen( str ) + 1;
+	int c = 0, seen = 0;
+	
+	cout << "run " << str << " " << min << " " << max << ":";
+	
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		_acts = _foo_actions + _foo_from_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 1:
+				{
+					c = 0; 
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 46  )
+			{
+				int ck = 0;
+				if ( (({ c < max; }) ) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto ctr0;
+				}
+				
+				goto ctr1;
+				
+			}
+			
+			{
+				goto ctr2;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch ( ((*( p  ))
+			) ) {
+				case 0:
+				{
+					int ck = 0;
+					if ( (({ c >= min; }) ) )
+					ck += 1;
+					
+					if ( 1 <= ck  )
+					{		goto ctr3;
+					}
+					
+					goto ctr1;
+					
+				}
+				case 46:
+				{
+					int ck = 0;
+					if ( (({ c < max; }) ) )
+					ck += 1;
+					
+					if ( 1 <= ck  )
+					{		goto ctr0;
+					}
+					
+					goto ctr1;
+					
+				}
+				
+			}
+			{
+				goto ctr2;
+			}
+			case 3:
+			{
+				goto ctr2;
+			}
+			
+		}
+		ctr2: cs = 0;
+		goto _again;
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto f1;
+		ctr3: cs = 3;
+		goto _again;
+		
+		f1: _acts = _foo_actions + 3 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					seen += 1; 
+				}
+				
+				break;
+				case 2:
+				{
+					c += 1; 
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+	cout << " " << seen;
+	
+	if ( cs >= foo_first_final )
+	cout << " success" << endl;
+	else
+	cout << " failure" << endl;
+}
+
+int main()
+{
+	test( 0, 0, "" );
+	test( 0, 1, "" );
+	test( 1, 1, "" );
+	test( 1, 2, "" );
+	test( 2, 2, "" );
+	test( 2, 3, "" );
+	
+	test( 0, 0, "." );
+	test( 0, 1, "." );
+	test( 1, 1, "." );
+	test( 1, 2, "." );
+	test( 2, 2, "." );
+	test( 2, 3, "." );
+	
+	test( 0, 0, ".." );
+	test( 0, 1, ".." );
+	test( 1, 1, ".." );
+	test( 1, 2, ".." );
+	test( 2, 2, ".." );
+	test( 2, 3, ".." );
+	
+	test( 0, 0, "..." );
+	test( 0, 1, "..." );
+	test( 1, 1, "..." );
+	test( 1, 2, "..." );
+	test( 2, 2, "..." );
+	test( 2, 3, "..." );
+	
+	test( 0, 0, "...." );
+	test( 0, 1, "...." );
+	test( 1, 1, "...." );
+	test( 1, 2, "...." );
+	test( 2, 2, "...." );
+	test( 2, 3, "...." );
+	return 0;
+}
+

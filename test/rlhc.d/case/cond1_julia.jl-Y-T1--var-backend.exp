@@ -1,0 +1,296 @@
+const _foo_key_offsets = Int8[0, 0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 0 , ]
+const _foo_trans_keys = UInt8[48, 49, 48, 49, 48, 49, 97, 98, 97, 98, 97, 98, 99, 10, 99, 99, 99, 99, 99, 99, 0 , ]
+const _foo_single_lengths = Int8[0, 0, 0, 0, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 , ]
+const _foo_range_lengths = Int8[0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , ]
+const _foo_index_offsets = Int8[0, 0, 2, 4, 6, 9, 12, 15, 17, 19, 21, 23, 25, 27, 29, 31, 0 , ]
+const _foo_trans_cond_spaces = Int8[-1, -1, -1, -1, -1, -1, -1, 1, -1, -1, 5, -1, -1, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , ]
+const _foo_trans_offsets = Int8[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 17, 18, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 0 , ]
+const _foo_trans_lengths = Int8[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , ]
+const _foo_cond_keys = Int8[0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , ]
+const _foo_cond_targs = Int8[2, 0, 3, 0, 4, 0, 5, 7, 0, 6, 11, 7, 12, 9, 13, 10, 14, 0, 6, 7, 9, 10, 0, 8, 0, 15, 0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 0, 8, 0, 0, 0 , ]
+const _foo_cond_actions = Int8[1, 0, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 5, 0, 6, 0, 7, 0, 8, 0, 9, 0, 10, 0, 11, 0, 0, 0 , ]
+const _foo_nfa_targs = Int8[0, 0 , ]
+const _foo_nfa_offsets = Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , ]
+const _foo_nfa_push_actions = Int8[0, 0 , ]
+const _foo_nfa_pop_trans = Int8[0, 0 , ]
+const foo_start  = 1
+const foo_first_final  = 15
+const foo_error  = 0
+const foo_en_main  = 1
+function m( data::AbstractString )
+	p = 0
+	pe = length(data)
+	eof = length(data)
+	cs = 0
+	buffer = ""
+	i = 0;
+	j = 0;
+	k = 0;
+	
+	cs = convert(Int, foo_start )
+	_klen= 0
+	;
+	_keys = 0;
+	_ckeys = 0;
+	_cpc= 0
+	;
+	_trans= 0
+	;
+	_cond = 0;
+	_have = 0;
+	_cont = 1;
+	while _cont == 1 
+		if cs == 0 
+			_cont = 0
+			
+		end
+		_have = 0
+		if p == pe 
+			if _have == 0 
+				_cont = 0
+				
+			end
+			
+		end
+		if _cont == 1 
+			if _have == 0 
+				_keys = _foo_key_offsets[1+(cs)]
+				_trans = convert(UInt, _foo_index_offsets[1+(cs)] )
+				_have = 0
+				_klen = convert(Int, _foo_single_lengths[1+(cs)] )
+				if _klen > 0 
+					_lower = 0;
+					_mid = 0;
+					_upper = 0;
+					_lower = _keys
+					_upper = _keys + _klen - 1
+					while _upper >= _lower && _have == 0 
+						_mid = _lower + ((_upper-_lower)>> 1)
+						if (data[1+(p )])< _foo_trans_keys[1+(_mid )]
+							_upper = _mid - 1
+							
+						elseif (data[1+(p )])> _foo_trans_keys[1+(_mid )]
+							_lower = _mid + 1
+							
+						else
+							_trans += convert(UInt, (_mid - _keys) )
+							_have = 1
+							
+						end
+						
+					end
+					if _have == 0 
+						_keys += _klen
+						_trans += convert(UInt, _klen )
+						
+					end
+					
+				end
+				if _have == 0 
+					_klen = convert(Int, _foo_range_lengths[1+(cs)] )
+					if _klen > 0 
+						_lower = 0;
+						_mid = 0;
+						_upper = 0;
+						_lower = _keys
+						_upper = _keys + (_klen<<1)- 2
+						while _have == 0 && _lower <= _upper 
+							_mid = _lower + (((_upper-_lower)>> 1)& ~1)
+							if (data[1+(p )])< _foo_trans_keys[1+(_mid )]
+								_upper = _mid - 2
+								
+							elseif (data[1+(p )])> _foo_trans_keys[1+(_mid + 1 )]
+								_lower = _mid + 2
+								
+							else
+								_trans += convert(UInt, ((_mid - _keys)>>1) )
+								_have = 1
+								
+							end
+							
+						end
+						if _have == 0 
+							_trans += convert(UInt, _klen )
+							
+						end
+						
+					end
+					
+				end
+				_ckeys = _foo_trans_offsets[1+(_trans)]
+				_klen = convert(Int, _foo_trans_lengths[1+(_trans)] )
+				_cond = convert(UInt, _foo_trans_offsets[1+(_trans)] )
+				_have = 0
+				_cpc = 0
+				if _foo_trans_cond_spaces[1+(_trans)] == 0 
+					if (i != 0)
+						_cpc += 1
+						
+					end
+					
+				elseif _foo_trans_cond_spaces[1+(_trans)] == 1 
+					if (j != 0)
+						_cpc += 1
+						
+					end
+					
+				elseif _foo_trans_cond_spaces[1+(_trans)] == 2 
+					if (k != 0)
+						_cpc += 1
+						
+					end
+					
+				elseif _foo_trans_cond_spaces[1+(_trans)] == 3 
+					if (i != 0)
+						_cpc += 1
+						
+					end
+					if (j != 0)
+						_cpc += 2
+						
+					end
+					
+				elseif _foo_trans_cond_spaces[1+(_trans)] == 4 
+					if (j != 0)
+						_cpc += 1
+						
+					end
+					if (k != 0)
+						_cpc += 2
+						
+					end
+					
+				elseif _foo_trans_cond_spaces[1+(_trans)] == 5 
+					if (i != 0)
+						_cpc += 1
+						
+					end
+					if (j != 0)
+						_cpc += 2
+						
+					end
+					if (k != 0)
+						_cpc += 4
+						
+					end
+					
+				end
+				_lower = 0;
+				_mid = 0;
+				_upper = 0;
+				_lower = _ckeys
+				_upper = _ckeys + _klen - 1
+				while _have == 0 && _lower <= _upper 
+					_mid = _lower + ((_upper-_lower)>> 1)
+					if _cpc < convert(Int, _foo_cond_keys[1+(_mid )] )
+						_upper = _mid - 1
+						
+					elseif _cpc > convert(Int, _foo_cond_keys[1+(_mid )] )
+						_lower = _mid + 1
+						
+					else
+						_cond += convert(UInt, (_mid - _ckeys) )
+						_have = 1
+						
+					end
+					
+				end
+				if _have == 0 
+					cs = 0
+					_cont = 0
+					
+				end
+				
+			end
+			if _cont == 1 
+				cs = convert(Int, _foo_cond_targs[1+(_cond)] )
+				if _foo_cond_actions[1+(_cond)] == 8 
+					print( "  one\n" );
+					
+				elseif _foo_cond_actions[1+(_cond)] == 4 
+					print( "  two\n" );
+					
+				elseif _foo_cond_actions[1+(_cond)] == 6 
+					print( "  three\n" );
+					
+				elseif _foo_cond_actions[1+(_cond)] == 1 
+					if ( ((data[1+(p )])) == 48 )
+						i = 0;
+						
+					else
+						i = 1;
+						
+					end
+					
+				elseif _foo_cond_actions[1+(_cond)] == 2 
+					if ( ((data[1+(p )])) == 48 )
+						j = 0;
+						
+					else
+						j = 1;
+						
+					end
+					
+				elseif _foo_cond_actions[1+(_cond)] == 3 
+					if ( ((data[1+(p )])) == 48 )
+						k = 0;
+						
+					else
+						k = 1;
+						
+					end
+					
+				elseif _foo_cond_actions[1+(_cond)] == 5 
+					{
+						p+= 1
+						_cont = 0
+						
+					}
+					
+				elseif _foo_cond_actions[1+(_cond)] == 9 
+					print( "  one\n" );
+					print( "  two\n" );
+					
+				elseif _foo_cond_actions[1+(_cond)] == 10 
+					print( "  one\n" );
+					print( "  three\n" );
+					
+				elseif _foo_cond_actions[1+(_cond)] == 7 
+					print( "  two\n" );
+					print( "  three\n" );
+					
+				elseif _foo_cond_actions[1+(_cond)] == 11 
+					print( "  one\n" );
+					print( "  two\n" );
+					print( "  three\n" );
+					
+				end
+				if cs == 0 
+					_cont = 0
+					
+				end
+				if _cont == 1 
+					p += 1
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	if ( cs >= foo_first_final )
+		println( "ACCEPT" );
+	else
+		println( "FAIL" );
+	end
+end
+
+m( "000abc\n" );
+m( "100abc\n" );
+m( "010abc\n" );
+m( "110abc\n" );
+m( "001abc\n" );
+m( "101abc\n" );
+m( "011abc\n" );
+m( "111abc\n" );

@@ -1,0 +1,16 @@
+lex
+	token word /[a-z]+/
+	ignore /[\t\n ]+/
+end
+
+def start
+	[word*]
+
+parse Start: start[stdin]
+
+prints( stderr, 'fd stderr: ', ^Start, '\n' )
+prints( stdout, 'fd stdout: ', ^Start, '\n' )
+##### IN #####
+a b c
+##### EXP #####
+fd stdout: a b c

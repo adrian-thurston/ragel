@@ -1,0 +1,266 @@
+host( "working/high2.rl", 1 ) @{/*
+	* @@LANG: c++
+	*/
+	
+	/**
+	* Test a high character to make sure signedness 
+	* isn't messing us up.
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct Fsm
+	{
+		int cs;
+		
+		// Initialize the machine. Invokes any init statement blocks. Returns 0
+		// if the machine begins in a non-accepting state and 1 if the machine
+		// begins in an accepting state.
+		int init( );
+		
+		// Execute the machine on a block of data. Returns -1 if after processing
+		// the data, the machine is in the error state and can never accept, 0 if
+		// the machine is in a non-accepting state and 1 if the machine is in an
+		// accepting state.
+		int execute( const unsigned char *data, int len );
+		
+		// Indicate that there is no more data. Returns -1 if the machine finishes
+		// in the error state and does not accept, 0 if the machine finishes
+		// in any other non-accepting state and 1 if the machine finishes in an
+		// accepting state.
+		int finish( );
+	};
+	
+	
+	
+}@
+array s8 _Fsm_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array s8 _Fsm_key_offsets( 0, 2 ) = { 0, 0, 1, 2, 0 };
+
+array unsigned char _Fsm_trans_keys( 0, 232 ) = { u(232), u(10), u(0) };
+
+array s8 _Fsm_single_lengths( 0, 1 ) = { 0, 1, 1, 0, 0 };
+
+array s8 _Fsm_range_lengths( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _Fsm_index_offsets( 0, 4 ) = { 0, 0, 2, 4, 0 };
+
+array s8 _Fsm_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, 0 };
+
+array s8 _Fsm_trans_offsets( 0, 4 ) = { 0, 1, 2, 3, 4, 0 };
+
+array s8 _Fsm_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 0 };
+
+array s8 _Fsm_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _Fsm_cond_targs( 0, 3 ) = { 2, 0, 3, 0, 0, 0 };
+
+array s8 _Fsm_cond_actions( 0, 1 ) = { 1, 0, 0, 0, 0, 0 };
+
+array s8 _Fsm_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _Fsm_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _Fsm_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _Fsm_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int Fsm_start = 1;
+value int Fsm_first_final = 3;
+value int Fsm_error = 0;
+
+value int Fsm_en_main = 1;
+
+host( "working/high2.rl", 49 ) @{
+	
+	int Fsm::init( )
+	{
+	}@
+	{
+		cs = cast(int)Fsm_start;
+	}
+	host( "working/high2.rl", 53 ) @{
+		return 0;
+	}
+	
+	int Fsm::execute( const unsigned char *_data, int _len )
+	{
+		const unsigned char *p = _data;
+		const unsigned char *pe = _data+_len;
+	}@
+	{
+		int _klen;
+		uint _trans = 0;
+		uint _cond = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index s8 _acts;
+		uint _nacts;
+		index unsigned char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _Fsm_trans_keys, _Fsm_key_offsets[cs] );
+					_trans = cast(uint)_Fsm_index_offsets[cs];
+					_have = 0;
+					
+					_klen = cast(int)_Fsm_single_lengths[cs];
+					if ( _klen > 0 ) {
+						index unsigned char _lower;
+						index unsigned char _mid;
+						index unsigned char _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0 ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _Fsm_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _Fsm_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					if ( _have == 0 ) {
+						_klen = cast(int)_Fsm_range_lengths[cs];
+						if ( _klen > 0 ) {
+							index unsigned char _lower;
+							index unsigned char _mid;
+							index unsigned char _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _Fsm_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _Fsm_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 )
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					_ckeys = offset( _Fsm_cond_keys, _Fsm_trans_offsets[_trans] );
+					_klen = cast(int)_Fsm_trans_lengths[_trans];
+					_cond = cast(uint)_Fsm_trans_offsets[_trans];
+					_have = 0;
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _Fsm_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _Fsm_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							cs = 0;
+							_cont = 0;
+						}
+					}
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_Fsm_cond_targs[_cond];
+					
+					if ( _Fsm_cond_actions[_cond] != 0 ) {
+						_acts = offset( _Fsm_actions, _Fsm_cond_actions[_cond] );
+						_nacts = cast(uint)deref( _Fsm_actions, _acts );
+						_acts += 1;
+						while ( _nacts > 0 )
+						{
+							switch ( deref( _Fsm_actions, _acts ) )
+							{
+								case 0 {
+									host( "working/high2.rl", 41 ) ${
+										printf("yes\n");
+									}$
+								}
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+					}
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}
+			}
+		}
+	}
+	host( "working/high2.rl", 61 ) @{
+		if ( cs == Fsm_error )
+		return -1;
+		if ( cs >= Fsm_first_final )
+		return 1;
+		return 0;
+	}
+	
+	int Fsm::finish()
+	{
+		if ( cs == Fsm_error )
+		return -1;
+		if ( cs >= Fsm_first_final )
+		return 1;
+		return 0;
+	}
+	
+	Fsm fsm;
+	
+	void test( unsigned char *buf, int len )
+	{
+		fsm.init();
+		fsm.execute( buf, len );
+		if ( fsm.finish() > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	unsigned char data1[] = { 0xe8, 10 };
+	unsigned char data2[] = { 0xf8, 10 };
+	
+	int main()
+	{
+		test( data1, 2 );
+		test( data2, 2 );
+		return 0;
+	}
+	
+}@

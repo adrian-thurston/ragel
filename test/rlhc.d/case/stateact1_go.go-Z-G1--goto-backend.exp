@@ -1,0 +1,178 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _state_act_to_state_actions [] int8  = [] int8  { 0, 0, 1, 4, 6, 4, 0  }
+var _state_act_from_state_actions [] int8  = [] int8  { 0, 0, 2, 5, 7, 5, 0  }
+var _state_act_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _state_act_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0  }
+var _state_act_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _state_act_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var state_act_start  int  = 4
+var state_act_first_final  int  = 4
+var state_act_error  int  = 0
+var state_act_en_main  int  = 4
+var state_act_en_main_line_again  int  = 3
+func prepare() {
+
+	{
+		cs = int(state_act_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch _state_act_from_state_actions[cs]  {
+			case 5:
+			{fmt.Print( "b2\n" );}
+			
+			break;
+			case 2:
+			{fmt.Print( "c2\n" );}
+			
+			break;
+			case 7:
+			{fmt.Print( "a2\n" );}
+			{fmt.Print( "b2\n" );}
+			
+			break;
+			
+		}
+		switch cs  {
+			case 4:
+			if ( data[p ]) == 104  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( data[p ]) == 105  {
+				{
+					goto ctr0;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 2:
+			if ( data[p ]) == 10  {
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( data[p ]) == 104  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( data[p ]) == 104  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr3: cs = 1;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		ctr2: cs = 5;
+		goto f2;
+		
+		f2:
+		{cs = 3;}
+		
+		goto _again;
+		
+		_again:
+		switch _state_act_to_state_actions[cs]  {
+			case 4:
+			{fmt.Print( "b1\n" );}
+			
+			break;
+			case 1:
+			{fmt.Print( "c1\n" );}
+			
+			break;
+			case 6:
+			{fmt.Print( "a1\n" );}
+			{fmt.Print( "b1\n" );}
+			
+			break;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= state_act_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"hi\nhi\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}
