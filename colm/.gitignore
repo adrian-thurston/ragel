@@ -12,6 +12,8 @@
 /install-sh
 /missing
 
+/Makefile
+/Makefile.in
 /runtests
 /subject.mk
 /subject.pl
