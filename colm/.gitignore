@@ -11,3 +11,11 @@
 
 /install-sh
 /missing
+
+/runtests
+/subject.mk
+/subject.pl
+/subject.sh
+/working
+
+/pcre.d

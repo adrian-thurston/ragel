@@ -47,7 +47,14 @@ CPPFLAGS="@SUBJECT_CPPFLAGS@"
 LDFLAGS="@SUBJECT_LDFLAGS@"
 export LD_LIBRARY_PATH="@SUBJECT_LD_LIBRARY_PATH@"
 
-cd `dirname $0`
+# Make available to to test directories below us that are not part of this
+# repository and cannot source one dir up.
+export SUBJECT_BIN="@SUBJECT_BIN@"
+export SUBJECT_CPPFLAGS="@SUBJECT_CPPFLAGS@"
+export SUBJECT_LDFLAGS="@SUBJECT_LDFLAGS@"
+export SUBJECT_LD_LIBRARY_PATH="@SUBJECT_LD_LIBRARY_PATH@"
+
+# cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
 
 function die()
@@ -104,7 +111,7 @@ shift $(($OPTIND - 1))
 if [ $# != 0 ]; then
 	TEST_PAT="$*"
 else
-	TEST_PAT='*.lm'
+	TEST_PAT='*.lm *.d'
 fi 
 
 function cat_section
@@ -169,6 +176,13 @@ function section
 function runtests()
 {
 	for TST in $TEST_PAT; do
+		if [ -d $TST ]; then
+			cd $TST;
+			./runtests
+			cd ..
+			continue
+		fi
+
 		ROOT=${TST/.lm}
 		LM=$WORKING/$ROOT.lm
 		ARGS=$WORKING/$ROOT.args
