@@ -1,0 +1,601 @@
+global Label: int = 1
+
+int rw_asm_factor( Factor: indep::factor )
+{
+	switch Factor
+	#if match Factor [`first_token_char]
+	#{
+	#	send Out "ts\[0\]"
+	#}
+	#else if match Factor [tk_ident `[ expr `]]
+	#{
+	#	send Out
+	#		"[$Factor.tk_ident]\[ [rw_c_expr(Factor.expr)] \]
+	#}
+	#else if match Factor [tk_ident `( expr `)]
+	#{
+	#	send Out
+	#		"[$Factor.tk_ident]( [rw_c_expr(Factor.expr)] )
+	#}
+	case [`< type `> `( expr `)] {
+		rw_asm_expr( Factor.expr )
+	}
+	case [`( expr `)] {
+		rw_asm_expr( Factor.expr )
+	}
+	case ['true'] {
+		send Out
+			"	movq	$1, %rax
+			"	pushq	%rax
+	}
+	case ['false'] {
+		send Out
+			"	movq	$0, %rax
+			"	pushq	%rax
+	}
+	case [`fentry `( E: expr `)] {
+		send Out
+			"	movq	$fentry([E]), %rax
+			"	pushq	%rax
+	}
+	case [`fc] {
+		send Out
+			"	movsbq	(%r12), %rax
+			"	pushq	%rax
+	}
+	case [`fcurs] {
+		send Out
+			"	fcurs;
+			"	pushq	%rax
+	}
+	case [`ftargs] {
+		send Out
+			"	ftargs;
+			"	pushq	%rax
+	}
+	case ["p"] {
+		send Out
+			"	pushq	%r12
+	}
+	case ["te"] {
+		send Out
+			"	movq	-24(%rbp), %rax
+			"	pushq	%rax
+	}
+	case [Ident: tk_ident] {
+		send Out
+			"	movq	[Ident](%rip), %rax
+			"	pushq	%rax
+	}
+	case [Number: tk_number] {
+		send Out
+			"	movq	$[Number], %rax
+			"	pushq	%rax
+	}
+	case [`- Number: tk_number] {
+		send Out
+			"	movq	$-[Number], %rax
+			"	pushq	%rax
+
+	}
+	case "'0'" {
+		send Out
+			"	movq	$48,	%rax
+			"	pushq	%rax
+	}
+	case "'a'" {
+		send Out
+			"	movq	$97,	%rax
+			"	pushq	%rax
+	}
+	case [String: string] {
+		send Out
+			"	.section	.rodata
+			"[Label]:
+			"	.string		[String]
+			"	.text
+			"	movq	$[Label]b, %rax
+			"	pushq	%rax
+		Label = Label + 1
+	}
+	case [`buffer] {
+		send Out
+			"	movq	$buf, %rax
+			"	pushq	%rax
+	}
+	case [`blen] {
+		send Out
+			"	movq	bpos(%rip), %rax
+			"	pushq	%rax
+	}
+	case [`first_token_char]
+	{
+		# Tokstart: -16
+		send Out
+			"	movq	-16(%rbp), %rax
+			"	movsbq	(%rax), %rcx
+			"	pushq	%rcx
+	}
+	default {
+		send Out
+			"NOT IMPELMENTED
+			"[Factor]
+	}
+	#else 
+	#{
+	#	send Out [$Factor]
+	#}
+}
+
+void rw_asm_abs_expr( Expr: indep::abs_expr )
+{
+	if ( Expr.Op ) {
+		rw_asm_abs_expr( Expr.E1 )
+		rw_asm_abs_expr( Expr.E2 )
+
+		send Out
+			"	popq	%rcx
+			"	popq	%rax
+
+		switch Expr.Op
+		case [`+] {
+			send Out
+				"	addq	%rcx, %rax
+		}
+		case [`-] {
+			send Out
+				"	subq	%rcx, %rax
+		}
+		case [`*] {
+			send Out
+				"	imul	%rcx, %rax
+		}
+		case [`==] {
+			send Out
+				"	cmp		%rcx, %rax
+				"	sete	%al
+				"	movsbq	%al, %rax
+		}
+		case [`!=] {
+			send Out
+				"	cmp		%rcx, %rax
+				"	setne	%al
+				"	movsbq	%al, %rax
+		}
+		case [`>=] {
+			send Out
+				"	cmp		%rcx, %rax
+				"	setge	%al
+				"	movsbq	%al, %rax
+		}
+
+		send Out
+				"	pushq	%rax
+	}
+	else {
+		rw_asm_factor( Expr.factor )
+	}
+}
+
+void rw_asm_expr( Expr: indep::expr )
+{
+	AbsExpr: indep::abs_expr = indep::abs_comparative( Expr.comparative )
+	rw_asm_abs_expr( AbsExpr )
+}
+
+int rw_asm_print_stmt( Stmt: indep::print_stmt )
+{
+	switch Stmt
+	case [`print_int expr `;] {
+		rw_asm_expr( Stmt.expr )
+
+		send Out
+			"	movq	$.L_fmt_int, %rdi
+			"	popq	%rsi
+			"	movq	$0, %rax
+			"	call	printf
+	}
+	case [`print_buf E1: expr `, E2: expr `;] {
+		#send Out
+		#	"fwrite( [rw_c_expr(E1)], 1, [rw_c_expr(E2)], stdout );"
+	}
+	case [`print_str expr `;] {
+		rw_asm_expr( Stmt.expr )
+
+		send Out
+			"	movq	$.L_fmt_str, %rdi
+			"	popq	%rsi
+			"	movq	$0, %rax
+			"	call	printf
+	}
+	case [`print_token `;] {
+		L1: int = Label
+		Label = Label + 1
+
+		L2: int = Label
+		Label = Label + 1
+
+		send Out
+			"	movq	-16(%rbp), %rax   # ts
+			"	movq	-24(%rbp), %rcx   # te
+			"	subq	%rax, %rcx        # length
+			"[L1]:
+			"	cmp		$0, %rcx
+			"	je		[L2]f
+			"	movsbl	(%rax), %edi
+			"	push	%rax
+			"	push	%rcx
+			"	call	putchar	
+			"	pop		%rcx
+			"	pop		%rax
+			"	addq	$1, %rax
+			"	subq	$1, %rcx
+			"	jmp		[L1]b
+			"[L2]:
+			"
+	}
+}
+
+int rw_asm_expr_stmt( ExprStmt: indep::expr_stmt )
+{
+	switch ExprStmt
+	case [tk_ident opt_sub `= expr `;]
+	{
+		rw_asm_expr( ExprStmt.expr )
+
+		send Out
+			"	popq	%rax
+			"	movq	%rax, [ExprStmt.tk_ident](%rip)
+	}
+	case [expr `;]
+	{
+		rw_asm_expr( ExprStmt.expr )
+		send Out
+			"	popq	%rax
+	}
+}
+
+int rw_asm_if_stmt( IfStmt: indep::if_stmt )
+{
+	L1: int = Label
+	Label = Label + 1
+
+	L2: int = Label
+	Label = Label + 1
+
+	rw_asm_expr( IfStmt.expr )
+
+	send Out
+		"	popq	%rax
+		"	test	%rax, %rax
+		"	jz		[L1]f
+
+	rw_asm_stmt_list( IfStmt._repeat_stmt )
+
+	if ( IfStmt.opt_else._repeat_stmt ) {
+		send Out
+			"	jmp		[L2]f
+			"[L1]:
+
+		rw_asm_stmt_list( IfStmt.opt_else._repeat_stmt )
+
+		send Out
+			"[L2]:
+	}
+	else {
+		send Out
+			"[L1]:
+	}
+
+}
+
+void rw_asm_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	movq	$0, bpos(%rip)
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	movq	bpos(%rip), %rax
+			"	movb	(%r12), %cl
+			'	movb	%cl, buf(%rax)
+			"	addq	$1, %rax
+			"	movb	$0,	buf(%rax)
+			"	movq	%rax, bpos(%rip)
+	}
+}
+
+int rw_asm_ragel_stmt( Stmt: indep::ragel_stmt )
+{
+	switch Stmt
+	case [`fexec E: expr `;] {
+		rw_asm_expr( E )
+
+		send Out
+			"	popq	%rax
+			"	fexec	%rax;
+	}
+	case [`fgoto `* E: expr `;] {
+		rw_asm_expr( E )
+		send Out
+			"movq	$0, %rax
+			"popq	%rcx
+			"fgoto	* %rcx;
+	}
+	case [`fnext `* E: expr `;] {
+		rw_asm_expr( E )
+		send Out
+			"movq	$0, %rax
+			"popq	%rcx
+			"fnext	* %rcx;
+	}
+	case [`fcall `* E: expr `;] {
+		rw_asm_expr( E )
+		send Out
+			"movq	$0, %rax
+			"popq	%rcx
+			"fcall	* %rcx;
+	}
+	case [`fncall `* E: expr `;] {
+		rw_asm_expr( E )
+		send Out
+			"movq	$0, %rax
+			"popq	%rcx
+			"fncall	* %rcx;
+	}
+	default {
+		send Out
+			"[Stmt]
+	}
+}
+
+int rw_asm_stmt( Stmt: indep::stmt )
+{
+	switch Stmt
+	case [var_decl] {
+		#rw_c_var_decl( Stmt.var_decl )
+	}
+	case [expr_stmt]
+		rw_asm_expr_stmt( Stmt.expr_stmt )
+	case [if_stmt]
+		rw_asm_if_stmt( Stmt.if_stmt )
+	case [print_stmt]
+		rw_asm_print_stmt( Stmt.print_stmt )
+	case [buf_stmt]
+		rw_asm_buf_stmt( Stmt.buf_stmt )
+	case [ragel_stmt]
+		rw_asm_ragel_stmt( Stmt.ragel_stmt )
+}
+
+void rw_asm_stmt_list( StmtList: indep::stmt* )
+{
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_asm_stmt( Stmt )
+}
+
+out_code::lines rw_asm_asm_action_block( ActionBlock: indep::action_block, ActionNum: int )
+{
+	Out = new parser<out_code::lines>()
+	if match ActionBlock [`{ stmt* `}] {
+		send Out
+			"{
+			"	[rw_asm_stmt_list( ActionBlock._repeat_stmt )]
+			"}
+	}
+	else if match ActionBlock [`{ expr `}] {
+		send Out
+			"{
+			"	[rw_asm_expr( ActionBlock.expr )]
+			"	popq	%rax
+			"}
+	}
+	send Out [] eos
+	return Out->tree
+}
+
+int rw_asm_var_decl( VarDecl: indep::var_decl )
+{
+	send Out
+		"	.section	.data
+		"	.comm	[VarDecl.tk_ident],8,8
+		"	.text
+}
+
+
+void rw_asm( Output: stream )
+{
+	send Output
+		"#
+		"# @LANG: asm
+		"# @GENERATED: true
+
+	if ProhibitGenflags {
+		send Output
+			"# @PROHIBIT_GENFLAGS:[ProhibitGenflags]
+	}
+
+	send Output
+		"#
+		"
+
+	Init: indep::stmt* = RagelTree.Init
+	for Stmt: indep::stmt in Init {
+		if match Stmt [Decl: var_decl] {
+			Out = new parser<out_code::lines>()
+			rw_asm_var_decl( Decl )
+			send Out [] eos
+
+			send Output
+				[Out->tree]
+		}
+	}
+
+	ActionNum: int = 0
+	Section: indep::section = RagelTree.section
+	for Action: ragel::action_block in Section {
+		# Reparse as lang-independent code.
+		parse IndepActionBlock: indep::action_block[$Action]
+		if ( !IndepActionBlock ) {
+			print( error, '\n', Action )
+			exit(1)
+		}
+
+		Lines: out_code::lines =
+				rw_asm_asm_action_block( IndepActionBlock, ActionNum )
+
+		# Reparse back to ragel action block.
+		Action = parse ragel::action_block[Lines]
+		if ( !Action ) {
+			print( error, ': could not reparse action: ', Lines, '\n' )
+			exit(1)
+		}
+
+		ActionNum = ActionNum + 1
+	}
+
+	send Output
+		"
+		"[Section]
+		"
+		"	.text
+		"	.comm		buf, 1024, 32
+		"	.comm		bpos, 8, 8
+		"	.comm		stack_data, 1024, 32
+		"	.section	.rodata
+		"
+		".L_str_accept:
+		"	.string \"ACCEPT\"
+		".L_str_fail:
+		"	.string \"FAIL\"
+		".L_fmt_int:
+		"	.string \"%ld\"
+		".L_fmt_str:
+		"	.string \"%s\"
+		"
+		"	%% write data;
+		"
+		"	.text
+		"exec:
+		"	pushq	%rbp
+		"	movq	%rsp, %rbp
+		"	subq	$96, %rsp
+		"
+		"	movq	$stack_data, -56(%rbp)
+		"
+		"	pushq	%r12
+		"	pushq	%r13
+		"	movq	%rdi, %r12
+
+
+	for Stmt: indep::stmt in Init {
+		if match Stmt [ExprStmt: expr_stmt] {
+			Out = new parser<out_code::lines>()
+			rw_asm_expr_stmt( ExprStmt )
+			send Out [] eos
+			send Output [Out->tree]
+		}
+	}
+
+	send Output
+		"
+		"	# Get the length.
+		"	movq	%r12, %rdi
+		"	call	strlen
+		"	movq	%r12, %r13
+		"	movslq	%eax, %rax
+		"	addq	%rax, %r13
+		"
+		"	movq	$0,	bpos(%rip)
+
+	if NeedsEof {
+		send Output
+			"	movq	%r13, -8(%rbp)
+	}
+
+	send Output
+		"
+		"	%% write init;
+		"	%% write exec;
+		"
+		"	# current state is in r11.
+		"	movq	[MachineName.word]_first_final(%rip), %rax
+		"	cmpq	%rax, %r11
+		"	jl		.L_exec_fail
+		"	movq	$.L_str_accept, %rdi
+		"	call	puts
+		"	jmp		.L_exec_done
+		".L_exec_fail:
+		"	movq	$.L_str_fail, %rdi
+		"	call	puts
+		".L_exec_done:
+		"	popq	%r13
+		"	popq	%r12
+		"	leave
+		"	ret
+
+	send Output
+		"	.section	.rodata
+		".L_debug_msg:
+		"	.string	\"debug %d\\n\"
+
+	NR: int = 0
+	for InputString: indep::input_string in RagelTree {
+		send Output 
+			".L_inp_[NR]:
+			"	.string	[^InputString]
+		NR = NR + 1
+	}
+
+	send Output
+		"
+		"	.align 8
+		"inp:
+
+	NR = 0
+	for InputString: indep::input_string in RagelTree {
+		send Output 
+			"	.quad	.L_inp_[NR]
+		NR = NR + 1
+	}
+
+	send Output
+		"
+
+
+	send Output
+		"	.align 8
+		"inplen:
+		"	.quad [NR]
+		"
+
+	send Output
+		"	.text
+		"	.globl	main
+		"main:
+		"	pushq	%rbp
+		"	movq	%rsp, %rbp
+		"	pushq	%r12
+		"	movq	$0, %r12
+		".L_again:
+		"	movq	inplen(%rip), %rax
+		"	cmpq	%r12, %rax
+		"	je		.L_done
+		"	movq	inp(,%r12,8), %rdi
+		"	call	exec
+		"	incq	%r12
+		"	jmp		.L_again
+		".L_done:
+		"	popq	%r12
+		"	mov		$0, %rax
+		"	leave
+		"	ret
+		"debug:
+		"	movl	%edi, %esi
+		"	movq	$0, %rax
+		"	movq	$.L_debug_msg, %rdi
+		"	call	printf
+		"	ret
+		"	
+}

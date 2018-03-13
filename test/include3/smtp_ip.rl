@@ -1,0 +1,4 @@
+%%{
+  machine smtp_ip;
+
+}%%
