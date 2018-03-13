@@ -153,7 +153,11 @@ function run_test()
 	if [ "$compile_only" != "true" ]; then
 		echo -n "running $exec_cmd ... ";
 
-		$exec_cmd 2>&1 > $wk/$output;
+		if [ -n "$FILTER" ]; then
+			$exec_cmd | $FILTER 2>&1 > $wk/$output;
+		else
+			$exec_cmd 2>&1 > $wk/$output;
+		fi
 		EXIT_STATUS=$?
 		if test $EXIT_STATUS = 0 && \
 				diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
@@ -493,6 +497,9 @@ function run_translate()
 
 	# Override the test case file name.
 	RAGEL_FILE=`sed '/@RAGEL_FILE:/s/^.*: *//p;d' $test_case`
+
+	# Filter to pass output through. Shell code.
+	FILTER=`sed '/@FILTER:/s/^.*: *//p;d' $test_case`
 
 	# If the test case has a directory by the same name, copy it into the
 	# working direcotory.
