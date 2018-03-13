@@ -300,7 +300,7 @@ void rw_c( Output: stream )
 		"
 		"void finish( )
 		"{
-		"	if ( cs >= [$MachineName.word]_first_final )
+		"	if ( cs >= [$MachineName.mn_word]_first_final )
 		"		printf( \"ACCEPT\\n\" );
 		"	else
 		"		printf( \"FAIL\\n\" );

@@ -520,7 +520,7 @@ void rw_asm( Output: stream )
 		"	%% write exec;
 		"
 		"	# current state is in r11.
-		"	movq	[MachineName.word]_first_final(%rip), %rax
+		"	movq	[MachineName.mn_word]_first_final(%rip), %rax
 		"	cmpq	%rax, %r11
 		"	jl		.L_exec_fail
 		"	movq	$.L_str_accept, %rdi
