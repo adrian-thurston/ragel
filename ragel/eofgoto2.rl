@@ -1,112 +1,75 @@
 /*
- * @LANG: c
+ * @LANG: indep
+ * @NEEDS_EOF: yes
  *
  * Testing fgoto * in an EOF action.
  */
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-int neg;
+bool neg;
 int value;
 
+value = 0;
+neg = false;
 
 %%{
 	machine atoi;
 
 	action begin {
-		neg = 0;
+		neg = false;
 		value = 0;
 	}
 
-	action see_neg
-	{
-		neg = 1;
+	action see_neg {
+		neg = true;
 	}
 
-	action add_digit
-	{
-		value = value * 10 + ( int ) ( fc - 48 );
+	action add_digit { 
+		value = value * 10 + <int>(fc - 48);
 	}
 
-	action finish
-	{
+	action finish {
 		if ( neg != 0 ) {
 			value = -1 * value;
-		} 
+		}
+	}
+	action print {
+		print_int value;
+		print_str "\n";
 	}
 
-	action print
-	{
-		printf( "%d", value );
-		printf( "%s", "\n" );
-	}
 
 	atoi = (
 		('-'@see_neg | '+')? (digit @add_digit)+
 	) >begin %finish;
 
-	main := atoi '\n' @print %{ printf("goto extra\n"); fgoto *fentry(extra); };
+	action done
+	{
+		print_str "done: ";
+		print_off;
+		print_str "\n";
+	}
 
-	extra := "" %{ printf("done: %d\n", (int)(p-data)); };
+	action extra
+	{
+		print_str "goto extra\n";
+		fgoto *fentry(extra);
+	}
 
+	extra := "" %done;
+
+	main := atoi '\n' @print %extra;
 }%%
 
-%% write data;
-int cs;
-int blen;
-char buffer[1024];
-
-void init()
-{
-	value = 0;
-	neg = 0;
-	%% write init;
-}
-
-void exec( char *data, int len )
-{
-	char *p = data;
-	char *pe = data + len;
-	char *eof = pe;
-	%% write exec;
-}
-
-void finish( )
-{
-	if ( cs >= atoi_first_final )
-		printf( "ACCEPT\n" );
-	else
-		printf( "FAIL\n" );
-	
-}
-
-char *inp[] = {
-	"1\n",
-	"12\n",
-	"222222\n",
-	"+2123\n",
-	"213 3213\n",
-	"-12321\n",
-	"--123\n",
-	"-99\n",
-	" -3000\n",
-};
-
-int inplen = 9;
-
-int main( )
-{
-	int i;
-	for ( i = 0; i < inplen; i++ ) {
-		init();
-		exec( inp[i], strlen(inp[i]) );
-		finish();
-	}
-	return 0;
-}
-
+##### INPUT #####
+	"1\n"
+	"12\n"
+	"222222\n"
+	"+2123\n"
+	"213 3213\n"
+	"-12321\n"
+	"--123\n"
+	"-99\n"
+	" -3000\n"
 ##### OUTPUT #####
 1
 goto extra
