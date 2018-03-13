@@ -37,10 +37,10 @@ AC_ARG_WITH(subject,
 		SUBJECT_LD_LIBRARY_PATH="$withval/lib"
 	],
 	[
-		SUBJECT_BIN="\${abs_top_builddir}/../ragel/src/ragel"
-		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../ragel/src -I\${abs_top_builddir}/../ragel/aapl"
-		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../ragel/src/.libs"
-		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../ragel/src/.libs"
+		SUBJECT_BIN="\${abs_top_builddir}/../src/ragel"
+		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../src -I\${abs_top_builddir}/../aapl"
+		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../src/.libs"
+		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../src/.libs"
 	]
 )
 
@@ -52,7 +52,7 @@ AC_SUBST(SUBJECT_LD_LIBRARY_PATH)
 AC_ARG_WITH(ragel-src,
 	[AC_HELP_STRING([--with-ragel-src], [location of ragel src code])],
 		[RAGEL_SRC="$withval"],
-		[RAGEL_SRC="\${abs_top_builddir}/../ragel/src"] )
+		[RAGEL_SRC="\${abs_top_builddir}/../src"] )
 
 AC_SUBST(RAGEL_SRC)
 
