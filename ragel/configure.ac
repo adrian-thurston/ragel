@@ -31,16 +31,20 @@ dnl
 AC_ARG_WITH(subject,
 	[AC_HELP_STRING([--with-subject], [location of ragel to test])],
 	[
-		SUBJECT_BIN="$withval/bin/ragel"
-		SUBJECT_CPPFLAGS="-I$withval/include"
-		SUBJECT_LDFLAGS="-L$withval/lib"
-		SUBJECT_LD_LIBRARY_PATH="$withval/lib"
+		if [ -d "$withval/bin" ]; then
+			SUBJECT_BIN="$withval/bin/ragel"
+			SUBJECT_CPPFLAGS="-I$withval/include"
+			SUBJECT_LDFLAGS="-L$withval/lib"
+			SUBJECT_LD_LIBRARY_PATH="$withval/lib"
+		else
+			SUBJECT_BIN="${withval}/src/ragel"
+			SUBJECT_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
+			SUBJECT_LDFLAGS="-L${withval}/src/.libs"
+			SUBJECT_LD_LIBRARY_PATH="${withval}/src/.libs"
+		fi
 	],
 	[
-		SUBJECT_BIN="\${abs_top_builddir}/../src/ragel"
-		SUBJECT_CPPFLAGS="-I\${abs_top_builddir}/../src -I\${abs_top_builddir}/../aapl"
-		SUBJECT_LDFLAGS="-L\${abs_top_builddir}/../src/.libs"
-		SUBJECT_LD_LIBRARY_PATH="\${abs_top_builddir}/../src/.libs"
+		AC_ERROR(["require --with-subject"])
 	]
 )
 
