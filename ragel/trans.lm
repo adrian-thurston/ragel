@@ -23,7 +23,7 @@ namespace indep
 		literal `%%{ `}%%
 
 		literal `int `bool `char `ptr `byte `if `else
-				`print_int `print_buf `print_str `print_token
+				`print_int `print_buf `print_str `print_token `print_off
 				`first_token_char `buffer `blen `buf_append `buf_clear
 
 		literal `fpc `fc `fcurs `ftargs `fentry
@@ -223,6 +223,7 @@ namespace indep
 	|	[`print_buf expr `, expr `;]
 	|	[`print_str expr `;]
 	|	[`print_token `;]
+	|	[`print_off `;]
 
 	def ragel_stmt
 		[`fgoto tk_ident `;]

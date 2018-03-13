@@ -234,6 +234,16 @@ int rw_asm_print_stmt( Stmt: indep::print_stmt )
 			"[L2]:
 			"
 	}
+	case [`print_off `;] {
+		send Out
+			"	movq	%r12, %rax
+			"	movq	-104(%rbp), %rcx
+			"	subq	%rcx, %rax
+			"	movq	$.L_fmt_int, %rdi
+			"	movq	%rax, %rsi
+			"	movq	$0, %rax
+			"	call	printf
+	}
 }
 
 int rw_asm_expr_stmt( ExprStmt: indep::expr_stmt )
@@ -480,13 +490,18 @@ void rw_asm( Output: stream )
 		"exec:
 		"	pushq	%rbp
 		"	movq	%rsp, %rbp
-		"	subq	$96, %rsp
+		"
+		"	# Ragel requires 96 bytes, we include one word for the data pointer.
+		"	subq	$104, %rsp
 		"
 		"	movq	$stack_data, -56(%rbp)
 		"
 		"	pushq	%r12
 		"	pushq	%r13
 		"	movq	%rdi, %r12
+		"
+		"   # Save data pointer for use in actions.
+		"	movq	%rdi, -104(%rbp)
 
 
 	for Stmt: indep::stmt in Init {
