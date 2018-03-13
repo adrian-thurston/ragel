@@ -1,2 +1,2 @@
-argv
+L: list<str> = argv
 ##### EXP #####
