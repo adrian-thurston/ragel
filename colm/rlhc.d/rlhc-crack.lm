@@ -506,7 +506,7 @@ namespace crack_gen
 
 		if CO {
 			send Output
-				[CO]
+				[@CO]
 		}
 		else {
 			send stderr

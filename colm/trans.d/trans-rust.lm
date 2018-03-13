@@ -289,7 +289,7 @@ void rust( Output: stream )
 
 	send Output
 		"
-		"[Section]
+		"[@Section]
 		"
 		"%% write data;
 		"

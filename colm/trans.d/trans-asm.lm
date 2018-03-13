@@ -457,7 +457,7 @@ void rw_asm( Output: stream )
 
 	send Output
 		"
-		"[Section]
+		"[@Section]
 		"
 		"	.text
 		"	.comm		buf, 1024, 32

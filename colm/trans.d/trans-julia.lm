@@ -275,7 +275,7 @@ void julia( Output: stream )
 
 	send Output
 		"
-		"[Section]
+		"[@Section]
 		"
 		"%% write data;
 		"

@@ -15,7 +15,7 @@ let token = ref 0
 	# coverage of the scanner action types.
 	main := |*
 		'a' => {print_string( "on last     " );
-if p.contents + 1  == te .contents then
+if p.contents + 1 == te .contents then
 begin
 	print_string( "yes" );
 
@@ -25,7 +25,7 @@ print_string( "\n" );
 };
 
 		'b'+ => {print_string( "on next     " );
-if p.contents + 1  == te .contents then
+if p.contents + 1 == te .contents then
 begin
 	print_string( "yes" );
 
@@ -35,7 +35,7 @@ print_string( "\n" );
 };
 
 		'c1' 'dxxx'? => {print_string( "on lag      " );
-if p.contents + 1  == te .contents then
+if p.contents + 1 == te .contents then
 begin
 	print_string( "yes" );
 
@@ -45,7 +45,7 @@ print_string( "\n" );
 };
 
 		'd1' => {print_string( "lm switch1  " );
-if p.contents + 1  == te .contents then
+if p.contents + 1 == te .contents then
 begin
 	print_string( "yes" );
 
@@ -54,7 +54,7 @@ end
 print_string( "\n" );
 };
 		'd2' => {print_string( "lm switch2  " );
-if p.contents + 1  == te .contents then
+if p.contents + 1 == te .contents then
 begin
 	print_string( "yes" );
 

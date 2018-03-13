@@ -481,7 +481,7 @@ namespace go_gen
 
 		if GO {
 			send Output
-				[GO]
+				[@GO]
 		}
 		else {
 			send stderr

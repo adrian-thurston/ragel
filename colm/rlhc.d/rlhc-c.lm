@@ -494,7 +494,7 @@ namespace c_gen
 
 		if CO {
 			send Output
-				[CO]
+				[@CO]
 		}
 		else {
 			send stderr

@@ -35,7 +35,7 @@ let stack = Array.make 32 0
 	dig_comm := digit+ $!hold_and_return;
 
 	# Choose which to machine to call into based on the command.
-	action comm_arg {if comm .contents >= 97  then
+	action comm_arg {if comm .contents >= 97 then
 begin
 	fncall alp_comm;
 		

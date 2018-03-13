@@ -486,7 +486,7 @@ namespace ruby_gen
 
 		if RO {
 			send Output
-				[RO]
+				[@RO]
 		}
 		else {
 			send stderr

@@ -488,7 +488,7 @@ namespace java_gen
 
 		if JO {
 			send Output
-				[JO]
+				[@JO]
 		}
 		else {
 			send stderr

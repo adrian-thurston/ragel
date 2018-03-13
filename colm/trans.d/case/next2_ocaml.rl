@@ -38,7 +38,7 @@ last := 2;
 } |
 
 		# This one is conditional based on the last.
-		'3' @{if last .contents == 2  then
+		'3' @{if last .contents == 2 then
 begin
 	target := fentry( three );
 fnext *target.contents;
