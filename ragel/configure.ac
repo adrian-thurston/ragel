@@ -28,30 +28,30 @@ AC_PROG_MAKE_SET
 dnl
 dnl Which ragel are we testing. Default is the one in parent's source dir.
 dnl
-AC_ARG_WITH(subject,
-	[AC_HELP_STRING([--with-subject], [location of ragel to test])],
+AC_ARG_WITH(ragel,
+	[AC_HELP_STRING([--with-ragel], [location of ragel to test])],
 	[
-		if [ -d "$withval/bin" ]; then
-			SUBJECT_BIN="$withval/bin/ragel"
-			SUBJECT_CPPFLAGS="-I$withval/include"
-			SUBJECT_LDFLAGS="-L$withval/lib"
-			SUBJECT_LD_LIBRARY_PATH="$withval/lib"
+		if test -d "$withval/bin"; then
+			RAGEL_BIN="$withval/bin/ragel"
+			RAGEL_CPPFLAGS="-I$withval/include"
+			RAGEL_LDFLAGS="-L$withval/lib"
+			RAGEL_LD_LIBRARY_PATH="$withval/lib"
 		else
-			SUBJECT_BIN="${withval}/src/ragel"
-			SUBJECT_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
-			SUBJECT_LDFLAGS="-L${withval}/src/.libs"
-			SUBJECT_LD_LIBRARY_PATH="${withval}/src/.libs"
+			RAGEL_BIN="${withval}/src/ragel"
+			RAGEL_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
+			RAGEL_LDFLAGS="-L${withval}/src/.libs"
+			RAGEL_LD_LIBRARY_PATH="${withval}/src/.libs"
 		fi
 	],
 	[
-		AC_ERROR(["require --with-subject"])
+		AC_ERROR(["require --with-ragel"])
 	]
 )
 
-AC_SUBST(SUBJECT_BIN)
-AC_SUBST(SUBJECT_CPPFLAGS)
-AC_SUBST(SUBJECT_LDFLAGS)
-AC_SUBST(SUBJECT_LD_LIBRARY_PATH)
+AC_SUBST(RAGEL_BIN)
+AC_SUBST(RAGEL_CPPFLAGS)
+AC_SUBST(RAGEL_LDFLAGS)
+AC_SUBST(RAGEL_LD_LIBRARY_PATH)
 
 AC_ARG_WITH(ragel-src,
 	[AC_HELP_STRING([--with-ragel-src], [location of ragel src code])],
@@ -101,10 +101,10 @@ if test "x$INSTALLED_VER" != "x$EXPECTED_VER"; then
 fi
 
 SED_SUBST=["\
-	-e 's|@SUBJECT_BIN@|${SUBJECT_BIN}|g' \
-	-e 's|@SUBJECT_CPPFLAGS@|${SUBJECT_CPPFLAGS}|g' \
-	-e 's|@SUBJECT_LDFLAGS@|${SUBJECT_LDFLAGS}|g' \
-	-e 's|@SUBJECT_LD_LIBRARY_PATH@|${SUBJECT_LD_LIBRARY_PATH}|g' \
+	-e 's|@RAGEL_BIN@|${RAGEL_BIN}|g' \
+	-e 's|@RAGEL_CPPFLAGS@|${RAGEL_CPPFLAGS}|g' \
+	-e 's|@RAGEL_LDFLAGS@|${RAGEL_LDFLAGS}|g' \
+	-e 's|@RAGEL_LD_LIBRARY_PATH@|${RAGEL_LD_LIBRARY_PATH}|g' \
 	-e 's|@LD_LIBRARY_PATH@|${LD_LIBRARY_PATH}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \

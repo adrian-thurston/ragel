@@ -14,10 +14,10 @@ TRANS=./trans
 
 # Make available to to test directories below us that are not part of this
 # repository and cannot source one dir up.
-export SUBJECT_BIN="@SUBJECT_BIN@"
-export SUBJECT_CPPFLAGS="@SUBJECT_CPPFLAGS@"
-export SUBJECT_LDFLAGS="@SUBJECT_LDFLAGS@"
-export SUBJECT_LD_LIBRARY_PATH="@SUBJECT_LD_LIBRARY_PATH@"
+export RAGEL_BIN="@RAGEL_BIN@"
+export RAGEL_CPPFLAGS="@RAGEL_CPPFLAGS@"
+export RAGEL_LDFLAGS="@RAGEL_LDFLAGS@"
+export RAGEL_LD_LIBRARY_PATH="@RAGEL_LD_LIBRARY_PATH@"
 
 function sig_exit()
 {
@@ -95,7 +95,7 @@ shift $((OPTIND - 1));
 
 [ -z "$*" ] && set -- *.rl *.d
 
-ragel="@SUBJECT_BIN@"
+ragel="@RAGEL_BIN@"
 
 export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
 
