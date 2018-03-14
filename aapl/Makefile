@@ -20,7 +20,7 @@
 
 LIBS = 
 
-CFLAGS = -g -Wall -I../src
+CFLAGS = -g -Wall -I$(HOME)/devel/aapl/src
 
 STRESS = \
 	stress_avltree.cpp stress_avliter.cpp stress_avlmel.cpp \

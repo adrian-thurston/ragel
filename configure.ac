@@ -24,10 +24,10 @@ dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
 dnl
-dnl Which ragel are we testing. Default is the one in parent's source dir.
+dnl Which ragel are we testing. Can use a src or install directory.
 dnl
 AC_ARG_WITH(ragel,
-	[AC_HELP_STRING([--with-ragel], [location of ragel to test])],
+	[AC_HELP_STRING([--with-ragel], [location of ragel to test (source or installed)])],
 	[
 		if test -d "$withval/bin"; then
 			RAGEL_BIN="$withval/bin/ragel"
@@ -76,7 +76,7 @@ AC_ARG_WITH(deps,
 )
 
 AC_ARG_WITH(colm,
-	[AC_HELP_STRING([--with-colm], [location of colm install])],
+	[AC_HELP_STRING([--with-colm], [location of colm to test (source or installed)])],
 	[
 		if test -d "${withval}/bin"; then
 			COLM_BIN="${withval}/bin/colm"
@@ -110,6 +110,23 @@ if test "x$INSTALLED_VER" != "x$EXPECTED_COLM_VER"; then
 	AC_ERROR( [check colm: expected version $EXPECTED_COLM_VER, but $INSTALLED_VER is installed] )
 fi
 
+dnl
+dnl Which aapl
+dnl
+AC_ARG_WITH(aapl,
+	[AC_HELP_STRING([--with-aapl], [location of aapl to test (source or installed)])],
+	[
+		if test -d "$withval/bin"; then
+			AAPL_CPPFLAGS="-I$withval/include"
+		else
+			AAPL_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
+		fi
+	],
+	[AC_ERROR(["require --with-aapl"])]
+)
+
+AC_SUBST(AAPL_CPPFLAGS)
+
 SED_SUBST=["\
 	-e 's|@RAGEL_BIN@|${RAGEL_BIN}|g' \
 	-e 's|@RAGEL_CPPFLAGS@|${RAGEL_CPPFLAGS}|g' \
@@ -118,6 +135,7 @@ SED_SUBST=["\
 	-e 's|@COLM_BIN@|${COLM_BIN}|g' \
 	-e 's|@COLM_CPPFLAGS@|${COLM_CPPFLAGS}|g' \
 	-e 's|@COLM_LDFLAGS@|${COLM_LDFLAGS}|g' \
+	-e 's|@AAPL_CPPFLAGS@|${AAPL_CPPFLAGS}|g' \
 	-e 's|@LD_LIBRARY_PATH@|${LD_LIBRARY_PATH}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
