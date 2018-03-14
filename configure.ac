@@ -33,13 +33,13 @@ AC_ARG_WITH(ragel,
 			RAGEL_BIN="$withval/bin/ragel"
 			RAGEL_CPPFLAGS="-I$withval/include"
 			RAGEL_LDFLAGS="-L$withval/lib"
-			RAGEL_LM="${withval}/share/ragel.lm"
+			RAGEL_LM="${withval}/share"
 			LD_LIBRARY_PATH="$withval/lib"
 		else
 			RAGEL_BIN="${withval}/src/ragel"
 			RAGEL_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
 			RAGEL_LDFLAGS="-L${withval}/src/.libs"
-			RAGEL_LM="${withval}/src/ragel.lm"
+			RAGEL_LM="${withval}/src"
 			LD_LIBRARY_PATH="${withval}/src/.libs"
 		fi
 	],
