@@ -17,7 +17,7 @@ TRANS=./trans
 export RAGEL_BIN="@RAGEL_BIN@"
 export RAGEL_CPPFLAGS="@RAGEL_CPPFLAGS@"
 export RAGEL_LDFLAGS="@RAGEL_LDFLAGS@"
-export RAGEL_LD_LIBRARY_PATH="@RAGEL_LD_LIBRARY_PATH@"
+export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
 
 function sig_exit()
 {
@@ -96,8 +96,6 @@ shift $((OPTIND - 1));
 [ -z "$*" ] && set -- *.rl *.d
 
 ragel="@RAGEL_BIN@"
-
-export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"

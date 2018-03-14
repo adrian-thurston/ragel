@@ -1,0 +1,15 @@
+/Makefile.in
+/Makefile
+/aclocal.m4
+/autom4te.cache/
+/config.log
+/config.status
+/configure
+/stamp-h1
+/compile
+/depcomp
+/install-sh
+/missing
+/test-driver
+/config.h
+/config.h.in

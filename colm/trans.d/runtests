@@ -4,7 +4,6 @@
 make
 
 . ../subject.sh
-export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
 
 langs='asm crack c cs d go java julia ocaml'
 
