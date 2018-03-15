@@ -145,6 +145,8 @@ AC_SUBST(SED_SUBST)
 
 dnl write output files
 AC_OUTPUT([
+		Makefile
+		aapl/Makefile
 		ragel/Makefile
 		colm/Makefile
 ])

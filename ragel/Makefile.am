@@ -18,7 +18,7 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-COLM = @COLM@
+COLM = @COLM_BIN@
 RAGEL_LM = @RAGEL_LM@
 
 TESTS = runtests
@@ -58,7 +58,7 @@ trans_LDADD = -lcolm
 trans_LDFLAGS = @COLM_LDFLAGS@
 
 trans.c: trans.lm $(TRANS_DEPS)
-	$(COLM_BIN) -c -b trans_object -I$(RAGEL_LM) -o $@ $<
+	$(COLM) -c -b trans_object -I$(RAGEL_LM) -o $@ $<
 
 runtests: runtests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
