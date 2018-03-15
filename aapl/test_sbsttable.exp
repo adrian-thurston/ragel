@@ -1,0 +1,30 @@
+(1) maps to 3
+(0, 2) maps to 10
+(1, 2) maps to 10
+(1, 3) maps to 10
+(2, -10) maps to 10
+(2, 2) maps to 10
+KeyStruct(0)
+KeyStruct(KeyStruct &)
+ins res = 0xd1dcf8
+~KeyStruct = {0}
+KeyStruct(1)
+KeyStruct(KeyStruct &)
+ins res = 0xd1dd00
+~KeyStruct = {1}
+~KeyStruct = {0}
+~KeyStruct = {1}
+6
+6
+0
+TEST 5
+1
+2
+3
+1
+1
+2
+2
+2
+3
+3

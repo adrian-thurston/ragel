@@ -2,6 +2,7 @@
 /Makefile
 /*.o
 /.deps
+/*.out
 /stress_allsort
 /stress_avlimap
 /stress_avlimel

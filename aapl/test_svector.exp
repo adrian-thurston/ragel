@@ -1,0 +1,96 @@
+2
+10
+11
+10
+11
+10
+0
+3
+8
+NoisyData::NoisyData()
+NoisyData::NoisyData()
+NoisyData::NoisyData(int)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::~NoisyData()
+NoisyData::NoisyData(int)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::~NoisyData()
+NoisyData::NoisyData(int)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::~NoisyData()
+NoisyData::NoisyData(int)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::NoisyData(const NoisyData&)
+NoisyData::~NoisyData()
+3
+4
+4
+4
+4
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+NoisyData::~NoisyData()
+Iterator Default Constructor
+0 1 0 1 0 0
+Zero Items
+0 1 0 1 0 0
+0 1 0 1 0 0
+0 1 0 1 0 0
+0 1 0 1 0 0
+0 1 0 1 0 0
+0 1 0 1 0 0
+One Item
+1 0 1 0 1 1
+1 0 1 0 1 1
+1 0 1 0 1 1
+1 0 1 0 1 1
+1 0 1 0 1 1
+1 0 1 0 1 1
+Two Items
+1 0 1 0 1 0
+1 0 1 0 1 0
+1 0 1 0 0 1
+1 0 1 0 1 0
+1 0 1 0 1 0
+1 0 1 0 0 1
+test1
+1
+2
+3
+4
+test2
+1
+2
+3
+4
+test3
+4
+3
+2
+1
+test4
+1
+2
+3
+4
+test5
+1
+2
+3
+4
+test6
+4
+3
+2
+1
+testConstructor
