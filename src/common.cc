@@ -27,6 +27,18 @@
 #include <assert.h>
 #include "ragel.h"
 
+/*
+ * C
+ */
+
+const char *c_defaultOutFn( const char *inputFileName )
+{
+	const char *ext = findFileExtension( inputFileName );
+	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+		return fileNameFromStem( inputFileName, ".h" );
+	else
+		return fileNameFromStem( inputFileName, ".c" );
+}
 
 HostType hostTypesC[] =
 {
@@ -40,6 +52,50 @@ HostType hostTypesC[] =
 	{ "unsigned", "long",  "ulong",   false,  true,  false,  0, 0,                  0, ULONG_MAX,  sizeof(unsigned long) },
 };
 
+const HostLang hostLangC = {
+	"C",
+	"-C",
+	HostLang::C,
+	hostTypesC, 8,
+	hostTypesC+0,
+	true,
+	false,
+	"c",
+	&c_defaultOutFn
+};
+
+/*
+ * ASM
+ */
+const char *asm_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".s" );
+}
+
+const HostLang hostLangAsm = {
+	"ASM",
+	"--asm",
+	HostLang::Asm,
+	hostTypesC, 8,
+	hostTypesC+0,
+	true,
+	false,
+	"no-lang",
+	&asm_defaultOutFn
+};
+
+/*
+ * D
+ */
+
+const char *d_defaultOutFn( const char *inputFileName )
+{
+	const char *ext = findFileExtension( inputFileName );
+	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+		return fileNameFromStem( inputFileName, ".h" );
+	else
+		return fileNameFromStem( inputFileName, ".d" );
+}
 
 HostType hostTypesD[] =
 {
@@ -53,6 +109,27 @@ HostType hostTypesD[] =
 	{ "uint",    0,  "uint",    false,  true,  false,  0, 0,                   0, UINT_MAX,    4 },
 	{ "dchar",   0,  "dchar",   false,  true,  false,  0, 0,                   0, UINT_MAX,    4 },
 };
+
+const HostLang hostLangD = {
+	"D",
+	"-D",
+	HostLang::D,
+	hostTypesD, 9,
+	hostTypesD+2,
+	true,
+	true,
+	"d",
+	&d_defaultOutFn
+};
+
+/*
+ * Go
+ */
+
+const char *go_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".go" );
+}
 
 HostType hostTypesGo[] = 
 {
@@ -68,6 +145,27 @@ HostType hostTypesGo[] =
 	{ "rune",    0,  "int32",   true,   true,  true,   S32BIT_MIN, S32BIT_MAX,  0, 0,                    4 },
 };
 
+const HostLang hostLangGo = {
+	"Go",
+	"-Z",
+	HostLang::Go,
+	hostTypesGo, 10,
+	hostTypesGo+0,
+	false,
+	true,
+	"go",
+	&go_defaultOutFn
+};
+
+/*
+ * Java
+ */
+
+const char *java_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".java" );
+}
+
 HostType hostTypesJava[] = 
 {
 	{ "byte",    0,  "byte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
@@ -75,6 +173,31 @@ HostType hostTypesJava[] =
 	{ "char",    0,  "char",   false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },
 	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },
 };
+
+const HostLang hostLangJava = {
+	"Java",
+	"-J",
+	HostLang::Java,
+	hostTypesJava, 4,
+	hostTypesJava+2,
+	false,
+	true,
+	"java",
+	&java_defaultOutFn
+};
+
+/*
+ * C#
+ */
+
+const char *csharp_defaultOutFn( const char *inputFileName )
+{
+	const char *ext = findFileExtension( inputFileName );
+	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+		return fileNameFromStem( inputFileName, ".h" );
+	else
+		return fileNameFromStem( inputFileName, ".cs" );
+}
 
 HostType hostTypesCSharp[] =
 {
@@ -89,10 +212,50 @@ HostType hostTypesCSharp[] =
 	{ "ulong",   0,  "ulong",   false,  true,  false,  0, 0,                   0, ULONG_MAX,   8 },
 };
 
+const HostLang hostLangCSharp = {
+	"C#",
+	"-A",
+	HostLang::CSharp,
+	hostTypesCSharp, 9,
+	hostTypesCSharp+4,
+	true,
+	true,
+	"csharp",
+	&csharp_defaultOutFn
+};
+
+/*
+ * OCaml
+ */
+const char *ocaml_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".ml" );
+}
+
 HostType hostTypesOCaml[] =
 {
 	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
 };
+
+const HostLang hostLangOCaml = {
+	"OCaml",
+	"-O",
+	HostLang::OCaml,
+	hostTypesOCaml, 1,
+	hostTypesOCaml+0,
+	false,
+	true,
+	"ocaml",
+	&ocaml_defaultOutFn
+};
+
+/*
+ * Crack
+ */
+const char *crack_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".crk" );
+}
 
 HostType hostTypesCrack[] = 
 {
@@ -103,15 +266,76 @@ HostType hostTypesCrack[] =
 	{ "uint",    0,  "uint",     false,  true,  false,  0, 0,                     0, UINT_MAX,     sizeof(int) },  
 };
 
+const HostLang hostLangCrack = {
+	"Crack",
+	"-K",
+	HostLang::Crack,
+	hostTypesCrack, 5,
+	hostTypesCrack+0,
+	true,
+	true,
+	"crack",
+	&crack_defaultOutFn
+};
+
+/*
+ * Rust
+ */
+const char *rust_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".rs" );
+}
+
 HostType hostTypesRust[] =
 {
 	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
 };
 
+const HostLang hostLangRust = {
+	"Rust",
+	"-U",
+	HostLang::Rust,
+	hostTypesRust, 1,
+	hostTypesRust+0,
+	false,
+	true,
+	"rust",
+	&rust_defaultOutFn
+};
+
+/*
+ * Julia
+ */
+const char *julia_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".jl" );
+}
+
 HostType hostTypesJulia[] =
 {
 	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
 };
+
+const HostLang hostLangJulia = {
+	"Julia",
+	"-Y",
+	HostLang::Julia,
+	hostTypesJulia, 1,
+	hostTypesJulia+0,
+	false,
+	true,
+	"julia",
+	&julia_defaultOutFn
+};
+
+/*
+ * JavaScript
+ */
+
+const char *js_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".js" );
+}
 
 HostType hostTypesJS[] =
 {
@@ -124,116 +348,6 @@ HostType hostTypesJS[] =
 	{ "number", 0, "number",  true,   true,  false,  LONG_MIN,  LONG_MAX,   0, 0,          8 },
 };
 
-const HostLang hostLangC = {
-	"C",
-	"-C",
-	HostLang::C,
-	hostTypesC, 8,
-	hostTypesC+0,
-	true,
-	false,
-	"c"
-};
-
-const HostLang hostLangAsm = {
-	"ASM",
-	"--asm",
-	HostLang::Asm,
-	hostTypesC, 8,
-	hostTypesC+0,
-	true,
-	false,
-	"no-lang"
-};
-
-const HostLang hostLangD = {
-	"D",
-	"-D",
-	HostLang::D,
-	hostTypesD, 9,
-	hostTypesD+2,
-	true,
-	true,
-	"d"
-};
-
-const HostLang hostLangGo = {
-	"Go",
-	"-Z",
-	HostLang::Go,
-	hostTypesGo, 10,
-	hostTypesGo+0,
-	false,
-	true,
-	"go"
-};
-
-const HostLang hostLangJava = {
-	"Java",
-	"-J",
-	HostLang::Java,
-	hostTypesJava, 4,
-	hostTypesJava+2,
-	false,
-	true,
-	"java"
-};
-
-const HostLang hostLangCSharp = {
-	"C#",
-	"-A",
-	HostLang::CSharp,
-	hostTypesCSharp, 9,
-	hostTypesCSharp+4,
-	true,
-	true,
-	"csharp"
-};
-
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
-	HostLang::OCaml,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
-	false,
-	true,
-	"ocaml"
-};
-
-const HostLang hostLangCrack = {
-	"Crack",
-	"-K",
-	HostLang::Crack,
-	hostTypesCrack, 5,
-	hostTypesCrack+0,
-	true,
-	true,
-	"crack"
-};
-
-const HostLang hostLangRust = {
-	"Rust",
-	"-U",
-	HostLang::Rust,
-	hostTypesRust, 1,
-	hostTypesRust+0,
-	false,
-	true,
-	"rust"
-};
-
-const HostLang hostLangJulia = {
-	"Julia",
-	"-Y",
-	HostLang::Julia,
-	hostTypesJulia, 1,
-	hostTypesJulia+0,
-	false,
-	true,
-	"julia"
-};
-
 const HostLang hostLangJS = {
 	"JavaScript",
 	"-P",
@@ -242,7 +356,8 @@ const HostLang hostLangJS = {
 	hostTypesJS+1,
 	false,
 	true,
-	"js"
+	"js",
+	&js_defaultOutFn
 };
 
 const HostLang *hostLangs[] = {
@@ -258,7 +373,6 @@ const HostLang *hostLangs[] = {
 	&hostLangJulia,
 	&hostLangJS,
 };
-
 
 const int numHostLangs = sizeof(hostLangs)/sizeof(hostLangs[0]);
 

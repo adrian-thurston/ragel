@@ -1,4 +1,4 @@
-DIST_SUBDIRS = host-ruby
+SUBDIRS = host-ruby
 
 COLM        = @COLM@
 COLM_LD     = @COLM_LD@

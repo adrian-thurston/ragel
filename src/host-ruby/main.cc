@@ -35,6 +35,11 @@ static HostType hostTypesRuby[] =
 	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0, 4 },
 };
 
+const char *ruby_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".rb" );
+}
+
 static const HostLang hostLangRuby = {
 	"Ruby",
 	"-R",
@@ -43,9 +48,9 @@ static const HostLang hostLangRuby = {
 	hostTypesRuby+0,
 	false,
 	true,
-	"ruby"
+	"ruby",
+	&ruby_defaultOutFn
 };
-
 
 int run_rlhc( int argc, const char **argv )
 {

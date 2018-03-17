@@ -322,18 +322,6 @@ struct InputData
 	void prepareSingleMachine();
 	void prepareAllMachines();
 
-	void cdDefaultFileName( const char *inputFile );
-	void goDefaultFileName( const char *inputFile );
-	void javaDefaultFileName( const char *inputFile );
-	void rubyDefaultFileName( const char *inputFile );
-	void csharpDefaultFileName( const char *inputFile );
-	void ocamlDefaultFileName( const char *inputFile );
-	void crackDefaultFileName( const char *inputFile );
-	void asmDefaultFileName( const char *inputFile );
-	void rustDefaultFileName( const char *inputFile );
-	void juliaDefaultFileName( const char *inputFile );
-	void jsDefaultFileName( const char *inputFile );
-
 	void writeOutput( InputItem *ii );
 	void writeLanguage( std::ostream &out );
 

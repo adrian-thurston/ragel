@@ -28,6 +28,7 @@
 #include "dlist.h"
 
 struct colm_location;
+struct InputData;
 
 #define S8BIT_MIN  -128
 #define S8BIT_MAX  127
@@ -227,6 +228,7 @@ struct HostLang
 	bool explicitUnsigned;
 	bool rlhcRequired;
 	const char *rlhcArg;
+	const char *(*defaultOutFn)( const char *inputFileName );
 };
 
 extern const HostLang hostLangC;
