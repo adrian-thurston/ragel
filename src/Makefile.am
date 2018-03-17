@@ -24,6 +24,7 @@ pkginclude_HEADERS = \
 
 nodist_pkginclude_HEADERS = config.h
 
+data_DATA = ragel.lm
 
 #
 # libfsm
