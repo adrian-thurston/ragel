@@ -55,9 +55,6 @@ dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
 	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc
 
-nodist_libragel_la_SOURCES = \
-	ldparse.c ldreduce.cc
-
 #
 # ragel program.
 #
@@ -74,8 +71,7 @@ ragel_DEPENDENCIES = libragel.la libfsm.la $(COLM_LIBDEP)
 
 BUILT_SOURCES = \
 	version.h \
-	parse.c rlreduce.cc \
-	ldparse.c ldreduce.cc
+	parse.c rlreduce.cc
 
 if WITH_RAGEL_KELBT
 nodist_ragel_SOURCES += \
@@ -91,7 +87,6 @@ version.h: Makefile
 
 EXTRA_DIST = \
 	$(RAGEL_LM) \
-	langdesc.lm \
 	rlscan.rl \
 	rlparse.kh \
 	rlparse.kl
@@ -112,11 +107,6 @@ parse.c: $(RAGEL_LM) $(COLM_BINDEP)
 	$(COLM) -c -b rl_parse -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: parse.c
-
-ldparse.c: langdesc.lm $(COLM_BINDEP)
-	$(COLM) -c -b ld_parse -o $@ -m ldreduce.cc $<
-
-ldreduce.cc: ldparse.c
 
 RLHC = \
 	rlhc-host.lm \

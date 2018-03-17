@@ -28,6 +28,25 @@
 
 extern struct colm_sections rlhc;
 
+/* What are the appropriate types for ruby? */
+static HostType hostTypesRuby[] = 
+{
+	{ "char",    0,  "char",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0, 1 },
+	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0, 4 },
+};
+
+static const HostLang hostLangRuby = {
+	"Ruby",
+	"-R",
+	HostLang::Ruby,
+	hostTypesRuby, 2,
+	hostTypesRuby+0,
+	false,
+	true,
+	"ruby"
+};
+
+
 int run_rlhc( int argc, const char **argv )
 {
 	struct colm_program *prg;

@@ -76,13 +76,6 @@ HostType hostTypesJava[] =
 	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },
 };
 
-/* What are the appropriate types for ruby? */
-HostType hostTypesRuby[] = 
-{
-	{ "char",    0,  "char",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0, 1 },
-	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0, 4 },
-};
-
 HostType hostTypesCSharp[] =
 {
 	{ "sbyte",   0,  "sbyte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
@@ -186,17 +179,6 @@ const HostLang hostLangJava = {
 	"java"
 };
 
-const HostLang hostLangRuby = {
-	"Ruby",
-	"-R",
-	HostLang::Ruby,
-	hostTypesRuby, 2,
-	hostTypesRuby+0,
-	false,
-	true,
-	"ruby"
-};
-
 const HostLang hostLangCSharp = {
 	"C#",
 	"-A",
@@ -269,7 +251,6 @@ const HostLang *hostLangs[] = {
 	&hostLangD,
 	&hostLangGo,
 	&hostLangJava,
-	&hostLangRuby,
 	&hostLangCSharp,
 	&hostLangOCaml,
 	&hostLangRust,
