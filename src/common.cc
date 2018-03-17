@@ -61,7 +61,8 @@ const HostLang hostLangC = {
 	true,
 	false,
 	"c",
-	&c_defaultOutFn
+	&c_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -81,7 +82,8 @@ const HostLang hostLangAsm = {
 	true,
 	false,
 	"no-lang",
-	&asm_defaultOutFn
+	&asm_defaultOutFn,
+	&asm_makeCodeGen
 };
 
 /*
@@ -119,7 +121,8 @@ const HostLang hostLangD = {
 	true,
 	true,
 	"d",
-	&d_defaultOutFn
+	&d_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -154,7 +157,8 @@ const HostLang hostLangGo = {
 	false,
 	true,
 	"go",
-	&go_defaultOutFn
+	&go_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -183,7 +187,8 @@ const HostLang hostLangJava = {
 	false,
 	true,
 	"java",
-	&java_defaultOutFn
+	&java_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -221,7 +226,8 @@ const HostLang hostLangCSharp = {
 	true,
 	true,
 	"csharp",
-	&csharp_defaultOutFn
+	&csharp_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -246,7 +252,8 @@ const HostLang hostLangOCaml = {
 	false,
 	true,
 	"ocaml",
-	&ocaml_defaultOutFn
+	&ocaml_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -275,7 +282,8 @@ const HostLang hostLangCrack = {
 	true,
 	true,
 	"crack",
-	&crack_defaultOutFn
+	&crack_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -300,7 +308,8 @@ const HostLang hostLangRust = {
 	false,
 	true,
 	"rust",
-	&rust_defaultOutFn
+	&rust_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -325,7 +334,8 @@ const HostLang hostLangJulia = {
 	false,
 	true,
 	"julia",
-	&julia_defaultOutFn
+	&julia_defaultOutFn,
+	&makeCodeGen
 };
 
 /*
@@ -357,7 +367,8 @@ const HostLang hostLangJS = {
 	false,
 	true,
 	"js",
-	&js_defaultOutFn
+	&js_defaultOutFn,
+	&makeCodeGen
 };
 
 const HostLang *hostLangs[] = {

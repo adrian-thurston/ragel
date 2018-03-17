@@ -1448,7 +1448,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 	args.lineDirectives = !id->noLineDirectives;
 
 	/* Write out with it. */
-	cgd = makeCodeGen( hostLang, args );
+	cgd = (*hostLang->makeCodeGen)( hostLang, args );
 
 	/* Code generation anlysis step. */
 	cgd->genAnalysis();

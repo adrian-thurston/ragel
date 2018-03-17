@@ -28,7 +28,11 @@
 #include "dlist.h"
 
 struct colm_location;
+
 struct InputData;
+struct CodeGenData;
+struct HostLang;
+struct CodeGenArgs;
 
 #define S8BIT_MIN  -128
 #define S8BIT_MAX  127
@@ -229,6 +233,7 @@ struct HostLang
 	bool rlhcRequired;
 	const char *rlhcArg;
 	const char *(*defaultOutFn)( const char *inputFileName );
+	CodeGenData *(*makeCodeGen)( const HostLang *hostLang, const CodeGenArgs &args );
 };
 
 extern const HostLang hostLangC;
@@ -488,5 +493,8 @@ enum BackendFeature
 	GotoFeature,
 	VarFeature
 };
+
+CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
+CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 #endif
