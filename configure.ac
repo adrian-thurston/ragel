@@ -201,6 +201,7 @@ AC_OUTPUT([
 		Makefile
 		src/Makefile
 		src/host-ruby/Makefile
+		src/host-asm/Makefile
 		aapl/Makefile 
 		doc/Makefile
 		doc/ragel.1

@@ -226,7 +226,7 @@ void InputData::writeOutput( InputItem *ii )
 		case InputItem::HostData: {
 			switch ( backend ) {
 				case Direct:
-					if ( hostLang->lang == HostLang::C ) {
+					if ( hostLang->_lang == HostLang::C ) {
 						if ( ii->loc.fileName != 0 ) {
 							if ( !noLineDirectives ) {
 								*outStream << "\n#line " << ii->loc.line <<
@@ -697,37 +697,6 @@ void InputData::showBackends()
 	abortCompile( 0 );
 }
 
-void InputData::showStyles()
-{
-	switch ( hostLang->lang ) {
-	case HostLang::C:
-	case HostLang::D:
-	case HostLang::Go:
-		info() << "-T0 -T1 -F0 -F1 -G0 -G1 -G2" << endl;
-		break;
-	case HostLang::CSharp:
-		info() << "-T0 -T1 -F0 -F1 -G0 -G1" << endl;
-		break;
-	case HostLang::Asm:
-		info() << "-G2" << endl;
-		break;
-	case HostLang::Java:
-	case HostLang::Ruby:
-	case HostLang::OCaml:
-	case HostLang::Crack:
-	case HostLang::Rust:
-	case HostLang::Julia:
-		info() << "-T0 -T1 -F0 -F1" << endl;
-		break;
-	case HostLang::JS:
-		info() << "-T0" << endl;
-		break;
-
-	}
-
-	abortCompile( 0 );
-}
-
 InputLoc makeInputLoc( const char *fileName, int line, int col )
 {
 	InputLoc loc( fileName, line, col );
@@ -747,8 +716,6 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 void InputData::parseArgs( int argc, const char **argv )
 {
 	ParamCheck pc( "PD:r:o:dnmleabjkS:M:I:CEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
-
-	bool showStylesOpt = false;
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -954,10 +921,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					frontend = ReduceBased;
 					frontendSpecified = true;
 				}
-				else if ( strcmp( arg, "asm" ) == 0 )
-					hostLang = &hostLangAsm;
-				else if ( strcmp( arg, "gnu-asm-x86-64-sys-v" ) == 0 )
-					hostLang = &hostLangAsm;
 				else if ( strcmp( arg, "direct" ) == 0 ) {
 					backend = Direct;
 					backendSpecified = true;
@@ -996,8 +959,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					showFrontends();
 				else if ( strcmp( arg, "supported-backends" ) == 0 )
 					showBackends();
-				else if ( strcmp( arg, "supported-styles" ) == 0 )
-					showStylesOpt = true;
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
 				else if ( strcmp( arg, "prior-interaction" ) == 0 )
@@ -1096,21 +1057,6 @@ void InputData::parseArgs( int argc, const char **argv )
 			break;
 		}
 	}
-
-	if ( showStylesOpt )
-		showStyles();
-}
-
-bool langSupportsGoto( const HostLang *hostLang )
-{
-	if ( hostLang->lang == HostLang::Ruby ||
-			hostLang->lang == HostLang::OCaml ||
-			hostLang->lang == HostLang::Rust ||
-			hostLang->lang == HostLang::Crack ||
-			hostLang->lang == HostLang::Julia )
-		return false;
-	
-	return true;
 }
 
 void InputData::loadHistogram()
@@ -1182,20 +1128,6 @@ void InputData::checkArgs()
 
 	if ( !frontendSpecified )
 		frontend = ReduceBased;
-
-	if ( !backendSpecified ) {
-		if ( hostLang->lang == HostLang::C || hostLang->lang == HostLang::Asm )
-			backend = Direct;
-		else
-			backend = Translated;
-	}
-
-	if ( !featureSpecified ) {
-		if ( langSupportsGoto( hostLang ) )
-			backendFeature = GotoFeature;
-		else
-			backendFeature = VarFeature;
-	}
 
 	if ( checkBreadth ) {
 		if ( histogramFn != 0 )

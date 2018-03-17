@@ -66,27 +66,6 @@ const HostLang hostLangC = {
 };
 
 /*
- * ASM
- */
-const char *asm_defaultOutFn( const char *inputFileName )
-{
-	return fileNameFromStem( inputFileName, ".s" );
-}
-
-const HostLang hostLangAsm = {
-	"ASM",
-	"--asm",
-	HostLang::Asm,
-	hostTypesC, 8,
-	hostTypesC+0,
-	true,
-	false,
-	"no-lang",
-	&asm_defaultOutFn,
-	&asm_makeCodeGen
-};
-
-/*
  * D
  */
 
@@ -373,7 +352,6 @@ const HostLang hostLangJS = {
 
 const HostLang *hostLangs[] = {
 	&hostLangC,
-	&hostLangAsm,
 	&hostLangD,
 	&hostLangGo,
 	&hostLangJava,

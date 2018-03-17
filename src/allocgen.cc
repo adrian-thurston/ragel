@@ -41,12 +41,6 @@
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"
-#include "asm.h"
-
-CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
-{
-	return new AsmCodeGen( args );
-}
 
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )

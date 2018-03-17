@@ -213,11 +213,9 @@ struct HostLang
 		D,
 		Go,
 		Java,
-		Ruby,
 		CSharp,
 		OCaml,
 		Crack,
-		Asm,
 		Rust,
 		Julia,
 		JS
@@ -225,7 +223,7 @@ struct HostLang
 
 	const char *name;
 	const char *arg;
-	Lang lang;
+	Lang _lang;
 	HostType *hostTypes;
 	int numHostTypes;
 	HostType *defaultAlphType;

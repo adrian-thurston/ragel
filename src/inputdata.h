@@ -218,7 +218,6 @@ struct InputData
 	void showHostLangArgs();
 	void showFrontends();
 	void showBackends();
-	void showStyles();
 
 	std::string dirName;
 
