@@ -201,47 +201,41 @@ void InputData::jsDefaultFileName( const char *inputFile )
 
 void InputData::makeDefaultFileName()
 {
-	if ( backend == Translated ) {
-		if ( outputFileName == 0 )
-			outputFileName = fileNameFromStem( inputFileName, ".ri" );
-	}
-	else {
-		switch ( hostLang->lang ) {
-			case HostLang::C:
-			case HostLang::D:
-				cdDefaultFileName( inputFileName );
-				break;
-			case HostLang::Java:
-				javaDefaultFileName( inputFileName );
-				break;
-			case HostLang::Go:
-				goDefaultFileName( inputFileName );
-				break;
-			case HostLang::Ruby:
-				rubyDefaultFileName( inputFileName );
-				break;
-			case HostLang::CSharp:
-				csharpDefaultFileName( inputFileName );
-				break;
-			case HostLang::OCaml:
-				ocamlDefaultFileName( inputFileName );
-				break;
-			case HostLang::Crack:
-				crackDefaultFileName( inputFileName );
-				break;
-			case HostLang::Asm:
-				asmDefaultFileName( inputFileName );
-				break;
-			case HostLang::Rust:
-				rustDefaultFileName( inputFileName );
-				break;
-			case HostLang::Julia:
-				juliaDefaultFileName( inputFileName );
-				break;
-			case HostLang::JS:
-				jsDefaultFileName( inputFileName );
-				break;
-		}
+	switch ( hostLang->lang ) {
+		case HostLang::C:
+		case HostLang::D:
+			cdDefaultFileName( inputFileName );
+			break;
+		case HostLang::Java:
+			javaDefaultFileName( inputFileName );
+			break;
+		case HostLang::Go:
+			goDefaultFileName( inputFileName );
+			break;
+		case HostLang::Ruby:
+			rubyDefaultFileName( inputFileName );
+			break;
+		case HostLang::CSharp:
+			csharpDefaultFileName( inputFileName );
+			break;
+		case HostLang::OCaml:
+			ocamlDefaultFileName( inputFileName );
+			break;
+		case HostLang::Crack:
+			crackDefaultFileName( inputFileName );
+			break;
+		case HostLang::Asm:
+			asmDefaultFileName( inputFileName );
+			break;
+		case HostLang::Rust:
+			rustDefaultFileName( inputFileName );
+			break;
+		case HostLang::Julia:
+			juliaDefaultFileName( inputFileName );
+			break;
+		case HostLang::JS:
+			jsDefaultFileName( inputFileName );
+			break;
 	}
 }
 
@@ -543,11 +537,9 @@ void InputData::flushRemaining()
 
 void InputData::makeTranslateOutputFileName()
 {
-	if ( backend == Translated ) {
-		origOutputFileName = outputFileName;
-		outputFileName = fileNameFromStem( inputFileName, ".ri" );
-		genOutputFileName = outputFileName;
-	}
+	origOutputFileName = outputFileName;
+	outputFileName = fileNameFromStem( outputFileName, ".ri" );
+	genOutputFileName = outputFileName;
 }
 
 #ifdef WITH_RAGEL_KELBT
@@ -606,8 +598,6 @@ void InputData::processKelbt()
 		processDot();
 	}
 	else {
-		makeDefaultFileName();
-		makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
 		parseKelbt();
@@ -666,8 +656,6 @@ bool InputData::processReduce()
 		return true;
 	}
 	else {
-		makeDefaultFileName();
-		//makeTranslateOutputFileName();
 		createOutputStream();
 		openOutput();
 
@@ -1088,7 +1076,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				else if ( strcmp( arg, "rbx" ) == 0 )
 					rubyImpl = Rubinius;
 				else if ( strcmp( arg, "rlhc" ) == 0 )
-					rlhcShowCmd = true;
+					rlhc = true;
 				else if ( strcmp( arg, "no-intermediate" ) == 0 )
 					noIntermediate = true;
 #ifdef WITH_RAGEL_KELBT
@@ -1390,13 +1378,13 @@ int InputData::main( int argc, const char **argv )
 	try {
 		parseArgs( argc, argv );
 		checkArgs();
+		makeDefaultFileName();
 
 		if ( !process() )
 			abortCompile( 1 );
 	}
 	catch ( const AbortCompile &ac ) {
 		code = ac.code;
-
 	}
 
 	if ( comm.size() > 0 ) {

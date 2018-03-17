@@ -2,8 +2,7 @@
 /Makefile
 /.deps
 /.libs
-/rlrb
+/ragel-ruby
 /rlparse.c
 /rlreduce.cc
-/rlhc
 /rlhc.c

@@ -191,6 +191,7 @@ struct InputData
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
 		rubyImpl(MRI),
+		rlhc(false),
 		rlhcShowCmd(false),
 		noIntermediate(false),
 		frontendSpecified(false),
@@ -277,6 +278,7 @@ struct InputData
 	/* Target ruby impl */
 	RubyImplEnum rubyImpl;
 
+	bool rlhc;
 	bool rlhcShowCmd;
 	bool noIntermediate;
 

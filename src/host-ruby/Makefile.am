@@ -3,18 +3,18 @@ COLM_LD     = @COLM_LD@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 
-noinst_PROGRAMS = rlrb rlhc
+noinst_PROGRAMS = ragel-ruby
 
-rlrb_CPPFLAGS = -I$(top_srcdir)/aapl
+ragel_ruby_CPPFLAGS = -I$(top_srcdir)/aapl
 
-dist_rlrb_SOURCES = main.cc
+dist_ragel_ruby_SOURCES = main.cc rlhc.c
 
-nodist_rlrb_SOURCES = \
+nodist_ragel_ruby_SOURCES = \
 	rlparse.c rlreduce.cc
 
-rlrb_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
+ragel_ruby_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
-BUILT_SOURCES = rlparse.c rlreduce.cc
+BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
 rlparse.c: rlrb.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
@@ -22,5 +22,7 @@ rlparse.c: rlrb.lm $(COLM_BINDEP)
 rlreduce.cc: rlparse.c
 
 rlhc$(EXEEXT): rlhc.lm
-	$(COLM) -I .. -o $@ $<
+	$(COLM) -I.. -o $@ $<
 
+rlhc.c: rlhc.lm
+	$(COLM) -I.. -c -b rlhc -o $@ $<

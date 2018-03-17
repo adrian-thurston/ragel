@@ -51,7 +51,6 @@ namespace ruby_out
 		[_IN_ _EX_ item*]
 end
 
-
 global Parser: parser<ruby_out::ruby_out>
 
 void tok_list( TL: host::tok* )
@@ -495,25 +494,6 @@ void trans( Output: stream, Start: start )
 	}
 }
 
-str argvPop()
-{
-	A: list_el<str> = argv->pop_el()
-	return A->value
-}
-
-OutputFile: str = argvPop()
-InputFile: str = argvPop()
-#Lang: str = argvPop()
-
-Input: stream = open( InputFile, "r" )
-
-parse Start: start[ Input ]
-
-if ( !Start ) {
-	print( error, '\n' )
-	exit(1)
-}
-
 void assign_labels( Prog: ref<any> )
 {
 	N: int = 1
@@ -531,8 +511,23 @@ void assign_labels( Prog: ref<any> )
 	}
 }
 
+InputFile: str = argv->pop()
+OutputFile: str = argv->pop()
+
+#
+# Open input and parse
+#
+Input: stream = open( InputFile, "r" )
+parse Start: start[ Input ]
+if ( !Start ) {
+	print( error, '\n' )
+	exit(1)
+}
+
 assign_labels( Start )
 
+#
+# Translate
+#
 Output: stream = open( OutputFile, "w" )
-
 trans( Output, Start )
