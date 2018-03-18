@@ -49,7 +49,8 @@ static const HostLang hostLangRuby = {
 	false,
 	true,
 	"ruby",
-	&ruby_defaultOutFn
+	&ruby_defaultOutFn,
+	&makeCodeGen
 };
 
 int run_rlhc( int argc, const char **argv )

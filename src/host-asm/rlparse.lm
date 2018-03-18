@@ -1,7 +1,324 @@
 include 'ragel.lm'
 include 'reducer.lm'
-include 'host.lm'
-include 'hostred.lm'
+
+namespace inline
+	lex 
+		literal `fpc `fc  `fcurs `ftargs
+			`fentry `fhold `fexec `fgoto `fnext
+			`fcall `fret `fbreak `fncall `fnret `fnbreak
+
+		token ident /ident/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+		token dec_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/ c_comment | cpp_comment /
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		literal 
+			`{ `} `:: `* `, `( `) `;
+
+		token var_ref
+			/ "$" [a-zA-Z_][a-zA-Z_0-9]* /
+			{
+				if GblActionParams 
+				{
+					input->push( make_token(
+							typeid<var_ref>, input->pull( match_length ) ) )
+				}
+				else
+				{
+					# Just pull one char. Don't consume the word because it may
+					# be a keyword.
+					input->push( make_token(
+							typeid<c_any>, input->pull( 1 ) ) )
+				}
+			}
+
+		token c_any
+			/ any /
+	end
+
+end
+
+
+namespace host
+	lex 
+		literal `%%{
+
+		token close_inc /'}--%%'/
+		{
+			input->push( make_token( typeid<close_inc>, input->pull( match_length ) ) )
+			restoreGlobals()
+		}
+
+		token close_imp /'}++%%'/
+		{
+			input->push( make_token( typeid<close_imp>, input->pull( match_length ) ) )
+			restoreGlobals()
+		}
+
+		token slr / '%%' [^{] [^\n]* '\n' /
+		{
+			# Translates single line to multi-line
+			input->pull( 2 )
+			R: str = input->pull( match_length - 3 )
+			input->push( "\n}%%" )
+			input->push( R )
+			input->push( "%%{" )
+		}
+
+		rl NL / '\n' /
+
+		rl s_literal
+			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
+
+		rl d_literal
+			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+		literal `define `=
+
+		token ident /ident "'"?/
+		token number /digit+/
+		token hex_number /'0x' [0-9a-fA-F]+/
+
+		token comment
+			/ c_comment | cpp_comment /
+
+		token string
+			/ s_literal | d_literal /
+
+		token whitespace
+			/ ( [ \t] | NL )+ /
+
+		token c_any / any /
+	end
+
+	token no_match //
+
+	def tok
+		[no_match ident whitespace number] :ImportNum
+	|	[no_match ident whitespace string] :ImportStr
+	|	[no_match ident] :Else
+	|	[`define whitespace ident whitespace? number]  :ImportDefNum
+	|	[`define whitespace ident whitespace? string]  :ImportDefStr
+	|	[ident whitespace? `= whitespace? number]      :ImportAssignNum
+	|	[ident whitespace? `= whitespace? string]      :ImportAssignStr
+	|	[`define]              :Def
+	|	[`=]                   :Eq
+	|	[ident] :Ident
+	|	[number] :Number
+	|	[hex_number] :HexNumber
+	|	[comment] :Comment
+	|	[string] :String
+	|	[whitespace] :Whitespace
+	|	[c_any] :Any
+		{
+			NM: no_match = make_token( typeid<no_match>, "" )
+			I: ident = make_token( typeid<ident>, $lhs.c_any )
+			lhs = cons tok [NM I]
+		}
+end
+
+reduction TopLevel
+
+	# Pass Through.
+	# def tok
+	#	[`define ident number] :Def1
+	# |	[`define ident string] :Def2
+	# |	[ident `= number]      :Ass1
+	# |	[ident `= string]      :Ass2
+	#	[`define whitespace ident whitespace? number]  :ImportDefNum
+	# |	[`define whitespace ident whitespace? string]  :ImportDefStr
+	# |	[ident whitespace? `= whitespace? number]      :ImportAssignNum
+	# |	[ident whitespace? `= whitespace? string]      :ImportAssignStr
+	# |	[`define]              :Def
+	# |	[`=]                   :Eq
+	# |	[ident] :Ident
+	# |	[number] :Number
+	# |	[hex_number] :HexNumber
+	# |	[comment] :Comment
+	# |	[string] :String
+	# |	[whitespace] :Whitespace
+	# |	[c_any] :Any
+
+	host::tok  :ImportDefNum
+	{
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @number,
+					false /* $number->neg */, $number->data,
+					$number->length, Literal::Number );
+
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( "define ", 7 );
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( " ", 1 );
+				id->curItem->data.write( $number->data, $number->length );
+			}
+		}
+	}
+	host::tok  :ImportDefStr
+	{
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @string, false,
+					$string->data, $string->length, Literal::LitString );
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( "define ", 7 );
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( " ", 1 );
+				id->curItem->data.write( $string->data, $string->length );
+			}
+		}
+	}
+	host::tok  :ImportAssignNum
+	{
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @number,
+					false /*$number->neg */, $number->data,
+					$number->length, Literal::Number );
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( "=", 1 );
+				id->curItem->data.write( $number->data, $number->length );
+			}
+		}
+	}
+	host::tok  :ImportAssignStr
+	{
+		if ( isImport )
+		{
+			Literal *lit = new Literal( @string, false,
+					$string->data, $string->length, Literal::LitString );
+
+			string name( $ident->data, $ident->length );
+			import( @ident, name, lit );
+		}
+		else
+		{
+			if ( includeDepth == 0 ) {
+				id->curItem->data.write( $ident->data, $ident->length );
+				id->curItem->data.write( "=", 1 );
+				id->curItem->data.write( $string->data, $string->length );
+			}
+		}
+	}
+	host::tok  :Def
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( "define", 6 );
+
+	}
+	host::tok  :Eq
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( "=", 1 );
+	}
+
+	host::tok :Ident
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $ident->data, $ident->length );
+	}
+
+	host::tok :Number
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $number->data, $number->length );
+	}
+
+	host::tok :HexNumber
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $hex_number->data, $hex_number->length );
+	}
+
+	host::tok :Comment
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $comment->data, $comment->length );
+	}
+
+	host::tok :String
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $string->data, $string->length );
+	}
+
+	host::tok :Whitespace
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $whitespace->data, $whitespace->length );
+	}
+
+	host::tok :Any
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $c_any->data, $c_any->length );
+	}
+	host::tok :Else
+	{
+		if ( !isImport && includeDepth == 0 )
+			id->curItem->data.write( $ident->data, $ident->length );
+	}
+
+	host::section :MultiLine
+	{
+		if ( !isImport && includeDepth == 0 ) {
+			InputItem *inputItem = new InputItem;
+			inputItem->type = InputItem::EndSection;
+			inputItem->loc = @5;
+			id->inputItems.append( inputItem );
+
+			if ( section != 0 ) {
+				inputItem->section = section;
+				section->lastReference = inputItem;
+			}
+
+			/* The end section may include a newline on the end, so
+			 * we use the last line, which will count the newline. */
+			inputItem = new InputItem;
+			inputItem->type = InputItem::HostData;
+			inputItem->loc = @5;
+			if ( inputItem->loc.fileName == 0 )
+				inputItem->loc = @1;
+						
+			id->inputItems.append( inputItem );
+
+			/* Record the parse data and move over the end section. */
+			id->curItem = id->curItem->next;
+			id->curItem->pd = pd;
+
+			/* Move over the host data. */
+			id->curItem = id->curItem->next;
+		}
+	}
+
+end
+
 
 export RagelError: str
 

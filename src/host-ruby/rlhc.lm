@@ -1,4 +1,4 @@
-include 'ri.lm'
+include 'ril.lm'
 
 namespace ruby_out
 	token _IN_ /''/

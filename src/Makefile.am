@@ -100,7 +100,6 @@ endif
 RAGEL_LM = \
 	rlparse.lm \
 	ragel.lm \
-	host.lm \
 	reducer.lm
 
 parse.c: $(RAGEL_LM) $(COLM_BINDEP)

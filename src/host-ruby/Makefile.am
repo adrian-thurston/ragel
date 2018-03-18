@@ -16,7 +16,7 @@ ragel_ruby_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
-rlparse.c: rlrb.lm $(COLM_BINDEP)
+rlparse.c: rlparse.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: rlparse.c
