@@ -333,13 +333,6 @@ while ( argv->length > 0 ) {
 	GblIncludePaths->push_tail_el( A )
 }
 
-if ( arg0 == "rlparse" ) {
-	Stream: stream = open( GblFileName, "r" )
-	reduce TopLevel start[ Stream ]
-	RagelError = error
-}
-elsif ( arg0 == "rlpostfix" ) {
-	Stream: stream = open( GblFileName, "r" )
-	read_reduce TopLevel start[ Stream ]
-	RagelError = error
-}
+Stream: stream = open( GblFileName, "r" )
+reduce TopLevel start[ Stream ]
+RagelError = error

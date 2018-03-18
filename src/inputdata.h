@@ -173,8 +173,6 @@ struct InputData
 	: 
 		inputFileName(0),
 		outputFileName(0),
-		commFileName(0),
-		langDescFileName(0),
 		nextMachineId(0),
 		inStream(0),
 		outStream(0),
@@ -206,8 +204,7 @@ struct InputData
 		histogramFn(0),
 		histogram(0),
 		input(0),
-		forceLibRagel(false),
-		postfix(false)
+		forceLibRagel(false)
 	{}
 
 	~InputData();
@@ -224,8 +221,6 @@ struct InputData
 	/* The name of the root section, this does not change during an include. */
 	const char *inputFileName;
 	const char *outputFileName;
-	const char *commFileName;
-	const char *langDescFileName;
 
 	string comm;
 
@@ -304,7 +299,6 @@ struct InputData
 	Vector<const char**> streamFileNames;
 
 	bool forceLibRagel;
-	bool postfix;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();

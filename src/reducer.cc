@@ -228,28 +228,3 @@ void TopLevel::reduceFile( const char *cmd, const char *inputFileName )
 
 	delete[] argv;
 }
-
-void LangDesc::reduceFile( const char *cmd, const char *inputFileName )
-{
-	const char *argv[3];
-	argv[0] = cmd;
-	argv[1] = inputFileName;
-	argv[2] = 0;
-
-	colm_program *program = colm_new_program( &rl_parse );
-	colm_set_debug( program, 0 );
-	colm_set_reduce_ctx( program, this );
-	colm_run_program( program, 2, argv );
-
-	int length = 0;
-	const char *err = colm_error( program, &length );
-	if ( err != 0 ) {
-		std::cout << "error" << std::endl;
-//		id->error_plain() << string( err, length ) << std::endl;
-	}
-
-	colm_delete_program( program );
-}
-
-
-

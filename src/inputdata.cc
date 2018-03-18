@@ -497,7 +497,7 @@ bool InputData::parseReduce()
 	lastFlush = inputItems.head;
 
 
-	topLevel->reduceFile( ( postfix ? "rlpostfix" : "rlparse" ), inputFileName );
+	topLevel->reduceFile( "rlparse", inputFileName );
 
 	if ( errorCount )
 		return false;
@@ -518,11 +518,6 @@ bool InputData::processReduce()
 	else {
 		createOutputStream();
 		openOutput();
-
-		if ( langDescFileName != 0 ) {
-			LangDesc ld;
-			ld.reduceFile( "langdesc", langDescFileName );
-		}
 
 		bool success = parseReduce();
 		if ( success )
@@ -715,7 +710,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "PD:r:o:dnmleabjkS:M:I:CEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "r:o:dnmleabjkS:M:I:CEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -749,18 +744,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					outputFileName = new char[strlen(pc.paramArg)+1];
 					strcpy( (char*)outputFileName, pc.paramArg );
 				}
-				break;
-
-			case 'P':
-				postfix = true;
-				break;
-
-			case 'D':
-				langDescFileName = pc.paramArg;
-				break;
-
-			case 'r':
-				commFileName = pc.paramArg;
 				break;
 
 			/* Flag for turning off duplicate action removal. */
@@ -1177,17 +1160,6 @@ int InputData::main( int argc, const char **argv )
 	}
 	catch ( const AbortCompile &ac ) {
 		code = ac.code;
-	}
-
-	if ( comm.size() > 0 ) {
-		if ( commFileName == 0 ) {
-			std::cout << comm;
-		}
-		else {
-			ofstream ofs( commFileName, std::fstream::app );
-			ofs << comm;
-			ofs.close();
-		}
 	}
 
 	return code;
