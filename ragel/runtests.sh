@@ -86,7 +86,7 @@ done
 [ -z "$minflags" ]    && minflags="-n -m -l -e"
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]   && langflags="-C --asm -R"
+[ -z "$langflags" ]   && langflags="-C --asm -R -Y"
 [ -z "$frontflags" ]  && frontflags="--kelbt-frontend --reduce-frontend"
 [ -z "$backflags" ]   && backflags="--direct-backend"
 [ -z "$featflags" ]   && featflags="--goto-backend"
@@ -108,12 +108,12 @@ go_compiler=
 ocaml_compiler=
 rust_compiler=
 crack_interpreter=
-julia_interpreter=
+julia_interpreter="julia"
 
 #
 # Remove any unsupported host languages.
 #
-supported_host_langs="-C -R --asm"
+supported_host_langs="-C --asm -R -Y"
 supported_frontends=`$ragel --supported-frontends`
 supported_backends=`$ragel --supported-backends`
 
@@ -395,7 +395,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
+			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;

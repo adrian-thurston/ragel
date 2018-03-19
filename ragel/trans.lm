@@ -421,7 +421,7 @@ include 'trans-asm.lm'
 include 'trans-ruby.lm'
 #include 'trans-ocaml.lm'
 #include 'trans-rust.lm'
-#include 'trans-julia.lm'
+include 'trans-julia.lm'
 #include 'trans-crack.lm'
 
 str argvPop()
@@ -480,8 +480,8 @@ elsif ( Lang == 'ruby' )
 #	rw_ocaml( Output )
 #elsif ( Lang == 'rust' )
 #	trans_rust::rust( Output )
-#elsif ( Lang == 'julia' )
-#	trans_julia::julia( Output )
+elsif ( Lang == 'julia' )
+	trans_julia::julia( Output )
 #elsif ( Lang == 'crack' )
 #	trans_crack::crack( Output )
 else {
