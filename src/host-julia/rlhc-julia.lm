@@ -1,3 +1,4 @@
+include 'ril.lm'
 
 namespace julia_out
 	token _IN_ /''/
@@ -550,3 +551,22 @@ namespace julia_gen
 		}
 	}
 end
+
+InputFile: str = argv->pop()
+OutputFile: str = argv->pop()
+
+#
+# Open input and parse
+#
+Input: stream = open( InputFile, "r" )
+parse Start: start[ Input ]
+if ( !Start ) {
+	print( error, '\n' )
+	exit(1)
+}
+
+#
+# Translate
+#
+Output: stream = open( OutputFile, "w" )
+julia_gen::trans( Output, Start )

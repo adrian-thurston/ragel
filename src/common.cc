@@ -345,34 +345,6 @@ const HostLang hostLangRust = {
 };
 
 /*
- * Julia
- */
-const char *julia_defaultOutFn( const char *inputFileName )
-{
-	return fileNameFromStem( inputFileName, ".jl" );
-}
-
-HostType hostTypesJulia[] =
-{
-	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
-};
-
-const HostLang hostLangJulia = {
-	"Julia",
-	"-Y",
-	HostLang::Julia,
-	hostTypesJulia, 1,
-	hostTypesJulia+0,
-	false,
-	true,
-	"julia",
-	&julia_defaultOutFn,
-	&makeCodeGen,
-	Translated,
-	GotoFeature
-};
-
-/*
  * JavaScript
  */
 

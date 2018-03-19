@@ -1,4 +1,4 @@
-SUBDIRS = host-ruby host-asm
+SUBDIRS = host-ruby host-asm host-julia
 
 COLM        = @COLM@
 COLM_LD     = @COLM_LD@
