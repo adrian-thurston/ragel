@@ -26,21 +26,6 @@
 int main( int argc, const char **argv )
 {
 	InputData id( &hostLangAsm );
-
-	int code = 0;
-	try {
-		id.parseArgs( argc, argv );
-		id.hostLang = &hostLangAsm;
-		id.checkArgs();
-		id.makeDefaultFileName();
-
-		if ( !id.process() )
-			id.abortCompile( 1 );
-	}
-	catch ( const AbortCompile &ac ) {
-		code = ac.code;
-	}
-
-	return code;
+	return id.main( argc, argv );
 }
 

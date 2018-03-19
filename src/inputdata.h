@@ -169,9 +169,10 @@ struct InputData
 :
 	public FsmGbl
 {
-	InputData( const HostLang *hostLang )
+	InputData( const HostLang *hostLang, struct colm_sections *rlhcSections = 0 )
 	: 
 		FsmGbl(hostLang),
+		rlhcSections(rlhcSections),
 		inputFileName(0),
 		outputFileName(0),
 		nextMachineId(0),
@@ -219,6 +220,7 @@ struct InputData
 	void showFrontends();
 	void showBackends();
 
+	struct colm_sections *rlhcSections;
 	std::string dirName;
 
 	/* The name of the root section, this does not change during an include. */
@@ -346,6 +348,9 @@ struct InputData
 	const char **makeIncludePathChecks( const char *curFileName, const char *fileName );
 	std::ifstream *tryOpenInclude( const char **pathChecks, long &found );
 	int main( int argc, const char **argv );
+
+	int rlhcRun( int argc, const char **argv );
+	int rlhcMain( int argc, const char **argv );
 };
 
 

@@ -21,10 +21,6 @@
  */
 
 #include "inputdata.h"
-#include <colm/colm.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
 extern struct colm_sections rlhc;
 
@@ -55,48 +51,8 @@ static const HostLang hostLangRuby = {
 	VarFeature
 };
 
-int run_rlhc( int argc, const char **argv )
-{
-	struct colm_program *prg;
-	int exit_status;
-
-	prg = colm_new_program( &rlhc );
-	colm_set_debug( prg, 0 );
-	colm_run_program( prg, argc, argv );
-	exit_status = colm_delete_program( prg );
-	return exit_status;
-}
-
 int main( int argc, const char **argv )
 {
-	int status = 0;
-	pid_t pid = 0;
-	InputData id( &hostLangRuby );
-
-	id.parseArgs( argc, argv );
-	id.checkArgs();
-	id.makeDefaultFileName();
-	id.makeTranslateOutputFileName();
-
-	pid = fork();
-	if ( pid == 0 ) {
-		/* Child. */
-		if ( !id.process() )
-			id.abortCompile( 1 );
-		exit( 0 );
-	}
-
-	waitpid( pid, &status, 0 );
-
-	pid = fork();
-	if ( pid == 0 ) {
-		/* rlhc <input> <output> */
-		const char *_argv[] = { "rlhc",
-			id.genOutputFileName.c_str(),
-			id.origOutputFileName.c_str(), 0 };
-		run_rlhc( 3, _argv );
-	}
-
-	waitpid( pid, &status, 0 );
-	return 0;
+	InputData id( &hostLangRuby, &rlhc );
+	return id.rlhcMain( argc, argv );
 }

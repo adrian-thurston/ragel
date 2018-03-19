@@ -29,6 +29,7 @@
 #include "reducer.h"
 #include "version.h"
 #include "pcheck.h"
+#include <colm/colm.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -38,11 +39,11 @@
 #include <fstream>
 #include <unistd.h>
 #include <sstream>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -1138,4 +1139,49 @@ int InputData::main( int argc, const char **argv )
 	}
 
 	return code;
+}
+
+int InputData::rlhcRun( int argc, const char **argv )
+{
+	struct colm_program *prg;
+	int exit_status;
+
+	prg = colm_new_program( rlhcSections );
+	colm_set_debug( prg, 0 );
+	colm_run_program( prg, argc, argv );
+	exit_status = colm_delete_program( prg );
+	return exit_status;
+}
+
+int InputData::rlhcMain( int argc, const char **argv )
+{
+	int status = 0;
+	pid_t pid = 0;
+
+	parseArgs( argc, argv );
+	checkArgs();
+	makeDefaultFileName();
+	makeTranslateOutputFileName();
+
+	pid = fork();
+	if ( pid == 0 ) {
+		/* Child. */
+		if ( !process() )
+			abortCompile( 1 );
+		exit( 0 );
+	}
+
+	waitpid( pid, &status, 0 );
+
+	pid = fork();
+	if ( pid == 0 ) {
+		/* rlhc <input> <output> */
+		const char *_argv[] = { "rlhc",
+			genOutputFileName.c_str(),
+			origOutputFileName.c_str(), 0 };
+		rlhcRun( 3, _argv );
+	}
+
+	waitpid( pid, &status, 0 );
+	return 0;
 }
