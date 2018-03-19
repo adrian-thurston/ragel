@@ -448,6 +448,7 @@ protected:
 
 /* Selects and constructs the codegen based on the output options. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
+CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
 
 typedef AvlMap<char *, CodeGenData*, CmpStr> CodeGenMap;
 typedef AvlMapEl<char *, CodeGenData*> CodeGenMapEl;

@@ -224,7 +224,7 @@ void InputData::writeOutput( InputItem *ii )
 			break;
 		}
 		case InputItem::HostData: {
-			switch ( backend ) {
+			switch ( hostLang->backend ) {
 				case Direct:
 					if ( hostLang->_lang == HostLang::C ) {
 						if ( ii->loc.fileName != 0 ) {
@@ -903,31 +903,6 @@ void InputData::parseArgs( int argc, const char **argv )
 				else if ( strcmp( arg, "reduce-frontend" ) == 0 ) {
 					frontend = ReduceBased;
 					frontendSpecified = true;
-				}
-				else if ( strcmp( arg, "direct" ) == 0 ) {
-					backend = Direct;
-					backendSpecified = true;
-				}
-				else if ( strcmp( arg, "direct-backend" ) == 0 ) {
-					backend = Direct;
-					backendSpecified = true;
-				}
-				else if ( strcmp( arg, "colm-backend" ) == 0 ) {
-					backend = Translated;
-					backendSpecified = true;
-				}
-				else if ( strcmp( arg, "var-backend" ) == 0 ) {
-					/* Forces variable-based backend, even if the target
-					 * language supports the goto-based backend. May require
-					 * --colm-backend depending on the target language (C for
-					 * example is direct by default). */
-					backendFeature = VarFeature;
-					featureSpecified = true;
-				}
-				else if ( strcmp( arg, "goto-backend" ) == 0 ) {
-					/* Forces goto-based based backend. */
-					backendFeature = GotoFeature;
-					featureSpecified = true;
 				}
 				else if ( strcmp( arg, "string-tables" ) == 0 )
 					stringTables = true;

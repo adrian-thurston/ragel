@@ -331,7 +331,7 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
 	tableData( 0 ),
-	backend( args.id->backend ),
+	backend( args.id->hostLang->backend ),
 	stringTables( args.id->stringTables )
 {
 }

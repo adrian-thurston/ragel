@@ -34,6 +34,18 @@ struct CodeGenData;
 struct HostLang;
 struct CodeGenArgs;
 
+enum RagelBackend
+{
+	Direct,
+	Translated
+};
+
+enum BackendFeature
+{
+	GotoFeature,
+	VarFeature
+};
+
 #define S8BIT_MIN  -128
 #define S8BIT_MAX  127
 
@@ -232,9 +244,12 @@ struct HostLang
 	const char *rlhcArg;
 	const char *(*defaultOutFn)( const char *inputFileName );
 	CodeGenData *(*makeCodeGen)( const HostLang *hostLang, const CodeGenArgs &args );
+	RagelBackend backend;
+	BackendFeature feature;
 };
 
 extern const HostLang hostLangC;
+extern const HostLang hostLangAsm;
 extern const HostLang hostLangD;
 extern const HostLang hostLangGo;
 extern const HostLang hostLangJava;
@@ -478,18 +493,6 @@ enum RagelFrontend
 {
 	KelbtBased,
 	ReduceBased
-};
-
-enum RagelBackend
-{
-	Direct,
-	Translated
-};
-
-enum BackendFeature
-{
-	GotoFeature,
-	VarFeature
 };
 
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );

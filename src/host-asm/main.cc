@@ -23,60 +23,15 @@
 #include "inputdata.h"
 #include "asm.h"
 
-/*
- * ASM
- */
-const char *asm_defaultOutFn( const char *inputFileName )
-{
-	return fileNameFromStem( inputFileName, ".s" );
-}
-
-CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
-{
-	return new AsmCodeGen( args );
-}
-
-HostType hostTypesAsm[] =
-{
-	{ "char",     0,       "char",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,          sizeof(char) },
-	{ "unsigned", "char",  "uchar",   false,  true,  false,  0, 0,                  0, UCHAR_MAX,  sizeof(unsigned char) },
-	{ "short",    0,       "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,          sizeof(short) },
-	{ "unsigned", "short", "ushort",  false,  true,  false,  0, 0,                  0, USHRT_MAX,  sizeof(unsigned short) },
-	{ "int",      0,       "int",     true,   true,  false,  INT_MIN,   INT_MAX,    0, 0,          sizeof(int) },
-	{ "unsigned", "int",   "uint",    false,  true,  false,  0, 0,                  0, UINT_MAX,   sizeof(unsigned int) },
-	{ "long",     0,       "long",    true,   true,  false,  LONG_MIN,  LONG_MAX,   0, 0,          sizeof(long) },
-	{ "unsigned", "long",  "ulong",   false,  true,  false,  0, 0,                  0, ULONG_MAX,  sizeof(unsigned long) },
-};
-
-
-const HostLang hostLangAsm = {
-	"ASM",
-	"--asm",
-	(HostLang::Lang)-1,
-	hostTypesAsm, 8,
-	hostTypesAsm+0,
-	true,
-	false,
-	"no-lang",
-	&asm_defaultOutFn,
-	&asm_makeCodeGen
-};
-
-
 int main( int argc, const char **argv )
 {
-	InputData id;
+	InputData id( &hostLangAsm );
 
 	int code = 0;
 	try {
 		id.parseArgs( argc, argv );
-
 		id.hostLang = &hostLangAsm;
-
 		id.checkArgs();
-
-		id.backendFeature = GotoFeature;
-
 		id.makeDefaultFileName();
 
 		if ( !id.process() )

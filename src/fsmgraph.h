@@ -1017,15 +1017,16 @@ struct CondData
 
 struct FsmGbl
 {
-	FsmGbl()
+	FsmGbl( const HostLang *hostLang )
 	:
 		printStatistics(false),
 		errorCount(0),
 		//inLibRagel(false),
 		displayPrintables(false),
-		backend(Direct),
+		//backend(Direct),
+		hostLang(hostLang),
 		stringTables(false),
-		backendFeature(GotoFeature),
+		//backendFeature(GotoFeature),
 		checkPriorInteraction(0),
 		wantDupsRemoved(true),
 		minimizeLevel(MinimizePartition2),
@@ -1064,9 +1065,10 @@ struct FsmGbl
 	void abortCompile( int code );
 	bool displayPrintables;
 
-	RagelBackend backend;
+	//RagelBackend backend;
+	const HostLang *hostLang;
 	bool stringTables;
-	BackendFeature backendFeature;
+	//BackendFeature backendFeature;
 	bool checkPriorInteraction;
 	bool wantDupsRemoved;
 

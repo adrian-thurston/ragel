@@ -62,8 +62,47 @@ const HostLang hostLangC = {
 	false,
 	"c",
 	&c_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Direct,
+	GotoFeature
 };
+
+/*
+ * ASM
+ */
+const char *asm_defaultOutFn( const char *inputFileName )
+{
+	return fileNameFromStem( inputFileName, ".s" );
+}
+
+HostType hostTypesAsm[] =
+{
+	{ "char",     0,       "char",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,          sizeof(char) },
+	{ "unsigned", "char",  "uchar",   false,  true,  false,  0, 0,                  0, UCHAR_MAX,  sizeof(unsigned char) },
+	{ "short",    0,       "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,          sizeof(short) },
+	{ "unsigned", "short", "ushort",  false,  true,  false,  0, 0,                  0, USHRT_MAX,  sizeof(unsigned short) },
+	{ "int",      0,       "int",     true,   true,  false,  INT_MIN,   INT_MAX,    0, 0,          sizeof(int) },
+	{ "unsigned", "int",   "uint",    false,  true,  false,  0, 0,                  0, UINT_MAX,   sizeof(unsigned int) },
+	{ "long",     0,       "long",    true,   true,  false,  LONG_MIN,  LONG_MAX,   0, 0,          sizeof(long) },
+	{ "unsigned", "long",  "ulong",   false,  true,  false,  0, 0,                  0, ULONG_MAX,  sizeof(unsigned long) },
+};
+
+
+const HostLang hostLangAsm = {
+	"ASM",
+	"--asm",
+	(HostLang::Lang)-1,
+	hostTypesAsm, 8,
+	hostTypesAsm+0,
+	true,
+	false,
+	"no-lang",
+	&asm_defaultOutFn,
+	&asm_makeCodeGen,
+	Direct,
+	GotoFeature
+};
+
 
 /*
  * D
@@ -101,7 +140,9 @@ const HostLang hostLangD = {
 	true,
 	"d",
 	&d_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	GotoFeature
 };
 
 /*
@@ -137,7 +178,9 @@ const HostLang hostLangGo = {
 	true,
 	"go",
 	&go_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	GotoFeature
 };
 
 /*
@@ -167,7 +210,9 @@ const HostLang hostLangJava = {
 	true,
 	"java",
 	&java_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	VarFeature
 };
 
 /*
@@ -206,7 +251,9 @@ const HostLang hostLangCSharp = {
 	true,
 	"csharp",
 	&csharp_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	GotoFeature
 };
 
 /*
@@ -232,7 +279,9 @@ const HostLang hostLangOCaml = {
 	true,
 	"ocaml",
 	&ocaml_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	VarFeature
 };
 
 /*
@@ -262,7 +311,9 @@ const HostLang hostLangCrack = {
 	true,
 	"crack",
 	&crack_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	VarFeature
 };
 
 /*
@@ -288,7 +339,9 @@ const HostLang hostLangRust = {
 	true,
 	"rust",
 	&rust_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	VarFeature
 };
 
 /*
@@ -314,7 +367,9 @@ const HostLang hostLangJulia = {
 	true,
 	"julia",
 	&julia_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	GotoFeature
 };
 
 /*
@@ -347,7 +402,9 @@ const HostLang hostLangJS = {
 	true,
 	"js",
 	&js_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	VarFeature
 };
 
 const HostLang *hostLangs[] = {

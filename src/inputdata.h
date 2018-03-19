@@ -169,8 +169,9 @@ struct InputData
 :
 	public FsmGbl
 {
-	InputData()
+	InputData( const HostLang *hostLang )
 	: 
+		FsmGbl(hostLang),
 		inputFileName(0),
 		outputFileName(0),
 		nextMachineId(0),
@@ -179,7 +180,6 @@ struct InputData
 		outFilter(0),
 		curItem(0),
 		lastFlush(0),
-		hostLang(&hostLangC),
 		codeStyle(GenBinaryLoop),
 		dotGenPd(0),
 		machineSpec(0),
@@ -205,7 +205,10 @@ struct InputData
 		histogram(0),
 		input(0),
 		forceLibRagel(false)
-	{}
+	{
+		
+	
+	}
 
 	~InputData();
 
@@ -239,8 +242,6 @@ struct InputData
 	InputItemList inputItems;
 	InputItem *curItem;
 	InputItem *lastFlush;
-
-	const HostLang *hostLang;
 
 	/* Ragel-6 frontend. */
 	ParserDict parserDict;

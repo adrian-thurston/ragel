@@ -41,6 +41,12 @@
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"
+#include "asm.h"
+
+CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
+{
+	return new AsmCodeGen( args );
+}
 
 /* Invoked by the parser when a ragel definition is opened. */
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
@@ -50,48 +56,48 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 
 	switch ( args.codeStyle ) {
 	case GenBinaryLoop:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new BinaryLoopGoto( args );
 		else
 			codeGen = new BinaryLoopVar( args );
 		break;
 
 	case GenBinaryExp:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new BinaryExpGoto( args );
 		else
 			codeGen = new BinaryExpVar( args );
 		break;
 
 	case GenFlatLoop:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new FlatLoopGoto( args );
 		else
 			codeGen = new FlatLoopVar( args );
 		break;
 
 	case GenFlatExp:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new FlatExpGoto( args );
 		else
 			codeGen = new FlatExpVar( args );
 		break;
 
 	case GenSwitchLoop:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new SwitchLoopGoto(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 	case GenSwitchExp:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new SwitchExpGoto(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 
 	case GenIpGoto:
-		if ( id->backendFeature == GotoFeature )
+		if ( hostLang->feature == GotoFeature )
 			codeGen = new IpGoto(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;

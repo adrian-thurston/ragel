@@ -50,7 +50,9 @@ static const HostLang hostLangRuby = {
 	true,
 	"ruby",
 	&ruby_defaultOutFn,
-	&makeCodeGen
+	&makeCodeGen,
+	Translated,
+	VarFeature
 };
 
 int run_rlhc( int argc, const char **argv )
@@ -69,22 +71,15 @@ int main( int argc, const char **argv )
 {
 	int status = 0;
 	pid_t pid = 0;
-	InputData id;
+	InputData id( &hostLangRuby );
 
 	id.parseArgs( argc, argv );
-	id.hostLang = &hostLangRuby;
-
 	id.checkArgs();
-	id.backendFeature = VarFeature;
-
 	id.makeDefaultFileName();
 	id.makeTranslateOutputFileName();
 
 	pid = fork();
 	if ( pid == 0 ) {
-		id.backend = Translated;
-		id.backendSpecified = true;
-
 		/* Child. */
 		if ( !id.process() )
 			id.abortCompile( 1 );

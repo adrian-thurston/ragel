@@ -24,6 +24,6 @@
 
 int main( int argc, const char **argv )
 {
-	InputData id;
+	InputData id( &hostLangC );
 	return id.main( argc, argv );
 }

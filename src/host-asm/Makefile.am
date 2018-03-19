@@ -7,7 +7,7 @@ noinst_PROGRAMS = ragel-asm
 
 ragel_asm_CPPFLAGS = -I$(top_srcdir)/aapl
 
-dist_ragel_asm_SOURCES = main.cc asm.h asm.cc
+dist_ragel_asm_SOURCES = main.cc
 
 nodist_ragel_asm_SOURCES = \
 	rlparse.c rlreduce.cc
