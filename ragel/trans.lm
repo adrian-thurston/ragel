@@ -418,7 +418,7 @@ include 'trans-asm.lm'
 #include 'trans-csharp.lm'
 #include 'trans-go.lm'
 #include 'trans-java.lm'
-#include 'trans-ruby.lm'
+include 'trans-ruby.lm'
 #include 'trans-ocaml.lm'
 #include 'trans-rust.lm'
 #include 'trans-julia.lm'
@@ -474,8 +474,8 @@ elsif ( Lang == 'asm' )
 #	rw_go( Output )
 #elsif ( Lang == 'java' )
 #	rw_java( Output )
-#elsif ( Lang == 'ruby' )
-#	rw_ruby( Output )
+elsif ( Lang == 'ruby' )
+	rw_ruby( Output )
 #elsif ( Lang == 'ocaml' )
 #	rw_ocaml( Output )
 #elsif ( Lang == 'rust' )

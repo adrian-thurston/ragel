@@ -1,6 +1,8 @@
 /*
  * @LANG: indep
  * @NEEDS_EOF: yes
+ * @PROHIBIT_LANGUAGES: ruby ocaml
+ * @PROHIBIT_FEATFLAGS: --var-backend
  *
  * Testing fcall * in an EOF action.
  */

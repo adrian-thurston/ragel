@@ -86,7 +86,7 @@ done
 [ -z "$minflags" ]    && minflags="-n -m -l -e"
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]   && langflags="-C --asm"
+[ -z "$langflags" ]   && langflags="-C --asm -R"
 [ -z "$frontflags" ]  && frontflags="--kelbt-frontend --reduce-frontend"
 [ -z "$backflags" ]   && backflags="--direct-backend"
 [ -z "$featflags" ]   && featflags="--goto-backend"
@@ -102,7 +102,7 @@ c_compiler="@CC@"
 objc_compiler=
 d_compiler=
 java_compiler=
-ruby_engine=
+ruby_engine="ruby"
 csharp_compiler=
 go_compiler=
 ocaml_compiler=
@@ -113,7 +113,7 @@ julia_interpreter=
 #
 # Remove any unsupported host languages.
 #
-supported_host_langs=`$ragel --supported-host-langs`
+supported_host_langs="-C -R --asm"
 supported_frontends=`$ragel --supported-frontends`
 supported_backends=`$ragel --supported-backends`
 
@@ -124,10 +124,10 @@ function test_error
 
 function run_test()
 {
-	opts="$lang_opt $min_opt $gen_opt $enc_opt $f_opt"
+	opts="$min_opt $gen_opt $enc_opt $f_opt"
 	args="-I. $opts -o $wk/$code_src $translated"
-	echo "$ragel $args"
-	if ! $ragel $args; then
+	echo "$host_ragel $args"
+	if ! $host_ragel $args; then
 		test_error;
 	fi
 
@@ -187,6 +187,7 @@ function lang_opts()
 			code_suffix=c;
 			interpreted=false
 			compiler=$c_compiler;
+			host_ragel=$ragel
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_minflags=""
@@ -203,6 +204,7 @@ function lang_opts()
 			code_suffix=cpp;
 			interpreted=false
 			compiler=$cxx_compiler;
+			host_ragel=$ragel
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_minflags=""
@@ -219,6 +221,7 @@ function lang_opts()
 			code_suffix=m;
 			interpreted=false
 			compiler=$objc_compiler
+			host_ragel=$ragel
 			flags="-Wall -O3 -fno-strict-aliasing -I/usr/include/GNUstep"
 			libs="-lobjc -lgnustep-base"
 			prohibit_minflags=""
@@ -235,13 +238,14 @@ function lang_opts()
 			code_suffix=d;
 			interpreted=false
 			compiler=$d_compiler;
+			host_ragel=`dirname $ragel`/host-d/ragel-d
 			flags="-Wall -O3"
 			libs=""
 			prohibit_minflags=""
 			prohibit_genflags=""
 			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
-			prohibit_backflags="--direct-backend --reduce-frontend"
+			prohibit_frontflags="--kelbt-frontend --colm-frontend"
+			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
 			exec_cmd=./$wk/$binary
@@ -251,6 +255,7 @@ function lang_opts()
 			code_suffix=java;
 			interpreted=false
 			compiler=$java_compiler
+			host_ragel=`dirname $ragel`/host-java/ragel-java
 			flags=""
 			libs=""
 			prohibit_minflags=""
@@ -267,12 +272,13 @@ function lang_opts()
 			code_suffix=rb;
 			interpreted=true
 			compiler=$ruby_engine
+			host_ragel=`dirname $ragel`/host-ruby/ragel-ruby
 			flags=""
 			libs=""
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
+			prohibit_frontflags="--kelbt-frontend --colm-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
@@ -283,6 +289,7 @@ function lang_opts()
 			code_suffix=cs;
 			interpreted=false
 			compiler=$csharp_compiler
+			host_ragel=`dirname $ragel`/host-csharp/ragel-csharp
 			flags=""
 			libs=""
 			prohibit_minflags=""
@@ -299,6 +306,7 @@ function lang_opts()
 			code_suffix=go
 			interpreted=false
 			compiler=$go_compiler
+			host_ragel=`dirname $ragel`/host-go/ragel-go
 			flags="build"
 			libs=""
 			prohibit_minflags=""
@@ -315,6 +323,7 @@ function lang_opts()
 			code_suffix=ml
 			interpreted=true
 			compiler=$ocaml_compiler
+			host_ragel=`dirname $ragel`/host-ocaml/ragel-ocaml
 			flags=""
 			libs=""
 			prohibit_minflags=""
@@ -331,6 +340,7 @@ function lang_opts()
 			code_suffix=s
 			interpreted=false
 			compiler="gcc"
+			host_ragel=`dirname $ragel`/host-asm/ragel-asm
 			flags=""
 			libs=""
 			prohibit_minflags=""
@@ -347,6 +357,7 @@ function lang_opts()
 			code_suffix=rs
 			interpreted=false
 			compiler=$rust_compiler
+			host_ragel=`dirname $ragel`/host-rust/ragel-rust
 			flags="-A non_upper_case_globals -A dead_code \
 					-A unused_variables -A unused_assignments \
 					-A unused_mut -A unused_parens"
@@ -365,6 +376,7 @@ function lang_opts()
 			code_suffix=crk
 			interpreted=true
 			compiler=$crack_interpreter
+			host_ragel=`dirname $ragel`/host-crack/ragel-crack
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
@@ -379,6 +391,7 @@ function lang_opts()
 			code_suffix=jl
 			interpreted=true
 			compiler=$julia_interpreter
+			host_ragel=`dirname $ragel`/host-julia/ragel-julia
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
