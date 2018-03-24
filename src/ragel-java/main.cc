@@ -25,35 +25,40 @@
 extern struct colm_sections rlhc;
 
 /*
- * OCaml
+ * Java
  */
-const char *ocaml_defaultOutFn( const char *inputFileName )
+
+const char *java_defaultOutFn( const char *inputFileName )
 {
-	return fileNameFromStem( inputFileName, ".ml" );
+	return fileNameFromStem( inputFileName, ".java" );
 }
 
-HostType hostTypesOCaml[] =
+HostType hostTypesJava[] = 
 {
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
+	{ "byte",    0,  "byte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
+	{ "short",   0,  "short",  true,   true,  false,  SHRT_MIN,  SHRT_MAX,    0, 0,           2 },
+	{ "char",    0,  "char",   false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },
+	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },
 };
 
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
+const HostLang hostLangJava = {
+	"Java",
+	"-J",
 	(HostLang::Lang)-1,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
+	hostTypesJava, 4,
+	hostTypesJava+2,
 	false,
 	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
+	"java",
+	&java_defaultOutFn,
 	&makeCodeGen,
 	Translated,
 	VarFeature
 };
 
+
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rlhc );
+	InputData id( &hostLangJava, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

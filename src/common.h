@@ -222,15 +222,6 @@ struct HostLang
 	enum Lang
 	{
 		C,
-		D,
-		Go,
-		Java,
-		CSharp,
-		OCaml,
-		Crack,
-		Rust,
-		Julia,
-		JS
 	};
 
 	const char *name;
@@ -250,13 +241,6 @@ struct HostLang
 
 extern const HostLang hostLangC;
 extern const HostLang hostLangAsm;
-extern const HostLang hostLangD;
-extern const HostLang hostLangGo;
-extern const HostLang hostLangJava;
-extern const HostLang hostLangCSharp;
-extern const HostLang hostLangCrack;
-extern const HostLang hostLangRust;
-extern const HostLang hostLangJS;
 
 extern const HostLang *hostLangs[];
 extern const int numHostLangs;

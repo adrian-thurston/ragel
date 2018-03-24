@@ -25,36 +25,50 @@
 extern struct colm_sections rlhc;
 
 /*
- * Julia
+ * C#
  */
-const char *julia_defaultOutFn( const char *inputFileName )
+
+const char *csharp_defaultOutFn( const char *inputFileName )
 {
-	return fileNameFromStem( inputFileName, ".jl" );
+	const char *ext = findFileExtension( inputFileName );
+	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+		return fileNameFromStem( inputFileName, ".h" );
+	else
+		return fileNameFromStem( inputFileName, ".cs" );
 }
 
-HostType hostTypesJulia[] =
+HostType hostTypesCSharp[] =
 {
-	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
+	{ "sbyte",   0,  "sbyte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
+	{ "byte",    0,  "byte",    false,  true,  false,  0, 0,                   0, UCHAR_MAX,   1 },
+	{ "short",   0,  "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,    0, 0,           2 },
+	{ "ushort",  0,  "ushort",  false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },
+	{ "char",    0,  "char",    false,  true,  true,   0, 0,                   0, USHRT_MAX,   2 },
+	{ "int",     0,  "int",     true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },
+	{ "uint",    0,  "uint",    false,  true,  false,  0, 0,                   0, UINT_MAX,    4 },
+	{ "long",    0,  "long",    true,   true,  false,  LONG_MIN,  LONG_MAX,    0, 0,           8 },
+	{ "ulong",   0,  "ulong",   false,  true,  false,  0, 0,                   0, ULONG_MAX,   8 },
 };
 
-const HostLang hostLangJulia = {
-	"Julia",
-	"-Y",
+const HostLang hostLangCSharp = {
+	"C#",
+	"-A",
 	(HostLang::Lang)-1,
-	hostTypesJulia, 1,
-	hostTypesJulia+0,
-	false,
+	hostTypesCSharp, 9,
+	hostTypesCSharp+4,
 	true,
-	"julia",
-	&julia_defaultOutFn,
+	true,
+	"csharp",
+	&csharp_defaultOutFn,
 	&makeCodeGen,
 	Translated,
 	GotoFeature
 };
 
 
+
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJulia, &rlhc );
+	InputData id( &hostLangCSharp, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

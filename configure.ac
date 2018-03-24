@@ -205,6 +205,13 @@ AC_OUTPUT([
 		src/ragel-julia/Makefile
 		src/ragel-ocaml/Makefile
 		src/ragel-c/Makefile
+		src/ragel-d/Makefile
+		src/ragel-csharp/Makefile
+		src/ragel-go/Makefile
+		src/ragel-java/Makefile
+		src/ragel-rust/Makefile
+		src/ragel-crack/Makefile
+		src/ragel-js/Makefile
 		aapl/Makefile 
 		doc/Makefile
 		doc/ragel.1

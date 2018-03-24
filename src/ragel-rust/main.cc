@@ -25,35 +25,37 @@
 extern struct colm_sections rlhc;
 
 /*
- * OCaml
+ * Rust
  */
-const char *ocaml_defaultOutFn( const char *inputFileName )
+const char *rust_defaultOutFn( const char *inputFileName )
 {
-	return fileNameFromStem( inputFileName, ".ml" );
+	return fileNameFromStem( inputFileName, ".rs" );
 }
 
-HostType hostTypesOCaml[] =
+HostType hostTypesRust[] =
 {
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
+	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
 };
 
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
+const HostLang hostLangRust = {
+	"Rust",
+	"-U",
 	(HostLang::Lang)-1,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
+	hostTypesRust, 1,
+	hostTypesRust+0,
 	false,
 	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
+	"rust",
+	&rust_defaultOutFn,
 	&makeCodeGen,
 	Translated,
 	VarFeature
 };
 
+
+
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rlhc );
+	InputData id( &hostLangRust, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

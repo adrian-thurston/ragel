@@ -25,35 +25,49 @@
 extern struct colm_sections rlhc;
 
 /*
- * OCaml
+ * D
  */
-const char *ocaml_defaultOutFn( const char *inputFileName )
+
+const char *d_defaultOutFn( const char *inputFileName )
 {
-	return fileNameFromStem( inputFileName, ".ml" );
+	const char *ext = findFileExtension( inputFileName );
+	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
+		return fileNameFromStem( inputFileName, ".h" );
+	else
+		return fileNameFromStem( inputFileName, ".d" );
 }
 
-HostType hostTypesOCaml[] =
+HostType hostTypesD[] =
 {
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
+	{ "byte",    0,  "byte",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
+	{ "ubyte",   0,  "ubyte",   false,  true,  false,  0, 0,                   0, UCHAR_MAX,   1 },
+	{ "char",    0,  "char",    false,  true,  false,  0, 0,                   0, UCHAR_MAX,   1 },
+	{ "short",   0,  "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,    0, 0,           2 },
+	{ "ushort",  0,  "ushort",  false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },
+	{ "wchar",   0,  "wchar",   false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },
+	{ "int",     0,  "int",     true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },
+	{ "uint",    0,  "uint",    false,  true,  false,  0, 0,                   0, UINT_MAX,    4 },
+	{ "dchar",   0,  "dchar",   false,  true,  false,  0, 0,                   0, UINT_MAX,    4 },
 };
 
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
+const HostLang hostLangD = {
+	"D",
+	"-D",
 	(HostLang::Lang)-1,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
-	false,
+	hostTypesD, 9,
+	hostTypesD+2,
 	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
+	true,
+	"d",
+	&d_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	GotoFeature
 };
+
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rlhc );
+	InputData id( &hostLangD, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

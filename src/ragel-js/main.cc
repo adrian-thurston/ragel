@@ -25,35 +25,43 @@
 extern struct colm_sections rlhc;
 
 /*
- * OCaml
+ * JavaScript
  */
-const char *ocaml_defaultOutFn( const char *inputFileName )
+
+const char *js_defaultOutFn( const char *inputFileName )
 {
-	return fileNameFromStem( inputFileName, ".ml" );
+	return fileNameFromStem( inputFileName, ".js" );
 }
 
-HostType hostTypesOCaml[] =
+HostType hostTypesJS[] =
 {
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
+	{ "s8",     0, "int8",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,          1 },
+	{ "u8",     0, "uint8",   false,  true,  false,  0, 0,                  0, UCHAR_MAX,  1 },
+	{ "s16",    0, "int16",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,          2 },
+	{ "u16",    0, "uint16",  false,  true,  false,  0, 0,                  0, USHRT_MAX,  2 },
+	{ "i32",    0, "int32",   true,   true,  false,  INT_MIN,   INT_MAX,    0, 0,          4 },
+	{ "u32",    0, "uint32",  false,  true,  false,  0, 0,                  0, UINT_MAX,   4 },
+	{ "number", 0, "number",  true,   true,  false,  LONG_MIN,  LONG_MAX,   0, 0,          8 },
 };
 
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
+const HostLang hostLangJS = {
+	"JavaScript",
+	"-P",
 	(HostLang::Lang)-1,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
+	hostTypesJS, 7,
+	hostTypesJS+1,
 	false,
 	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
+	"js",
+	&js_defaultOutFn,
 	&makeCodeGen,
 	Translated,
 	VarFeature
 };
 
+
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rlhc );
+	InputData id( &hostLangJS, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

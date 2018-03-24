@@ -25,28 +25,32 @@
 extern struct colm_sections rlhc;
 
 /*
- * OCaml
+ * Crack
  */
-const char *ocaml_defaultOutFn( const char *inputFileName )
+const char *crack_defaultOutFn( const char *inputFileName )
 {
-	return fileNameFromStem( inputFileName, ".ml" );
+	return fileNameFromStem( inputFileName, ".crk" );
 }
 
-HostType hostTypesOCaml[] =
+HostType hostTypesCrack[] = 
 {
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
+	{ "byte",    0,  "byte",     false,  true,  true,   0, 0,                     0, UCHAR_MAX,    1 },
+	{ "int32",   0,  "int32",    true,   true,  false,  S32BIT_MIN,  S32BIT_MAX,  0, 0,            4 },
+	{ "uint32",  0,  "uint32",   false,  true,  false,  0, 0,                     0, U32BIT_MAX,   4 },
+	{ "int",     0,  "int",      true,   true,  false,  INT_MIN,     INT_MAX,     0, 0,            sizeof(int) },
+	{ "uint",    0,  "uint",     false,  true,  false,  0, 0,                     0, UINT_MAX,     sizeof(int) },  
 };
 
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
+const HostLang hostLangCrack = {
+	"Crack",
+	"-K",
 	(HostLang::Lang)-1,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
-	false,
+	hostTypesCrack, 5,
+	hostTypesCrack+0,
 	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
+	true,
+	"crack",
+	&crack_defaultOutFn,
 	&makeCodeGen,
 	Translated,
 	VarFeature
@@ -54,6 +58,6 @@ const HostLang hostLangOCaml = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rlhc );
+	InputData id( &hostLangCrack, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

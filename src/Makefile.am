@@ -1,4 +1,5 @@
-SUBDIRS = . ragel-ruby ragel-asm ragel-julia ragel-ocaml ragel-c
+SUBDIRS = . ragel-ruby ragel-asm ragel-julia ragel-ocaml ragel-c \
+	ragel-d ragel-csharp ragel-go ragel-java ragel-rust ragel-crack ragel-js
 
 COLM        = @COLM@
 COLM_LD     = @COLM_LD@

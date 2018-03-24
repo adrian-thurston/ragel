@@ -3,16 +3,16 @@ COLM_LD     = @COLM_LD@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 
-noinst_PROGRAMS = ragel-julia
+noinst_PROGRAMS = ragel-d
 
-ragel_julia_CPPFLAGS = -I$(top_srcdir)/aapl
+ragel_d_CPPFLAGS = -I$(top_srcdir)/aapl
 
-dist_ragel_julia_SOURCES = main.cc rlhc.c
+dist_ragel_d_SOURCES = main.cc rlhc.c
 
-nodist_ragel_julia_SOURCES = \
+nodist_ragel_d_SOURCES = \
 	rlparse.c rlreduce.cc
 
-ragel_julia_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
+ragel_d_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
@@ -21,5 +21,5 @@ rlparse.c: rlparse.lm $(COLM_BINDEP)
 
 rlreduce.cc: rlparse.c
 
-rlhc.c: rlhc-julia.lm
+rlhc.c: rlhc-d.lm
 	$(COLM) -I.. -c -b rlhc -o $@ $<

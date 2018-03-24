@@ -1,3 +1,5 @@
+include 'ril.lm'
+
 namespace crack_out
 	token _IN_ /''/
 	token _EX_ /''/
@@ -515,3 +517,21 @@ namespace crack_gen
 	}
 end
 
+InputFile: str = argv->pop()
+OutputFile: str = argv->pop()
+
+#
+# Open input and parse
+#
+Input: stream = open( InputFile, "r" )
+parse Start: start[ Input ]
+if ( !Start ) {
+	print( error, '\n' )
+	exit(1)
+}
+
+#
+# Translate
+#
+Output: stream = open( OutputFile, "w" )
+crack_gen::trans( Output, Start )
