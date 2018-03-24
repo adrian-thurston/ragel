@@ -388,7 +388,6 @@ const HostLang *hostLangs[] = {
 	&hostLangOCaml,
 	&hostLangRust,
 	&hostLangCrack,
-	&hostLangJulia,
 	&hostLangJS,
 };
 

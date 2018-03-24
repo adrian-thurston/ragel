@@ -7,9 +7,12 @@ COLM_BINDEP = @COLM_BINDEP@
 KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
-# Libfsm contains only the FSM construction code and the backend code
+# libfsm contains only the FSM construction code and the backend code
 # generators. It is useful for building code generators in programs not
 # connected to the ragel language.
+#
+# libragel contains the parse tree and other parsing support code. Everything
+# except the reducers, which are specific to the frontends.
 lib_LTLIBRARIES = libfsm.la libragel.la
 
 if BUILD_PROGRAM
@@ -27,7 +30,7 @@ nodist_pkginclude_HEADERS = config.h
 data_DATA = ragel.lm
 
 #
-# libfsm
+# libfsm: state machine construction and direct code generation.
 #
 libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
