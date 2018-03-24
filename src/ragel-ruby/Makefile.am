@@ -21,8 +21,5 @@ rlparse.c: rlparse.lm $(COLM_BINDEP)
 
 rlreduce.cc: rlparse.c
 
-rlhc$(EXEEXT): rlhc.lm
-	$(COLM) -I.. -o $@ $<
-
-rlhc.c: rlhc.lm
+rlhc.c: rlhc-ruby.lm
 	$(COLM) -I.. -c -b rlhc -o $@ $<

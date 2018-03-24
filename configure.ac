@@ -204,6 +204,7 @@ AC_OUTPUT([
 		src/ragel-asm/Makefile
 		src/ragel-julia/Makefile
 		src/ragel-ocaml/Makefile
+		src/ragel-c/Makefile
 		aapl/Makefile 
 		doc/Makefile
 		doc/ragel.1
