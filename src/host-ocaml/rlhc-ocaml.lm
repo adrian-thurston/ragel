@@ -1,3 +1,5 @@
+include 'ril.lm'
+
 namespace ocaml_out
 	token _IN_ /''/
 	token _EX_ /''/
@@ -572,3 +574,22 @@ namespace ml_gen
 	}
 
 end
+
+InputFile: str = argv->pop()
+OutputFile: str = argv->pop()
+
+#
+# Open input and parse
+#
+Input: stream = open( InputFile, "r" )
+parse Start: start[ Input ]
+if ( !Start ) {
+	print( error, '\n' )
+	exit(1)
+}
+
+#
+# Translate
+#
+Output: stream = open( OutputFile, "w" )
+ml_gen::trans( Output, Start )

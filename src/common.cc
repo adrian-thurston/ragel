@@ -257,34 +257,6 @@ const HostLang hostLangCSharp = {
 };
 
 /*
- * OCaml
- */
-const char *ocaml_defaultOutFn( const char *inputFileName )
-{
-	return fileNameFromStem( inputFileName, ".ml" );
-}
-
-HostType hostTypesOCaml[] =
-{
-	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
-};
-
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
-	HostLang::OCaml,
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
-	false,
-	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
-	&makeCodeGen,
-	Translated,
-	VarFeature
-};
-
-/*
  * Crack
  */
 const char *crack_defaultOutFn( const char *inputFileName )
@@ -385,7 +357,6 @@ const HostLang *hostLangs[] = {
 	&hostLangGo,
 	&hostLangJava,
 	&hostLangCSharp,
-	&hostLangOCaml,
 	&hostLangRust,
 	&hostLangCrack,
 	&hostLangJS,

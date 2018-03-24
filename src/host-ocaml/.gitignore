@@ -1,0 +1,8 @@
+/Makefile
+/Makefile.in
+/.deps
+/.libs
+/ragel-ocaml
+/rlhc.c
+/rlparse.c
+/rlreduce.cc

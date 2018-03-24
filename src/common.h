@@ -254,7 +254,6 @@ extern const HostLang hostLangD;
 extern const HostLang hostLangGo;
 extern const HostLang hostLangJava;
 extern const HostLang hostLangCSharp;
-extern const HostLang hostLangOCaml;
 extern const HostLang hostLangCrack;
 extern const HostLang hostLangRust;
 extern const HostLang hostLangJS;
