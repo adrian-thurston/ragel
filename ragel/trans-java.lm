@@ -1,0 +1,346 @@
+int rw_java_factor( Factor: indep::factor )
+{
+	if match Factor [`first_token_char]
+	{
+		send Out "data\[ts\]"
+	}
+	else if match Factor [tk_ident `[ expr `]]
+	{
+		send Out
+			"[$Factor.tk_ident]\[ [rw_java_expr(Factor.expr)] \]
+	}
+	else if match Factor [tk_ident `( expr `)]
+	{
+		send Out
+			"[$Factor.tk_ident]( [rw_java_expr(Factor.expr)] )
+	}
+	elsif match Factor [`< type `> `( expr `)]
+	{
+		send Out
+			"( [rw_java_type(Factor.type)] ) ( [rw_java_expr(Factor.expr)] )
+	}
+	elsif match Factor [`( expr `)]
+	{
+		send Out
+			"( [rw_java_expr(Factor.expr)] )
+	}
+	elsif match Factor ['true']
+	{
+		send Out '1'
+	}
+	elsif match Factor ['false']
+	{
+		send Out '0'
+	}
+	elsif match Factor [`buffer]
+	{
+		send Out
+			"new String( buffer, 0, blen )"
+	}
+	else 
+	{
+		send Out [$Factor]
+	}
+}
+
+void rw_java_type( Type: indep::type )
+{
+	if match Type [`int]
+	{
+		send Out "int"
+	}
+	elsif match Type [`bool]
+	{
+		send Out "int"
+	}
+	elsif match Type [`char]
+	{
+		send Out "char"
+	}
+	elsif match Type [`ptr]
+	{
+		send Out "int
+	}
+	elsif match Type [`byte]
+	{
+		send Out "unsigned char"
+	}
+}
+
+void rw_java_abs_expr( Expr: indep::abs_expr )
+{
+	if ( Expr.Op ) {
+		send Out
+			"[rw_java_abs_expr(Expr.E1)] [$Expr.Op] [rw_java_abs_expr( Expr.E2 )]"
+	}
+	else {
+		rw_java_factor( Expr.factor )
+	}
+}
+
+void rw_java_expr( Expr: indep::expr )
+{
+	AbsExpr: indep::abs_expr = indep::abs_comparative( Expr.comparative )
+	rw_java_abs_expr( AbsExpr )
+}
+
+void rw_java_opt_array( OptArr: indep::opt_arr, Type: indep::type )
+{
+	if OptArr.expr {
+		send Out "\[\] = new [rw_java_type( Type )]\[[rw_java_expr( OptArr.expr )]\]"
+	}
+}
+
+int rw_java_var_decl( VarDecl: indep::var_decl )
+{
+	send Out
+		"[rw_java_type( VarDecl.type )] [$VarDecl.tk_ident] [rw_java_opt_array(VarDecl.opt_arr, VarDecl.type)];
+}
+
+void rw_java_opt_sub( OptSub: indep::opt_sub )
+{
+	if ( OptSub.expr )
+		send Out "\[[rw_java_expr(OptSub.expr)]\]"
+}
+
+int rw_java_expr_stmt( ExprStmt: indep::expr_stmt )
+{
+	if match ExprStmt [tk_ident opt_sub `= expr `;]
+	{
+		send Out
+			"[$ExprStmt.tk_ident rw_java_opt_sub(ExprStmt.opt_sub)] = [rw_java_expr(ExprStmt.expr)];
+	}
+	else if match ExprStmt [expr `;]
+	{
+		send Out
+			"[rw_java_expr(ExprStmt.expr)];
+	}
+}
+
+int rw_java_if_stmt( IfStmt: indep::if_stmt )
+{
+	send Out
+		"if ( [rw_java_expr( IfStmt.expr )] )
+		"{
+		"	[rw_java_stmt_list( IfStmt._repeat_stmt )]
+		"} 
+
+	if ( IfStmt.opt_else._repeat_stmt ) {
+		send Out
+			"else {
+			"	[rw_java_stmt_list( IfStmt.opt_else._repeat_stmt )]
+			"}
+	}
+}
+
+int rw_java_print_stmt( Stmt: indep::print_stmt )
+{
+	if match Stmt [`print_int expr `;] {
+		send Out
+			"System.out.print( [rw_java_expr(Stmt.expr)] );
+	}
+	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	{
+		send Out
+			"_s = new String( [rw_java_expr(E1)], 0, [rw_java_expr(E2)] );
+			"System.out.print( _s );
+	}
+	else if match Stmt [`print_str expr `;]
+	{
+		send Out
+			"System.out.print( [rw_java_expr( Stmt.expr )] );
+	}
+	else if match Stmt [`print_token `;]
+	{
+		send Out
+			"_s = new String( data, ts, te - ts );
+			"System.out.print( _s );
+	}
+}
+
+void rw_java_buf_stmt( BufStmt: indep::buf_stmt )
+{
+	switch BufStmt
+	case [`buf_clear `( `) `;] {
+		send Out
+			"	blen = 0;
+	}
+	case [`buf_append `( `) `;] {
+		send Out
+			"	buffer\[blen\] = fc;
+			"	blen += 1;
+	}
+}
+
+
+int rw_java_ragel_stmt( Stmt: indep::ragel_stmt )
+{
+	send Out
+		[$Stmt]
+}
+
+int rw_java_stmt( Stmt: indep::stmt )
+{
+	if match Stmt [var_decl]
+		rw_java_var_decl( Stmt.var_decl )
+	else if match Stmt [expr_stmt]
+		rw_java_expr_stmt( Stmt.expr_stmt )
+	else if match Stmt [if_stmt]
+		rw_java_if_stmt( Stmt.if_stmt )
+	else if match Stmt [print_stmt]
+		rw_java_print_stmt( Stmt.print_stmt )
+	else if match Stmt [buf_stmt]
+		rw_java_buf_stmt( Stmt.buf_stmt )
+	else if	match Stmt [ragel_stmt]
+		rw_java_ragel_stmt( Stmt.ragel_stmt )
+}
+
+void rw_java_stmt_list( StmtList: indep::stmt* )
+{
+	for Stmt: indep::stmt in repeat( StmtList )
+		rw_java_stmt( Stmt )
+}
+
+int rw_java_action_block( ActionBlock: indep::action_block )
+{
+	Out = new parser<out_code::lines>()
+	if match ActionBlock [`{ stmt* `}] {
+		send Out
+			"{[rw_java_stmt_list( ActionBlock._repeat_stmt )]}
+	}
+	else if match ActionBlock [`{ expr `}] {
+		send Out
+			"{[rw_java_expr( ActionBlock.expr )]}
+	}
+	send Out [] eos
+}
+
+void rw_java( Output: stream )
+{
+	# Translate action blocks.
+	Section: indep::section = RagelTree.section
+	for Action: ragel::action_block in Section {
+		# Reparse as lang-independent code.
+		parse IndepActionBlock: indep::action_block[$Action]
+		if ( !IndepActionBlock ) {
+			print( error, '\n', Action )
+			exit(1)
+		}
+
+		rw_java_action_block( IndepActionBlock )
+
+		# Reparse back to ragel action block.
+		Action = parse ragel::action_block[$Out->tree]
+		if ( !Action ) {
+			print( error, '\n' )
+			exit(1)
+		}
+	}
+
+	send Output
+		"/*
+		" * @LANG: java
+		" * @GENERATED: true
+
+	if ProhibitGenflags {
+		send Output
+			" * @PROHIBIT_GENFLAGS:[ProhibitGenflags]
+	}
+
+	send Output
+		" */
+		"
+		"
+		"class [ClassName]
+		"{
+
+	Init: indep::stmt* = RagelTree.Init
+	for Stmt: indep::stmt in Init {
+		if match Stmt [Decl: var_decl] {
+			Out = new parser<out_code::lines>()
+			rw_java_var_decl( Decl )
+			send Out [] eos
+			send Output [Out->tree]
+		}
+	}
+
+	send Output
+		"
+		"[Section]
+		"
+		"%% write data;
+		"int cs;
+		"
+		"void init()
+		"{
+
+	for Stmt: indep::stmt in Init {
+		if match Stmt [ExprStmt: expr_stmt] {
+			Out = new parser<out_code::lines>()
+			rw_java_expr_stmt( ExprStmt )
+			send Out [] eos
+			send Output [Out->tree]
+		}
+	}
+
+	send Output
+		"	%% write init;
+		"}
+		"
+		"void exec( char data\[\], int len )
+		"{
+		"	char buffer \[\] = new char\[1024\];
+		"	int blen = 0;
+		"	int p = 0;
+		"	int pe = len;
+		"
+
+	if NeedsEof {
+		send Output
+			"	int eof = len;
+	}
+
+	send Output
+		"	String _s;
+		"	%% write exec;
+		"}
+		"
+		"void finish( )
+		"{
+		"	if ( cs >= [MachineName.mn_word]_first_final )
+		"		System.out.println( \"ACCEPT\" );
+		"	else
+		"		System.out.println( \"FAIL\" );
+		"}
+		"
+
+	send Output
+		"static final String inp\[\] = {
+
+	NR: int = 0
+	for InputString: indep::input_string in RagelTree {
+		send Output 
+			[^InputString ",\n"]
+		NR = NR + 1
+	}
+
+	send Output
+		"};
+		"
+
+	send Output
+		"static final int inplen = [NR];
+		"
+
+	send Output
+		"public static void main (String\[\] args)
+		"{
+		"	[ClassName] machine = new [ClassName]();
+		"	for ( int i = 0; i < inplen; i++ ) {
+		"		machine.init();
+		"		machine.exec( inp\[i\].toCharArray(), inp\[i\].length() );
+		"		machine.finish();
+		"	}
+		"}
+		"}
+}
