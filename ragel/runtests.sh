@@ -86,7 +86,7 @@ done
 [ -z "$minflags" ]    && minflags="-n -m -l -e"
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
-[ -z "$langflags" ]   && langflags="-C --asm -R -Y"
+[ -z "$langflags" ]   && langflags="-C --asm -R -Y -O"
 [ -z "$frontflags" ]  && frontflags="--kelbt-frontend --reduce-frontend"
 [ -z "$backflags" ]   && backflags="--direct-backend"
 [ -z "$featflags" ]   && featflags="--goto-backend"
@@ -105,7 +105,7 @@ java_compiler=
 ruby_engine="ruby"
 csharp_compiler=
 go_compiler=
-ocaml_compiler=
+ocaml_compiler="ocaml"
 rust_compiler=
 crack_interpreter=
 julia_interpreter="julia"
@@ -113,7 +113,7 @@ julia_interpreter="julia"
 #
 # Remove any unsupported host languages.
 #
-supported_host_langs="-C --asm -R -Y"
+supported_host_langs="-C --asm -R -Y -O"
 supported_frontends=`$ragel --supported-frontends`
 supported_backends=`$ragel --supported-backends`
 
@@ -329,7 +329,7 @@ function lang_opts()
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
 			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend --reduce-frontend"
+			prohibit_frontflags="--kelbt-frontend"
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
