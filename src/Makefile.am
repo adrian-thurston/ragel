@@ -1,4 +1,4 @@
-SUBDIRS = . host-ruby host-asm host-julia host-ocaml
+SUBDIRS = . ragel-ruby ragel-asm ragel-julia ragel-ocaml
 
 COLM        = @COLM@
 COLM_LD     = @COLM_LD@
