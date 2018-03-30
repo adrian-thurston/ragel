@@ -200,18 +200,18 @@ dnl write output files
 AC_OUTPUT([
 		Makefile
 		src/Makefile
-		src/ragel-ruby/Makefile
-		src/ragel-asm/Makefile
-		src/ragel-julia/Makefile
-		src/ragel-ocaml/Makefile
-		src/ragel-c/Makefile
-		src/ragel-d/Makefile
-		src/ragel-csharp/Makefile
-		src/ragel-go/Makefile
-		src/ragel-java/Makefile
-		src/ragel-rust/Makefile
-		src/ragel-crack/Makefile
-		src/ragel-js/Makefile
+		src/host-ruby/Makefile
+		src/host-asm/Makefile
+		src/host-julia/Makefile
+		src/host-ocaml/Makefile
+		src/host-c/Makefile
+		src/host-d/Makefile
+		src/host-csharp/Makefile
+		src/host-go/Makefile
+		src/host-java/Makefile
+		src/host-rust/Makefile
+		src/host-crack/Makefile
+		src/host-js/Makefile
 		aapl/Makefile 
 		doc/Makefile
 		doc/ragel.1

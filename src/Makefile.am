@@ -1,5 +1,5 @@
-SUBDIRS = . ragel-ruby ragel-asm ragel-julia ragel-ocaml ragel-c \
-	ragel-d ragel-csharp ragel-go ragel-java ragel-rust ragel-crack ragel-js
+SUBDIRS = . host-ruby host-asm host-julia host-ocaml host-c \
+	host-d host-csharp host-go host-java host-rust host-crack host-js
 
 COLM        = @COLM@
 COLM_LD     = @COLM_LD@
