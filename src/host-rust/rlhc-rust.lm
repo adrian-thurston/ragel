@@ -501,21 +501,9 @@ namespace rust_gen
 	}
 end
 
-InputFile: str = argv->pop()
-OutputFile: str = argv->pop()
-
-#
-# Open input and parse
-#
-Input: stream = open( InputFile, "r" )
-parse Start: start[ Input ]
-if ( !Start ) {
-	print( error, '\n' )
-	exit(1)
+void trans( Output: stream, Start: start )
+{
+	rust_gen::trans( Output, Start )
 }
 
-#
-# Translate
-#
-Output: stream = open( OutputFile, "w" )
-rust_gen::trans( Output, Start )
+include 'rlhc-main.lm'

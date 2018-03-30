@@ -476,7 +476,7 @@ void stmt_list( StmtList: stmt* )
 		stmt( Stmt )
 }
 
-void trans( Output: stream, Start: start )
+void ruby_trans( Output: stream, Start: start )
 {
 	Parser = new parser<ruby_out::ruby_out>()
 
@@ -511,23 +511,10 @@ void assign_labels( Prog: ref<any> )
 	}
 }
 
-InputFile: str = argv->pop()
-OutputFile: str = argv->pop()
-
-#
-# Open input and parse
-#
-Input: stream = open( InputFile, "r" )
-parse Start: start[ Input ]
-if ( !Start ) {
-	print( error, '\n' )
-	exit(1)
+void trans( Output: stream, Start: start )
+{
+	assign_labels( Start )
+	ruby_trans( Output, Start )
 }
 
-assign_labels( Start )
-
-#
-# Translate
-#
-Output: stream = open( OutputFile, "w" )
-trans( Output, Start )
+include 'rlhc-main.lm'
