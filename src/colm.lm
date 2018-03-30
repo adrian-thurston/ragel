@@ -723,8 +723,7 @@ def pattern_top_el
 |	[SQOPEN PatternElList: pattern_el* SQCLOSE] :SubList
 
 def pattern_list
-	[pattern_list pattern_top_el] :List
-|	[pattern_top_el] :Base
+	[pattern_top_el] :Base
 
 def pattern
 	[pattern_list]
@@ -760,8 +759,7 @@ def cons_top_el
 |	[SQOPEN ConsElList: cons_el* SQCLOSE] :SubList
 
 def cons_list
-	[cons_top_el cons_list] :List
-|	[cons_top_el] :Base
+	[cons_top_el] :Base
 
 def constructor
 	[cons_list]
@@ -814,8 +812,7 @@ def string_top_el
 |	[SQOPEN StringElList: string_el* SQCLOSE] :SubList
 
 def string_list
-	[string_top_el string_list] :List
-|	[string_top_el] :Base
+	[string_top_el] :Base
 
 def string
 	[string_list]

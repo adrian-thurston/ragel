@@ -638,17 +638,6 @@ struct LoadColm
 	{
 		PatternItemList *list = 0;
 		switch ( patternList.prodName() ) {
-		case pattern_list::List: {
-
-			PatternItemList *left = walkPatternList(
-					patternList._pattern_list(), patternVarRef );
-
-			PatternItemList *right = walkPattternTopEl(
-					patternList.pattern_top_el(), patternVarRef );
-
-			list = patListConcat( left, right );
-			break;
-		}
 		case pattern_list::Base: {
 			list = walkPattternTopEl( patternList.pattern_top_el(), patternVarRef );
 			break;
@@ -1484,20 +1473,12 @@ struct LoadColm
 
 	ConsItemList *walkConsList( cons_list consList, TypeRef *consTypeRef )
 	{
-		ConsItemList *list = walkConsTopEl( consList.cons_top_el(), consTypeRef );
-
-		if ( consList._cons_list() != 0 ) {
-			ConsItemList *extension = walkConsList( consList._cons_list(), consTypeRef );
-			consListConcat( list, extension );
-		}
-
-		return list;
+		return walkConsTopEl( consList.cons_top_el(), consTypeRef );
 	}
 
 	ConsItemList *walkConstructor( constructor Constructor, TypeRef *consTypeRef )
 	{
-		ConsItemList *list = walkConsList( Constructor.cons_list(), consTypeRef );
-		return list;
+		return walkConsList( Constructor.cons_list(), consTypeRef );
 	}
 
 	/*
@@ -1616,14 +1597,7 @@ struct LoadColm
 
 	ConsItemList *walkStringList( string_list stringList )
 	{
-		ConsItemList *list = walkStringTopEl( stringList.string_top_el() );
-
-		if ( stringList._string_list() != 0 ) {
-			ConsItemList *extension = walkStringList( stringList._string_list() );
-			consListConcat( list, extension );
-		}
-
-		return list;
+		return walkStringTopEl( stringList.string_top_el() );
 	}
 
 	ConsItemList *walkString( string String )
