@@ -1216,9 +1216,6 @@ void ParseData::reportAnalysisResult( FsmRes &res )
 
 	else if ( res.type == FsmRes::TypePriorInteraction )
 		analysisResult( 60, res.id, "prior-interaction" );
-
-	else if ( res.type == FsmRes::TypeRepetitionError )
-		analysisResult( 2, 0, "rep-error" );
 }
 
 

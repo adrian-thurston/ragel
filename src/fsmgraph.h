@@ -75,9 +75,6 @@ struct PriorInteraction
 	long long id;
 };
 
-struct RepetitionError {};
-struct TransDensity {};
-
 struct NfaRound
 {
 	NfaRound( long depth, long groups )
@@ -1860,7 +1857,6 @@ struct FsmRes
 	struct TooManyStates {};
 	struct PriorInteraction {};
 	struct CondCostTooHigh {};
-	struct RepetitionError {};
 	struct InternalError {};
 
 	enum Type
@@ -1869,7 +1865,6 @@ struct FsmRes
 		TypeTooManyStates,
 		TypePriorInteraction,
 		TypeCondCostTooHigh,
-		TypeRepetitionError,
 		TypeInternalError,
 	};
 
@@ -1884,9 +1879,6 @@ struct FsmRes
 
 	FsmRes( const CondCostTooHigh &, long long costId )
 		: fsm(0), type(TypeCondCostTooHigh), id(costId) {}
-
-	FsmRes( const RepetitionError & )
-		: fsm(0), type(TypeRepetitionError) {}
 
 	FsmRes( const InternalError & )
 		: fsm(0), type(TypeInternalError) {}
