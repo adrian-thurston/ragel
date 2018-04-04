@@ -1263,7 +1263,7 @@ struct StateAp
 	/* Actions to add to any future transitions that leave via this state. */
 	ActionTable outActionTable;
 
-	/* Conditions to add to any future transiions that leave via this sttate. */
+	/* Conditions to add to any future transiions that leave via this state. */
 	CondSpace *outCondSpace;
 	CondKeySet outCondKeys;
 

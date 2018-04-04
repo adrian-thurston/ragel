@@ -1129,7 +1129,8 @@ int InputData::main( int argc, const char **argv )
 	try {
 		parseArgs( argc, argv );
 		checkArgs();
-		makeDefaultFileName();
+		if ( !generateDot )
+			makeDefaultFileName();
 
 		if ( !process() )
 			abortCompile( 1 );
