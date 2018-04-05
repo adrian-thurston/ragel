@@ -68,11 +68,11 @@ item* expandIncludes( ItemList: ref<item*> )
 		if match IL 
 			[`include FN: ifn_path Rest: item*]
 		{
-			S: start = parseTxt( 
+			S: start = parseTxt([
 				"
 				"%%
 				"
-			)
+			])
 
 			match S [em_item* `%% IncludedItems: item*]
 

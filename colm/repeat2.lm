@@ -393,7 +393,7 @@ match Author [cmd_author AuthorData: text* nl]
 
 License: license = license in Preamble
 
-print( 
+print([
 	~\documentclass[letterpaper,11pt,oneside]{book}
 	~\usepackage{graphicx}
 	~\usepackage{comment}
@@ -435,7 +435,7 @@ print(
 	~\thispagestyle{empty}
 	~\begin{center}
 	~\vspace*{3in}
-)
+])
 
 print( '{\\huge ', TitleData, '}\\\\\n' )
 
@@ -443,38 +443,38 @@ print( '\\vspace*{12pt}\n' )
 
 print( '{\\Large ', SubTitleData, '}\\\\\n' )
 
-print(
+print([
 	~\vspace{1in}
 	~by\\
 	~\vspace{12pt}
-)
+])
 
 print( '{\\large ', AuthorData, '}\\\\\n' )
 
-print(
+print([
 	~\end{center}
 	~\clearpage
 	~
 	~\pagenumbering{roman}
 	~
 	~\chapter*{License}
-)
+])
 
-print(
+print([
 	~Ragel version \version, \pubdate\\
 	~Copyright \copyright\ 2003-2012 Adrian D. Thurston
 	~\vspace{6mm}
 	~
-)
+])
 
 i: int = 0
 for P: paragraph in License {
 	if ( i != 0 ) {
-		print(
+		print([
 			~
 			~\vspace{5pt}
 			~
-		)
+		])
 	}
 	print( "{\\bf\\it\\noindent " )
 	print( P )
@@ -482,14 +482,14 @@ for P: paragraph in License {
 	i = i + 1
 }
 
-print(
+print([
 	~
 	~\clearpage
 	~\tableofcontents
 	~\clearpage
 	~
 	~\pagenumbering{arabic}
-)
+])
 
 
 for Chapter: chapter in repeat(Chapters) {
@@ -524,10 +524,10 @@ for Chapter: chapter in repeat(Chapters) {
 	}
 }
 
-print( 
+print([
 	~
 	~\end{document}
-)
+])
 ##### IN #####
 .title Ragel State Machine Compiler
 
