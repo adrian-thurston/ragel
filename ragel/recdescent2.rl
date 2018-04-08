@@ -39,19 +39,20 @@ class recdescent2
 		action call_main
 		{
 			System.out.print( "calling main\n" );
-			fcall main;
+			fncall main;
 		}
 
 		action return_main
 		{
 			if ( top == 0 ) {
 				System.out.print( "STRAY CLOSE\n" );
-				fbreak;
+				fnbreak;
 			}
-
-			System.out.print( "returning from main\n" );
-			fhold;
-			fret;
+			else {
+				System.out.print( "returning from main\n" );
+				fhold;
+				fnret;
+			}
 		}
 
 		id = [a-zA-Z_]+;
@@ -75,7 +76,7 @@ class recdescent2
 		int cs, p = 0, pe = data.length, eof = data.length, item = 0;
 		int stack[] = new int[1024];
 		int stack_size = 1;
-		int top;
+		int top = 0;
 
 		%% write init;
 		%% write exec;
