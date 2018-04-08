@@ -50,7 +50,12 @@ CLEANFILES = \
 
 TRANS_DEPS = \
 	$(RAGEL_LM)/ragel.lm \
-	trans-c.lm trans-asm.lm 
+	trans-c.lm trans-asm.lm \
+	trans-crack.lm trans-csharp.lm \
+	trans-d.lm trans-go.lm \
+	trans-java.lm trans-julia.lm \
+	trans-ocaml.lm trans-ruby.lm \
+	trans-rust.lm
 
 trans_CPPFLAGS = @COLM_CPPFLAGS@
 trans_SOURCES = trans.c main.c
