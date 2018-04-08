@@ -1,7 +1,7 @@
 /*
  * @LANG: indep
  * @NEEDS_EOF: yes
- * @PROHIBIT_LANGUAGES: ruby ocaml
+ * @PROHIBIT_LANGUAGES: ruby ocaml java rust crack
  * @PROHIBIT_FEATFLAGS: --var-backend
  *
  * Testing fgoto * in an EOF action.

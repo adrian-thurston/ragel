@@ -1,6 +1,6 @@
 /*
  * @LANG: indep
- * @PROHIBIT_LANGUAGES: ruby ocaml
+ * @PROHIBIT_LANGUAGES: ruby ocaml java rust javascript crack
  * @PROHIBIT_FEATFLAGS: --var-backend
  */
 
