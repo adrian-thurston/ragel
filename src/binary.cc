@@ -48,6 +48,10 @@ Binary::Binary( const CodeGenArgs &args )
 	eofActions(         "eof_actions",           *this ),
 	eofTransDirect(     "eof_trans_direct",      *this ),
 	eofTransIndexed(    "eof_trans_indexed",     *this ),
+	eofCondSpaces(      "eof_cond_spaces",       *this ),
+	eofCondKeyOffs(     "eof_cond_key_offs",     *this ),
+	eofCondKeyLens(     "eof_cond_key_lens",     *this ),
+	eofCondKeys(        "eof_cond_keys",         *this ),
 	actions(            "actions",               *this ),
 	keys(               "trans_keys",            *this ),
 	condKeys(           "cond_keys",             *this ),
@@ -154,6 +158,68 @@ void Binary::taEofActions()
 		EOF_ACTION( st );
 
 	eofActions.finish();
+}
+
+void Binary::taEofConds()
+{
+	/*
+	 * EOF Cond Spaces
+	 */
+	eofCondSpaces.start();
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->outCondSpace != 0 )
+			transCondSpaces.value( st->outCondSpace->condSpaceId );
+		else
+			transCondSpaces.value( -1 );
+	}
+	eofCondSpaces.finish();
+
+	/*
+	 * EOF Cond Key Indixes
+	 */
+	eofCondKeyOffs.start();
+
+	int curOffset = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		long off = 0;
+		if ( st->outCondSpace != 0 ) {
+			off = curOffset;
+			curOffset += st->outCondKeys.length();
+		}
+		eofCondKeyOffs.value( off );
+	}
+
+	eofCondKeyOffs.finish();
+
+	/*
+	 * EOF Cond Key Lengths.
+	 */
+	eofCondKeyLens.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		long len = 0;
+		if ( st->outCondSpace != 0 )
+			len = st->outCondKeys.length();
+		eofCondKeyLens.value( len );
+	}
+
+	eofCondKeyLens.finish();
+
+	/*
+	 * EOF Cond Keys
+	 */
+	eofCondKeys.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->outCondSpace != 0 ) {
+			for ( int c = 0; c < st->outCondKeys.length(); c++ ) {
+				CondKey key = st->outCondKeys[c];
+				eofCondKeys.value( key.getVal() );
+			}
+		}
+	}
+
+	eofCondKeys.finish();
 }
 
 void Binary::taEofTransDirect()

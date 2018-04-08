@@ -598,7 +598,8 @@ struct RedStateAp
 		numInConds(0),
 		inCondTests(0),
 		numInCondTests(0),
-		nfaTargs(0)
+		nfaTargs(0),
+		outCondSpace(0)
 	{ }
 
 	/* Transitions out. */
@@ -641,6 +642,8 @@ struct RedStateAp
 	int numInCondTests;
 
 	RedNfaTargs *nfaTargs;
+	GenCondSpace *outCondSpace;
+	RedCondKeySet outCondKeys;
 };
 
 /* List of states. */

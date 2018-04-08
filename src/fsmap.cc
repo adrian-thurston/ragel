@@ -1128,9 +1128,9 @@ int FsmAp::compareStateData( const StateAp *state1, const StateAp *state2 )
 void FsmAp::clearOutData( StateAp *state )
 {
 	/* Kill the out actions and priorities. */
-	state->outActionTable.empty();
 	state->outCondSpace = 0;
 	state->outCondKeys.empty();
+	state->outActionTable.empty();
 	state->outPriorTable.empty();
 }
 

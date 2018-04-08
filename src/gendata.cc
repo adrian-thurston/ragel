@@ -623,6 +623,21 @@ void Reducer::makeEofTrans( StateAp *state )
 
 		setEofTrans( curState, targ, action );
 	}
+
+	if ( state->outCondSpace != 0 ) {
+		RedStateAp *rs = allStates + curState;
+		GenCondSpace *condSpace = allCondSpaces + state->outCondSpace->condSpaceId;
+		rs->outCondSpace = condSpace;
+		rs->outCondKeys = state->outCondKeys;
+
+		std::cout << "ck: " << state->alg.stateNum << " " <<
+				state->outCondKeys.length() << std::endl;
+
+		for ( CondKeySet::Iter k = state->outCondKeys; k.lte(); k++ ) {
+			std::cout << "  k: " << *k << std::endl;
+
+		}
+	}
 }
 
 void Reducer::makeTrans( Key lowKey, Key highKey, TransAp *trans )

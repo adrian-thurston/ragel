@@ -57,6 +57,10 @@ protected:
 	TableArray eofActions;
 	TableArray eofTransDirect;
 	TableArray eofTransIndexed;
+	TableArray eofCondSpaces;
+	TableArray eofCondKeyOffs;
+	TableArray eofCondKeyLens;
+	TableArray eofCondKeys;
 	TableArray actions;
 	TableArray keys;
 	TableArray condKeys;
@@ -90,6 +94,7 @@ protected:
 	void taToStateActions();
 	void taFromStateActions();
 	void taEofActions();
+	void taEofConds();
 	void taEofTransDirect();
 	void taEofTransIndexed();
 	void taKeys();

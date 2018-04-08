@@ -38,7 +38,8 @@ ostream &operator<<( ostream &out, const NameRef &nameRef );
 ostream &operator<<( ostream &out, const NameInst &nameInst );
 
 /* Read string literal (and regex) options and return the true end. */
-const char *checkLitOptions( InputData *id, const InputLoc &loc, const char *data, int length, bool &caseInsensitive )
+const char *checkLitOptions( InputData *id, const InputLoc &loc,
+		const char *data, int length, bool &caseInsensitive )
 {
 	const char *end = data + length - 1;
 	while ( *end != '\'' && *end != '\"' && *end != '/' ) {
@@ -94,7 +95,8 @@ char *prepareLitString( InputData *id, const InputLoc &loc, const char *data, lo
 	return resData;
 }
 
-Key *prepareHexString( ParseData *pd, const InputLoc &loc, const char *data, long length, long &resLen )
+Key *prepareHexString( ParseData *pd, const InputLoc &loc,
+		const char *data, long length, long &resLen )
 {
 	Key *dest = new Key[( length - 2 ) >> 1];
 	const char *src = data;
