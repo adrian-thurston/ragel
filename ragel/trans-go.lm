@@ -26,11 +26,11 @@ int rw_go_factor( Factor: indep::factor )
 	}
 	elsif match Factor ['true']
 	{
-		send Out '1'
+		send Out 'true'
 	}
 	elsif match Factor ['false']
 	{
-		send Out '0'
+		send Out 'false'
 	}
 	elsif match Factor [`buffer]
 	{
@@ -154,6 +154,11 @@ int rw_go_print_stmt( Stmt: indep::print_stmt )
 	{
 		send Out
 			"fmt.Print( data\[ts:te\] );" 
+	}
+	else if match Stmt [`print_off `;]
+	{
+		send Out
+			"fmt.Print( p );" 
 	}
 }
 

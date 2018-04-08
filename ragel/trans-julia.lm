@@ -28,11 +28,11 @@ int factor( Factor: indep::factor )
 	}
 	elsif match Factor ['true']
 	{
-		send Out '1'
+		send Out 'true'
 	}
 	elsif match Factor ['false']
 	{
-		send Out '0'
+		send Out 'false'
 	}
 	elsif match Factor [`buffer]
 	{
@@ -175,7 +175,12 @@ int print_stmt( Stmt: indep::print_stmt )
 	case [`print_token `;]
 	{
 		send Out
-			"print( data\[(ts+1) : (te)\] )
+			"print( data\[(ts+1) : (te)\] );
+	}
+	case [`print_off `;]
+	{
+		send Out
+			"print( p );" 
 	}
 }
 

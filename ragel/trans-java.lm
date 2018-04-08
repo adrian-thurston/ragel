@@ -26,11 +26,11 @@ int rw_java_factor( Factor: indep::factor )
 	}
 	elsif match Factor ['true']
 	{
-		send Out '1'
+		send Out 'true'
 	}
 	elsif match Factor ['false']
 	{
-		send Out '0'
+		send Out 'false'
 	}
 	elsif match Factor [`buffer]
 	{

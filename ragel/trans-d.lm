@@ -149,6 +149,11 @@ int rw_d_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"printf( \"%.*s\", ts\[0..(te - ts)\] );"
 	}
+	else if match Stmt [`print_off `;]
+	{
+		send Out
+			"printf( \"%d\", (p - &data\[0\]) );"
+	}
 }
 
 void rw_d_buf_stmt( BufStmt: indep::buf_stmt )

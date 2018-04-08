@@ -26,10 +26,10 @@ int rw_ocaml_factor( Factor: indep::factor )
 			"( [rw_ocaml_expr(Factor.expr)] )
 	}
 	case ['true'] {
-		send Out '1'
+		send Out 'true'
 	}
 	case ['false'] {
-		send Out '0'
+		send Out 'false'
 	}
 	case "'0'" {
 		send Out

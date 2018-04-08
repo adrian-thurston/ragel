@@ -26,11 +26,11 @@ int rw_cs_factor( Factor: indep::factor )
 	}
 	elsif match Factor ['true']
 	{
-		send Out '1'
+		send Out 'true'
 	}
 	elsif match Factor ['false']
 	{
-		send Out '0'
+		send Out 'false'
 	}
 	elsif match Factor [`buffer]
 	{
@@ -160,6 +160,11 @@ int rw_cs_print_stmt( Stmt: indep::print_stmt )
 	{
 		send Out
 			"Console.Write( new String( data , ts , te - ts ) );
+	}
+	else if match Stmt [`print_off `;]
+	{
+		send Out
+			"Console.Write( p );"
 	}
 }
 
