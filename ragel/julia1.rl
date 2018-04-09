@@ -10,7 +10,7 @@
 
 %% write data;
 
-function test( data::String )
+function test( data::AbstractString )
 	p = 0
 	pe = length(data)
 	eof = length(data)

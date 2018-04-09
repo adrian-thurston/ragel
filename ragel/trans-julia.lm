@@ -110,7 +110,7 @@ int var_decl( VarDecl: indep::var_decl )
 {
 	if VarDecl.opt_arr.expr {
 		send Out
-			"[VarDecl.tk_ident] = [type( VarDecl.type )] "
+			"[VarDecl.tk_ident] = [type( VarDecl.type )]"
 				"\[ [array_init( atoi($VarDecl.opt_arr.expr) )] \];
 	}
 	else {
