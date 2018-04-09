@@ -99,7 +99,7 @@ ragel="@RAGEL_BIN@"
 
 cxx_compiler="@CXX@"
 c_compiler="@CC@"
-objc_compiler=
+objc_compiler="@CC@"
 d_compiler="gdc-5"
 java_compiler="javac"
 ruby_engine="ruby"
@@ -225,7 +225,7 @@ function lang_opts()
 			compiler=$objc_compiler
 			#host_ragel=$ragel
 			host_ragel=`dirname $ragel`/host-c/ragel-c
-			flags="-Wall -O3 -fno-strict-aliasing -I/usr/include/GNUstep"
+			flags="`gnustep-config --objc-flags`"
 			libs="-lobjc -lgnustep-base"
 			prohibit_minflags=""
 			prohibit_genflags=""
