@@ -71,7 +71,7 @@ void rw_ocaml_type( Type: indep::type )
 	}
 	elsif match Type [`bool]
 	{
-		send Out "int"
+		send Out "bool"
 	}
 	elsif match Type [`char]
 	{
@@ -113,13 +113,18 @@ void rw_ocaml_opt_array( OptArr: indep::opt_arr )
 
 int rw_ocaml_var_decl( VarDecl: indep::var_decl )
 {
-	if match VarDecl.opt_arr [] {
+	OptArr: indep::opt_arr = VarDecl.opt_arr
+	if OptArr.expr {
 		send Out
-			"let [$VarDecl.tk_ident] = ref 0
+			"let [$VarDecl.tk_ident] = Array.make 32 0
+	}
+	else if match VarDecl.type [`bool] {
+		send Out 
+			"let [VarDecl.tk_ident] = ref false
 	}
 	else {
 		send Out
-			"let [$VarDecl.tk_ident] = Array.make 32 0
+			"let [VarDecl.tk_ident] = ref 0
 	}
 }
 

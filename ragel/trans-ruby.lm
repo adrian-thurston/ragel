@@ -21,10 +21,10 @@ int rw_ruby_factor( Factor: indep::factor )
 			"( [rw_ruby_expr(Factor.expr)] )
 	}
 	case ['true'] {
-		send Out '1'
+		send Out 'true'
 	}
 	case ['false'] {
-		send Out '0'
+		send Out 'false'
 	}
 	case "'0'" {
 		send Out '"0"[0].ord'
@@ -49,7 +49,7 @@ void rw_ruby_type( Type: indep::type )
 	}
 	elsif match Type [`bool]
 	{
-		send Out "int"
+		send Out "bool"
 	}
 	elsif match Type [`char]
 	{
@@ -96,9 +96,13 @@ int rw_ruby_var_decl( VarDecl: indep::var_decl )
 		send Out 
 			"[$VarDecl.tk_ident] = Array.new
 	}
+	else if match VarDecl.type [`bool] {
+		send Out 
+			"[$VarDecl.tk_ident] = false
+	}
 	else {
 		send Out 
-			"[$VarDecl.tk_ident] = 1
+			"[$VarDecl.tk_ident] = 0
 	}
 }
 

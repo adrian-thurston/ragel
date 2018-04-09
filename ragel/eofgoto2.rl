@@ -30,7 +30,7 @@ neg = false;
 	}
 
 	action finish {
-		if ( neg != 0 ) {
+		if ( neg ) {
 			value = -1 * value;
 		}
 	}

@@ -51,7 +51,7 @@ void rw_go_type( Type: indep::type )
 	}
 	elsif match Type [`bool]
 	{
-		send Out "int"
+		send Out "bool"
 	}
 	elsif match Type [`char]
 	{

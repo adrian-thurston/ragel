@@ -35,7 +35,7 @@ long nfa_count = 0;
 	}
 
 	action finish {
-		if ( neg != 0 ) { value = -1 * value; }
+		if ( neg ) { value = -1 * value; }
 	}
 
 	action print1 {

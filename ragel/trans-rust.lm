@@ -28,11 +28,11 @@ int factor( Factor: indep::factor )
 	}
 	elsif match Factor ['true']
 	{
-		send Out '1'
+		send Out 'true'
 	}
 	elsif match Factor ['false']
 	{
-		send Out '0'
+		send Out 'false'
 	}
 	elsif match Factor [`buffer]
 	{
@@ -59,7 +59,7 @@ void type( Type: indep::type )
 	}
 	case [`bool]
 	{
-		send Out "i8"
+		send Out "bool"
 	}
 	case [`char]
 	{
@@ -113,6 +113,10 @@ int var_decl( VarDecl: indep::var_decl )
 			"static mut [VarDecl.tk_ident] : "
 				"\[ [type( VarDecl.type )] ; [expr( VarDecl.opt_arr.expr )]\] = "
 				"\[ [array_init( atoi($VarDecl.opt_arr.expr) )] \];
+	}
+	else if match VarDecl.type [`bool] {
+		send Out
+			"static mut [VarDecl.tk_ident] : [type( VarDecl.type )] = false;
 	}
 	else {
 		send Out

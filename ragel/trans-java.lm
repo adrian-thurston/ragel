@@ -51,7 +51,7 @@ void rw_java_type( Type: indep::type )
 	}
 	elsif match Type [`bool]
 	{
-		send Out "int"
+		send Out "boolean"
 	}
 	elsif match Type [`char]
 	{

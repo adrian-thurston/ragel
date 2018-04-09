@@ -9,9 +9,9 @@ bool k;
 %%{
 	machine foo;
 
-	action c1 {i != 0}
-	action c2 {j != 0}
-	action c3 {k != 0}
+	action c1 {i}
+	action c2 {j}
+	action c3 {k}
 	action one { print_str "  one\n";}
 	action two { print_str "  two\n";}
 	action three { print_str "  three\n";}

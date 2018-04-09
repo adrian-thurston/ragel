@@ -33,7 +33,7 @@ int stack[32];
 	}
 
 	action finish {
-		if ( neg != 0 ) {
+		if ( neg ) {
 			value = -1 * value;
 		}
 	}
