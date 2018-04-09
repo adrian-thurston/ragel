@@ -32,6 +32,11 @@ int rw_d_factor( Factor: indep::factor )
 	{
 		send Out '0'
 	}
+	elsif match Factor [`buffer]
+	{
+		send Out
+			"cast(string)buffer\[0..blen\]"
+	}
 	else 
 	{
 		send Out [$Factor]

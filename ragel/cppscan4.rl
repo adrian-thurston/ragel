@@ -5,6 +5,7 @@
 module cppscan;
 
 import std.c.stdio;
+import std.stdio;
 import std.string;
 
 const int BUFSIZE = 2048;
@@ -54,12 +55,12 @@ class Scanner
 	{
 		/* Leader. */
 		if ( nonTokBuf.length > 0 ) {
-			printf("%.*s", nonTokBuf);
+			writef("%s", cast(string)nonTokBuf);
 			nonTokBuf = "";
 		}
 
 		/* Token data. */
-		printf("<%d>%.*s", id, tokBuf);
+		writef("<%d>%s", id, cast(string)tokBuf);
 
 		tokBuf = "";
 	}
@@ -155,7 +156,7 @@ class Scanner
 
 		action onEOFChar { 
 			/* On EOF char, write out the non token buffer. */
-			printf("%.*s", nonTokBuf);
+			writef("%s", cast(string)nonTokBuf);
 			nonTokBuf = "";
 		}
 
@@ -226,7 +227,7 @@ void test(const(char)[] buf)
 	 * trailing null to force the last token into whitespace. */
 	const(char) eof_char = 0;
 	if ( scanner.execute( &eof_char, 1 ) <= 0 ) {
-		fprintf(stderr, "cppscan: scan failed\n");
+		std.stdio.stderr.writef("cppscan: scan failed\n");
 	}
 }
 

@@ -6,6 +6,7 @@
 module clang;
 
 import std.c.stdio;
+import std.stdio;
 
 char[] string(char c)
 {
@@ -44,22 +45,22 @@ class CLang
 
 		# Functions to dump tokens as they are matched.
 		action ident {
-			printf("ident(%i): %.*s\n", curLine, identBuf);
+			writef( "ident(%d): %s\n", curLine, identBuf ); 
 		}
 		action literal {
-			printf("literal(%i): %.*s\n", curLine, identBuf);
+			writef( "literal(%d): %s\n", curLine, identBuf );
 		}
 		action float {
-			printf("float(%i): %.*s\n", curLine, identBuf);
+			writef( "float(%d): %s\n", curLine, identBuf );
 		}
 		action int {
-			printf("int(%i): %.*s\n", curLine, identBuf);
+			writef( "int(%d): %s\n", curLine, identBuf );
 		}
 		action hex {
-			printf("hex(%i): 0x%.*s\n", curLine, identBuf);
+			writef( "hex(%d): 0x%s\n", curLine, identBuf );
 		}
 		action symbol {
-			printf("symbol(%i): %.*s\n", curLine, identBuf);
+			writef( "symbol(%d): %s\n", curLine, identBuf );
 		}
 
 		# Alpha numberic characters or underscore.
