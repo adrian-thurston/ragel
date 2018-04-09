@@ -94,7 +94,7 @@ void rw_d_opt_array( OptArr: indep::opt_arr )
 int rw_d_var_decl( VarDecl: indep::var_decl )
 {
 	send Out
-		"[rw_d_type( VarDecl.type )] [$VarDecl.tk_ident][rw_d_opt_array(VarDecl.opt_arr)];
+		"[rw_d_type( VarDecl.type )][rw_d_opt_array(VarDecl.opt_arr)] [$VarDecl.tk_ident];
 }
 
 void rw_d_opt_sub( OptSub: indep::opt_sub )
@@ -267,7 +267,7 @@ void rw_d( Output: stream )
 		"%% write data;
 		"int cs;
 		"int blen;
-		"char buffer\[1024\];
+		"char\[1024\] buffer;
 		"
 		"void init()
 		"{
@@ -286,7 +286,7 @@ void rw_d( Output: stream )
 		"}
 
 	send Output
-		"void exec( const(char) data\[\] )
+		"void exec( const(char)\[\] data )
 		"{
 		"	const(char) *p = data.ptr;
 		"	const(char) *pe = data.ptr + data.length;
@@ -297,7 +297,7 @@ void rw_d( Output: stream )
 	}
 
 	send Output
-		"	char _s\[\];
+		"	char\[\] _s;
 		"
 		"	%% write exec;
 		"}
