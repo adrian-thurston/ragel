@@ -146,10 +146,10 @@ int rw_cs_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"Console.Write( [rw_cs_expr(Stmt.expr)] );"
 	}
-	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"Console.Write( new String( [rw_cs_expr(E1)], 0, [rw_cs_expr(E2)] ) );"
+			"Console.Write( new String( buffer, 0, blen ) );
 	}
 	else if match Stmt [`print_str expr `;]
 	{

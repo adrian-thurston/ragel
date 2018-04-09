@@ -345,7 +345,7 @@ namespace indep
 
 	def print_stmt
 		[`print_int expr `;]
-	|	[`print_buf expr `, expr `;]
+	|	[`print_buf `;]
 	|	[`print_str expr `;]
 	|	[`print_token `;]
 	|	[`print_off `;]

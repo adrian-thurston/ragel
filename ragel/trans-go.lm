@@ -140,10 +140,10 @@ int rw_go_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"fmt.Print( [rw_go_expr(Stmt.expr)] );"
 	}
-	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"fmt.Print( string ( [rw_go_expr(E1)]\[:[rw_go_expr(E2)]\] ));"
+			"fmt.Print( string(buffer\[0:blen\]) );
 	}
 	else if match Stmt [`print_str expr `;]
 	{

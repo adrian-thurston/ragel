@@ -195,7 +195,7 @@ int rw_asm_print_stmt( Stmt: indep::print_stmt )
 			"	movq	$0, %rax
 			"	call	printf
 	}
-	case [`print_buf E1: expr `, E2: expr `;] {
+	case [`print_buf `;] {
 		#send Out
 		#	"fwrite( [rw_c_expr(E1)], 1, [rw_c_expr(E2)], stdout );"
 	}

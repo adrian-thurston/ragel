@@ -139,11 +139,10 @@ int rw_java_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"System.out.print( [rw_java_expr(Stmt.expr)] );
 	}
-	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"_s = new String( [rw_java_expr(E1)], 0, [rw_java_expr(E2)] );
-			"System.out.print( _s );
+			"System.out.print( new String( buffer, 0, blen ) );
 	}
 	else if match Stmt [`print_str expr `;]
 	{

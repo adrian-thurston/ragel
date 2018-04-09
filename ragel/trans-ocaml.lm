@@ -180,10 +180,10 @@ int rw_ocaml_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"print_int( [rw_ocaml_expr(Stmt.expr)] );
 	}
-	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"for i = 0 to [rw_ocaml_expr(E2)] - 1 do print_char (Char.chr [E1].(i)) done; "
+			"print_string( String.sub buffer 0 blen.contents );
 	}
 	else if match Stmt [`print_str expr `;]
 	{

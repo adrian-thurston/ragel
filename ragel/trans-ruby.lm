@@ -147,11 +147,10 @@ int rw_ruby_print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"print( [rw_ruby_expr(Stmt.expr)] );
 	}
-	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"_a = [rw_ruby_expr(E1)] \[0..pos-1\] ;
-			"print( _a.pack( \"c*\" )  );
+			"print( buffer\[0..blen-1\].pack( \"c*\" ) );
 	}
 	else if match Stmt [`print_str expr `;]
 	{

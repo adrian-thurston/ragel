@@ -132,27 +132,27 @@ int rw_d_print_stmt( Stmt: indep::print_stmt )
 {
 	if match Stmt [`print_int expr `;] {
 		send Out
-			"printf( \"%d\", [rw_d_expr(Stmt.expr)] );
+			"write( [rw_d_expr(Stmt.expr)] );
 	}
-	else if match Stmt [`print_buf E1: expr `, E2: expr `;]
+	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"printf( \"%.*s\", [rw_d_expr(E1)]\[0..([rw_d_expr(E2)])\] );"
+			"printf( \"%s\", &buffer ); 
 	}
 	else if match Stmt [`print_str expr `;]
 	{
 		send Out
-			"printf( \"%.*s\", [rw_d_expr(Stmt.expr)] );"
+			"write( [rw_d_expr(Stmt.expr)] );"
 	}
 	else if match Stmt [`print_token `;]
 	{
 		send Out
-			"printf( \"%.*s\", ts\[0..(te - ts)\] );"
+			"write( ts\[0..(te - ts)\] );"
 	}
 	else if match Stmt [`print_off `;]
 	{
 		send Out
-			"printf( \"%d\", (p - &data\[0\]) );"
+			"write( (p - &data\[0\]) );"
 	}
 }
 

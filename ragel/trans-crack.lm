@@ -162,10 +162,10 @@ int print_stmt( Stmt: indep::print_stmt )
 		send Out
 			"cout.format( [expr(Stmt.expr)] );
 	}
-	case [`print_buf E1: expr `, E2: expr `;]
+	case [`print_buf `;]
 	{
 		send Out
-			"print!( \"{}\", buffer );
+			"cout.format( buffer );
 	}
 	case [`print_str expr `;]
 	{
