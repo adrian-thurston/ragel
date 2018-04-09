@@ -67,9 +67,9 @@ namespace julia_gen
 			switch Tok
 			case [host::`${ StmtList: stmt* host::`}$] {
 				send Parser
-					"{
+					"begin
 					"	[stmt_list( StmtList )]
-					"}
+					"end
 			}
 			case [host::`={ Expr: expr host::`}=] {
 				send Parser
