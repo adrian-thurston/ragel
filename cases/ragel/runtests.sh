@@ -122,18 +122,58 @@ function test_error
 	exit 1;
 }
 
+function exec_cmd()
+{
+	lang=$1
+
+	case $lang in
+		c) exec_cmd=./$wk/$_binary ;;
+		c++) exec_cmd=./$wk/$_binary ;;
+		obj-c) exec_cmd=./$wk/$_binary ;;
+		d) exec_cmd=./$wk/$_binary ;;
+		java) exec_cmd="java -classpath $wk $_root" ;;
+		ruby) exec_cmd="ruby $wk/$_code_src" ;;
+		csharp) exec_cmd="mono $wk/$_binary" ;;
+		go) exec_cmd=./$wk/$_binary ;;
+		ocaml) exec_cmd="ocaml $wk/$_code_src" ;;
+		asm) exec_cmd=./$wk/$_binary ;;
+		rust) exec_cmd=./$wk/$_binary ;;
+		crack) exec_cmd="$crack_interpreter $wk/$_code_src" ;;
+		julia) exec_cmd="$julia_interpreter $wk/$_code_src" ;;
+		indep) ;;
+	esac
+}
+
 function run_test()
 {
+	_root=`echo s$min_opt$gen_opt$enc_opt$f_opt-$root | sed 's/-\+/_/g'`
+	_code_src=`echo s$min_opt$gen_opt$enc_opt$f_opt-$code_src | sed 's/-\+/_/g'`
+	_binary=`echo s$min_opt$gen_opt$enc_opt$f_opt-$binary | sed 's/-\+/_/g'`
+	_output=`echo s$min_opt$gen_opt$enc_opt$f_opt-$output | sed 's/-\+/_/g'`
+	_diff=`echo s$min_opt$gen_opt$enc_opt$f_opt-$diff | sed 's/-\+/_/g'`
+
 	opts="$min_opt $gen_opt $enc_opt $f_opt"
-	args="-I. $opts -o $wk/$code_src $translated"
-	echo "$host_ragel $args"
-	if ! $host_ragel $args; then
-		test_error;
+	args="-I. $opts -o $wk/$_code_src $translated"
+	echo "preparing $root $opts"
+	##echo "$host_ragel $args"
+
+cat >> $MF <<EOF
+all: $wk/$_diff
+$wk/$_diff: $translated $wk/$expected_out
+	@echo "testing $root $opts"
+	@$host_ragel $args
+EOF
+
+	if [ $lang == java ]; then
+
+cat >> $MF <<EOF
+	@sed -i 's/\<$root\>/$_root/g' $wk/$_code_src
+EOF
 	fi
 
 	out_args=""
-	[ $lang != java ] && out_args="-o $wk/$binary";
-	[ $lang == csharp ] && out_args="-out:$wk/$binary";
+	[ $lang != java ] && out_args="-o $wk/$_binary";
+	[ $lang == csharp ] && out_args="-out:$wk/$_binary";
 
 	# Some langs are just interpreted.
 	if [ $interpreted != "true" ]; then
@@ -144,29 +184,39 @@ function run_test()
 			scode="$wk/$code_src-support.c"
 		fi
 
-		echo "$compiler $flags $out_args $wk/$code_src $scode $libs"
-		if ! $compiler $flags $out_args $wk/$code_src $scode $libs; then
-			test_error;
-		fi
+		#echo "$compiler $flags $out_args $wk/$code_src $scode $libs"
+
+cat >> $MF <<EOF
+	@$compiler $flags $out_args $wk/$_code_src $scode $libs
+EOF
 	fi
 
+	exec_cmd $lang
 	if [ "$compile_only" != "true" ]; then
-		echo -n "running $exec_cmd ... ";
+		#echo -n "running $exec_cmd ... ";
 
 		if [ -n "$FILTER" ]; then
-			$exec_cmd | $FILTER 2>&1 > $wk/$output;
-		else
-			$exec_cmd 2>&1 > $wk/$output;
-		fi
-		EXIT_STATUS=$?
-		if test $EXIT_STATUS = 0 && \
-				diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
-		then
-			echo "passed";
-		else
-			echo "FAILED";
-			test_error;
-		fi;
+			exec_cmd="$exec_cmd | $FILTER"
+		fi		
+
+cat >> $MF <<EOF
+	@$exec_cmd 2>&1 > $wk/$_output;
+EOF
+
+cat >> $MF <<EOF
+	@diff --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
+	@rm -f $wk/$_root.ri $wk/$_code_src $wk/$_binary $wk/$_root.class $wk/$_output 
+EOF
+
+#		EXIT_STATUS=$?
+#		if test $EXIT_STATUS = 0 && \
+#				diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
+#		then
+#			echo "passed";
+#		else
+#			echo "FAILED";
+#			test_error;
+#		fi;
 	fi
 }
 
@@ -175,6 +225,7 @@ function file_names()
 	code_src=$root.$code_suffix;
 	binary=$root.bin;
 	output=$root.out;
+	diff=$root.diff;
 }
 
 function lang_opts()
@@ -361,9 +412,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$rust_compiler
 			host_ragel=`dirname $ragel`/host-rust/ragel-rust
-			flags="-A non_upper_case_globals -A dead_code \
-					-A unused_variables -A unused_assignments \
-					-A unused_mut -A unused_parens"
+			flags="-A non_upper_case_globals -A dead_code -A unused_variables -A unused_assignments -A unused_mut -A unused_parens"
 			libs=""
 			prohibit_minflags=""
 			prohibit_genflags="-G0 -G1 -G2"
@@ -482,7 +531,7 @@ function run_internal()
 	echo -n "running: $exec_cmd ... "
 
 	$exec_cmd 2>&1 > $wk/$output;
-	if diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
+	if diff --strip-trailing-cr $wk/$expected_out $wk/$output > $wk/$diff
 	then
 		echo "passed";
 	else
@@ -526,8 +575,10 @@ function run_translate()
 	expected_out=$root.exp;
 	case_rl=${root}.rl
 
-	# Create the expected output.
-	sed '1,/^#\+ * OUTPUT #\+/d;' $test_case > $wk/$expected_out
+cat >> $MF <<EOF
+$wk/$expected_out: $test_case
+	sed '1,/^#\+ * OUTPUT #\+/{ d };' $test_case > $wk/$expected_out
+EOF
 
 	# internal consistency check?
 	internal=`sed '/@INTERNAL:/{s/^.*: *//;s/ *$//;p};d' $test_case`
@@ -576,15 +627,26 @@ function run_translate()
 
 				# Translate to target language and strip off output.
 				targ=${root}_$lang.rl
-				echo "$TRANS $lang $wk/$targ $test_case ${root}_${lang}"
+				#echo "$TRANS $lang $wk/$targ $test_case ${root}_${lang}"
 				if ! $TRANS $lang $wk/$targ $test_case ${root}_${lang}; then
 					test_error
 				fi
 
+cat >> $MF <<EOF
+$wk/$targ: $test_case
+	$TRANS $lang $wk/$targ $test_case ${root}_${lang}
+EOF
+
 				cases="$cases $wk/$targ"
 			done
 		else
+
 			sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
+
+cat >> $MF <<EOF
+$wk/$case_rl: $test_case
+	sed '/^#\+ * OUTPUT #\+/,\$\${ d }' $test_case > $wk/$case_rl
+EOF
 			cases=$wk/$case_rl
 
 			if [ -n "$RAGEL_FILE" ]; then
@@ -620,6 +682,13 @@ function run_type()
 	fi
 }
 
+MF=working/run.mk
+rm -f $MF
+echo "do: all" >> $MF
+
 for test_case; do
 	run_type $test_case
 done
+
+echo -----------
+make -j4 -f $MF
