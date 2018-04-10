@@ -209,7 +209,7 @@ void rw_ocaml_buf_stmt( BufStmt: indep::buf_stmt )
 	case [`buf_append `( `) `;] {
 		send Out
 			"	begin
-			"	String.set buffer blen.contents data.\[p.contents\];
+			"	Bytes.set buffer blen.contents data.\[p.contents\];
 			"	blen := blen.contents + 1;
 			"	end
 	}
@@ -321,7 +321,7 @@ void rw_ocaml( Output: stream )
 		"%% write data;
 		"
 		"let exec data = 
-		"  let buffer = String.create(1024) in 
+		"  let buffer = Bytes.create(1024) in 
 		"  let blen :int ref = ref 0 in
 		"  let cs = ref 0 in
 		"  let p = ref 0 in

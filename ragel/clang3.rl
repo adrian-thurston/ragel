@@ -180,7 +180,7 @@ class CLang
 
 static const int BUFSIZE = 1024;
 
-void test( const char buf[] )
+void test( const char[] buf )
 {
 	CLang scanner = new CLang();
 	scanner.init();
