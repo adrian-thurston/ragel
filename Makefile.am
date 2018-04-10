@@ -1,4 +1,4 @@
-SUBDIRS = aapl ragel colm
+SUBDIRS = cases aapl colm
 
 noinst_SCRIPTS = runtests
 
