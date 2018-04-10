@@ -93,7 +93,7 @@ done
 
 shift $((OPTIND - 1));
 
-[ -z "$*" ] && set -- *.rl *.d
+[ -z "$*" ] && set -- *.rl
 
 ragel="@RAGEL_BIN@"
 
@@ -131,7 +131,7 @@ function exec_cmd()
 		c++) exec_cmd=./$wk/$_binary ;;
 		obj-c) exec_cmd=./$wk/$_binary ;;
 		d) exec_cmd=./$wk/$_binary ;;
-		java) exec_cmd="java -classpath $wk $_root" ;;
+		java) exec_cmd="java -classpath $wk $_lroot" ;;
 		ruby) exec_cmd="ruby $wk/$_code_src" ;;
 		csharp) exec_cmd="mono $wk/$_binary" ;;
 		go) exec_cmd=./$wk/$_binary ;;
@@ -144,88 +144,12 @@ function exec_cmd()
 	esac
 }
 
-function run_test()
-{
-	_root=`echo s$min_opt$gen_opt$enc_opt$f_opt-$root | sed 's/-\+/_/g'`
-	_code_src=`echo s$min_opt$gen_opt$enc_opt$f_opt-$code_src | sed 's/-\+/_/g'`
-	_binary=`echo s$min_opt$gen_opt$enc_opt$f_opt-$binary | sed 's/-\+/_/g'`
-	_output=`echo s$min_opt$gen_opt$enc_opt$f_opt-$output | sed 's/-\+/_/g'`
-	_diff=`echo s$min_opt$gen_opt$enc_opt$f_opt-$diff | sed 's/-\+/_/g'`
-
-	opts="$min_opt $gen_opt $enc_opt $f_opt"
-	args="-I. $opts -o $wk/$_code_src $translated"
-	echo "preparing $root $opts"
-	##echo "$host_ragel $args"
-
-cat >> $MF <<EOF
-all: $wk/$_diff
-$wk/$_diff: $translated $wk/$expected_out
-	@echo "testing $root $opts"
-	@$host_ragel $args
-EOF
-
-	if [ $lang == java ]; then
-
-cat >> $MF <<EOF
-	@sed -i 's/\<$root\>/$_root/g' $wk/$_code_src
-EOF
-	fi
-
-	out_args=""
-	[ $lang != java ] && out_args="-o $wk/$_binary";
-	[ $lang == csharp ] && out_args="-out:$wk/$_binary";
-
-	# Some langs are just interpreted.
-	if [ $interpreted != "true" ]; then
-		scode=""
-		if [ -n "$support" ]; then
-			echo $ragel -o $wk/$code_src-support.c $support
-			$ragel -o $wk/$code_src-support.c $support
-			scode="$wk/$code_src-support.c"
-		fi
-
-		#echo "$compiler $flags $out_args $wk/$code_src $scode $libs"
-
-cat >> $MF <<EOF
-	@$compiler $flags $out_args $wk/$_code_src $scode $libs
-EOF
-	fi
-
-	exec_cmd $lang
-	if [ "$compile_only" != "true" ]; then
-		#echo -n "running $exec_cmd ... ";
-
-		if [ -n "$FILTER" ]; then
-			exec_cmd="$exec_cmd | $FILTER"
-		fi		
-
-cat >> $MF <<EOF
-	@$exec_cmd 2>&1 > $wk/$_output;
-EOF
-
-cat >> $MF <<EOF
-	@diff --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
-	@rm -f $wk/$_root.ri $wk/$_code_src $wk/$_binary $wk/$_root.class $wk/$_output 
-EOF
-
-#		EXIT_STATUS=$?
-#		if test $EXIT_STATUS = 0 && \
-#				diff --strip-trailing-cr $wk/$expected_out $wk/$output > /dev/null;
-#		then
-#			echo "passed";
-#		else
-#			echo "FAILED";
-#			test_error;
-#		fi;
-	fi
-}
-
 function file_names()
 {
-	code_src=$root.$code_suffix;
-	binary=$root.bin;
-	output=$root.out;
-	diff=$root.diff;
+	code_src=$lroot.$code_suffix;
+	binary=$lroot.bin;
+	output=$lroot.out;
+	diff=$lroot.diff;
 }
 
 function lang_opts()
@@ -319,7 +243,7 @@ function lang_opts()
 			prohibit_backflags="--direct-backend"
 			prohibit_encflags="--string-tables"
 			file_names;
-			exec_cmd="java -classpath $wk $root"
+			exec_cmd="java -classpath $wk $lroot"
 		;;
 		ruby)
 			lang_opt=-R;
@@ -468,15 +392,83 @@ function lang_opts()
 	prohibit_backflags="$prohibit_backflags $case_prohibit_backflags"
 }
 
+function run_test()
+{
+	_lroot=`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot | sed 's/-\+/_/g'`
+	_code_src=`echo s$min_opt$gen_opt$enc_opt$f_opt-$code_src | sed 's/-\+/_/g'`
+	_binary=`echo s$min_opt$gen_opt$enc_opt$f_opt-$binary | sed 's/-\+/_/g'`
+	_output=`echo s$min_opt$gen_opt$enc_opt$f_opt-$output | sed 's/-\+/_/g'`
+	_diff=`echo s$min_opt$gen_opt$enc_opt$f_opt-$diff | sed 's/-\+/_/g'`
+
+	opts="$min_opt $gen_opt $enc_opt $f_opt"
+	args="-I. $opts -o $wk/$_code_src $translated"
+	echo "preparing $lroot $opts"
+	##echo "$host_ragel $args"
+
+cat >> $MF <<EOF
+all: $wk/$_diff
+$wk/$_diff: $translated $wk/$expected_out
+	@echo "testing $lroot $opts"
+	@$host_ragel $args
+EOF
+
+	if [ $lang == java ]; then
+
+cat >> $MF <<EOF
+	@sed -i 's/\<$lroot\>/$_lroot/g' $wk/$_code_src
+EOF
+	fi
+
+	out_args=""
+	[ $lang != java ] && out_args="-o $wk/$_binary";
+	[ $lang == csharp ] && out_args="-out:$wk/$_binary";
+
+	# Some langs are just interpreted.
+	if [ $interpreted != "true" ]; then
+		scode=""
+		if [ -n "$support" ]; then
+			echo $ragel -o $wk/$code_src-support.c $support
+			$ragel -o $wk/$code_src-support.c $support
+			scode="$wk/$code_src-support.c"
+		fi
+
+		#echo "$compiler $flags $out_args $wk/$code_src $scode $libs"
+
+cat >> $MF <<EOF
+	@$compiler $flags $out_args $wk/$_code_src $scode $libs
+EOF
+	fi
+
+	exec_cmd $lang
+	if [ "$compile_only" != "true" ]; then
+		#echo -n "running $exec_cmd ... ";
+
+		if [ -n "$FILTER" ]; then
+			exec_cmd="$exec_cmd | $FILTER"
+		fi		
+
+cat >> $MF <<EOF
+	@$exec_cmd 2>&1 > $wk/$_output;
+EOF
+
+cat >> $MF <<EOF
+	@diff --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
+	@rm -f $wk/$_lroot.ri $wk/$_code_src $wk/$_binary $wk/$_lroot.class $wk/$_output 
+EOF
+
+	fi
+}
+
+
 function run_options()
 {
 	translated=$1
 
-	root=`basename $translated`
-	root=${root%.rl};
+	lroot=`basename $translated`
+	lroot=${lroot%.rl};
 
 	# maybe translated to multiple targets, re-read each lang.
-	lang=`sed '/@LANG:/{s/^.*: *//;s/ *$//;p};d' $translated`
+	# lang=`sed '/@LANG:/{s/^.*: *//;s/ *$//;p};d' $translated`
 
 	lang_opts $lang
 
@@ -606,12 +598,12 @@ EOF
 		cases=""
 
 		if [ $lang == indep ]; then
-			for lang in c asm d cs go java ruby ocaml rust crack julia; do
+			for lang in c asm d csharp go java ruby ocaml rust crack julia; do
 				case $lang in 
 					c) lf="-C" ;;
 					asm) lf="--asm" ;;
 					d) lf="-D" ;;
-					cs) lf="-A" ;;
+					csharp) lf="-A" ;;
 					go) lf="-Z" ;;
 					java) lf="-J" ;;
 					ruby) lf="-R" ;;
@@ -627,10 +619,6 @@ EOF
 
 				# Translate to target language and strip off output.
 				targ=${root}_$lang.rl
-				#echo "$TRANS $lang $wk/$targ $test_case ${root}_${lang}"
-				if ! $TRANS $lang $wk/$targ $test_case ${root}_${lang}; then
-					test_error
-				fi
 
 cat >> $MF <<EOF
 $wk/$targ: $test_case
@@ -638,6 +626,8 @@ $wk/$targ: $test_case
 EOF
 
 				cases="$cases $wk/$targ"
+
+				run_options $wk/$targ
 			done
 		else
 
@@ -652,42 +642,20 @@ EOF
 			if [ -n "$RAGEL_FILE" ]; then
 				cases="$RAGEL_FILE"
 			fi
+
+			run_options $cases
 		fi
-
-		for translated in $cases; do
-			run_options $translated
-		done
-	fi
-}
-
-function run_dircase()
-{
-	test_case=$1
-
-	cd $test_case
-	./runtests
-	cd ..
-}
-
-function run_type()
-{
-	test_case=$1
-
-	if [ -f "$test_case" ]; then
-		run_translate $test_case
-	elif [ -d "$test_case" ]; then
-		run_dircase $test_case
-	else
-		echo "runtests: not a file or directory: $test_case"; >&2
 	fi
 }
 
 MF=working/run.mk
+echo working/* | xargs rm -Rf
+
 rm -f $MF
 echo "do: all" >> $MF
 
 for test_case; do
-	run_type $test_case
+	run_translate $test_case
 done
 
 echo -----------
