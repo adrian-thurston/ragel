@@ -1,6 +1,6 @@
 /*
  * @LANG: c++
- * @PROHIBIT_FEATFLAGS: --var-backend
+ * @PROHIBIT_FLAGS: --var-backend
  */
 
 #include <stdio.h>

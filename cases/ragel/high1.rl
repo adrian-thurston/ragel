@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @PROHIBIT_GENFLAGS: -F0 -F1
+ * @PROHIBIT_FLAGS: -F0 -F1
  */
 
 /**

@@ -62,14 +62,6 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 					encflags="$encflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
-				kelbt-frontend|colm-frontend|reduce-frontend)
-					frontflags="$frontflags --$OPTARG"
-					gen_opts="$gen_opts --$OPTARG"
-				;;
-				direct-backend|colm-backend)
-					backflags="$backflags --$OPTARG"
-					gen_opts="$gen_opts --$OPTARG"
-				;;
 				var-backend|goto-backend)
 					featflags="$featflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
@@ -87,8 +79,6 @@ done
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
 [ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ]   && langflags="-C --asm -R -Y -O -U -J -Z -D -A -K"
-[ -z "$frontflags" ]  && frontflags="--kelbt-frontend --reduce-frontend"
-[ -z "$backflags" ]   && backflags="--direct-backend"
 [ -z "$featflags" ]   && featflags="--goto-backend"
 
 shift $((OPTIND - 1));
@@ -159,14 +149,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-c/ragel-c
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags=""
-			prohibit_featflags=""
-			prohibit_frontflags=""
-			prohibit_backflags=""
-			prohibit_encflags=""
+			prohibit_flags=""
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		c++)
 			lang_opt=-C;
@@ -177,14 +161,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-c/ragel-c
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags=""
-			prohibit_featflags=""
-			prohibit_frontflags=""
-			prohibit_backflags=""
-			prohibit_encflags=""
+			prohibit_flags=""
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		obj-c)
 			lang_opt=-C;
@@ -195,14 +173,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-c/ragel-c
 			flags="`gnustep-config --objc-flags`"
 			libs="-lobjc -lgnustep-base"
-			prohibit_minflags=""
-			prohibit_genflags=""
-			prohibit_featflags=""
-			prohibit_frontflags=""
-			prohibit_backflags=""
-			prohibit_encflags=""
+			prohibit_flags=""
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		d)
 			lang_opt=-D;
@@ -212,14 +184,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-d/ragel-d
 			flags="-Wall -O3"
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags=""
-			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="--string-tables"
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		java)
 			lang_opt=-J;
@@ -229,14 +195,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-java/ragel-java
 			flags=""
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 			file_names;
-			exec_cmd="java -classpath $wk $lroot"
 		;;
 		ruby)
 			lang_opt=-R;
@@ -246,14 +206,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-ruby/ragel-ruby
 			flags=""
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend --colm-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 			file_names;
-			exec_cmd="ruby $wk/$code_src"
 		;;
 		csharp)
 			lang_opt="-A";
@@ -263,14 +217,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-csharp/ragel-csharp
 			flags=""
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags="-G2"
-			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G2 --string-tables"
 			file_names;
-			exec_cmd="mono $wk/$binary"
 		;;
 		go)
 			lang_opt="-Z"
@@ -280,14 +228,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-go/ragel-go
 			flags="build"
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags=""
-			prohibit_featflags=""
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="--string-tables"
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		ocaml)
 			lang_opt="-O"
@@ -297,14 +239,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-ocaml/ragel-ocaml
 			flags=""
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 			file_names;
-			exec_cmd="ocaml $wk/$code_src"
 		;;
 		asm)
 			lang_opt="--asm"
@@ -314,14 +250,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-asm/ragel-asm
 			flags=""
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags="-T0 -T1 -F0 -F1 -G0 -G1"
-			prohibit_featflags=""
-			prohibit_frontflags="--colm-frontend"
-			prohibit_backflags="--colm-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-T0 -T1 -F0 -F1 -G0 -G1 --string-tables"
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		rust)
 			lang_opt="-U"
@@ -331,14 +261,8 @@ function lang_opts()
 			host_ragel=`dirname $ragel`/host-rust/ragel-rust
 			flags="-A non_upper_case_globals -A dead_code -A unused_variables -A unused_assignments -A unused_mut -A unused_parens"
 			libs=""
-			prohibit_minflags=""
-			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 			file_names;
-			exec_cmd=./$wk/$binary
 		;;
 		crack)
 			lang_opt="-K"
@@ -346,14 +270,8 @@ function lang_opts()
 			interpreted=true
 			compiler=$crack_interpreter
 			host_ragel=`dirname $ragel`/host-crack/ragel-crack
-			prohibit_minflags=""
-			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 			file_names;
-			exec_cmd="$crack_interpreter $wk/$code_src"
 		;;
 		julia)
 			lang_opt="-Y"
@@ -361,14 +279,8 @@ function lang_opts()
 			interpreted=true
 			compiler=$julia_interpreter
 			host_ragel=`dirname $ragel`/host-julia/ragel-julia
-			prohibit_minflags=""
-			prohibit_genflags="-G0 -G1 -G2"
-			prohibit_featflags="--goto-backend"
-			prohibit_frontflags="--kelbt-frontend"
-			prohibit_backflags="--direct-backend"
-			prohibit_encflags="--string-tables"
+			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 			file_names;
-			exec_cmd="$julia_interpreter $wk/$code_src"
 		;;
 		indep)
 		;;
@@ -378,9 +290,7 @@ function lang_opts()
 		;;
 	esac
 
-	prohibit_minflags="$prohibit_minflags $case_prohibit_minflags"
-	prohibit_genflags="$prohibit_genflags $case_prohibit_genflags"
-	prohibit_featflags="$prohibit_featflags $case_prohibit_featflags"
+	prohibit_flags="$prohibit_flags $case_prohibit_flags"
 }
 
 function run_test()
@@ -469,15 +379,15 @@ function run_options()
 	echo "$langflags" | grep -qe $lang_opt || return
 
 	for min_opt in $minflags; do
-		echo "" "$prohibit_minflags" | \
+		echo "" "$prohibit_flags" | \
 				grep -e $min_opt >/dev/null && continue
 
 		for gen_opt in $genflags; do
-			echo "" "$prohibit_genflags" | \
+			echo "" "$prohibit_flags" | \
 					grep -e $gen_opt >/dev/null && continue
 
 			for enc_opt in $encflags; do
-				echo "" "$prohibit_encflags" | \
+				echo "" "$prohibit_flags" | \
 						grep -e $enc_opt >/dev/null && continue
 
 				run_test
@@ -557,9 +467,7 @@ EOF
 		prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
 
 		# Add these into the langugage-specific defaults selected in run_options
-		case_prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
-		case_prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
-		case_prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
+		case_prohibit_flags=`sed '/@PROHIBIT_FLAGS:/s/^.*: *//p;d' $test_case`
 
 		additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
 		support=`sed '/@SUPPORT:/s/^.*: *//p;d' $test_case`

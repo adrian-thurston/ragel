@@ -1,6 +1,6 @@
 /*
  * @LANG: java
- * @PROHIBIT_FEATFLAGS: --var-backend
+ * @PROHIBIT_FLAGS: --var-backend
  */
 
 class recdescent2

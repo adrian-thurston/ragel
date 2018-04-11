@@ -1,7 +1,7 @@
 /*
  * @LANG: indep
  * @PROHIBIT_LANGUAGES: ruby ocaml java rust crack
- * @PROHIBIT_FEATFLAGS: --var-backend
+ * @PROHIBIT_FLAGS: --var-backend
  * @NEEDS_EOF: yes
  */
 

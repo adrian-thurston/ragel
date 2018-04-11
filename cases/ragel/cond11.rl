@@ -1,7 +1,7 @@
 /* 
  * @LANG: indep
  * @NEEDS_EOF: yes
- * @PROHIBIT_GENFLAGS: -T1 -F0 -F1 -G0 -G1 -G2
+ * @PROHIBIT_FLAGS: -T1 -F0 -F1 -G0 -G1 -G2
  * @PROHIBIT_LANGUAGES: go csharp java ruby ocaml rust crack julia
  */
 
