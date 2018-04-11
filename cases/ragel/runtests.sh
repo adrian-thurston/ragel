@@ -300,24 +300,21 @@ function run_test()
 	_binary=`echo s$min_opt$gen_opt$enc_opt$f_opt-$binary | sed 's/-\+/_/g'`
 	_output=`echo s$min_opt$gen_opt$enc_opt$f_opt-$output | sed 's/-\+/_/g'`
 	_diff=`echo s$min_opt$gen_opt$enc_opt$f_opt-$diff | sed 's/-\+/_/g'`
+	_sh=$wk/`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot.sh | sed 's/-\+/_/g'`
+	_log=`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot.log | sed 's/-\+/_/g'`
 
 	opts="$min_opt $gen_opt $enc_opt $f_opt"
 	args="-I. $opts -o $wk/$_code_src $translated"
-	echo "preparing $lroot $opts"
-	##echo "$host_ragel $args"
 
-cat >> $MF <<EOF
-all: $wk/$_diff
-$wk/$_diff: $translated $wk/$expected_out
-	@echo "testing $lroot $opts"
-	@$host_ragel $args
-EOF
+	cat >> $_sh <<-EOF
+	echo "testing $lroot $opts"
+	$host_ragel $args
+	EOF
 
 	if [ $lang == java ]; then
-
-cat >> $MF <<EOF
-	@sed -i 's/\<$lroot\>/$_lroot/g' $wk/$_code_src
-EOF
+		cat >> $_sh <<-EOF
+		sed -i 's/\<$lroot\>/$_lroot/g' $wk/$_code_src
+		EOF
 	fi
 
 	out_args=""
@@ -333,31 +330,30 @@ EOF
 			scode="$wk/$code_src-support.c"
 		fi
 
-		#echo "$compiler $flags $out_args $wk/$code_src $scode $libs"
-
-cat >> $MF <<EOF
-	@$compiler $flags $out_args $wk/$_code_src $scode $libs
-EOF
+		cat >> $_sh <<-EOF
+		$compiler $flags $out_args $wk/$_code_src \
+				$scode $libs >$wk/$_log 2>$wk/$_log
+		EOF
 	fi
 
 	exec_cmd $lang
 	if [ "$compile_only" != "true" ]; then
-		#echo -n "running $exec_cmd ... ";
-
 		if [ -n "$FILTER" ]; then
 			exec_cmd="$exec_cmd | $FILTER"
 		fi		
 
-cat >> $MF <<EOF
-	@$exec_cmd 2>&1 > $wk/$_output;
-EOF
+		cat >> $_sh <<-EOF
+		$exec_cmd 2> $wk/$_log > $wk/$_output
+		EOF
 
-cat >> $MF <<EOF
-	@diff --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
-	@rm -f $wk/$_lroot.ri $wk/$_code_src $wk/$_binary $wk/$_lroot.class $wk/$_output 
-EOF
+		cat >> $_sh <<-EOF
+		diff --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
+		rm -f $wk/$_lroot.ri $wk/$_code_src $wk/$_binary $wk/$_lroot.class $wk/$_output 
+		EOF
 
 	fi
+
+	echo $_sh
 }
 
 
@@ -454,10 +450,7 @@ function run_translate()
 	expected_out=$root.exp;
 	case_rl=${root}.rl
 
-cat >> $MF <<EOF
-$wk/$expected_out: $test_case
 	sed '1,/^#\+ * OUTPUT #\+/{ d };' $test_case > $wk/$expected_out
-EOF
 
 	# internal consistency check?
 	internal=`sed '/@INTERNAL:/{s/^.*: *//;s/ *$//;p};d' $test_case`
@@ -502,10 +495,7 @@ EOF
 				# Translate to target language and strip off output.
 				targ=${root}_$lang.rl
 
-cat >> $MF <<EOF
-$wk/$targ: $test_case
-	$TRANS $lang $wk/$targ $test_case ${root}_${lang}
-EOF
+				$TRANS $lang $wk/$targ $test_case ${root}_${lang}
 
 				cases="$cases $wk/$targ"
 
@@ -515,10 +505,6 @@ EOF
 
 			sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
 
-cat >> $MF <<EOF
-$wk/$case_rl: $test_case
-	sed '/^#\+ * OUTPUT #\+/,\$\${ d }' $test_case > $wk/$case_rl
-EOF
 			cases=$wk/$case_rl
 
 			if [ -n "$RAGEL_FILE" ]; then
@@ -536,9 +522,18 @@ echo working/* | xargs rm -Rf
 rm -f $MF
 echo "do: all" >> $MF
 
-for test_case; do
-	run_translate $test_case
-done
+go()
+{
+	for test_case; do
+		run_translate $test_case
+	done
+}
 
 echo -----------
-make -j4 -f $MF
+go "$@" | xargs -P 4 -n 1 bash
+
+echo ---- failures ------
+find working -name *.diff -not -size 0 | wc -l
+
+echo ---- warnings ------
+find working -name *.log -not -size 0 | wc -l
