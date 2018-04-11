@@ -1,6 +1,5 @@
 /* 
  * @LANG: c++
- * @PROHIBIT_FRONTFLAGS: --colm-frontend
  *
  * This is a conds test modified to exercise actions arguments.
  */

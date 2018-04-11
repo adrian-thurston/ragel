@@ -110,13 +110,6 @@ rust_compiler="rustc"
 crack_interpreter="$HOME/pkgs/crack-0.11/bin/crack"
 julia_interpreter="julia"
 
-#
-# Remove any unsupported host languages.
-#
-supported_host_langs="-C --asm -R -Y -O -U -J -Z -D -A -K"
-supported_frontends=`$ragel --supported-frontends`
-supported_backends=`$ragel --supported-backends`
-
 function test_error
 {
 	exit 1;
@@ -388,8 +381,6 @@ function lang_opts()
 	prohibit_minflags="$prohibit_minflags $case_prohibit_minflags"
 	prohibit_genflags="$prohibit_genflags $case_prohibit_genflags"
 	prohibit_featflags="$prohibit_featflags $case_prohibit_featflags"
-	prohibit_frontflags="$prohibit_frontflags $case_prohibit_frontflags"
-	prohibit_backflags="$prohibit_backflags $case_prohibit_backflags"
 }
 
 function run_test()
@@ -467,9 +458,6 @@ function run_options()
 	lroot=`basename $translated`
 	lroot=${lroot%.rl};
 
-	# maybe translated to multiple targets, re-read each lang.
-	# lang=`sed '/@LANG:/{s/^.*: *//;s/ *$//;p};d' $translated`
-
 	lang_opts $lang
 
 	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
@@ -479,9 +467,6 @@ function run_options()
 
 	# Make sure that we are interested in the host language.
 	echo "$langflags" | grep -qe $lang_opt || return
-
-	# Make sure that ragel supports the host language
-	echo "$supported_host_langs" | grep -qe $lang_opt || return
 
 	for min_opt in $minflags; do
 		echo "" "$prohibit_minflags" | \
@@ -495,15 +480,7 @@ function run_options()
 				echo "" "$prohibit_encflags" | \
 						grep -e $enc_opt >/dev/null && continue
 
-				for f_opt in $frontflags; do
-					echo "" "$prohibit_frontflags" | \
-							grep -e $f_opt >/dev/null && continue
-
-					# Ragel must support the frontend.
-					echo "$supported_frontends" | grep -qe $f_opt || continue
-
-					run_test
-				done
+				run_test
 			done
 		done
 	done
@@ -583,8 +560,6 @@ EOF
 		case_prohibit_minflags=`sed '/@PROHIBIT_MINFLAGS:/s/^.*: *//p;d' $test_case`
 		case_prohibit_genflags=`sed '/@PROHIBIT_GENFLAGS:/s/^.*: *//p;d' $test_case`
 		case_prohibit_featflags=`sed '/@PROHIBIT_FEATFLAGS:/s/^.*: *//p;d' $test_case`
-		case_prohibit_frontflags=`sed '/@PROHIBIT_FRONTFLAGS:/s/^.*: *//p;d' $test_case`
-		case_prohibit_backflags=`sed '/@PROHIBIT_BACKFLAGS:/s/^.*: *//p;d' $test_case`
 
 		additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
 		support=`sed '/@SUPPORT:/s/^.*: *//p;d' $test_case`
@@ -615,7 +590,6 @@ EOF
 
 				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
 				echo "$langflags" | grep -qe $lf || continue
-				echo "$supported_host_langs" | grep -qe $lf || continue
 
 				# Translate to target language and strip off output.
 				targ=${root}_$lang.rl
