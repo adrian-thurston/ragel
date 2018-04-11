@@ -532,8 +532,11 @@ go()
 echo -----------
 go "$@" | xargs -P 4 -n 1 bash
 
+echo ----  cases   ------
+find working -name '*.sh' -not -size 0 | wc -l
+
 echo ---- failures ------
-find working -name *.diff -not -size 0 | wc -l
+find working -name '*.diff' -not -size 0 | wc -l
 
 echo ---- warnings ------
-find working -name *.log -not -size 0 | wc -l
+find working -name '*.log' -not -size 0 | wc -l
