@@ -111,7 +111,7 @@ shift $(($OPTIND - 1))
 if [ $# != 0 ]; then
 	TEST_PAT="$*"
 else
-	TEST_PAT='*.lm *.d'
+	TEST_PAT='*.lm'
 fi 
 
 function cat_section

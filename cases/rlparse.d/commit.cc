@@ -13,10 +13,12 @@
 #include <errno.h>
 
 #include <iostream>
+#include <ext/stdio_filebuf.h>
+#include <fstream>
+
 using std::endl;
 
 #include "reducer.h"
-
 
 struct lel_def_name
 {
@@ -582,6 +584,43 @@ extern "C" long rlparse_object_commit_union_sz( int reducer )
 {
 	return sizeof( commit_reduce_union );
 }
+struct read_reduce_node
+{
+	std::string name;
+	int id;
+	int prod_num;
+	colm_location loc;
+	colm_data data;
+	commit_reduce_union u;
+	read_reduce_node *next;
+	read_reduce_node *child;
+};
+
+static void unescape( colm_data *tokdata )
+{
+	unsigned char *src = (unsigned char*)tokdata->data, *dest = (unsigned char*)tokdata->data;
+	while ( *src != 0 ) {
+		if ( *src == '\\' ) {
+			unsigned int i;
+			char buf[3];
+
+			src += 1;
+			buf[0] = *src++;
+			buf[1] = *src++;
+			buf[2] = 0;
+
+			sscanf( buf, "%x", &i );
+			*dest++ = (unsigned char)i;
+
+			tokdata->length -= 2;
+		}
+		else {
+			*dest++ = *src++;
+		}
+	}
+	*dest = 0;
+}
+
 
 extern "C" void rlparse_object_commit_reduce_forward( program_t *prg, tree_t **root,
 		struct pda_run *pda_run, parse_tree_t *pt )
@@ -596,6 +635,12 @@ extern "C" void rlparse_object_commit_reduce_forward( program_t *prg, tree_t **r
 	case 3:
 		((IncludePass*)prg->red_ctx)->commit_reduce_forward( prg, root, pda_run, pt );
 		break;
+	}
+}
+
+extern "C" void rlparse_object_read_reduce( program_t *prg, int reducer, stream_t *stream )
+{
+	switch ( reducer ) {
 	}
 }
 
@@ -636,7 +681,7 @@ recurse:
 	lel_inline_expr_reparse *_lhs = &((commit_reduce_union*)(lel+1))->inline_expr_reparse;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_expr *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_expr;
-#line 891"reducer.lm"
+#line 891 "reducer.lm"
 
 		_lhs->inlineList = _rhs0->inlineList;
 				}
@@ -650,7 +695,7 @@ lel_join *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->join;
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_expression *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->expression;
-#line 392"reducer.lm"
+#line 392 "reducer.lm"
 
 		_lhs->join = _rhs0->join;
 		_lhs->join->exprList.append( _rhs2->expr );
@@ -659,7 +704,7 @@ lel_expression *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->expression;
 	lel_join *_lhs = &((commit_reduce_union*)(lel+1))->join;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_expression *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expression;
-#line 398"reducer.lm"
+#line 398 "reducer.lm"
 
 		_lhs->join = new Join( _rhs0->expr );
 				}
@@ -672,7 +717,7 @@ lel_expression *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expression;
 lel_expr_left *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_left;
 	_pt_cursor = _pt_cursor->next;
 lel_expression_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->expression_op_list;
-#line 410"reducer.lm"
+#line 410 "reducer.lm"
 
 		// 1. reverse the list
 		// 2. put the new term at the end.
@@ -699,14 +744,14 @@ lel_expression_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->express
 lel_expression_op *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expression_op;
 	_pt_cursor = _pt_cursor->next;
 lel_expression_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->expression_op_list;
-#line 447"reducer.lm"
+#line 447 "reducer.lm"
 
 		_lhs->expr = new Expression( _rhs1->expr,
 				_rhs0->term, _rhs0->type );
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_expression_op_list *_lhs = &((commit_reduce_union*)(lel+1))->expression_op_list;
-#line 453"reducer.lm"
+#line 453 "reducer.lm"
 
 		_lhs->expr = 0;
 				}
@@ -718,7 +763,7 @@ lel_expression_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->express
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 470"reducer.lm"
+#line 470 "reducer.lm"
 
 		_lhs->type = Expression::OrType;
 		_lhs->term = _rhs1->term;
@@ -728,7 +773,7 @@ lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 476"reducer.lm"
+#line 476 "reducer.lm"
 
 		_lhs->type = Expression::IntersectType;
 		_lhs->term = _rhs1->term;
@@ -738,7 +783,7 @@ lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 482"reducer.lm"
+#line 482 "reducer.lm"
 
 		_lhs->type = Expression::SubtractType;
 		_lhs->term = _rhs1->term;
@@ -748,7 +793,7 @@ lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 488"reducer.lm"
+#line 488 "reducer.lm"
 
 		_lhs->type = Expression::StrongSubtractType;
 		_lhs->term = _rhs1->term;
@@ -760,7 +805,7 @@ lel_term *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 	lel_expr_left *_lhs = &((commit_reduce_union*)(lel+1))->expr_left;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_term *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 434"reducer.lm"
+#line 434 "reducer.lm"
 
 		_lhs->term = _rhs0->term;
 				}
@@ -773,7 +818,7 @@ lel_term *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 lel_term_left *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->term_left;
 	_pt_cursor = _pt_cursor->next;
 lel_term_op_list_short *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term_op_list_short;
-#line 502"reducer.lm"
+#line 502 "reducer.lm"
 
 		// 1. reverse the list
 		// 2. put the new term at the end.
@@ -798,7 +843,7 @@ lel_term_op_list_short *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term_op
 	lel_term_left *_lhs = &((commit_reduce_union*)(lel+1))->term_left;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_factor_label *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
-#line 528"reducer.lm"
+#line 528 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 				}
@@ -807,7 +852,7 @@ lel_factor_label *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 		case 1118: {
 			if ( kid->tree->prod_num == 0 ) {
 	lel_term_op_list_short *_lhs = &((commit_reduce_union*)(lel+1))->term_op_list_short;
-#line 542"reducer.lm"
+#line 542 "reducer.lm"
 
 		_lhs->term = 0;
 				}
@@ -817,7 +862,7 @@ lel_factor_label *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 lel_term_op *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->term_op;
 	_pt_cursor = _pt_cursor->next;
 lel_term_op_list_short *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term_op_list_short;
-#line 547"reducer.lm"
+#line 547 "reducer.lm"
 
 		_lhs->term = new Term( _rhs1->term,
 				_rhs0->fwa, _rhs0->type );
@@ -829,7 +874,7 @@ lel_term_op_list_short *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->term_op
 	lel_term_op *_lhs = &((commit_reduce_union*)(lel+1))->term_op;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_factor_label *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
-#line 566"reducer.lm"
+#line 566 "reducer.lm"
 
 		_lhs->type = Term::ConcatType;
 		_lhs->fwa = _rhs0->fwa;
@@ -839,7 +884,7 @@ lel_factor_label *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
-#line 572"reducer.lm"
+#line 572 "reducer.lm"
 
 		_lhs->type = Term::ConcatType;
 		_lhs->fwa = _rhs1->fwa;
@@ -849,7 +894,7 @@ lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
-#line 578"reducer.lm"
+#line 578 "reducer.lm"
 
 		_lhs->type = Term::RightStartType;
 		_lhs->fwa = _rhs1->fwa;
@@ -859,7 +904,7 @@ lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
-#line 584"reducer.lm"
+#line 584 "reducer.lm"
 
 		_lhs->type = Term::RightFinishType;
 		_lhs->fwa = _rhs1->fwa;
@@ -869,7 +914,7 @@ lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_factor_label *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
-#line 590"reducer.lm"
+#line 590 "reducer.lm"
 
 		_lhs->type = Term::LeftType;
 		_lhs->fwa = _rhs1->fwa;
@@ -886,7 +931,7 @@ lel_factor_label *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 604"reducer.lm"
+#line 604 "reducer.lm"
 
 		_lhs->fwa = _rhs2->fwa;
 
@@ -902,7 +947,7 @@ lel_factor_label *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->factor_label;
 	lel_factor_label *_lhs = &((commit_reduce_union*)(lel+1))->factor_label;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_factor_ep *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_ep;
-#line 617"reducer.lm"
+#line 617 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 				}
@@ -919,7 +964,7 @@ lel_epsilon_target *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->epsilon_tar
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 630"reducer.lm"
+#line 630 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 		_rhs0->fwa->epsilonLinks.append( EpsilonLink( _loc1, _rhs2->nameRef ) );
@@ -928,7 +973,7 @@ lel_epsilon_target *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->epsilon_tar
 	lel_factor_ep *_lhs = &((commit_reduce_union*)(lel+1))->factor_ep;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
-#line 636"reducer.lm"
+#line 636 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 				}
@@ -945,7 +990,7 @@ lel_epsilon_target *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->epsilon_tar
 	_tree_cursor = _tree_cursor->next;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
-#line 649"reducer.lm"
+#line 649 "reducer.lm"
 
 		_lhs->nameRef = _rhs0->nameRef;
 		_lhs->nameRef->append( string( _rhs2->data, _rhs2->length ) );
@@ -954,7 +999,7 @@ lel_epsilon_target *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->epsilon_tar
 	lel_epsilon_target *_lhs = &((commit_reduce_union*)(lel+1))->epsilon_target;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 655"reducer.lm"
+#line 655 "reducer.lm"
 
 		_lhs->nameRef = new NameRef;
 		_lhs->nameRef->append( string( _rhs0->data, _rhs0->length ) );
@@ -970,7 +1015,7 @@ lel_epsilon_target *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->epsilon_tar
 lel_inline_expr *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 907"reducer.lm"
+#line 907 "reducer.lm"
 
 		_lhs->loc = *_loc0;
 		_lhs->inlineList = _rhs2->inlineList;
@@ -986,7 +1031,7 @@ lel_inline_expr *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 lel_inline_block *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 878"reducer.lm"
+#line 878 "reducer.lm"
 
 		_lhs->loc = *_loc0;
 		_lhs->inlineList = _rhs2->inlineList;
@@ -1001,7 +1046,7 @@ lel_action_arg_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_arg
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 744"reducer.lm"
+#line 744 "reducer.lm"
 
 		_lhs->argList = _rhs0->argList;
 		_lhs->argList->append( _rhs2->action );
@@ -1010,7 +1055,7 @@ lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 	lel_action_arg_list *_lhs = &((commit_reduce_union*)(lel+1))->action_arg_list;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_ref *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 750"reducer.lm"
+#line 750 "reducer.lm"
 
 		_lhs->argList = new ActionArgList;
 		_lhs->argList->append( _rhs0->action );
@@ -1022,13 +1067,13 @@ lel_action_ref *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 	lel_opt_action_arg_list *_lhs = &((commit_reduce_union*)(lel+1))->opt_action_arg_list;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_arg_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_arg_list;
-#line 764"reducer.lm"
+#line 764 "reducer.lm"
 
 		_lhs->argList = _rhs0->argList;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_opt_action_arg_list *_lhs = &((commit_reduce_union*)(lel+1))->opt_action_arg_list;
-#line 769"reducer.lm"
+#line 769 "reducer.lm"
 
 		_lhs->argList = new ActionArgList;
 				}
@@ -1040,7 +1085,7 @@ lel_action_arg_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_arg
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 669"reducer.lm"
+#line 669 "reducer.lm"
 
 		/* Set the name in the actionDict. */
 		string data( _rhs0->data, _rhs0->length );
@@ -1067,7 +1112,7 @@ lel_opt_action_arg_list *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->opt_ac
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 688"reducer.lm"
+#line 688 "reducer.lm"
 
 		/* Set the name in the actionDict. */
 		string data( _rhs0->data, _rhs0->length );
@@ -1121,7 +1166,7 @@ lel_opt_action_arg_list *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->opt_ac
 	lel_action_ref *_lhs = &((commit_reduce_union*)(lel+1))->action_ref;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_named_action_ref *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->named_action_ref;
-#line 783"reducer.lm"
+#line 783 "reducer.lm"
 
 		_lhs->action = _rhs0->action;
 				}
@@ -1130,7 +1175,7 @@ lel_named_action_ref *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->named_act
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_named_action_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->named_action_ref;
-#line 788"reducer.lm"
+#line 788 "reducer.lm"
 
 		_lhs->action = _rhs1->action;
 				}
@@ -1138,7 +1183,7 @@ lel_named_action_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->named_act
 	lel_action_ref *_lhs = &((commit_reduce_union*)(lel+1))->action_ref;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
-#line 793"reducer.lm"
+#line 793 "reducer.lm"
 
 		/* Create the action, add it to the list and pass up. */
 		Action *newAction = new Action( &_rhs0->loc, std::string(),
@@ -1153,7 +1198,7 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_priority_name *_lhs = &((commit_reduce_union*)(lel+1))->priority_name;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 1387"reducer.lm"
+#line 1387 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 
@@ -1172,7 +1217,7 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_error_name *_lhs = &((commit_reduce_union*)(lel+1))->error_name;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 1407"reducer.lm"
+#line 1407 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		/* Lookup/create the priority key. */
@@ -1191,7 +1236,7 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1363"reducer.lm"
+#line 1363 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->priorityNum = tryLongScan( _loc0, data.c_str() );
@@ -1202,7 +1247,7 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 1368"reducer.lm"
+#line 1368 "reducer.lm"
 
 		string data( _rhs1->data, _rhs1->length );
 		_lhs->priorityNum = tryLongScan( _loc0, data.c_str() );
@@ -1213,7 +1258,7 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 1373"reducer.lm"
+#line 1373 "reducer.lm"
 
 		string data( _rhs1->data, _rhs1->length );
 		_lhs->priorityNum = -1 * tryLongScan( _loc0, data.c_str() );
@@ -1221,30 +1266,30 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 			break;
 		}
 		case 1132: {
-			if ( kid->tree->prod_num == 1 ) {
-	lel_aug_base *_lhs = &((commit_reduce_union*)(lel+1))->aug_base;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1428"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
-			if ( kid->tree->prod_num == 3 ) {
-	lel_aug_base *_lhs = &((commit_reduce_union*)(lel+1))->aug_base;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1430"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
 			if ( kid->tree->prod_num == 0 ) {
 	lel_aug_base *_lhs = &((commit_reduce_union*)(lel+1))->aug_base;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1432"reducer.lm"
+#line 1432 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_finish; 			}
+			if ( kid->tree->prod_num == 1 ) {
+	lel_aug_base *_lhs = &((commit_reduce_union*)(lel+1))->aug_base;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1428 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_base *_lhs = &((commit_reduce_union*)(lel+1))->aug_base;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1434"reducer.lm"
+#line 1434 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_leave; 			}
+			if ( kid->tree->prod_num == 3 ) {
+	lel_aug_base *_lhs = &((commit_reduce_union*)(lel+1))->aug_base;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1430 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
 			break;
 		}
 		case 1133: {
@@ -1252,55 +1297,55 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1448"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
-			if ( kid->tree->prod_num == 3 ) {
-	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1450"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1452"reducer.lm"
+#line 1448 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1454"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
-			if ( kid->tree->prod_num == 4 ) {
-	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1456"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1458"reducer.lm"
+#line 1454 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1460"reducer.lm"
+#line 1460 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_leave; 			}
+			if ( kid->tree->prod_num == 3 ) {
+	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1450 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
+			if ( kid->tree->prod_num == 4 ) {
+	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1456 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
 			if ( kid->tree->prod_num == 5 ) {
 	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1462"reducer.lm"
+#line 1462 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_leave; 			}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1452 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1458 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all; 			}
 			if ( kid->tree->prod_num == 8 ) {
 	lel_aug_cond *_lhs = &((commit_reduce_union*)(lel+1))->aug_cond;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1464"reducer.lm"
+#line 1464 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_leave; 			}
 			break;
 		}
@@ -1309,73 +1354,73 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1479"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start_to_state; 			}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1481"reducer.lm"
+#line 1479 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_start_to_state; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1483"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_start_to_state; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1485"reducer.lm"
+#line 1483 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_start_to_state; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1487"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all_to_state; 			}
-			if ( kid->tree->prod_num == 8 ) {
-	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1489"reducer.lm"
+#line 1487 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_all_to_state; 			}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1491"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_final_to_state; 			}
-			if ( kid->tree->prod_num == 9 ) {
-	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1493"reducer.lm"
+#line 1491 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_final_to_state; 			}
 			if ( kid->tree->prod_num == 4 ) {
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1495"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_final_to_state; 			}
-			if ( kid->tree->prod_num == 10 ) {
-	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1497"reducer.lm"
+#line 1495 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_final_to_state; 			}
 			if ( kid->tree->prod_num == 5 ) {
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1499"reducer.lm"
+#line 1499 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_to_state; 			}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1481 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start_to_state; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1485 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_start_to_state; 			}
+			if ( kid->tree->prod_num == 8 ) {
+	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1489 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all_to_state; 			}
+			if ( kid->tree->prod_num == 9 ) {
+	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1493 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_final_to_state; 			}
+			if ( kid->tree->prod_num == 10 ) {
+	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1497 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_final_to_state; 			}
 			if ( kid->tree->prod_num == 11 ) {
 	lel_aug_to_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_to_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1501"reducer.lm"
+#line 1501 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_to_state; 			}
 			break;
 		}
@@ -1384,73 +1429,73 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1516"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start_from_state; 			}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1518"reducer.lm"
+#line 1516 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_start_from_state; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1520"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_start_from_state; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1522"reducer.lm"
+#line 1520 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_start_from_state; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1524"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all_from_state; 			}
-			if ( kid->tree->prod_num == 8 ) {
-	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1526"reducer.lm"
+#line 1524 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_all_from_state; 			}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1528"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_final_from_state; 			}
-			if ( kid->tree->prod_num == 9 ) {
-	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1530"reducer.lm"
+#line 1528 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_final_from_state; 			}
 			if ( kid->tree->prod_num == 4 ) {
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1532"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_final_from_state; 			}
-			if ( kid->tree->prod_num == 10 ) {
-	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1534"reducer.lm"
+#line 1532 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_final_from_state; 			}
 			if ( kid->tree->prod_num == 5 ) {
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1536"reducer.lm"
+#line 1536 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_from_state; 			}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1518 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start_from_state; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1522 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_start_from_state; 			}
+			if ( kid->tree->prod_num == 8 ) {
+	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1526 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all_from_state; 			}
+			if ( kid->tree->prod_num == 9 ) {
+	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1530 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_final_from_state; 			}
+			if ( kid->tree->prod_num == 10 ) {
+	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1534 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_final_from_state; 			}
 			if ( kid->tree->prod_num == 11 ) {
 	lel_aug_from_state *_lhs = &((commit_reduce_union*)(lel+1))->aug_from_state;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1538"reducer.lm"
+#line 1538 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_from_state; 			}
 			break;
 		}
@@ -1459,73 +1504,73 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1553"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start_eof; 			}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1555"reducer.lm"
+#line 1553 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_start_eof; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1557"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_start_eof; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1559"reducer.lm"
+#line 1557 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_start_eof; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1561"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all_eof; 			}
-			if ( kid->tree->prod_num == 8 ) {
-	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1563"reducer.lm"
+#line 1561 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_all_eof; 			}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1565"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_final_eof; 			}
-			if ( kid->tree->prod_num == 9 ) {
-	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1567"reducer.lm"
+#line 1565 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_final_eof; 			}
 			if ( kid->tree->prod_num == 4 ) {
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1569"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_final_eof; 			}
-			if ( kid->tree->prod_num == 10 ) {
-	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1571"reducer.lm"
+#line 1569 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_final_eof; 			}
 			if ( kid->tree->prod_num == 5 ) {
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1573"reducer.lm"
+#line 1573 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_eof; 			}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1555 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start_eof; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1559 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_start_eof; 			}
+			if ( kid->tree->prod_num == 8 ) {
+	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1563 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all_eof; 			}
+			if ( kid->tree->prod_num == 9 ) {
+	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1567 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_final_eof; 			}
+			if ( kid->tree->prod_num == 10 ) {
+	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1571 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_final_eof; 			}
 			if ( kid->tree->prod_num == 11 ) {
 	lel_aug_eof *_lhs = &((commit_reduce_union*)(lel+1))->aug_eof;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1575"reducer.lm"
+#line 1575 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_eof; 			}
 			break;
 		}
@@ -1534,79 +1579,79 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1590"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start_gbl_error; 			}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1592"reducer.lm"
+#line 1590 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_start_gbl_error; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1594"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_start_gbl_error; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1596"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_start_gbl_error; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1598"reducer.lm"
+#line 1594 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_start_gbl_error; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1600"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all_gbl_error; 			}
-			if ( kid->tree->prod_num == 8 ) {
-	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1602"reducer.lm"
+#line 1600 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_all_gbl_error; 			}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1604"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_final_gbl_error; 			}
-			if ( kid->tree->prod_num == 9 ) {
-	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1606"reducer.lm"
+#line 1604 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_final_gbl_error; 			}
 			if ( kid->tree->prod_num == 4 ) {
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1608"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_final_gbl_error; 			}
-			if ( kid->tree->prod_num == 10 ) {
-	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1610"reducer.lm"
+#line 1608 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_final_gbl_error; 			}
 			if ( kid->tree->prod_num == 5 ) {
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1612"reducer.lm"
+#line 1612 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_gbl_error; 			}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1592 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start_gbl_error; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1596 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_start_gbl_error; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1598 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_start_gbl_error; 			}
+			if ( kid->tree->prod_num == 8 ) {
+	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1602 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all_gbl_error; 			}
+			if ( kid->tree->prod_num == 9 ) {
+	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1606 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_final_gbl_error; 			}
+			if ( kid->tree->prod_num == 10 ) {
+	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1610 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_final_gbl_error; 			}
 			if ( kid->tree->prod_num == 11 ) {
 	lel_aug_gbl_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_gbl_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1614"reducer.lm"
+#line 1614 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_gbl_error; 			}
 			break;
 		}
@@ -1615,73 +1660,73 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1629"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_start_local_error; 			}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1632"reducer.lm"
+#line 1629 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_start_local_error; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1635"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_start_local_error; 			}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1638"reducer.lm"
+#line 1635 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_start_local_error; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1641"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_all_local_error; 			}
-			if ( kid->tree->prod_num == 8 ) {
-	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1644"reducer.lm"
+#line 1641 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_all_local_error; 			}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1647"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_final_local_error; 			}
-			if ( kid->tree->prod_num == 9 ) {
-	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1650"reducer.lm"
+#line 1647 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_final_local_error; 			}
 			if ( kid->tree->prod_num == 4 ) {
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1653"reducer.lm"
- _lhs->loc = *_loc0; _lhs->augType = at_not_final_local_error; 			}
-			if ( kid->tree->prod_num == 10 ) {
-	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1656"reducer.lm"
+#line 1653 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_not_final_local_error; 			}
 			if ( kid->tree->prod_num == 5 ) {
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1659"reducer.lm"
+#line 1659 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_local_error; 			}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1632 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_start_local_error; 			}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1638 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_start_local_error; 			}
+			if ( kid->tree->prod_num == 8 ) {
+	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1644 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_all_local_error; 			}
+			if ( kid->tree->prod_num == 9 ) {
+	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1650 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_final_local_error; 			}
+			if ( kid->tree->prod_num == 10 ) {
+	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1656 "reducer.lm"
+ _lhs->loc = *_loc0; _lhs->augType = at_not_final_local_error; 			}
 			if ( kid->tree->prod_num == 11 ) {
 	lel_aug_local_error *_lhs = &((commit_reduce_union*)(lel+1))->aug_local_error;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1662"reducer.lm"
+#line 1662 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->augType = at_middle_local_error; 			}
 			break;
 		}
@@ -1694,7 +1739,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_base *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_base;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1683"reducer.lm"
+#line 1683 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1711,7 +1756,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_base *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_base;
 	_pt_cursor = _pt_cursor->next;
 lel_priority_aug *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->priority_aug;
-#line 1693"reducer.lm"
+#line 1693 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1730,7 +1775,7 @@ lel_priority_name *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->priority_nam
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_priority_aug *_rhs5 = &((commit_reduce_union*)(_pt_cursor+1))->priority_aug;
-#line 1701"reducer.lm"
+#line 1701 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1745,7 +1790,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_cond *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_cond;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1709"reducer.lm"
+#line 1709 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1761,7 +1806,7 @@ lel_aug_cond *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_cond;
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1717"reducer.lm"
+#line 1717 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1776,7 +1821,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_to_state *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_to_state;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1725"reducer.lm"
+#line 1725 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1791,7 +1836,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_from_state *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_from_state;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1733"reducer.lm"
+#line 1733 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1806,7 +1851,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_eof *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_eof;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1741"reducer.lm"
+#line 1741 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 		_rhs0->fwa->actions.append( ParserAction( &_rhs1->loc,
@@ -1820,7 +1865,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_gbl_error *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_gbl_error;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1748"reducer.lm"
+#line 1748 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1835,7 +1880,7 @@ lel_factor_aug *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_aug;
 lel_aug_local_error *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->aug_local_error;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1756"reducer.lm"
+#line 1756 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1854,7 +1899,7 @@ lel_error_name *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->error_name;
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs5 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1764"reducer.lm"
+#line 1764 "reducer.lm"
 
 		_lhs->fwa = _rhs0->fwa;
 
@@ -1865,7 +1910,7 @@ lel_action_ref *_rhs5 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 	lel_factor_aug *_lhs = &((commit_reduce_union*)(lel+1))->factor_aug;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_factor_rep *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep;
-#line 1772"reducer.lm"
+#line 1772 "reducer.lm"
 
 		_lhs->fwa = new FactorWithAug( _rhs0->rep );
 				}
@@ -1878,7 +1923,7 @@ lel_factor_rep *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep;
 lel_factor_neg *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_neg;
 	_pt_cursor = _pt_cursor->next;
 lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_op_list;
-#line 1785"reducer.lm"
+#line 1785 "reducer.lm"
 
 		FactorWithRep *prev = new FactorWithRep( _rhs0->neg );
 		FactorWithRep *cur = _rhs1->rep;
@@ -1903,14 +1948,14 @@ lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_
 lel_factor_rep_op *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_op;
 	_pt_cursor = _pt_cursor->next;
 lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_op_list;
-#line 1810"reducer.lm"
+#line 1810 "reducer.lm"
 
 		_lhs->rep = _rhs0->rep;
 		_lhs->rep->factorWithRep = _rhs1->rep;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_factor_rep_op_list *_lhs = &((commit_reduce_union*)(lel+1))->factor_rep_op_list;
-#line 1815"reducer.lm"
+#line 1815 "reducer.lm"
 
 		_lhs->rep = 0;
 				}
@@ -1921,7 +1966,7 @@ lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_
 	lel_factor_rep_op *_lhs = &((commit_reduce_union*)(lel+1))->factor_rep_op;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1833"reducer.lm"
+#line 1833 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0, 0, 0, FactorWithRep::StarType );
 				}
@@ -1929,7 +1974,7 @@ lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_
 	lel_factor_rep_op *_lhs = &((commit_reduce_union*)(lel+1))->factor_rep_op;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1837"reducer.lm"
+#line 1837 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0, 0, 0, FactorWithRep::StarStarType );
 				}
@@ -1937,7 +1982,7 @@ lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_
 	lel_factor_rep_op *_lhs = &((commit_reduce_union*)(lel+1))->factor_rep_op;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1841"reducer.lm"
+#line 1841 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0, 0, 0, FactorWithRep::OptionalType );
 				}
@@ -1945,7 +1990,7 @@ lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_
 	lel_factor_rep_op *_lhs = &((commit_reduce_union*)(lel+1))->factor_rep_op;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1845"reducer.lm"
+#line 1845 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0, 0, 0, FactorWithRep::PlusType );
 				}
@@ -1956,7 +2001,7 @@ lel_factor_rep_op_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_
 lel_factor_rep_num *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1849"reducer.lm"
+#line 1849 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0,
 				_rhs1->rep, 0,
@@ -1970,7 +2015,7 @@ lel_factor_rep_num *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_
 lel_factor_rep_num *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1855"reducer.lm"
+#line 1855 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0,
 				0, _rhs2->rep,
@@ -1983,7 +2028,7 @@ lel_factor_rep_num *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_
 lel_factor_rep_num *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1861"reducer.lm"
+#line 1861 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0,
 				_rhs1->rep, 0,
@@ -1999,7 +2044,7 @@ lel_factor_rep_num *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_
 lel_factor_rep_num *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1867"reducer.lm"
+#line 1867 "reducer.lm"
 
 		_lhs->rep = new FactorWithRep( _loc0, 0,
 				_rhs1->rep, _rhs3->rep,
@@ -2013,7 +2058,7 @@ lel_factor_rep_num *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1881"reducer.lm"
+#line 1881 "reducer.lm"
 
 		// Convert the priority number to a long. Check for overflow.
 		string data( _rhs0->data, _rhs0->length );
@@ -2039,7 +2084,7 @@ lel_factor_rep_num *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->factor_rep_
 lel_factor_neg *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_neg;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1908"reducer.lm"
+#line 1908 "reducer.lm"
 
 		_lhs->neg = new FactorWithNeg( _loc0,
 				_rhs1->neg, FactorWithNeg::NegateType );
@@ -2051,7 +2096,7 @@ lel_factor_neg *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_neg;
 lel_factor_neg *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_neg;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1914"reducer.lm"
+#line 1914 "reducer.lm"
 
 		_lhs->neg = new FactorWithNeg( _loc0,
 				_rhs1->neg, FactorWithNeg::CharNegateType );
@@ -2060,7 +2105,7 @@ lel_factor_neg *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->factor_neg;
 	lel_factor_neg *_lhs = &((commit_reduce_union*)(lel+1))->factor_neg;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_factor *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor;
-#line 1920"reducer.lm"
+#line 1920 "reducer.lm"
 
 		_lhs->neg = new FactorWithNeg( _rhs0->factor );
 				}
@@ -2072,13 +2117,13 @@ lel_factor *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->factor;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 1932"reducer.lm"
+#line 1932 "reducer.lm"
 
 		_lhs->action = _rhs1->action;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_opt_max_arg *_lhs = &((commit_reduce_union*)(lel+1))->opt_max_arg;
-#line 1937"reducer.lm"
+#line 1937 "reducer.lm"
 
 		_lhs->action = 0;
 				}
@@ -2087,43 +2132,30 @@ lel_action_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 		case 1147: {
 			if ( kid->tree->prod_num == 0 ) {
 	lel_colon_cond *_lhs = &((commit_reduce_union*)(lel+1))->colon_cond;
-#line 1947"reducer.lm"
+#line 1947 "reducer.lm"
 
 		_lhs->type = Factor::CondStar;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_colon_cond *_lhs = &((commit_reduce_union*)(lel+1))->colon_cond;
-#line 1952"reducer.lm"
+#line 1952 "reducer.lm"
 
 		_lhs->type = Factor::CondStar;
 				}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_colon_cond *_lhs = &((commit_reduce_union*)(lel+1))->colon_cond;
-#line 1957"reducer.lm"
+#line 1957 "reducer.lm"
 
 		_lhs->type = Factor::CondPlus;
 				}
 			break;
 		}
 		case 1148: {
-			if ( kid->tree->prod_num == 10 ) {
-	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
-	struct colm_parse_tree *_pt_cursor = lel->child;
-	_pt_cursor = _pt_cursor->next;
-lel_join *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->join;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1983"reducer.lm"
-
-		/* Create a new factor going to a parenthesized join. */
-		_lhs->factor = new Factor( _rhs1->join );
-		_lhs->factor->join->loc = _loc0;
-				}
 			if ( kid->tree->prod_num == 0 ) {
 	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
-#line 1990"reducer.lm"
+#line 1990 "reducer.lm"
 
 		_lhs->factor = new Factor( new Literal( _rhs0->tok.loc,
 				_rhs0->neg, _rhs0->tok.data,
@@ -2134,7 +2166,7 @@ lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1997"reducer.lm"
+#line 1997 "reducer.lm"
 
 		InputLoc loc = _loc0;
 		string s( _rhs0->data, _rhs0->length );
@@ -2162,32 +2194,10 @@ lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2021"reducer.lm"
+#line 2021 "reducer.lm"
 
 		_lhs->factor = new Factor( new Literal( _loc0, false,
 				_rhs0->data, _rhs0->length, Literal::LitString ) );
-				}
-			if ( kid->tree->prod_num == 6 ) {
-	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
-	struct colm_parse_tree *_pt_cursor = lel->child;
-lel_range_lit *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
-	_pt_cursor = _pt_cursor->next;
-	_pt_cursor = _pt_cursor->next;
-lel_range_lit *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
-#line 2033"reducer.lm"
-
-		_lhs->factor = new Factor( new Range( _rhs0->literal, _rhs2->literal, false ) );
-				}
-			if ( kid->tree->prod_num == 7 ) {
-	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
-	struct colm_parse_tree *_pt_cursor = lel->child;
-lel_range_lit *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
-	_pt_cursor = _pt_cursor->next;
-	_pt_cursor = _pt_cursor->next;
-lel_range_lit *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
-#line 2038"reducer.lm"
-
-		_lhs->factor = new Factor( new Range( _rhs0->literal, _rhs2->literal, true ) );
 				}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
@@ -2196,7 +2206,7 @@ lel_range_lit *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
 lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2044"reducer.lm"
+#line 2044 "reducer.lm"
 
 		_lhs->factor = new Factor( new ReItem( _loc0,
 				_rhs1->reOrBlock, ReItem::OrBlock ) );
@@ -2208,10 +2218,51 @@ lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2050"reducer.lm"
+#line 2050 "reducer.lm"
 
 		_lhs->factor = new Factor( new ReItem( _loc0,
 				_rhs1->reOrBlock, ReItem::NegOrBlock ) );
+				}
+			if ( kid->tree->prod_num == 5 ) {
+	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
+	struct colm_parse_tree *_pt_cursor = lel->child;
+	_pt_cursor = _pt_cursor->next;
+lel_regex *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->regex;
+	_pt_cursor = _pt_cursor->next;
+	kid_t *_tree_cursor = kid->tree->child;
+	_tree_cursor = _tree_cursor->next;
+	_tree_cursor = _tree_cursor->next;
+	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
+	colm_location *_loc2 = colm_find_location( prg, _tree_cursor->tree );
+#line 2071 "reducer.lm"
+
+		bool caseInsensitive = false;
+		checkLitOptions( pd->id, _loc2, _rhs2->data, _rhs2->length, caseInsensitive );
+		if ( caseInsensitive )
+			_rhs1->regExpr->caseInsensitive = true;
+		_lhs->factor = new Factor( _rhs1->regExpr );
+				}
+			if ( kid->tree->prod_num == 6 ) {
+	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
+	struct colm_parse_tree *_pt_cursor = lel->child;
+lel_range_lit *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
+	_pt_cursor = _pt_cursor->next;
+	_pt_cursor = _pt_cursor->next;
+lel_range_lit *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
+#line 2033 "reducer.lm"
+
+		_lhs->factor = new Factor( new Range( _rhs0->literal, _rhs2->literal, false ) );
+				}
+			if ( kid->tree->prod_num == 7 ) {
+	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
+	struct colm_parse_tree *_pt_cursor = lel->child;
+lel_range_lit *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
+	_pt_cursor = _pt_cursor->next;
+	_pt_cursor = _pt_cursor->next;
+lel_range_lit *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->range_lit;
+#line 2038 "reducer.lm"
+
+		_lhs->factor = new Factor( new Range( _rhs0->literal, _rhs2->literal, true ) );
 				}
 			if ( kid->tree->prod_num == 8 ) {
 	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
@@ -2239,7 +2290,7 @@ lel_action_ref *_rhs12 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 lel_action_ref *_rhs14 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2056"reducer.lm"
+#line 2056 "reducer.lm"
 
 		/* push, pop, init, stay, repeat, exit */
 		_lhs->factor = new Factor( _loc0, pd->nextRepId++, _rhs2->expr,
@@ -2267,30 +2318,24 @@ lel_opt_max_arg *_rhs9 = &((commit_reduce_union*)(_pt_cursor+1))->opt_max_arg;
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 2064"reducer.lm"
+#line 2064 "reducer.lm"
 
 		/* init, inc, min, opt-max. */
 		_lhs->factor = new Factor( _loc1, pd->nextRepId++, _rhs2->expr,
 				_rhs4->action, _rhs6->action, _rhs8->action, _rhs9->action, 0, 0, _rhs0->type );
 				}
-			if ( kid->tree->prod_num == 5 ) {
+			if ( kid->tree->prod_num == 10 ) {
 	lel_factor *_lhs = &((commit_reduce_union*)(lel+1))->factor;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
-lel_regex *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->regex;
-	_pt_cursor = _pt_cursor->next;
+lel_join *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->join;
 	kid_t *_tree_cursor = kid->tree->child;
-	_tree_cursor = _tree_cursor->next;
-	_tree_cursor = _tree_cursor->next;
-	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
-	colm_location *_loc2 = colm_find_location( prg, _tree_cursor->tree );
-#line 2071"reducer.lm"
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 1983 "reducer.lm"
 
-		bool caseInsensitive = false;
-		checkLitOptions( pd->id, _loc2, _rhs2->data, _rhs2->length, caseInsensitive );
-		if ( caseInsensitive )
-			_rhs1->regExpr->caseInsensitive = true;
-		_lhs->factor = new Factor( _rhs1->regExpr );
+		/* Create a new factor going to a parenthesized join. */
+		_lhs->factor = new Factor( _rhs1->join );
+		_lhs->factor->join->loc = _loc0;
 				}
 			break;
 		}
@@ -2299,7 +2344,7 @@ lel_regex *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->regex;
 	lel_regex *_lhs = &((commit_reduce_union*)(lel+1))->regex;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_reg_item_rep_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item_rep_list;
-#line 2087"reducer.lm"
+#line 2087 "reducer.lm"
 
 		_lhs->regExpr = _rhs0->regExpr;
 				}
@@ -2312,14 +2357,14 @@ lel_reg_item_rep_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item
 lel_reg_item_rep_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item_rep_list;
 	_pt_cursor = _pt_cursor->next;
 lel_reg_item_rep *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item_rep;
-#line 2099"reducer.lm"
+#line 2099 "reducer.lm"
 
 		_lhs->regExpr = new RegExpr( _rhs0->regExpr,
 				_rhs1->reItem );
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_reg_item_rep_list *_lhs = &((commit_reduce_union*)(lel+1))->reg_item_rep_list;
-#line 2104"reducer.lm"
+#line 2104 "reducer.lm"
 
 		_lhs->regExpr = new RegExpr();
 				}
@@ -2330,7 +2375,7 @@ lel_reg_item_rep *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item_rep;
 	lel_reg_item_rep *_lhs = &((commit_reduce_union*)(lel+1))->reg_item_rep;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_reg_item *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item;
-#line 2117"reducer.lm"
+#line 2117 "reducer.lm"
 
 		_lhs->reItem = _rhs0->reItem;
 		_lhs->reItem->star = true;
@@ -2339,7 +2384,7 @@ lel_reg_item *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item;
 	lel_reg_item_rep *_lhs = &((commit_reduce_union*)(lel+1))->reg_item_rep;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_reg_item *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item;
-#line 2123"reducer.lm"
+#line 2123 "reducer.lm"
 
 		_lhs->reItem = _rhs0->reItem;
 				}
@@ -2353,7 +2398,7 @@ lel_reg_item *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_item;
 lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2137"reducer.lm"
+#line 2137 "reducer.lm"
 
 		_lhs->reItem = new ReItem( _loc0, _rhs1->reOrBlock, ReItem::OrBlock );
 				}
@@ -2364,7 +2409,7 @@ lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2141"reducer.lm"
+#line 2141 "reducer.lm"
 
 		_lhs->reItem = new ReItem( _loc0, _rhs1->reOrBlock, ReItem::NegOrBlock );
 				}
@@ -2372,7 +2417,7 @@ lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	lel_reg_item *_lhs = &((commit_reduce_union*)(lel+1))->reg_item;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2145"reducer.lm"
+#line 2145 "reducer.lm"
 
 		_lhs->reItem = new ReItem( _loc0, ReItem::Dot );
 				}
@@ -2381,7 +2426,7 @@ lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2149"reducer.lm"
+#line 2149 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		char *c = unescape( data.c_str() );
@@ -2397,7 +2442,7 @@ lel_reg_or_data *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 lel_reg_or_data *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_data;
 	_pt_cursor = _pt_cursor->next;
 lel_reg_or_char *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_char;
-#line 2165"reducer.lm"
+#line 2165 "reducer.lm"
 
 		/* An optimization to lessen the tree size. If an or char is directly
 		 * under the left side on the right and the right side is another or
@@ -2420,7 +2465,7 @@ lel_reg_or_char *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_char;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_reg_or_data *_lhs = &((commit_reduce_union*)(lel+1))->reg_or_data;
-#line 2187"reducer.lm"
+#line 2187 "reducer.lm"
 
 		_lhs->reOrBlock = new ReOrBlock();
 				}
@@ -2432,7 +2477,7 @@ lel_reg_or_char *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_char;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2200"reducer.lm"
+#line 2200 "reducer.lm"
 
 		// ReOrItem *reOrItem;
 		char *c = unescape( _rhs0->data, _rhs0->length );
@@ -2447,7 +2492,7 @@ lel_reg_or_char *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_char;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
-#line 2208"reducer.lm"
+#line 2208 "reducer.lm"
 
 		// ReOrItem *reOrItem;
 		char *low = unescape( _rhs0->data, _rhs0->length );
@@ -2464,7 +2509,7 @@ lel_reg_or_char *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_char;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2255"reducer.lm"
+#line 2255 "reducer.lm"
 
 		/* Range literals must have only one char. We restrict this in the
 		 * parse tree. */
@@ -2475,7 +2520,7 @@ lel_reg_or_char *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->reg_or_char;
 	lel_range_lit *_lhs = &((commit_reduce_union*)(lel+1))->range_lit;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
-#line 2263"reducer.lm"
+#line 2263 "reducer.lm"
 
 		_lhs->literal = new Literal( _rhs0->tok.loc,
 				_rhs0->neg, _rhs0->tok.data,
@@ -2489,7 +2534,7 @@ lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2229"reducer.lm"
+#line 2229 "reducer.lm"
 
 		_lhs->neg = false;
 		_lhs->tok.set( _rhs0, _loc0 );
@@ -2500,7 +2545,7 @@ lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 2235"reducer.lm"
+#line 2235 "reducer.lm"
 
 		_lhs->neg = true;
 		_lhs->tok.set( _rhs1, _loc0 );
@@ -2510,7 +2555,7 @@ lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2241"reducer.lm"
+#line 2241 "reducer.lm"
 
 		_lhs->neg = false;
 		_lhs->tok.set( _rhs0, _loc0 );
@@ -2523,7 +2568,7 @@ lel_alphabet_num *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->alphabet_num;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_action_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
-#line 2380"reducer.lm"
+#line 2380 "reducer.lm"
 
 		_lhs->action = _rhs1->action;
 				}
@@ -2531,7 +2576,7 @@ lel_action_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_ref;
 	lel_lm_act *_lhs = &((commit_reduce_union*)(lel+1))->lm_act;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
-#line 2384"reducer.lm"
+#line 2384 "reducer.lm"
 
 		/* Create the action, add it to the list and pass up. */
 		Action *newAction = new Action( &_rhs0->loc, std::string(),
@@ -2546,13 +2591,13 @@ lel_action_block *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	lel_opt_lm_act *_lhs = &((commit_reduce_union*)(lel+1))->opt_lm_act;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_lm_act *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->lm_act;
-#line 2363"reducer.lm"
+#line 2363 "reducer.lm"
 
 		_lhs->action = _rhs0->action;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_opt_lm_act *_lhs = &((commit_reduce_union*)(lel+1))->opt_lm_act;
-#line 2368"reducer.lm"
+#line 2368 "reducer.lm"
 
 		_lhs->action = 0;
 				}
@@ -2565,7 +2610,7 @@ lel_lm_act *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->lm_act;
 lel_join *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->join;
 	_pt_cursor = _pt_cursor->next;
 lel_opt_lm_act *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->opt_lm_act;
-#line 2325"reducer.lm"
+#line 2325 "reducer.lm"
 
 		InputLoc loc;
 		loc.line = 1;
@@ -2586,13 +2631,13 @@ lel_opt_lm_act *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->opt_lm_act;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_lm_stmt *_lhs = &((commit_reduce_union*)(lel+1))->lm_stmt;
-#line 2345"reducer.lm"
+#line 2345 "reducer.lm"
 
 		_lhs->lmPart = 0;
 				}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_lm_stmt *_lhs = &((commit_reduce_union*)(lel+1))->lm_stmt;
-#line 2350"reducer.lm"
+#line 2350 "reducer.lm"
 
 		_lhs->lmPart = 0;
 				}
@@ -2605,7 +2650,7 @@ lel_opt_lm_act *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->opt_lm_act;
 lel_lm_stmt_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt_list;
 	_pt_cursor = _pt_cursor->next;
 lel_lm_stmt *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt;
-#line 2301"reducer.lm"
+#line 2301 "reducer.lm"
 
 		_lhs->lmPartList = _rhs0->lmPartList;
 		if ( _rhs1->lmPart != 0 )
@@ -2615,7 +2660,7 @@ lel_lm_stmt *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt;
 	lel_lm_stmt_list *_lhs = &((commit_reduce_union*)(lel+1))->lm_stmt_list;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_lm_stmt *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt;
-#line 2307"reducer.lm"
+#line 2307 "reducer.lm"
 
 		_lhs->lmPartList = new LmPartList;
 		if ( _rhs0->lmPart != 0 )
@@ -2628,7 +2673,7 @@ lel_lm_stmt *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt;
 	lel_lm *_lhs = &((commit_reduce_union*)(lel+1))->lm;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_join *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->join;
-#line 2278"reducer.lm"
+#line 2278 "reducer.lm"
 
 		_lhs->machineDef = new MachineDef( _rhs0->join );
 				}
@@ -2639,7 +2684,7 @@ lel_join *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->join;
 lel_lm_stmt_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt_list;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 2283"reducer.lm"
+#line 2283 "reducer.lm"
 
 		/* Create a new factor going to a longest match structure. Record in
 		 * the parse data that we have a longest match. */
@@ -2656,7 +2701,7 @@ lel_lm_stmt_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->lm_stmt_list;
 	lel_action_param *_lhs = &((commit_reduce_union*)(lel+1))->action_param;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 840"reducer.lm"
+#line 840 "reducer.lm"
 
 		string param( _rhs0->data, _rhs0->length );
 		_lhs->param = new ActionParam( param );
@@ -2671,7 +2716,7 @@ lel_action_param_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_p
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_action_param *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_param;
-#line 854"reducer.lm"
+#line 854 "reducer.lm"
 
 		_lhs->paramList = _rhs0->paramList;
 		_lhs->paramList->append( _rhs2->param );
@@ -2680,7 +2725,7 @@ lel_action_param *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_param;
 	lel_action_param_list *_lhs = &((commit_reduce_union*)(lel+1))->action_param_list;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_param *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_param;
-#line 860"reducer.lm"
+#line 860 "reducer.lm"
 
 		_lhs->paramList = new ActionParamList;
 		_lhs->paramList->append( _rhs0->param );
@@ -2692,13 +2737,13 @@ lel_action_param *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_param;
 	lel_opt_action_param_list *_lhs = &((commit_reduce_union*)(lel+1))->opt_action_param_list;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_action_param_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_param_list;
-#line 823"reducer.lm"
+#line 823 "reducer.lm"
 
 		_lhs->paramList = _rhs0->paramList;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_opt_action_param_list *_lhs = &((commit_reduce_union*)(lel+1))->opt_action_param_list;
-#line 828"reducer.lm"
+#line 828 "reducer.lm"
 
 		_lhs->paramList = new ActionParamList;
 				}
@@ -2710,7 +2755,7 @@ lel_action_param_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->action_p
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_opt_action_param_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->opt_action_param_list;
-#line 809"reducer.lm"
+#line 809 "reducer.lm"
 
 		_lhs->paramList = _rhs1->paramList;
 		paramList = _rhs1->paramList;
@@ -2730,7 +2775,7 @@ lel_action_block *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 160"reducer.lm"
+#line 160 "reducer.lm"
 
 		string data( _rhs1->data, _rhs1->length );
 		if ( pd->actionDict.find( data ) ) {
@@ -2761,7 +2806,7 @@ lel_action_block *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 182"reducer.lm"
+#line 182 "reducer.lm"
 
 		string data( _rhs1->data, _rhs1->length );
 		if ( pd->actionDict.find( data ) ) {
@@ -2786,7 +2831,7 @@ lel_action_block *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 117"reducer.lm"
+#line 117 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->tok.set( _rhs0, _loc0 );
@@ -2816,7 +2861,7 @@ lel_def_name *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->def_name;
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_join *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->join;
-#line 54"reducer.lm"
+#line 54 "reducer.lm"
 
 		InputLoc loc = &_rhs1->loc;
 
@@ -2856,7 +2901,7 @@ lel_def_name *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->def_name;
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_lm *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->lm;
-#line 86"reducer.lm"
+#line 86 "reducer.lm"
 
 		InputLoc loc = &_rhs1->loc;
 
@@ -2888,7 +2933,7 @@ lel_nfa_expr *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_term *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 2420"reducer.lm"
+#line 2420 "reducer.lm"
 
 		_lhs->nfaUnion = _rhs0->nfaUnion;
 		_lhs->nfaUnion->terms.append( _rhs2->term );
@@ -2897,7 +2942,7 @@ lel_term *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 	lel_nfa_expr *_lhs = &((commit_reduce_union*)(lel+1))->nfa_expr;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_term *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->term;
-#line 2426"reducer.lm"
+#line 2426 "reducer.lm"
 
 		_lhs->nfaUnion = new NfaUnion();
 		_lhs->nfaUnion->terms.append( _rhs0->term );
@@ -2913,7 +2958,7 @@ lel_term *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->term;
 	_tree_cursor = _tree_cursor->next;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
-#line 2440"reducer.lm"
+#line 2440 "reducer.lm"
 
 		// Convert the priority number to a long. Check for overflow.
 		errno = 0;
@@ -2935,7 +2980,7 @@ lel_nfa_round_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_round_l
 	_pt_cursor = _pt_cursor->next;
 	_pt_cursor = _pt_cursor->next;
 lel_nfa_round_spec *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_round_spec;
-#line 2461"reducer.lm"
+#line 2461 "reducer.lm"
 
 		_lhs->roundsList = _rhs0->roundsList;
 		_lhs->roundsList->append( NfaRound( _rhs2->depth,
@@ -2945,7 +2990,7 @@ lel_nfa_round_spec *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_round_s
 	lel_nfa_round_list *_lhs = &((commit_reduce_union*)(lel+1))->nfa_round_list;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_nfa_round_spec *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_round_spec;
-#line 2468"reducer.lm"
+#line 2468 "reducer.lm"
 
 		_lhs->roundsList = new NfaRoundVect;
 		_lhs->roundsList->append( NfaRound( _rhs0->depth,
@@ -2959,7 +3004,7 @@ lel_nfa_round_spec *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_round_s
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_nfa_round_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_round_list;
-#line 2482"reducer.lm"
+#line 2482 "reducer.lm"
 
 		_lhs->roundsList = _rhs1->roundsList;
 				}
@@ -2974,7 +3019,7 @@ lel_def_name *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->def_name;
 lel_nfa_rounds *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_rounds;
 	_pt_cursor = _pt_cursor->next;
 lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
-#line 139"reducer.lm"
+#line 139 "reducer.lm"
 
 		InputLoc loc = &_rhs0->loc;
 		string name( _rhs0->tok.data, _rhs0->tok.length );
@@ -2993,7 +3038,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 284"reducer.lm"
+#line 284 "reducer.lm"
 
 		string one( _rhs0->data, _rhs0->length );
 		if ( ! pd->setAlphType( _loc0, hostLang, one.c_str() ) ) {
@@ -3008,7 +3053,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 294"reducer.lm"
+#line 294 "reducer.lm"
 
 		string one( _rhs0->data, _rhs0->length );
 		string two( _rhs1->data, _rhs1->length );
@@ -3026,7 +3071,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 365"reducer.lm"
+#line 365 "reducer.lm"
 
 		_lhs->machine.set( _rhs0, _loc0 );
 		_lhs->file.data = 0;
@@ -3036,7 +3081,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 371"reducer.lm"
+#line 371 "reducer.lm"
 
 		_lhs->file.set( _rhs0, _loc0 );
 		_lhs->machine.data = 0;
@@ -3049,7 +3094,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 377"reducer.lm"
+#line 377 "reducer.lm"
 
 		_lhs->machine.set( _rhs0, _loc0 );
 		_lhs->file.set( _rhs1, _loc1 );
@@ -3059,13 +3104,13 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 		case 1177: {
 			if ( kid->tree->prod_num == 0 ) {
 	lel_opt_export *_lhs = &((commit_reduce_union*)(lel+1))->opt_export;
-#line 2401"reducer.lm"
+#line 2401 "reducer.lm"
 
 		_lhs->isSet = true;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_opt_export *_lhs = &((commit_reduce_union*)(lel+1))->opt_export;
-#line 2406"reducer.lm"
+#line 2406 "reducer.lm"
 
 		_lhs->isSet = false;
 				}
@@ -3075,7 +3120,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 			if ( kid->tree->prod_num == 0 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2488"reducer.lm"
+#line 2488 "reducer.lm"
 
 		string arg( _rhs0->data, _rhs0->length );
 		writeArgs.push_back( arg );
@@ -3087,7 +3132,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 6"reducer.lm"
+#line 6 "reducer.lm"
 
 		InputLoc sectionLoc;
 		string machine( _rhs1->data, _rhs1->length );
@@ -3124,7 +3169,7 @@ lel_nfa_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->nfa_expr;
 lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 203"reducer.lm"
+#line 203 "reducer.lm"
 
 		if ( pd->fsmCtx->prePushExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
@@ -3139,43 +3184,13 @@ lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 212"reducer.lm"
+#line 212 "reducer.lm"
 
 		if ( pd->fsmCtx->postPopExpr != 0 ) {
 			/* Recover by just ignoring the duplicate. */
 			pd->id->error(_loc0) << "postpop code already defined" << endl;
 		}
 		pd->fsmCtx->postPopExpr = new InlineBlock( _loc0, _rhs1->inlineList );
-				}
-			if ( kid->tree->prod_num == 13 ) {
-	struct colm_parse_tree *_pt_cursor = lel->child;
-	_pt_cursor = _pt_cursor->next;
-lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 223"reducer.lm"
-
-		if ( pd->fsmCtx->nfaPrePushExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			pd->id->error(_loc0) << "nfa_pre_push code already defined" << endl;
-		}
-
-		pd->fsmCtx->nfaPrePushExpr = new InlineBlock( _loc0, _rhs1->inlineList );
-				}
-			if ( kid->tree->prod_num == 14 ) {
-	struct colm_parse_tree *_pt_cursor = lel->child;
-	_pt_cursor = _pt_cursor->next;
-lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
-	kid_t *_tree_cursor = kid->tree->child;
-	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 235"reducer.lm"
-
-		if ( pd->fsmCtx->nfaPostPopExpr != 0 ) {
-			/* Recover by just ignoring the duplicate. */
-			pd->id->error(_loc0) << "nfa_post_pop code already defined" << endl;
-		}
-
-		pd->fsmCtx->nfaPostPopExpr = new InlineBlock( _loc0, _rhs1->inlineList );
 				}
 			if ( kid->tree->prod_num == 6 ) {
 	struct colm_parse_tree *_pt_cursor = lel->child;
@@ -3186,7 +3201,7 @@ lel_inline_expr_reparse *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->inline
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 248"reducer.lm"
+#line 248 "reducer.lm"
 
 		string data( _rhs1->data, _rhs1->length );
 		bool wasSet = pd->setVariable( data.c_str(),
@@ -3198,7 +3213,7 @@ lel_inline_expr_reparse *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->inline
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_inline_expr_reparse *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr_reparse;
-#line 257"reducer.lm"
+#line 257 "reducer.lm"
 
 		pd->fsmCtx->accessExpr = _rhs1->inlineList;
 				}
@@ -3206,7 +3221,7 @@ lel_inline_expr_reparse *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 264"reducer.lm"
+#line 264 "reducer.lm"
 
 		if ( includeDepth == 0 ) {
 			id->curItem = id->curItem->next;
@@ -3226,7 +3241,7 @@ lel_inline_expr_reparse *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline
 	struct colm_parse_tree *_pt_cursor = lel->child;
 	_pt_cursor = _pt_cursor->next;
 lel_inline_expr_reparse *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr_reparse;
-#line 308"reducer.lm"
+#line 308 "reducer.lm"
 
 		pd->fsmCtx->getKeyExpr = _rhs1->inlineList;
 				}
@@ -3235,7 +3250,7 @@ lel_inline_expr_reparse *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 313"reducer.lm"
+#line 313 "reducer.lm"
 
 		InputLoc loc = _loc1;
 		std::string fileName( _rhs1->data, _rhs1->length );
@@ -3254,7 +3269,7 @@ lel_inline_expr_reparse *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline
 lel_include_spec *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->include_spec;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 329"reducer.lm"
+#line 329 "reducer.lm"
 
 		string fileName = id->inputFileName;
 		string machine = pd->sectionName;
@@ -3278,6 +3293,36 @@ lel_include_spec *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->include_spec;
 
 		include( _loc0, fileSpecified, fileName, machine );
 				}
+			if ( kid->tree->prod_num == 13 ) {
+	struct colm_parse_tree *_pt_cursor = lel->child;
+	_pt_cursor = _pt_cursor->next;
+lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 223 "reducer.lm"
+
+		if ( pd->fsmCtx->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(_loc0) << "nfa_pre_push code already defined" << endl;
+		}
+
+		pd->fsmCtx->nfaPrePushExpr = new InlineBlock( _loc0, _rhs1->inlineList );
+				}
+			if ( kid->tree->prod_num == 14 ) {
+	struct colm_parse_tree *_pt_cursor = lel->child;
+	_pt_cursor = _pt_cursor->next;
+lel_action_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->action_block;
+	kid_t *_tree_cursor = kid->tree->child;
+	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
+#line 235 "reducer.lm"
+
+		if ( pd->fsmCtx->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(_loc0) << "nfa_post_pop code already defined" << endl;
+		}
+
+		pd->fsmCtx->nfaPostPopExpr = new InlineBlock( _loc0, _rhs1->inlineList );
+				}
 			break;
 		}
 		case 1183: {
@@ -3285,7 +3330,7 @@ lel_include_spec *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->include_spec;
 	lel_inline_expr *_lhs = &((commit_reduce_union*)(lel+1))->inline_expr;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_expr_item_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_item_list;
-#line 1233"reducer.lm"
+#line 1233 "reducer.lm"
 
 		_lhs->inlineList = _rhs0->inlineList;
 				}
@@ -3298,14 +3343,14 @@ lel_expr_item_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_item_l
 lel_expr_item_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_item_list;
 	_pt_cursor = _pt_cursor->next;
 lel_expr_item *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->expr_item;
-#line 1246"reducer.lm"
+#line 1246 "reducer.lm"
 
 		_lhs->inlineList = _rhs0->inlineList;
 		_lhs->inlineList->append( _rhs1->inlineItem );
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_expr_item_list *_lhs = &((commit_reduce_union*)(lel+1))->expr_item_list;
-#line 1252"reducer.lm"
+#line 1252 "reducer.lm"
 
 		_lhs->inlineList = new InlineList;
 				}
@@ -3316,7 +3361,7 @@ lel_expr_item *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->expr_item;
 	lel_expr_item *_lhs = &((commit_reduce_union*)(lel+1))->expr_item;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_expr_any *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_any;
-#line 1266"reducer.lm"
+#line 1266 "reducer.lm"
 
 		_lhs->inlineItem = _rhs0->inlineItem;
 				}
@@ -3324,7 +3369,7 @@ lel_expr_any *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_any;
 	lel_expr_item *_lhs = &((commit_reduce_union*)(lel+1))->expr_item;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_expr_symbol *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_symbol;
-#line 1270"reducer.lm"
+#line 1270 "reducer.lm"
 
 		string sym( _rhs0->sym );
 		_lhs->inlineItem = new InlineItem( &_rhs0->loc, sym, InlineItem::Text );
@@ -3333,7 +3378,7 @@ lel_expr_symbol *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_symbol;
 	lel_expr_item *_lhs = &((commit_reduce_union*)(lel+1))->expr_item;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interpret;
-#line 1275"reducer.lm"
+#line 1275 "reducer.lm"
 
 		_lhs->inlineItem = _rhs0->inlineItem;
 				}
@@ -3345,7 +3390,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 997"reducer.lm"
+#line 997 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3355,7 +3400,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1003"reducer.lm"
+#line 1003 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3365,7 +3410,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1009"reducer.lm"
+#line 1009 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3375,7 +3420,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1015"reducer.lm"
+#line 1015 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3385,7 +3430,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1021"reducer.lm"
+#line 1021 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3395,7 +3440,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1027"reducer.lm"
+#line 1027 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3405,7 +3450,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1033"reducer.lm"
+#line 1033 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3417,31 +3462,31 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	lel_expr_symbol *_lhs = &((commit_reduce_union*)(lel+1))->expr_symbol;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1288"reducer.lm"
+#line 1288 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->sym = ","; 			}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_expr_symbol *_lhs = &((commit_reduce_union*)(lel+1))->expr_symbol;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1290"reducer.lm"
+#line 1290 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->sym = "("; 			}
 			if ( kid->tree->prod_num == 2 ) {
 	lel_expr_symbol *_lhs = &((commit_reduce_union*)(lel+1))->expr_symbol;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1292"reducer.lm"
+#line 1292 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->sym = ")"; 			}
 			if ( kid->tree->prod_num == 3 ) {
 	lel_expr_symbol *_lhs = &((commit_reduce_union*)(lel+1))->expr_symbol;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1294"reducer.lm"
+#line 1294 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->sym = "*"; 			}
 			if ( kid->tree->prod_num == 4 ) {
 	lel_expr_symbol *_lhs = &((commit_reduce_union*)(lel+1))->expr_symbol;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1296"reducer.lm"
+#line 1296 "reducer.lm"
  _lhs->loc = *_loc0; _lhs->sym = "::"; 			}
 			break;
 		}
@@ -3450,7 +3495,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	lel_expr_interpret *_lhs = &((commit_reduce_union*)(lel+1))->expr_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1312"reducer.lm"
+#line 1312 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::PChar );
 				}
@@ -3458,7 +3503,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	lel_expr_interpret *_lhs = &((commit_reduce_union*)(lel+1))->expr_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1317"reducer.lm"
+#line 1317 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Char );
 				}
@@ -3466,7 +3511,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	lel_expr_interpret *_lhs = &((commit_reduce_union*)(lel+1))->expr_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1322"reducer.lm"
+#line 1322 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Curs );
 				}
@@ -3474,7 +3519,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 	lel_expr_interpret *_lhs = &((commit_reduce_union*)(lel+1))->expr_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1327"reducer.lm"
+#line 1327 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Targs );
 				}
@@ -3486,7 +3531,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 lel_state_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1332"reducer.lm"
+#line 1332 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, _rhs2->nameRef, InlineItem::Entry );
 				}
@@ -3495,7 +3540,7 @@ lel_state_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1337"reducer.lm"
+#line 1337 "reducer.lm"
 
 		string data( _rhs0->data + 1, _rhs0->length - 1 );
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Subst );
@@ -3521,7 +3566,7 @@ lel_state_ref *_rhs2 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 lel_opt_name_sep *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->opt_name_sep;
 	_pt_cursor = _pt_cursor->next;
 lel_state_ref_names *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref_names;
-#line 1089"reducer.lm"
+#line 1089 "reducer.lm"
 
 		_lhs->nameRef = _rhs1->nameRef;
 		if ( _rhs0->nameSep )
@@ -3532,13 +3577,13 @@ lel_state_ref_names *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref_
 		case 1190: {
 			if ( kid->tree->prod_num == 0 ) {
 	lel_opt_name_sep *_lhs = &((commit_reduce_union*)(lel+1))->opt_name_sep;
-#line 1104"reducer.lm"
+#line 1104 "reducer.lm"
 
 		_lhs->nameSep = true;
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_opt_name_sep *_lhs = &((commit_reduce_union*)(lel+1))->opt_name_sep;
-#line 1109"reducer.lm"
+#line 1109 "reducer.lm"
 
 		_lhs->nameSep = false;
 				}
@@ -3555,7 +3600,7 @@ lel_state_ref_names *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref_
 	_tree_cursor = _tree_cursor->next;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
-#line 1122"reducer.lm"
+#line 1122 "reducer.lm"
 
 		_lhs->nameRef = _rhs0->nameRef;
 		_lhs->nameRef->append( string( _rhs2->data, _rhs2->length ) );
@@ -3564,7 +3609,7 @@ lel_state_ref_names *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref_
 	lel_state_ref_names *_lhs = &((commit_reduce_union*)(lel+1))->state_ref_names;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 1128"reducer.lm"
+#line 1128 "reducer.lm"
 
 		_lhs->nameRef = new NameRef;
 		_lhs->nameRef->append( string( _rhs0->data, _rhs0->length ) );
@@ -3576,7 +3621,7 @@ lel_state_ref_names *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref_
 	lel_inline_block *_lhs = &((commit_reduce_union*)(lel+1))->inline_block;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_block_item_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_item_list;
-#line 920"reducer.lm"
+#line 920 "reducer.lm"
 
 		_lhs->inlineList = _rhs0->inlineList;
 				}
@@ -3589,7 +3634,7 @@ lel_block_item_list *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_item
 lel_block_item *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_item;
 	_pt_cursor = _pt_cursor->next;
 lel_block_item_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->block_item_list;
-#line 933"reducer.lm"
+#line 933 "reducer.lm"
 
 		_lhs->inlineList = _rhs1->inlineList;
 
@@ -3602,7 +3647,7 @@ lel_block_item_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->block_item
 				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_block_item_list *_lhs = &((commit_reduce_union*)(lel+1))->block_item_list;
-#line 945"reducer.lm"
+#line 945 "reducer.lm"
 
 		_lhs->inlineList = new InlineList;
 				}
@@ -3613,7 +3658,7 @@ lel_block_item_list *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->block_item
 	lel_block_item *_lhs = &((commit_reduce_union*)(lel+1))->block_item;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_expr_any *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_any;
-#line 961"reducer.lm"
+#line 961 "reducer.lm"
 
 		_lhs->inlineItem = _rhs0->inlineItem;
 				}
@@ -3621,7 +3666,7 @@ lel_expr_any *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_any;
 	lel_block_item *_lhs = &((commit_reduce_union*)(lel+1))->block_item;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_block_symbol *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_symbol;
-#line 966"reducer.lm"
+#line 966 "reducer.lm"
 
 		_lhs->inlineItem = _rhs0->inlineItem;
 				}
@@ -3629,7 +3674,7 @@ lel_block_symbol *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_symbol;
 	lel_block_item *_lhs = &((commit_reduce_union*)(lel+1))->block_item;
 	struct colm_parse_tree *_pt_cursor = lel->child;
 lel_block_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_interpret;
-#line 971"reducer.lm"
+#line 971 "reducer.lm"
 
 		_lhs->inlineItem = _rhs0->inlineItem;
 				}
@@ -3640,7 +3685,7 @@ lel_block_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->block_inte
 lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 976"reducer.lm"
+#line 976 "reducer.lm"
 
 		_lhs->inlineList = _rhs1->inlineList;
 		_lhs->inlineList->prepend( new InlineItem( _loc0, "{", InlineItem::Text ) );
@@ -3655,7 +3700,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1046"reducer.lm"
+#line 1046 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3665,7 +3710,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1052"reducer.lm"
+#line 1052 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3675,7 +3720,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1058"reducer.lm"
+#line 1058 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3685,7 +3730,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1064"reducer.lm"
+#line 1064 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3695,7 +3740,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1070"reducer.lm"
+#line 1070 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3705,7 +3750,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1076"reducer.lm"
+#line 1076 "reducer.lm"
 
 		string data( _rhs0->data, _rhs0->length );
 		_lhs->inlineItem = new InlineItem( _loc0, data, InlineItem::Text );
@@ -3713,11 +3758,19 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 			break;
 		}
 		case 1196: {
+			if ( kid->tree->prod_num == 0 ) {
+	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
+	struct colm_parse_tree *_pt_cursor = lel->child;
+lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interpret;
+#line 1221 "reducer.lm"
+
+		_lhs->inlineItem = _rhs0->inlineItem;
+				}
 			if ( kid->tree->prod_num == 1 ) {
 	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1155"reducer.lm"
+#line 1155 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Hold );
 				}
@@ -3730,7 +3783,7 @@ lel_inline_block *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_block;
 lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1159"reducer.lm"
+#line 1159 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::GotoExpr );
 		_lhs->inlineItem->children = _rhs3->inlineList;
@@ -3744,7 +3797,7 @@ lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1164"reducer.lm"
+#line 1164 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::NextExpr );
 		_lhs->inlineItem->children = _rhs3->inlineList;
@@ -3758,7 +3811,7 @@ lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1169"reducer.lm"
+#line 1169 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::CallExpr );
 		_lhs->inlineItem->children = _rhs3->inlineList;
@@ -3772,7 +3825,7 @@ lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1174"reducer.lm"
+#line 1174 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::NcallExpr );
 		_lhs->inlineItem->children = _rhs3->inlineList;
@@ -3784,7 +3837,7 @@ lel_inline_expr *_rhs3 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 lel_inline_expr *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1179"reducer.lm"
+#line 1179 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Exec );
 		_lhs->inlineItem->children = _rhs1->inlineList;
@@ -3796,7 +3849,7 @@ lel_inline_expr *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->inline_expr;
 lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1184"reducer.lm"
+#line 1184 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0,
 				_rhs1->nameRef, InlineItem::Goto );
@@ -3808,7 +3861,7 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1189"reducer.lm"
+#line 1189 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0,
 				_rhs1->nameRef, InlineItem::Next );
@@ -3820,7 +3873,7 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1194"reducer.lm"
+#line 1194 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0,
 				_rhs1->nameRef, InlineItem::Call );
@@ -3832,7 +3885,7 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1199"reducer.lm"
+#line 1199 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0,
 				_rhs1->nameRef, InlineItem::Ncall );
@@ -3841,7 +3894,7 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1204"reducer.lm"
+#line 1204 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Ret );
 				}
@@ -3849,7 +3902,7 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1208"reducer.lm"
+#line 1208 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Nret );
 				}
@@ -3857,7 +3910,7 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1212"reducer.lm"
+#line 1212 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Break );
 				}
@@ -3865,17 +3918,9 @@ lel_state_ref *_rhs1 = &((commit_reduce_union*)(_pt_cursor+1))->state_ref;
 	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_location *_loc0 = colm_find_location( prg, _tree_cursor->tree );
-#line 1216"reducer.lm"
+#line 1216 "reducer.lm"
 
 		_lhs->inlineItem = new InlineItem( _loc0, InlineItem::Nbreak );
-				}
-			if ( kid->tree->prod_num == 0 ) {
-	lel_block_interpret *_lhs = &((commit_reduce_union*)(lel+1))->block_interpret;
-	struct colm_parse_tree *_pt_cursor = lel->child;
-lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interpret;
-#line 1221"reducer.lm"
-
-		_lhs->inlineItem = _rhs0->inlineItem;
 				}
 			break;
 		}
@@ -3883,7 +3928,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 0 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2503"reducer.lm"
+#line 2503 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3891,7 +3936,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 1 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2509"reducer.lm"
+#line 2509 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3899,7 +3944,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 2 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2515"reducer.lm"
+#line 2515 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3907,7 +3952,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 3 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2521"reducer.lm"
+#line 2521 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3915,7 +3960,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 4 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2527"reducer.lm"
+#line 2527 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3923,7 +3968,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 5 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2533"reducer.lm"
+#line 2533 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3931,7 +3976,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 			if ( kid->tree->prod_num == 6 ) {
 	kid_t *_tree_cursor = kid->tree->child;
 	colm_data *_rhs0 = _tree_cursor->tree->tokdata;
-#line 2539"reducer.lm"
+#line 2539 "reducer.lm"
 
 		if ( includeDepth == 0 )
 			id->curItem->data.write( _rhs0->data, _rhs0->length );
@@ -3940,7 +3985,7 @@ lel_expr_interpret *_rhs0 = &((commit_reduce_union*)(_pt_cursor+1))->expr_interp
 		}
 		case 1198: {
 			if ( kid->tree->prod_num == 0 ) {
-#line 2545"reducer.lm"
+#line 2545 "reducer.lm"
 
 		if ( includeDepth == 0 ) {
 			id->curItem = id->curItem->next;
@@ -4008,7 +4053,7 @@ recurse:
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 2571"reducer.lm"
+#line 2571 "reducer.lm"
 
 		string machine( _rhs1->data, _rhs1->length );
 
@@ -4029,7 +4074,7 @@ recurse:
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_location *_loc1 = colm_find_location( prg, _tree_cursor->tree );
-#line 2586"reducer.lm"
+#line 2586 "reducer.lm"
 
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::Write;
@@ -4048,7 +4093,7 @@ recurse:
 	_tree_cursor = _tree_cursor->next;
 	_tree_cursor = _tree_cursor->next;
 	colm_location *_loc2 = colm_find_location( prg, _tree_cursor->tree );
-#line 2597"reducer.lm"
+#line 2597 "reducer.lm"
 
 		InputItem *inputItem = new InputItem;
 		inputItem->type = InputItem::EndSection;
@@ -4124,7 +4169,7 @@ recurse:
 	kid_t *_tree_cursor = kid->tree->child;
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs1 = _tree_cursor->tree->tokdata;
-#line 2622"reducer.lm"
+#line 2622 "reducer.lm"
 
 		sectionMachine = string( _rhs1->data, _rhs1->length );
 				}
@@ -4138,7 +4183,7 @@ recurse:
 	_tree_cursor = _tree_cursor->next;
 	colm_data *_rhs2 = _tree_cursor->tree->tokdata;
 	colm_location *_loc2 = colm_find_location( prg, _tree_cursor->tree );
-#line 2627"reducer.lm"
+#line 2627 "reducer.lm"
 
 		if ( sectionMachine.size() > 0 && sectionMachine == targetMachine ) {
 			IncItem *incItem = new IncItem;
@@ -4176,7 +4221,7 @@ struct reduction_info
 	unsigned char need_loc[1259];
 };
 
-struct reduction_info ri[4];
+static struct reduction_info ri[4];
 
 extern "C" void rlparse_object_init_need()
 {

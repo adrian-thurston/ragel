@@ -147,9 +147,9 @@ dnl write output files
 AC_OUTPUT([
 		Makefile
 		cases/Makefile
-		cases/ragel/Makefile
-		aapl/Makefile
-		colm/Makefile
+		cases/ragel.d/Makefile
+		cases/aapl.d/Makefile
+		cases/colm.d/Makefile
 ])
 
 echo "configuration of ragel test package complete"

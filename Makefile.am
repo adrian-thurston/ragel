@@ -1,4 +1,4 @@
-SUBDIRS = cases aapl colm
+SUBDIRS = cases
 
 noinst_SCRIPTS = runtests
 
