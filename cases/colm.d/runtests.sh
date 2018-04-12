@@ -312,7 +312,7 @@ function runtests()
 }
 
 rm -f $WORKING/*
-runtests | xargs -P 4 -n 1 bash
+runtests 
 
 #exit $EXIT;
 

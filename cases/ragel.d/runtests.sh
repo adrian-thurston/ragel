@@ -516,12 +516,6 @@ function run_translate()
 	fi
 }
 
-MF=working/run.mk
-echo working/* | xargs rm -Rf
-
-rm -f $MF
-echo "do: all" >> $MF
-
 go()
 {
 	for test_case; do
@@ -529,14 +523,5 @@ go()
 	done
 }
 
-echo -----------
-go "$@" | xargs -P 4 -n 1 bash
-
-echo ----  cases   ------
-find working -name '*.sh' -not -size 0 | wc -l
-
-echo ---- failures ------
-find working -name '*.diff' -not -size 0 | wc -l
-
-echo ---- warnings ------
-find working -name '*.log' -not -size 0 | wc -l
+echo working/* | xargs rm -Rf
+go "$@"

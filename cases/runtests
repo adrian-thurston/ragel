@@ -1,0 +1,30 @@
+#!/bin/bash
+
+DIRS="ragel.d pcre-ragel.d colm.d"
+WORKING="ragel.d/working pcre-ragel.d/working colm.d/working"
+
+for d in $DIRS; do
+	cd $d
+
+	if [ $d = ragel.d ]; then
+		./runtests -n -T0 --integral-tables any1.rl | xargs -P 4 -n 1 bash
+	elif [ $d = pcre-ragel.d ]; then
+		./runtests 'pcre-011.case' | xargs -P 4 -n 1 bash
+	elif [ $d = colm.d ]; then
+		./runtests ref1.lm | xargs -P 4 -n 1 bash
+	else
+		./runtests | xargs -P 4 -n 1 bash
+	fi
+	
+	cd ..
+done
+
+
+echo ----  cases   ------
+find $WORKING -name *.sh -not -size 0 | wc -l
+
+echo ---- failures ------
+find $WORKING -name *.diff -not -size 0 | wc -l
+
+#echo ---- warnings ------
+#find $WORKING -name *.log -not -size 0 | wc -l
