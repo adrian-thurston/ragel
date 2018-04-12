@@ -1,26 +1,27 @@
 #!/bin/bash
 
-. ../subject.sh
+. ../colm.d/subject.sh
 
 export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
 
-set -x
-
-make
-
 [ -d working ] || mkdir working
 
-cd 'case'
-
-for fn in *.rl; do
+for fn in case/*.rl; do
 
 	FA="--reduce-frontend --colm-frontend"
 	for frontend in $FA; do
 
 		exp=${fn%.rl}$frontend.exp
+		exp=${exp#case/}
 
 		out=${fn%.rl}$frontend.out
-		out=../working/${out#case}
+		out=../working/${out#case/}
+
+		diff=${fn%.rl}$frontend.diff
+		diff=../working/${diff#case/}
+
+		sh=${fn%.rl}$frontend.sh
+		sh=working/${sh#case/}
 
 #		lang=`echo $fn | awk -vFS=- '{ print $2 }'`
 #	
@@ -36,13 +37,14 @@ for fn in *.rl; do
 #			Z) lang=go;;
 #		esac
 
-		../rlparse $frontend $fn > $out
+		rm -f $sh
 
-		if ! diff -u $exp $out; then
-			exit;
-		fi
+		echo echo testing $fn $frontend >> $sh
+		echo cd case >> $sh
+		echo ../rlparse $frontend ${fn#case/} '>' $out >> $sh
+		echo diff -u $exp $out '>' $diff >> $sh
+
+		echo $sh
 	done
-
-
 done
 

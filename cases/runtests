@@ -7,10 +7,12 @@ read -d '' DIRS <<EOF
 	colm.d
 	rlhc.d
 	trans.d
+	rlparse.d
 EOF
 
 for D in $DIRS; do
 	cd $D
+	echo "---- $D ----"
 
 	ARGS=""
 	if [ $D = ragel.d ]; then
@@ -38,6 +40,7 @@ find $WORKING -name *.sh -not -size 0 | wc -l
 
 echo ---- failures ------
 find $WORKING -name *.diff -not -size 0 | wc -l
+find $WORKING -name *.diff -not -size 0 
 
 #echo ---- warnings ------
 #find $WORKING -name *.log -not -size 0 | wc -l
