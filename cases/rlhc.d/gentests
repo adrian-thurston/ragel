@@ -1,20 +1,29 @@
 #!/bin/bash
 
-. ../subject.sh
+. ../colm.d/subject.sh
 
 export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
 
-set -x
-
-make
-
 [ -d working ] || mkdir working
 
-for fn in 'case'/*.in; do
+echo working/* | xargs rm -f
+
+[ -z "$*" ] && set -- case/*.in
+
+for fn; do
 
 	exp=${fn%.in}.exp
+
 	out=${fn%.in}.out
 	out=working${out#case}
+
+	sh=${fn%.in}.sh
+	sh=working${sh#case}
+
+	diff=${fn%.in}.diff
+	diff=working${diff#case}
+
+	rm -f $sh
 
 	lang=`echo $fn | awk -vFS=- '{ print $2 }'`
 
@@ -30,11 +39,11 @@ for fn in 'case'/*.in; do
 		Z) lang=go;;
 	esac
 
-	./rlhc $out $fn $lang
+	echo echo executing $fn $lang >> $sh
+	echo ./rlhc $out $fn $lang >> $sh
+	echo diff $exp $out '>' $diff >> $sh
 
-	if ! diff $exp $out; then
-		exit;
-	fi
+	echo $sh
 
 done
 

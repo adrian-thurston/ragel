@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+
+. ../colm.d/subject.sh
+
+langs='asm crack c cs d go java julia ocaml'
+
+mkdir -p working
+
+echo working/* | xargs rm -f
+
+[ $# = 0 ] && set -- `find case -type f -and -not -name '*_*' | sort`
+
+for fn; do 
+	
+	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $fn`
+
+	for l in $langs; do
+
+		echo "$prohibit_languages" | grep -q "\<$l\>" && continue;
+		
+		out=${fn%.rl}_$l.out
+		out=working/${out#case/}
+
+		class=${fn%.rl}
+		class=${class#case/}_$l
+
+		exp=${fn%.rl}_$l.rl
+
+		diff=${fn%.rl}_$l.out
+		diff=working/${diff#case/}
+
+		sh=${fn%.rl}_$l.sh
+		sh=working/${sh#case/}
+
+		rm -f $sh
+
+		echo echo testing $l $fn >> $sh
+		echo ./trans $l $out $fn $class >> $sh
+		echo diff $exp $out '>' $diff >> $sh
+
+		echo $sh
+	done
+done
+

@@ -1,21 +1,28 @@
 #!/bin/bash
 
-DIRS="ragel.d pcre-ragel.d colm.d"
-WORKING="ragel.d/working pcre-ragel.d/working colm.d/working"
+DIRS="ragel.d pcre-ragel.d colm.d rlhc.d trans.d"
 
-for d in $DIRS; do
-	cd $d
+for D in $DIRS; do
+	cd $D
 
-	if [ $d = ragel.d ]; then
-		./gentests -n -T0 --integral-tables any1.rl | xargs -P 4 -n 1 bash
-	elif [ $d = pcre-ragel.d ]; then
-		./gentests 'pcre-011.case' | xargs -P 4 -n 1 bash
-	elif [ $d = colm.d ]; then
-		./gentests ref1.lm | xargs -P 4 -n 1 bash
-	else
-		./gentests | xargs -P 4 -n 1 bash
+	ARGS=""
+	if [ $D = ragel.d ]; then
+		ARGS=" -n -T0 --integral-tables -K any1.rl"
+	elif [ $D = pcre-ragel.d ]; then
+		ARGS="pcre-011.case"
+	elif [ $D = colm.d ]; then
+		ARGS="ref1.lm"
+	elif [ $D = rlhc.d ]; then
+		ARGS="case/zlen1_go.go-Z-T1--var-backend.in"
+	elif [ $D = trans.d ]; then
+		ARGS="case/scan4.rl"
 	fi
+
+	ARGS=""
+
+	./gentests $ARGS | xargs -n1 -P4 bash
 	
+	WORKING="$WORKING $D/working"
 	cd ..
 done
 
