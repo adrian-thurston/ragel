@@ -185,11 +185,9 @@ function runtests()
 
 		ROOT=${TST/.lm}
 		LM=$WORKING/$ROOT.lm
-		ARGS=$WORKING/$ROOT.args
-		IN=$WORKING/$ROOT.in
-		EXP=$WORKING/$ROOT.exp
 		HOST=$WORKING/$ROOT.host.cc
 		CALL=$WORKING/$ROOT.call.c
+		SH=$WORKING/$ROOT.sh
 
 		section LM 0 $TST $LM
 
@@ -214,32 +212,38 @@ function runtests()
 
 		COMP=`cat_section COMP 0 $TST`
 
+		echo echo testing $ROOT >> $SH
+		echo rm -f $DIFF >> $SH
+	
 		if test -f $HOST; then
 			PARSE=$WORKING/$ROOT.parse
 			IF=$WORKING/$ROOT.if
 
-			echo_cmd $COLM $COMP -c -o $PARSE.c -e $IF.h -x $IF.cc $LM
+			echo $COLM $COMP -c -o $PARSE.c -e $IF.h -x $IF.cc $LM >> $SH
 			if ! check_compilation $?; then
 				continue
 			fi
 
-			echo_cmd gcc -c $CPPFLAGS $LDFLAGS -o $PARSE.o $PARSE.c
-			echo_cmd g++ -I. $CPPFLAGS $LDFLAGS -o $WORKING/$ROOT \
-					$IF.cc $HOST $PARSE.o -lcolm
+			echo gcc -c $CPPFLAGS $LDFLAGS -o $PARSE.o $PARSE.c >> $SH
+			echo g++ -I. $CPPFLAGS $LDFLAGS -o $WORKING/$ROOT $IF.cc $HOST $PARSE.o -lcolm >> $SH
 
 			if ! check_compilation $?; then
 				continue
 			fi
 		else
 			# Compilation.
-			echo_cmd $COLM $COMP $COLM_ADDS $LM &> $LOG 
-			if ! check_compilation $?; then
-				continue
-			fi
+			echo $COLM $COMP $COLM_ADDS $LM '&>' $LOG >> $SH
+			#if ! check_compilation $?; then
+			#	continue
+			#fi
 		fi
 
 		Nth=0
 		while true; do
+			ARGS=$WORKING/$ROOT-$Nth.args
+			IN=$WORKING/$ROOT-$Nth.in
+			EXP=$WORKING/$ROOT-$Nth.exp
+
 			section EXP $Nth $TST $EXP
 
 			# Stop when we have no Nth expected output.
@@ -259,67 +263,56 @@ function runtests()
 				cmdargs=`cat $ARGS`
 			fi
 
-			echo -n "running test $TST ($Nth)... "
-
 			if [ '!' -f $IN ] && [ -f $ROOT.in ]; then
 				IN=$ROOT.in;
 			fi
 
-			if [ "$verbose" = true ]; then
-				if [ -f $IN ]; then
-					echo "${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG"
-				else
-					echo "${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG"
-				fi
-			fi
-
 			# Execution
 			if [ -f $IN ]; then
-				${VALGRIND}./$BIN $cmdargs < $IN > $OUT 2>> $LOG
+				echo ${VALGRIND}./$BIN $cmdargs '<' $IN '>' $OUT '2>>' $LOG >> $SH
 			else
-				${VALGRIND}./$BIN $cmdargs > $OUT 2>>$LOG
+				echo ${VALGRIND}./$BIN $cmdargs '>' $OUT '2>>' $LOG >> $SH
 			fi
 
-			e=$?
-			if [ $e != "$EXIT" ]; then
-				echo "FAILED: exit value error: got: $e expected: $EXIT"
-				ERRORS=$(( ERRORS + 1 ))
-				Nth=$((Nth + 1))
-				continue
+			cat <<-EOF >> $SH
+			e=\$?
+			if [ \$e != "$EXIT" ]; then
+				echo "FAILED: exit value error: got: \$e expected: $EXIT"
 			fi
-
+			EOF
 
 			# Diff of output
-			diff -u $EXP $OUT > $DIFF
-			if [ $? != 0 ]; then
-				echo "FAILED: output differs from expected output"
-				ERRORS=$(( ERRORS + 1 ))
-				Nth=$((Nth + 1))
-				if [ "$diff" = true ]; then
-					echo
-					cat $DIFF
-					echo
-				fi
-				continue
-			fi
+			echo diff -u $EXP $OUT '>' $DIFF >> $SH
+			#if [ $? != 0 ]; then
+			#	echo "FAILED: output differs from expected output"
+			#	ERRORS=$(( ERRORS + 1 ))
+			#	Nth=$((Nth + 1))
+			#	if [ "$diff" = true ]; then
+			#		echo
+			#		cat $DIFF
+			#		echo
+			#	fi
+			#	continue
+			#fi
 
-			echo ok
+			#echo ok
 			Nth=$((Nth + 1))
+
 		done
+		echo $SH
 	done
 
-	if [ $ERRORS != 0 ]; then
-		[ $ERRORS != 1 ] && plural="s";
-		echo
-		echo "TESTING FAILED: $ERRORS failure$plural"
-		echo
-		EXIT=1
-	fi
+#	if [ $ERRORS != 0 ]; then
+#		[ $ERRORS != 1 ] && plural="s";
+#		echo
+#		echo "TESTING FAILED: $ERRORS failure$plural"
+#		echo
+#		EXIT=1
+#	fi
 }
 
-[ -d $workingdir ] || mkdir $workingdir
+rm -f $WORKING/*
+runtests | xargs -P 4 -n 1 bash
 
-runtests;
-
-exit $EXIT;
+#exit $EXIT;
 
