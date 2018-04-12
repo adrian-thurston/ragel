@@ -1,9 +1,5 @@
 /Makefile.in
 /Makefile
-/cur-tests
-/runtests.log
-/runtests.trs
-/test-suite.log
 
 /aclocal.m4
 /autom4te.cache/
@@ -20,7 +16,7 @@
 
 /working
 
-/runtests
+/gentests
 
 /.deps
 /trans

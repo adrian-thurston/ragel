@@ -7,14 +7,13 @@
 /config.log
 /config.status
 /configure
-/runtests
+/gentests
 
 /install-sh
 /missing
 
 /Makefile
 /Makefile.in
-/runtests
 /subject.mk
 /subject.pl
 /subject.sh

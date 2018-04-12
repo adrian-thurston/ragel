@@ -21,13 +21,13 @@
 COLM = @COLM_BIN@
 RAGEL_LM = @RAGEL_LM@
 
-TESTS = runtests
+TESTS = gentests
 
-noinst_SCRIPTS = runtests subject.mk subject.sh
+noinst_SCRIPTS = gentests subject.mk subject.sh
 noinst_PROGRAMS = trans
 
 EXTRA_DIST = \
-	trans.lm trans-c.lm trans-asm.lm runtests.sh \
+	trans.lm trans-c.lm trans-asm.lm gentests.sh \
 	atoi1.rl clang2.rl cond7.rl element3.rl erract8.rl forder3.rl java1.rl \
 	range.rl scan3.rl xml.rl atoi2.rl clang3.rl cppscan1.rl eofact.rl \
 	erract9.rl gotocallret1.rl java2.rl recdescent1.rl scan4.rl atoi3.rl \
@@ -65,7 +65,7 @@ trans_LDFLAGS = @COLM_LDFLAGS@
 trans.c: trans.lm $(TRANS_DEPS)
 	$(COLM) -c -b trans_object -I$(RAGEL_LM) -o $@ $<
 
-runtests: runtests.sh Makefile
+gentests: gentests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
 
 subject.mk: subject.mk.in Makefile

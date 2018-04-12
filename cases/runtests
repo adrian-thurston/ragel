@@ -7,13 +7,13 @@ for d in $DIRS; do
 	cd $d
 
 	if [ $d = ragel.d ]; then
-		./runtests -n -T0 --integral-tables any1.rl | xargs -P 4 -n 1 bash
+		./gentests -n -T0 --integral-tables any1.rl | xargs -P 4 -n 1 bash
 	elif [ $d = pcre-ragel.d ]; then
-		./runtests 'pcre-011.case' | xargs -P 4 -n 1 bash
+		./gentests 'pcre-011.case' | xargs -P 4 -n 1 bash
 	elif [ $d = colm.d ]; then
-		./runtests ref1.lm | xargs -P 4 -n 1 bash
+		./gentests ref1.lm | xargs -P 4 -n 1 bash
 	else
-		./runtests | xargs -P 4 -n 1 bash
+		./gentests | xargs -P 4 -n 1 bash
 	fi
 	
 	cd ..
