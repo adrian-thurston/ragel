@@ -26,12 +26,18 @@ TESTS="
 	test_vector
 "
 
-for t in $TESTS; do
-	./$t > $t.out
+mkdir -p working
 
-	if diff $t.out $t.exp >/dev/null; then
-		echo $t test passed
-	else
-		echo $t test FAILED
-	fi
+rm -f working/*
+
+[ $# = 0 ] && set -- $TESTS
+
+for t; do
+	rm -f working/$t.sh
+
+	echo echo testing $t >> working/$t.sh
+	echo ./$t '>' working/$t.out >> working/$t.sh
+	echo diff working/$t.out $t.exp '>' working/$t.diff >> working/$t.sh
+
+	echo working/$t.sh
 done

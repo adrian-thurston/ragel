@@ -39,4 +39,5 @@
 /test_string
 /test_svector
 /test_vector
-/runtests
+/gentests
+/working

@@ -1,6 +1,13 @@
 #!/bin/bash
 
-DIRS="ragel.d pcre-ragel.d colm.d rlhc.d trans.d"
+read -d '' DIRS <<EOF
+	aapl.d
+	ragel.d
+	pcre-ragel.d
+	colm.d
+	rlhc.d
+	trans.d
+EOF
 
 for D in $DIRS; do
 	cd $D
@@ -16,16 +23,15 @@ for D in $DIRS; do
 		ARGS="case/zlen1_go.go-Z-T1--var-backend.in"
 	elif [ $D = trans.d ]; then
 		ARGS="case/scan4.rl"
+	elif [ $D = aapl.d ]; then
+		ARGS="test_string"
 	fi
-
-	ARGS=""
 
 	./gentests $ARGS | xargs -n1 -P4 bash
 	
 	WORKING="$WORKING $D/working"
 	cd ..
 done
-
 
 echo ----  cases   ------
 find $WORKING -name *.sh -not -size 0 | wc -l

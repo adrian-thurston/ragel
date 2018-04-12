@@ -19,7 +19,7 @@ noinst_PROGRAMS = \
 	test_avlikeyless test_compare test_string \
 	test_rope
 
-noinst_SCRIPTS = runtests
+noinst_SCRIPTS = gentests
 
 stress_avltree_SOURCES = stress_avltree.cpp util.cpp
 stress_avliter_SOURCES = stress_avliter.cpp util.cpp
@@ -58,7 +58,7 @@ test_compare_SOURCES = test_compare.cpp util.cpp
 test_string_SOURCES = test_string.cpp util.cpp
 test_rope_SOURCES = test_rope.cpp util.cpp
 
-runtests: runtests.sh Makefile
+gentests: gentests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
 
 #*************************************
