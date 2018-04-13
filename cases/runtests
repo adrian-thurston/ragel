@@ -8,6 +8,7 @@ read -d '' DIRS <<EOF
 	rlhc.d
 	trans.d
 	rlparse.d
+	pcre-colm.d
 EOF
 
 for D in $DIRS; do
@@ -28,6 +29,8 @@ for D in $DIRS; do
 	elif [ $D = aapl.d ]; then
 		ARGS="test_string"
 	fi
+
+	ARGS=""
 
 	./gentests $ARGS | xargs -n1 -P4 bash
 	
