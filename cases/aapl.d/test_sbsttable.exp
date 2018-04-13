@@ -6,11 +6,11 @@
 (2, 2) maps to 10
 KeyStruct(0)
 KeyStruct(KeyStruct &)
-ins res = 0xd1dcf8
+ins res = 1
 ~KeyStruct = {0}
 KeyStruct(1)
 KeyStruct(KeyStruct &)
-ins res = 0xd1dd00
+ins res = 1
 ~KeyStruct = {1}
 ~KeyStruct = {0}
 ~KeyStruct = {1}

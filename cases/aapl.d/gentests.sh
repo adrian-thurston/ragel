@@ -10,7 +10,6 @@ TESTS="
 	test_bstmap
 	test_bstset
 	test_bsttable
-	test_bubblesort
 	test_compare
 	test_dlistval
 	test_doublelist
