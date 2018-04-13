@@ -11,39 +11,31 @@ read -d '' DIRS <<EOF
 	pcre-colm.d
 EOF
 
+HERE=$(basename $(pwd))
+if [ "${HERE%.d}" != "$HERE" ]; then
+	# In a test directory. Pass the arguments to the local gentests.
+	DIRS=.
+	ARGS="$@"
+else
+	# Assuming called from the parent cases directory. use the args as the list
+	# of dirs to test in.
+	if [ $# == 0 ]; then
+		DIRS="*.d"
+	else
+		DIRS="$@"
+	fi
+fi
+
 for D in $DIRS; do
 	cd $D
-	echo "---- $D ----"
-
-	ARGS=""
-	if [ $D = ragel.d ]; then
-		ARGS=" -n -T0 --integral-tables -K any1.rl"
-	elif [ $D = pcre-ragel.d ]; then
-		ARGS="pcre-011.case"
-	elif [ $D = colm.d ]; then
-		ARGS="ref1.lm"
-	elif [ $D = rlhc.d ]; then
-		ARGS="case/zlen1_go.go-Z-T1--var-backend.in"
-	elif [ $D = trans.d ]; then
-		ARGS="case/scan4.rl"
-	elif [ $D = aapl.d ]; then
-		ARGS="test_string"
-	fi
-
-	ARGS=""
-
+	echo ------- $D
 	./gentests $ARGS | xargs -n1 -P4 bash
-	
 	WORKING="$WORKING $D/working"
-	cd ..
+	cd $OLDPWD
 done
 
 echo ----  cases   ------
-find $WORKING -name *.sh -not -size 0 | wc -l
+find $WORKING -name '*.sh' -not -size 0 | wc -l
 
 echo ---- failures ------
-find $WORKING -name *.diff -not -size 0 | wc -l
-find $WORKING -name *.diff -not -size 0 
-
-#echo ---- warnings ------
-#find $WORKING -name *.log -not -size 0 | wc -l
+find $WORKING -name '*.diff' -not -size 0 | wc -l
