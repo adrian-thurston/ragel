@@ -332,7 +332,7 @@ function run_test()
 
 		cat >> $_sh <<-EOF
 		$compiler $flags $out_args $wk/$_code_src \
-				$scode $libs >$wk/$_log 2>$wk/$_log
+				$scode $libs >>$wk/$_log 2>>$wk/$_log
 		EOF
 	fi
 
@@ -343,11 +343,11 @@ function run_test()
 		fi		
 
 		cat >> $_sh <<-EOF
-		$exec_cmd 2> $wk/$_log > $wk/$_output
+		$exec_cmd 2>> $wk/$_log >> $wk/$_output
 		EOF
 
 		cat >> $_sh <<-EOF
-		diff --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
+		diff -u --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
 		rm -f $wk/$_lroot.ri $wk/$_code_src $wk/$_binary $wk/$_lroot.class $wk/$_output 
 		EOF
 
