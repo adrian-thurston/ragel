@@ -948,40 +948,32 @@ void Binary::LOCATE_TRANS()
 		"\n";
 }
 
-void Binary::LOCATE_COND()
+void Binary::COND_EXEC( std::string expr )
 {
 	out <<
-		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
-		"	_klen = " << CAST( "int" ) << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	switch ( " << expr << " ) {\n"
 		"\n";
 
-	out <<
-		"	_cpc = 0;\n";
-	
-	if ( red->condSpaceList.length() > 0 ) {
-		out <<
-			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
-			"\n";
-
-		for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
-			GenCondSpace *condSpace = csi;
-			out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
-			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-				out << TABS(2) << "if ( ";
-				CONDITION( out, *csi );
-				Size condValOffset = (1 << csi.pos());
-				out << " ) _cpc += " << condValOffset << ";\n";
-			}
-
-			out << 
-				"	" << CEND() << "}\n";
+	for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
+		GenCondSpace *condSpace = csi;
+		out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			out << TABS(2) << "if ( ";
+			CONDITION( out, *csi );
+			Size condValOffset = (1 << csi.pos());
+			out << " ) _cpc += " << condValOffset << ";\n";
 		}
 
 		out << 
-			"	}\n";
+			"	" << CEND() << "}\n";
 	}
-	
+
+	out << 
+		"	}\n";
+}
+
+void Binary::COND_BIN_SEARCH( std::string ok, std::string error )
+{
 	out <<
 		"	{\n"
 		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << ";\n"
@@ -999,14 +991,33 @@ void Binary::LOCATE_COND()
 		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_cond += " << CAST( UINT() ) << "(_mid - _ckeys);\n"
-		"				goto _match_cond;\n"
+		"				" << ok << "\n"
 		"			}\n"
 		"		}\n"
 		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"		goto _again;\n"
+		"		" << error << "\n"
 		"	}\n"
 	;
+}
+
+void Binary::LOCATE_COND()
+{
+	out <<
+		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
+		"	_klen = " << CAST( "int" ) << ARR_REF( transLengths ) << "[_trans];\n"
+		"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+		"\n";
+
+	out <<
+		"	_cpc = 0;\n";
+	
+	if ( red->condSpaceList.length() > 0 )
+		COND_EXEC( ARR_REF( transCondSpaces ) + "[_trans]" );
+	
+	COND_BIN_SEARCH(
+			"_cond += " + CAST( UINT() ) + "(_mid - _ckeys); goto _match_cond;\n",
+			"goto _again;\n"
+	);
 }
 
 void Binary::GOTO( ostream &ret, int gotoDest, bool inFinish )

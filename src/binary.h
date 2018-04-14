@@ -107,6 +107,9 @@ protected:
 
 	void setKeyType();
 
+	void COND_EXEC( std::string expr );
+	void COND_BIN_SEARCH( std::string ok, std::string error );
+
 	void LOCATE_TRANS();
 	void LOCATE_COND();
 

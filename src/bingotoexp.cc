@@ -72,6 +72,7 @@ void BinaryExpGoto::tableDataPass()
 	taToStateActions();
 	taFromStateActions();
 	taEofActions();
+	taEofConds();
 
 	taEofTransDirect();
 	taEofTransIndexed();
@@ -292,6 +293,8 @@ void BinaryExpGoto::writeData()
 	if ( redFsm->anyEofActions() )
 		taEofActions();
 
+	taEofConds();
+
 	if ( redFsm->anyEofTrans() ) {
 		taEofTransIndexed();
 		taEofTransDirect();
@@ -463,6 +466,26 @@ void BinaryExpGoto::writeExec()
 				"		goto _match_cond;\n"
 				"	}\n";
 		}
+
+		out <<
+			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
+			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
+						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
+			"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+			"		_cpc = 0;\n"
+		;
+
+		if ( red->condSpaceList.length() > 0 )
+			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
+
+		COND_BIN_SEARCH( "goto _ok;", "goto _out;" );
+
+		out << 
+			"		_ok: {}\n"
+			"	}\n"
+		;
+
+		outLabelUsed = true;
 
 		if ( redFsm->anyEofActions() ) {
 			out <<
