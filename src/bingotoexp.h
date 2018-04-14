@@ -34,7 +34,6 @@ class BinaryExpGoto : public Binary
 public:
 	BinaryExpGoto( const CodeGenArgs &args );
 
-	void calcIndexSize();
 	void tableDataPass();
 
 	virtual void genAnalysis();

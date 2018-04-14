@@ -241,7 +241,6 @@ protected:
 	bool outLabelUsed;
 	bool testEofUsed;
 	bool againLabelUsed;
-	bool useIndicies;
 	bool matchCondLabelUsed;
 
 	void VALUE( string type, string name, string value );

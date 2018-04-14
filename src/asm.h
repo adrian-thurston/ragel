@@ -157,7 +157,6 @@ protected:
 	bool outLabelUsed;
 	bool testEofUsed;
 	bool againLabelUsed;
-	bool useIndicies;
 	long nextLmSwitchLabel;
 	bool stackCS;
 
@@ -180,8 +179,6 @@ protected:
 			int targState, bool inFinish, bool csForced );
 
 public:
-	/* Determine if we should use indicies. */
-	virtual void calcIndexSize() {}
 
 	virtual string NULL_ITEM();
 	virtual string POINTER();

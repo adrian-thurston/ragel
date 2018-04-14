@@ -32,25 +32,6 @@ FlatLoopVar::FlatLoopVar( const CodeGenArgs &args )
 	FlatVar( args )
 {}
 
-/* Determine if we should use indicies or not. */
-void FlatLoopVar::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-
-	///* If using indicies reduces the size, use them. */
-	//useIndicies = sizeWithInds < sizeWithoutInds;
-	useIndicies = false;
-}
-
 
 void FlatLoopVar::tableDataPass()
 {
@@ -211,52 +192,6 @@ std::ostream &FlatLoopVar::ACTION_SWITCH()
 
 void FlatLoopVar::writeData()
 {
-#if 0
-	/* If there are any transtion functions then output the array. If there
-	 * are none, don't bother emitting an empty array that won't be used. */
-	if ( redFsm->anyActions() )
-		taActions();
-
-	taKeyOffsets();
-	taKeys();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-
-	if ( useIndicies ) {
-		taIndicies();
-		taTransCondSpacesWi();
-		taTransOffsetsWi();
-		taTransLengthsWi();
-	}
-	else {
-		taTransCondSpaces();
-		taTransOffsets();
-		taTransLengths();
-	}
-
-	taCondKeys();
-
-	taCondTargs();
-	taCondActions();
-
-	if ( redFsm->anyToStateActions() )
-		taToStateActions();
-
-	if ( redFsm->anyFromStateActions() )
-		taFromStateActions();
-
-	if ( redFsm->anyEofActions() )
-		taEofActions();
-
-	if ( redFsm->anyEofTrans() ) {
-		taEofTransIndexed();
-		taEofTransDirect();
-	}
-
-	STATE_IDS();
-#endif
-
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
 	if ( redFsm->anyActions() )

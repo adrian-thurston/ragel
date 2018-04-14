@@ -33,23 +33,6 @@ FlatExpVar::FlatExpVar( const CodeGenArgs &args )
 {
 }
 
-/* Determine if we should use indicies or not. */
-void FlatExpVar::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-//
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-//
-	useIndicies = false;
-}
-
 void FlatExpVar::tableDataPass()
 {
 	taKeys();

@@ -33,23 +33,6 @@ BinaryExpVar::BinaryExpVar( const CodeGenArgs &args )
 {
 }
 
-/* Determine if we should use indicies or not. */
-void BinaryExpVar::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-//
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-//
-	useIndicies = false;
-}
-
 void BinaryExpVar::tableDataPass()
 {
 	taKeyOffsets();
@@ -110,9 +93,6 @@ void BinaryExpVar::genAnalysis()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
-
-	/* Determine if we should use indicies. */
-	calcIndexSize();
 
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );
@@ -267,17 +247,9 @@ void BinaryExpVar::writeData()
 	taRangeLens();
 	taIndexOffsets();
 
-	if ( useIndicies ) {
-		taIndicies();
-		taTransCondSpacesWi();
-		taTransOffsetsWi();
-		taTransLengthsWi();
-	}
-	else {
-		taTransCondSpaces();
-		taTransOffsets();
-		taTransLengths();
-	}
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
 
 	taCondKeys();
 	taCondTargs();
@@ -374,10 +346,9 @@ void BinaryExpVar::writeExec()
 				"	{\n";
 
 			if ( redFsm->anyEofTrans() ) {
-				TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"	if ( " << ARR_REF( eofTransDirect ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTransDirect ) << "[" << vCS() << "] - 1;\n"
 					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 					"		_have = 1;\n"
 					"	}\n";
@@ -470,9 +441,6 @@ void BinaryExpVar::writeExec()
 	NFA_PUSH();
 
 	LOCATE_TRANS();
-
-	if ( useIndicies )
-		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
 
 	LOCATE_COND();
 

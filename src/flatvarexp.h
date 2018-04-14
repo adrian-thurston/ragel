@@ -36,7 +36,6 @@ class FlatExpVar
 public:
 	FlatExpVar( const CodeGenArgs &args );
 
-	void calcIndexSize();
 	void tableDataPass();
 
 	virtual void genAnalysis();

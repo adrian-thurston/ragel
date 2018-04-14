@@ -32,26 +32,6 @@ BinaryLoopGoto::BinaryLoopGoto( const CodeGenArgs &args )
 	Binary( args )
 {}
 
-/* Determine if we should use indicies or not. */
-void BinaryLoopGoto::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-
-	///* If using indicies reduces the size, use them. */
-	//useIndicies = sizeWithInds < sizeWithoutInds;
-	useIndicies = false;
-}
-
-
 void BinaryLoopGoto::tableDataPass()
 {
 	taActions();
@@ -113,9 +93,6 @@ void BinaryLoopGoto::genAnalysis()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
-
-	/* Determine if we should use indicies. */
-	calcIndexSize();
 
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );
@@ -250,17 +227,9 @@ void BinaryLoopGoto::writeData()
 	taRangeLens();
 	taIndexOffsets();
 
-	if ( useIndicies ) {
-		taIndicies();
-		taTransCondSpacesWi();
-		taTransOffsetsWi();
-		taTransLengthsWi();
-	}
-	else {
-		taTransCondSpaces();
-		taTransOffsets();
-		taTransLengths();
-	}
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
 
 	taCondKeys();
 
@@ -382,9 +351,6 @@ void BinaryLoopGoto::writeExec()
 	out << "}\n";
 	out << LABEL( "_match" ) << " {\n";
 
-	if ( useIndicies )
-		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
-
 	LOCATE_COND();
 
 	out << "}\n";
@@ -478,10 +444,9 @@ void BinaryLoopGoto::writeExec()
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
-			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"	if ( " << ARR_REF( eofTransDirect ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << CAST(UINT()) << ARR_REF( eofTransDirect ) << "[" << vCS() << "] - 1;\n"
 				"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";

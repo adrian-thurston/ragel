@@ -33,23 +33,6 @@ BinaryExpGoto::BinaryExpGoto( const CodeGenArgs &args )
 {
 }
 
-/* Determine if we should use indicies or not. */
-void BinaryExpGoto::calcIndexSize()
-{
-//	long long sizeWithInds =
-//		indicies.size() +
-//		transCondSpacesWi.size() +
-//		transOffsetsWi.size() +
-//		transLengthsWi.size();
-//
-//	long long sizeWithoutInds =
-//		transCondSpaces.size() +
-//		transOffsets.size() +
-//		transLengths.size();
-
-	useIndicies = false;
-}
-
 void BinaryExpGoto::tableDataPass()
 {
 	taKeyOffsets();
@@ -110,9 +93,6 @@ void BinaryExpGoto::genAnalysis()
 	/* Run the analysis pass over the table data. */
 	setTableState( TableArray::AnalyzePass );
 	tableDataPass();
-
-	/* Determine if we should use indicies. */
-	calcIndexSize();
 
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );
@@ -268,17 +248,9 @@ void BinaryExpGoto::writeData()
 	taRangeLens();
 	taIndexOffsets();
 
-	if ( useIndicies ) {
-		taIndicies();
-		taTransCondSpacesWi();
-		taTransOffsetsWi();
-		taTransLengthsWi();
-	}
-	else {
-		taTransCondSpaces();
-		taTransOffsets();
-		taTransLengths();
-	}
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
 
 	taCondKeys();
 	taCondTargs();
@@ -377,9 +349,6 @@ void BinaryExpGoto::writeExec()
 	out << "}\n";
 	out << LABEL( "_match" ) << " {\n";
 
-	if ( useIndicies )
-		out << "	_trans = " << ARR_REF( indicies ) << "[_trans];\n";
-
 	LOCATE_COND();
 
 	out << "}\n";
@@ -458,10 +427,9 @@ void BinaryExpGoto::writeExec()
 			"	{\n";
 
 		if ( redFsm->anyEofTrans() ) {
-			TableArray &eofTrans = useIndicies ? eofTransIndexed : eofTransDirect;
 			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"	if ( " << ARR_REF( eofTransDirect ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTransDirect ) << "[" << vCS() << "] - 1;\n"
 				"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";
