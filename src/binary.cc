@@ -972,13 +972,13 @@ void Binary::COND_EXEC( std::string expr )
 		"	}\n";
 }
 
-void Binary::COND_BIN_SEARCH( std::string ok, std::string error )
+void Binary::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
 {
 	out <<
 		"	{\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
 		"		_lower = _ckeys;\n"
 		"		_upper = _ckeys + _klen - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"
@@ -986,9 +986,9 @@ void Binary::COND_BIN_SEARCH( std::string ok, std::string error )
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < " << CAST("int") << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+		"			if ( _cpc < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				" << ok << "\n"
@@ -1015,6 +1015,7 @@ void Binary::LOCATE_COND()
 		COND_EXEC( ARR_REF( transCondSpaces ) + "[_trans]" );
 	
 	COND_BIN_SEARCH(
+			condKeys,
 			"_cond += " + CAST( UINT() ) + "(_mid - _ckeys); goto _match_cond;\n",
 			"goto _again;\n"
 	);

@@ -478,7 +478,7 @@ void BinaryExpGoto::writeExec()
 		if ( red->condSpaceList.length() > 0 )
 			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
 
-		COND_BIN_SEARCH( "goto _ok;", "goto _out;" );
+		COND_BIN_SEARCH( eofCondKeys, "goto _ok;", "goto _out;" );
 
 		out << 
 			"		_ok: {}\n"
