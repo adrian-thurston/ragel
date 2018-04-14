@@ -276,6 +276,34 @@ void BinaryVar::LOCATE_TRANS()
 		"\n";
 }
 
+void BinaryVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
+{
+	out <<
+		"	{\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
+		"		_lower = _ckeys;\n"
+		"		_upper = _ckeys + _klen - 1;\n"
+		"		while ( _have == 0 && _lower <= _upper ) {\n"
+		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+		"			if ( _cpc < " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"				_upper = _mid - 1;\n"
+		"			else if ( _cpc > " << CAST("int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"				_lower = _mid + 1;\n"
+		"			else {\n"
+		"				" << ok << 
+		"				_have = 1;\n"
+		"			}\n"
+		"		}\n"
+		"		if ( _have == 0 ) {\n"
+		"			" << vCS() << " = " << ERROR_STATE() << ";\n"
+		"			_cont = 0;\n"
+		"		}\n"
+		"	}\n"
+		;
+}
+
 void BinaryVar::LOCATE_COND()
 {
 	out <<
@@ -288,53 +316,14 @@ void BinaryVar::LOCATE_COND()
 	out <<
 		"	_cpc = 0;\n";
 
-	if ( red->condSpaceList.length() > 0 ) {
-		out <<
-			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
-			"\n";
+	if ( red->condSpaceList.length() > 0 )
+		COND_EXEC( ARR_REF( transCondSpaces ) + "[_trans]" );
 
-		for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
-			GenCondSpace *condSpace = csi;
-			out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
-			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-				out << TABS(2) << "if ( ";
-				CONDITION( out, *csi );
-				Size condValOffset = (1 << csi.pos());
-				out << " ) _cpc += " << condValOffset << ";\n";
-			}
-
-			out << 
-				"	" << CEND() << "}\n";
-		}
-
-		out << 
-			"	}\n";
-	}
-	
-	out <<
-		"	{\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << ";\n"
-		"		_lower = _ckeys;\n"
-		"		_upper = _ckeys + _klen - 1;\n"
-		"		while ( _have == 0 && _lower <= _upper ) {\n"
-		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < " << CAST( "int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > " << CAST("int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
-		"				_lower = _mid + 1;\n"
-		"			else {\n"
-		"				_cond += " << CAST( UINT() ) << "(_mid - _ckeys);\n"
-		"				_have = 1;\n"
-		"			}\n"
-		"		}\n"
-		"		if ( _have == 0 ) {\n"
-		"			" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"			_cont = 0;\n"
-		"		}\n"
-		"	}\n"
-	;
+	COND_BIN_SEARCH( condKeys,
+			"_cond += " + CAST( UINT() ) + "(_mid - _ckeys);\n",
+			""
+	);
+			
 	outLabelUsed = true;
 }
 

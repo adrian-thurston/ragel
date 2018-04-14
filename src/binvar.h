@@ -34,6 +34,8 @@ struct BinaryVar
 		Binary( args )
 	{}
 
+	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
+
 	void LOCATE_TRANS();
 	void LOCATE_COND();
 
