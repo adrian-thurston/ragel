@@ -56,9 +56,7 @@ void BinaryExpVar::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 	taEofConds();
-
 	taEofTransDirect();
-	taEofTransIndexed();
 
 	taKeys();
 	taCondKeys();
@@ -266,10 +264,8 @@ void BinaryExpVar::writeData()
 
 	taEofConds();
 
-	if ( redFsm->anyEofTrans() ) {
-		taEofTransIndexed();
+	if ( redFsm->anyEofTrans() )
 		taEofTransDirect();
-	}
 
 	taNfaTargs();
 	taNfaOffsets();

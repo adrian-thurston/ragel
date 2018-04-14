@@ -56,9 +56,7 @@ void BinaryLoopGoto::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 	taEofConds();
-
 	taEofTransDirect();
-	taEofTransIndexed();
 
 	taKeys();
 	taCondKeys();
@@ -247,10 +245,8 @@ void BinaryLoopGoto::writeData()
 
 	taEofConds();
 
-	if ( redFsm->anyEofTrans() ) {
-		taEofTransIndexed();
+	if ( redFsm->anyEofTrans() )
 		taEofTransDirect();
-	}
 
 	taNfaTargs();
 	taNfaOffsets();

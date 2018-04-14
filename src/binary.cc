@@ -47,7 +47,6 @@ Binary::Binary( const CodeGenArgs &args )
 	fromStateActions(   "from_state_actions",    *this ),
 	eofActions(         "eof_actions",           *this ),
 	eofTransDirect(     "eof_trans_direct",      *this ),
-	eofTransIndexed(    "eof_trans_indexed",     *this ),
 	eofCondSpaces(      "eof_cond_spaces",       *this ),
 	eofCondKeyOffs(     "eof_cond_key_offs",     *this ),
 	eofCondKeyLens(     "eof_cond_key_lens",     *this ),
@@ -246,28 +245,6 @@ void Binary::taEofTransDirect()
 	}
 
 	eofTransDirect.finish();
-}
-
-void Binary::taEofTransIndexed()
-{
-	/* Transitions must be written ordered by their id. */
-	long t = 0, *transPos = new long[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
-		transPos[trans->id] = t++;
-
-	eofTransIndexed.start();
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		long trans = 0;
-		if ( st->eofTrans != 0 )
-			trans = transPos[st->eofTrans->id] + 1;
-
-		eofTransIndexed.value( trans );
-	}
-
-	eofTransIndexed.finish();
-
-	delete[] transPos;
 }
 
 void Binary::taKeys()
