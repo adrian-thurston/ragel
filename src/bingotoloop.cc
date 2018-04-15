@@ -56,7 +56,7 @@ void BinaryLoopGoto::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 	taEofConds();
-	taEofTransDirect();
+	taEofTrans();
 
 	taKeys();
 	taCondKeys();
@@ -246,7 +246,7 @@ void BinaryLoopGoto::writeData()
 	taEofConds();
 
 	if ( redFsm->anyEofTrans() )
-		taEofTransDirect();
+		taEofTrans();
 
 	taNfaTargs();
 	taNfaOffsets();
@@ -391,8 +391,6 @@ void BinaryLoopGoto::writeExec()
 		out << "\n";
 	}
 
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 	out << "}\n";
 	out << LABEL( "_again" ) << " {\n";
 
@@ -441,8 +439,8 @@ void BinaryLoopGoto::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ARR_REF( eofTransDirect ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST(UINT()) << ARR_REF( eofTransDirect ) << "[" << vCS() << "] - 1;\n"
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 				"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n"
 				"		goto _match_cond;\n"
 				"	}\n";

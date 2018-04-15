@@ -46,7 +46,7 @@ Binary::Binary( const CodeGenArgs &args )
 	toStateActions(     "to_state_actions",      *this ),
 	fromStateActions(   "from_state_actions",    *this ),
 	eofActions(         "eof_actions",           *this ),
-	eofTransDirect(     "eof_trans_direct",      *this ),
+	eofTrans(           "eof_trans",             *this ),
 	eofCondSpaces(      "eof_cond_spaces",       *this ),
 	eofCondKeyOffs(     "eof_cond_key_offs",     *this ),
 	eofCondKeyLens(     "eof_cond_key_lens",     *this ),
@@ -221,9 +221,9 @@ void Binary::taEofConds()
 	eofCondKeys.finish();
 }
 
-void Binary::taEofTransDirect()
+void Binary::taEofTrans()
 {
-	eofTransDirect.start();
+	eofTrans.start();
 
 	/* Need to compute transition positions. */
 	int totalTrans = 0;
@@ -241,10 +241,10 @@ void Binary::taEofTransDirect()
 			totalTrans += 1;
 		}
 
-		eofTransDirect.value( trans );
+		eofTrans.value( trans );
 	}
 
-	eofTransDirect.finish();
+	eofTrans.finish();
 }
 
 void Binary::taKeys()

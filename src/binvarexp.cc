@@ -56,7 +56,7 @@ void BinaryExpVar::tableDataPass()
 	taFromStateActions();
 	taEofActions();
 	taEofConds();
-	taEofTransDirect();
+	taEofTrans();
 
 	taKeys();
 	taCondKeys();
@@ -265,7 +265,7 @@ void BinaryExpVar::writeData()
 	taEofConds();
 
 	if ( redFsm->anyEofTrans() )
-		taEofTransDirect();
+		taEofTrans();
 
 	taNfaTargs();
 	taNfaOffsets();
@@ -343,8 +343,8 @@ void BinaryExpVar::writeExec()
 
 			if ( redFsm->anyEofTrans() ) {
 				out <<
-					"	if ( " << ARR_REF( eofTransDirect ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTransDirect ) << "[" << vCS() << "] - 1;\n"
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
 					"		_have = 1;\n"
 					"	}\n";
