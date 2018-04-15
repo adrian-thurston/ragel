@@ -34,42 +34,41 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryLoopVar
+class BinVarLoop
 	: public BinaryVar
 {
 public:
-	BinaryLoopVar( const CodeGenArgs &args );
-
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
+	BinVarLoop( const CodeGenArgs &args );
 
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
 
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
+	virtual std::ostream &ACTION_SWITCH();
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
+
+	void REG_ACTIONS();
+	void TO_STATE_ACTIONS();
+	void FROM_STATE_ACTIONS();
+	void EOF_ACTIONS();
 };
 
 namespace C
 {
-	class BinaryLoopVar
+	class BinVarLoop
 	:
-		public ::BinaryLoopVar
+		public ::BinVarLoop
 	{
 	public:
-		BinaryLoopVar( const CodeGenArgs &args )
-			: ::BinaryLoopVar( args )
+		BinVarLoop( const CodeGenArgs &args )
+			: ::BinVarLoop( args )
 		{}
 	};
 }

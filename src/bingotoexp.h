@@ -29,10 +29,10 @@
 /* Forwards. */
 struct CodeGenData;
 
-class BinaryExpGoto : public BinGoto
+class BinGotoExp : public BinGoto
 {
 public:
-	BinaryExpGoto( const CodeGenArgs &args );
+	BinGotoExp( const CodeGenArgs &args );
 
 protected:
 	virtual std::ostream &TO_STATE_ACTION_SWITCH();
@@ -57,13 +57,13 @@ protected:
 
 namespace C
 {
-	class BinaryExpGoto
+	class BinGotoExp
 	:
-		public ::BinaryExpGoto
+		public ::BinGotoExp
 	{
 	public:
-		BinaryExpGoto( const CodeGenArgs &args )
-			: ::BinaryExpGoto( args )
+		BinGotoExp( const CodeGenArgs &args )
+			: ::BinGotoExp( args )
 		{}
 	};
 }

@@ -217,8 +217,6 @@ void BinaryVar::NFA_POP()
 	}
 }
 
-
-
 void BinaryVar::LOCATE_TRANS()
 {
 	out <<
@@ -327,3 +325,303 @@ void BinaryVar::LOCATE_COND()
 	outLabelUsed = true;
 }
 
+void BinaryVar::genAnalysis()
+{
+	redFsm->sortByStateId();
+
+	/* Choose default transitions and the single transition. */
+	redFsm->chooseDefaultSpan();
+		
+	/* Choose the singles. */
+	redFsm->moveSelectTransToSingle();
+
+	/* If any errors have occured in the input file then don't write anything. */
+	if ( red->id->errorCount > 0 )
+		return;
+
+	/* Anlayze Machine will find the final action reference counts, among other
+	 * things. We will use these in reporting the usage of fsm directives in
+	 * action code. */
+	red->analyzeMachine();
+
+	setKeyType();
+
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::AnalyzePass );
+	tableDataPass();
+
+	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
+}
+
+void BinaryVar::tableDataPass()
+{
+	if ( type == Loop )
+		taActions();
+
+	taKeyOffsets();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+	taIndicies();
+
+	taTransCondSpacesWi();
+	taTransOffsetsWi();
+	taTransLengthsWi();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+
+	taCondTargs();
+	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+	taEofConds();
+	taEofTrans();
+
+	taKeys();
+	taCondKeys();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+}
+
+void BinaryVar::writeData()
+{
+	if ( type == Loop ) {
+		/* If there are any transtion functions then output the array. If there
+		 * are none, don't bother emitting an empty array that won't be used. */
+		if ( redFsm->anyActions() )
+			taActions();
+	}
+
+	taKeyOffsets();
+	taKeys();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+
+	taCondKeys();
+	taCondTargs();
+	taCondActions();
+
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
+
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
+
+	if ( redFsm->anyEofActions() )
+		taEofActions();
+
+	taEofConds();
+
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+
+	STATE_IDS();
+}
+
+void BinaryVar::writeExec()
+{
+	testEofUsed = false;
+	outLabelUsed = false;
+	matchCondLabelUsed = false;
+
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"{\n"
+			"	" << UINT() << " _nfa_cont = 1;\n"
+			"	" << UINT() << " _nfa_repeat = 1;\n"
+			"	while ( _nfa_cont != 0 )\n";
+	}
+
+	out << 
+		"	{\n"
+		"	int _klen;\n";
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	int _ps;\n";
+
+	out <<
+		"	" << UINT() << " _trans = 0;\n" <<
+		"	" << UINT() << " _cond = 0;\n"
+		"	" << UINT() << " _have = 0;\n"
+		"	" << UINT() << " _cont = 1;\n";
+
+	if ( type == Loop )
+	{
+		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
+				|| redFsm->anyFromStateActions() )
+		{
+			out << 
+				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
+				"	" << UINT() << " _nacts;\n";
+		}
+	}
+
+	out <<
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
+		"	int _cpc;\n";
+
+	out <<
+		"	while ( _cont == 1 ) {\n"
+		"\n";
+
+	if ( redFsm->errState != 0 ) {
+		outLabelUsed = true;
+		out << 
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
+			"		_cont = 0;\n";
+	}
+
+	out << 
+		"_have = 0;\n";
+
+	if ( !noEnd ) {
+
+		out << 
+			"	if ( " << P() << " == " << PE() << " ) {\n";
+
+		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+
+			out << 
+				"	if ( " << P() << " == " << vEOF() << " )\n"
+				"	{\n";
+
+			out << UINT() << " _eofcont = 0;\n";
+
+			out <<
+				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
+				"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
+							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
+				"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+				"		_cpc = 0;\n"
+			;
+
+			if ( red->condSpaceList.length() > 0 )
+				COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
+
+			out <<
+				"	{\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << ";\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << ";\n"
+				"		_lower = _ckeys;\n"
+				"		_upper = _ckeys + _klen - 1;\n"
+				"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
+				"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+				"			if ( _cpc < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
+				"				_upper = _mid - 1;\n"
+				"			else if ( _cpc > " << CAST("int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
+				"				_lower = _mid + 1;\n"
+				"			else {\n"
+				"				_eofcont = 1;\n"
+				"			}\n"
+				"		}\n"
+				"		if ( _eofcont == 0 ) {\n"
+				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
+				"		}\n"
+				"	}\n"
+			;
+
+			out << 
+				"	}\n"
+				"	else { _eofcont = 1; }\n"
+			;
+
+			out << "if ( _eofcont == 1 ) {\n";
+
+			EOF_ACTIONS();
+
+			out << "	}\n";
+
+			out << "if ( _eofcont == 1 ) {\n";
+
+			if ( redFsm->anyEofTrans() ) {
+				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_have = 1;\n"
+					"	}\n";
+					matchCondLabelUsed = true;
+			}
+
+			out << "}\n";
+			out << "}\n\n";
+		}
+
+		out << 
+			"	if ( _have == 0 )\n"
+			"		_cont = 0;\n"
+			"	}\n";
+	}
+
+	out << 
+		"	if ( _cont == 1 ) {\n"
+		"	if ( _have == 0 ) {\n";
+
+	FROM_STATE_ACTIONS();
+
+	NFA_PUSH();
+
+	LOCATE_TRANS();
+
+	LOCATE_COND();
+
+	out << "}\n";
+		
+	out << "if ( _cont == 1 ) {\n";
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	_ps = " << vCS() << ";\n";
+
+	out <<
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
+		"\n";
+
+	REG_ACTIONS();
+
+	TO_STATE_ACTIONS();
+
+	if ( redFsm->errState != 0 ) {
+		outLabelUsed = true;
+		out << 
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
+			"		_cont = 0;\n";
+	}
+
+	out << 
+		"	if ( _cont == 1 )\n"
+		"		" << P() << " += 1;\n";
+
+	out << "}\n";
+
+	out << "}\n";
+
+	out << "}\n";
+
+	NFA_POP();
+
+	/* The execute block. */
+	out << "}\n";
+
+	if ( redFsm->anyNfaStates() )
+		out << "}\n";
+}

@@ -29,18 +29,12 @@
 /* Forwards. */
 struct CodeGenData;
 
-class BinaryExpVar
+class BinVarExp
 :
 	public BinaryVar
 {
 public:
-	BinaryExpVar( const CodeGenArgs &args );
-
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
+	BinVarExp( const CodeGenArgs &args );
 
 protected:
 
@@ -57,17 +51,22 @@ protected:
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
+
+	void REG_ACTIONS();
+	void TO_STATE_ACTIONS();
+	void FROM_STATE_ACTIONS();
+	void EOF_ACTIONS();
 };
 
 namespace C
 {
-	class BinaryExpVar
+	class BinVarExp
 	:
-		public ::BinaryExpVar
+		public ::BinVarExp
 	{
 	public:
-		BinaryExpVar( const CodeGenArgs &args )
-			: ::BinaryExpVar( args )
+		BinVarExp( const CodeGenArgs &args )
+			: ::BinVarExp( args )
 		{}
 	};
 }

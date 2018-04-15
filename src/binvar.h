@@ -51,7 +51,31 @@ struct BinaryVar
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	void NFA_POP();
-};
 
+	void genAnalysis();
+
+	virtual void tableDataPass();
+	virtual void writeData();
+	virtual void writeExec();
+
+	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void EOF_ACTION( RedStateAp *state ) = 0;
+	virtual void COND_ACTION( RedCondPair *cond ) = 0;
+
+	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
+	virtual std::ostream &ACTION_SWITCH() = 0;
+
+	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
+	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
+	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
+
+	virtual void REG_ACTIONS() = 0;
+	virtual void TO_STATE_ACTIONS() = 0;
+	virtual void FROM_STATE_ACTIONS() = 0;
+	virtual void EOF_ACTIONS() = 0;
+};
 
 #endif

@@ -59,14 +59,14 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 		if ( hostLang->feature == GotoFeature )
 			codeGen = new BinGotoLoop( args );
 		else
-			codeGen = new BinaryLoopVar( args );
+			codeGen = new BinVarLoop( args );
 		break;
 
 	case GenBinaryExp:
 		if ( hostLang->feature == GotoFeature )
-			codeGen = new BinaryExpGoto( args );
+			codeGen = new BinGotoExp( args );
 		else
-			codeGen = new BinaryExpVar( args );
+			codeGen = new BinVarExp( args );
 		break;
 
 	case GenFlatLoop:

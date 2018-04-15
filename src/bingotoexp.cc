@@ -27,13 +27,13 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-BinaryExpGoto::BinaryExpGoto( const CodeGenArgs &args ) 
+BinGotoExp::BinGotoExp( const CodeGenArgs &args ) 
 :
 	BinGoto( args, Exp )
 {
 }
 
-void BinaryExpGoto::COND_ACTION( RedCondPair *cond )
+void BinGotoExp::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
@@ -41,7 +41,7 @@ void BinaryExpGoto::COND_ACTION( RedCondPair *cond )
 	condActions.value( action );
 }
 
-void BinaryExpGoto::TO_STATE_ACTION( RedStateAp *state )
+void BinGotoExp::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -49,7 +49,7 @@ void BinaryExpGoto::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinaryExpGoto::FROM_STATE_ACTION( RedStateAp *state )
+void BinGotoExp::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -57,7 +57,7 @@ void BinaryExpGoto::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinaryExpGoto::EOF_ACTION( RedStateAp *state )
+void BinGotoExp::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -65,7 +65,7 @@ void BinaryExpGoto::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void BinaryExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void BinGotoExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -73,7 +73,7 @@ void BinaryExpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void BinaryExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
+void BinGotoExp::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -84,7 +84,7 @@ void BinaryExpGoto::NFA_POP_TEST( RedNfaTarg *targ )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryExpGoto::TO_STATE_ACTION_SWITCH()
+std::ostream &BinGotoExp::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -107,7 +107,7 @@ std::ostream &BinaryExpGoto::TO_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryExpGoto::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinGotoExp::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -128,7 +128,7 @@ std::ostream &BinaryExpGoto::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinaryExpGoto::EOF_ACTION_SWITCH()
+std::ostream &BinGotoExp::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -151,7 +151,7 @@ std::ostream &BinaryExpGoto::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinaryExpGoto::ACTION_SWITCH()
+std::ostream &BinGotoExp::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -172,7 +172,7 @@ std::ostream &BinaryExpGoto::ACTION_SWITCH()
 	return out;
 }
 
-void BinaryExpGoto::NFA_FROM_STATE_ACTION_EXEC()
+void BinGotoExp::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -183,7 +183,7 @@ void BinaryExpGoto::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void BinaryExpGoto::FROM_STATE_ACTIONS()
+void BinGotoExp::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -194,7 +194,7 @@ void BinaryExpGoto::FROM_STATE_ACTIONS()
 	}
 }
 
-void BinaryExpGoto::TO_STATE_ACTIONS()
+void BinGotoExp::TO_STATE_ACTIONS()
 {
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -205,7 +205,7 @@ void BinaryExpGoto::TO_STATE_ACTIONS()
 	}
 }
 
-void BinaryExpGoto::REG_ACTIONS()
+void BinGotoExp::REG_ACTIONS()
 {
 	out <<
 		"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
@@ -214,7 +214,7 @@ void BinaryExpGoto::REG_ACTIONS()
 		"\n";
 }
 
-void BinaryExpGoto::EOF_ACTIONS()
+void BinGotoExp::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
