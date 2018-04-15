@@ -29,73 +29,9 @@
 
 BinaryExpGoto::BinaryExpGoto( const CodeGenArgs &args ) 
 :
-	Binary(args)
+	BinGoto( args, Exp )
 {
 }
-
-void BinaryExpGoto::tableDataPass()
-{
-	taKeyOffsets();
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-	taIndicies();
-
-	taTransCondSpacesWi();
-	taTransOffsetsWi();
-	taTransLengthsWi();
-
-	taTransCondSpaces();
-	taTransOffsets();
-	taTransLengths();
-
-	taCondTargs();
-	taCondActions();
-
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-	taEofConds();
-	taEofTrans();
-
-	taKeys();
-	taCondKeys();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-}
-
-void BinaryExpGoto::genAnalysis()
-{
-	redFsm->sortByStateId();
-
-	/* Choose default transitions and the single transition. */
-	redFsm->chooseDefaultSpan();
-		
-	/* Choose single. */
-	redFsm->moveSelectTransToSingle();
-
-	/* If any errors have occured in the input file then don't write anything. */
-	if ( red->id->errorCount > 0 )
-		return;
-
-	/* Anlayze Machine will find the final action reference counts, among other
-	 * things. We will use these in reporting the usage of fsm directives in
-	 * action code. */
-	red->analyzeMachine();
-
-	setKeyType();
-
-	/* Run the analysis pass over the table data. */
-	setTableState( TableArray::AnalyzePass );
-	tableDataPass();
-
-	/* Switch the tables over to the code gen mode. */
-	setTableState( TableArray::GeneratePass );
-}
-
 
 void BinaryExpGoto::COND_ACTION( RedCondPair *cond )
 {
@@ -236,46 +172,6 @@ std::ostream &BinaryExpGoto::ACTION_SWITCH()
 	return out;
 }
 
-void BinaryExpGoto::writeData()
-{
-	taKeyOffsets();
-
-	taKeys();
-
-	taSingleLens();
-	taRangeLens();
-	taIndexOffsets();
-
-	taTransCondSpaces();
-	taTransOffsets();
-	taTransLengths();
-
-	taCondKeys();
-	taCondTargs();
-	taCondActions();
-
-	if ( redFsm->anyToStateActions() )
-		taToStateActions();
-
-	if ( redFsm->anyFromStateActions() )
-		taFromStateActions();
-
-	if ( redFsm->anyEofActions() )
-		taEofActions();
-
-	taEofConds();
-
-	if ( redFsm->anyEofTrans() )
-		taEofTrans();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-
-	STATE_IDS();
-}
-
 void BinaryExpGoto::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
@@ -287,49 +183,8 @@ void BinaryExpGoto::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-
-void BinaryExpGoto::writeExec()
+void BinaryExpGoto::FROM_STATE_ACTIONS()
 {
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	out << 
-		"	{\n"
-		"	int _klen;\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps;\n";
-
-	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _cpc;\n"
-		"	" << UINT() << " _trans = 0;\n"
-		"	" << UINT() << " _cond = 0;\n";
-
-	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
-
-	out << "	" << ENTRY() << " {\n";
-
-	out << "\n";
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out <<
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
-
-	out << LABEL( "_resume" ) << " { \n";
-
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
@@ -337,56 +192,10 @@ void BinaryExpGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	NFA_PUSH();
-
-	LOCATE_TRANS();
-
-	out << "}\n";
-	out << LABEL( "_match" ) << " {\n";
-
-	LOCATE_COND();
-
-	out << "}\n";
-	out << LABEL( "_match_cond" ) << " {\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << vCS() << ";\n";
-
-	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
-		"\n";
-
-	if ( redFsm->anyRegActions() ) {
-		out << 
-			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
-			"		goto _again;\n"
-			"\n";
-
-		if ( redFsm->anyRegNbreak() )
-			out << "	_nbreak = 0;\n";
-
-		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
-			ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-
-		if ( redFsm->anyRegNbreak() ) {
-			out <<
-				"	if ( _nbreak == 1 )\n"
-				"		goto _out;\n";
-			outLabelUsed = true;
-		}
-
-		out << "\n";
-	}
-
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-	out << "}\n";
-	out << LABEL( "_again" ) << " {\n";
-
+void BinaryExpGoto::TO_STATE_ACTIONS()
+{
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
@@ -394,83 +203,23 @@ void BinaryExpGoto::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
+void BinaryExpGoto::REG_ACTIONS()
+{
+	out <<
+		"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
+		ACTION_SWITCH() <<
+		"	}\n"
+		"\n";
+}
 
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
-
-	if ( testEofUsed )
-		out << "}\n" << LABEL( "_test_eof" ) << " { {}\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+void BinaryExpGoto::EOF_ACTIONS()
+{
+	if ( redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		out <<
-			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
-						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-			"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
-			"		_cpc = 0;\n"
-		;
-
-		if ( red->condSpaceList.length() > 0 )
-			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
-
-		COND_BIN_SEARCH( eofCondKeys, "goto _ok;", "goto _out;" );
-
-		out << 
-			"		_ok: {}\n"
-			"	}\n"
-		;
-
-		outLabelUsed = true;
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH() <<
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
-				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
-
-		out << 
-			"	}\n"
-			"\n";
+			"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"	}\n";
 	}
-
-	if ( outLabelUsed )
-		out << "}\n" << LABEL( "_out" ) << " { {}\n";
-
-	/* The entry loop. */
-	out << "}\n}\n";
-
-	NFA_POP();
-
-	out << "	}\n";
 }

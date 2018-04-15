@@ -42,7 +42,8 @@ dist_libfsm_la_SOURCES = \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
-	allocgen.cc codegen.cc binary.cc bingotoloop.cc bingotoexp.cc binvar.cc \
+	allocgen.cc codegen.cc binary.cc bingoto.cc bingotoloop.cc \
+	bingotoexp.cc binvar.cc \
 	binvarloop.cc binvarexp.cc flat.cc flatgotoloop.cc flatgotoexp.cc \
 	flatvar.cc flatvarloop.cc flatvarexp.cc goto.cc gotoloop.cc \
 	gotoexp.cc ipgoto.cc dot.cc asm.cc

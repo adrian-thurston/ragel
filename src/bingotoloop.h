@@ -24,7 +24,7 @@
 #define BIN_GOTO_LOOP_H
 
 #include <iostream>
-#include "binary.h"
+#include "bingoto.h"
 #include "vector.h"
 
 /* Forwards. */
@@ -33,42 +33,41 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class BinaryLoopGoto
-	: public Binary
+class BinGotoLoop
+	: public BinGoto
 {
 public:
-	BinaryLoopGoto( const CodeGenArgs &args );
-
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
+	BinGotoLoop( const CodeGenArgs &args );
 
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
 	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
 
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
+	virtual std::ostream &ACTION_SWITCH();
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
+
+	virtual void FROM_STATE_ACTIONS();
+	virtual void TO_STATE_ACTIONS();
+	virtual void REG_ACTIONS();
+	virtual void EOF_ACTIONS();
 };
 
 namespace C
 {
-	class BinaryLoopGoto
+	class BinGotoLoop
 	:
-		public ::BinaryLoopGoto
+		public ::BinGotoLoop
 	{
 	public:
-		BinaryLoopGoto( const CodeGenArgs &args )
-			: ::BinaryLoopGoto( args )
+		BinGotoLoop( const CodeGenArgs &args )
+			: ::BinGotoLoop( args )
 		{}
 	};
 }

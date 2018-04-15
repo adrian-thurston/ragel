@@ -29,7 +29,7 @@
 
 BinaryLoopVar::BinaryLoopVar( const CodeGenArgs &args )
 :
-	BinaryVar( args )
+	BinaryVar( args, Loop )
 {}
 
 void BinaryLoopVar::tableDataPass()

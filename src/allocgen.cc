@@ -57,7 +57,7 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 	switch ( args.codeStyle ) {
 	case GenBinaryLoop:
 		if ( hostLang->feature == GotoFeature )
-			codeGen = new BinaryLoopGoto( args );
+			codeGen = new BinGotoLoop( args );
 		else
 			codeGen = new BinaryLoopVar( args );
 		break;

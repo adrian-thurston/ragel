@@ -27,9 +27,10 @@
 
 #include <assert.h>
 
-Binary::Binary( const CodeGenArgs &args )
+Binary::Binary( const CodeGenArgs &args, Type type )
 :
 	CodeGen( args ),
+	type(type),
 	keyOffsets(         "key_offsets",           *this ),
 	singleLens(         "single_lengths",        *this ),
 	rangeLens(          "range_lengths",         *this ),

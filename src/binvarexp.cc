@@ -29,7 +29,7 @@
 
 BinaryExpVar::BinaryExpVar( const CodeGenArgs &args ) 
 :
-	BinaryVar(args)
+	BinaryVar( args, Exp )
 {
 }
 

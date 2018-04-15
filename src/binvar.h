@@ -29,9 +29,9 @@ struct BinaryVar
 :
 	public Binary
 {
-	BinaryVar( const CodeGenArgs &args )
+	BinaryVar( const CodeGenArgs &args, Binary::Type type )
 	:
-		Binary( args )
+		Binary( args, type )
 	{}
 
 	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );

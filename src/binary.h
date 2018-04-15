@@ -35,10 +35,18 @@ struct RedStateAp;
 class Binary
 	: public CodeGen
 {
+protected:
+	enum Type {
+		Loop = 1, Exp
+	};
+
 public:
-	Binary( const CodeGenArgs &args );
+	Binary( const CodeGenArgs &args, Type type );
+
 
 protected:
+	Type type;
+
 	TableArray keyOffsets;
 	TableArray singleLens;
 	TableArray rangeLens;

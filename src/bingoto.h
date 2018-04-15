@@ -23,11 +23,44 @@
 #ifndef RAGEL_BINGOTO_H
 #define RAGEL_BINGOTO_H
 
-struct BinaryGoto
+#include "binary.h"
+
+struct BinGoto
+:
 	public Binary
 {
+	BinGoto( const CodeGenArgs &args, Binary::Type type )
+	:
+		Binary( args, type )
+	{}
 
+	virtual void writeData();
+	virtual void writeExec();
 
+	virtual void genAnalysis();
+	void tableDataPass();
+
+	void writeExecLoop();
+	void writeExecExp();
+
+	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
+	virtual std::ostream &ACTION_SWITCH() = 0;
+
+	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void EOF_ACTION( RedStateAp *state ) = 0;
+	virtual void COND_ACTION( RedCondPair *cond ) = 0;
+
+	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
+	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
+	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
+
+	virtual void FROM_STATE_ACTIONS() = 0;
+	virtual void TO_STATE_ACTIONS() = 0;
+	virtual void REG_ACTIONS() = 0;
+	virtual void EOF_ACTIONS() = 0;
 };
 
 #endif

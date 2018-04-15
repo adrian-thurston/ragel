@@ -24,27 +24,21 @@
 #define BIN_GOTO_EXP_H
 
 #include <iostream>
-#include "binary.h"
+#include "bingoto.h"
 
 /* Forwards. */
 struct CodeGenData;
 
-class BinaryExpGoto : public Binary
+class BinaryExpGoto : public BinGoto
 {
 public:
 	BinaryExpGoto( const CodeGenArgs &args );
 
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
-
 protected:
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
+	virtual std::ostream &ACTION_SWITCH();
 
 	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
@@ -54,6 +48,11 @@ protected:
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
+
+	virtual void FROM_STATE_ACTIONS();
+	virtual void TO_STATE_ACTIONS();
+	virtual void REG_ACTIONS();
+	virtual void EOF_ACTIONS();
 };
 
 namespace C
