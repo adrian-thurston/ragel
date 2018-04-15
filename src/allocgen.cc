@@ -71,27 +71,27 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 
 	case GenFlatLoop:
 		if ( hostLang->feature == GotoFeature )
-			codeGen = new FlatLoopGoto( args );
+			codeGen = new FlatGotoLoop( args );
 		else
-			codeGen = new FlatLoopVar( args );
+			codeGen = new FlatVarLoop( args );
 		break;
 
 	case GenFlatExp:
 		if ( hostLang->feature == GotoFeature )
-			codeGen = new FlatExpGoto( args );
+			codeGen = new FlatGotoExp( args );
 		else
-			codeGen = new FlatExpVar( args );
+			codeGen = new FlatVarExp( args );
 		break;
 
 	case GenSwitchLoop:
 		if ( hostLang->feature == GotoFeature )
-			codeGen = new SwitchLoopGoto(args);
+			codeGen = new SwitchGotoLoop(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 	case GenSwitchExp:
 		if ( hostLang->feature == GotoFeature )
-			codeGen = new SwitchExpGoto(args);
+			codeGen = new SwitchGotoExp(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;

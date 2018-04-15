@@ -28,7 +28,7 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-void SwitchLoopGoto::tableDataPass()
+void SwitchGotoLoop::tableDataPass()
 {
 	taActions();
 	taToStateActions();
@@ -41,7 +41,7 @@ void SwitchLoopGoto::tableDataPass()
 	taNfaPopTrans();
 }
 
-void SwitchLoopGoto::genAnalysis()
+void SwitchGotoLoop::genAnalysis()
 {
 	/* For directly executable machines there is no required state
 	 * ordering. Choose a depth-first ordering to increase the
@@ -71,7 +71,7 @@ void SwitchLoopGoto::genAnalysis()
 	setTableState( TableArray::GeneratePass );
 }
 
-void SwitchLoopGoto::writeData()
+void SwitchGotoLoop::writeData()
 {
 	if ( redFsm->anyActions() )
 		taActions();
@@ -93,7 +93,7 @@ void SwitchLoopGoto::writeData()
 	STATE_IDS();
 }
 
-std::ostream &SwitchLoopGoto::ACTION_SWITCH()
+std::ostream &SwitchGotoLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -109,7 +109,7 @@ std::ostream &SwitchLoopGoto::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchLoopGoto::EOF_ACTION_SWITCH()
+std::ostream &SwitchGotoLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -125,7 +125,7 @@ std::ostream &SwitchLoopGoto::EOF_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchLoopGoto::FROM_STATE_ACTION_SWITCH()
+std::ostream &SwitchGotoLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -141,7 +141,7 @@ std::ostream &SwitchLoopGoto::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchLoopGoto::TO_STATE_ACTION_SWITCH()
+std::ostream &SwitchGotoLoop::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -157,7 +157,7 @@ std::ostream &SwitchLoopGoto::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-void SwitchLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void SwitchGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -165,7 +165,7 @@ void SwitchLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void SwitchLoopGoto::NFA_POP_TEST( RedNfaTarg *targ )
+void SwitchGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -173,7 +173,7 @@ void SwitchLoopGoto::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-std::ostream &SwitchLoopGoto::EXEC_FUNCS()
+std::ostream &SwitchGotoLoop::EXEC_FUNCS()
 {
 	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -215,7 +215,7 @@ std::ostream &SwitchLoopGoto::EXEC_FUNCS()
 	return out;
 }
 
-void SwitchLoopGoto::NFA_FROM_STATE_ACTION_EXEC()
+void SwitchGotoLoop::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -235,7 +235,7 @@ void SwitchLoopGoto::NFA_FROM_STATE_ACTION_EXEC()
 
 
 
-void SwitchLoopGoto::writeExec()
+void SwitchGotoLoop::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

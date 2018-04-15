@@ -30,13 +30,13 @@
 struct CodeGenData;
 
 /*
- * FlatExpGoto
+ * FlatGotoExp
  */
-class FlatExpGoto
+class FlatGotoExp
 	: public Flat
 {
 public:
-	FlatExpGoto( const CodeGenArgs &args ) 
+	FlatGotoExp( const CodeGenArgs &args ) 
 		: Flat(args) {}
 
 	void tableDataPass();
@@ -60,18 +60,5 @@ protected:
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
-
-namespace C
-{
-	class FlatExpGoto
-	:
-		public ::FlatExpGoto
-	{
-	public:
-		FlatExpGoto( const CodeGenArgs &args )
-			: ::FlatExpGoto( args )
-		{}
-	};
-}
 
 #endif

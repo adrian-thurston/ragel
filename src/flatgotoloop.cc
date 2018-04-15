@@ -27,7 +27,7 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-void FlatLoopGoto::tableDataPass()
+void FlatGotoLoop::tableDataPass()
 {
 	if ( redFsm->anyActions() )
 		taActions();
@@ -53,7 +53,7 @@ void FlatLoopGoto::tableDataPass()
 	taNfaPopTrans();
 }
 
-void FlatLoopGoto::genAnalysis()
+void FlatGotoLoop::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -82,7 +82,7 @@ void FlatLoopGoto::genAnalysis()
 	setTableState( TableArray::GeneratePass );
 }
 
-std::ostream &FlatLoopGoto::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatGotoLoop::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -98,7 +98,7 @@ std::ostream &FlatLoopGoto::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatLoopGoto::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatGotoLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -114,7 +114,7 @@ std::ostream &FlatLoopGoto::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatLoopGoto::EOF_ACTION_SWITCH()
+std::ostream &FlatGotoLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -130,7 +130,7 @@ std::ostream &FlatLoopGoto::EOF_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatLoopGoto::ACTION_SWITCH()
+std::ostream &FlatGotoLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -146,7 +146,7 @@ std::ostream &FlatLoopGoto::ACTION_SWITCH()
 	return out;
 }
 
-void FlatLoopGoto::writeData()
+void FlatGotoLoop::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -185,7 +185,7 @@ void FlatLoopGoto::writeData()
 	STATE_IDS();
 }
 
-void FlatLoopGoto::NFA_FROM_STATE_ACTION_EXEC()
+void FlatGotoLoop::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -203,7 +203,7 @@ void FlatLoopGoto::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void FlatLoopGoto::writeExec()
+void FlatGotoLoop::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
@@ -420,7 +420,7 @@ void FlatLoopGoto::writeExec()
 	out << "	}\n";
 }
 
-void FlatLoopGoto::TO_STATE_ACTION( RedStateAp *state )
+void FlatGotoLoop::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -428,7 +428,7 @@ void FlatLoopGoto::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void FlatLoopGoto::FROM_STATE_ACTION( RedStateAp *state )
+void FlatGotoLoop::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -436,7 +436,7 @@ void FlatLoopGoto::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void FlatLoopGoto::EOF_ACTION( RedStateAp *state )
+void FlatGotoLoop::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -444,7 +444,7 @@ void FlatLoopGoto::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void FlatLoopGoto::COND_ACTION( RedCondPair *cond )
+void FlatGotoLoop::COND_ACTION( RedCondPair *cond )
 {
 	/* If there are actions, emit them. Otherwise emit zero. */
 	int act = 0;
@@ -453,7 +453,7 @@ void FlatLoopGoto::COND_ACTION( RedCondPair *cond )
 	condActions.value( act );
 }
 
-void FlatLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -461,7 +461,7 @@ void FlatLoopGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatLoopGoto::NFA_POP_TEST( RedNfaTarg *targ )
+void FlatGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )

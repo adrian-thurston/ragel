@@ -30,13 +30,13 @@
 struct CodeGenData;
 
 /*
- * class SwitchExpGoto
+ * class SwitchGotoExp
  */
-class SwitchExpGoto
+class SwitchGotoExp
 	: public Goto
 {
 public:
-	SwitchExpGoto( const CodeGenArgs &args )
+	SwitchGotoExp( const CodeGenArgs &args )
 		: Goto(args) {}
 
 	std::ostream &EXEC_ACTIONS();
@@ -61,13 +61,13 @@ public:
 
 namespace C
 {
-	class SwitchExpGoto
+	class SwitchGotoExp
 	:
-		public ::SwitchExpGoto
+		public ::SwitchGotoExp
 	{
 	public:
-		SwitchExpGoto( const CodeGenArgs &args )
-			: ::SwitchExpGoto( args )
+		SwitchGotoExp( const CodeGenArgs &args )
+			: ::SwitchGotoExp( args )
 		{}
 	};
 }

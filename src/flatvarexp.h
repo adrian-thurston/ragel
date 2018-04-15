@@ -29,12 +29,12 @@
 /* Forwards. */
 struct CodeGenData;
 
-class FlatExpVar
+class FlatVarExp
 :
 	public FlatVar
 {
 public:
-	FlatExpVar( const CodeGenArgs &args );
+	FlatVarExp( const CodeGenArgs &args );
 
 	void tableDataPass();
 
@@ -58,18 +58,5 @@ protected:
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
-
-namespace C
-{
-	class FlatExpVar
-	:
-		public ::FlatExpVar
-	{
-	public:
-		FlatExpVar( const CodeGenArgs &args )
-			: ::FlatExpVar( args )
-		{}
-	};
-}
 
 #endif

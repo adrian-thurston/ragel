@@ -33,11 +33,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class FlatLoopVar
+class FlatVarLoop
 	: public FlatVar
 {
 public:
-	FlatLoopVar( const CodeGenArgs &args );
+	FlatVarLoop( const CodeGenArgs &args );
 
 	void tableDataPass();
 
@@ -59,18 +59,5 @@ public:
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
-
-namespace C
-{
-	class FlatLoopVar
-	:
-		public ::FlatLoopVar
-	{
-	public:
-		FlatLoopVar( const CodeGenArgs &args )
-			: ::FlatLoopVar( args )
-		{}
-	};
-}
 
 #endif

@@ -27,13 +27,13 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-FlatLoopVar::FlatLoopVar( const CodeGenArgs &args )
+FlatVarLoop::FlatVarLoop( const CodeGenArgs &args )
 :
 	FlatVar( args )
 {}
 
 
-void FlatLoopVar::tableDataPass()
+void FlatVarLoop::tableDataPass()
 {
 	if ( redFsm->anyActions() )
 		taActions();
@@ -62,7 +62,7 @@ void FlatLoopVar::tableDataPass()
 	taNfaPopTrans();
 }
 
-void FlatLoopVar::genAnalysis()
+void FlatVarLoop::genAnalysis()
 {
 	redFsm->sortByStateId();
 
@@ -92,7 +92,7 @@ void FlatLoopVar::genAnalysis()
 }
 
 
-void FlatLoopVar::COND_ACTION( RedCondPair *cond )
+void FlatVarLoop::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )
@@ -100,7 +100,7 @@ void FlatLoopVar::COND_ACTION( RedCondPair *cond )
 	condActions.value( act );
 }
 
-void FlatLoopVar::TO_STATE_ACTION( RedStateAp *state )
+void FlatVarLoop::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -108,7 +108,7 @@ void FlatLoopVar::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void FlatLoopVar::FROM_STATE_ACTION( RedStateAp *state )
+void FlatVarLoop::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -116,7 +116,7 @@ void FlatLoopVar::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void FlatLoopVar::EOF_ACTION( RedStateAp *state )
+void FlatVarLoop::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -124,7 +124,7 @@ void FlatLoopVar::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-std::ostream &FlatLoopVar::TO_STATE_ACTION_SWITCH()
+std::ostream &FlatVarLoop::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -140,7 +140,7 @@ std::ostream &FlatLoopVar::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatLoopVar::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatVarLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -156,7 +156,7 @@ std::ostream &FlatLoopVar::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatLoopVar::EOF_ACTION_SWITCH()
+std::ostream &FlatVarLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -173,7 +173,7 @@ std::ostream &FlatLoopVar::EOF_ACTION_SWITCH()
 }
 
 
-std::ostream &FlatLoopVar::ACTION_SWITCH()
+std::ostream &FlatVarLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -190,7 +190,7 @@ std::ostream &FlatLoopVar::ACTION_SWITCH()
 }
 
 
-void FlatLoopVar::writeData()
+void FlatVarLoop::writeData()
 {
 	/* If there are any transtion functions then output the array. If there
 	 * are none, don't bother emitting an empty array that won't be used. */
@@ -229,7 +229,7 @@ void FlatLoopVar::writeData()
 	STATE_IDS();
 }
 
-void FlatLoopVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatVarLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -237,7 +237,7 @@ void FlatLoopVar::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatLoopVar::NFA_POP_TEST( RedNfaTarg *targ )
+void FlatVarLoop::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -245,7 +245,7 @@ void FlatLoopVar::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-void FlatLoopVar::NFA_FROM_STATE_ACTION_EXEC()
+void FlatVarLoop::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -263,7 +263,7 @@ void FlatLoopVar::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void FlatLoopVar::writeExec()
+void FlatVarLoop::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

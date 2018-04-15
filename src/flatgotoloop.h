@@ -32,11 +32,11 @@ struct NameInst;
 struct RedTransAp;
 struct RedStateAp;
 
-class FlatLoopGoto
+class FlatGotoLoop
 	: public Flat
 {
 public:
-	FlatLoopGoto( const CodeGenArgs &args )
+	FlatGotoLoop( const CodeGenArgs &args )
 		: Flat(args) {}
 
 	void tableDataPass();
@@ -61,18 +61,5 @@ protected:
 
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
-
-namespace C
-{
-	class FlatLoopGoto
-	:
-		public ::FlatLoopGoto
-	{
-	public:
-		FlatLoopGoto( const CodeGenArgs &args )
-			: ::FlatLoopGoto( args )
-		{}
-	};
-}
 
 #endif
