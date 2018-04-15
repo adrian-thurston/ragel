@@ -437,15 +437,6 @@ void BinaryLoopGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n"
-				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
 			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
@@ -479,6 +470,15 @@ void BinaryLoopGoto::writeExec()
 				"		}\n"
 				"		__nacts -= 1;\n"
 				"		__acts += 1;\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+				"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n"
+				"		goto _match_cond;\n"
 				"	}\n";
 		}
 		

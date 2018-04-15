@@ -589,13 +589,6 @@ std::ostream &IpGoto::FINISH_CASES()
 		}
 	}
 
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 ) {
-			RedCondPair *cond = st->eofTrans->outCond( 0 );
-			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
-		}
-	}
-
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
 			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
@@ -608,6 +601,13 @@ std::ostream &IpGoto::FINISH_CASES()
 			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( STATE_ERR_STATE, true, false ) );
 			out << "\n\tbreak;\n";
+		}
+	}
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			RedCondPair *cond = st->eofTrans->outCond( 0 );
+			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
 		}
 	}
 

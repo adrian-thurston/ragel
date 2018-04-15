@@ -320,6 +320,13 @@ void SwitchExpGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+				EOF_ACTION_SWITCH() <<
+				"	}\n";
+		}
+
 		if ( redFsm->anyEofTrans() ) {
 			out <<
 				"	switch ( " << vCS() << " ) {\n";
@@ -332,13 +339,6 @@ void SwitchExpGoto::writeExec()
 			}
 
 			out <<
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH() <<
 				"	}\n";
 		}
 

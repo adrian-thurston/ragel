@@ -347,21 +347,6 @@ void SwitchLoopGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	switch ( " << vCS() << " ) {\n";
-
-			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-				if ( st->eofTrans != 0 ) {
-					RedCondPair *cond = st->eofTrans->outCond( 0 );
-					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
-				}
-			}
-
-			out <<
-				"	}\n";
-		}
-
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
@@ -375,6 +360,21 @@ void SwitchLoopGoto::writeExec()
 				"		}\n"
 				"		__acts += 1;\n"
 				"		__nacts -= 1;\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	switch ( " << vCS() << " ) {\n";
+
+			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+				if ( st->eofTrans != 0 ) {
+					RedCondPair *cond = st->eofTrans->outCond( 0 );
+					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+				}
+			}
+
+			out <<
 				"	}\n";
 		}
 

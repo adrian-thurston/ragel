@@ -342,6 +342,16 @@ void FlatExpVar::writeExec()
 				"	if ( " << P() << " == " << vEOF() << " )\n"
 				"	{\n";
 
+			if ( redFsm->anyEofActions() ) {
+				out <<
+					"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+					EOF_ACTION_SWITCH() <<
+					"	}\n";
+			}
+
+
+			out << "if ( _have == 0 ) {\n";
+
 			if ( redFsm->anyEofTrans() ) {
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
@@ -356,15 +366,6 @@ void FlatExpVar::writeExec()
 					"		_have = 1;\n"
 					"	}\n";
 					matchCondLabelUsed = true;
-			}
-
-			out << "if ( _have == 0 ) {\n";
-
-			if ( redFsm->anyEofActions() ) {
-				out <<
-					"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-					EOF_ACTION_SWITCH() <<
-					"	}\n";
 			}
 
 			out << "}\n";

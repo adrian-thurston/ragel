@@ -334,18 +334,6 @@ void BinaryLoopVar::writeExec()
 				"	if ( " << P() << " == " << vEOF() << " )\n"
 				"	{\n";
 
-			if ( redFsm->anyEofTrans() ) {
-				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
-					"		_have = 1;\n"
-					"	}\n";
-					matchCondLabelUsed = true;
-			}
-
-			out << "if ( _have == 0 ) {\n";
-
 			out << UINT() << " _eofcont = 0;\n";
 
 			out <<
@@ -360,28 +348,28 @@ void BinaryLoopVar::writeExec()
 			if ( red->condSpaceList.length() > 0 )
 				COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
 
-		out <<
-		"	{\n"
-		"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
-		"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << ";\n"
-		"		_lower = _ckeys;\n"
-		"		_upper = _ckeys + _klen - 1;\n"
-		"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
-		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > " << CAST("int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
-		"				_lower = _mid + 1;\n"
-		"			else {\n"
-		"				_eofcont = 1;\n"
-		"			}\n"
-		"		}\n"
-		"		if ( _eofcont == 0 ) {\n"
-		"			" << vCS() << " = " << ERROR_STATE() << ";\n"
-		"		}\n"
-		"	}\n"
-		;
+			out <<
+				"	{\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << ";\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << ";\n"
+				"		_lower = _ckeys;\n"
+				"		_upper = _ckeys + _klen - 1;\n"
+				"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
+				"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+				"			if ( _cpc < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
+				"				_upper = _mid - 1;\n"
+				"			else if ( _cpc > " << CAST("int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
+				"				_lower = _mid + 1;\n"
+				"			else {\n"
+				"				_eofcont = 1;\n"
+				"			}\n"
+				"		}\n"
+				"		if ( _eofcont == 0 ) {\n"
+				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
+				"		}\n"
+				"	}\n"
+			;
 
 			out << 
 				"	}\n"
@@ -407,12 +395,22 @@ void BinaryLoopVar::writeExec()
 					"	}\n";
 			}
 
-			out << 
-				"	}\n"
-			;
+			out << "	}\n";
+
+			out << "if ( _eofcont == 1 ) {\n";
+
+			if ( redFsm->anyEofTrans() ) {
+				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+					"		_have = 1;\n"
+					"	}\n";
+					matchCondLabelUsed = true;
+			}
 
 			out << "}\n";
-			
+
 			out << 
 				"	}\n"
 				"\n";

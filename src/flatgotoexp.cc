@@ -392,6 +392,13 @@ void FlatExpGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
+		if ( redFsm->anyEofActions() ) {
+			out <<
+				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+				EOF_ACTION_SWITCH() <<
+				"	}\n";
+		}
+
 		if ( redFsm->anyEofTrans() ) {
 			out <<
 				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
@@ -404,13 +411,6 @@ void FlatExpGoto::writeExec()
 
 			out <<
 				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH() <<
 				"	}\n";
 		}
 

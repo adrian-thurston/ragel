@@ -342,24 +342,6 @@ void FlatLoopVar::writeExec()
 				"	if ( " << P() << " == " << vEOF() << " )\n"
 				"	{\n";
 
-			if ( redFsm->anyEofTrans() ) {
-				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-				if ( red->condSpaceList.length() > 0 ) {
-					out <<
-						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
-				}
-
-				out <<
-					"		_have = 1;\n"
-					"	}\n";
-					matchCondLabelUsed = true;
-			}
-
-			out << "if ( _have == 0 ) {\n";
-
 			if ( redFsm->anyEofActions() ) {
 				out <<
 					"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
@@ -375,6 +357,24 @@ void FlatLoopVar::writeExec()
 					"		__nacts -= 1;\n"
 					"		__acts += 1;\n"
 					"	}\n";
+			}
+
+			out << "if ( _have == 0 ) {\n";
+
+			if ( redFsm->anyEofTrans() ) {
+				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+				if ( red->condSpaceList.length() > 0 ) {
+					out <<
+						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+				}
+
+				out <<
+					"		_have = 1;\n"
+					"	}\n";
+					matchCondLabelUsed = true;
 			}
 
 			out << "}\n";

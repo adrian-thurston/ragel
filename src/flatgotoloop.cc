@@ -374,21 +374,6 @@ void FlatLoopGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-			if ( red->condSpaceList.length() > 0 ) {
-				out <<
-					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
-			}
-
-			out << 
-				"		goto _match_cond;\n"
-				"	}\n";
-		}
-
 		if ( redFsm->anyEofActions() ) {
 			out <<
 				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
@@ -401,6 +386,21 @@ void FlatLoopGoto::writeExec()
 				"		}\n"
 				"		__nacts -= 1;\n"
 				"		__acts += 1;\n"
+				"	}\n";
+		}
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+			if ( red->condSpaceList.length() > 0 ) {
+				out <<
+					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+			}
+
+			out << 
+				"		goto _match_cond;\n"
 				"	}\n";
 		}
 
