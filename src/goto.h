@@ -40,13 +40,25 @@ class Goto
 	: public CodeGen
 {
 public:
-	Goto( const CodeGenArgs &args );
+	enum Type {
+		Loop = 1,
+		Exp,
+		Ip
+	};
+
+	Goto( const CodeGenArgs &args, Type type );
+
+	void tableDataPass();
+	virtual void genAnalysis();
+	virtual void writeData();
+	virtual void writeExec();
 
 	std::ostream &TRANSITION( RedCondPair *pair );
 
 	std::ostream &STATE_GOTOS();
 	std::ostream &TRANSITIONS();
-	std::ostream &FINISH_CASES();
+
+	Type type;
 
 	TableArray actions;
 	TableArray toStateActions;
@@ -85,11 +97,12 @@ public:
 	virtual unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	virtual unsigned int EOF_ACTION( RedStateAp *state );
 
-	std::ostream &ACTIONS_ARRAY();
+	virtual std::ostream &EXEC_FUNCS() = 0;
+	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
 
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
+	std::ostream &ACTIONS_ARRAY();
 
 	void setTableState( TableArray::State );
 
@@ -113,6 +126,11 @@ public:
 
 	void NFA_PUSH();
 	void NFA_POP();
+
+	virtual void FROM_STATE_ACTIONS() = 0;
+	virtual void TO_STATE_ACTIONS() = 0;
+	virtual void REG_ACTIONS() = 0;
+	virtual void EOF_ACTIONS() = 0;
 };
 
 #endif

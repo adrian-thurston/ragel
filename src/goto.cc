@@ -30,9 +30,10 @@
 
 using std::ostringstream;
 
-Goto::Goto( const CodeGenArgs &args ) 
+Goto::Goto( const CodeGenArgs &args, Type type ) 
 :
 	CodeGen( args ),
+	type(type),
 	actions(           "actions",             *this ),
 	toStateActions(    "to_state_actions",    *this ),
 	fromStateActions(  "from_state_actions",  *this ),
@@ -909,4 +910,191 @@ void Goto::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1; " << CLOSE_GEN_BLOCK();
+}
+
+void Goto::tableDataPass()
+{
+	if ( type == Loop )
+		taActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+}
+
+void Goto::genAnalysis()
+{
+	/* For directly executable machines there is no required state
+	 * ordering. Choose a depth-first ordering to increase the
+	 * potential for fall-throughs. */
+	redFsm->depthFirstOrdering();
+
+	/* Choose default transitions and the single transition. */
+	redFsm->chooseDefaultSpan();
+		
+	/* Choose single. */
+	redFsm->moveSelectTransToSingle();
+
+	/* If any errors have occured in the input file then don't write anything. */
+	if ( red->id->errorCount > 0 )
+		return;
+
+	/* Anlayze Machine will find the final action reference counts, among other
+	 * things. We will use these in reporting the usage of fsm directives in
+	 * action code. */
+	red->analyzeMachine();
+
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::AnalyzePass );
+	tableDataPass();
+
+	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
+}
+
+void Goto::writeData()
+{
+	if ( type == Loop ) {
+		if ( redFsm->anyActions() )
+			taActions();
+	}
+
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
+
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
+
+	if ( redFsm->anyEofActions() )
+		taEofActions();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+
+	STATE_IDS();
+}
+
+void Goto::writeExec()
+{
+	testEofUsed = false;
+	outLabelUsed = false;
+
+	out << "	{\n";
+
+	if ( type == Loop ) {
+		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
+				|| redFsm->anyFromStateActions() )
+		{
+			out << 
+				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
+				"	" << UINT() << " _nacts;\n";
+		}
+	}
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	int _ps = 0;\n";
+
+	out << "\n";
+
+	if ( redFsm->anyRegNbreak() ) {
+		out << "	int _nbreak;\n";
+	}
+
+	if ( !noEnd ) {
+		testEofUsed = true;
+		out << 
+			"	if ( " << P() << " == " << PE() << " )\n"
+			"		goto _test_eof;\n";
+	}
+
+	if ( redFsm->errState != 0 ) {
+		outLabelUsed = true;
+		out << 
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
+			"		goto _out;\n";
+	}
+
+	out << "_resume:\n";
+
+	FROM_STATE_ACTIONS();
+
+	NFA_PUSH();
+
+	out <<
+		"	switch ( " << vCS() << " ) {\n";
+		STATE_GOTOS() <<
+		"	}\n"
+		"\n";
+		TRANSITIONS() <<
+		"\n";
+
+	if ( redFsm->anyRegActions() )
+		EXEC_FUNCS() << "\n";
+
+	out << "_again:\n";
+
+	TO_STATE_ACTIONS();
+
+	if ( redFsm->errState != 0 ) {
+		outLabelUsed = true;
+		out << 
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
+			"		goto _out;\n";
+	}
+
+	if ( !noEnd ) {
+		out << 
+			"	" << P() << " += 1;\n"
+			"	if ( " << P() << " != " << PE() << " )\n"
+			"		goto _resume;\n";
+	}
+	else {
+		out << 
+			"	" << P() << " += 1;\n"
+			"	goto _resume;\n";
+	}
+
+	if ( testEofUsed )
+		out << "	_test_eof: {}\n";
+
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+		out << 
+			"	if ( " << P() << " == " << vEOF() << " )\n"
+			"	{\n";
+
+		EOF_ACTIONS();
+
+		if ( redFsm->anyEofTrans() ) {
+			out <<
+				"	switch ( " << vCS() << " ) {\n";
+
+			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+				if ( st->eofTrans != 0 ) {
+					RedCondPair *cond = st->eofTrans->outCond( 0 );
+					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+				}
+			}
+
+			out <<
+				"	}\n";
+		}
+
+		out <<
+			"	}\n"
+			"\n";
+	}
+
+	if ( outLabelUsed )
+		out << "	_out: {}\n";
+
+	NFA_POP();
+
+	out << "	}\n";
 }

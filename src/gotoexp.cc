@@ -28,49 +28,7 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-void SwitchGotoExp::tableDataPass()
-{
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-}
-
-void SwitchGotoExp::genAnalysis()
-{
-	/* For directly executable machines there is no required state
-	 * ordering. Choose a depth-first ordering to increase the
-	 * potential for fall-throughs. */
-	redFsm->depthFirstOrdering();
-
-	/* Choose default transitions and the single transition. */
-	redFsm->chooseDefaultSpan();
-		
-	/* Choose single. */
-	redFsm->moveSelectTransToSingle();
-
-	/* If any errors have occured in the input file then don't write anything. */
-	if ( red->id->errorCount > 0 )
-		return;
-	
-	/* Anlayze Machine will find the final action reference counts, among other
-	 * things. We will use these in reporting the usage of fsm directives in
-	 * action code. */
-	red->analyzeMachine();
-
-	/* Run the analysis pass over the table data. */
-	setTableState( TableArray::AnalyzePass );
-	tableDataPass();
-
-	/* Switch the tables over to the code gen mode. */
-	setTableState( TableArray::GeneratePass );
-}
-
-std::ostream &SwitchGotoExp::EXEC_ACTIONS()
+std::ostream &SwitchGotoExp::EXEC_FUNCS()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -201,25 +159,6 @@ void SwitchGotoExp::NFA_POP_TEST( RedNfaTarg *targ )
 }
 
 
-void SwitchGotoExp::writeData()
-{
-	if ( redFsm->anyToStateActions() )
-		taToStateActions();
-
-	if ( redFsm->anyFromStateActions() )
-		taFromStateActions();
-
-	if ( redFsm->anyEofActions() )
-		taEofActions();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-
-	STATE_IDS();
-}
-
 void SwitchGotoExp::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
@@ -231,37 +170,8 @@ void SwitchGotoExp::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void SwitchGotoExp::writeExec()
+void SwitchGotoExp::FROM_STATE_ACTIONS()
 {
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	out << "	{\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps = 0;\n";
-
-	if ( redFsm->anyRegNbreak() ) {
-		out << 
-			"	int _nbreak;\n";
-	}
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
-
-	out << "_resume:\n";
-
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
@@ -269,22 +179,10 @@ void SwitchGotoExp::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	NFA_PUSH();
-
-	out << 
-		"	switch ( " << vCS() << " ) {\n";
-		STATE_GOTOS() <<
-		"	}\n"
-		"\n";
-		TRANSITIONS() << 
-		"\n";
-
-	if ( redFsm->anyRegActions() )
-		EXEC_ACTIONS() << "\n";
-
-	out << "_again:\n";
-
+void SwitchGotoExp::TO_STATE_ACTIONS()
+{
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
@@ -292,65 +190,20 @@ void SwitchGotoExp::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
+void SwitchGotoExp::REG_ACTIONS()
+{
 
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << "+= 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
+}
 
-	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+void SwitchGotoExp::EOF_ACTIONS()
+{
+	if ( redFsm->anyEofActions() ) {
 		out <<
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-				EOF_ACTION_SWITCH() <<
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	switch ( " << vCS() << " ) {\n";
-
-			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-				if ( st->eofTrans != 0 ) {
-					RedCondPair *cond = st->eofTrans->outCond( 0 );
-					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
-				}
-			}
-
-			out <<
-				"	}\n";
-		}
-
-		out <<
-			"	}\n"
-			"\n";
+			"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"	}\n";
 	}
 
-	if ( outLabelUsed )
-		out << "	_out: {}\n";
-
-	NFA_POP();
-
-	out << "	}\n";
 }

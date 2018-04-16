@@ -37,13 +37,13 @@ class SwitchGotoExp
 {
 public:
 	SwitchGotoExp( const CodeGenArgs &args )
-		: Goto(args) {}
+		: Goto(args, Exp) {}
 
-	std::ostream &EXEC_ACTIONS();
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &FINISH_CASES();
-	std::ostream &EOF_ACTION_SWITCH();
+	virtual std::ostream &EXEC_FUNCS();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
+
 	unsigned int TO_STATE_ACTION( RedStateAp *state );
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
@@ -52,11 +52,10 @@ public:
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
+	virtual void FROM_STATE_ACTIONS();
+	virtual void TO_STATE_ACTIONS();
+	virtual void REG_ACTIONS();
+	virtual void EOF_ACTIONS();
 };
 
 namespace C

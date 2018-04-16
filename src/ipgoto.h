@@ -37,7 +37,7 @@ class IpGoto
 {
 public:
 	IpGoto( const CodeGenArgs &args ) 
-			: Goto(args) {}
+			: Goto( args, Ip ) {}
 
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
@@ -46,6 +46,19 @@ public:
 	std::ostream &AGAIN_CASES();
 	std::ostream &STATE_GOTOS();
 	std::ostream &STATE_GOTO_CASES();
+
+	/* unused. */
+	virtual std::ostream &ACTION_SWITCH() { return out; }
+	virtual std::ostream &EXEC_FUNCS() { return out; }
+	virtual std::ostream &TO_STATE_ACTION_SWITCH() { return out; }
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH() { return out; }
+	virtual std::ostream &EOF_ACTION_SWITCH() { return out; }
+
+	/* Unused */
+	virtual void FROM_STATE_ACTIONS() {}
+	virtual void TO_STATE_ACTIONS() {}
+	virtual void REG_ACTIONS() {}
+	virtual void EOF_ACTIONS() {}
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

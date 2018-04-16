@@ -28,71 +28,6 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-void SwitchGotoLoop::tableDataPass()
-{
-	taActions();
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-}
-
-void SwitchGotoLoop::genAnalysis()
-{
-	/* For directly executable machines there is no required state
-	 * ordering. Choose a depth-first ordering to increase the
-	 * potential for fall-throughs. */
-	redFsm->depthFirstOrdering();
-
-	/* Choose default transitions and the single transition. */
-	redFsm->chooseDefaultSpan();
-		
-	/* Choose single. */
-	redFsm->moveSelectTransToSingle();
-
-	/* If any errors have occured in the input file then don't write anything. */
-	if ( red->id->errorCount > 0 )
-		return;
-
-	/* Anlayze Machine will find the final action reference counts, among other
-	 * things. We will use these in reporting the usage of fsm directives in
-	 * action code. */
-	red->analyzeMachine();
-
-	/* Run the analysis pass over the table data. */
-	setTableState( TableArray::AnalyzePass );
-	tableDataPass();
-
-	/* Switch the tables over to the code gen mode. */
-	setTableState( TableArray::GeneratePass );
-}
-
-void SwitchGotoLoop::writeData()
-{
-	if ( redFsm->anyActions() )
-		taActions();
-
-	if ( redFsm->anyToStateActions() )
-		taToStateActions();
-
-	if ( redFsm->anyFromStateActions() )
-		taFromStateActions();
-
-	if ( redFsm->anyEofActions() )
-		taEofActions();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-
-	STATE_IDS();
-}
-
 std::ostream &SwitchGotoLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -233,48 +168,8 @@ void SwitchGotoLoop::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-
-
-void SwitchGotoLoop::writeExec()
+void SwitchGotoLoop::FROM_STATE_ACTIONS()
 {
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	out << "	{\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps = 0;\n";
-
-	if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-			|| redFsm->anyFromStateActions() )
-	{
-		out << 
-			"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
-			"	" << UINT() << " _nacts;\n";
-	}
-
-	out << "\n";
-
-	if ( redFsm->anyRegNbreak() ) {
-		out << "	int _nbreak;\n";
-	}
-
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
-
-	out << "_resume:\n";
-
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ),
@@ -289,22 +184,10 @@ void SwitchGotoLoop::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	NFA_PUSH();
-
-	out <<
-		"	switch ( " << vCS() << " ) {\n";
-		STATE_GOTOS() <<
-		"	}\n"
-		"\n";
-		TRANSITIONS() <<
-		"\n";
-
-	if ( redFsm->anyRegActions() )
-		EXEC_FUNCS() << "\n";
-
-	out << "_again:\n";
-
+void SwitchGotoLoop::TO_STATE_ACTIONS()
+{
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	_acts = " << OFFSET( ARR_REF( actions ),
@@ -319,74 +202,27 @@ void SwitchGotoLoop::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
-	}
+void SwitchGotoLoop::REG_ACTIONS()
+{
+}
 
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
-	}
-
-	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out << 
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		if ( redFsm->anyEofActions() ) {
-			out <<
-				"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
-				"	" << UINT() << " __nacts;\n"
-				"	__acts = " << OFFSET( ARR_REF( actions ), 
-						ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-				"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
-				"	while ( __nacts > 0 ) {\n"
-				"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
-				EOF_ACTION_SWITCH() <<
-				"		}\n"
-				"		__acts += 1;\n"
-				"		__nacts -= 1;\n"
-				"	}\n";
-		}
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	switch ( " << vCS() << " ) {\n";
-
-			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-				if ( st->eofTrans != 0 ) {
-					RedCondPair *cond = st->eofTrans->outCond( 0 );
-					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
-				}
-			}
-
-			out <<
-				"	}\n";
-		}
-
+void SwitchGotoLoop::EOF_ACTIONS()
+{
+	if ( redFsm->anyEofActions() ) {
 		out <<
-			"	}\n"
-			"\n";
+			"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
+			"	" << UINT() << " __nacts;\n"
+			"	__acts = " << OFFSET( ARR_REF( actions ), 
+					ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
+			"	while ( __nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"		}\n"
+			"		__acts += 1;\n"
+			"		__nacts -= 1;\n"
+			"	}\n";
 	}
-
-	if ( outLabelUsed )
-		out << "	_out: {}\n";
-
-	NFA_POP();
-
-	out << "	}\n";
 }
