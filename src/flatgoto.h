@@ -33,7 +33,16 @@ struct FlatGoto
 	:
 		Flat( args, type )
 	{}
+
+	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
+	virtual std::ostream &ACTION_SWITCH() = 0;
+
+	virtual void tableDataPass();
+	virtual void genAnalysis();
+	virtual void writeData();
+	virtual void writeExec();
 };
 
 #endif
-
