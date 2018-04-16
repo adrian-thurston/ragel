@@ -24,6 +24,7 @@
 #define RAGEL_FLATVAR_H
 
 #include "flat.h"
+#include "flat.h"
 
 struct FlatVar
 :
@@ -48,7 +49,26 @@ struct FlatVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NRET( ostream &ret, bool inFinish );
 	void NBREAK( ostream &ret, int targState, bool csForced );
-};
 
+	void tableDataPass();
+	virtual void genAnalysis();
+	virtual void writeData();
+	virtual void writeExec();
+
+	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
+	virtual void EOF_ACTION( RedStateAp *state ) = 0;
+	virtual void COND_ACTION( RedCondPair *cond ) = 0;
+
+	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
+	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
+	virtual std::ostream &ACTION_SWITCH() = 0;
+
+	virtual void REG_ACTIONS( std::string cond ) = 0;
+	virtual void TO_STATE_ACTIONS() = 0;
+	virtual void FROM_STATE_ACTIONS() = 0;
+	virtual void EOF_ACTIONS() = 0;
+};
 
 #endif

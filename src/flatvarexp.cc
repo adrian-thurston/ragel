@@ -27,59 +27,6 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-void FlatVarExp::tableDataPass()
-{
-	taKeys();
-	taCharClass();
-	taFlatIndexOffset();
-
-	taIndicies();
-	taIndexDefaults();
-	taTransCondSpaces();
-	if ( red->condSpaceList.length() > 0 )
-		taTransOffsets();
-	taCondTargs();
-	taCondActions();
-
-	taToStateActions();
-	taFromStateActions();
-	taEofActions();
-	taEofTrans();
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-}
-
-void FlatVarExp::genAnalysis()
-{
-	redFsm->sortByStateId();
-
-	/* Choose default transitions and the single transition. */
-	redFsm->chooseDefaultSpan();
-		
-	/* Do flat expand. */
-	redFsm->makeFlatClass();
-
-	/* If any errors have occured in the input file then don't write anything. */
-	if ( red->id->errorCount > 0 )
-		return;
-
-	/* Anlayze Machine will find the final action reference counts, among other
-	 * things. We will use these in reporting the usage of fsm directives in
-	 * action code. */
-	red->analyzeMachine();
-
-	setKeyType();
-
-	/* Run the analysis pass over the table data. */
-	setTableState( TableArray::AnalyzePass );
-	tableDataPass();
-
-	/* Switch the tables over to the code gen mode. */
-	setTableState( TableArray::GeneratePass );
-}
-
 
 void FlatVarExp::COND_ACTION( RedCondPair *cond )
 {
@@ -220,39 +167,6 @@ std::ostream &FlatVarExp::ACTION_SWITCH()
 	return out;
 }
 
-void FlatVarExp::writeData()
-{
-	taKeys();
-	taCharClass();
-	taFlatIndexOffset();
-
-	taIndicies();
-	taIndexDefaults();
-	taTransCondSpaces();
-	if ( red->condSpaceList.length() > 0 )
-		taTransOffsets();
-	taCondTargs();
-	taCondActions();
-
-	if ( redFsm->anyToStateActions() )
-		taToStateActions();
-
-	if ( redFsm->anyFromStateActions() )
-		taFromStateActions();
-
-	if ( redFsm->anyEofActions() )
-		taEofActions();
-
-	if ( redFsm->anyEofTrans() )
-		taEofTrans();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-
-	STATE_IDS();
-}
 
 void FlatVarExp::NFA_FROM_STATE_ACTION_EXEC()
 {
@@ -265,121 +179,8 @@ void FlatVarExp::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void FlatVarExp::writeExec()
+void FlatVarExp::FROM_STATE_ACTIONS()
 {
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	if ( redFsm->anyNfaStates() ) {
-		out << 
-			"{\n"
-			"	" << UINT() << " _nfa_cont = 1;\n"
-			"	" << UINT() << " _nfa_repeat = 1;\n"
-			"	while ( _nfa_cont != 0 )\n";
-	}
-
-	out <<
-		"	{\n";
-	
-//	out <<
-//		"	int _klen;\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps;\n";
-
-//	out <<
-//		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-//		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-
-	if ( red->condSpaceList.length() > 0 )
-		out << "	int _cpc;\n";
-
-	out <<
-		"	" << UINT() << " _trans = 0;\n"
-		"	" << UINT() << " _have = 0;\n"
-		"	" << UINT() << " _cont = 1;\n";
-
-	if ( red->condSpaceList.length() > 0 ) {
-		out <<
-			"	" << UINT() << " _cond = 0;\n";
-	}
-
-//	if ( redFsm->anyRegNbreak() )
-//		out << "	int _nbreak;\n";
-
-	if ( redFsm->classMap != 0 ) {
-		out <<
-			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
-	}
-
-	out <<
-		"	while ( _cont == 1 ) {\n"
-		"\n";
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		_cont = 0;\n";
-	}
-
-	out << 
-		"_have = 0;\n";
-
-	if ( !noEnd ) {
-		out << 
-			"	if ( " << P() << " == " << PE() << " ) {\n";
-
-		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-			out << 
-				"	if ( " << P() << " == " << vEOF() << " )\n"
-				"	{\n";
-
-			if ( redFsm->anyEofActions() ) {
-				out <<
-					"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-					EOF_ACTION_SWITCH() <<
-					"	}\n";
-			}
-
-
-			out << "if ( _have == 0 ) {\n";
-
-			if ( redFsm->anyEofTrans() ) {
-				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-				if ( red->condSpaceList.length() > 0 ) {
-					out << 
-						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
-				}
-
-				out <<
-					"		_have = 1;\n"
-					"	}\n";
-					matchCondLabelUsed = true;
-			}
-
-			out << "}\n";
-			
-			out << 
-				"	}\n"
-				"\n";
-		}
-
-		out << 
-			"	if ( _have == 0 )\n"
-			"		_cont = 0;\n"
-			"	}\n";
-
-	}
-
-	out << 
-		"	if ( _cont == 1 ) {\n"
-		"	if ( _have == 0 ) {\n";
-
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
@@ -387,34 +188,10 @@ void FlatVarExp::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	NFA_PUSH();
-
-	LOCATE_TRANS();
-
-	string cond = "_cond";
-	if ( red->condSpaceList.length() == 0 )
-		cond = "_trans";
-
-	out << "}\n";
-	
-	out << "if ( _cont == 1 ) {\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << vCS() << ";\n";
-
-	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
-		"\n";
-
-	if ( redFsm->anyRegActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
-			ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-
+void FlatVarExp::TO_STATE_ACTIONS()
+{
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
@@ -422,31 +199,25 @@ void FlatVarExp::writeExec()
 			"	}\n"
 			"\n";
 	}
+}
 
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		_cont = 0;\n";
+void FlatVarExp::REG_ACTIONS( std::string cond )
+{
+	if ( redFsm->anyRegActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
+			ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
 	}
+}
 
-	out << 
-		"	if ( _cont == 1 )\n"
-		"		" << P() << " += 1;\n"
-		"\n";
-
-	out <<
-		/* cont if. */
-		"}}\n";
-
-	/* The loop. */
-	out << "}\n";
-
-	NFA_POP();
-
-	/* The execute block. */
-	out << "	}\n";
-
-	if ( redFsm->anyNfaStates() )
-		out << "}\n";
+void FlatVarExp::EOF_ACTIONS()
+{
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"	}\n";
+	}
 }

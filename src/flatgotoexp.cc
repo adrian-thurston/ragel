@@ -170,3 +170,43 @@ void FlatGotoExp::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
+void FlatGotoExp::FROM_STATE_ACTIONS()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+}
+
+void FlatGotoExp::TO_STATE_ACTIONS()
+{
+	if ( redFsm->anyToStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
+			TO_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+}
+
+void FlatGotoExp::REG_ACTIONS( string cond )
+{
+	out <<
+		"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
+		ACTION_SWITCH() << 
+		"	}\n"
+		"\n";
+}
+
+void FlatGotoExp::EOF_ACTIONS()
+{
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"	}\n";
+	}
+}

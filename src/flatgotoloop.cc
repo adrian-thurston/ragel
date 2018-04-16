@@ -158,3 +158,73 @@ void FlatGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
+
+void FlatGotoLoop::FROM_STATE_ACTIONS()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
+			"	}\n"
+			"\n";
+	}
+}
+
+void FlatGotoLoop::TO_STATE_ACTIONS()
+{
+	if ( redFsm->anyToStateActions() ) {
+		out <<
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF ( actions ), "_acts" ) << "; _acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			TO_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
+			"	}\n"
+			"\n";
+	}
+}
+
+void FlatGotoLoop::REG_ACTIONS( string cond )
+{
+	out <<
+		"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
+		"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+		"	_acts += 1;\n"
+		"	while ( _nacts > 0 ) {\n"
+		"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
+		"		{\n";
+		ACTION_SWITCH() <<
+		"		}\n"
+		"		_nacts -= 1;\n"
+		"		_acts += 1;\n"
+		"	}\n"
+		"\n";
+}
+
+void FlatGotoLoop::EOF_ACTIONS()
+{
+	if ( redFsm->anyEofActions() ) {
+		out <<
+			"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
+			"	" << UINT() << " __nacts;\n"
+			"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
+			"	while ( __nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
+			EOF_ACTION_SWITCH() <<
+			"		}\n"
+			"		__nacts -= 1;\n"
+			"		__acts += 1;\n"
+			"	}\n";
+	}
+}

@@ -43,6 +43,11 @@ struct FlatGoto
 	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
+
+	virtual void FROM_STATE_ACTIONS() = 0;
+	virtual void TO_STATE_ACTIONS() = 0;
+	virtual void REG_ACTIONS( std::string cond ) = 0;
+	virtual void EOF_ACTIONS() = 0;
 };
 
 #endif

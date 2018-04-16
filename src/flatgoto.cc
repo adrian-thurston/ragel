@@ -180,32 +180,7 @@ void FlatGoto::writeExec()
 
 	out << LABEL( "_resume" ) << " {\n";
 
-	if ( type == Loop )
-	{
-		if ( redFsm->anyFromStateActions() ) {
-			out <<
-				"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
-				"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-				"	_acts += 1;\n"
-				"	while ( _nacts > 0 ) {\n"
-				"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
-				FROM_STATE_ACTION_SWITCH() <<
-				"		}\n"
-				"		_nacts -= 1;\n"
-				"		_acts += 1;\n"
-				"	}\n"
-				"\n";
-		}
-	}
-	else {
-		if ( redFsm->anyFromStateActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( fromStateActions ) << "[" << vCS() << "] ) {\n";
-				FROM_STATE_ACTION_SWITCH() <<
-				"	}\n"
-				"\n";
-		}
-	}
+	FROM_STATE_ACTIONS();
 
 	NFA_PUSH();
 
@@ -232,28 +207,7 @@ void FlatGoto::writeExec()
 		if ( redFsm->anyRegNbreak() )
 			out << "	_nbreak = 0;\n";
 
-		if ( type == Loop ) {
-			out <<
-				"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
-				"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-				"	_acts += 1;\n"
-				"	while ( _nacts > 0 ) {\n"
-				"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
-				"		{\n";
-				ACTION_SWITCH() <<
-				"		}\n"
-				"		_nacts -= 1;\n"
-				"		_acts += 1;\n"
-				"	}\n"
-				"\n";
-		}
-		else {
-			out <<
-				"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
-				ACTION_SWITCH() << 
-				"	}\n"
-				"\n";
-		}
+		REG_ACTIONS( cond );
 
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
@@ -270,31 +224,7 @@ void FlatGoto::writeExec()
 			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "}\n" << LABEL( "_again" ) << " {\n";
 
-	if ( type == Loop )
-	{
-		if ( redFsm->anyToStateActions() ) {
-			out <<
-				"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-				"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF ( actions ), "_acts" ) << "; _acts += 1;\n"
-				"	while ( _nacts > 0 ) {\n"
-				"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
-				TO_STATE_ACTION_SWITCH() <<
-				"		}\n"
-				"		_nacts -= 1;\n"
-				"		_acts += 1;\n"
-				"	}\n"
-				"\n";
-		}
-	}
-	else {
-		if ( redFsm->anyToStateActions() ) {
-			out <<
-				"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
-				TO_STATE_ACTION_SWITCH() <<
-				"	}\n"
-				"\n";
-		}
-	}
+	TO_STATE_ACTIONS();
 
 	if ( redFsm->errState != 0 ) {
 		outLabelUsed = true;
@@ -323,31 +253,7 @@ void FlatGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
-		if ( type == Loop )
-		{
-			if ( redFsm->anyEofActions() ) {
-				out <<
-					"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
-					"	" << UINT() << " __nacts;\n"
-					"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-					"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
-					"	while ( __nacts > 0 ) {\n"
-					"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
-					EOF_ACTION_SWITCH() <<
-					"		}\n"
-					"		__nacts -= 1;\n"
-					"		__acts += 1;\n"
-					"	}\n";
-			}
-		}
-		else {
-			if ( redFsm->anyEofActions() ) {
-				out <<
-					"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
-					EOF_ACTION_SWITCH() <<
-					"	}\n";
-			}
-		}
+		EOF_ACTIONS();
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
