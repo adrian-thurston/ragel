@@ -43,6 +43,7 @@ void FlatGoto::tableDataPass()
 
 	taToStateActions();
 	taFromStateActions();
+	taEofConds();
 	taEofActions();
 	taEofTrans();
 	taNfaTargs();
@@ -106,6 +107,8 @@ void FlatGoto::writeData()
 
 	if ( redFsm->anyFromStateActions() )
 		taFromStateActions();
+
+	taEofConds();
 
 	if ( redFsm->anyEofActions() )
 		taEofActions();
@@ -252,6 +255,28 @@ void FlatGoto::writeExec()
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
+
+		out <<
+			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
+			"		" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
+			"		int _klen;\n"
+			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
+						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
+			"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+			"		_cpc = 0;\n"
+		;
+
+		if ( red->condSpaceList.length() > 0 )
+			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
+
+		COND_BIN_SEARCH( eofCondKeys, "goto _ok;", "goto _out;" );
+
+		out << 
+			"		_ok: {}\n"
+			"	}\n"
+		;
+
+		outLabelUsed = true;
 
 		EOF_ACTIONS();
 

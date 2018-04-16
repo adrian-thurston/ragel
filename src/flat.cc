@@ -41,6 +41,10 @@ Flat::Flat( const CodeGenArgs &args, Type type )
 	condActions(      "cond_actions",        *this ),
 	toStateActions(   "to_state_actions",    *this ),
 	fromStateActions( "from_state_actions",  *this ),
+	eofCondSpaces(    "eof_cond_spaces",     *this ),
+	eofCondKeyOffs(   "eof_cond_key_offs",   *this ),
+	eofCondKeyLens(   "eof_cond_key_lens",   *this ),
+	eofCondKeys(      "eof_cond_keys",       *this ),
 	eofActions(       "eof_actions",         *this ),
 	eofTrans(         "eof_trans",           *this ),
 	nfaTargs(         "nfa_targs",           *this ),
@@ -128,6 +132,68 @@ void Flat::taEofActions()
 	}
 
 	eofActions.finish();
+}
+
+void Flat::taEofConds()
+{
+	/*
+	 * EOF Cond Spaces
+	 */
+	eofCondSpaces.start();
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->outCondSpace != 0 )
+			transCondSpaces.value( st->outCondSpace->condSpaceId );
+		else
+			transCondSpaces.value( -1 );
+	}
+	eofCondSpaces.finish();
+
+	/*
+	 * EOF Cond Key Indixes
+	 */
+	eofCondKeyOffs.start();
+
+	int curOffset = 0;
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		long off = 0;
+		if ( st->outCondSpace != 0 ) {
+			off = curOffset;
+			curOffset += st->outCondKeys.length();
+		}
+		eofCondKeyOffs.value( off );
+	}
+
+	eofCondKeyOffs.finish();
+
+	/*
+	 * EOF Cond Key Lengths.
+	 */
+	eofCondKeyLens.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		long len = 0;
+		if ( st->outCondSpace != 0 )
+			len = st->outCondKeys.length();
+		eofCondKeyLens.value( len );
+	}
+
+	eofCondKeyLens.finish();
+
+	/*
+	 * EOF Cond Keys
+	 */
+	eofCondKeys.start();
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->outCondSpace != 0 ) {
+			for ( int c = 0; c < st->outCondKeys.length(); c++ ) {
+				CondKey key = st->outCondKeys[c];
+				eofCondKeys.value( key.getVal() );
+			}
+		}
+	}
+
+	eofCondKeys.finish();
 }
 
 void Flat::taEofTrans()
@@ -569,6 +635,58 @@ void Flat::NFA_POP()
 			"		goto _out;\n"
 			"	}\n";
 	}
+}
+
+void Flat::COND_EXEC( std::string expr )
+{
+	out <<
+		"	switch ( " << expr << " ) {\n"
+		"\n";
+
+	for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
+		GenCondSpace *condSpace = csi;
+		out << "	" << CASE( STR( condSpace->condSpaceId ) ) << " {\n";
+		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+			out << TABS(2) << "if ( ";
+			CONDITION( out, *csi );
+			Size condValOffset = (1 << csi.pos());
+			out << " ) _cpc += " << condValOffset << ";\n";
+		}
+
+		out << 
+			"	" << CEND() << "}\n";
+	}
+
+	out << 
+		"	}\n";
+}
+
+void Flat::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
+{
+	out <<
+		"	{\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
+		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
+		"		_lower = _ckeys;\n"
+		"		_upper = _ckeys + _klen - 1;\n"
+		"		while ( " << TRUE() << " ) {\n"
+		"			if ( _upper < _lower )\n"
+		"				break;\n"
+		"\n"
+		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+		"			if ( _cpc < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"				_upper = _mid - 1;\n"
+		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"				_lower = _mid + 1;\n"
+		"			else {\n"
+		"				" << ok << "\n"
+		"			}\n"
+		"		}\n"
+		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
+		"		" << error << "\n"
+		"	}\n"
+	;
 }
 
 void Flat::LOCATE_TRANS()

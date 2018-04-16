@@ -59,6 +59,10 @@ protected:
 	TableArray condActions;
 	TableArray toStateActions;
 	TableArray fromStateActions;
+	TableArray eofCondSpaces;
+	TableArray eofCondKeyOffs;
+	TableArray eofCondKeyLens;
+	TableArray eofCondKeys;
 	TableArray eofActions;
 	TableArray eofTrans;
 	TableArray nfaTargs;
@@ -81,6 +85,7 @@ protected:
 	void taFromStateActions();
 	void taEofActions();
 	void taEofTrans();
+	void taEofConds();
 	void taNfaTargs();
 	void taNfaOffsets();
 	void taNfaPushActions();
@@ -129,6 +134,9 @@ protected:
 
 	void NFA_PUSH();
 	void NFA_POP();
+
+	void COND_EXEC( std::string expr );
+	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
 };
 
 #endif
