@@ -24,7 +24,7 @@
 #define FLAT_GOTO_EXP_H
 
 #include <iostream>
-#include "flat.h"
+#include "flatgoto.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -33,11 +33,11 @@ struct CodeGenData;
  * FlatGotoExp
  */
 class FlatGotoExp
-	: public Flat
+	: public FlatGoto
 {
 public:
 	FlatGotoExp( const CodeGenArgs &args ) 
-		: Flat(args) {}
+		: FlatGoto(args, Flat::Exp) {}
 
 	void tableDataPass();
 

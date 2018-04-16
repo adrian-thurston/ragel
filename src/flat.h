@@ -35,12 +35,18 @@ struct RedStateAp;
 class Flat
 	: public CodeGen
 {
+protected:
+	enum Type {
+		Loop = 1, Exp
+	};
+
 public:
-	Flat( const CodeGenArgs &args );
+	Flat( const CodeGenArgs &args, Type type );
 
 	virtual ~Flat() { }
 
 protected:
+	Type type;
 	TableArray actions;
 	TableArray keys;
 	TableArray charClass;

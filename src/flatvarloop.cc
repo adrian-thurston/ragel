@@ -27,11 +27,6 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-FlatVarLoop::FlatVarLoop( const CodeGenArgs &args )
-:
-	FlatVar( args )
-{}
-
 
 void FlatVarLoop::tableDataPass()
 {

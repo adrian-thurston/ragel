@@ -37,7 +37,10 @@ class FlatVarLoop
 	: public FlatVar
 {
 public:
-	FlatVarLoop( const CodeGenArgs &args );
+	FlatVarLoop( const CodeGenArgs &args )
+	:
+		FlatVar( args, Flat::Loop )
+	{}
 
 	void tableDataPass();
 

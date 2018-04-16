@@ -34,7 +34,10 @@ class FlatVarExp
 	public FlatVar
 {
 public:
-	FlatVarExp( const CodeGenArgs &args );
+	FlatVarExp( const CodeGenArgs &args ) 
+	:
+		FlatVar( args, Flat::Exp )
+	{}
 
 	void tableDataPass();
 

@@ -43,10 +43,8 @@ protected:
 public:
 	Binary( const CodeGenArgs &args, Type type );
 
-
 protected:
 	Type type;
-
 	TableArray keyOffsets;
 	TableArray singleLens;
 	TableArray rangeLens;

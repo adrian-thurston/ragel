@@ -29,9 +29,9 @@ struct FlatVar
 :
 	public Flat
 {
-	FlatVar( const CodeGenArgs &args )
+	FlatVar( const CodeGenArgs &args, Flat::Type type )
 	:
-		Flat( args )
+		Flat( args, type )
 	{}
 
 	void NFA_POP();

@@ -25,9 +25,10 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-Flat::Flat( const CodeGenArgs &args ) 
+Flat::Flat( const CodeGenArgs &args, Type type ) 
 :
 	CodeGen( args ),
+	type(type),
 	actions(          "actions",             *this ),
 	keys(             "trans_keys",          *this ),
 	charClass(        "char_class",          *this ),

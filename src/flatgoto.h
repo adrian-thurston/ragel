@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,46 +20,20 @@
  * SOFTWARE.
  */
 
-#ifndef FLAT_GOTO_LOOP_H
-#define FLAT_GOTO_LOOP_H
+#ifndef RAGEL_FLATGOTO_H
+#define RAGEL_FLATGOTO_H
 
-#include <iostream>
-#include "flatgoto.h"
+#include "flat.h"
 
-/* Forwards. */
-struct CodeGenData;
-struct NameInst;
-struct RedTransAp;
-struct RedStateAp;
-
-class FlatGotoLoop
-	: public FlatGoto
+struct FlatGoto
+:
+	public Flat
 {
-public:
-	FlatGotoLoop( const CodeGenArgs &args )
-		: FlatGoto(args, Flat::Loop) {}
-
-	void tableDataPass();
-
-	virtual void genAnalysis();
-	virtual void writeData();
-	virtual void writeExec();
-
-protected:
-	std::ostream &TO_STATE_ACTION_SWITCH();
-	std::ostream &FROM_STATE_ACTION_SWITCH();
-	std::ostream &EOF_ACTION_SWITCH();
-	std::ostream &ACTION_SWITCH();
-
-	virtual void TO_STATE_ACTION( RedStateAp *state );
-	virtual void FROM_STATE_ACTION( RedStateAp *state );
-	virtual void EOF_ACTION( RedStateAp *state );
-	virtual void COND_ACTION( RedCondPair *cond );
-
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
-	virtual void NFA_POP_TEST( RedNfaTarg *targ );
-
-	virtual void NFA_FROM_STATE_ACTION_EXEC();
+	FlatGoto( const CodeGenArgs &args, Flat::Type type )
+	:
+		Flat( args, type )
+	{}
 };
 
 #endif
+

@@ -27,12 +27,6 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-FlatVarExp::FlatVarExp( const CodeGenArgs &args ) 
-:
-	FlatVar(args)
-{
-}
-
 void FlatVarExp::tableDataPass()
 {
 	taKeys();
