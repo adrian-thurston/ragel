@@ -157,7 +157,7 @@ void FlatGoto::writeExec()
 			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
 	}
 
-	if ( red->condSpaceList.length() > 0 )
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
 		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
@@ -266,8 +266,9 @@ void FlatGoto::writeExec()
 			"		_cpc = 0;\n"
 		;
 
-		if ( red->condSpaceList.length() > 0 )
+		if ( red->condSpaceList.length() > 0 ) {
 			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
+		}
 
 		COND_BIN_SEARCH( eofCondKeys, "goto _ok;", "goto _out;" );
 

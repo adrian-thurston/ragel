@@ -1069,6 +1069,43 @@ void Goto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
+		out <<
+			"	switch ( " << vCS() << " ) {\n";
+
+		bool okeydokey = false;
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			if ( st->outCondSpace != 0 ) {
+				out << "	case " << st->id << ": {\n";
+				out << "int ck = 0;\n";
+				for ( GenCondSet::Iter csi = st->outCondSpace->condSet; csi.lte(); csi++ ) {
+					out << "if ( ";
+					CONDITION( out, *csi );
+					Size condValOffset = (1 << csi.pos());
+					out << " ) ck += " << condValOffset << ";\n";
+				}
+
+				out << "	switch ( ck ) {\n";
+				for ( CondKeySet::Iter k = st->outCondKeys; k.lte(); k++ ) {
+					out << "case " << *k << ": goto _okeydokey;\n";
+					okeydokey = true;
+				}
+				out << "}\n";
+				out << vCS() << " = " << ERROR_STATE() << ";\n";
+				out << "goto _out;\n";
+
+				out << "}\n";
+			}
+
+		}
+
+		out <<
+			"	}\n";
+
+		if ( okeydokey ) {
+			out <<
+				"_okeydokey: {}\n";
+		}
+
 		EOF_ACTIONS();
 
 		if ( redFsm->anyEofTrans() ) {

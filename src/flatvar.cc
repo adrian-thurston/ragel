@@ -561,7 +561,7 @@ void FlatVar::writeExec()
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	if ( red->condSpaceList.length() > 0 )
+	if ( red->condSpaceList.length() > 0 || redFsm->anyEofTrans() || redFsm->anyEofActions() )
 		out << "	int _cpc;\n";
 
 	if ( red->condSpaceList.length() > 0 )
