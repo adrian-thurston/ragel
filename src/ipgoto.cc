@@ -770,10 +770,23 @@ void IpGoto::writeExec()
 		out <<
 			"	switch ( " << vCS() << " ) {\n";
 
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			out << "	case " << st->id << ": {\n";
+			NFA_PUSH( st );
+			out << "\n\t" << CEND() << "}\n";
+		}
+
+		out <<
+			"	}\n";
+
+		out <<
+			"	switch ( " << vCS() << " ) {\n";
+
 		bool okeydokey = false;
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			if ( st->outCondSpace != 0 ) {
 				out << "	case " << st->id << ": {\n";
+
 				out << "int ck = 0;\n";
 				for ( GenCondSet::Iter csi = st->outCondSpace->condSet; csi.lte(); csi++ ) {
 					out << "if ( ";
@@ -793,7 +806,6 @@ void IpGoto::writeExec()
 
 				out << "}\n";
 			}
-
 		}
 
 		out <<

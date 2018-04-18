@@ -256,6 +256,8 @@ void FlatGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
+		NFA_PUSH();
+
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
 			"		" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"

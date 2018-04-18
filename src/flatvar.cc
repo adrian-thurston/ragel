@@ -606,6 +606,8 @@ void FlatVar::writeExec()
 				"	if ( " << P() << " == " << vEOF() << " )\n"
 				"	{\n";
 
+			NFA_PUSH();
+
 			out << UINT() << " _eofcont = 0;\n";
 
 			out <<

@@ -262,6 +262,8 @@ void BinGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
+		NFA_PUSH();
+
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
 			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),

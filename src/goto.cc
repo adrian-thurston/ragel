@@ -1069,6 +1069,8 @@ void Goto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
+		NFA_PUSH();
+
 		out <<
 			"	switch ( " << vCS() << " ) {\n";
 
