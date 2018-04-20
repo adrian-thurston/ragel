@@ -598,7 +598,15 @@ void BinaryVar::writeExec()
 		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
 		"\n";
 
-	REG_ACTIONS();
+	if ( redFsm->anyRegActions() ) {
+		out <<
+			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n";
+
+		REG_ACTIONS();
+
+		out <<
+			"	}\n";
+	}
 
 	TO_STATE_ACTIONS();
 

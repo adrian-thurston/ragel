@@ -36,17 +36,19 @@ data_DATA = ragel.lm
 libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 dist_libfsm_la_SOURCES = \
-	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h \
-	binvarloop.h binvarexp.h flat.h flatgoto.h flatgotoloop.h flatgotoexp.h flatvar.h \
+	buffer.h codegen.h \
+	binary.h bingoto.h binvar.h binloop.h binexp.h \
+	flat.h flatgoto.h flatgotoloop.h flatgotoexp.h flatvar.h \
 	flatvarloop.h flatvarexp.h goto.h gotoloop.h gotoexp.h \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
-	allocgen.cc codegen.cc binary.cc bingoto.cc bingotoloop.cc \
-	bingotoexp.cc binvar.cc \
-	binvarloop.cc binvarexp.cc flat.cc flatgoto.cc flatgotoloop.cc flatgotoexp.cc \
-	flatvar.cc flatvarloop.cc flatvarexp.cc goto.cc gotoloop.cc \
-	gotoexp.cc ipgoto.cc dot.cc asm.cc
+	allocgen.cc codegen.cc \
+	binary.cc bingoto.cc binloop.cc binexp.cc binvar.cc \
+	flat.cc flatgoto.cc flatgotoloop.cc flatgotoexp.cc \
+	flatvar.cc flatvarloop.cc flatvarexp.cc \
+	goto.cc gotoloop.cc gotoexp.cc ipgoto.cc \
+	dot.cc asm.cc
 
 nodist_libfsm_la_SOURCES = \
 	version.h

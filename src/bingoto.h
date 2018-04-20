@@ -24,10 +24,12 @@
 #define RAGEL_BINGOTO_H
 
 #include "binary.h"
+#include "binloop.h"
+#include "binexp.h"
 
 struct BinGoto
 :
-	public Binary
+	public virtual Binary
 {
 	BinGoto( const CodeGenArgs &args, Binary::Type type )
 	:
@@ -42,25 +44,32 @@ struct BinGoto
 
 	void writeExecLoop();
 	void writeExecExp();
-
-	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
-	virtual std::ostream &ACTION_SWITCH() = 0;
-
-	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void EOF_ACTION( RedStateAp *state ) = 0;
-	virtual void COND_ACTION( RedCondPair *cond ) = 0;
-
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
-	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
-
-	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void TO_STATE_ACTIONS() = 0;
-	virtual void REG_ACTIONS() = 0;
-	virtual void EOF_ACTIONS() = 0;
 };
+
+class BinGotoLoop
+	: public BinGoto, public BinLoop
+{
+public:
+	BinGotoLoop( const CodeGenArgs &args )
+	:
+		Binary( args, Loop ),
+		BinGoto( args, Loop ),
+		BinLoop( args, Loop )
+	{}
+};
+
+
+class BinGotoExp
+	: public BinGoto, public BinExp
+{
+public:
+	BinGotoExp( const CodeGenArgs &args ) 
+	:
+		Binary( args, Exp ),
+		BinGoto( args, Exp ),
+		BinExp( args, Exp )
+	{}
+};
+
 
 #endif

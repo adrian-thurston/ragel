@@ -30,10 +30,8 @@
 /*
  * Code generators.
  */
-#include "binvarloop.h"
-#include "bingotoloop.h"
-#include "binvarexp.h"
-#include "bingotoexp.h"
+#include "binvar.h"
+#include "bingoto.h"
 #include "flatgotoloop.h"
 #include "flatvarloop.h"
 #include "flatgotoexp.h"

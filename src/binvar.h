@@ -24,10 +24,12 @@
 #define RAGEL_BINVAR_H
 
 #include "binary.h"
+#include "binloop.h"
+#include "binexp.h"
 
 struct BinaryVar
 :
-	public Binary
+	public virtual Binary
 {
 	BinaryVar( const CodeGenArgs &args, Binary::Type type )
 	:
@@ -58,24 +60,32 @@ struct BinaryVar
 	virtual void writeData();
 	virtual void writeExec();
 
-	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void EOF_ACTION( RedStateAp *state ) = 0;
-	virtual void COND_ACTION( RedCondPair *cond ) = 0;
 
-	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
-	virtual std::ostream &ACTION_SWITCH() = 0;
+};
 
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
-	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
+class BinVarLoop
+	: public BinaryVar, public BinLoop
+{
+public:
+	BinVarLoop( const CodeGenArgs &args )
+	:
+		Binary( args, Loop ),
+		BinaryVar( args, Loop ),
+		BinLoop( args, Exp )
+	{}
+};
 
-	virtual void REG_ACTIONS() = 0;
-	virtual void TO_STATE_ACTIONS() = 0;
-	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void EOF_ACTIONS() = 0;
+class BinVarExp
+:
+	public BinaryVar, public BinExp
+{
+public:
+	BinVarExp( const CodeGenArgs &args ) 
+	:
+		Binary( args, Exp ),
+		BinaryVar( args, Exp ),
+		BinExp( args, Exp )
+	{}
 };
 
 #endif

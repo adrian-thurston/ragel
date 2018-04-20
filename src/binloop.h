@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,57 +20,43 @@
  * SOFTWARE.
  */
 
+#ifndef _BINLOOP_H
+#define _BINLOOP_H
 
-#ifndef BINBASIC_H
-#define BINBASIC_H
+#include "binary.h"
 
-#include <iostream>
-#include "binvar.h"
-#include "vector.h"
-
-/* Forwards. */
-struct CodeGenData;
-struct NameInst;
-struct RedTransAp;
 struct RedStateAp;
+struct RedCondPair;
 
-class BinVarLoop
-	: public BinaryVar
+class BinLoop
+	: public virtual Binary
 {
 public:
-	BinVarLoop( const CodeGenArgs &args );
+	BinLoop( const CodeGenArgs &args, Binary::Type type )
+	:
+		Binary( args, type )
+	{}
 
-	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
-	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
-
-	virtual std::ostream &TO_STATE_ACTION_SWITCH();
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
-	virtual std::ostream &EOF_ACTION_SWITCH();
-	virtual std::ostream &ACTION_SWITCH();
+	virtual void TO_STATE_ACTION( RedStateAp *state );
+	virtual void EOF_ACTION( RedStateAp *state );
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
-	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
-	void REG_ACTIONS();
-	void TO_STATE_ACTIONS();
-	void FROM_STATE_ACTIONS();
-	void EOF_ACTIONS();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &ACTION_SWITCH();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
+
+	virtual void FROM_STATE_ACTIONS();
+	virtual void REG_ACTIONS();
+	virtual void TO_STATE_ACTIONS();
+	virtual void EOF_ACTIONS();
+
+	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
 
-namespace C
-{
-	class BinVarLoop
-	:
-		public ::BinVarLoop
-	{
-	public:
-		BinVarLoop( const CodeGenArgs &args )
-			: ::BinVarLoop( args )
-		{}
-	};
-}
 
 #endif

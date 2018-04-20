@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,52 +20,43 @@
  * SOFTWARE.
  */
 
-#ifndef BIN_GOTO_EXP_H
-#define BIN_GOTO_EXP_H
+#ifndef _BINEXP_H
+#define _BINEXP_H
 
-#include <iostream>
-#include "bingoto.h"
+#include "binary.h"
 
-/* Forwards. */
-struct CodeGenData;
+struct RedStateAp;
+struct RedCondPair;
 
-class BinGotoExp : public BinGoto
+class BinExp
+	: public virtual Binary
 {
 public:
-	BinGotoExp( const CodeGenArgs &args );
+	BinExp( const CodeGenArgs &args, Binary::Type type )
+	:
+		Binary( args, type )
+	{}
 
-protected:
-	virtual std::ostream &TO_STATE_ACTION_SWITCH();
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
-	virtual std::ostream &EOF_ACTION_SWITCH();
-	virtual std::ostream &ACTION_SWITCH();
-
-	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
-	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
+	virtual void TO_STATE_ACTION( RedStateAp *state );
+	virtual void EOF_ACTION( RedStateAp *state );
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
-	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
-	virtual void FROM_STATE_ACTIONS();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &ACTION_SWITCH();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
+
 	virtual void TO_STATE_ACTIONS();
 	virtual void REG_ACTIONS();
+	virtual void FROM_STATE_ACTIONS();
 	virtual void EOF_ACTIONS();
+
+	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
 
-namespace C
-{
-	class BinGotoExp
-	:
-		public ::BinGotoExp
-	{
-	public:
-		BinGotoExp( const CodeGenArgs &args )
-			: ::BinGotoExp( args )
-		{}
-	};
-}
-
 #endif
+

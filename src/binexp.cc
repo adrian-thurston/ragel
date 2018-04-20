@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,53 +20,43 @@
  * SOFTWARE.
  */
 
-#include "ragel.h"
-#include "binvarexp.h"
+#include "bingoto.h"
 #include "redfsm.h"
 #include "gendata.h"
-#include "parsedata.h"
-#include "inputdata.h"
 
-BinVarExp::BinVarExp( const CodeGenArgs &args ) 
-:
-	BinaryVar( args, Exp )
-{
-}
-
-
-void BinVarExp::COND_ACTION( RedCondPair *cond )
-{
-	int action = 0;
-	if ( cond->action != 0 )
-		action = cond->action->actListId+1;
-	condActions.value( action );
-}
-
-void BinVarExp::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->actListId+1;
-	toStateActions.value( act );
-}
-
-void BinVarExp::FROM_STATE_ACTION( RedStateAp *state )
+void BinExp::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->actListId+1;
+		act = state->fromStateAction->actListId + 1;
 	fromStateActions.value( act );
 }
 
-void BinVarExp::EOF_ACTION( RedStateAp *state )
+void BinExp::COND_ACTION( RedCondPair *cond )
+{
+	int action = 0;
+	if ( cond->action != 0 )
+		action = cond->action->actListId + 1;
+	condActions.value( action );
+}
+
+void BinExp::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->actListId + 1;
+	toStateActions.value( act );
+}
+
+void BinExp::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
-		act = state->eofAction->actListId+1;
+		act = state->eofAction->actListId + 1;
 	eofActions.value( act );
 }
 
-void BinVarExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void BinExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -74,7 +64,7 @@ void BinVarExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void BinVarExp::NFA_POP_TEST( RedNfaTarg *targ )
+void BinExp::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -84,7 +74,7 @@ void BinVarExp::NFA_POP_TEST( RedNfaTarg *targ )
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinVarExp::TO_STATE_ACTION_SWITCH()
+std::ostream &BinExp::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -105,9 +95,20 @@ std::ostream &BinVarExp::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
+void BinExp::TO_STATE_ACTIONS()
+{
+	if ( redFsm->anyToStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
+			TO_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+}
+
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinVarExp::FROM_STATE_ACTION_SWITCH()
+std::ostream &BinExp::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -128,7 +129,7 @@ std::ostream &BinVarExp::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinVarExp::EOF_ACTION_SWITCH()
+std::ostream &BinExp::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -151,7 +152,7 @@ std::ostream &BinVarExp::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &BinVarExp::ACTION_SWITCH()
+std::ostream &BinExp::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -172,7 +173,7 @@ std::ostream &BinVarExp::ACTION_SWITCH()
 	return out;
 }
 
-void BinVarExp::NFA_FROM_STATE_ACTION_EXEC()
+void BinExp::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -183,29 +184,7 @@ void BinVarExp::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void BinVarExp::REG_ACTIONS()
-{
-	if ( redFsm->anyRegActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
-			ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-}
-
-void BinVarExp::TO_STATE_ACTIONS()
-{
-	if ( redFsm->anyToStateActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
-			TO_STATE_ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-}
-
-void BinVarExp::FROM_STATE_ACTIONS()
+void BinExp::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -216,7 +195,16 @@ void BinVarExp::FROM_STATE_ACTIONS()
 	}
 }
 
-void BinVarExp::EOF_ACTIONS()
+void BinExp::REG_ACTIONS()
+{
+	out <<
+		"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
+		ACTION_SWITCH() <<
+		"	}\n"
+		"\n";
+}
+
+void BinExp::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
@@ -225,3 +213,4 @@ void BinVarExp::EOF_ACTIONS()
 			"	}\n";
 	}
 }
+
