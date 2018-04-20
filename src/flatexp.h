@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,40 +20,33 @@
  * SOFTWARE.
  */
 
-#ifndef FLATLOOPVAR_H
-#define FLATLOOPVAR_H
+#ifndef _FLATEXP_H
+#define _FLATEXP_H
 
-#include <iostream>
-#include "flatvar.h"
-#include "vector.h"
+#include "flat.h"
 
-/* Forwards. */
-struct CodeGenData;
-struct NameInst;
-struct RedTransAp;
-struct RedStateAp;
-
-class FlatVarLoop
-	: public FlatVar
+class FlatExp
+	: public virtual Flat
 {
 public:
-	FlatVarLoop( const CodeGenArgs &args )
+	FlatExp( const CodeGenArgs &args, Flat::Type type )
 	:
-		FlatVar( args, Flat::Loop )
+		Flat( args, type )
 	{}
-
-	virtual void TO_STATE_ACTION( RedStateAp *state );
-	virtual void FROM_STATE_ACTION( RedStateAp *state );
-	virtual void EOF_ACTION( RedStateAp *state );
-	virtual void COND_ACTION( RedCondPair *cond );
 
 	virtual std::ostream &TO_STATE_ACTION_SWITCH();
 	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
 	virtual std::ostream &EOF_ACTION_SWITCH();
 	virtual std::ostream &ACTION_SWITCH();
 
+	virtual void TO_STATE_ACTION( RedStateAp *state );
+	virtual void FROM_STATE_ACTION( RedStateAp *state );
+	virtual void EOF_ACTION( RedStateAp *state );
+	virtual void COND_ACTION( RedCondPair *cond );
+
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
+
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
 	virtual void FROM_STATE_ACTIONS();

@@ -24,30 +24,49 @@
 #define RAGEL_FLATGOTO_H
 
 #include "flat.h"
+#include "flatloop.h"
+#include "flatexp.h"
 
 struct FlatGoto
 :
-	public Flat
+	public virtual Flat
 {
 	FlatGoto( const CodeGenArgs &args, Flat::Type type )
 	:
 		Flat( args, type )
 	{}
 
-	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
-	virtual std::ostream &ACTION_SWITCH() = 0;
-
 	virtual void tableDataPass();
 	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
+};
 
-	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void TO_STATE_ACTIONS() = 0;
-	virtual void REG_ACTIONS( std::string cond ) = 0;
-	virtual void EOF_ACTIONS() = 0;
+class FlatGotoLoop
+	: public FlatGoto, public FlatLoop
+{
+public:
+	FlatGotoLoop( const CodeGenArgs &args )
+	:
+		Flat( args, Flat::Loop ),
+		FlatGoto( args, Flat::Loop ),
+		FlatLoop( args, Flat::Loop )
+	{}
+};
+
+/*
+ * FlatGotoExp
+ */
+class FlatGotoExp
+	: public FlatGoto, public FlatExp
+{
+public:
+	FlatGotoExp( const CodeGenArgs &args ) 
+	:
+		Flat( args, Flat::Exp ),
+		FlatGoto( args, Flat::Exp ),
+		FlatExp( args, Flat::Exp )
+	{}
 };
 
 #endif

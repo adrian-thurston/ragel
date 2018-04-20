@@ -32,10 +32,8 @@
  */
 #include "binvar.h"
 #include "bingoto.h"
-#include "flatgotoloop.h"
-#include "flatvarloop.h"
-#include "flatgotoexp.h"
-#include "flatvarexp.h"
+#include "flatvar.h"
+#include "flatgoto.h"
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"

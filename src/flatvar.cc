@@ -21,8 +21,6 @@
  */
 
 #include "flatvar.h"
-#include "flatvarloop.h"
-#include "flatvarexp.h"
 
 #include "parsedata.h"
 #include "inputdata.h"
@@ -714,7 +712,16 @@ void FlatVar::writeExec()
 		"	" << vCS() << " = " << CAST( "int" ) << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
-	REG_ACTIONS( cond );
+	if ( redFsm->anyRegActions() ) {
+		out <<
+			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] != 0 ) {\n";
+
+		REG_ACTIONS( cond );
+
+		out << 
+			"	}\n"
+			"\n";
+	}
 
 	TO_STATE_ACTIONS();
 

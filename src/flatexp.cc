@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2004-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,31 +20,15 @@
  * SOFTWARE.
  */
 
+#include "flatexp.h"
+
 #include "ragel.h"
-#include "flatvarexp.h"
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"
 #include "inputdata.h"
 
-
-void FlatVarExp::COND_ACTION( RedCondPair *cond )
-{
-	int action = 0;
-	if ( cond->action != 0 )
-		action = cond->action->actListId+1;
-	condActions.value( action );
-}
-
-void FlatVarExp::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->actListId+1;
-	toStateActions.value( act );
-}
-
-void FlatVarExp::FROM_STATE_ACTION( RedStateAp *state )
+void FlatExp::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -52,7 +36,23 @@ void FlatVarExp::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void FlatVarExp::EOF_ACTION( RedStateAp *state )
+void FlatExp::COND_ACTION( RedCondPair *cond )
+{
+	int action = 0;
+	if ( cond->action != 0 )
+		action = cond->action->actListId+1;
+	condActions.value( action );
+}
+
+void FlatExp::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->actListId+1;
+	toStateActions.value( act );
+}
+
+void FlatExp::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -60,7 +60,7 @@ void FlatVarExp::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void FlatVarExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -68,7 +68,7 @@ void FlatVarExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatVarExp::NFA_POP_TEST( RedNfaTarg *targ )
+void FlatExp::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -76,33 +76,9 @@ void FlatVarExp::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatVarExp::TO_STATE_ACTION_SWITCH()
-{
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numToStateRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
-		}
-	}
-
-	return out;
-}
-
-/* Write out the function switch. This switch is keyed on the values
- * of the func index. */
-std::ostream &FlatVarExp::FROM_STATE_ACTION_SWITCH()
+std::ostream &FlatExp::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -116,28 +92,7 @@ std::ostream &FlatVarExp::FROM_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << CEND() << "}\n";
-		}
-	}
-
-	return out;
-}
-
-std::ostream &FlatVarExp::EOF_ACTION_SWITCH()
-{
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numEofRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, true, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -146,7 +101,7 @@ std::ostream &FlatVarExp::EOF_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatVarExp::ACTION_SWITCH()
+std::ostream &FlatExp::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -160,26 +115,58 @@ std::ostream &FlatVarExp::ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-
-void FlatVarExp::NFA_FROM_STATE_ACTION_EXEC()
+/* Write out the function switch. This switch is keyed on the values
+ * of the func index. */
+std::ostream &FlatExp::TO_STATE_ACTION_SWITCH()
 {
-	if ( redFsm->anyFromStateActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( fromStateActions ) << "[nfa_bp[nfa_len].state] ) {\n";
-			FROM_STATE_ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+		if ( redAct->numToStateRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+				ACTION( out, item->value, IlOpts( 0, false, false ) );
+				out << "\n\t";
+			}
+
+			out << "\n\t" << CEND() << "}\n";
+		}
 	}
+
+	return out;
 }
 
-void FlatVarExp::FROM_STATE_ACTIONS()
+std::ostream &FlatExp::EOF_ACTION_SWITCH()
+{
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+		if ( redAct->numEofRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+				ACTION( out, item->value, IlOpts( 0, true, false ) );
+				out << "\n\t";
+			}
+
+			out << "\n\t" << CEND() << "}\n";
+		}
+	}
+
+	return out;
+}
+
+void FlatExp::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -190,7 +177,16 @@ void FlatVarExp::FROM_STATE_ACTIONS()
 	}
 }
 
-void FlatVarExp::TO_STATE_ACTIONS()
+void FlatExp::REG_ACTIONS( string cond )
+{
+	out <<
+		"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
+		ACTION_SWITCH() << 
+		"	}\n"
+		"\n";
+}
+
+void FlatExp::TO_STATE_ACTIONS()
 {
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -201,18 +197,7 @@ void FlatVarExp::TO_STATE_ACTIONS()
 	}
 }
 
-void FlatVarExp::REG_ACTIONS( std::string cond )
-{
-	if ( redFsm->anyRegActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
-			ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-}
-
-void FlatVarExp::EOF_ACTIONS()
+void FlatExp::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
@@ -221,3 +206,15 @@ void FlatVarExp::EOF_ACTIONS()
 			"	}\n";
 	}
 }
+
+void FlatExp::NFA_FROM_STATE_ACTION_EXEC()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( fromStateActions ) << "[nfa_bp[nfa_len].state] ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+}
+

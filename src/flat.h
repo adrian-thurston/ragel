@@ -94,9 +94,6 @@ protected:
 	void setKeyType();
 
 	std::ostream &INDICIES();
-	std::ostream &TO_STATE_ACTIONS();
-	std::ostream &FROM_STATE_ACTIONS();
-	std::ostream &EOF_ACTIONS();
 	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_COND_SPACES();
 	std::ostream &TRANS_OFFSETS();
@@ -126,9 +123,15 @@ protected:
 	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
 	virtual void EOF_ACTION( RedStateAp *state ) = 0;
 	virtual void COND_ACTION( RedCondPair *cond ) = 0;
+
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
 	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
 	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
+
+	virtual void FROM_STATE_ACTIONS() = 0;
+	virtual void REG_ACTIONS( std::string cond ) = 0;
+	virtual void TO_STATE_ACTIONS() = 0;
+	virtual void EOF_ACTIONS() = 0;
 
 	virtual void setTableState( TableArray::State );
 

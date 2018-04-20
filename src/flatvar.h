@@ -24,11 +24,12 @@
 #define RAGEL_FLATVAR_H
 
 #include "flat.h"
-#include "flat.h"
+#include "flatloop.h"
+#include "flatexp.h"
 
 struct FlatVar
 :
-	public Flat
+	public virtual Flat
 {
 	FlatVar( const CodeGenArgs &args, Flat::Type type )
 	:
@@ -54,21 +55,31 @@ struct FlatVar
 	virtual void genAnalysis();
 	virtual void writeData();
 	virtual void writeExec();
+};
 
-	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void EOF_ACTION( RedStateAp *state ) = 0;
-	virtual void COND_ACTION( RedCondPair *cond ) = 0;
+class FlatVarLoop
+	: public FlatVar, public FlatLoop
+{
+public:
+	FlatVarLoop( const CodeGenArgs &args )
+	:
+		Flat( args, Flat::Loop ),
+		FlatVar( args, Flat::Loop ),
+		FlatLoop( args, Flat::Loop )
+	{}
+};
 
-	virtual std::ostream &TO_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH() = 0;
-	virtual std::ostream &EOF_ACTION_SWITCH() = 0;
-	virtual std::ostream &ACTION_SWITCH() = 0;
-
-	virtual void REG_ACTIONS( std::string cond ) = 0;
-	virtual void TO_STATE_ACTIONS() = 0;
-	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void EOF_ACTIONS() = 0;
+class FlatVarExp
+:
+	public FlatVar, public FlatExp
+{
+public:
+	FlatVarExp( const CodeGenArgs &args ) 
+	:
+		Flat( args, Flat::Exp ),
+		FlatVar( args, Flat::Exp ),
+		FlatExp( args, Flat::Exp )
+	{}
 };
 
 #endif

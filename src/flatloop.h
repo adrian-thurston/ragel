@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,26 +20,20 @@
  * SOFTWARE.
  */
 
-#ifndef FLAT_GOTO_EXP_H
-#define FLAT_GOTO_EXP_H
+#ifndef _FLATLOOP_H
+#define _FLATLOOP_H
 
-#include <iostream>
-#include "flatgoto.h"
+#include "flat.h"
 
-/* Forwards. */
-struct CodeGenData;
-
-/*
- * FlatGotoExp
- */
-class FlatGotoExp
-	: public FlatGoto
+class FlatLoop
+	: public virtual Flat
 {
 public:
-	FlatGotoExp( const CodeGenArgs &args ) 
-		: FlatGoto(args, Flat::Exp) {}
+	FlatLoop( const CodeGenArgs &args, Flat::Type type )
+	:
+		Flat( args, type )
+	{}
 
-protected:
 	virtual std::ostream &TO_STATE_ACTION_SWITCH();
 	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
 	virtual std::ostream &EOF_ACTION_SWITCH();
@@ -52,6 +46,7 @@ protected:
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
+
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
 	virtual void FROM_STATE_ACTIONS();

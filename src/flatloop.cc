@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,36 +20,52 @@
  * SOFTWARE.
  */
 
-#include "ragel.h"
-#include "flatgotoloop.h"
+#include "flatloop.h"
+
 #include "redfsm.h"
 #include "gendata.h"
 #include "parsedata.h"
 #include "inputdata.h"
 
-std::ostream &FlatGotoLoop::TO_STATE_ACTION_SWITCH()
+void FlatLoop::FROM_STATE_ACTION( RedStateAp *state )
 {
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numToStateRefs > 0 ) {
-			/* Write the case label, the action and the case break */
-			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
-			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t" << CEND() << "}\n";
-		}
-	}
-
-	return out;
+	int act = 0;
+	if ( state->fromStateAction != 0 )
+		act = state->fromStateAction->location+1;
+	fromStateActions.value( act );
 }
 
-std::ostream &FlatGotoLoop::FROM_STATE_ACTION_SWITCH()
+void FlatLoop::COND_ACTION( RedCondPair *cond )
+{
+	int act = 0;
+	if ( cond->action != 0 )
+		act = cond->action->location+1;
+	condActions.value( act );
+}
+
+void FlatLoop::TO_STATE_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->toStateAction != 0 )
+		act = state->toStateAction->location+1;
+	toStateActions.value( act );
+}
+
+void FlatLoop::EOF_ACTION( RedStateAp *state )
+{
+	int act = 0;
+	if ( state->eofAction != 0 )
+		act = state->eofAction->location+1;
+	eofActions.value( act );
+}
+
+std::ostream &FlatLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numFromStateRefs > 0 ) {
-			/* Write the case label, the action and the case break */
+			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
 			out << "\n\t" << CEND() << "}\n";
@@ -59,13 +75,45 @@ std::ostream &FlatGotoLoop::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatGotoLoop::EOF_ACTION_SWITCH()
+std::ostream &FlatLoop::ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numTransRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\t" << CEND() << "}\n";
+		}
+	}
+
+	return out;
+}
+
+std::ostream &FlatLoop::TO_STATE_ACTION_SWITCH()
+{
+	/* Walk the list of functions, printing the cases. */
+	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
+		/* Write out referenced actions. */
+		if ( act->numToStateRefs > 0 ) {
+			/* Write the case label, the action and the case break. */
+			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
+			ACTION( out, act, IlOpts( 0, false, false ) );
+			out << "\n\t" << CEND() << "}\n";
+		}
+	}
+
+	return out;
+}
+
+std::ostream &FlatLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
 		/* Write out referenced actions. */
 		if ( act->numEofRefs > 0 ) {
-			/* Write the case label, the action and the case break */
+			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
 			out << "\n\t" << CEND() << "}\n";
@@ -75,74 +123,7 @@ std::ostream &FlatGotoLoop::EOF_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatGotoLoop::ACTION_SWITCH()
-{
-	/* Walk the list of functions, printing the cases. */
-	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
-		/* Write out referenced actions. */
-		if ( act->numTransRefs > 0 ) {
-			/* Write the case label, the action and the case break */
-			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
-			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t" << CEND() << "}\n";
-		}
-	}
-
-	return out;
-}
-
-void FlatGotoLoop::NFA_FROM_STATE_ACTION_EXEC()
-{
-	if ( redFsm->anyFromStateActions() ) {
-		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
-			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-			"	_acts += 1;\n"
-			"	while ( _nacts > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
-			FROM_STATE_ACTION_SWITCH() <<
-			"		}\n"
-			"		_nacts -= 1;\n"
-			"		_acts += 1;\n"
-			"	}\n"
-			"\n";
-	}
-}
-
-void FlatGotoLoop::TO_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->toStateAction != 0 )
-		act = state->toStateAction->location+1;
-	toStateActions.value( act );
-}
-
-void FlatGotoLoop::FROM_STATE_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->location+1;
-	fromStateActions.value( act );
-}
-
-void FlatGotoLoop::EOF_ACTION( RedStateAp *state )
-{
-	int act = 0;
-	if ( state->eofAction != 0 )
-		act = state->eofAction->location+1;
-	eofActions.value( act );
-}
-
-void FlatGotoLoop::COND_ACTION( RedCondPair *cond )
-{
-	/* If there are actions, emit them. Otherwise emit zero. */
-	int act = 0;
-	if ( cond->action != 0 )
-		act = cond->action->location+1;
-	condActions.value( act );
-}
-
-void FlatGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void FlatLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -150,7 +131,7 @@ void FlatGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
+void FlatLoop::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -158,8 +139,7 @@ void FlatGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-
-void FlatGotoLoop::FROM_STATE_ACTIONS()
+void FlatLoop::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -177,24 +157,7 @@ void FlatGotoLoop::FROM_STATE_ACTIONS()
 	}
 }
 
-void FlatGotoLoop::TO_STATE_ACTIONS()
-{
-	if ( redFsm->anyToStateActions() ) {
-		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF ( actions ), "_acts" ) << "; _acts += 1;\n"
-			"	while ( _nacts > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
-			TO_STATE_ACTION_SWITCH() <<
-			"		}\n"
-			"		_nacts -= 1;\n"
-			"		_acts += 1;\n"
-			"	}\n"
-			"\n";
-	}
-}
-
-void FlatGotoLoop::REG_ACTIONS( string cond )
+void FlatLoop::REG_ACTIONS( string cond )
 {
 	out <<
 		"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
@@ -211,14 +174,33 @@ void FlatGotoLoop::REG_ACTIONS( string cond )
 		"\n";
 }
 
-void FlatGotoLoop::EOF_ACTIONS()
+void FlatLoop::TO_STATE_ACTIONS()
+{
+	if ( redFsm->anyToStateActions() ) {
+		out <<
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF ( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			TO_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
+			"	}\n"
+			"\n";
+	}
+}
+
+void FlatLoop::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
 			"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
 			"	" << UINT() << " __nacts;\n"
 			"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << "; __acts += 1;\n"
+			"	__nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"
+			"	__acts += 1;\n"
 			"	while ( __nacts > 0 ) {\n"
 			"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
 			EOF_ACTION_SWITCH() <<
@@ -226,5 +208,23 @@ void FlatGotoLoop::EOF_ACTIONS()
 			"		__nacts -= 1;\n"
 			"		__acts += 1;\n"
 			"	}\n";
+	}
+}
+
+void FlatLoop::NFA_FROM_STATE_ACTION_EXEC()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
+			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
+			"	_acts += 1;\n"
+			"	while ( _nacts > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"		}\n"
+			"		_nacts -= 1;\n"
+			"		_acts += 1;\n"
+			"	}\n"
+			"\n";
 	}
 }
