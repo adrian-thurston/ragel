@@ -52,6 +52,8 @@ struct FlatVar
 	void NRET( ostream &ret, bool inFinish );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
+	void EOF_TRANS();
+
 	void tableDataPass();
 	virtual void genAnalysis();
 	virtual void writeData();

@@ -272,6 +272,8 @@ void BinaryVar::LOCATE_TRANS()
 		"	}\n"
 		"	}\n"
 		"\n";
+
+	LOCATE_COND();
 }
 
 void BinaryVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
@@ -436,6 +438,13 @@ void BinaryVar::writeData()
 	STATE_IDS();
 }
 
+void BinaryVar::EOF_TRANS()
+{
+	out <<
+		"_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+		"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+}
+
 /* --start1 */
 void BinaryVar::writeExec()
 {
@@ -454,9 +463,6 @@ void BinaryVar::writeExec()
 	out <<
 		"	{\n";
 
-	out <<
-		"	int _klen;\n";
-
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 
@@ -464,6 +470,9 @@ void BinaryVar::writeExec()
 		"	" << UINT() << " _trans = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
+
+	out <<
+		"	int _klen;\n";
 
 	out <<
 		"	" << UINT() << " _cond = 0;\n";
@@ -561,12 +570,15 @@ void BinaryVar::writeExec()
 
 			if ( redFsm->anyEofTrans() ) {
 				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
+
+				EOF_TRANS();
+
+				out <<
 					"		_have = 1;\n"
 					"	}\n";
-					matchCondLabelUsed = true;
+
+				matchCondLabelUsed = true;
 			}
 
 			out << "}\n";
@@ -588,8 +600,6 @@ void BinaryVar::writeExec()
 	NFA_PUSH();
 
 	LOCATE_TRANS();
-
-	LOCATE_COND();
 
 	out << "}\n";
 

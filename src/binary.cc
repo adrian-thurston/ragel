@@ -889,6 +889,12 @@ void Binary::LOCATE_TRANS()
 		"		_trans += " << CAST( UINT() ) << "_klen;\n"
 		"	}\n"
 		"\n";
+
+	out << LABEL( "_match" ) << " {\n";
+
+	LOCATE_COND();
+
+	out << "}\n";
 }
 
 void Binary::COND_EXEC( std::string expr )

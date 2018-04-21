@@ -37,6 +37,8 @@ struct BinGoto
 		Binary( args, type )
 	{}
 
+	void EOF_TRANS();
+
 	virtual void writeData();
 	virtual void writeExec();
 

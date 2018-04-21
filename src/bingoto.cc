@@ -134,6 +134,14 @@ void BinGoto::writeData()
 	STATE_IDS();
 }
 
+void BinGoto::EOF_TRANS()
+{
+	out <<
+		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+		"_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
+}
+
+
 /* --start1 */
 void BinGoto::writeExec()
 {
@@ -143,11 +151,11 @@ void BinGoto::writeExec()
 	out <<
 		"	{\n";
 
-	out <<
-		"	int _klen;\n";
-
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
+
+	out <<
+		"	int _klen;\n";
 
 	out <<
 		"	" << UINT() << " _trans = 0;\n"
@@ -195,11 +203,6 @@ void BinGoto::writeExec()
 	NFA_PUSH();
 
 	LOCATE_TRANS();
-
-	out << "}\n";
-	out << LABEL( "_match" ) << " {\n";
-
-	LOCATE_COND();
 
 	out << "}\n";
 	out << LABEL( "_match_cond" ) << " {\n";
@@ -292,9 +295,11 @@ void BinGoto::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-				"		_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n"
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
+
+			EOF_TRANS();
+
+			out <<
 				"		goto _match_cond;\n"
 				"	}\n";
 		}

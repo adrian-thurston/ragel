@@ -54,6 +54,7 @@ struct BinaryVar
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	void NFA_POP();
+	void EOF_TRANS();
 
 	void genAnalysis();
 

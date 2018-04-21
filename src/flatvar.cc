@@ -535,6 +535,17 @@ void FlatVar::writeData()
 	STATE_IDS();
 }
 
+void FlatVar::EOF_TRANS()
+{
+	out <<
+		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+	}
+}
+
 /* --start2 */
 void FlatVar::writeExec()
 {
@@ -553,12 +564,6 @@ void FlatVar::writeExec()
 	out <<
 		"	{\n";
 
-	if ( !noEnd && ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) ) {
-		out << 
-			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
-			"	int _klen;\n";
-	}
-
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 
@@ -566,6 +571,12 @@ void FlatVar::writeExec()
 		"	" << UINT() << " _trans = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
+
+	if ( !noEnd && ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) ) {
+		out << 
+			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
+			"	int _klen;\n";
+	}
 
 	if ( red->condSpaceList.length() > 0 )
 		out << "	" << UINT() << " _cond = 0;\n";
@@ -665,18 +676,15 @@ void FlatVar::writeExec()
 
 			if ( redFsm->anyEofTrans() ) {
 				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"		_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
 
-				if ( red->condSpaceList.length() > 0 ) {
-					out <<
-						"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
-				}
+				EOF_TRANS();
 
 				out <<
 					"		_have = 1;\n"
 					"	}\n";
-					matchCondLabelUsed = true;
+
+				matchCondLabelUsed = true;
 			}
 
 			out << "}\n";

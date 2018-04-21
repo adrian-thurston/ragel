@@ -124,6 +124,18 @@ void FlatGoto::writeData()
 	STATE_IDS();
 }
 
+void FlatGoto::EOF_TRANS()
+{
+	out <<
+		"_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+	}
+}
+
+
 /* --start2 */
 void FlatGoto::writeExec()
 {
@@ -133,31 +145,20 @@ void FlatGoto::writeExec()
 	out <<
 		"	{\n";
 
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	int _ps;\n";
+
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
 			"	int _klen;\n"
 			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n";
 	}
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps;\n";
-
 	out << "	int _trans = 0;\n";
 
 	if ( red->condSpaceList.length() > 0 )
 		out << "	" << UINT() << " _cond = 0;\n";
 
-
-
-	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
-				redFsm->anyFromStateActions() )
-		{
-			out << 
-				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
-				"	" << UINT() << " _nacts;\n";
-		}
-	}
 
 	if ( redFsm->classMap != 0 ) {
 		out <<
@@ -171,6 +172,15 @@ void FlatGoto::writeExec()
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
 
+	if ( type == Loop ) {
+		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
+				redFsm->anyFromStateActions() )
+		{
+			out << 
+				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
+				"	" << UINT() << " _nacts;\n";
+		}
+	}
 
 	out <<
 		"	" << ENTRY() << " {\n";
@@ -290,15 +300,11 @@ void FlatGoto::writeExec()
 
 		if ( redFsm->anyEofTrans() ) {
 			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-				"		_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
 
-			if ( red->condSpaceList.length() > 0 ) {
-				out <<
-					"		_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
-			}
+			EOF_TRANS();
 
-			out << 
+			out <<
 				"		goto _match_cond;\n"
 				"	}\n";
 		}
