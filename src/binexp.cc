@@ -72,39 +72,6 @@ void BinExp::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-/* Write out the function switch. This switch is keyed on the values
- * of the func index. */
-std::ostream &BinExp::TO_STATE_ACTION_SWITCH()
-{
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numToStateRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, false, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
-		}
-	}
-
-	return out;
-}
-
-void BinExp::TO_STATE_ACTIONS()
-{
-	if ( redFsm->anyToStateActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
-			TO_STATE_ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
-	}
-}
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
@@ -122,28 +89,7 @@ std::ostream &BinExp::FROM_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << CEND() << "}\n";
-		}
-	}
-
-	return out;
-}
-
-std::ostream &BinExp::EOF_ACTION_SWITCH()
-{
-	/* Loop the actions. */
-	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
-		if ( redAct->numEofRefs > 0 ) {
-			/* Write the entry label. */
-			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-			/* Write each action in the list of action items. */
-			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
-				ACTION( out, item->value, IlOpts( 0, true, false ) );
-				out << "\n\t";
-			}
-
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
@@ -166,23 +112,57 @@ std::ostream &BinExp::ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << CEND() << "}\n";
+			out << "\n\t" << CEND() << "}\n";
 		}
 	}
 
 	return out;
 }
 
-void BinExp::NFA_FROM_STATE_ACTION_EXEC()
+/* Write out the function switch. This switch is keyed on the values
+ * of the func index. */
+std::ostream &BinExp::TO_STATE_ACTION_SWITCH()
 {
-	if ( redFsm->anyFromStateActions() ) {
-		out <<
-			"	switch ( " << ARR_REF( fromStateActions ) << "[nfa_bp[nfa_len].state] ) {\n";
-			FROM_STATE_ACTION_SWITCH() <<
-			"	}\n"
-			"\n";
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+		if ( redAct->numToStateRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+				ACTION( out, item->value, IlOpts( 0, false, false ) );
+				out << "\n\t";
+			}
+
+			out << "\n\t" << CEND() << "}\n";
+		}
 	}
+
+	return out;
 }
+
+std::ostream &BinExp::EOF_ACTION_SWITCH()
+{
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
+		if ( redAct->numEofRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ ) {
+				ACTION( out, item->value, IlOpts( 0, true, false ) );
+				out << "\n\t";
+			}
+
+			out << "\n\t" << CEND() << "}\n";
+		}
+	}
+
+	return out;
+}
+
 
 void BinExp::FROM_STATE_ACTIONS()
 {
@@ -195,14 +175,25 @@ void BinExp::FROM_STATE_ACTIONS()
 	}
 }
 
-void BinExp::REG_ACTIONS()
+void BinExp::REG_ACTIONS( std::string cond )
 {
 	out <<
-		"	switch ( " << ARR_REF( condActions ) << "[_cond] ) {\n";
+		"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
 		ACTION_SWITCH() <<
 		"	}\n"
 		"\n";
 }
+void BinExp::TO_STATE_ACTIONS()
+{
+	if ( redFsm->anyToStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( toStateActions ) << "[" << vCS() << "] ) {\n";
+			TO_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
+	}
+}
+
 
 void BinExp::EOF_ACTIONS()
 {
@@ -211,6 +202,17 @@ void BinExp::EOF_ACTIONS()
 			"	switch ( " << ARR_REF( eofActions ) << "[" << vCS() << "] ) {\n";
 			EOF_ACTION_SWITCH() <<
 			"	}\n";
+	}
+}
+
+void BinExp::NFA_FROM_STATE_ACTION_EXEC()
+{
+	if ( redFsm->anyFromStateActions() ) {
+		out <<
+			"	switch ( " << ARR_REF( fromStateActions ) << "[nfa_bp[nfa_len].state] ) {\n";
+			FROM_STATE_ACTION_SWITCH() <<
+			"	}\n"
+			"\n";
 	}
 }
 

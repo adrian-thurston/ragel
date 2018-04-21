@@ -51,7 +51,7 @@ public:
 	virtual std::ostream &EOF_ACTION_SWITCH();
 
 	virtual void FROM_STATE_ACTIONS();
-	virtual void REG_ACTIONS();
+	virtual void REG_ACTIONS( std::string cond );
 	virtual void TO_STATE_ACTIONS();
 	virtual void EOF_ACTIONS();
 

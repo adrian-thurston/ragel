@@ -177,7 +177,7 @@ void FlatExp::FROM_STATE_ACTIONS()
 	}
 }
 
-void FlatExp::REG_ACTIONS( string cond )
+void FlatExp::REG_ACTIONS( std::string cond )
 {
 	out <<
 		"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";

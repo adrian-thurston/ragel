@@ -141,7 +141,7 @@ protected:
 	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
 
 	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void REG_ACTIONS() = 0;
+	virtual void REG_ACTIONS( std::string cond ) = 0;
 	virtual void TO_STATE_ACTIONS() = 0;
 	virtual void EOF_ACTIONS() = 0;
 

@@ -602,7 +602,7 @@ void BinaryVar::writeExec()
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n";
 
-		REG_ACTIONS();
+		REG_ACTIONS( "_cond" );
 
 		out <<
 			"	}\n";

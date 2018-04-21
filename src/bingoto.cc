@@ -218,7 +218,7 @@ void BinGoto::writeExec()
 		if ( redFsm->anyRegNbreak() )
 			out << "	_nbreak = 0;\n";
 
-		REG_ACTIONS();
+		REG_ACTIONS( "_cond" );
 
 		if ( redFsm->anyRegNbreak() ) {
 			out <<

@@ -59,6 +59,22 @@ void FlatLoop::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
+void FlatLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->push != 0 )
+		act = targ->push->actListId+1;
+	nfaPushActions.value( act );
+}
+
+void FlatLoop::NFA_POP_TEST( RedNfaTarg *targ )
+{
+	int act = 0;
+	if ( targ->popTest != 0 )
+		act = targ->popTest->actListId+1;
+	nfaPopTrans.value( act );
+}
+
 std::ostream &FlatLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
@@ -123,22 +139,6 @@ std::ostream &FlatLoop::EOF_ACTION_SWITCH()
 	return out;
 }
 
-void FlatLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
-{
-	int act = 0;
-	if ( targ->push != 0 )
-		act = targ->push->actListId+1;
-	nfaPushActions.value( act );
-}
-
-void FlatLoop::NFA_POP_TEST( RedNfaTarg *targ )
-{
-	int act = 0;
-	if ( targ->popTest != 0 )
-		act = targ->popTest->actListId+1;
-	nfaPopTrans.value( act );
-}
-
 void FlatLoop::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
@@ -157,7 +157,7 @@ void FlatLoop::FROM_STATE_ACTIONS()
 	}
 }
 
-void FlatLoop::REG_ACTIONS( string cond )
+void FlatLoop::REG_ACTIONS( std::string cond )
 {
 	out <<
 		"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
