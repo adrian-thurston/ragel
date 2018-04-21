@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include "codegen.h"
+#include "tables.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -33,7 +34,7 @@ struct RedTransAp;
 struct RedStateAp;
 
 class Flat
-	: public CodeGen
+	: public virtual Tables
 {
 protected:
 	enum Type {
@@ -41,34 +42,16 @@ protected:
 	};
 
 public:
-	Flat( const CodeGenArgs &args, Type type );
+	Flat( const CodeGenArgs &args, Type type ) 
+	:
+		Tables( args ),
+		type(type)
+	{}
 
 	virtual ~Flat() { }
 
 protected:
 	Type type;
-	TableArray actions;
-	TableArray keys;
-	TableArray charClass;
-	TableArray flatIndexOffset;
-	TableArray indicies;
-	TableArray indexDefaults;
-	TableArray transCondSpaces;
-	TableArray transOffsets;
-	TableArray condTargs;
-	TableArray condActions;
-	TableArray toStateActions;
-	TableArray fromStateActions;
-	TableArray eofCondSpaces;
-	TableArray eofCondKeyOffs;
-	TableArray eofCondKeyLens;
-	TableArray eofCondKeys;
-	TableArray eofActions;
-	TableArray eofTrans;
-	TableArray nfaTargs;
-	TableArray nfaOffsets;
-	TableArray nfaPushActions;
-	TableArray nfaPopTrans;
 
 	void taKeys();
 	void taKeySpans();
@@ -118,20 +101,6 @@ protected:
 	void NRET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
-
-	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void EOF_ACTION( RedStateAp *state ) = 0;
-	virtual void COND_ACTION( RedCondPair *cond ) = 0;
-
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
-	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
-
-	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void REG_ACTIONS( std::string cond ) = 0;
-	virtual void TO_STATE_ACTIONS() = 0;
-	virtual void EOF_ACTIONS() = 0;
 
 	virtual void setTableState( TableArray::State );
 

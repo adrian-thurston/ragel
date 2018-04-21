@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include "codegen.h"
+#include "tables.h"
 
 /* Forwards. */
 struct CodeGenData;
@@ -33,7 +34,7 @@ struct RedTransAp;
 struct RedStateAp;
 
 class Binary
-	: public CodeGen
+	: public virtual Tables
 {
 protected:
 	enum Type {
@@ -41,38 +42,14 @@ protected:
 	};
 
 public:
-	Binary( const CodeGenArgs &args, Type type );
+	Binary( const CodeGenArgs &args, Type type )
+	:
+		Tables( args ),
+		type(type)
+	{}
 
 protected:
 	Type type;
-	TableArray keyOffsets;
-	TableArray singleLens;
-	TableArray rangeLens;
-	TableArray indexOffsets;
-	TableArray indicies;
-	TableArray transCondSpacesWi;
-	TableArray transOffsetsWi;
-	TableArray transLengthsWi;
-	TableArray transCondSpaces;
-	TableArray transOffsets;
-	TableArray transLengths;
-	TableArray condTargs;
-	TableArray condActions;
-	TableArray toStateActions;
-	TableArray fromStateActions;
-	TableArray eofActions;
-	TableArray eofTrans;
-	TableArray eofCondSpaces;
-	TableArray eofCondKeyOffs;
-	TableArray eofCondKeyLens;
-	TableArray eofCondKeys;
-	TableArray actions;
-	TableArray keys;
-	TableArray condKeys;
-	TableArray nfaTargs;
-	TableArray nfaOffsets;
-	TableArray nfaPushActions;
-	TableArray nfaPopTrans;
 
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();
@@ -131,21 +108,6 @@ protected:
 	void NRET( ostream &ret, bool inFinish );
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
-
-	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
-	virtual void EOF_ACTION( RedStateAp *state ) = 0;
-	virtual void COND_ACTION( RedCondPair *cond ) = 0;
-
-	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ ) = 0;
-	virtual void NFA_POP_TEST( RedNfaTarg *targ ) = 0;
-
-	virtual void FROM_STATE_ACTIONS() = 0;
-	virtual void REG_ACTIONS( std::string cond ) = 0;
-	virtual void TO_STATE_ACTIONS() = 0;
-	virtual void EOF_ACTIONS() = 0;
-
-	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
 
 	void setTableState( TableArray::State );
 

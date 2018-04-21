@@ -20,39 +20,44 @@
  * SOFTWARE.
  */
 
-#ifndef _FLATLOOP_H
-#define _FLATLOOP_H
+#ifndef _BINLOOP_H
+#define _BINLOOP_H
 
-#include "flat.h"
+#include "binary.h"
+#include "tables.h"
 
-class FlatLoop
-	: public virtual Flat
+struct RedStateAp;
+struct RedCondPair;
+
+class ActLoop
+	: public virtual Tables
 {
 public:
-	FlatLoop( const CodeGenArgs &args, Flat::Type type )
+	ActLoop( const CodeGenArgs &args )
 	:
-		Flat( args, type )
+		Tables( args )
 	{}
 
-	virtual std::ostream &TO_STATE_ACTION_SWITCH();
-	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
-	virtual std::ostream &EOF_ACTION_SWITCH();
-	virtual std::ostream &ACTION_SWITCH();
-
-	virtual void TO_STATE_ACTION( RedStateAp *state );
 	virtual void FROM_STATE_ACTION( RedStateAp *state );
-	virtual void EOF_ACTION( RedStateAp *state );
 	virtual void COND_ACTION( RedCondPair *cond );
+	virtual void TO_STATE_ACTION( RedStateAp *state );
+	virtual void EOF_ACTION( RedStateAp *state );
 
 	virtual void NFA_PUSH_ACTION( RedNfaTarg *targ );
 	virtual void NFA_POP_TEST( RedNfaTarg *targ );
 
-	virtual void NFA_FROM_STATE_ACTION_EXEC();
+	virtual std::ostream &FROM_STATE_ACTION_SWITCH();
+	virtual std::ostream &ACTION_SWITCH();
+	virtual std::ostream &TO_STATE_ACTION_SWITCH();
+	virtual std::ostream &EOF_ACTION_SWITCH();
 
 	virtual void FROM_STATE_ACTIONS();
-	virtual void TO_STATE_ACTIONS();
 	virtual void REG_ACTIONS( std::string cond );
+	virtual void TO_STATE_ACTIONS();
 	virtual void EOF_ACTIONS();
+
+	virtual void NFA_FROM_STATE_ACTION_EXEC();
 };
+
 
 #endif

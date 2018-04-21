@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,47 +20,43 @@
  * SOFTWARE.
  */
 
-#include "flatexp.h"
-
-#include "ragel.h"
+#include "actexp.h"
 #include "redfsm.h"
 #include "gendata.h"
-#include "parsedata.h"
-#include "inputdata.h"
 
-void FlatExp::FROM_STATE_ACTION( RedStateAp *state )
+void ActExp::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
-		act = state->fromStateAction->actListId+1;
+		act = state->fromStateAction->actListId + 1;
 	fromStateActions.value( act );
 }
 
-void FlatExp::COND_ACTION( RedCondPair *cond )
+void ActExp::COND_ACTION( RedCondPair *cond )
 {
 	int action = 0;
 	if ( cond->action != 0 )
-		action = cond->action->actListId+1;
+		action = cond->action->actListId + 1;
 	condActions.value( action );
 }
 
-void FlatExp::TO_STATE_ACTION( RedStateAp *state )
+void ActExp::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
-		act = state->toStateAction->actListId+1;
+		act = state->toStateAction->actListId + 1;
 	toStateActions.value( act );
 }
 
-void FlatExp::EOF_ACTION( RedStateAp *state )
+void ActExp::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
-		act = state->eofAction->actListId+1;
+		act = state->eofAction->actListId + 1;
 	eofActions.value( act );
 }
 
-void FlatExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void ActExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -68,7 +64,7 @@ void FlatExp::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void FlatExp::NFA_POP_TEST( RedNfaTarg *targ )
+void ActExp::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -76,9 +72,10 @@ void FlatExp::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
+
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatExp::FROM_STATE_ACTION_SWITCH()
+std::ostream &ActExp::FROM_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -101,7 +98,7 @@ std::ostream &FlatExp::FROM_STATE_ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatExp::ACTION_SWITCH()
+std::ostream &ActExp::ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -124,7 +121,7 @@ std::ostream &FlatExp::ACTION_SWITCH()
 
 /* Write out the function switch. This switch is keyed on the values
  * of the func index. */
-std::ostream &FlatExp::TO_STATE_ACTION_SWITCH()
+std::ostream &ActExp::TO_STATE_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -145,7 +142,7 @@ std::ostream &FlatExp::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &FlatExp::EOF_ACTION_SWITCH()
+std::ostream &ActExp::EOF_ACTION_SWITCH()
 {
 	/* Loop the actions. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -166,7 +163,8 @@ std::ostream &FlatExp::EOF_ACTION_SWITCH()
 	return out;
 }
 
-void FlatExp::FROM_STATE_ACTIONS()
+
+void ActExp::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -177,16 +175,15 @@ void FlatExp::FROM_STATE_ACTIONS()
 	}
 }
 
-void FlatExp::REG_ACTIONS( std::string cond )
+void ActExp::REG_ACTIONS( std::string cond )
 {
 	out <<
 		"	switch ( " << ARR_REF( condActions ) << "[" << cond << "] ) {\n";
-		ACTION_SWITCH() << 
+		ACTION_SWITCH() <<
 		"	}\n"
 		"\n";
 }
-
-void FlatExp::TO_STATE_ACTIONS()
+void ActExp::TO_STATE_ACTIONS()
 {
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -197,7 +194,8 @@ void FlatExp::TO_STATE_ACTIONS()
 	}
 }
 
-void FlatExp::EOF_ACTIONS()
+
+void ActExp::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
@@ -207,7 +205,7 @@ void FlatExp::EOF_ACTIONS()
 	}
 }
 
-void FlatExp::NFA_FROM_STATE_ACTION_EXEC()
+void ActExp::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<

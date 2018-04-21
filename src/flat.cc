@@ -25,33 +25,6 @@
 #include "redfsm.h"
 #include "gendata.h"
 
-Flat::Flat( const CodeGenArgs &args, Type type ) 
-:
-	CodeGen( args ),
-	type(type),
-	actions(          "actions",             *this ),
-	keys(             "trans_keys",          *this ),
-	charClass(        "char_class",          *this ),
-	flatIndexOffset(  "index_offsets",       *this ),
-	indicies(         "indicies",            *this ),
-	indexDefaults(    "index_defaults",      *this ),
-	transCondSpaces(  "trans_cond_spaces",   *this ),
-	transOffsets(     "trans_offsets",       *this ),
-	condTargs(        "cond_targs",          *this ),
-	condActions(      "cond_actions",        *this ),
-	toStateActions(   "to_state_actions",    *this ),
-	fromStateActions( "from_state_actions",  *this ),
-	eofCondSpaces(    "eof_cond_spaces",     *this ),
-	eofCondKeyOffs(   "eof_cond_key_offs",   *this ),
-	eofCondKeyLens(   "eof_cond_key_lens",   *this ),
-	eofCondKeys(      "eof_cond_keys",       *this ),
-	eofActions(       "eof_actions",         *this ),
-	eofTrans(         "eof_trans",           *this ),
-	nfaTargs(         "nfa_targs",           *this ),
-	nfaOffsets(       "nfa_offsets",         *this ),
-	nfaPushActions(   "nfa_push_actions",    *this ),
-	nfaPopTrans(      "nfa_pop_trans",       *this )
-{}
 
 void Flat::setKeyType()
 {

@@ -28,13 +28,13 @@
 struct RedStateAp;
 struct RedCondPair;
 
-class BinExp
-	: public virtual Binary
+class ActExp
+	: public virtual Tables
 {
 public:
-	BinExp( const CodeGenArgs &args, Binary::Type type )
+	ActExp( const CodeGenArgs &args )
 	:
-		Binary( args, type )
+		Tables( args )
 	{}
 
 	virtual void FROM_STATE_ACTION( RedStateAp *state );

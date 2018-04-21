@@ -24,15 +24,16 @@
 #define RAGEL_FLATVAR_H
 
 #include "flat.h"
-#include "flatloop.h"
-#include "flatexp.h"
+#include "actloop.h"
+#include "actexp.h"
 
 struct FlatVar
 :
-	public virtual Flat
+	public Flat
 {
 	FlatVar( const CodeGenArgs &args, Flat::Type type )
 	:
+		Tables( args ),
 		Flat( args, type )
 	{}
 
@@ -58,27 +59,27 @@ struct FlatVar
 };
 
 class FlatVarLoop
-	: public FlatVar, public FlatLoop
+	: public FlatVar, public ActLoop
 {
 public:
 	FlatVarLoop( const CodeGenArgs &args )
 	:
-		Flat( args, Flat::Loop ),
+		Tables( args ),
 		FlatVar( args, Flat::Loop ),
-		FlatLoop( args, Flat::Loop )
+		ActLoop( args )
 	{}
 };
 
 class FlatVarExp
 :
-	public FlatVar, public FlatExp
+	public FlatVar, public ActExp
 {
 public:
 	FlatVarExp( const CodeGenArgs &args ) 
 	:
-		Flat( args, Flat::Exp ),
+		Tables( args ),
 		FlatVar( args, Flat::Exp ),
-		FlatExp( args, Flat::Exp )
+		ActExp( args )
 	{}
 };
 

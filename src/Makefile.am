@@ -37,15 +37,17 @@ libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
 
 dist_libfsm_la_SOURCES = \
 	buffer.h codegen.h \
-	binary.h bingoto.h binvar.h binloop.h binexp.h \
+	actloop.h actexp.h \
+	binary.h bingoto.h binvar.h \
 	flat.h flatgoto.h flatgotoloop.h flatgotoexp.h flatvar.h \
 	flatvarloop.h flatvarexp.h goto.h gotoloop.h gotoexp.h \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
 	allocgen.cc codegen.cc \
-	binary.cc bingoto.cc binloop.cc binexp.cc binvar.cc \
-	flat.cc flatgoto.cc flatvar.cc flatloop.cc flatexp.cc \
+	actexp.cc binvar.cc \
+	binary.cc bingoto.cc actloop.cc \
+	flat.cc flatgoto.cc flatvar.cc \
 	goto.cc gotoloop.cc gotoexp.cc ipgoto.cc \
 	dot.cc asm.cc
 

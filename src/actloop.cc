@@ -20,11 +20,11 @@
  * SOFTWARE.
  */
 
-#include "binloop.h"
+#include "actloop.h"
 #include "redfsm.h"
 #include "gendata.h"
 
-void BinLoop::FROM_STATE_ACTION( RedStateAp *state )
+void ActLoop::FROM_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->fromStateAction != 0 )
@@ -32,7 +32,7 @@ void BinLoop::FROM_STATE_ACTION( RedStateAp *state )
 	fromStateActions.value( act );
 }
 
-void BinLoop::COND_ACTION( RedCondPair *cond )
+void ActLoop::COND_ACTION( RedCondPair *cond )
 {
 	int act = 0;
 	if ( cond->action != 0 )
@@ -40,7 +40,7 @@ void BinLoop::COND_ACTION( RedCondPair *cond )
 	condActions.value( act );
 }
 
-void BinLoop::TO_STATE_ACTION( RedStateAp *state )
+void ActLoop::TO_STATE_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->toStateAction != 0 )
@@ -48,7 +48,7 @@ void BinLoop::TO_STATE_ACTION( RedStateAp *state )
 	toStateActions.value( act );
 }
 
-void BinLoop::EOF_ACTION( RedStateAp *state )
+void ActLoop::EOF_ACTION( RedStateAp *state )
 {
 	int act = 0;
 	if ( state->eofAction != 0 )
@@ -56,7 +56,7 @@ void BinLoop::EOF_ACTION( RedStateAp *state )
 	eofActions.value( act );
 }
 
-void BinLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void ActLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -64,7 +64,7 @@ void BinLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void BinLoop::NFA_POP_TEST( RedNfaTarg *targ )
+void ActLoop::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -72,7 +72,7 @@ void BinLoop::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-std::ostream &BinLoop::FROM_STATE_ACTION_SWITCH()
+std::ostream &ActLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -88,7 +88,7 @@ std::ostream &BinLoop::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinLoop::ACTION_SWITCH()
+std::ostream &ActLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -104,7 +104,7 @@ std::ostream &BinLoop::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &BinLoop::TO_STATE_ACTION_SWITCH()
+std::ostream &ActLoop::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -121,7 +121,7 @@ std::ostream &BinLoop::TO_STATE_ACTION_SWITCH()
 }
 
 
-std::ostream &BinLoop::EOF_ACTION_SWITCH()
+std::ostream &ActLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -139,7 +139,7 @@ std::ostream &BinLoop::EOF_ACTION_SWITCH()
 
 
 
-void BinLoop::FROM_STATE_ACTIONS()
+void ActLoop::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -157,7 +157,7 @@ void BinLoop::FROM_STATE_ACTIONS()
 	}
 }
 
-void BinLoop::REG_ACTIONS( std::string cond )
+void ActLoop::REG_ACTIONS( std::string cond )
 {
 	out <<
 		"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
@@ -174,7 +174,7 @@ void BinLoop::REG_ACTIONS( std::string cond )
 		"\n";
 }
 
-void BinLoop::TO_STATE_ACTIONS()
+void ActLoop::TO_STATE_ACTIONS()
 {
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -192,7 +192,7 @@ void BinLoop::TO_STATE_ACTIONS()
 	}
 }
 
-void BinLoop::EOF_ACTIONS()
+void ActLoop::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
@@ -211,7 +211,7 @@ void BinLoop::EOF_ACTIONS()
 	}
 }
 
-void BinLoop::NFA_FROM_STATE_ACTION_EXEC()
+void ActLoop::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<

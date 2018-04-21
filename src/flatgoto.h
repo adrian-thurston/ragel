@@ -24,15 +24,16 @@
 #define RAGEL_FLATGOTO_H
 
 #include "flat.h"
-#include "flatloop.h"
-#include "flatexp.h"
+#include "actloop.h"
+#include "actexp.h"
 
 struct FlatGoto
 :
-	public virtual Flat
+	public Flat
 {
 	FlatGoto( const CodeGenArgs &args, Flat::Type type )
 	:
+		Tables( args ),
 		Flat( args, type )
 	{}
 
@@ -43,14 +44,14 @@ struct FlatGoto
 };
 
 class FlatGotoLoop
-	: public FlatGoto, public FlatLoop
+	: public FlatGoto, public ActLoop
 {
 public:
 	FlatGotoLoop( const CodeGenArgs &args )
 	:
-		Flat( args, Flat::Loop ),
+		Tables( args ),
 		FlatGoto( args, Flat::Loop ),
-		FlatLoop( args, Flat::Loop )
+		ActLoop( args )
 	{}
 };
 
@@ -58,14 +59,14 @@ public:
  * FlatGotoExp
  */
 class FlatGotoExp
-	: public FlatGoto, public FlatExp
+	: public FlatGoto, public ActExp
 {
 public:
 	FlatGotoExp( const CodeGenArgs &args ) 
 	:
-		Flat( args, Flat::Exp ),
+		Tables( args ),
 		FlatGoto( args, Flat::Exp ),
-		FlatExp( args, Flat::Exp )
+		ActExp( args )
 	{}
 };
 

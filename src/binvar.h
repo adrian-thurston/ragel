@@ -24,15 +24,16 @@
 #define RAGEL_BINVAR_H
 
 #include "binary.h"
-#include "binloop.h"
-#include "binexp.h"
+#include "actloop.h"
+#include "actexp.h"
 
 struct BinaryVar
 :
-	public virtual Binary
+	public Binary
 {
 	BinaryVar( const CodeGenArgs &args, Binary::Type type )
 	:
+		Tables( args ),
 		Binary( args, type )
 	{}
 
@@ -64,27 +65,27 @@ struct BinaryVar
 };
 
 class BinVarLoop
-	: public BinaryVar, public BinLoop
+	: public BinaryVar, public ActLoop
 {
 public:
 	BinVarLoop( const CodeGenArgs &args )
 	:
-		Binary( args, Loop ),
+		Tables( args ),
 		BinaryVar( args, Loop ),
-		BinLoop( args, Exp )
+		ActLoop( args )
 	{}
 };
 
 class BinVarExp
 :
-	public BinaryVar, public BinExp
+	public BinaryVar, public ActExp
 {
 public:
 	BinVarExp( const CodeGenArgs &args ) 
 	:
-		Binary( args, Exp ),
+		Tables( args ),
 		BinaryVar( args, Exp ),
-		BinExp( args, Exp )
+		ActExp( args )
 	{}
 };
 

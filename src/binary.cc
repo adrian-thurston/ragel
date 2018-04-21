@@ -27,41 +27,6 @@
 
 #include <assert.h>
 
-Binary::Binary( const CodeGenArgs &args, Type type )
-:
-	CodeGen( args ),
-	type(type),
-	keyOffsets(         "key_offsets",           *this ),
-	singleLens(         "single_lengths",        *this ),
-	rangeLens(          "range_lengths",         *this ),
-	indexOffsets(       "index_offsets",         *this ),
-	indicies(           "indicies",              *this ),
-	transCondSpacesWi(  "trans_cond_spaces_wi",  *this ),
-	transOffsetsWi(     "trans_offsets_wi",      *this ),
-	transLengthsWi(     "trans_lengths_wi",      *this ),
-	transCondSpaces(    "trans_cond_spaces",     *this ),
-	transOffsets(       "trans_offsets",         *this ),
-	transLengths(       "trans_lengths",         *this ),
-	condTargs(          "cond_targs",            *this ),
-	condActions(        "cond_actions",          *this ),
-	toStateActions(     "to_state_actions",      *this ),
-	fromStateActions(   "from_state_actions",    *this ),
-	eofActions(         "eof_actions",           *this ),
-	eofTrans(           "eof_trans",             *this ),
-	eofCondSpaces(      "eof_cond_spaces",       *this ),
-	eofCondKeyOffs(     "eof_cond_key_offs",     *this ),
-	eofCondKeyLens(     "eof_cond_key_lens",     *this ),
-	eofCondKeys(        "eof_cond_keys",         *this ),
-	actions(            "actions",               *this ),
-	keys(               "trans_keys",            *this ),
-	condKeys(           "cond_keys",             *this ),
-	nfaTargs(           "nfa_targs",             *this ),
-	nfaOffsets(         "nfa_offsets",           *this ),
-	nfaPushActions(     "nfa_push_actions",      *this ),
-	nfaPopTrans(        "nfa_pop_trans",         *this )
-{
-}
-
 void Binary::setKeyType()
 {
 	keys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );

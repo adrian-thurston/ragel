@@ -24,15 +24,16 @@
 #define RAGEL_BINGOTO_H
 
 #include "binary.h"
-#include "binloop.h"
-#include "binexp.h"
+#include "actloop.h"
+#include "actexp.h"
 
 struct BinGoto
 :
-	public virtual Binary
+	public Binary
 {
 	BinGoto( const CodeGenArgs &args, Binary::Type type )
 	:
+		Tables( args ),
 		Binary( args, type )
 	{}
 
@@ -47,27 +48,27 @@ struct BinGoto
 };
 
 class BinGotoLoop
-	: public BinGoto, public BinLoop
+	: public BinGoto, public ActLoop
 {
 public:
 	BinGotoLoop( const CodeGenArgs &args )
 	:
-		Binary( args, Loop ),
+		Tables( args ),
 		BinGoto( args, Loop ),
-		BinLoop( args, Loop )
+		ActLoop( args )
 	{}
 };
 
 
 class BinGotoExp
-	: public BinGoto, public BinExp
+	: public BinGoto, public ActExp
 {
 public:
 	BinGotoExp( const CodeGenArgs &args ) 
 	:
-		Binary( args, Exp ),
+		Tables( args ),
 		BinGoto( args, Exp ),
-		BinExp( args, Exp )
+		ActExp( args )
 	{}
 };
 
