@@ -273,7 +273,8 @@ void BinaryVar::LOCATE_TRANS()
 		"	}\n"
 		"\n";
 
-	LOCATE_COND();
+	if ( red->condSpaceList.length() > 0 )
+		LOCATE_COND();
 }
 
 void BinaryVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
@@ -441,8 +442,12 @@ void BinaryVar::writeData()
 void BinaryVar::EOF_TRANS()
 {
 	out <<
-		"_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-		"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+		"_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+	
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+	}
 }
 
 /* --start1 */
@@ -609,6 +614,8 @@ void BinaryVar::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	string cond = "_cond";
+	if ( red->condSpaceList.length() == 0 )
+		cond = "_trans";
 
 	out <<
 		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"

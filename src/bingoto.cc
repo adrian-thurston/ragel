@@ -137,8 +137,12 @@ void BinGoto::writeData()
 void BinGoto::EOF_TRANS()
 {
 	out <<
-		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
-		"_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
+		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
+	}
 }
 
 
@@ -157,14 +161,21 @@ void BinGoto::writeExec()
 	out <<
 		"	int _klen;\n";
 
-	out <<
-		"	" << UINT() << " _trans = 0;\n"
-		"	" << UINT() << " _cond = 0;\n";
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 ) {
+		out <<
+			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n";
+	}
+
+	out << "	" << UINT() << " _trans = 0;\n";
+
+	if ( red->condSpaceList.length() > 0 )
+		out << "	" << UINT() << " _cond = 0;\n";
 
 	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _cpc;\n";
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n";
+
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
+		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
@@ -211,6 +222,8 @@ void BinGoto::writeExec()
 		out << "	_ps = " << vCS() << ";\n";
 
 	string cond = "_cond";
+	if ( red->condSpaceList.length() == 0 )
+		cond = "_trans";
 
 	out <<
 		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
@@ -236,8 +249,8 @@ void BinGoto::writeExec()
 		out << "\n";
 	}
 
-//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+			redFsm->anyActionCalls() || redFsm->anyActionRets() )
 		out << "}\n" << LABEL( "_again" ) << " {\n";
 
 	TO_STATE_ACTIONS();

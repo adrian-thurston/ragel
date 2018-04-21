@@ -892,7 +892,10 @@ void Binary::LOCATE_TRANS()
 
 	out << LABEL( "_match" ) << " {\n";
 
-	LOCATE_COND();
+	if ( red->condSpaceList.length() > 0 )
+		LOCATE_COND();
+	else
+		out << "goto _match_cond;\n";
 
 	out << "}\n";
 }
