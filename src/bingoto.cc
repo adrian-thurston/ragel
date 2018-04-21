@@ -134,13 +134,16 @@ void BinGoto::writeData()
 	STATE_IDS();
 }
 
+/* --start1 */
 void BinGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
 
 	out <<
-		"	{\n"
+		"	{\n";
+
+	out <<
 		"	int _klen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
@@ -159,8 +162,8 @@ void BinGoto::writeExec()
 		out << "	int _nbreak;\n";
 
 	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-				|| redFsm->anyFromStateActions() )
+		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
+				redFsm->anyFromStateActions() )
 		{
 			out << 
 				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
@@ -169,8 +172,7 @@ void BinGoto::writeExec()
 	}
 
 	out <<
-		"	" << ENTRY() << " {\n"
-		"\n";
+		"	" << ENTRY() << " {\n";
 
 	if ( !noEnd ) {
 		testEofUsed = true;
@@ -201,24 +203,25 @@ void BinGoto::writeExec()
 
 	out << "}\n";
 	out << LABEL( "_match_cond" ) << " {\n";
-	
+
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
+	string cond = "_cond";
+
 	out <<
-		"	" << vCS() << " = " << CAST( "int" ) << ARR_REF( condTargs ) << "[_cond];\n"
-		"\n";
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[_cond] == 0 )\n"
+			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] == 0 )\n"
 			"		goto _again;\n"
 			"\n";
 
 		if ( redFsm->anyRegNbreak() )
 			out << "	_nbreak = 0;\n";
 
-		REG_ACTIONS( "_cond" );
+		REG_ACTIONS( cond );
 
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
@@ -226,11 +229,13 @@ void BinGoto::writeExec()
 				"		goto _out;\n";
 			outLabelUsed = true;
 		}
+
 		out << "\n";
 	}
 
-	out << "}\n";
-	out << LABEL( "_again" ) << " {\n";
+//	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
+//			redFsm->anyActionCalls() || redFsm->anyActionRets() )
+		out << "}\n" << LABEL( "_again" ) << " {\n";
 
 	TO_STATE_ACTIONS();
 
@@ -257,7 +262,6 @@ void BinGoto::writeExec()
 		out << "}\n" << LABEL( "_test_eof" ) << " { {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
@@ -295,7 +299,7 @@ void BinGoto::writeExec()
 				"	}\n";
 		}
 
-		out << 
+		out <<
 			"	}\n"
 			"\n";
 	}
@@ -309,6 +313,7 @@ void BinGoto::writeExec()
 
 	NFA_POP();
 
-	/* The execute block. */
 	out << "	}\n";
 }
+
+/* --end1 */

@@ -535,6 +535,7 @@ void FlatVar::writeData()
 	STATE_IDS();
 }
 
+/* --start2 */
 void FlatVar::writeExec()
 {
 	testEofUsed = false;
@@ -542,14 +543,21 @@ void FlatVar::writeExec()
 	matchCondLabelUsed = false;
 
 	if ( redFsm->anyNfaStates() ) {
-		out << 
+		out <<
 			"{\n"
 			"	" << UINT() << " _nfa_cont = 1;\n"
 			"	" << UINT() << " _nfa_repeat = 1;\n"
 			"	while ( _nfa_cont != 0 )\n";
 	}
 
-	out << "	{\n";
+	out <<
+		"	{\n";
+
+	if ( !noEnd && ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) ) {
+		out << 
+			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
+			"	int _klen;\n";
+	}
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
@@ -559,11 +567,17 @@ void FlatVar::writeExec()
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
+	if ( red->condSpaceList.length() > 0 )
+		out << "	" << UINT() << " _cond = 0;\n";
+
 	if ( red->condSpaceList.length() > 0 || redFsm->anyEofTrans() || redFsm->anyEofActions() )
 		out << "	int _cpc;\n";
 
-	if ( red->condSpaceList.length() > 0 )
-		out << "	" << UINT() << " _cond = 0;\n";
+	if ( redFsm->classMap != 0 ) {
+		out <<
+			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+	}
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
@@ -573,12 +587,6 @@ void FlatVar::writeExec()
 				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
 				"	" << UINT() << " _nacts;\n";
 		}
-	}
-
-	if ( redFsm->classMap != 0 ) {
-		out <<
-			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
 	}
 
 	out <<
@@ -610,8 +618,6 @@ void FlatVar::writeExec()
 
 			out <<
 				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
-				"		int _klen;\n"
 				"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
 							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
 				"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
@@ -674,17 +680,13 @@ void FlatVar::writeExec()
 			}
 
 			out << "}\n";
-			
-			out << 
-				"	}\n"
-				"\n";
+			out << "}\n";
 		}
 
 		out << 
 			"	if ( _have == 0 )\n"
 			"		_cont = 0;\n"
 			"	}\n";
-
 	}
 
 	out << 
@@ -697,19 +699,19 @@ void FlatVar::writeExec()
 
 	LOCATE_TRANS();
 
-	string cond = "_cond";
-	if ( red->condSpaceList.length() == 0 )
-		cond = "_trans";
-
 	out << "}\n";
-	
+
 	out << "if ( _cont == 1 ) {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
+	string cond = "_cond";
+	if ( red->condSpaceList.length() == 0 )
+		cond = "_trans";
+
 	out <<
-		"	" << vCS() << " = " << CAST( "int" ) << ARR_REF( condTargs ) << "[" << cond << "];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
@@ -718,9 +720,8 @@ void FlatVar::writeExec()
 
 		REG_ACTIONS( cond );
 
-		out << 
-			"	}\n"
-			"\n";
+		out <<
+			"	}\n";
 	}
 
 	TO_STATE_ACTIONS();
@@ -734,19 +735,17 @@ void FlatVar::writeExec()
 
 	out << 
 		"	if ( _cont == 1 )\n"
-		"		" << P() << " += 1;\n"
-		"\n";
+		"		" << P() << " += 1;\n";
 
-	out << "}}\n";
-
-	/* The loop. */
+	out << "}\n";
+	out << "}\n";
 	out << "}\n";
 
 	NFA_POP();
 
-	out <<
-		"	}\n";
+	out << "}\n";
 
 	if ( redFsm->anyNfaStates() )
 		out << "}\n";
 }
+/* --end2 */

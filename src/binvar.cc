@@ -436,6 +436,7 @@ void BinaryVar::writeData()
 	STATE_IDS();
 }
 
+/* --start1 */
 void BinaryVar::writeExec()
 {
 	testEofUsed = false;
@@ -450,21 +451,31 @@ void BinaryVar::writeExec()
 			"	while ( _nfa_cont != 0 )\n";
 	}
 
-	out << 
-		"	{\n"
+	out <<
+		"	{\n";
+
+	out <<
 		"	int _klen;\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 
 	out <<
-		"	" << UINT() << " _trans = 0;\n" <<
-		"	" << UINT() << " _cond = 0;\n"
+		"	" << UINT() << " _trans = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	if ( type == Loop )
-	{
+	out <<
+		"	" << UINT() << " _cond = 0;\n";
+
+	out <<
+		"	int _cpc;\n";
+
+	out <<
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n";
+
+	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 				|| redFsm->anyFromStateActions() )
 		{
@@ -473,11 +484,6 @@ void BinaryVar::writeExec()
 				"	" << UINT() << " _nacts;\n";
 		}
 	}
-
-	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n"
-		"	int _cpc;\n";
 
 	out <<
 		"	while ( _cont == 1 ) {\n"
@@ -494,12 +500,10 @@ void BinaryVar::writeExec()
 		"_have = 0;\n";
 
 	if ( !noEnd ) {
-
 		out << 
 			"	if ( " << P() << " == " << PE() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-
 			out << 
 				"	if ( " << P() << " == " << vEOF() << " )\n"
 				"	{\n";
@@ -566,7 +570,7 @@ void BinaryVar::writeExec()
 			}
 
 			out << "}\n";
-			out << "}\n\n";
+			out << "}\n";
 		}
 
 		out << 
@@ -588,21 +592,23 @@ void BinaryVar::writeExec()
 	LOCATE_COND();
 
 	out << "}\n";
-		
+
 	out << "if ( _cont == 1 ) {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
+	string cond = "_cond";
+
 	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[_cond];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[_cond] != 0 ) {\n";
+			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] != 0 ) {\n";
 
-		REG_ACTIONS( "_cond" );
+		REG_ACTIONS( cond );
 
 		out <<
 			"	}\n";
@@ -622,16 +628,14 @@ void BinaryVar::writeExec()
 		"		" << P() << " += 1;\n";
 
 	out << "}\n";
-
 	out << "}\n";
-
 	out << "}\n";
 
 	NFA_POP();
 
-	/* The execute block. */
 	out << "}\n";
 
 	if ( redFsm->anyNfaStates() )
 		out << "}\n";
 }
+/* --end1 */

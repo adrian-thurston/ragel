@@ -124,13 +124,20 @@ void FlatGoto::writeData()
 	STATE_IDS();
 }
 
+/* --start2 */
 void FlatGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << 
+	out <<
 		"	{\n";
+
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+		out <<
+			"	int _klen;\n"
+			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n";
+	}
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
@@ -140,14 +147,15 @@ void FlatGoto::writeExec()
 	if ( red->condSpaceList.length() > 0 )
 		out << "	" << UINT() << " _cond = 0;\n";
 
-	if ( type == Loop )
-	{
-		if ( redFsm->anyToStateActions() || 
-				redFsm->anyRegActions() || redFsm->anyFromStateActions() )
+
+
+	if ( type == Loop ) {
+		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
+				redFsm->anyFromStateActions() )
 		{
 			out << 
 				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
-				"	" << UINT() << " _nacts;\n"; 
+				"	" << UINT() << " _nacts;\n";
 		}
 	}
 
@@ -189,14 +197,15 @@ void FlatGoto::writeExec()
 
 	LOCATE_TRANS();
 
-	string cond = "_cond";
-	if ( red->condSpaceList.length() == 0 )
-		cond = "_trans";
-
-	out << "}\n" << LABEL( "_match_cond" ) << " {\n";
+	out << "}\n";
+	out << LABEL( "_match_cond" ) << " {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
+
+	string cond = "_cond";
+	if ( red->condSpaceList.length() == 0 )
+		cond = "_trans";
 
 	out <<
 		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
@@ -219,8 +228,7 @@ void FlatGoto::writeExec()
 			outLabelUsed = true;
 		}
 
-		out <<
-			"\n";
+		out << "\n";
 	}
 
 	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
@@ -260,17 +268,14 @@ void FlatGoto::writeExec()
 
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-			"		" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
-			"		int _klen;\n"
 			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
 						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
 			"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
 			"		_cpc = 0;\n"
 		;
 
-		if ( red->condSpaceList.length() > 0 ) {
+		if ( red->condSpaceList.length() > 0 )
 			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
-		}
 
 		COND_BIN_SEARCH( eofCondKeys, "goto _ok;", "goto _out;" );
 
@@ -306,10 +311,13 @@ void FlatGoto::writeExec()
 	if ( outLabelUsed )
 		out << "}\n" << LABEL( "_out" ) << " { {}\n";
 
-	/* The entry loop. */
-	out << "}\n}\n";
+	out << "}\n";
+
+	out << "}\n";
 
 	NFA_POP();
 
 	out << "	}\n";
 }
+
+/* --end2 */
