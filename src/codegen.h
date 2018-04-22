@@ -54,10 +54,17 @@ struct LongestMatchPart;
 
 string itoa( int i );
 
+struct Variable
+{
+	Variable() : referenced(false) {}
+	void ref() { referenced = true; }
+
+	bool referenced;
+};
+
 struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
 struct CodeGen;
-
 
 struct TableArray
 {

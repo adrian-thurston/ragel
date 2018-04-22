@@ -388,7 +388,9 @@ inline void CondKey::increment()
 
 /* Filter on the output stream that keeps track of the number of lines
  * output. */
-class output_filter : public std::filebuf
+class output_filter
+:	
+	public std::filebuf
 {
 public:
 	output_filter( const char *fileName )
@@ -400,7 +402,7 @@ public:
 	{}
 
 	virtual int sync();
-	virtual std::streamsize xsputn(const char* s, std::streamsize n);
+	virtual std::streamsize xsputn( const char* s, std::streamsize n );
 
 	std::streamsize countAndWrite( const char* s, std::streamsize n );
 
@@ -408,6 +410,18 @@ public:
 	int line;
 	int level;
 	bool indent;
+};
+
+class nullbuf
+: 
+	public std::streambuf
+{
+public:
+	virtual std::streamsize xsputn( const char * s, std::streamsize n )
+		{ return n; }
+
+	virtual int overflow( int c )
+		{ return 1; }
 };
 
 class cfilebuf : public std::streambuf
