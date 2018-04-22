@@ -535,15 +535,26 @@ void FlatVar::writeData()
 	STATE_IDS();
 }
 
-void FlatVar::EOF_TRANS()
+void FlatVar::VARS()
 {
-	out <<
-		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-	if ( red->condSpaceList.length() > 0 ) {
-		out <<
-			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+	if ( !noEnd && ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) ) {
+		out << 
+			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
+			"	int _klen;\n";
 	}
+
+	if ( red->condSpaceList.length() > 0 )
+		out << "	" << UINT() << " _cond = 0;\n";
+
+	if ( red->condSpaceList.length() > 0 || redFsm->anyEofTrans() || redFsm->anyEofActions() )
+		out << "	int _cpc;\n";
+
+	if ( redFsm->classMap != 0 ) {
+		out <<
+			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+	}
+
 }
 
 /* --start2 */
@@ -572,23 +583,7 @@ void FlatVar::writeExec()
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	if ( !noEnd && ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) ) {
-		out << 
-			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n"
-			"	int _klen;\n";
-	}
-
-	if ( red->condSpaceList.length() > 0 )
-		out << "	" << UINT() << " _cond = 0;\n";
-
-	if ( red->condSpaceList.length() > 0 || redFsm->anyEofTrans() || redFsm->anyEofActions() )
-		out << "	int _cpc;\n";
-
-	if ( redFsm->classMap != 0 ) {
-		out <<
-			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
-	}
+	VARS();
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 

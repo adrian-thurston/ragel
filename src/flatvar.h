@@ -40,6 +40,7 @@ struct FlatVar
 	void NFA_POP();
 	void LOCATE_TRANS();
 	void LOCATE_COND();
+	void VARS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
@@ -51,8 +52,6 @@ struct FlatVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NRET( ostream &ret, bool inFinish );
 	void NBREAK( ostream &ret, int targState, bool csForced );
-
-	void EOF_TRANS();
 
 	void tableDataPass();
 	virtual void genAnalysis();

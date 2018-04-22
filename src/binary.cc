@@ -973,6 +973,18 @@ void Binary::LOCATE_COND()
 	);
 }
 
+void Binary::EOF_TRANS()
+{
+	out <<
+		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
+	}
+}
+
+
 void Binary::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest <<	";";

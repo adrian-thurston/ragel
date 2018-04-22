@@ -666,7 +666,7 @@ void Flat::LOCATE_TRANS()
 {
 	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	_trans = " << CAST("int") << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+			"	_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
 	}
 	else {
 		long lowKey = redFsm->lowKey.getVal();
@@ -701,18 +701,18 @@ void Flat::LOCATE_TRANS()
 							" - " << lowKey << "];\n"
 			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
 						"_ic >= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
-			"			_trans = " << CAST("int") << DEREF( ARR_REF( indicies ),
+			"			_trans = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
 								"_inds + " + CAST("int") + "( _ic - " + CAST("int") +
 								DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << "; \n"
 			"		else\n"
-			"			_trans = " << CAST("int") << ARR_REF( indexDefaults ) <<
+			"			_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
 
 		if ( !limitLow || !limitHigh ) {
 			out <<
 				"	}\n"
 				"	else {\n"
-				"		_trans = " << CAST("int") << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"		_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 				"	}\n"
 				"\n";
 		}
@@ -755,6 +755,17 @@ void Flat::LOCATE_TRANS()
 	out <<
 		"	goto _match_cond;\n"
 	;
+}
+
+void Flat::EOF_TRANS()
+{
+	out <<
+		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+
+	if ( red->condSpaceList.length() > 0 ) {
+		out <<
+			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+	}
 }
 
 void Flat::GOTO( ostream &ret, int gotoDest, bool inFinish )

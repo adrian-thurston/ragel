@@ -77,7 +77,6 @@ protected:
 	void setKeyType();
 
 	std::ostream &INDICIES();
-	std::ostream &EOF_TRANS();
 	std::ostream &TRANS_COND_SPACES();
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();
@@ -86,6 +85,7 @@ protected:
 	std::ostream &COND_ACTIONS();
 
 	void LOCATE_TRANS();
+	void EOF_TRANS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

@@ -37,7 +37,7 @@ struct FlatGoto
 		Flat( args, type )
 	{}
 
-	void EOF_TRANS();
+	void VARS();
 
 	virtual void tableDataPass();
 	virtual void genAnalysis();

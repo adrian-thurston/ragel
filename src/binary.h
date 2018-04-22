@@ -93,6 +93,7 @@ protected:
 
 	void LOCATE_TRANS();
 	void LOCATE_COND();
+	void EOF_TRANS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

@@ -41,6 +41,7 @@ struct BinaryVar
 
 	void LOCATE_TRANS();
 	void LOCATE_COND();
+	void VARS();
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
@@ -54,7 +55,6 @@ struct BinaryVar
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	void NFA_POP();
-	void EOF_TRANS();
 
 	void genAnalysis();
 

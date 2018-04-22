@@ -134,30 +134,8 @@ void BinGoto::writeData()
 	STATE_IDS();
 }
 
-void BinGoto::EOF_TRANS()
+void BinGoto::VARS()
 {
-	out <<
-		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-	if ( red->condSpaceList.length() > 0 ) {
-		out <<
-			"_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
-	}
-}
-
-
-/* --start1 */
-void BinGoto::writeExec()
-{
-	testEofUsed = false;
-	outLabelUsed = false;
-
-	out <<
-		"	{\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps;\n";
-
 	out <<
 		"	int _klen;\n";
 
@@ -173,12 +151,27 @@ void BinGoto::writeExec()
 
 	out <<
 		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n";
+}
+
+/* --start1 */
+void BinGoto::writeExec()
+{
+	testEofUsed = false;
+	outLabelUsed = false;
+
+	out <<
+		"	{\n";
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	int _ps;\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
 		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
+
+	VARS();
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||

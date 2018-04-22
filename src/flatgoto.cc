@@ -124,17 +124,25 @@ void FlatGoto::writeData()
 	STATE_IDS();
 }
 
-void FlatGoto::EOF_TRANS()
+void FlatGoto::VARS()
 {
-	out <<
-		"_trans = " << CAST("int") << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-
-	if ( red->condSpaceList.length() > 0 ) {
+	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out <<
-			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
+			"	int _klen;\n"
+			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n";
+	}
+
+	out << "	" << UINT() << " _trans = 0;\n";
+
+	if ( red->condSpaceList.length() > 0 )
+		out << "	" << UINT() << " _cond = 0;\n";
+
+	if ( redFsm->classMap != 0 ) {
+		out <<
+			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
 	}
 }
-
 
 /* --start2 */
 void FlatGoto::writeExec()
@@ -148,29 +156,13 @@ void FlatGoto::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	int _ps;\n";
 
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out <<
-			"	int _klen;\n"
-			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n";
-	}
-
-	out << "	int _trans = 0;\n";
-
-	if ( red->condSpaceList.length() > 0 )
-		out << "	" << UINT() << " _cond = 0;\n";
-
-
-	if ( redFsm->classMap != 0 ) {
-		out <<
-			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
-	}
-
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
 		out << "	int _cpc;\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
+
+	VARS();
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||

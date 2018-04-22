@@ -439,15 +439,20 @@ void BinaryVar::writeData()
 	STATE_IDS();
 }
 
-void BinaryVar::EOF_TRANS()
+void BinaryVar::VARS()
 {
 	out <<
-		"_trans = " << CAST( UINT() ) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
-	
-	if ( red->condSpaceList.length() > 0 ) {
-		out <<
-			"_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n";
-	}
+		"	int _klen;\n";
+
+	out <<
+		"	" << UINT() << " _cond = 0;\n";
+
+	out <<
+		"	int _cpc;\n";
+
+	out <<
+		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
+		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n";
 }
 
 /* --start1 */
@@ -476,18 +481,7 @@ void BinaryVar::writeExec()
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	out <<
-		"	int _klen;\n";
-
-	out <<
-		"	" << UINT() << " _cond = 0;\n";
-
-	out <<
-		"	int _cpc;\n";
-
-	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n";
+	VARS();
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
