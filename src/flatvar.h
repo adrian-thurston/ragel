@@ -29,12 +29,13 @@
 
 struct FlatVar
 :
-	public Flat
+	public Flat, public TablesVar
 {
 	FlatVar( const CodeGenArgs &args, Flat::Type type )
 	:
 		Tables( args ),
-		Flat( args, type )
+		Flat( args, type ),
+		TablesVar( args )
 	{}
 
 	void NFA_POP();
@@ -56,7 +57,6 @@ struct FlatVar
 	void tableDataPass();
 	virtual void genAnalysis();
 	virtual void writeData();
-	virtual void writeExec();
 };
 
 class FlatVarLoop

@@ -29,12 +29,13 @@
 
 struct FlatGoto
 :
-	public Flat
+	public Flat, public TablesGoto
 {
 	FlatGoto( const CodeGenArgs &args, Flat::Type type )
 	:
 		Tables( args ),
-		Flat( args, type )
+		Flat( args, type ),
+		TablesGoto( args )
 	{}
 
 	void VARS();
@@ -42,7 +43,6 @@ struct FlatGoto
 	virtual void tableDataPass();
 	virtual void genAnalysis();
 	virtual void writeData();
-	virtual void writeExec();
 };
 
 class FlatGotoLoop

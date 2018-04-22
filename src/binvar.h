@@ -29,12 +29,13 @@
 
 struct BinaryVar
 :
-	public Binary
+	public Binary, public TablesVar
 {
 	BinaryVar( const CodeGenArgs &args, Binary::Type type )
 	:
 		Tables( args ),
-		Binary( args, type )
+		Binary( args, type ),
+		TablesVar( args )
 	{}
 
 	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
@@ -60,9 +61,6 @@ struct BinaryVar
 
 	virtual void tableDataPass();
 	virtual void writeData();
-	virtual void writeExec();
-
-
 };
 
 class BinVarLoop

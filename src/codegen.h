@@ -403,6 +403,15 @@ protected:
 			return "export " + type + " " + name + " " + value + ";";
 	}
 
+	virtual void NFA_PUSH() = 0;
+	virtual void NFA_POP() = 0;
+	virtual void LOCATE_TRANS() {}
+	virtual void EOF_TRANS() {}
+
+	virtual void COND_EXEC( std::string expr ) {}
+	virtual void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error ) {}
+	virtual void VARS() {}
+
 public:
 	virtual void writeExports();
 };

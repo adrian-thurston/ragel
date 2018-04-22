@@ -29,18 +29,18 @@
 
 struct BinGoto
 :
-	public Binary
+	public Binary, public TablesGoto
 {
 	BinGoto( const CodeGenArgs &args, Binary::Type type )
 	:
 		Tables( args ),
-		Binary( args, type )
+		Binary( args, type ),
+		TablesGoto( args )
 	{}
 
 	void VARS();
 
 	virtual void writeData();
-	virtual void writeExec();
 
 	virtual void genAnalysis();
 	void tableDataPass();
