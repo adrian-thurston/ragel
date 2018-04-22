@@ -22,36 +22,6 @@
 
 #include "flatgoto.h"
 
-void FlatGoto::tableDataPass()
-{
-	if ( type == Flat::Loop ) {
-		if ( redFsm->anyActions() )
-			taActions();
-	}
-
-	taKeys();
-	taCharClass();
-	taFlatIndexOffset();
-
-	taIndicies();
-	taIndexDefaults();
-	taTransCondSpaces();
-	if ( red->condSpaceList.length() > 0 )
-		taTransOffsets();
-	taCondTargs();
-	taCondActions();
-
-	taToStateActions();
-	taFromStateActions();
-	taEofConds();
-	taEofActions();
-	taEofTrans();
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-}
-
 void FlatGoto::genAnalysis()
 {
 	redFsm->sortByStateId();
@@ -79,49 +49,6 @@ void FlatGoto::genAnalysis()
 
 	/* Switch the tables over to the code gen mode. */
 	setTableState( TableArray::GeneratePass );
-}
-
-void FlatGoto::writeData()
-{
-	if ( type == Flat::Loop ) {
-		/* If there are any transtion functions then output the array. If there
-		 * are none, don't bother emitting an empty array that won't be used. */
-		if ( redFsm->anyActions() )
-			taActions();
-	}
-
-	taKeys();
-	taCharClass();
-	taFlatIndexOffset();
-
-	taIndicies();
-	taIndexDefaults();
-	taTransCondSpaces();
-	if ( red->condSpaceList.length() > 0 )
-		taTransOffsets();
-	taCondTargs();
-	taCondActions();
-
-	if ( redFsm->anyToStateActions() )
-		taToStateActions();
-
-	if ( redFsm->anyFromStateActions() )
-		taFromStateActions();
-
-	taEofConds();
-
-	if ( redFsm->anyEofActions() )
-		taEofActions();
-
-	if ( redFsm->anyEofTrans() )
-		taEofTrans();
-
-	taNfaTargs();
-	taNfaOffsets();
-	taNfaPushActions();
-	taNfaPopTrans();
-
-	STATE_IDS();
 }
 
 void FlatGoto::VARS()

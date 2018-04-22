@@ -27,6 +27,89 @@
 
 #include <assert.h>
 
+void Binary::tableDataPass()
+{
+	if ( type == Loop )
+		taActions();
+
+	taKeyOffsets();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+	taIndicies();
+
+	taTransCondSpacesWi();
+	taTransOffsetsWi();
+	taTransLengthsWi();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+
+	taCondTargs();
+	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofActions();
+	taEofConds();
+	taEofTrans();
+
+	taKeys();
+	taCondKeys();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+}
+
+void Binary::writeData()
+{
+	if ( type == Loop ) {
+		/* If there are any transtion functions then output the array. If there
+		 * are none, don't bother emitting an empty array that won't be used. */
+		if ( redFsm->anyActions() )
+			taActions();
+	}
+
+	taKeyOffsets();
+	taKeys();
+	taSingleLens();
+	taRangeLens();
+	taIndexOffsets();
+
+	taTransCondSpaces();
+	taTransOffsets();
+	taTransLengths();
+
+	taCondKeys();
+	taCondTargs();
+	taCondActions();
+
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
+
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
+
+	if ( redFsm->anyEofActions() )
+		taEofActions();
+
+	taEofConds();
+
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+
+	STATE_IDS();
+}
+
+
 void Binary::setKeyType()
 {
 	keys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );

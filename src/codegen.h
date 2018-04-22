@@ -56,10 +56,10 @@ string itoa( int i );
 
 struct Variable
 {
-	Variable() : referenced(false) {}
-	void ref() { referenced = true; }
+	Variable() : isReferenced(false) {}
+	void ref() { isReferenced = true; }
 
-	bool referenced;
+	bool isReferenced;
 };
 
 struct TableArray;

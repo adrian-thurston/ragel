@@ -40,13 +40,8 @@ struct BinGoto
 
 	void VARS();
 
-	virtual void writeData();
 
 	virtual void genAnalysis();
-	void tableDataPass();
-
-	void writeExecLoop();
-	void writeExecExp();
 };
 
 class BinGotoLoop

@@ -25,6 +25,81 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+void Flat::tableDataPass()
+{
+	if ( type == Flat::Loop ) {
+		if ( redFsm->anyActions() )
+			taActions();
+	}
+
+	taKeys();
+	taCharClass();
+	taFlatIndexOffset();
+
+	taIndicies();
+	taIndexDefaults();
+	taTransCondSpaces();
+
+	if ( red->condSpaceList.length() > 0 )
+		taTransOffsets();
+
+	taCondTargs();
+	taCondActions();
+
+	taToStateActions();
+	taFromStateActions();
+	taEofConds();
+	taEofActions();
+	taEofTrans();
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+}
+
+void Flat::writeData()
+{
+	if ( type == Flat::Loop ) {
+		/* If there are any transtion functions then output the array. If there
+		 * are none, don't bother emitting an empty array that won't be used. */
+		if ( redFsm->anyActions() )
+			taActions();
+	}
+
+	taKeys();
+	taCharClass();
+	taFlatIndexOffset();
+
+	taIndicies();
+	taIndexDefaults();
+	taTransCondSpaces();
+	if ( red->condSpaceList.length() > 0 )
+		taTransOffsets();
+	taCondTargs();
+	taCondActions();
+
+	if ( redFsm->anyToStateActions() )
+		taToStateActions();
+
+	if ( redFsm->anyFromStateActions() )
+		taFromStateActions();
+
+	taEofConds();
+
+	if ( redFsm->anyEofActions() )
+		taEofActions();
+
+	if ( redFsm->anyEofTrans() )
+		taEofTrans();
+
+	taNfaTargs();
+	taNfaOffsets();
+	taNfaPushActions();
+	taNfaPopTrans();
+
+	STATE_IDS();
+}
+
 
 void Flat::setKeyType()
 {

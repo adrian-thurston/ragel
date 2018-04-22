@@ -58,9 +58,6 @@ struct BinaryVar
 	void NFA_POP();
 
 	void genAnalysis();
-
-	virtual void tableDataPass();
-	virtual void writeData();
 };
 
 class BinVarLoop

@@ -40,9 +40,7 @@ struct FlatGoto
 
 	void VARS();
 
-	virtual void tableDataPass();
 	virtual void genAnalysis();
-	virtual void writeData();
 };
 
 class FlatGotoLoop
