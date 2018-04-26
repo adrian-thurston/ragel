@@ -56,9 +56,16 @@ string itoa( int i );
 
 struct Variable
 {
-	Variable() : isReferenced(false) {}
-	void ref() { isReferenced = true; }
+	Variable( const char *name ) : name(name), isReferenced(false) {}
+	operator const char *() { isReferenced = true; return name; }
 
+	void declare( std::ostream &out, std::string type )
+	{
+		if ( isReferenced )
+			out << type << " " << name << ';';
+	}
+
+	const char *name;
 	bool isReferenced;
 };
 
@@ -320,6 +327,14 @@ protected:
 			return "const " + type + " *" + name;
 		else
 			return "index " + type + " " + name;
+	}
+
+	string INDEX( string type )
+	{
+		if ( backend == Direct )
+			return "const " + type + " *";
+		else
+			return "index " + type + " ";
 	}
 
 	string ENTRY()
