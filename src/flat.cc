@@ -25,6 +25,35 @@
 #include "redfsm.h"
 #include "gendata.h"
 
+void Flat::genAnalysis()
+{
+	redFsm->sortByStateId();
+
+	/* Choose default transitions and the single transition. */
+	redFsm->chooseDefaultSpan();
+		
+	/* Do flat expand. */
+	redFsm->makeFlatClass();
+
+	/* If any errors have occured in the input file then don't write anything. */
+	if ( red->id->errorCount > 0 )
+		return;
+
+	/* Anlayze Machine will find the final action reference counts, among other
+	 * things. We will use these in reporting the usage of fsm directives in
+	 * action code. */
+	red->analyzeMachine();
+
+	setKeyType();
+
+	/* Run the analysis pass over the table data. */
+	setTableState( TableArray::AnalyzePass );
+	tableDataPass();
+
+	/* Switch the tables over to the code gen mode. */
+	setTableState( TableArray::GeneratePass );
+}
+
 void Flat::tableDataPass()
 {
 	if ( type == Flat::Loop ) {

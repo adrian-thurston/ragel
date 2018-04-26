@@ -328,35 +328,6 @@ void BinaryVar::LOCATE_COND()
 	outLabelUsed = true;
 }
 
-void BinaryVar::genAnalysis()
-{
-	redFsm->sortByStateId();
-
-	/* Choose default transitions and the single transition. */
-	redFsm->chooseDefaultSpan();
-		
-	/* Choose the singles. */
-	redFsm->moveSelectTransToSingle();
-
-	/* If any errors have occured in the input file then don't write anything. */
-	if ( red->id->errorCount > 0 )
-		return;
-
-	/* Anlayze Machine will find the final action reference counts, among other
-	 * things. We will use these in reporting the usage of fsm directives in
-	 * action code. */
-	red->analyzeMachine();
-
-	setKeyType();
-
-	/* Run the analysis pass over the table data. */
-	setTableState( TableArray::AnalyzePass );
-	tableDataPass();
-
-	/* Switch the tables over to the code gen mode. */
-	setTableState( TableArray::GeneratePass );
-}
-
 void BinaryVar::VARS()
 {
 	out <<

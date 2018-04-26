@@ -117,6 +117,7 @@ protected:
 
 	virtual void writeData();
 	virtual void tableDataPass();
+	virtual void genAnalysis();
 };
 
 #endif

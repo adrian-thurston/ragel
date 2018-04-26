@@ -39,8 +39,6 @@ struct FlatGoto
 	{}
 
 	void VARS();
-
-	virtual void genAnalysis();
 };
 
 class FlatGotoLoop

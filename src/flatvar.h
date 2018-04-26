@@ -53,8 +53,6 @@ struct FlatVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NRET( ostream &ret, bool inFinish );
 	void NBREAK( ostream &ret, int targState, bool csForced );
-
-	virtual void genAnalysis();
 };
 
 class FlatVarLoop

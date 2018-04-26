@@ -39,9 +39,6 @@ struct BinGoto
 	{}
 
 	void VARS();
-
-
-	virtual void genAnalysis();
 };
 
 class BinGotoLoop
