@@ -46,8 +46,6 @@ struct Tables
 		condKeys(           "cond_keys",             *this )
 	{}
 
-	Variable ps;
-
 	TableArray actions;
 	TableArray keys;
 	TableArray charClass;

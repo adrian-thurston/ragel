@@ -1607,6 +1607,14 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 			else
 				write_option_error( loc, args[i] );
 		}
+		nullbuf nb;
+
+		/* Nullify the output and execute the write. We use this pass to collect references. */
+		std::streambuf *filt = out.rdbuf( &nb );
+		writeExec();
+
+		/* Restore the output and do the actual write. */
+		out.rdbuf( filt );
 		writeExec();
 	}
 	else if ( args[0] == "exports" ) {
