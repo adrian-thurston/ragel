@@ -57,13 +57,9 @@ string itoa( int i );
 struct Variable
 {
 	Variable( const char *name ) : name(name), isReferenced(false) {}
-	operator const char *() { isReferenced = true; return name; }
 
-	void declare( std::ostream &out, std::string type )
-	{
-		if ( isReferenced )
-			out << type << " " << name << ';';
-	}
+	operator const char *() { isReferenced = true; return name; }
+	void reference() { isReferenced = true; }
 
 	const char *name;
 	bool isReferenced;
@@ -195,6 +191,9 @@ protected:
 	string START() { return DATA_PREFIX() + "start"; }
 	string ERROR() { return DATA_PREFIX() + "error"; }
 	string FIRST_FINAL() { return DATA_PREFIX() + "first_final"; }
+
+	/* Declare a variable only if referenced. */
+	void DECLARE( std::string type, Variable &var, std::string init = "" );
 
 	string CAST( string type );
 

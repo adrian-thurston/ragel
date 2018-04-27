@@ -12,6 +12,17 @@ struct Tables
 	:
 		CodeGen( args ),
 
+		pa( "_pa" ),
+		klen( "_klen" ),
+		ckeys( "_ckeys" ),
+		trans( "_trans" ),
+		cond( "_cond" ),
+		keys( "_keys" ),
+		acts( "_acts" ),
+		nacts( "_nacts" ),
+		cpc( "_cpc" ),
+		inds( "_inds" ),
+
 		actions(          "actions",             *this ),
 		transKeys(        "trans_keys",          *this ),
 		charClass(        "char_class",          *this ),
@@ -45,6 +56,17 @@ struct Tables
 		transLengths(       "trans_lengths",         *this ),
 		condKeys(           "cond_keys",             *this )
 	{}
+
+	Variable pa;
+	Variable klen;
+	Variable ckeys;
+	Variable trans;
+	Variable cond;
+	Variable keys;
+	Variable acts;
+	Variable nacts;
+	Variable cpc;
+	Variable inds;
 
 	TableArray actions;
 	TableArray transKeys;

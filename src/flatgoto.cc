@@ -25,30 +25,36 @@
 
 void FlatGoto::VARS()
 {
+	klen.reference();
+	ckeys.reference();
+	trans.reference();
+	cond.reference();
+	keys.reference();
+	inds.reference();
+	acts.reference();
+	nacts.reference();
+
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out <<
-			"	int _klen;\n"
-			"	" << INDEX( ARR_TYPE( eofCondKeys ), "_ckeys" ) << ";\n";
+		DECLARE( "int", klen );
+		DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), ckeys );
 	}
 
-	out << "	" << UINT() << " _trans = 0;\n";
+	DECLARE( UINT(), trans, " = 0" );
 
 	if ( red->condSpaceList.length() > 0 )
-		out << "	" << UINT() << " _cond = 0;\n";
+		DECLARE( UINT(), cond, " = 0" );
 
 	if ( redFsm->classMap != 0 ) {
-		out <<
-			"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-			"	" << INDEX( ARR_TYPE( indicies ), "_inds" ) << ";\n";
+		DECLARE( INDEX( ALPH_TYPE() ), keys );
+		DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 	}
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
 				redFsm->anyFromStateActions() )
 		{
-			out << 
-				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
-				"	" << UINT() << " _nacts;\n";
+			DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
+			DECLARE( UINT(), nacts );
 		}
 	}
 }

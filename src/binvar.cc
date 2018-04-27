@@ -330,26 +330,29 @@ void BinaryVar::LOCATE_COND()
 
 void BinaryVar::VARS()
 {
-	out <<
-		"	int _klen;\n";
+	klen.reference();
+	cond.reference();
+	cpc.reference();
+	keys.reference();
+	ckeys.reference();
+	acts.reference();
+	nacts.reference();
 
-	out <<
-		"	" << UINT() << " _cond = 0;\n";
+	DECLARE( "int", klen );
 
-	out <<
-		"	int _cpc;\n";
+	DECLARE( UINT(), cond, " = 0" );
 
-	out <<
-		"	" << INDEX( ALPH_TYPE(), "_keys" ) << ";\n"
-		"	" << INDEX( ARR_TYPE( condKeys ), "_ckeys" ) << ";\n";
+	DECLARE( "int", cpc );
+
+	DECLARE( INDEX( ALPH_TYPE() ), keys, "" );
+	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys, "" );
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 				|| redFsm->anyFromStateActions() )
 		{
-			out << 
-				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
-				"	" << UINT() << " _nacts;\n";
+			DECLARE( INDEX( ARR_TYPE( actions ) ), acts, "" );
+			DECLARE( UINT(), nacts, "" );
 		}
 	}
 }

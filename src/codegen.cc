@@ -554,6 +554,12 @@ bool CodeGen::isAlphTypeSigned()
 	return keyOps->isSigned;
 }
 
+void CodeGen::DECLARE( std::string type, Variable &var, std::string init )
+{
+	if ( var.isReferenced )
+		out << type << " " << var.name << init << ';';
+}
+
 void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {
 	/* The parser gives fexec two children. The double brackets are for D
