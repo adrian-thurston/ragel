@@ -142,8 +142,8 @@ void Binary::writeData()
 
 void Binary::setKeyType()
 {
-	keys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );
-	keys.isSigned = keyOps->isSigned;
+	transKeys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );
+	transKeys.isSigned = keyOps->isSigned;
 }
 
 void Binary::setTableState( TableArray::State state )
@@ -328,25 +328,25 @@ void Binary::taEofTrans()
 
 void Binary::taKeys()
 {
-	keys.start();
+	transKeys.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Loop the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ ) {
-			keys.value( stel->lowKey.getVal() );
+			transKeys.value( stel->lowKey.getVal() );
 		}
 
 		/* Loop the state's transitions. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ ) {
 			/* Lower key. */
-			keys.value( rtel->lowKey.getVal() );
+			transKeys.value( rtel->lowKey.getVal() );
 
 			/* Upper key. */
-			keys.value( rtel->highKey.getVal() );
+			transKeys.value( rtel->highKey.getVal() );
 		}
 	}
 
-	keys.finish();
+	transKeys.finish();
 }
 
 void Binary::taIndicies()
@@ -950,7 +950,7 @@ void Binary::NFA_POP()
 void Binary::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << OFFSET( ARR_REF( keys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
+		"	_keys = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
 		"	_trans = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"\n"
 		"	_klen = " << CAST( "int" ) << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
@@ -965,9 +965,9 @@ void Binary::LOCATE_TRANS()
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				_trans += " << CAST( UINT() ) << "(_mid - _keys);\n"
@@ -990,9 +990,9 @@ void Binary::LOCATE_TRANS()
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1);\n"
-		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 2;\n"
-		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( keys ), "_mid + 1" ) << " )\n"
+		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid + 1" ) << " )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
 		"				_trans += " << CAST( UINT() ) << "((_mid - _keys)>>1);\n"

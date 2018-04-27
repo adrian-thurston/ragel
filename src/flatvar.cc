@@ -288,7 +288,7 @@ void FlatVar::LOCATE_TRANS()
 		bool limitHigh = keyOps->eq( highKey, keyOps->maxKey );
 
 		out <<
-			"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
+			"	_keys = " << OFFSET( ARR_REF( transKeys ), "(" + vCS() + "<<1)" ) << ";\n"
 			"	_inds = " << OFFSET( ARR_REF( indicies ),
 					ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 			"\n";
@@ -311,10 +311,10 @@ void FlatVar::LOCATE_TRANS()
 		out <<
 			"       int _ic = " << CAST( "int" ) << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
-						"_ic >= " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
+			"		if ( _ic <= " << CAST( "int" ) << DEREF( ARR_REF( transKeys ), "_keys+1" ) << " && " <<
+						"_ic >= " << CAST( "int" ) << DEREF( ARR_REF( transKeys ), "_keys" ) << " )\n"
 			"			_trans = " << CAST( UINT() ) << DEREF( ARR_REF( indicies ),
-								"_inds + " + CAST("int") + "( _ic - " + CAST("int") + DEREF( ARR_REF( keys ),
+								"_inds + " + CAST("int") + "( _ic - " + CAST("int") + DEREF( ARR_REF( transKeys ),
 								"_keys" ) + " ) " ) << "; \n"
 			"		else\n"
 			"			_trans = " << CAST( UINT() ) << ARR_REF( indexDefaults ) <<

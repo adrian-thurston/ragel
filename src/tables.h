@@ -13,7 +13,7 @@ struct Tables
 		CodeGen( args ),
 
 		actions(          "actions",             *this ),
-		keys(             "trans_keys",          *this ),
+		transKeys(        "trans_keys",          *this ),
 		charClass(        "char_class",          *this ),
 		flatIndexOffset(  "index_offsets",       *this ),
 		indicies(         "indicies",            *this ),
@@ -47,7 +47,7 @@ struct Tables
 	{}
 
 	TableArray actions;
-	TableArray keys;
+	TableArray transKeys;
 	TableArray charClass;
 	TableArray flatIndexOffset;
 	TableArray indicies;

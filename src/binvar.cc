@@ -220,7 +220,7 @@ void BinaryVar::NFA_POP()
 void BinaryVar::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << OFFSET( ARR_REF( keys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
+		"	_keys = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
 		"	_trans = " << CAST( UINT() ) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"	_have = 0;\n"
 		"\n"
@@ -233,9 +233,9 @@ void BinaryVar::LOCATE_TRANS()
 		"		_upper = _keys + _klen - 1;\n"
 		"		while ( _upper >= _lower && _have == 0 ) {\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				_trans += " << CAST( UINT() ) << "(_mid - _keys);\n"
@@ -258,9 +258,9 @@ void BinaryVar::LOCATE_TRANS()
 		"		_upper = _keys + (_klen<<1) - 2;\n"
 		"		while ( _have == 0 && _lower <= _upper ) {\n"
 		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1);\n"
-		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 2;\n"
-		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( keys ), "_mid + 1" ) << " )\n"
+		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid + 1" ) << " )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
 		"				_trans += " << CAST( UINT() ) << "((_mid - _keys)>>1);\n"

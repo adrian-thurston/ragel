@@ -132,8 +132,8 @@ void Flat::writeData()
 
 void Flat::setKeyType()
 {
-	keys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );
-	keys.isSigned = keyOps->isSigned;
+	transKeys.setType( ALPH_TYPE(), alphType->size, alphType->isChar );
+	transKeys.isSigned = keyOps->isSigned;
 }
 
 void Flat::setTableState( TableArray::State state )
@@ -306,22 +306,22 @@ void Flat::taEofTrans()
 
 void Flat::taKeys()
 {
-	keys.start();
+	transKeys.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList ) {
 			/* Emit just low key and high key. */
-			keys.value( st->low );
-			keys.value( st->high );
+			transKeys.value( st->low );
+			transKeys.value( st->high );
 		}
 		else {
 			/* Emit an impossible range so the driver fails the lookup. */
-			keys.value( 1 );
-			keys.value( 0 );
+			transKeys.value( 1 );
+			transKeys.value( 0 );
 		}
 	}
 
-	keys.finish();
+	transKeys.finish();
 }
 
 void Flat::taIndicies()
@@ -780,7 +780,7 @@ void Flat::LOCATE_TRANS()
 		bool limitHigh = keyOps->eq( highKey, keyOps->maxKey );
 
 		out <<
-			"	_keys = " << OFFSET( ARR_REF( keys ), "(" + vCS() + "<<1)" ) << ";\n"
+			"	_keys = " << OFFSET( ARR_REF( transKeys ), "(" + vCS() + "<<1)" ) << ";\n"
 			"	_inds = " << OFFSET( ARR_REF( indicies ),
 					ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 			"\n";
@@ -803,11 +803,11 @@ void Flat::LOCATE_TRANS()
 		out <<
 			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys+1" ) << " && " <<
-						"_ic >= " << CAST("int") << DEREF( ARR_REF( keys ), "_keys" ) << " )\n"
+			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( transKeys ), "_keys+1" ) << " && " <<
+						"_ic >= " << CAST("int") << DEREF( ARR_REF( transKeys ), "_keys" ) << " )\n"
 			"			_trans = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
 								"_inds + " + CAST("int") + "( _ic - " + CAST("int") +
-								DEREF( ARR_REF( keys ), "_keys" ) + " ) " ) << "; \n"
+								DEREF( ARR_REF( transKeys ), "_keys" ) + " ) " ) << "; \n"
 			"		else\n"
 			"			_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
