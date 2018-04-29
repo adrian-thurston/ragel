@@ -1,4 +1,150 @@
 #include "tables.h"
+#include "binary.h"
+#include "flat.h"
+
+void TablesGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << "goto _again;";
+	ret << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << CLOSE_HOST_EXPR() << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+	
+	ret << " goto _again;";
+	
+	ret << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK();
+
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
+			callDest << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << " goto _again;";
+
+	ret << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK();
+
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " <<
+			TOP() << " += 1;" << vCS() << " = " << 
+			callDest << "; " << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK();
+
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = " << OPEN_HOST_EXPR();
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+	ret << CLOSE_HOST_EXPR() << ";";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << "goto _again;";
+
+	ret << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK();
+
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = " << OPEN_HOST_EXPR();
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::RET( ostream &ret, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << "goto _again;" << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::NRET( ostream &ret, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
+
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	/* FIXME: ws in front of } will cause rlhc failure. */
+	ret << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::BREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
+}
+
+void TablesGoto::NBREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1;" << CLOSE_GEN_BLOCK();
+}
 
 void TablesGoto::writeExec()
 {

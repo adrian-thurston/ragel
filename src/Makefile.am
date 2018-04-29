@@ -47,7 +47,7 @@ dist_libfsm_la_SOURCES = \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
 	allocgen.cc codegen.cc \
 	actexp.cc binvar.cc \
-	tabgoto.cc tabvar.cc \
+	tables.cc tabgoto.cc tabvar.cc \
 	binary.cc bingoto.cc actloop.cc \
 	flat.cc flatgoto.cc flatvar.cc \
 	goto.cc gotoloop.cc gotoexp.cc ipgoto.cc \

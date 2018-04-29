@@ -1,4 +1,94 @@
 #include "tables.h"
+#include "flatvar.h"
+#include "binvar.h"
+
+void TablesVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";" << CLOSE_GEN_BLOCK();
+}
+
+void TablesVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR( "-", 1 );
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
+}
+
+void TablesVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	red->id->error() << "cannot use fcall in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
+}
+
+void TablesVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK();
+
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " <<
+			callDest << ";" << CLOSE_GEN_BLOCK();
+}
+
+void TablesVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	red->id->error() << "cannot use fcall in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
+}
+
+void TablesVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK();
+
+	if ( red->prePushExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->prePushExpr );
+		INLINE_LIST( ret, red->prePushExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << STACK() << "[" << TOP() << "] = " <<
+			vCS() << "; " << TOP() << " += 1;" << vCS() <<
+			" = " << OPEN_HOST_EXPR( "-", 1 );
+	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
+}
+
+void TablesVar::RET( ostream &ret, bool inFinish )
+{
+	red->id->error() << "cannot use fret in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
+}
+
+void TablesVar::NRET( ostream &ret, bool inFinish )
+{
+	ret << OPEN_GEN_BLOCK() << TOP() << "-= 1;" << vCS() << " = " <<
+			STACK() << "[" << TOP() << "]; ";
+
+	if ( red->postPopExpr != 0 ) {
+		ret << OPEN_HOST_BLOCK( red->postPopExpr );
+		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
+		ret << CLOSE_HOST_BLOCK();
+	}
+
+	ret << CLOSE_GEN_BLOCK();
+}
+
+void TablesVar::BREAK( ostream &ret, int targState, bool csForced )
+{
+	red->id->error() << "cannot use fbreak in -B mode" << std::endl;
+	red->id->abortCompile( 1 );
+}
+
+void TablesVar::NBREAK( ostream &ret, int targState, bool csForced )
+{
+	outLabelUsed = true;
+	ret << OPEN_GEN_BLOCK() << P() << "+= 1; _cont = 0; " << CLOSE_GEN_BLOCK();
+}
 
 void TablesVar::writeExec()
 {

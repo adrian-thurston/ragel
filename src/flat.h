@@ -84,31 +84,14 @@ protected:
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
 
+	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
 	void LOCATE_TRANS();
-	void EOF_TRANS();
-
-	void GOTO( ostream &ret, int gotoDest, bool inFinish );
-	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
-	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
-	void NEXT( ostream &ret, int nextDest, bool inFinish );
-	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
-	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
-	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
-	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
-	void CURS( ostream &ret, bool inFinish );
-	void TARGS( ostream &ret, bool inFinish, int targState );
-	void RET( ostream &ret, bool inFinish );
-	void NRET( ostream &ret, bool inFinish );
-	void BREAK( ostream &ret, int targState, bool csForced );
-	void NBREAK( ostream &ret, int targState, bool csForced );
-
+	
 	virtual void setTableState( TableArray::State );
 
 	void NFA_PUSH();
 	void NFA_POP();
 
-	void COND_EXEC( std::string expr );
-	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
 
 	virtual void genAnalysis();
 	virtual void tableDataPass();

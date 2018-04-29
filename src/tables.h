@@ -114,6 +114,13 @@ struct Tables
 	virtual void REG_ACTIONS( std::string cond ) = 0;
 	virtual void TO_STATE_ACTIONS() = 0;
 	virtual void EOF_ACTIONS() = 0;
+
+	void CURS( ostream &ret, bool inFinish );
+	void TARGS( ostream &ret, bool inFinish, int targState );
+	void NEXT( ostream &ret, int nextDest, bool inFinish );
+	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void EOF_TRANS();
+	void COND_EXEC( std::string expr );
 };
 
 struct TablesGoto
@@ -124,6 +131,17 @@ struct TablesGoto
 	:
 		Tables( args )
 	{}
+
+	void GOTO( ostream &ret, int gotoDest, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void RET( ostream &ret, bool inFinish );
+	void NRET( ostream &ret, bool inFinish );
+	void BREAK( ostream &ret, int targState, bool csForced );
+	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	void writeExec();
 };
@@ -136,6 +154,17 @@ struct TablesVar
 	:
 		Tables( args )
 	{}
+
+	void GOTO( ostream &ret, int gotoDest, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void RET( ostream &ret, bool inFinish );
+	void NRET( ostream &ret, bool inFinish );
+	void BREAK( ostream &ret, int targState, bool csForced );
+	void NBREAK( ostream &ret, int targState, bool csForced );
 
 	void writeExec();
 };
