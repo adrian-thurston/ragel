@@ -27,11 +27,11 @@
 #include "actloop.h"
 #include "actexp.h"
 
-struct BinaryVar
+struct BinVar
 :
 	public Binary, public TablesVar
 {
-	BinaryVar( const CodeGenArgs &args, Binary::Type type )
+	BinVar( const CodeGenArgs &args, Binary::Type type )
 	:
 		Tables( args ),
 		Binary( args, type ),
@@ -43,31 +43,29 @@ struct BinaryVar
 	void LOCATE_TRANS();
 	void LOCATE_COND();
 	void VARS();
-
-	void NFA_POP();
 };
 
 class BinVarLoop
-	: public BinaryVar, public ActLoop
+	: public BinVar, public ActLoop
 {
 public:
 	BinVarLoop( const CodeGenArgs &args )
 	:
 		Tables( args ),
-		BinaryVar( args, Loop ),
+		BinVar( args, Loop ),
 		ActLoop( args )
 	{}
 };
 
 class BinVarExp
 :
-	public BinaryVar, public ActExp
+	public BinVar, public ActExp
 {
 public:
 	BinVarExp( const CodeGenArgs &args ) 
 	:
 		Tables( args ),
-		BinaryVar( args, Exp ),
+		BinVar( args, Exp ),
 		ActExp( args )
 	{}
 };

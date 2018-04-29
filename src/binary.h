@@ -90,9 +90,6 @@ protected:
 
 	void setTableState( TableArray::State );
 
-	void NFA_PUSH();
-	void NFA_POP();
-
 	virtual void writeData();
 	virtual void tableDataPass();
 	virtual void genAnalysis();

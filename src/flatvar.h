@@ -38,7 +38,6 @@ struct FlatVar
 		TablesVar( args )
 	{}
 
-	void NFA_POP();
 	void LOCATE_TRANS();
 	void VARS();
 };

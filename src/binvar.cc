@@ -24,112 +24,8 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-void BinaryVar::NFA_POP()
-{
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	_nfa_repeat = 1;\n"
-			"	while ( _nfa_repeat ) {\n"
-			"		_nfa_repeat = 0;\n"
-			"	if ( nfa_len > 0 ) {\n"
-			"		int _pop_test = 1;\n"
-			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			;
 
-		if ( redFsm->bAnyNfaPops ) {
-			NFA_FROM_STATE_ACTION_EXEC();
-
-			out << 
-				"		switch ( " << ARR_REF( nfaPopTrans ) <<
-							"[nfa_bp[nfa_len].popTrans] ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopTestRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						NFA_CONDITION( out, item->value, item.last() );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n";
-
-			out <<
-				"		if ( _pop_test ) {\n"
-				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			if ( red->nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
-				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
-				out << CLOSE_HOST_BLOCK();
-			}
-
-			out <<
-//				"			goto _resume;\n"
-				"			_nfa_cont = 1;\n"
-				"			_nfa_repeat = 0;\n"
-				"		}\n";
-
-			if ( red->nfaPostPopExpr != 0 ) {
-				out <<
-				"			else {\n"
-				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
-				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
-				out << CLOSE_HOST_BLOCK() << "\n"
-//				"				goto _out;\n"
-				"				_nfa_cont = 0;\n"
-				"				_nfa_repeat = 1;\n"
-				"			}\n";
-			}
-			else {
-				out <<
-				"			else {\n"
-//				"				goto _out;\n"
-				"				_nfa_cont = 0;\n"
-				"				_nfa_repeat = 1;\n"
-				"			}\n"
-				;
-			}
-		}
-		else {
-			out <<
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			if ( red->nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
-				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
-				out << CLOSE_HOST_BLOCK();
-			}
-
-			out <<
-//				"		goto _resume;\n"
-				"		_nfa_cont = 1;\n"
-				"		_nfa_repeat = 0;\n"
-				;
-		}
-
-		out << 
-			"	}\n"
-			"	else {\n"
-			"		_nfa_cont = 0;\n"
-			"		_nfa_repeat = 0;\n"
-			"	}\n"
-			"}\n"
-			;
-	}
-}
-
-void BinaryVar::LOCATE_TRANS()
+void BinVar::LOCATE_TRANS()
 {
 	out <<
 		"	_keys = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
@@ -189,7 +85,7 @@ void BinaryVar::LOCATE_TRANS()
 		LOCATE_COND();
 }
 
-void BinaryVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
+void BinVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
 {
 	out <<
 		"	{\n"
@@ -217,7 +113,7 @@ void BinaryVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string e
 		;
 }
 
-void BinaryVar::LOCATE_COND()
+void BinVar::LOCATE_COND()
 {
 	out <<
 		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
@@ -240,7 +136,7 @@ void BinaryVar::LOCATE_COND()
 	outLabelUsed = true;
 }
 
-void BinaryVar::VARS()
+void BinVar::VARS()
 {
 	klen.reference();
 	cond.reference();

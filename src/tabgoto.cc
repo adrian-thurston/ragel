@@ -146,6 +146,87 @@ void TablesGoto::NBREAK( ostream &ret, int targState, bool csForced )
 	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1;" << CLOSE_GEN_BLOCK();
 }
 
+void TablesGoto::NFA_POP()
+{
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len > 0 ) {\n"
+			"		nfa_count += 1;\n"
+			"		nfa_len -= 1;\n"
+			"		" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
+
+		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
+
+			out << 
+				"		int _pop_test = 1;\n"
+				"		switch ( " << ARR_REF( nfaPopTrans ) <<
+							"[nfa_bp[nfa_len].popTrans] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPopTestRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						NFA_CONDITION( out, item->value, item.last() );
+
+					out << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"		}\n";
+
+			out <<
+				"		if ( _pop_test ) {\n"
+				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( red->nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
+				"			goto _resume;\n"
+				"		}\n";
+
+			if ( red->nfaPostPopExpr != 0 ) {
+				out <<
+				"			else {\n"
+				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
+				out << CLOSE_HOST_BLOCK() << "\n"
+				"			}\n";
+			}
+		}
+		else {
+			out <<
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+			if ( red->nfaPostPopExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			out <<
+				"		goto _resume;\n";
+		}
+
+		out << 
+			"		goto _out;\n"
+			"	}\n";
+	}
+}
+
+
 void TablesGoto::writeExec()
 {
 	testEofUsed = false;

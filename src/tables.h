@@ -121,6 +121,8 @@ struct Tables
 	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void EOF_TRANS();
 	void COND_EXEC( std::string expr );
+
+	void NFA_PUSH();
 };
 
 struct TablesGoto
@@ -143,6 +145,7 @@ struct TablesGoto
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
+	void NFA_POP();
 	void writeExec();
 };
 
@@ -166,6 +169,7 @@ struct TablesVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
+	void NFA_POP();
 	void writeExec();
 };
 
