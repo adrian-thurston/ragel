@@ -245,7 +245,7 @@ void TablesVar::writeExec()
 				"	if ( " << P() << " == " << vEOF() << " )\n"
 				"	{\n";
 
-			NFA_PUSH();
+			NFA_PUSH( vCS() );
 
 			out << UINT() << " _eofcont = 0;\n";
 
@@ -325,7 +325,7 @@ void TablesVar::writeExec()
 
 	FROM_STATE_ACTIONS();
 
-	NFA_PUSH();
+	NFA_PUSH( vCS() );
 
 	LOCATE_TRANS();
 

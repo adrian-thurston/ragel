@@ -267,7 +267,7 @@ void TablesGoto::writeExec()
 
 	FROM_STATE_ACTIONS();
 
-	NFA_PUSH();
+	NFA_PUSH( vCS() );
 
 	LOCATE_TRANS();
 
@@ -338,7 +338,7 @@ void TablesGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
 
-		NFA_PUSH();
+		NFA_PUSH( vCS() );
 
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"

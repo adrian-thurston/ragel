@@ -483,69 +483,9 @@ std::ostream &IpGoto::STATE_GOTO_CASES()
 
 void IpGoto::NFA_PUSH( RedStateAp *state )
 {
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	if ( " << ARR_REF( nfaOffsets ) << "[" << state->id << "] ) {\n"
-			"		int alt = 0; \n"
-			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
-						ARR_REF( nfaOffsets ) << "[" << state->id << "]];\n";
-
-		if ( red->nfaPrePushExpr != 0 ) {
-			out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
-			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
-			out << CLOSE_HOST_BLOCK();
-		}
-
-		out <<
-			"		while ( alt < new_recs ) { \n";
-
-
-		out <<
-			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
-							ARR_REF( nfaOffsets ) << "[" << state->id << "] + 1 + alt];\n"
-			"			nfa_bp[nfa_len].p = " << P() << ";\n";
-
-		if ( redFsm->bAnyNfaPops ) {
-			out <<
-				"			nfa_bp[nfa_len].popTrans = " << CAST("long") <<
-								ARR_REF( nfaOffsets ) << "[" << state->id << "] + 1 + alt;\n"
-				"\n"
-				;
-		}
-
-		if ( redFsm->bAnyNfaPushes ) {
-			out <<
-				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
-								ARR_REF( nfaOffsets ) << "[" << state->id << "] + 1 + alt] ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPushRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						ACTION( out, item->value, IlOpts( 0, false, false ) );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"			}\n";
-		}
-
-
-		out <<
-			"			nfa_len += 1;\n"
-			"			alt += 1;\n"
-			"		}\n"
-			"	}\n"
-			;
-	}
+	std::stringstream ss;
+	ss << state->id;
+	CodeGen::NFA_PUSH( ss.str() );
 }
 
 std::ostream &IpGoto::STATE_GOTOS()

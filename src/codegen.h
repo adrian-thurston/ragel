@@ -173,6 +173,11 @@ protected:
 	bool stringTables;
 	BackendFeature backendFeature;
 
+	TableArray nfaTargs;
+	TableArray nfaOffsets;
+	TableArray nfaPushActions;
+	TableArray nfaPopTrans;
+
 	virtual string GET_KEY();
 
 	string P();
@@ -424,7 +429,7 @@ protected:
 			return "export " + type + " " + name + " " + value + ";";
 	}
 
-	virtual void NFA_PUSH() = 0;
+	virtual void NFA_PUSH( std::string );
 	virtual void NFA_POP() = 0;
 	virtual void LOCATE_TRANS() {}
 	virtual void EOF_TRANS() {}

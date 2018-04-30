@@ -332,7 +332,12 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 	CodeGenData( args ),
 	tableData( 0 ),
 	backend( args.id->hostLang->backend ),
-	stringTables( args.id->stringTables )
+	stringTables( args.id->stringTables ),
+
+	nfaTargs(         "nfa_targs",           *this ),
+	nfaOffsets(       "nfa_offsets",         *this ),
+	nfaPushActions(   "nfa_push_actions",    *this ),
+	nfaPopTrans(      "nfa_pop_trans",       *this )
 {
 }
 
@@ -1061,5 +1066,72 @@ void CodeGen::writeExports()
 				DATA_PREFIX() + "ex_" + ex->name, KEY(ex->key) ) << "\n";
 		}
 		out << "\n";
+	}
+}
+
+void CodeGen::NFA_PUSH( std::string state )
+{
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( " << ARR_REF( nfaOffsets ) << "[" << state << "] ) {\n"
+			"		int alt = 0; \n"
+			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+						ARR_REF( nfaOffsets ) << "[" << state << "]];\n";
+
+		if ( red->nfaPrePushExpr != 0 ) {
+			out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
+			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
+			out << CLOSE_HOST_BLOCK();
+		}
+
+		out <<
+			"		while ( alt < new_recs ) { \n";
+
+
+		out <<
+			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+							ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt];\n"
+			"			nfa_bp[nfa_len].p = " << P() << ";\n";
+
+		if ( redFsm->bAnyNfaPops ) {
+			out <<
+				"			nfa_bp[nfa_len].popTrans = " << CAST("long") <<
+								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt;\n"
+				"\n"
+				;
+		}
+
+		if ( redFsm->bAnyNfaPushes ) {
+			out <<
+				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
+								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt] ) {\n";
+
+			/* Loop the actions. */
+			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+					redAct.lte(); redAct++ )
+			{
+				if ( redAct->numNfaPushRefs > 0 ) {
+					/* Write the entry label. */
+					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+					/* Write each action in the list of action items. */
+					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+
+					out << "\n\t" << CEND() << "}\n";
+				}
+			}
+
+			out <<
+				"			}\n";
+		}
+
+
+		out <<
+			"			nfa_len += 1;\n"
+			"			alt += 1;\n"
+			"		}\n"
+			"	}\n"
+			;
 	}
 }

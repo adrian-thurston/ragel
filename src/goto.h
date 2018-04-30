@@ -124,7 +124,6 @@ public:
 	virtual void NFA_POP_TEST( RedNfaTarg *targ ) {}
 	virtual void NFA_FROM_STATE_ACTION_EXEC() = 0;
 
-	void NFA_PUSH();
 	void NFA_POP();
 
 	virtual void FROM_STATE_ACTIONS() = 0;

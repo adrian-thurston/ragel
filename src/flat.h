@@ -84,9 +84,6 @@ protected:
 	std::ostream &COND_TARGS();
 	std::ostream &COND_ACTIONS();
 
-	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
-	void LOCATE_TRANS();
-	
 	virtual void setTableState( TableArray::State );
 
 	virtual void genAnalysis();

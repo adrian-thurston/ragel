@@ -41,10 +41,6 @@ struct Tables
 		eofCondKeys(      "eof_cond_keys",       *this ),
 		eofActions(       "eof_actions",         *this ),
 		eofTrans(         "eof_trans",           *this ),
-		nfaTargs(         "nfa_targs",           *this ),
-		nfaOffsets(       "nfa_offsets",         *this ),
-		nfaPushActions(   "nfa_push_actions",    *this ),
-		nfaPopTrans(      "nfa_pop_trans",       *this ),
 
 		keyOffsets(         "key_offsets",           *this ),
 		singleLens(         "single_lengths",        *this ),
@@ -86,10 +82,6 @@ struct Tables
 	TableArray eofCondKeys;
 	TableArray eofActions;
 	TableArray eofTrans;
-	TableArray nfaTargs;
-	TableArray nfaOffsets;
-	TableArray nfaPushActions;
-	TableArray nfaPopTrans;
 
 	TableArray keyOffsets;
 	TableArray singleLens;
@@ -121,8 +113,6 @@ struct Tables
 	void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void EOF_TRANS();
 	void COND_EXEC( std::string expr );
-
-	void NFA_PUSH();
 };
 
 struct TablesGoto
