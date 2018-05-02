@@ -226,7 +226,8 @@ void TablesVar::writeExec()
 	DECLARE( INDEX( ALPH_TYPE() ), keys );
 	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
 	DECLARE( UINT(), nacts );
-	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys, "" );
+	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys );
+	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), cekeys );
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 
 	out <<
@@ -258,7 +259,7 @@ void TablesVar::writeExec()
 
 			out <<
 				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-				"		" << ckeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
+				"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
 							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
 				"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
 				"		" << cpc << " = 0;\n"
@@ -272,8 +273,8 @@ void TablesVar::writeExec()
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << ";\n"
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << ";\n"
-				"		_lower = " << ckeys << ";\n"
-				"		_upper = " << ckeys << " + " << klen << " - 1;\n"
+				"		_lower = " << cekeys << ";\n"
+				"		_upper = " << cekeys << " + " << klen << " - 1;\n"
 				"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
 				"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 				"			if ( " << cpc << " < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"

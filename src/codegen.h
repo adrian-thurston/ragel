@@ -437,7 +437,7 @@ protected:
 	virtual void EOF_TRANS() {}
 
 	virtual void COND_EXEC( std::string expr ) {}
-	virtual void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error ) {}
+	virtual void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error ) {}
 
 public:
 	virtual void writeExports();

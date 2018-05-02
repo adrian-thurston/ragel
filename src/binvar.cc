@@ -85,15 +85,15 @@ void BinVar::LOCATE_TRANS()
 		LOCATE_COND();
 }
 
-void BinVar::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
+void BinVar::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error )
 {
 	out <<
 		"	{\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
-		"		_lower = " << ckeys << ";\n"
-		"		_upper = " << ckeys << " + " << klen << " - 1;\n"
+		"		_lower = " << var << ";\n"
+		"		_upper = " << var << " + " << klen << " - 1;\n"
 		"		while ( _have == 0 && _lower <= _upper ) {\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 		"			if ( " << cpc << " < " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
@@ -128,8 +128,8 @@ void BinVar::LOCATE_COND()
 	if ( red->condSpaceList.length() > 0 )
 		COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
 
-	COND_BIN_SEARCH( condKeys,
-			"" + string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + ");\n",
+	COND_BIN_SEARCH( ckeys, condKeys,
+			string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + ");\n",
 			""
 	);
 			

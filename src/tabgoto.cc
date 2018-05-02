@@ -244,7 +244,8 @@ void TablesGoto::writeExec()
 		out << "	int _nbreak;\n";
 
 	DECLARE( "int", klen );
-	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), ckeys );
+	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys );
+	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), cekeys );
 	DECLARE( UINT(), trans, " = 0" );
 	DECLARE( UINT(), cond, " = 0" );
 	DECLARE( INDEX( ALPH_TYPE() ), keys );
@@ -347,7 +348,7 @@ void TablesGoto::writeExec()
 
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-			"		" << ckeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
+			"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
 						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
 			"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
 			"		" << cpc << " = 0;\n"
@@ -356,7 +357,7 @@ void TablesGoto::writeExec()
 		if ( red->condSpaceList.length() > 0 )
 			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
 
-		COND_BIN_SEARCH( eofCondKeys, "goto _ok;", "goto _out;" );
+		COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto _out;" );
 
 		out << 
 			"		_ok: {}\n"

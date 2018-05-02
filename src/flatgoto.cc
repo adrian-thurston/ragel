@@ -22,15 +22,15 @@
 
 #include "flatgoto.h"
 
-void FlatGoto::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
+void FlatGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error )
 {
 	out <<
 		"	{\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
-		"		_lower = " << ckeys << ";\n"
-		"		_upper = " << ckeys << " + " << klen << " - 1;\n"
+		"		_lower = " << var << ";\n"
+		"		_upper = " << var << " + " << klen << " - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
