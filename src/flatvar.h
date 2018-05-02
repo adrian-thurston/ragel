@@ -39,7 +39,6 @@ struct FlatVar
 	{}
 
 	void LOCATE_TRANS();
-	void VARS();
 };
 
 class FlatVarLoop

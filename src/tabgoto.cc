@@ -226,7 +226,6 @@ void TablesGoto::NFA_POP()
 	}
 }
 
-
 void TablesGoto::writeExec()
 {
 	testEofUsed = false;
@@ -244,7 +243,14 @@ void TablesGoto::writeExec()
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
 
-	VARS();
+	DECLARE( "int", klen );
+	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), ckeys );
+	DECLARE( UINT(), trans, " = 0" );
+	DECLARE( UINT(), cond, " = 0" );
+	DECLARE( INDEX( ALPH_TYPE() ), keys );
+	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
+	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
+	DECLARE( UINT(), nacts );
 
 	out <<
 		"	" << ENTRY() << " {\n";

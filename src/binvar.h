@@ -42,7 +42,6 @@ struct BinVar
 
 	void LOCATE_TRANS();
 	void LOCATE_COND();
-	void VARS();
 };
 
 class BinVarLoop

@@ -119,40 +119,4 @@ void FlatVar::LOCATE_TRANS()
 //	;
 }
 
-void FlatVar::VARS()
-{
-	ckeys.reference();
-	klen.reference();
-	cond.reference();
-	cpc.reference();
-	keys.reference();
-	inds.reference();
-	acts.reference();
-	nacts.reference();
-
-	if ( !noEnd && ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) ) {
-		DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), ckeys );
-		DECLARE( "int",  klen );
-	}
-
-	if ( red->condSpaceList.length() > 0 )
-		DECLARE( UINT(), cond, " = 0" );
-
-	if ( red->condSpaceList.length() > 0 || redFsm->anyEofTrans() || redFsm->anyEofActions() )
-		DECLARE( "int", cpc );
-
-	if ( redFsm->classMap != 0 ) {
-		DECLARE( INDEX( ALPH_TYPE() ), keys );
-		DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
-	}
-
-	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-				|| redFsm->anyFromStateActions() )
-		{
-			DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
-			DECLARE( UINT(), nacts );
-		}
-	}
-}
 

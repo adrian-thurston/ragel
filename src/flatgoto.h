@@ -40,8 +40,6 @@ struct FlatGoto
 
 	void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error );
 	void LOCATE_TRANS();
-	
-	void VARS();
 };
 
 class FlatGotoLoop

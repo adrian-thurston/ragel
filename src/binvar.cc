@@ -136,31 +136,3 @@ void BinVar::LOCATE_COND()
 	outLabelUsed = true;
 }
 
-void BinVar::VARS()
-{
-	klen.reference();
-	cond.reference();
-	cpc.reference();
-	keys.reference();
-	ckeys.reference();
-	acts.reference();
-	nacts.reference();
-
-	DECLARE( "int", klen );
-
-	DECLARE( UINT(), cond, " = 0" );
-
-	DECLARE( "int", cpc );
-
-	DECLARE( INDEX( ALPH_TYPE() ), keys, "" );
-	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys, "" );
-
-	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-				|| redFsm->anyFromStateActions() )
-		{
-			DECLARE( INDEX( ARR_TYPE( actions ) ), acts, "" );
-			DECLARE( UINT(), nacts, "" );
-		}
-	}
-}

@@ -438,7 +438,6 @@ protected:
 
 	virtual void COND_EXEC( std::string expr ) {}
 	virtual void COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error ) {}
-	virtual void VARS() {}
 
 public:
 	virtual void writeExports();

@@ -146,39 +146,4 @@ void FlatGoto::LOCATE_TRANS()
 }
 
 
-void FlatGoto::VARS()
-{
-	klen.reference();
-	ckeys.reference();
-	trans.reference();
-	cond.reference();
-	keys.reference();
-	inds.reference();
-	acts.reference();
-	nacts.reference();
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		DECLARE( "int", klen );
-		DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), ckeys );
-	}
-
-	DECLARE( UINT(), trans, " = 0" );
-
-	if ( red->condSpaceList.length() > 0 )
-		DECLARE( UINT(), cond, " = 0" );
-
-	if ( redFsm->classMap != 0 ) {
-		DECLARE( INDEX( ALPH_TYPE() ), keys );
-		DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
-	}
-
-	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
-				redFsm->anyFromStateActions() )
-		{
-			DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
-			DECLARE( UINT(), nacts );
-		}
-	}
-}
 

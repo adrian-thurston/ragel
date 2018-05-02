@@ -23,39 +23,6 @@
 #include "bingoto.h"
 
 
-void BinGoto::VARS()
-{
-	klen.reference();
-	ckeys.reference();
-	trans.reference();
-	cond.reference();
-	keys.reference();
-	acts.reference();
-	nacts.reference();
-
-	DECLARE( "int", klen );
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 ) {
-		DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), ckeys );
-	}
-
-	DECLARE( UINT(), trans, " = 0" );
-
-	if ( red->condSpaceList.length() > 0 )
-		DECLARE( UINT(), cond, " = 0" );
-
-	DECLARE( INDEX( ALPH_TYPE() ), keys );
-
-	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() ||
-				redFsm->anyFromStateActions() )
-		{
-			DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
-			DECLARE( UINT(), nacts );
-		}
-	}
-}
-
 void BinGoto::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string error )
 {
 	out <<

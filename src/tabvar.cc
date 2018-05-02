@@ -220,7 +220,14 @@ void TablesVar::writeExec()
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
-	VARS();
+	DECLARE( "int",  klen );
+	DECLARE( UINT(), cond, " = 0" );
+	DECLARE( "int", cpc );
+	DECLARE( INDEX( ALPH_TYPE() ), keys );
+	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
+	DECLARE( UINT(), nacts );
+	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys, "" );
+	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 
 	out <<
 		"	while ( _cont == 1 ) {\n"
