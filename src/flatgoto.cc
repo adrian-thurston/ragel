@@ -29,16 +29,16 @@ void FlatGoto::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string er
 		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
-		"		_lower = _ckeys;\n"
-		"		_upper = _ckeys + _klen - 1;\n"
+		"		_lower = " << ckeys << ";\n"
+		"		_upper = " << ckeys << " + " << klen << " - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			else if ( " << cpc << " > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				" << ok << "\n"
@@ -54,7 +54,7 @@ void FlatGoto::LOCATE_TRANS()
 {
 	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+			"	" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
 	}
 	else {
 		long lowKey = redFsm->lowKey.getVal();
@@ -64,8 +64,8 @@ void FlatGoto::LOCATE_TRANS()
 		bool limitHigh = keyOps->eq( highKey, keyOps->maxKey );
 
 		out <<
-			"	_keys = " << OFFSET( ARR_REF( transKeys ), "(" + vCS() + "<<1)" ) << ";\n"
-			"	_inds = " << OFFSET( ARR_REF( indicies ),
+			"	" << keys << " = " << OFFSET( ARR_REF( transKeys ), "(" + vCS() + "<<1)" ) << ";\n"
+			"	" << inds << " = " << OFFSET( ARR_REF( indicies ),
 					ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 			"\n";
 
@@ -87,20 +87,20 @@ void FlatGoto::LOCATE_TRANS()
 		out <<
 			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( transKeys ), "_keys+1" ) << " && " <<
-						"_ic >= " << CAST("int") << DEREF( ARR_REF( transKeys ), "_keys" ) << " )\n"
-			"			_trans = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
-								"_inds + " + CAST("int") + "( _ic - " + CAST("int") +
-								DEREF( ARR_REF( transKeys ), "_keys" ) + " ) " ) << "; \n"
+			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
+						"_ic >= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
+			"			" << trans << " = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
+								string(inds) + " + " + CAST("int") + "( _ic - " + CAST("int") +
+								DEREF( ARR_REF( transKeys ), string(keys) + "" ) + " ) " ) << "; \n"
 			"		else\n"
-			"			_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<
+			"			" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
 
 		if ( !limitLow || !limitHigh ) {
 			out <<
 				"	}\n"
 				"	else {\n"
-				"		_trans = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"		" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 				"	}\n"
 				"\n";
 		}
@@ -109,14 +109,14 @@ void FlatGoto::LOCATE_TRANS()
 
 	if ( red->condSpaceList.length() > 0 ) {
 		out <<
-			"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+			"	" << cond << " = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[" << trans << "];\n"
 			"\n";
 
 		out <<
-			"	_cpc = 0;\n";
+			"	" << cpc << " = 0;\n";
 
 		out <<
-			"	switch ( " << ARR_REF( transCondSpaces ) << "[_trans] ) {\n"
+			"	switch ( " << ARR_REF( transCondSpaces ) << "[" << trans << "] ) {\n"
 			"\n";
 
 		for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
@@ -127,7 +127,7 @@ void FlatGoto::LOCATE_TRANS()
 					out << TABS(2) << "if ( ";
 					CONDITION( out, *csi );
 					Size condValOffset = (1 << csi.pos());
-					out << " ) _cpc += " << condValOffset << ";\n";
+					out << " ) " << cpc << " += " << condValOffset << ";\n";
 				}
 
 				out << 
@@ -137,7 +137,7 @@ void FlatGoto::LOCATE_TRANS()
 
 		out << 
 			"	}\n"
-			"	_cond += " << CAST( UINT() ) << "_cpc;\n";
+			"	" << cond << " += " << CAST( UINT() ) << "" << cpc << ";\n";
 	}
 	
 	out <<

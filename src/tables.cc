@@ -25,11 +25,11 @@ void Tables::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 void Tables::EOF_TRANS()
 {
 	out <<
-		"_trans = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
+		"" << trans << " = " << CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n";
 
 	if ( red->condSpaceList.length() > 0 ) {
 		out <<
-			"_cond = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[_trans];\n";
+			"" << cond << " = " << CAST(UINT()) << ARR_REF( transOffsets ) << "[" << trans << "];\n";
 	}
 }
 
@@ -46,7 +46,7 @@ void Tables::COND_EXEC( std::string expr )
 			out << TABS(2) << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = (1 << csi.pos());
-			out << " ) _cpc += " << condValOffset << ";\n";
+			out << " ) " << cpc << " += " << condValOffset << ";\n";
 		}
 
 		out << 

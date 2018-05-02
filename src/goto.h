@@ -46,7 +46,21 @@ public:
 		Ip
 	};
 
-	Goto( const CodeGenArgs &args, Type type );
+	Goto( const CodeGenArgs &args, Type type ) 
+	:
+		CodeGen( args ),
+		type(type),
+		acts( "_acts" ),
+		nacts( "_nacts" ),
+		actions(           "actions",             *this ),
+		toStateActions(    "to_state_actions",    *this ),
+		fromStateActions(  "from_state_actions",  *this ),
+		eofActions(        "eof_actions",         *this ),
+		nfaTargs(          "nfa_targs",           *this ),
+		nfaOffsets(        "nfa_offsets",         *this ),
+		nfaPushActions(    "nfa_push_actions",    *this ),
+		nfaPopTrans(       "nfa_pop_trans",        *this )
+	{}
 
 	void tableDataPass();
 	virtual void genAnalysis();
@@ -59,6 +73,9 @@ public:
 	std::ostream &TRANSITIONS();
 
 	Type type;
+
+	Variable acts;
+	Variable nacts;
 
 	TableArray actions;
 	TableArray toStateActions;

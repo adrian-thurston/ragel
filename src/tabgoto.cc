@@ -239,7 +239,7 @@ void TablesGoto::writeExec()
 		out << "	int _ps;\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
-		out << "	int _cpc;\n";
+		out << "	int " << cpc << ";\n";
 
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
@@ -277,23 +277,22 @@ void TablesGoto::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
-	string cond = "_cond";
-	if ( red->condSpaceList.length() == 0 )
-		cond = "_trans";
+	string condVar =
+			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
 
 	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n\n";
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] == 0 )\n"
+			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] == 0 )\n"
 			"		goto _again;\n"
 			"\n";
 
 		if ( redFsm->anyRegNbreak() )
 			out << "	_nbreak = 0;\n";
 
-		REG_ACTIONS( cond );
+		REG_ACTIONS( condVar );
 
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
@@ -342,10 +341,10 @@ void TablesGoto::writeExec()
 
 		out <<
 			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-			"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
+			"		" << ckeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
 						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-			"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
-			"		_cpc = 0;\n"
+			"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+			"		" << cpc << " = 0;\n"
 		;
 
 		if ( red->condSpaceList.length() > 0 )

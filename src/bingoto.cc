@@ -63,16 +63,16 @@ void BinGoto::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string err
 		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << ";\n"
-		"		_lower = _ckeys;\n"
-		"		_upper = _ckeys + _klen - 1;\n"
+		"		_lower = " << ckeys << ";\n"
+		"		_upper = " << ckeys << " + " << klen << " - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( _cpc < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_upper = _mid - 1;\n"
-		"			else if ( _cpc > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
+		"			else if ( " << cpc << " > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				" << ok << "\n"
@@ -87,20 +87,20 @@ void BinGoto::COND_BIN_SEARCH( TableArray &keys, std::string ok, std::string err
 void BinGoto::LOCATE_COND()
 {
 	out <<
-		"	_ckeys = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[_trans]" ) << ";\n"
-		"	_klen = " << CAST( "int" ) << ARR_REF( transLengths ) << "[_trans];\n"
-		"	_cond = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[_trans];\n"
+		"	" << ckeys << " = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[" + string(trans) + "]" ) << ";\n"
+		"	" << klen << " = " << CAST( "int" ) << ARR_REF( transLengths ) << "[" << trans << "];\n"
+		"	" << cond << " = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[" << trans << "];\n"
 		"\n";
 
 	out <<
-		"	_cpc = 0;\n";
+		"	" << cpc << " = 0;\n";
 	
 	if ( red->condSpaceList.length() > 0 )
-		COND_EXEC( ARR_REF( transCondSpaces ) + "[_trans]" );
+		COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
 	
 	COND_BIN_SEARCH(
 			condKeys,
-			"_cond += " + CAST( UINT() ) + "(_mid - _ckeys); goto _match_cond;\n",
+			"" + string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + "); goto _match_cond;\n",
 			"goto _again;\n"
 	);
 }
@@ -108,16 +108,16 @@ void BinGoto::LOCATE_COND()
 void BinGoto::LOCATE_TRANS()
 {
 	out <<
-		"	_keys = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
-		"	_trans = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
+		"	" << keys << " = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
+		"	" << trans << " = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"\n"
-		"	_klen = " << CAST( "int" ) << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
-		"	if ( _klen > 0 ) {\n"
+		"	" << klen << " = " << CAST( "int" ) << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
+		"	if ( " << klen << " > 0 ) {\n"
 		"		" << INDEX( ALPH_TYPE(), "_lower" ) << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_upper" ) << ";\n"
-		"		_lower = _keys;\n"
-		"		_upper = _keys + _klen - 1;\n"
+		"		_lower = " << keys << ";\n"
+		"		_upper = " << keys << " + " << klen << " - 1;\n"
 		"		while ( " << TRUE() << " ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
@@ -128,21 +128,21 @@ void BinGoto::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				_trans += " << CAST( UINT() ) << "(_mid - _keys);\n"
+		"				" << trans << " += " << CAST( UINT() ) << "(_mid - " << keys << ");\n"
 		"				goto _match;\n"
 		"			}\n"
 		"		}\n"
-		"		_keys += _klen;\n"
-		"		_trans += " << CAST( UINT() ) << "_klen;\n"
+		"		" << keys << " += " << klen << ";\n"
+		"		" << trans << " += " << CAST( UINT() ) << "" << klen << ";\n"
 		"	}\n"
 		"\n"
-		"	_klen = " << CAST("int") << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
-		"	if ( _klen > 0 ) {\n"
+		"	" << klen << " = " << CAST("int") << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
+		"	if ( " << klen << " > 0 ) {\n"
 		"		" << INDEX( ALPH_TYPE(), "_lower" ) << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_upper" ) << ";\n"
-		"		_lower = _keys;\n"
-		"		_upper = _keys + (_klen<<1) - 2;\n"
+		"		_lower = " << keys << ";\n"
+		"		_upper = " << keys << " + (" << klen << "<<1) - 2;\n"
 		"		while ( " << TRUE() << " ) {\n"
 		"			if ( _upper < _lower )\n"
 		"				break;\n"
@@ -153,11 +153,11 @@ void BinGoto::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid + 1" ) << " )\n"
 		"				_lower = _mid + 2;\n"
 		"			else {\n"
-		"				_trans += " << CAST( UINT() ) << "((_mid - _keys)>>1);\n"
+		"				" << trans << " += " << CAST( UINT() ) << "((_mid - " << keys << ")>>1);\n"
 		"				goto _match;\n"
 		"			}\n"
 		"		}\n"
-		"		_trans += " << CAST( UINT() ) << "_klen;\n"
+		"		" << trans << " += " << CAST( UINT() ) << "" << klen << ";\n"
 		"	}\n"
 		"\n";
 

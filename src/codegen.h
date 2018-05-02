@@ -155,6 +155,8 @@ protected:
 	typedef Vector<TableArray*> ArrayVector;
 	ArrayVector arrayVector;
 
+	Variable cpc;
+
 	string FSM_NAME();
 	string START_STATE_ID();
 	void taActions();

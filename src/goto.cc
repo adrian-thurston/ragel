@@ -30,20 +30,6 @@
 
 using std::ostringstream;
 
-Goto::Goto( const CodeGenArgs &args, Type type ) 
-:
-	CodeGen( args ),
-	type(type),
-	actions(           "actions",             *this ),
-	toStateActions(    "to_state_actions",    *this ),
-	fromStateActions(  "from_state_actions",  *this ),
-	eofActions(        "eof_actions",         *this ),
-	nfaTargs(          "nfa_targs",           *this ),
-	nfaOffsets(        "nfa_offsets",         *this ),
-	nfaPushActions(    "nfa_push_actions",    *this ),
-	nfaPopTrans(       "nfa_pop_trans",        *this )
-{}
-
 void Goto::setTableState( TableArray::State state )
 {
 	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
@@ -116,7 +102,7 @@ void Goto::NFA_POP()
 			"	if ( nfa_len > 0 ) {\n";
 
 		if ( redFsm->bAnyNfaCondRefs )
-			out << "	int _cpc;\n";
+			out << "	int " << cpc << ";\n";
 
 		out <<
 			"		nfa_count += 1;\n"
@@ -926,8 +912,8 @@ void Goto::writeExec()
 				|| redFsm->anyFromStateActions() )
 		{
 			out << 
-				"	" << INDEX( ARR_TYPE( actions ), "_acts" ) << ";\n"
-				"	" << UINT() << " _nacts;\n";
+				"	" << INDEX( ARR_TYPE( actions ), "" + string(acts) + "" ) << ";\n"
+				"	" << UINT() << " " << nacts << ";\n";
 		}
 	}
 

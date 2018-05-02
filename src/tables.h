@@ -20,7 +20,6 @@ struct Tables
 		keys( "_keys" ),
 		acts( "_acts" ),
 		nacts( "_nacts" ),
-		cpc( "_cpc" ),
 		inds( "_inds" ),
 
 		actions(          "actions",             *this ),
@@ -61,7 +60,6 @@ struct Tables
 	Variable keys;
 	Variable acts;
 	Variable nacts;
-	Variable cpc;
 	Variable inds;
 
 	TableArray actions;

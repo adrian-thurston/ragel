@@ -143,15 +143,15 @@ void ActLoop::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ),  ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-			"	_acts += 1;\n"
-			"	while ( _nacts > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			"	" << acts << " = " << OFFSET( ARR_REF( actions ),  ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	" << nacts << " = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+			"	" << acts << " += 1;\n"
+			"	while ( " << nacts << " > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
-			"		_nacts -= 1;\n"
-			"		_acts += 1;\n"
+			"		" << nacts << " -= 1;\n"
+			"		" << acts << " += 1;\n"
 			"	}\n"
 			"\n";
 	}
@@ -160,16 +160,16 @@ void ActLoop::FROM_STATE_ACTIONS()
 void ActLoop::REG_ACTIONS( std::string cond )
 {
 	out <<
-		"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
-		"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ),  "_acts" ) << ";\n"
-		"	_acts += 1;\n"
-		"	while ( _nacts > 0 ) {\n"
-		"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " )\n"
+		"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( condActions ) + "[" + cond + "]" ) << ";\n"
+		"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ),  "" + string(acts) + "" ) << ";\n"
+		"	" << acts << " += 1;\n"
+		"	while ( " << nacts << " > 0 ) {\n"
+		"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " )\n"
 		"		{\n";
 		ACTION_SWITCH() <<
 		"		}\n"
-		"		_nacts -= 1;\n"
-		"		_acts += 1;\n"
+		"		" << nacts << " -= 1;\n"
+		"		" << acts << " += 1;\n"
 		"	}\n"
 		"\n";
 }
@@ -178,15 +178,15 @@ void ActLoop::TO_STATE_ACTIONS()
 {
 	if ( redFsm->anyToStateActions() ) {
 		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	_nacts = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-			"	_acts += 1;\n"
-			"	while ( _nacts > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	" << nacts << " = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+			"	" << acts << " += 1;\n"
+			"	while ( " << nacts << " > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
-			"		_nacts -= 1;\n"
-			"		_acts += 1;\n"
+			"		" << nacts << " -= 1;\n"
+			"		" << acts << " += 1;\n"
 			"	}\n"
 			"\n";
 	}
@@ -215,15 +215,15 @@ void ActLoop::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
-			"	_acts = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
-			"	_nacts = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "_acts" ) << ";\n"
-			"	_acts += 1;\n"
-			"	while ( _nacts > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "_acts" ) << " ) {\n";
+			"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
+			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+			"	" << acts << " += 1;\n"
+			"	while ( " << nacts << " > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
-			"		_nacts -= 1;\n"
-			"		_acts += 1;\n"
+			"		" << nacts << " -= 1;\n"
+			"		" << acts << " += 1;\n"
 			"	}\n"
 			"\n";
 	}

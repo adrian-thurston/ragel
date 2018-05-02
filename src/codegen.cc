@@ -330,6 +330,7 @@ void TableArray::finish()
 CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
+	cpc( "_cpc" ),
 	tableData( 0 ),
 	backend( args.id->hostLang->backend ),
 	stringTables( args.id->stringTables ),
@@ -900,7 +901,7 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 			GenInlineItem::NfaWrapConds )
 	{
 		ret <<
-			"	_cpc = 0;\n";
+			"	" << cpc << " = 0;\n";
 
 		GenCondSpace *condSpace = condition->inlineList->head->condSpace;
 		for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
@@ -908,14 +909,14 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 				"	if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = (1 << csi.pos());
-			ret << " ) _cpc += " << condValOffset << ";\n";
+			ret << " ) " << cpc << " += " << condValOffset << ";\n";
 		}
 
 		const CondKeySet &keys = condition->inlineList->head->condKeySet;
 		if ( keys.length() > 0 ) {
 			ret << "_pop_test = ";
 			for ( CondKeySet::Iter cki = keys; cki.lte(); cki++ ) {
-				ret << "_cpc == " << *cki;
+				ret << "" << cpc << " == " << *cki;
 				if ( !cki.last() )
 					ret << " || ";
 			}

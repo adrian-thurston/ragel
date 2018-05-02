@@ -216,7 +216,7 @@ void TablesVar::writeExec()
 		out << "	int _ps;\n";
 
 	out <<
-		"	" << UINT() << " _trans = 0;\n"
+		"	" << UINT() << " " << trans << " = 0;\n"
 		"	" << UINT() << " _have = 0;\n"
 		"	" << UINT() << " _cont = 1;\n";
 
@@ -251,10 +251,10 @@ void TablesVar::writeExec()
 
 			out <<
 				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-				"		_ckeys = " << OFFSET( ARR_REF( eofCondKeys ),
+				"		" << ckeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
 							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-				"		_klen = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
-				"		_cpc = 0;\n"
+				"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+				"		" << cpc << " = 0;\n"
 			;
 
 			if ( red->condSpaceList.length() > 0 )
@@ -265,13 +265,13 @@ void TablesVar::writeExec()
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << ";\n"
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << ";\n"
-				"		_lower = _ckeys;\n"
-				"		_upper = _ckeys + _klen - 1;\n"
+				"		_lower = " << ckeys << ";\n"
+				"		_upper = " << ckeys << " + " << klen << " - 1;\n"
 				"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
 				"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-				"			if ( _cpc < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
+				"			if ( " << cpc << " < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
 				"				_upper = _mid - 1;\n"
-				"			else if ( _cpc > " << CAST("int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
+				"			else if ( " << cpc << " > " << CAST("int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
 				"				_lower = _mid + 1;\n"
 				"			else {\n"
 				"				_eofcont = 1;\n"
@@ -336,19 +336,18 @@ void TablesVar::writeExec()
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
-	string cond = "_cond";
-	if ( red->condSpaceList.length() == 0 )
-		cond = "_trans";
+	string condVar =
+			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
 
 	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << cond << "];\n"
+		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n"
 		"\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[" << cond << "] != 0 ) {\n";
+			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] != 0 ) {\n";
 
-		REG_ACTIONS( cond );
+		REG_ACTIONS( condVar );
 
 		out <<
 			"	}\n";
