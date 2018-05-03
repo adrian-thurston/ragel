@@ -29,13 +29,13 @@
 
 struct FlatGoto
 :
-	public Flat, public TablesGoto
+	public Flat, public TabGoto
 {
 	FlatGoto( const CodeGenArgs &args, Flat::Type type )
 	:
 		Tables( args ),
 		Flat( args, type ),
-		TablesGoto( args )
+		TabGoto( args )
 	{}
 
 	void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error );

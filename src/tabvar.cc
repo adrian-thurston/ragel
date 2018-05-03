@@ -1,26 +1,48 @@
+/*
+ * Copyright 2018 Adrian Thurston <thurston@colm.net>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include "tables.h"
 #include "flatvar.h"
 #include "binvar.h"
 
-void TablesVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void TabVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";" << CLOSE_GEN_BLOCK();
 }
 
-void TablesVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void TabVar::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR( "-", 1 );
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
 }
 
-void TablesVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void TabVar::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	red->id->error() << "cannot use fcall in -B mode" << std::endl;
 	red->id->abortCompile( 1 );
 }
 
-void TablesVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+void TabVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -35,13 +57,13 @@ void TablesVar::NCALL( ostream &ret, int callDest, int targState, bool inFinish 
 			callDest << ";" << CLOSE_GEN_BLOCK();
 }
 
-void TablesVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void TabVar::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	red->id->error() << "cannot use fcall in -B mode" << std::endl;
 	red->id->abortCompile( 1 );
 }
 
-void TablesVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void TabVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -58,13 +80,13 @@ void TablesVar::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 	ret << CLOSE_HOST_EXPR() << ";" << CLOSE_GEN_BLOCK();
 }
 
-void TablesVar::RET( ostream &ret, bool inFinish )
+void TabVar::RET( ostream &ret, bool inFinish )
 {
 	red->id->error() << "cannot use fret in -B mode" << std::endl;
 	red->id->abortCompile( 1 );
 }
 
-void TablesVar::NRET( ostream &ret, bool inFinish )
+void TabVar::NRET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << "-= 1;" << vCS() << " = " <<
 			STACK() << "[" << TOP() << "]; ";
@@ -78,19 +100,19 @@ void TablesVar::NRET( ostream &ret, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TablesVar::BREAK( ostream &ret, int targState, bool csForced )
+void TabVar::BREAK( ostream &ret, int targState, bool csForced )
 {
 	red->id->error() << "cannot use fbreak in -B mode" << std::endl;
 	red->id->abortCompile( 1 );
 }
 
-void TablesVar::NBREAK( ostream &ret, int targState, bool csForced )
+void TabVar::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << "+= 1; _cont = 0; " << CLOSE_GEN_BLOCK();
 }
 
-void TablesVar::NFA_POP()
+void TabVar::NFA_POP()
 {
 	if ( redFsm->anyNfaStates() ) {
 		out <<
@@ -195,7 +217,7 @@ void TablesVar::NFA_POP()
 	}
 }
 
-void TablesVar::writeExec()
+void TabVar::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

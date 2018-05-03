@@ -29,13 +29,13 @@
 
 struct BinGoto
 :
-	public Binary, public TablesGoto
+	public Binary, public TabGoto
 {
 	BinGoto( const CodeGenArgs &args, Binary::Type type )
 	:
 		Tables( args ),
 		Binary( args, type ),
-		TablesGoto( args )
+		TabGoto( args )
 	{}
 
 	void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error );

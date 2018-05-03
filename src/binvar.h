@@ -29,13 +29,13 @@
 
 struct BinVar
 :
-	public Binary, public TablesVar
+	public Binary, public TabVar
 {
 	BinVar( const CodeGenArgs &args, Binary::Type type )
 	:
 		Tables( args ),
 		Binary( args, type ),
-		TablesVar( args )
+		TabVar( args )
 	{}
 
 	void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error );

@@ -1,8 +1,30 @@
+/*
+ * Copyright 2018 Adrian Thurston <thurston@colm.net>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include "tables.h"
 #include "binary.h"
 #include "flat.h"
 
-void TablesGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void TabGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";";
 
@@ -13,7 +35,7 @@ void TablesGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void TabGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -27,7 +49,7 @@ void TablesGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void TabGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -49,7 +71,7 @@ void TablesGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+void TabGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -64,7 +86,7 @@ void TablesGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish
 			callDest << "; " << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void TabGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -88,7 +110,7 @@ void TablesGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void TabGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -104,7 +126,7 @@ void TablesGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState,
 	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::RET( ostream &ret, bool inFinish )
+void TabGoto::RET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
@@ -120,7 +142,7 @@ void TablesGoto::RET( ostream &ret, bool inFinish )
 	ret << "goto _again;" << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::NRET( ostream &ret, bool inFinish )
+void TabGoto::NRET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
@@ -134,19 +156,19 @@ void TablesGoto::NRET( ostream &ret, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::BREAK( ostream &ret, int targState, bool csForced )
+void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::NBREAK( ostream &ret, int targState, bool csForced )
+void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1;" << CLOSE_GEN_BLOCK();
 }
 
-void TablesGoto::NFA_POP()
+void TabGoto::NFA_POP()
 {
 	if ( redFsm->anyNfaStates() ) {
 		out <<
@@ -226,7 +248,7 @@ void TablesGoto::NFA_POP()
 	}
 }
 
-void TablesGoto::writeExec()
+void TabGoto::writeExec()
 {
 	testEofUsed = false;
 	outLabelUsed = false;

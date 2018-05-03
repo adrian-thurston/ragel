@@ -29,13 +29,13 @@
 
 struct FlatVar
 :
-	public Flat, public TablesVar
+	public Flat, public TabVar
 {
 	FlatVar( const CodeGenArgs &args, Flat::Type type )
 	:
 		Tables( args ),
 		Flat( args, type ),
-		TablesVar( args )
+		TabVar( args )
 	{}
 
 	void LOCATE_TRANS();
