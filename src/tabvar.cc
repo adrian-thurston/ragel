@@ -270,11 +270,9 @@ void TablesVar::writeExec()
 
 			out <<
 				"	{\n"
-				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << ";\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << " = " << cekeys << ";\n"
+				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << " = " << cekeys << " + " << klen << " - 1;\n"
 				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
-				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << ";\n"
-				"		_lower = " << cekeys << ";\n"
-				"		_upper = " << cekeys << " + " << klen << " - 1;\n"
 				"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
 				"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 				"			if ( " << cpc << " < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"

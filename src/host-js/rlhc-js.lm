@@ -428,7 +428,15 @@ namespace js_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"var [Index.ident];
+				"var [Index.ident]"
+
+			if match Index.opt_init [E: `= expr] {
+				send Parser
+					[E expr(Index.opt_init.expr)]
+			}
+
+			send Parser
+				";
 		}
 		case [case_block]
 		{

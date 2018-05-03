@@ -452,10 +452,17 @@ namespace d_gen
 		{
 			send Parser "goto case;"
 		}
-		case [index_stmt]
+		case [Index: index_stmt]
 		{
 			send Parser
-				"const([type(Stmt.index_stmt.type)]) *[Stmt.index_stmt.ident];
+				"const([type(Index.type)]) *[Index.ident]"
+
+			if match Index.opt_init [E: `= expr] {
+				send Parser
+					[E expr(Index.opt_init.expr)]
+			}
+
+			send Parser ";
 		}
 		case [label_stmt]
 		{

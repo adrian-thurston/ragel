@@ -350,7 +350,17 @@ namespace rust_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"let mut [Index.ident] :i32 = 0;
+				"let mut [Index.ident] :i32"
+
+			switch Index.opt_init
+			case [E: `= expr] {
+				send Parser
+					"= [expr(Index.opt_init.expr)];
+			}
+			default {
+				send Parser
+					"= 0;
+			}
 		}
 		case [
 				'if' `( IfExpr: expr `) IfStmt: stmt

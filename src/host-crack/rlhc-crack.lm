@@ -435,7 +435,18 @@ namespace crack_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"int [Index.ident] = 0;
+				"int [Index.ident]
+
+			if match Index.opt_init [E: `= expr] {
+				send Parser
+					[E expr(Index.opt_init.expr)]
+			}
+			else {
+				send Parser
+					" = 0"
+			}
+
+			send Parser ";
 		}
 		case [case_block]
 		{

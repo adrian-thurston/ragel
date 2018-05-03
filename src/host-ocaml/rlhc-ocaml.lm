@@ -458,7 +458,7 @@ namespace ml_gen
 			switch D.opt_init
 			case [E: `= expr] {
 				send Parser
-					"= ref [expr(D.opt_init.expr)]"
+					"= ref ( [expr(D.opt_init.expr)] )"
 			}
 			default {
 				send Parser
@@ -480,7 +480,20 @@ namespace ml_gen
 		case [Index: index_stmt]
 		{
 			send Parser
-				"let [Index.ident] : int ref = ref 0 in
+				"let [Index.ident] : int ref "
+
+			switch Index.opt_init
+			case [E: `= expr] {
+				send Parser
+					"= ref ( [expr(Index.opt_init.expr)] )"
+			}
+			default {
+				send Parser
+					"= ref 0"
+			}
+
+			send Parser
+				" in
 		}
 		case [case_block]
 		{

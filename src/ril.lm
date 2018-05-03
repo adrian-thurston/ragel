@@ -224,11 +224,11 @@ def opt_const
 def declaration
 	[opt_const type ident opt_init `;]
 
+def index_stmt
+	[`index type ident opt_init`;]
+
 def export_stmt
 	[`export type ident number `;]
-
-def index_stmt
-	[`index type  ident `;]
 
 def goto_stmt
 	Id: int

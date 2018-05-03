@@ -420,10 +420,17 @@ namespace go_gen
 			send Parser
 				"fallthrough
 		}
-		case [index_stmt]
+		case [Index: index_stmt]
 		{
 			send Parser
-				"var  [Stmt.index_stmt.ident] int
+				"var [Index.ident] int"
+
+			if match Index.opt_init ['=' Expr: expr] {
+				send Parser
+					" = [expr(Expr)]"
+			}
+
+			send Parser ['\n']
 		}
 		case [case_block]
 		{
