@@ -907,6 +907,7 @@ struct Compiler
 
 	int nextLelId;
 	int firstNonTermId;
+	int structInbuiltId;
 
 	LangEl **langElIndex;
 	PdaState *actionDestState;

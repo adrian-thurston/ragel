@@ -1113,7 +1113,7 @@ stream_t *colm_stream_new_struct( program_t *prg )
 	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
 	memset( stream, 0, memsize );
 	colm_struct_add( prg, (struct colm_struct *)stream );
-	stream->id = STRUCT_INBUILT_ID;
+	stream->id = prg->rtd->struct_inbuilt_id;
 	stream->destructor = &colm_stream_destroy;
 	return stream;
 }

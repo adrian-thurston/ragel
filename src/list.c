@@ -205,7 +205,7 @@ list_t *colm_list_new( struct colm_program *prg )
 	struct colm_list *list = (struct colm_list*) malloc( memsize );
 	memset( list, 0, memsize );
 	colm_struct_add( prg, (struct colm_struct *)list );
-	list->id = STRUCT_INBUILT_ID;
+	list->id = prg->rtd->struct_inbuilt_id;
 	list->destructor = &colm_list_destroy;
 	return list;
 }

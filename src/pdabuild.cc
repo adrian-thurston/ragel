@@ -242,9 +242,14 @@ void Compiler::makeLangElIds()
 
 void Compiler::makeStructElIds()
 {
-	int nextId = 0;
+	/* Start at the next lang el id and go up from there. Using disjoint sets
+	 * allows us to verify that a tree is a tree and struct is a struct because
+	 * the ID field is at the same offset. */
+	int nextId = nextLelId;
 	for ( StructElList::Iter sel = structEls; sel.lte(); sel++ )
 		sel->id = nextId++;
+
+	structInbuiltId = nextId;
 }
 
 void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
@@ -1709,6 +1714,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->no_token_id = noTokenLangEl->id;
 	runtimeData->global_id = globalSel->id;
 	runtimeData->argv_el_id = argvElSel->id;
+	runtimeData->struct_inbuilt_id = structInbuiltId;
 
 	runtimeData->fsm_execute = &internalFsmExecute;
 	runtimeData->send_named_lang_el = &internalSendNamedLangEl;

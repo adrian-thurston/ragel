@@ -61,24 +61,28 @@ struct colm_struct *colm_struct_new_size( program_t *prg, int size )
 
 struct colm_struct *colm_struct_new( program_t *prg, int id )
 {
-	struct colm_struct *s = colm_struct_new_size( prg, prg->rtd->sel_info[id].size );
+	struct colm_struct *s = colm_struct_new_size( prg, prg->rtd->sel_info[id - prg->rtd->num_lang_els].size );
 	s->id = id;
 	return s;
 }
 
+struct struct_el_info *colm_sel_info( program_t *prg, int id )
+{
+	return &prg->rtd->sel_info[id - prg->rtd->num_lang_els];
+}
+
 void colm_struct_delete( program_t *prg, tree_t **sp, struct colm_struct *el )
 {
-	if ( el->id == STRUCT_INBUILT_ID ) {
+	if ( el->id == prg->rtd->struct_inbuilt_id ) {
 		colm_destructor_t destructor = ((struct colm_inbuilt*)el)->destructor;
 		if ( destructor != 0 )
 			(*destructor)( prg, sp, el );
 	}
-
-	if ( el->id >= 0 ) { 
-		short *t = prg->rtd->sel_info[el->id].trees;
-		int i, len = prg->rtd->sel_info[el->id].trees_len;
-		for ( i = 0; i < len; i++ ) {
-			tree_t *tree = colm_struct_get_field( el, tree_t*, t[i] );
+	else {
+		int tree_i;
+		struct struct_el_info *sel = colm_sel_info( prg, el->id );
+		for ( tree_i = 0; tree_i < sel->trees_len; tree_i++ ) {
+			tree_t *tree = colm_struct_get_field( el, tree_t*, sel->trees[tree_i] );
 			colm_tree_downref( prg, sp, tree );
 		}
 	}
@@ -110,7 +114,7 @@ parser_t *colm_parser_new( program_t *prg, struct generic_info *gi, int reducer 
 	memset( parser, 0, memsize );
 	colm_struct_add( prg, (struct colm_struct*) parser );
 
-	parser->id = STRUCT_INBUILT_ID;
+	parser->id = prg->rtd->struct_inbuilt_id;
 	parser->destructor = &colm_parser_destroy;
 	parser->pda_run = pda_run;
 
@@ -136,7 +140,7 @@ map_t *colm_map_new( struct colm_program *prg )
 	struct colm_map *map = (struct colm_map*) malloc( memsize );
 	memset( map, 0, memsize );
 	colm_struct_add( prg, (struct colm_struct *)map );
-	map->id = STRUCT_INBUILT_ID;
+	map->id = prg->rtd->struct_inbuilt_id;
 	return map;
 }
 
