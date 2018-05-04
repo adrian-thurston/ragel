@@ -2329,8 +2329,6 @@ again:
 
 			struct stream_impl *si = stream_to_impl( ((parser_t*)pptr)->input );
 			stream_undo_append_stream( prg, sp, si, input, len );
-
-			colm_tree_downref( prg, sp, input );
 			break;
 		}
 
