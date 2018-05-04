@@ -3152,7 +3152,6 @@ again:
 			list_t *list = vm_pop_list();
 			long len = colm_list_length( list );
 			value_t res = len;
-			colm_tree_downref( prg, sp, (tree_t*)list );
 			vm_push_value( res );
 			break;
 		}
