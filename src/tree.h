@@ -151,7 +151,7 @@ enum IterType
 	IT_User
 };
 
-typedef struct _TreeIter
+typedef struct colm_tree_iter
 {
 	enum IterType type;
 	ref_t root_ref;
@@ -176,7 +176,7 @@ typedef struct colm_generic_iter
 } generic_iter_t;
 
 /* This must overlay tree iter because some of the same bytecodes are used. */
-typedef struct _RevTreeIter
+typedef struct colm_rev_tree_iter
 {
 	enum IterType type;
 	ref_t root_ref;

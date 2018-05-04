@@ -3299,12 +3299,10 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_MEM_R %hd\n", field );
 
 			tree_t *obj = vm_pop_tree();
-			tree_t *val = get_parser_mem( (parser_t*)obj, field );
-			colm_tree_upref( val );
 
-			/* In at least one case we extract the result on a parser with ref
-			 * one. Do it after. */
-			colm_tree_downref( prg, sp, obj );
+			tree_t *val = get_parser_mem( (parser_t*)obj, field );
+
+			colm_tree_upref( val );
 			vm_push_tree( val );
 			break;
 		}

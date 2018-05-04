@@ -2642,7 +2642,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			code.append(     IN_GET_CONST );
 			code.appendHalf( IN_CONST_STDOUT );
 			consItemList->evaluateSendStream( pd, code );
-			code.append( IN_POP_TREE );
+			code.append( IN_POP_VAL );
 			break;
 		}
 		case ExprType: {
