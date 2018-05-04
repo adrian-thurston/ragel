@@ -51,8 +51,10 @@ void colm_list_iter_destroy( program_t *prg, tree_t ***psp, generic_iter_t *iter
 		long cur_stack_size = vm_ssize() - iter->root_size;
 		assert( iter->yield_size == cur_stack_size );
 		vm_popn( iter->yield_size );
-		for ( i = 0; i < iter->arg_size; i++ )
-			colm_tree_downref( prg, sp, vm_pop_tree() );
+		for ( i = 0; i < iter->arg_size; i++ ) {
+			//colm_tree_downref( prg, sp, vm_pop_tree() );
+			vm_pop_value();
+		}
 		iter->type = 0;
 		*psp = sp;
 	}
