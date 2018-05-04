@@ -3325,8 +3325,6 @@ again:
 			long len = map_length( (map_t*)obj );
 			value_t res = len;
 			vm_push_value( res );
-
-			colm_tree_downref( prg, sp, obj );
 			break;
 		}
 		case IN_GET_MAP_MEM_R: {
