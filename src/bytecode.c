@@ -4646,24 +4646,23 @@ again:
 			return;
 		}
 		case IN_PARSE_APPEND_BKT: {
+			tree_t *input;
+
 			consume_word(); //( parser );
-			consume_word(); //( input );
+			read_tree( input );
 			consume_word(); //( len );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_BKT\n" ); 
 
+			colm_tree_downref( prg, sp, input );
 			break;
 		}
 		case IN_PARSE_APPEND_STREAM_BKT: {
-			tree_t *input;
-
 			consume_word(); //( sptr );
-			read_tree( input );
+			consume_word(); //( input );
 			consume_word(); //( len );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_BKT\n" );
-
-			colm_tree_downref( prg, sp, input );
 			break;
 		}
 
