@@ -898,6 +898,10 @@ struct LoadColm
 			tr = TypeRef::cons( internal, pd->uniqueTypeBool );
 			break;
 		}
+		case type_ref::Void: {
+			tr = TypeRef::cons( internal, pd->uniqueTypeVoid );
+			break;
+		}
 		case type_ref::Parser: {
 			TypeRef *type = walkTypeRef( typeRef._type_ref() );
 			tr = TypeRef::cons( typeRef.loc(), TypeRef::Parser, 0, type, 0 );

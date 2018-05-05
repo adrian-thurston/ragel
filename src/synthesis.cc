@@ -1572,7 +1572,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
-			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+			if ( ut->typeId == TYPE_VOID ) {
 				/* Clear it away if return type is void. */
 				code.append( IN_POP_VAL );
 				continue;
@@ -1687,7 +1687,7 @@ void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
 		}
 		case ConsItem::ExprType:
 			UniqueType *ut = item->expr->evaluate( pd, code );
-			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+			if ( ut->typeId == TYPE_VOID ) {
 				/* Clear it away if the the return type is void. */
 				code.append( IN_POP_VAL );
 				code.append( IN_POP_VAL );
@@ -1755,7 +1755,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 		}
 		case ConsItem::ExprType:
 			UniqueType *ut = item->expr->evaluate( pd, code );
-			if ( ut->typeId == TYPE_TREE && ut->langEl == pd->voidLangEl ) {
+			if ( ut->typeId == TYPE_VOID ) {
 				/* Clear it away if return type is void. */
 				code.append( IN_POP_VAL );
 				continue;
@@ -2648,7 +2648,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
 			UniqueType *exprUt = expr->evaluate( pd, code );
-			if ( exprUt->tree() && exprUt->langEl != pd->voidLangEl )
+			if ( exprUt->tree() )
 				code.append( IN_POP_TREE );
 			else
 				code.append( IN_POP_VAL );

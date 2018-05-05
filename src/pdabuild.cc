@@ -268,14 +268,14 @@ void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
 void Compiler::makeLangElNames()
 {
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
-		if ( lel->id == LEL_ID_VOID ) {
-			lel->fullName = "_void";
-			lel->fullLit = "_void";
-			lel->refName = "_void";
-			lel->declName = "_void";
-			lel->xmlTag = "void";
-
-		}
+//		if ( lel->id == LEL_ID_VOID ) {
+//			lel->fullName = "_void";
+//			lel->fullLit = "_void";
+//			lel->refName = "_void";
+//			lel->declName = "_void";
+//			lel->xmlTag = "void";
+//
+//		}
 //		else if ( lel->id == LEL_ID_INT ) {
 //			lel->fullName = "_int";
 //			lel->fullLit = "_int";
@@ -290,13 +290,13 @@ void Compiler::makeLangElNames()
 //			lel->declName = "_bool";
 //			lel->xmlTag = "bool";
 //		}
-		else {
+//		else {
 			lel->fullName = lel->name;
 			lel->fullLit = lel->lit;
 			lel->refName = lel->lit;
 			lel->declName = lel->lit;
 			lel->xmlTag = lel->name;
-		}
+//		}
 
 		/* If there is also a namespace next to the type, we add a prefix to
 		 * the type. It's not convenient to name C++ classes the same as a

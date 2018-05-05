@@ -894,7 +894,6 @@ struct Compiler
 	GenericType *anyVector;
 
 	LangEl *ptrLangEl;
-	LangEl *voidLangEl;
 	LangEl *strLangEl;
 	LangEl *anyLangEl;
 	LangEl *rootLangEl;

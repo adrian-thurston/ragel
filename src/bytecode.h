@@ -447,9 +447,8 @@ enum GEN {
 /* Known language element ids. */
 enum LEL_ID {
 	LEL_ID_PTR        = 1,
-	LEL_ID_VOID       = 2,
-	LEL_ID_STR        = 3,
-	LEL_ID_IGNORE     = 4
+	LEL_ID_STR        = 2,
+	LEL_ID_IGNORE     = 3
 };
 
 /*

@@ -890,17 +890,9 @@ tree_t *split_tree( program_t *prg, tree_t *tree )
 void tree_free_rec( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	tree_t **top = vm_ptop();
-//	struct lang_el_info *lelInfo;
-//	long genericId;
 
 free_tree:
-//	lelInfo = prg->rtd->lelInfo;
-//	genericId = lelInfo[tree->id].genericId;
-//	assert( genericId == 0 );
-
 	switch ( tree->id ) {
-//	case LEL_ID_BOOL:
-//	case LEL_ID_INT:
 	case LEL_ID_PTR:
 		tree_free( prg, tree );
 		break;

@@ -30,7 +30,7 @@
 void Compiler::initUniqueTypes( )
 {
 	uniqueTypeNil = new UniqueType( TYPE_NIL );
-	uniqueTypeVoid = new UniqueType( TYPE_TREE, voidLangEl );
+	uniqueTypeVoid = new UniqueType( TYPE_VOID );
 	uniqueTypePtr = new UniqueType( TYPE_TREE, ptrLangEl );
 	uniqueTypeBool = new UniqueType( TYPE_BOOL );
 	uniqueTypeInt = new UniqueType( TYPE_INT );
@@ -337,7 +337,6 @@ void Compiler::declareBaseLangEls()
 	noTokenLangEl->isIgnore = true;
 	
 	ptrLangEl = declareLangEl( this, rootNamespace, "ptr", LangEl::Term );
-	voidLangEl = declareLangEl( this, rootNamespace, "void", LangEl::Term );
 	strLangEl = declareLangEl( this, rootNamespace, "str", LangEl::Term );
 	ignoreLangEl = declareLangEl( this, rootNamespace, "il", LangEl::Term );
 

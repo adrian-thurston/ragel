@@ -55,6 +55,7 @@ lex
 	token DEFAULT / 'default' /
 	token INT / 'int' /
 	token BOOL / 'bool' /
+	token VOID / 'void' /
 
 	token MAKE_TOKEN / 'make_token' /
 	token MAKE_TREE / 'make_tree' /
@@ -643,6 +644,7 @@ def type_ref
 	[region_qual id opt_repeat] :Id
 |	[INT] :Int
 |	[BOOL] :Bool
+|	[VOID] :Void
 |	[PARSER LT type_ref GT] :Parser
 |	[LIST LT type_ref GT] :List
 |	[MAP LT KeyType: type_ref COMMA ValType: type_ref GT] :Map
