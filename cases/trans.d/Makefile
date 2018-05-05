@@ -25,3 +25,6 @@ trans.o: trans.c
 
 trans.c: trans.lm $(TRANS_DEPS) 
 	$(COLM) -b trans_object -c -o $@ $<
+
+clean:
+	rm -f *.o

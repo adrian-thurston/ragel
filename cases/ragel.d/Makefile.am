@@ -43,10 +43,7 @@ EXTRA_DIST = \
 	element2.rl erract7.rl forder2.rl include2.rl patact.rl scan2.rl \
 	xmlcommon.rl cppscan1.h eofact.h mailbox1.h strings2.h
 
-CLEANFILES = \
-	*.c *.cpp *.m *.d *.java *.bin *.class *.exp \
-	*.out *_c.rl *_d.rl *_java.rl *_ruby.rl *_csharp.rl *.cs \
-	*_go.rl *.go *.exe
+CLEANFILES = working
 
 TRANS_DEPS = \
 	$(RAGEL_LM)/ragel.lm \

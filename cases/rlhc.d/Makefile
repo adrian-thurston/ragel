@@ -23,3 +23,6 @@ RLHC_DEP = \
 
 rlhc: rlhc.lm $(RLHC_DEP)
 	$(COLM) -b rlhc_object -o $@ $<
+
+clean:
+	rm -f *.o

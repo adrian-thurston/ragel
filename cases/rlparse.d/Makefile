@@ -19,6 +19,7 @@ RAGEL_LM = \
 
 if.h: parse.c
 if.cc: parse.c
+commit.cc: parse.c
 
 parse.c: rlparse.lm reducer.lm $(RAGEL_LM)
 	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
@@ -31,3 +32,6 @@ parse.c: rlparse.lm reducer.lm $(RAGEL_LM)
 
 rlparse: $(OBJ)
 	g++ -o $@ $(OBJ) $(COLM_LIB) -lcolm
+
+clean:
+	rm -f *.o
