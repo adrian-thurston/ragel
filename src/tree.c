@@ -841,25 +841,12 @@ tree_t *copy_real_tree( program_t *prg, tree_t *tree, kid_t *old_next_down, kid_
 
 tree_t *colm_copy_tree( program_t *prg, tree_t *tree, kid_t *old_next_down, kid_t **new_next_down )
 {
-//	struct lang_el_info *lelInfo = prg->rtd->lelInfo;
-//	long genericId = lelInfo[tree->id].genericId;
-//	if ( genericId > 0 )
-//		assert(false);
-	if ( tree->id == LEL_ID_PTR )
-		assert(false);
-//	else if ( tree->id == LEL_ID_BOOL )
-//		assert(false);
-//	else if ( tree->id == LEL_ID_INT )
-//		assert(false);
-	else if ( tree->id == LEL_ID_STR )
-		assert(false);
-//	else if ( tree->id == LEL_ID_STREAM )
-//		assert(false);
-	else {
-		tree = copy_real_tree( prg, tree, old_next_down, new_next_down );
-	}
+	assert( tree->id != LEL_ID_PTR && tree->id != LEL_ID_STR );
+
+	tree = copy_real_tree( prg, tree, old_next_down, new_next_down );
 
 	assert( tree->refs == 0 );
+
 	return tree;
 }
 
@@ -952,11 +939,8 @@ void colm_tree_downref( program_t *prg, tree_t **sp, tree_t *tree )
 void object_free_rec( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	tree_t **top = vm_ptop();
-//	struct lang_el_info *lelInfo;
-//	long genericId;
 
 free_tree:
-//	lelInfo = prg->rtd->lelInfo;
 
 	switch ( tree->id ) {
 	case LEL_ID_STR: {
@@ -965,17 +949,10 @@ free_tree:
 		tree_free( prg, tree );
 		break;
 	}
-//	case LEL_ID_BOOL:
-//	case LEL_ID_INT: {
-//		tree_free( prg, tree );
-//		break;
-//	}
 	case LEL_ID_PTR: {
 		tree_free( prg, tree );
 		break;
 	}
-//	case LEL_ID_STREAM: {
-//	}
 	default: { 
 		if ( tree->id != LEL_ID_IGNORE )
 			string_free( prg, tree->tokdata );
