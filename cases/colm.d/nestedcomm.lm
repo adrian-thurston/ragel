@@ -39,9 +39,9 @@ def nested [id*]
 parse P: nested[ stdin ]
 
 print( ^P, '\n' )
-print_xml( ^P )
+print( xml(^P) )
 print( '\n' )
-print_xml_ac( ^P )
+print( xmlac(^P) )
 print( '\n' )
 print( ^P, '\n' )
 ##### IN #####

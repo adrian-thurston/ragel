@@ -24,7 +24,7 @@ def method_call
 
 parse R: method_call[stdin]
 
-print_xml( R )
+print( xml( R ) )
 print( '\n' )
 
 ##### IN #####

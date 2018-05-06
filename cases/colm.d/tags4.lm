@@ -326,7 +326,7 @@ Tags->TagStack = construct tags::tag_stack []
 parse HTML: tags::start(Tags)[ stdin ]
 print( HTML )
 
-#print_xml( HTML )
+#print( xml( HTML ) )
 #for C: close_tag in HTML 
 #	print( C '\n' )
 ##### IN #####

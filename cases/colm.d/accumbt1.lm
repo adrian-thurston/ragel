@@ -33,7 +33,7 @@ send I " dude\n"
 S: start = I->finish()
 S = match S 
 	~id 77 88 "hello" dude dude
-print_xml( S )
+print( xml(S) )
 print( '\n' )
 ##### EXP #####
 <start><prefix><id>id</id></prefix><choice1><number>77</number></choice1><choice2><number>88</number></choice2><string>"hello"</string><id>dude</id><id>dude</id></start>

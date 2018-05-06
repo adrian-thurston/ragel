@@ -20,7 +20,7 @@ def start
 
 parse S: start[ stdin ]
 R: start = match S ~ 9 + 9
-print_xml( R )
+print( xml( R ) )
 print( '\n' )
 ##### IN #####
 9 + 9

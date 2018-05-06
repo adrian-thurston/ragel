@@ -303,7 +303,7 @@ Tags->TagStack = construct tags::tag_stack []
 parse HTML_P: tags::start(Tags)[ stdin ]
 HTML: tags::start = HTML_P
 tags::flatten( HTML )
-print_xml( HTML )
+print( xml( HTML ) )
 tags::printLinks( HTML )
 ##### IN #####
 <t1>

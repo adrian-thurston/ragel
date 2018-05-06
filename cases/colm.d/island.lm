@@ -49,7 +49,7 @@ def start
 	[top_item*]
 
 parse S: start[ stdin ]
-print_xml( S )
+print( xml( S ) )
 print( '\n' )
 
 #pattern start

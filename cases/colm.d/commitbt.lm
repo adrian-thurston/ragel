@@ -100,7 +100,7 @@ def stuff
 |	[sub]
 
 parse S: stuff[ stdin ]
-print_xml( S )
+print( xml( S ) )
 print( '\n' )
 ##### IN #####
 1 2 3 * !

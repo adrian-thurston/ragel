@@ -92,7 +92,7 @@ end # ruby_here
 CTX: ruby_here = new ruby_here()
 
 parse S: ruby_here::start( CTX ) [ stdin ]
-print_xml(S)
+print( xml(S) )
 print('\n')
 ##### IN #####
 print( <<DATA1, more, <<DATA2, 99 )

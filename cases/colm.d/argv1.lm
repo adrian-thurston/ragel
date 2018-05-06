@@ -1,8 +1,8 @@
-print_xml( arg0 )
+print( xml( arg0 ) )
 
 A: list_el<str> = argv->head_el
 while ( A ) {
-	print_xml( A->value )
+	print( xml( A->value ) )
 	A = A->next
 }
 print( '\n' )

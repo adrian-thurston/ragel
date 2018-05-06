@@ -49,7 +49,7 @@ def start
 	}
 
 parse S: start[stdin]
-print_xml( S )
+print( xml( S ) )
 print( '\n' )
 ##### IN #####
 a + "%{{"; 1 * 2;

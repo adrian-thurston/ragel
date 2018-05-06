@@ -87,7 +87,7 @@ for I:orlit_item in S {
 		print( I, '\n' )
 	}
 }
-print_xml( S )
+print( xml( S ) )
 print( '\n' )
 ##### IN #####
 2 / /[^gu-zy].*o[\d-xa]*/;

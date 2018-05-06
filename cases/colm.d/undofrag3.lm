@@ -34,7 +34,7 @@ context undo
 	def F
 		[]
 		{
-			print_xml( Out->finish() )
+			print( xml( Out->finish() ) )
 		}
 
 	def start 

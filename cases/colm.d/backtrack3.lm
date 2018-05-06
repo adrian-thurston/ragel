@@ -22,7 +22,7 @@ def choice2
 def start 
 	[prefix choice1 choice2 string id id]
 	{
-		print_xml( match lhs "id 77 88 \"hello\" dude dude\n" )
+		print( xml( match lhs "id 77 88 \"hello\" dude dude\n" ) )
 	}
 
 parse start[stdin]

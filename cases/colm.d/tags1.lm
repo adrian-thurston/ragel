@@ -69,15 +69,15 @@ context tags
 	def start
 		[tag* SEMI_NL]
 		{
-			print_xml( TS )
-			print_xml( lhs )
+			print( xml( TS ) )
+			print( xml( lhs ) )
 			print( 'got structure\n' )
 		}
 
 	|	[id* SEMI_NL]
 		{
-			print_xml( TS )
-			print_xml( lhs )
+			print( xml( TS ) )
+			print( xml( lhs ) )
 			print( 'failed\n' )
 		}
 end # tags

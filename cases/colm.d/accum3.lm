@@ -29,7 +29,7 @@ while ( A ) {
 
 Args: args = ArgParser->finish() 
 
-print_xml( Args )
+print( xml(Args) )
 print( '\n' )
 ##### ARGS #####
 -qv -h -o output sdf -i eth0 file

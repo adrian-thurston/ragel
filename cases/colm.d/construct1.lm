@@ -11,7 +11,7 @@ def four_ids
 	[id id id id]
 
 Constructed: four_ids = construct four_ids "a  b  c  d"
-print_xml( Constructed )
+print( xml( Constructed ) )
 print( '\n' )
 
 ##### EXP #####

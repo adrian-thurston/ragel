@@ -13,7 +13,7 @@ end
 def start 
 	[expression]
 	{
-		print_xml( lhs )
+		print( xml( lhs ) )
 	}
 
 def expression [term expression_op*]
