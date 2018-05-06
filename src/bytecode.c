@@ -3289,6 +3289,12 @@ again:
 			vm_push_tree( res );
 			break;
 		}
+		case IN_GET_PARSER_STREAM: {
+			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_STREAM\n" );
+			parser_t *parser = vm_pop_parser();
+			vm_push_stream( parser->input );
+			break;
+		}
 		case IN_GET_PARSER_MEM_R: {
 			short field;
 			read_half( field );

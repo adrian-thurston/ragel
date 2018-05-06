@@ -1398,6 +1398,9 @@ void Compiler::initParserFunctions( GenericType *gen )
 
 	initFunction( gen->elUt, gen->objDef, "eof",
 			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
+
+	initFunction( uniqueTypeStream, gen->objDef, "gets",
+			IN_GET_PARSER_STREAM, IN_GET_PARSER_STREAM, true );
 }
 
 void Compiler::initParserField( GenericType *gen, const char *name,

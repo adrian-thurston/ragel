@@ -337,6 +337,8 @@ typedef unsigned char uchar;
 #define IN_SET_PARSER_MEM_WV     0x00
 #define IN_SET_PARSER_MEM_BKT    0x00
 
+#define IN_GET_PARSER_STREAM     0x6b
+
 #define IN_GET_ERROR             0xcc
 #define IN_SET_ERROR             0xe2
 
