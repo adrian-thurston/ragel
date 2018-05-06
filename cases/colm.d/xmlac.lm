@@ -1,0 +1,28 @@
+
+lex
+	ignore / ' ' /
+	token line /[^ \n] [^\n]* '\n'/
+end
+
+def g
+	I: int
+	[g line]
+|	[]
+
+new Output: parser<g>()
+
+send Output " hello friend
+
+G: g = Output->finish()
+G.I = 1
+
+send stdout [ xml( G ) ]
+send stdout "
+send stdout [ xmlac( G ) ]
+send stdout "
+
+##### EXP #####
+<g><g></g><line>hello friend
+</line></g>
+<g><ptr>1</ptr><g></g><_ignore_0001> </_ignore_0001><line>hello friend
+</line></g>
