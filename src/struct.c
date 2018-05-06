@@ -164,6 +164,7 @@ struct_t *colm_construct_generic( program_t *prg, long generic_id )
 		case GEN_PARSER: {
 			parser_t *parser = colm_parser_new( prg, generic_info, 0 );
 			parser->input = colm_stream_new( prg );
+			parser->input->parser = parser;
 			new_generic = (struct_t*) parser;
 			break;
 		}

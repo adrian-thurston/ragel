@@ -70,6 +70,7 @@ typedef struct colm_stream
 	void *buffer[8];
 
 	struct stream_impl *impl;
+	parser_t *parser;
 } stream_t;
 
 #define COLM_LIST_EL_SIZE 2
