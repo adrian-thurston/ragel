@@ -511,6 +511,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		"	" << runtimeData->global_id << ",\n"
 		"	" << runtimeData->argv_el_id << ",\n"
 		"	" << runtimeData->struct_inbuilt_id << ",\n"
+		"	" << runtimeData->struct_stream_id << ",\n"
 		"	&fsm_execute,\n"
 		"	&sendNamedLangEl,\n"
 		"	&initBindings,\n"

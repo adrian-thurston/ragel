@@ -99,6 +99,7 @@ struct colm_sections
 	long global_id;
 	long argv_el_id;
 	long struct_inbuilt_id;
+	long struct_stream_id;
 
 	void (*fsm_execute)( struct pda_run *pda_run, struct stream_impl *input_stream );
 	void (*send_named_lang_el)( struct colm_program *prg, tree_t **tree,

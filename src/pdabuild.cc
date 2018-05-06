@@ -247,7 +247,8 @@ void Compiler::makeStructElIds()
 	for ( StructElList::Iter sel = structEls; sel.lte(); sel++ )
 		sel->id = nextId++;
 
-	structInbuiltId = nextId;
+	structInbuiltId = nextId++;
+	structStreamId = nextId++;
 }
 
 void Compiler::refNameSpace( LangEl *lel, Namespace *nspace )
@@ -1689,6 +1690,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->global_id = globalSel->id;
 	runtimeData->argv_el_id = argvElSel->id;
 	runtimeData->struct_inbuilt_id = structInbuiltId;
+	runtimeData->struct_stream_id = structStreamId;
 
 	runtimeData->fsm_execute = &internalFsmExecute;
 	runtimeData->send_named_lang_el = &internalSendNamedLangEl;
