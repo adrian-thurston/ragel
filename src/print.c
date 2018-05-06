@@ -745,3 +745,25 @@ void colm_postfix_tree_file( program_t *prg, tree_t **sp, struct stream_impl *im
 	fflush( impl->file );
 }
 
+void colm_print_tree_collect_xml( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			collect, false, false, trim, &append_collect, 
+			&xml_open, &xml_term, &xml_close
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+
+void colm_print_tree_collect_xml_ac( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim )
+{
+	struct colm_print_args print_args = {
+			collect, true, true, trim, &append_collect, 
+			&xml_open, &xml_term, &xml_close
+	};
+
+	colm_print_tree_args( prg, sp, &print_args, tree );
+}
+

@@ -1024,6 +1024,14 @@ void Compiler::declareGlobalFields()
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "system",
 		IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
 
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "xml",
+		IN_TREE_TO_STR_XML, IN_TREE_TO_STR_XML, uniqueTypeAny, true );
+	method->useCallObj = false;
+
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "xmlac",
+		IN_TREE_TO_STR_XML_AC, IN_TREE_TO_STR_XML_AC, uniqueTypeAny, true );
+	method->useCallObj = false;
+
 	addStdin();
 	addStdout();
 	addStderr();

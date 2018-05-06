@@ -153,6 +153,39 @@ static head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim,
 	return ret;
 }
 
+static head_t *tree_to_str_xml( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
+{
+	/* Collect the tree data. */
+	StrCollect collect;
+	init_str_collect( &collect );
+
+	colm_print_tree_collect_xml( prg, sp, &collect, tree, trim );
+
+	/* Set up the input stream. */
+	head_t *ret = string_alloc_full( prg, collect.data, collect.length );
+
+	str_collect_destroy( &collect );
+
+	return ret;
+}
+
+static head_t *tree_to_str_xml_ac( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
+{
+	/* Collect the tree data. */
+	StrCollect collect;
+	init_str_collect( &collect );
+
+	colm_print_tree_collect_xml_ac( prg, sp, &collect, tree, trim );
+
+	/* Set up the input stream. */
+	head_t *ret = string_alloc_full( prg, collect.data, collect.length );
+
+	str_collect_destroy( &collect );
+
+	return ret;
+}
+
+
 static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, tree_t *input )
 {
 	long length = 0;
@@ -1539,6 +1572,28 @@ again:
 			tree_t *str = construct_string( prg, res );
 			colm_tree_upref( str );
 			vm_push_tree( str );
+			break;
+		}
+		case IN_TREE_TO_STR_XML: {
+			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR_XML_AC\n" );
+
+			tree_t *tree = vm_pop_tree();
+			head_t *res = tree_to_str_xml( prg, sp, tree, false, false );
+			tree_t *str = construct_string( prg, res );
+			colm_tree_upref( str );
+			vm_push_tree( str );
+			colm_tree_downref( prg, sp, tree );
+			break;
+		}
+		case IN_TREE_TO_STR_XML_AC: {
+			debug( prg, REALM_BYTECODE, "IN_TREE_TO_STR_XML_AC\n" );
+
+			tree_t *tree = vm_pop_tree();
+			head_t *res = tree_to_str_xml_ac( prg, sp, tree, false, false );
+			tree_t *str = construct_string( prg, res );
+			colm_tree_upref( str );
+			vm_push_tree( str );
+			colm_tree_downref( prg, sp, tree );
 			break;
 		}
 		case IN_TREE_TO_STR: {

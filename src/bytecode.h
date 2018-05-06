@@ -235,6 +235,9 @@ typedef unsigned char uchar;
 #define IN_PRINT_STREAM          0x8a
 #define IN_PRINT_DUMP            0xf6
 
+#define IN_TREE_TO_STR_XML       0x6e
+#define IN_TREE_TO_STR_XML_AC    0x6f
+
 #define IN_HOST                  0xea
 
 #define IN_CALL_WC               0x8c
