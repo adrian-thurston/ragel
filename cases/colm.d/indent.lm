@@ -1,0 +1,36 @@
+lex
+	ignore /space+/
+	literal `* `( `)
+	token id /[a-zA-Z_]+/
+
+end
+
+    token _IN_ /''/
+    token _EX_ /''/
+
+def item 
+	[id]
+|	[`( _IN_ item* _EX_ `)]
+
+def start 
+	[item*]
+
+parse S: start[ stdin ]
+
+send stdout [S]
+###### IN ######
+(
+a ( b
+c
+d
+) e
+f
+)
+###### EXP ######
+(
+	a ( b
+		c
+		d
+	) e
+	f
+)
