@@ -237,6 +237,7 @@ typedef unsigned char uchar;
 
 #define IN_TREE_TO_STR_XML       0x6e
 #define IN_TREE_TO_STR_XML_AC    0x6f
+#define IN_TREE_TO_STR_POSTFIX   0xb6
 
 #define IN_HOST                  0xea
 

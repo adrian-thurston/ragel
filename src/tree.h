@@ -372,6 +372,12 @@ tree_t *construct_string( struct colm_program *prg, head_t *s );
 
 void free_kid_list( program_t *prg, kid_t *kid );
 
+void colm_print_tree_collect_xml( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim );
+
+void colm_print_tree_collect_xml_ac( program_t *prg, tree_t **sp,
+		StrCollect *collect, tree_t *tree, int trim );
+
 #if defined(__cplusplus)
 }
 #endif

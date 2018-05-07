@@ -1032,6 +1032,10 @@ void Compiler::declareGlobalFields()
 		IN_TREE_TO_STR_XML_AC, IN_TREE_TO_STR_XML_AC, uniqueTypeAny, true );
 	method->useCallObj = false;
 
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "postfix",
+		IN_TREE_TO_STR_POSTFIX, IN_TREE_TO_STR_POSTFIX, uniqueTypeAny, true );
+	method->useCallObj = false;
+
 	addStdin();
 	addStdout();
 	addStderr();
