@@ -1652,73 +1652,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	return targetUT;
 }
 
-void ConsItemList::evaluateSendStream( Compiler *pd, CodeVect &code )
-{
-	for ( ConsItemList::Iter item = first(); item.lte(); item++ ) {
-		/* Load a dup of the stream. */
-		code.append( IN_DUP_VAL );
-
-		switch ( item->type ) {
-		case ConsItem::LiteralType: {
-			String result;
-			bool unusedCI;
-			prepareLitString( result, unusedCI, 
-					item->prodEl->typeRef->pdaLiteral->data,
-					item->prodEl->typeRef->pdaLiteral->loc );
-
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( result, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
-
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ConsItem::InputText: {
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( item->data, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
-
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ConsItem::ExprType:
-			UniqueType *ut = item->expr->evaluate( pd, code );
-			if ( ut->typeId == TYPE_VOID ) {
-				/* Clear it away if the the return type is void. */
-				code.append( IN_POP_VAL );
-				code.append( IN_POP_VAL );
-				continue;
-			}
-			else if ( ut->typeId == TYPE_TREE && !isStr( ut ) ) {
-				if ( item->trim )
-					code.append( IN_TREE_TRIM );
-			}
-
-			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
-				code.append( IN_INT_TO_STR );
-			break;
-		}
-
-		code.append( IN_PRINT_STREAM );
-		code.append( 1 );
-	}
-}
-
-void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
-{
-	varRef->evaluate( pd, code );
-	parserText->list->evaluateSendStream( pd, code );
-
-	/* Normally we would have to pop the stream var ref that we evaluated
-	 * before all the print arguments (which includes the stream, evaluated
-	 * last), however we send is part of an expression, and is supposed to
-	 * leave the varref on the stack. */
-}
-
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const
 {
 	varRef->evaluate( pd, code );
@@ -2589,62 +2522,6 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 	pd->unwindCode.insert( 0, block );
 
 	switch ( type ) {
-		case PrintType: 
-		case PrintXMLACType:
-		case PrintXMLType:
-		case PrintDumpType:
-		case PrintStreamType: {
-			UniqueType **types = new UniqueType*[exprPtrVect->length()];
-			
-			/* Push the args backwards. */
-			for ( CallArgVect::Iter pex = exprPtrVect->first(); pex.lte(); pex++ ) {
-				types[pex.pos()] = (*pex)->expr->evaluate( pd, code );
-				if ( types[pex.pos()]->typeId == TYPE_INT || 
-					types[pex.pos()]->typeId == TYPE_BOOL )
-				{
-					code.append( IN_INT_TO_STR );
-				}
-				else if ( isTree( types[pex.pos()] ) && !isStr( types[pex.pos()] ) ) {
-					code.append( IN_TREE_TRIM );
-				}
-			}
-
-			/* Run the printing forwards. */
-			if ( type == PrintType ) {
-				code.append( IN_PRINT );
-				code.append( exprPtrVect->length() );
-			}
-			else if ( type == PrintXMLACType ) {
-				code.append( IN_PRINT_XML_AC );
-				code.append( exprPtrVect->length() );
-			}
-			else if ( type == PrintXMLType ) {
-				code.append( IN_PRINT_XML );
-				code.append( exprPtrVect->length() );
-			}
-			else if ( type == PrintStreamType ) {
-				/* Minus one because the first arg is the stream. */
-				code.append( IN_PRINT_STREAM );
-				code.append( exprPtrVect->length() - 1 );
-			}
-			else if ( type == PrintDumpType ) {
-				/* Minus one because the first arg is the stream. */
-				code.append( IN_PRINT_DUMP );
-				code.append( exprPtrVect->length() - 1 );
-			}
-
-			delete[] types;
-
-			break;
-		}
-		case PrintAccum: {
-			code.append( IN_LOAD_GLOBAL_R );
-			code.append(     IN_GET_CONST );
-			code.appendHalf( IN_CONST_STDOUT );
-			consItemList->evaluateSendStream( pd, code );
-			code.append( IN_POP_VAL );
-			break;
-		}
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
 			UniqueType *exprUt = expr->evaluate( pd, code );

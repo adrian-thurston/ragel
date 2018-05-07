@@ -539,13 +539,6 @@ void LangStmt::declareForIter( Compiler *pd ) const
 void LangStmt::declare( Compiler *pd ) const
 {
 	switch ( type ) {
-		case PrintType: 
-		case PrintXMLACType:
-		case PrintXMLType:
-		case PrintStreamType:
-		case PrintAccum:
-		case PrintDumpType:
-			break;
 		case ExprType:
 			break;
 		case IfType:

@@ -229,12 +229,6 @@ typedef unsigned char uchar;
 #define IN_VECTOR_INSERT_WC      0x85
 #define IN_VECTOR_INSERT_BKT     0x86
 
-#define IN_PRINT                 0x87
-#define IN_PRINT_XML_AC          0x88
-#define IN_PRINT_XML             0x89
-#define IN_PRINT_STREAM          0x8a
-#define IN_PRINT_DUMP            0xf6
-
 #define IN_TREE_TO_STR_XML       0x6e
 #define IN_TREE_TO_STR_XML_AC    0x6f
 #define IN_TREE_TO_STR_POSTFIX   0xb6
@@ -246,7 +240,6 @@ typedef unsigned char uchar;
 #define IN_RET                   0x8e
 #define IN_YIELD                 0x8f
 #define IN_HALT                  0x8b
-
 
 #define IN_INT_TO_STR            0x97
 #define IN_TREE_TO_STR           0x98

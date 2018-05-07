@@ -628,20 +628,6 @@ void LangStmt::resolveForIter( Compiler *pd ) const
 void LangStmt::resolve( Compiler *pd ) const
 {
 	switch ( type ) {
-		case PrintType: 
-		case PrintXMLACType:
-		case PrintXMLType:
-		case PrintStreamType:
-		case PrintDumpType: {
-			/* Push the args backwards. */
-			for ( CallArgVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
-				(*pex)->expr->resolve( pd );
-			break;
-		}
-		case PrintAccum: {
-			consItemList->resolve( pd );
-			break;
-		}
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
 			expr->resolve( pd );
