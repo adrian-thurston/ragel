@@ -2324,11 +2324,27 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WC\n" );
 
 			tree_t *input = vm_pop_tree();
-			parser_t *parser = vm_pop_parser();
+			stream_t *stream = vm_pop_stream();
 
-			stream_append_tree( prg, sp, parser->input, input );
+			if ( stream->id == prg->rtd->struct_stream_id ) {
+				struct stream_impl *si = stream_to_impl( stream );
 
-			vm_push_parser( parser );
+				if ( si->file != 0 )
+					colm_print_tree_file( prg, sp, si, input, false );
+				else if ( si->collect != 0 )
+					colm_print_tree_collect( prg, sp, si->collect, input, false );
+
+				vm_push_stream( stream );
+
+				instr += 6;
+			}
+			else {
+				parser_t *parser = (parser_t*)stream;
+
+				stream_append_tree( prg, sp, parser->input, input );
+				vm_push_parser( parser );
+			}
+
 			colm_tree_downref( prg, sp, input );
 			break;
 		}
@@ -2337,18 +2353,34 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WV\n" );
 
 			tree_t *input = vm_pop_tree();
-			parser_t *parser = vm_pop_parser();
+			stream_t *stream = vm_pop_stream();
 
-			word_t len = stream_append_tree( prg, sp, parser->input, input );
+			if ( stream->id == prg->rtd->struct_stream_id ) {
+				struct stream_impl *si = stream_to_impl( stream );
 
-			vm_push_parser( parser );
+				if ( si->file != 0 )
+					colm_print_tree_file( prg, sp, si, input, false );
+				else if ( si->collect != 0 )
+					colm_print_tree_collect( prg, sp, si->collect, input, false );
 
-			rcode_unit_start( exec );
-			rcode_code( exec, IN_PARSE_APPEND_BKT );
-			rcode_word( exec, (word_t) parser );
-			rcode_word( exec, (word_t) input );
-			rcode_word( exec, (word_t) len );
-			rcode_unit_term( exec );
+				vm_push_stream( stream );
+
+				instr += 6;
+			}
+			else {
+				parser_t *parser = (parser_t*)stream;
+
+				word_t len = stream_append_tree( prg, sp, parser->input, input );
+
+				vm_push_parser( parser );
+
+				rcode_unit_start( exec );
+				rcode_code( exec, IN_PARSE_APPEND_BKT );
+				rcode_word( exec, (word_t) parser );
+				rcode_word( exec, (word_t) input );
+				rcode_word( exec, (word_t) len );
+				rcode_unit_term( exec );
+			}
 			break;
 		}
 
