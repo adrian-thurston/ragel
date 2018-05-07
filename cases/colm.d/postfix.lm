@@ -1,0 +1,24 @@
+
+lex
+	ignore / ' ' /
+	token line /[^ \n] [^\n]* '\n'/
+end
+
+def g
+	I: int
+	[g line]
+|	[]
+
+new Output: parser<g>()
+
+send Output " hello friend
+
+G: g = Output->finish()
+G.I = 1
+
+send stdout [ postfix( G ) ]
+
+##### EXP #####
+r g 21 1 0
+t line 5 1 2 1 hello\20friend\0a
+r g 21 0 2
