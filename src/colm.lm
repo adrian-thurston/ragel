@@ -8,9 +8,6 @@ lex
 	token IGNORE / 'ignore' /
 	token PRINT / 'print' /
 	token PRINTS / 'prints' /
-	token PRINT_XML / 'print_xml' /
-	token PRINT_XML_AC / 'print_xml_ac' /
-	token PRINT_DUMP / 'print_dump' /
 	token PARSE / 'parse' /
 	token REDUCE / 'reduce' /
 	token READ_REDUCE /'read_reduce'/
@@ -580,10 +577,7 @@ def var_def
 
 def print_stmt
 	[PRINT POPEN call_arg_list PCLOSE] :Tree
-|	[PRINTS POPEN call_arg_list PCLOSE] :PrintStream
-|	[PRINT_XML POPEN call_arg_list PCLOSE] :Xml
-|	[PRINT_XML_AC POPEN call_arg_list PCLOSE] :XmlAc
-|	[PRINT_DUMP POPEN call_arg_list PCLOSE] :Dump
+|	[PRINTS POPEN var_ref COMMA call_arg_list PCLOSE] :PrintStream
 |	[PRINT accumulate] :Accum
 
 def expr_stmt

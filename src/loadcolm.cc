@@ -291,9 +291,9 @@ struct LoadColm
 		case statement::BareSend: {
 			NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
 			QualItemVect *qualItemVect = new QualItemVect;
-			String id = "Output";
+
 			LangVarRef *varRef = LangVarRef::cons( InputLoc(),
-					curNspace(), curStruct(), curScope(), nspaceQual, qualItemVect, id );
+					curNspace(), curStruct(), curScope(), nspaceQual, qualItemVect, String("Output") );
 
 			ConsItemList *list = walkAccumulate( Statement.accumulate() );
 			bool eof = walkOptEos( Statement.opt_eos() );
@@ -1271,39 +1271,79 @@ struct LoadColm
 		return callArgVect;
 	}
 
+	ConsItemList *walkCallArgSeqAccum( call_arg_seq callArgSeq )
+	{
+		ConsItemList *consItemList = new ConsItemList;
+		while ( callArgSeq != 0 ) {
+			code_expr codeExpr = callArgSeq.code_expr();
+
+//			LangExpr *expr = walkCodeExpr( codeExpr );
+//			callArgVect->append( new CallArg(expr) );
+
+			bool trim = false; //walkTrim( consEl.opt_no_trim() );
+			LangExpr *consExpr = walkCodeExpr( codeExpr );
+			ConsItem *consItem = ConsItem::cons( consExpr->loc,
+					ConsItem::ExprType, consExpr, trim );
+			consItemList->append( consItem );
+
+			callArgSeq = callArgSeq._call_arg_seq();
+		}
+		return consItemList;
+	}
+
+	ConsItemList *walkCallArgListAccum( call_arg_list callArgList )
+	{
+		return walkCallArgSeqAccum( callArgList.call_arg_seq() );
+	}
+
 	LangStmt *walkPrintStmt( print_stmt &printStmt )
 	{
-		if ( printStmt.prodName() == print_stmt::Accum ) {
-			ConsItemList *list = walkAccumulate( printStmt.accumulate() );
-			return LangStmt::cons( printStmt.PRINT().loc(), LangStmt::PrintAccum, list );
-		}
-		else {
-			CallArgVect *exprVect = walkCallArgList( printStmt.call_arg_list() );
+		LangStmt *stmt = 0;
+		switch ( printStmt.prodName() ) {
+		case print_stmt::Accum: {
+			InputLoc loc = printStmt.PRINT().loc();
 
-			LangStmt::Type type = LangStmt::PrintType;
-			switch ( printStmt.prodName() ) {
-			case print_stmt::Tree:
-				type = LangStmt::PrintType;
-				break;
-			case print_stmt::PrintStream:
-				type = LangStmt::PrintStreamType;
-				break;
-			case print_stmt::Xml:
-				type = LangStmt::PrintXMLType;
-				break;
-			case print_stmt::XmlAc:
-				type = LangStmt::PrintXMLACType;
-				break;
-			case print_stmt::Dump:
-				type = LangStmt::PrintDumpType;
-				break;
-			case print_stmt::Accum:
-				/* unreachable (see above) */
-				break;
-			}
-				
-			return LangStmt::cons( printStmt.POPEN().loc(), type, exprVect );
+			NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+			QualItemVect *qualItemVect = new QualItemVect;
+			LangVarRef *varRef = LangVarRef::cons( loc, curNspace(), curStruct(),
+					curScope(), nspaceQual, qualItemVect, String("stdout") );
+
+			ConsItemList *list = walkAccumulate( printStmt.accumulate() );
+
+			bool eof = false; //walkOptEos( StmtOrFactor.opt_eos() );
+			LangExpr *expr = send( loc, varRef, list, eof );
+			stmt = LangStmt::cons( loc, LangStmt::ExprType, expr );
+			break;
 		}
+		case print_stmt::Tree: {
+			InputLoc loc = printStmt.PRINT().loc();
+
+			NamespaceQual *nspaceQual = NamespaceQual::cons( curNspace() );
+			QualItemVect *qualItemVect = new QualItemVect;
+			LangVarRef *varRef = LangVarRef::cons( loc, curNspace(), curStruct(),
+					curScope(), nspaceQual, qualItemVect, String("stdout") );
+
+			ConsItemList *list = walkCallArgListAccum( printStmt.call_arg_list() );
+
+
+			bool eof = false; //walkOptEos( StmtOrFactor.opt_eos() );
+			LangExpr *expr = send( loc, varRef, list, eof );
+			stmt = LangStmt::cons( loc, LangStmt::ExprType, expr );
+			break;
+		}
+		case print_stmt::PrintStream: {
+			LangVarRef *varRef = walkVarRef( printStmt.var_ref() );
+
+			ConsItemList *list = walkCallArgListAccum( printStmt.call_arg_list() );
+
+			InputLoc loc = printStmt.PRINTS().loc();
+
+			bool eof = false; //walkOptEos( StmtOrFactor.opt_eos() );
+			LangExpr *expr = send( loc, varRef, list, eof );
+			stmt = LangStmt::cons( loc, LangStmt::ExprType, expr );
+			break;
+		}}
+		return stmt;
 	}
 
 	QualItemVect *walkQual( qual &Qual )

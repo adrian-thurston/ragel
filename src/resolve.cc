@@ -560,6 +560,10 @@ void LangTerm::resolve( Compiler *pd )
 			break;
 
 		case SendType:
+//			for ( CallArgVect::Iter pex = exprPtrVect->last(); pex.gtb(); pex-- )
+//				(*pex)->expr->resolve( pd );
+			parserText->list->resolve( pd );
+			break;
 		case SendTreeType:
 		case EmbedStringType:
 			break;
