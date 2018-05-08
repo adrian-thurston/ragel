@@ -1595,15 +1595,15 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 		if ( isStream ) {
 			if ( pd->revertOn )
-				code.append( IN_PARSE_APPEND_STREAM_WV );
+				code.append( IN_SEND_STREAM_WV );
 			else
-				code.append( IN_PARSE_APPEND_STREAM_WC );
+				code.append( IN_SEND_STREAM_WC );
 		}
 		else {
 			if ( pd->revertOn )
-				code.append( IN_PARSE_APPEND_WV );
+				code.append( IN_SEND_TREE_WV );
 			else
-				code.append( IN_PARSE_APPEND_WC );
+				code.append( IN_SEND_TREE_WC );
 		}
 
 		/* Parse instruction, dependent on whether or not we are producing
@@ -1711,15 +1711,15 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 		if ( isStream ) {
 			if ( pd->revertOn )
-				code.append( IN_PARSE_APPEND_STREAM_WV );
+				code.append( IN_SEND_STREAM_WV );
 			else
-				code.append( IN_PARSE_APPEND_STREAM_WC );
+				code.append( IN_SEND_STREAM_WC );
 		}
 		else {
 			if ( pd->revertOn )
-				code.append( IN_PARSE_APPEND_WV );
+				code.append( IN_SEND_TREE_WV );
 			else
-				code.append( IN_PARSE_APPEND_WC );
+				code.append( IN_SEND_TREE_WC );
 		}
 
 		parseFrag( pd, code, 0 );

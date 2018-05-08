@@ -2220,8 +2220,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_APPEND_WC: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WC\n" );
+		case IN_SEND_TREE_WC: {
+			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_WC\n" );
 
 			tree_t *input = vm_pop_tree();
 			stream_t *stream = vm_pop_stream();
@@ -2249,8 +2249,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_APPEND_WV: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_WV\n" );
+		case IN_SEND_TREE_WV: {
+			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_WV\n" );
 
 			tree_t *input = vm_pop_tree();
 			stream_t *stream = vm_pop_stream();
@@ -2275,7 +2275,7 @@ again:
 				vm_push_parser( parser );
 
 				rcode_unit_start( exec );
-				rcode_code( exec, IN_PARSE_APPEND_BKT );
+				rcode_code( exec, IN_SEND_TREE_BKT );
 				rcode_word( exec, (word_t) parser );
 				rcode_word( exec, (word_t) input );
 				rcode_word( exec, (word_t) len );
@@ -2284,7 +2284,7 @@ again:
 			break;
 		}
 
-		case IN_PARSE_APPEND_BKT: {
+		case IN_SEND_TREE_BKT: {
 			tree_t *pptr;
 			tree_t *input;
 			word_t len;
@@ -2292,7 +2292,7 @@ again:
 			read_tree( input );
 			read_word( len );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_BKT\n" );
 
 			struct stream_impl *si = stream_to_impl( ((parser_t*)pptr)->input );
 			stream_undo_append( prg, sp, si, input, len );
@@ -2301,8 +2301,8 @@ again:
 			break;
 		}
 
-		case IN_PARSE_APPEND_STREAM_WC: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_WC\n" );
+		case IN_SEND_STREAM_WC: {
+			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_WC\n" );
 
 			tree_t *input = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
@@ -2312,8 +2312,8 @@ again:
 			stream_append_stream( prg, sp, parser->input, input );
 			break;
 		}
-		case IN_PARSE_APPEND_STREAM_WV: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_WV\n" );
+		case IN_SEND_STREAM_WV: {
+			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_WV\n" );
 
 			tree_t *input = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
@@ -2323,7 +2323,7 @@ again:
 			vm_push_parser( parser );
 
 			rcode_unit_start( exec );
-			rcode_code( exec, IN_PARSE_APPEND_STREAM_BKT );
+			rcode_code( exec, IN_SEND_STREAM_BKT );
 			rcode_word( exec, (word_t) parser );
 			rcode_word( exec, (word_t) input );
 			rcode_word( exec, (word_t) len );
@@ -2331,7 +2331,7 @@ again:
 			break;
 		}
 
-		case IN_PARSE_APPEND_STREAM_BKT: {
+		case IN_SEND_STREAM_BKT: {
 			tree_t *pptr;
 			tree_t *input;
 			word_t len;
@@ -2339,7 +2339,7 @@ again:
 			read_tree( input );
 			read_word( len );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_BKT\n" );
 
 			struct stream_impl *si = stream_to_impl( ((parser_t*)pptr)->input );
 			stream_undo_append_stream( prg, sp, si, input, len );
@@ -4663,24 +4663,24 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PCR_END_DECK\n" );
 			return;
 		}
-		case IN_PARSE_APPEND_BKT: {
+		case IN_SEND_TREE_BKT: {
 			tree_t *input;
 
 			consume_word(); //( parser );
 			read_tree( input );
 			consume_word(); //( len );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_BKT\n" ); 
+			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_BKT\n" ); 
 
 			colm_tree_downref( prg, sp, input );
 			break;
 		}
-		case IN_PARSE_APPEND_STREAM_BKT: {
+		case IN_SEND_STREAM_BKT: {
 			consume_word(); //( sptr );
 			consume_word(); //( input );
 			consume_word(); //( len );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_APPEND_STREAM_BKT\n" );
+			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_BKT\n" );
 			break;
 		}
 
