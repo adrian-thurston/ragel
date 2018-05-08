@@ -334,6 +334,8 @@ typedef unsigned char uchar;
 #define IN_SET_PARSER_MEM_WV     0x00
 #define IN_SET_PARSER_MEM_BKT    0x00
 
+#define IN_GET_STREAM_MEM_R      0xb7
+
 #define IN_GET_PARSER_STREAM     0x6b
 
 #define IN_GET_ERROR             0xcc
@@ -592,7 +594,7 @@ typedef struct colm_execution
 
 	long rcode_unit_len;
 
-	parser_t *parser;
+	stream_t *stream;
 	long steps;
 	long pcr;
 	tree_t *ret_val;

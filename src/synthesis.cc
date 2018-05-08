@@ -1042,13 +1042,15 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	/* The call instruction. */
 	if ( pd->revertOn && revert )  {
 		if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_WV ) {
+			code.append( IN_GET_PARSER_STREAM );
+
 			code.append( IN_PARSE_LOAD );
 			code.append( IN_PARSE_FINISH_WV );
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_EXIT_WV );
 
-			code.append( IN_GET_PARSER_MEM_R );
+			code.append( IN_GET_STREAM_MEM_R );
 			code.appendHalf( 0 );
 		}
 		else {
@@ -1063,13 +1065,15 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	}
 	else {
 		if ( lookup.objMethod->opcodeWC == IN_PARSE_FINISH_WC ) {
+			code.append( IN_GET_PARSER_STREAM );
+
 			code.append( IN_PARSE_LOAD );
 			code.append( IN_PARSE_FINISH_WC );
 			code.appendHalf( 0 );
 			code.append( IN_PCR_CALL );
 			code.append( IN_PARSE_FINISH_EXIT_WC );
 
-			code.append( IN_GET_PARSER_MEM_R );
+			code.append( IN_GET_STREAM_MEM_R );
 			code.appendHalf( 0 );
 		}
 		else {
@@ -1538,8 +1542,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	}
 
 	/*****************************/
+
+	code.append( IN_GET_PARSER_STREAM );
 	
-	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 		bool isStream = false;
 		switch ( item->type ) {
@@ -1638,12 +1643,12 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	/* Pull out the error and save it off. */
 	code.append( IN_DUP_VAL );
-	code.append( IN_GET_PARSER_MEM_R );
+	code.append( IN_GET_STREAM_MEM_R );
 	code.appendHalf( 1 );
 	code.append( IN_SET_ERROR );
 
 	/* Replace the parser with the parsed tree. */
-	code.append( IN_GET_PARSER_MEM_R );
+	code.append( IN_GET_STREAM_MEM_R );
 	code.appendHalf( 0 );
 
 	/* Capture to the local var. */
@@ -1654,7 +1659,11 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const
 {
-	varRef->evaluate( pd, code );
+	UniqueType *varUt = varRef->evaluate( pd, code );
+
+	if ( varUt->parser() ) {
+		code.append( IN_GET_PARSER_STREAM );
+	}
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {

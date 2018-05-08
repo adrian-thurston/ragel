@@ -180,6 +180,7 @@ struct_t *colm_construct_reducer( program_t *prg, long generic_id, int reducer_i
 
 	parser_t *parser = colm_parser_new( prg, generic_info, reducer_id );
 	parser->input = colm_stream_new( prg );
+	parser->input->parser = parser;
 	new_generic = (struct_t*) parser;
 
 	return new_generic;
