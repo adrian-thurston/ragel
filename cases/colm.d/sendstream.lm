@@ -1,0 +1,29 @@
+
+lex
+	ignore / ' ' /
+	token line /[^ \n] [^\n]* '\n'/
+end
+
+def g
+	I: int
+	[g line]
+|	[]
+
+new Parser: parser<g>()
+
+Stream: stream = Parser->gets()
+
+I: int = 2
+while ( I > 0 ) {
+	send Stream "  hello friend
+	Stream = stdout
+	I = I - 1
+}
+
+G: g = Parser->finish()
+G.I = 1
+
+send stdout [G]
+##### EXP #####
+  hello friend
+  hello friend
