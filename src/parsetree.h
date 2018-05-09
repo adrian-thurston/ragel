@@ -2866,6 +2866,7 @@ struct LangVarRef
 	void popRefQuals( Compiler *pd, CodeVect &code, 
 			VarRefLookup &lookup, CallArgVect *args, bool temps ) const;
 
+	bool isFinishCall( VarRefLookup &lookup ) const;
 
 	InputLoc loc;
 	Namespace *nspace;
@@ -3130,7 +3131,10 @@ struct LangTerm
 	void evaluateCapture( Compiler *pd, CodeVect &code, bool isTree ) const;
 	UniqueType *evaluateNew( Compiler *pd, CodeVect &code ) const;
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
-	void parseFrag( Compiler *pd, CodeVect &code, int stopId ) const;
+
+	static void parseFrag( Compiler *pd, CodeVect &code, int stopId );
+	static void parseFinish( Compiler *pd, CodeVect &code, int stopId, bool revert );
+
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const;
 	UniqueType *evaluateReadReduce( Compiler *pd, CodeVect &code ) const;
 	void evaluateSendStream( Compiler *pd, CodeVect &code ) const;

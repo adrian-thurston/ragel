@@ -1023,6 +1023,16 @@ void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup,
 	}
 }
 
+bool LangVarRef::isFinishCall( VarRefLookup &lookup ) const
+{
+	if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_WV ||
+			lookup.objMethod->opcodeWC == IN_PARSE_FINISH_WC )
+	{
+		return true;
+	}
+	return false;
+}
+
 void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const
 {
 	/* This is for writing if it is a non-const builtin. */
@@ -1039,21 +1049,16 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	bool revert = lookup.lastPtrInQual >= 0 || !isLocalRef() || isInbuiltObject();
 	bool unwind = false;
 	
-	/* The call instruction. */
-	if ( pd->revertOn && revert )  {
-		if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_WV ) {
-			code.append( IN_GET_PARSER_STREAM );
+	if ( isFinishCall( lookup ) ) {
+		code.append( IN_GET_PARSER_STREAM );
 
-			code.append( IN_PARSE_LOAD );
-			code.append( IN_PARSE_FINISH_WV );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FINISH_EXIT_WV );
+		LangTerm::parseFinish( pd, code, 0, revert );
 
-			code.append( IN_GET_STREAM_MEM_R );
-			code.appendHalf( 0 );
-		}
-		else {
+		code.append( IN_GET_STREAM_MEM_R );
+		code.appendHalf( 0 );
+	}
+	else {
+		if ( pd->revertOn && revert )  {
 			if ( lookup.objMethod->opcodeWV == IN_CALL_WV ||
 					lookup.objMethod->opcodeWC == IN_EXIT )
 				unwind = true;
@@ -1061,20 +1066,6 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 			if ( lookup.objMethod->useFnInstr )
 				code.append( IN_FN );
 			code.append( lookup.objMethod->opcodeWV );
-		}
-	}
-	else {
-		if ( lookup.objMethod->opcodeWC == IN_PARSE_FINISH_WC ) {
-			code.append( IN_GET_PARSER_STREAM );
-
-			code.append( IN_PARSE_LOAD );
-			code.append( IN_PARSE_FINISH_WC );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FINISH_EXIT_WC );
-
-			code.append( IN_GET_STREAM_MEM_R );
-			code.appendHalf( 0 );
 		}
 		else {
 			if ( lookup.objMethod->opcodeWC == IN_CALL_WC ||
@@ -1431,7 +1422,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 }
 
 
-void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
+void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId )
 {
 	/* Parse instruction, dependent on whether or not we are producing
 	 * revert or commit code. */
@@ -1448,6 +1439,24 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId ) const
 		code.appendHalf( stopId );
 		code.append( IN_PCR_CALL );
 		code.append( IN_PARSE_FRAG_EXIT_WC );
+	}
+}
+
+void LangTerm::parseFinish( Compiler *pd, CodeVect &code, int stopId, bool revert )
+{
+	if ( pd->revertOn && revert ) {
+		code.append( IN_PARSE_LOAD );
+		code.append( IN_PARSE_FINISH_WV );
+		code.appendHalf( stopId );
+		code.append( IN_PCR_CALL );
+		code.append( IN_PARSE_FINISH_EXIT_WV );
+	}
+	else {
+		code.append( IN_PARSE_LOAD );
+		code.append( IN_PARSE_FINISH_WC );
+		code.appendHalf( stopId );
+		code.append( IN_PCR_CALL );
+		code.append( IN_PARSE_FINISH_EXIT_WC );
 	}
 }
 
@@ -1620,26 +1629,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 * Finish operation
 	 */
 
-	/* Parse instruction, dependent on whether or not we are producing revert
-	 * or commit code. */
-	if ( pd->revertOn ) {
-		/* Finish immediately. */
-		code.append( IN_PARSE_LOAD );
-		code.append( IN_PARSE_FINISH_WV );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_EXIT_WV );
-	}
-	else {
-		/* Finish immediately. */
-		code.append( IN_PARSE_LOAD );
-		code.append( IN_PARSE_FINISH_WC );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_EXIT_WC );
-	}
-
-	/* Parser is on the top of the stack. */
+	parseFinish( pd, code, stopId, true );
 
 	/* Pull out the error and save it off. */
 	code.append( IN_DUP_VAL );
@@ -1734,22 +1724,8 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 		parseFrag( pd, code, 0 );
 	}
 
-	if ( eof ) { 
-		if ( pd->revertOn ) {
-			code.append( IN_PARSE_LOAD );
-			code.append( IN_PARSE_FINISH_WV );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FINISH_EXIT_WV );
-		}
-		else {
-			code.append( IN_PARSE_LOAD );
-			code.append( IN_PARSE_FINISH_WC );
-			code.appendHalf( 0 );
-			code.append( IN_PCR_CALL );
-			code.append( IN_PARSE_FINISH_EXIT_WC );
-		}
-	}
+	if ( eof )
+		parseFinish( pd, code, 0, true );
 }
 
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
