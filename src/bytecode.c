@@ -2236,7 +2236,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += 6;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2265,7 +2265,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += 6;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2379,19 +2379,30 @@ again:
 			break;
 		}
 
+		/* stream: push value and stash current on IN_PCR_CALL. The
+		 *   instructions exectued by a call need access to the stream the
+		 *   parser was called with. We need to preserver the stream for the
+		 *   caller, so we push first set it to the current stream.
+		 * pcr: push value and init on PCR call. Need to preserve value
+		 *   between pars machinery invocations. Start fresh with a private
+		 *   value on a CALL.
+		 * steps:
+		 *   Init from the PDA run when we start to parse. Need to preserve the
+		 *   starting steps value from the start of parsing to the moment we
+		 *   write the backtrack instruction. Start fresh with a private value
+		 *   on a PCR_CALL by pushing and initializing. */
+
 		case IN_PARSE_LOAD: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
 
 			stream_t *stream = vm_pop_stream();
 			struct pda_run *pda_run = stream->parser->pda_run;
-			long steps = pda_run->steps;
+			exec->steps = pda_run->steps;
 
 			vm_push_stream( exec->stream );
 			vm_push_type( long, exec->pcr );
-			vm_push_type( long, exec->steps );
 
 			exec->stream = stream;
-			exec->steps = steps;
 			exec->pcr = PCR_START;
 			break;
 		}
@@ -2409,7 +2420,6 @@ again:
 
 			vm_push_stream( exec->stream );
 			vm_push_value( exec->pcr );
-			vm_push_value( exec->steps );
 
 			exec->stream = stream;
 			exec->steps = steps;
@@ -2426,11 +2436,12 @@ again:
 				frame_size = fi->frame_size;
 			}
 
-			vm_contiguous( 4 + frame_size );
+			vm_contiguous( 5 + frame_size );
 
 			vm_push_type( tree_t**, exec->frame_ptr );
 			vm_push_type( tree_t**, exec->iframe_ptr );
 			vm_push_type( long, exec->frame_id );
+			vm_push_type( long, exec->steps );
 
 			/* Return location one instruction back. Depends on the size of of
 			 * the frag/finish. */
@@ -2440,6 +2451,7 @@ again:
 			exec->frame_ptr = 0;
 			exec->iframe_ptr = 0;
 			exec->frame_id = 0;
+			exec->steps = 0;
 
 			instr = exec->stream->parser->pda_run->code;
 
@@ -2473,6 +2485,7 @@ again:
 			}
 
 			instr = vm_pop_type(code_t*);
+			exec->steps =      vm_pop_type(long);
 			exec->frame_id =   vm_pop_type(long);
 			exec->iframe_ptr = vm_pop_type(tree_t**);
 			exec->frame_ptr =  vm_pop_type(tree_t**);
@@ -2511,7 +2524,6 @@ again:
 
 			stream_t *stream = exec->stream;
 
-			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
 			exec->stream = vm_pop_stream();
 
@@ -2543,9 +2555,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WV \n" );
 
 			stream_t *stream = exec->stream;
-			long steps = exec->steps;
 
-			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
 			exec->stream = vm_pop_stream();
 
@@ -2553,11 +2563,13 @@ again:
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
-			rcode_word( exec, (word_t) stream );
-			rcode_word( exec, (word_t) PCR_START );
-			rcode_word( exec, steps );
+			rcode_word( exec, (word_t)stream );
+			rcode_word( exec, (word_t)PCR_START );
+			rcode_word( exec, (word_t)exec->steps );
+
 			rcode_code( exec, IN_PARSE_FRAG_BKT );
 			rcode_half( exec, 0 );
+
 			rcode_code( exec, IN_PCR_CALL );
 			rcode_code( exec, IN_PARSE_FRAG_EXIT_BKT );
 			rcode_unit_term( exec );
@@ -2584,7 +2596,6 @@ again:
 		case IN_PARSE_FRAG_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
 
-			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
 			exec->stream = vm_pop_stream();
 
@@ -2616,7 +2627,6 @@ again:
 
 			stream_t *stream = exec->stream;
 
-			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
 			exec->stream = vm_pop_stream();
 
@@ -2650,21 +2660,22 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WV\n" );
 
 			stream_t *stream = exec->stream;
-			long steps = exec->steps;
 
-			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
 			exec->stream = vm_pop_stream();
 
 			vm_push_stream( stream );
 
 			rcode_unit_start( exec );
+
 			rcode_code( exec, IN_PARSE_INIT_BKT );
 			rcode_word( exec, (word_t)stream );
 			rcode_word( exec, (word_t)PCR_START );
-			rcode_word( exec, steps );
+			rcode_word( exec, (word_t)exec->steps );
+
 			rcode_code( exec, IN_PARSE_FINISH_BKT );
 			rcode_half( exec, 0 );
+
 			rcode_code( exec, IN_PCR_CALL );
 			rcode_code( exec, IN_PARSE_FINISH_EXIT_BKT );
 			rcode_unit_term( exec );
@@ -2694,7 +2705,6 @@ again:
 
 			stream_t *stream = exec->stream;
 
-			exec->steps = vm_pop_type(long);
 			exec->pcr = vm_pop_type(long);
 			exec->stream = vm_pop_stream();
 
