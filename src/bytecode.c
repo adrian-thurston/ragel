@@ -2379,13 +2379,14 @@ again:
 			break;
 		}
 
-		/* stream: push value and stash current on IN_PCR_CALL. The
-		 *   instructions exectued by a call need access to the stream the
-		 *   parser was called with. We need to preserver the stream for the
-		 *   caller, so we push first set it to the current stream.
-		 * pcr: push value and init on PCR call. Need to preserve value
-		 *   between pars machinery invocations. Start fresh with a private
-		 *   value on a CALL.
+		/* stream:
+		 *   Push value and stash current on IN_PCR_CALL. The instructions
+		 *   exectued by a call need access to the stream the parser was called
+		 *   with. We need to preserver the stream for the caller, so we push
+		 *   first set it to the current stream.
+		 * pcr:
+		 *   Need to preserve the pcr value between pda run invocations. Push
+		 *   current pcr value and start fresh with a new value on PCR_CALL.
 		 * steps:
 		 *   Init from the PDA run when we start to parse. Need to preserve the
 		 *   starting steps value from the start of parsing to the moment we
@@ -2396,13 +2397,9 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
 
 			stream_t *stream = vm_pop_stream();
-			struct pda_run *pda_run = stream->parser->pda_run;
-			exec->steps = pda_run->steps;
+			vm_push_stream( stream );
 
-			vm_push_stream( exec->stream );
-			vm_push_type( long, exec->pcr );
-
-			exec->stream = stream;
+			exec->steps = stream->parser->pda_run->steps;
 			exec->pcr = PCR_START;
 			break;
 		}
@@ -2411,37 +2408,38 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
 			stream_t *stream;
-			word_t pcr;
 			word_t steps;
 
 			read_stream( stream );
-			read_word( pcr );
 			read_word( steps );
 
-			vm_push_stream( exec->stream );
-			vm_push_value( exec->pcr );
+			vm_push_stream( stream );
 
-			exec->stream = stream;
 			exec->steps = steps;
-			exec->pcr = pcr;
+			exec->pcr = PCR_START;
 			break;
 		}
 
 		case IN_PCR_CALL: {
 			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			int frame_size = 0;
-			if ( exec->stream->parser->pda_run->frame_id >= 0 )  {
-				struct frame_info *fi = &prg->rtd->frame_info[exec->stream->parser->pda_run->frame_id];
+			if ( stream->parser->pda_run->frame_id >= 0 )  {
+				struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
 				frame_size = fi->frame_size;
 			}
 
-			vm_contiguous( 5 + frame_size );
+			vm_contiguous( 7 + frame_size );
 
 			vm_push_type( tree_t**, exec->frame_ptr );
 			vm_push_type( tree_t**, exec->iframe_ptr );
 			vm_push_type( long, exec->frame_id );
-			vm_push_type( long, exec->steps );
+			vm_push_type( word_t, exec->steps );
+			vm_push_type( word_t, exec->pcr );
+			vm_push_stream( exec->stream );
 
 			/* Return location one instruction back. Depends on the size of of
 			 * the frag/finish. */
@@ -2452,13 +2450,14 @@ again:
 			exec->iframe_ptr = 0;
 			exec->frame_id = 0;
 			exec->steps = 0;
+			exec->stream = stream;
 
-			instr = exec->stream->parser->pda_run->code;
+			instr = stream->parser->pda_run->code;
 
-			exec->frame_id = exec->stream->parser->pda_run->frame_id;
+			exec->frame_id = stream->parser->pda_run->frame_id;
 
-			if ( exec->stream->parser->pda_run->frame_id >= 0 )  {
-				struct frame_info *fi = &prg->rtd->frame_info[exec->stream->parser->pda_run->frame_id];
+			if ( stream->parser->pda_run->frame_id >= 0 )  {
+				struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
 
 				exec->frame_ptr = vm_ptop();
 				vm_pushn( fi->frame_size );
@@ -2485,7 +2484,9 @@ again:
 			}
 
 			instr = vm_pop_type(code_t*);
-			exec->steps =      vm_pop_type(long);
+			exec->stream =     vm_pop_stream();
+			exec->pcr =        vm_pop_type(word_t);
+			exec->steps =      vm_pop_type(word_t);
 			exec->frame_id =   vm_pop_type(long);
 			exec->iframe_ptr = vm_pop_type(tree_t**);
 			exec->frame_ptr =  vm_pop_type(tree_t**);
@@ -2507,10 +2508,13 @@ again:
 			half_t stop_id;
 			read_half( stop_id );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stop_id );
 
-			exec->pcr = colm_parse_frag( prg, sp, exec->stream->parser->pda_run,
-					exec->stream->parser->input, stop_id, exec->pcr );
+			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
+					stream->parser->input, stop_id, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2522,11 +2526,7 @@ again:
 		case IN_PARSE_FRAG_EXIT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WC\n" );
 
-			stream_t *stream = exec->stream;
-
-			exec->pcr = vm_pop_type(long);
-			exec->stream = vm_pop_stream();
-
+			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
 			if ( prg->induce_exit )
@@ -2539,10 +2539,13 @@ again:
 			half_t stop_id;
 			read_half( stop_id );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stop_id );
 
-			exec->pcr = colm_parse_frag( prg, sp, exec->stream->parser->pda_run,
-					exec->stream->parser->input, stop_id, exec->pcr );
+			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
+					stream->parser->input, stop_id, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2554,17 +2557,12 @@ again:
 		case IN_PARSE_FRAG_EXIT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WV \n" );
 
-			stream_t *stream = exec->stream;
-
-			exec->pcr = vm_pop_type(long);
-			exec->stream = vm_pop_stream();
-
+			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_PARSE_INIT_BKT );
 			rcode_word( exec, (word_t)stream );
-			rcode_word( exec, (word_t)PCR_START );
 			rcode_word( exec, (word_t)exec->steps );
 
 			rcode_code( exec, IN_PARSE_FRAG_BKT );
@@ -2583,10 +2581,13 @@ again:
 			half_t stop_id;
 			read_half( stop_id );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stop_id );
 
-			exec->pcr = colm_parse_undo_frag( prg, sp, exec->stream->parser->pda_run,
-					exec->stream->parser->input, exec->steps, exec->pcr );
+			exec->pcr = colm_parse_undo_frag( prg, sp, stream->parser->pda_run,
+					stream->parser->input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
@@ -2596,9 +2597,7 @@ again:
 		case IN_PARSE_FRAG_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
 
-			exec->pcr = vm_pop_type(long);
-			exec->stream = vm_pop_stream();
-
+			vm_pop_stream();
 			break;
 		}
 
@@ -2606,14 +2605,17 @@ again:
 			half_t stop_id;
 			read_half( stop_id );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stop_id );
 
 			tree_t *result = 0;
 			exec->pcr = colm_parse_finish( &result, prg, sp,
-					exec->stream->parser->pda_run,
-					exec->stream->parser->input, false, exec->pcr );
+					stream->parser->pda_run,
+					stream->parser->input, false, exec->pcr );
 
-			exec->stream->parser->result = result;
+			stream->parser->result = result;
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2625,11 +2627,7 @@ again:
 		case IN_PARSE_FINISH_EXIT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WC\n" );
 
-			stream_t *stream = exec->stream;
-
-			exec->pcr = vm_pop_type(long);
-			exec->stream = vm_pop_stream();
-
+			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
 			if ( prg->induce_exit )
@@ -2642,14 +2640,17 @@ again:
 			half_t stop_id;
 			read_half( stop_id );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stop_id );
 
 			tree_t *result = 0;
 			exec->pcr = colm_parse_finish( &result, prg, sp,
-					exec->stream->parser->pda_run,
-					exec->stream->parser->input, true, exec->pcr );
+					stream->parser->pda_run,
+					stream->parser->input, true, exec->pcr );
 
-			exec->stream->parser->result = result;
+			stream->parser->result = result;
 
 			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
@@ -2659,18 +2660,13 @@ again:
 		case IN_PARSE_FINISH_EXIT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WV\n" );
 
-			stream_t *stream = exec->stream;
-
-			exec->pcr = vm_pop_type(long);
-			exec->stream = vm_pop_stream();
-
+			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
 			rcode_unit_start( exec );
 
 			rcode_code( exec, IN_PARSE_INIT_BKT );
 			rcode_word( exec, (word_t)stream );
-			rcode_word( exec, (word_t)PCR_START );
 			rcode_word( exec, (word_t)exec->steps );
 
 			rcode_code( exec, IN_PARSE_FINISH_BKT );
@@ -2690,10 +2686,13 @@ again:
 			half_t stop_id;
 			read_half( stop_id );
 
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stop_id );
 
-			exec->pcr = colm_parse_undo_frag( prg, sp, exec->stream->parser->pda_run,
-					exec->stream->parser->input, exec->steps, exec->pcr );
+			exec->pcr = colm_parse_undo_frag( prg, sp, stream->parser->pda_run,
+					stream->parser->input, exec->steps, exec->pcr );
 
 			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
@@ -2703,10 +2702,7 @@ again:
 		case IN_PARSE_FINISH_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 
-			stream_t *stream = exec->stream;
-
-			exec->pcr = vm_pop_type(long);
-			exec->stream = vm_pop_stream();
+			stream_t *stream = vm_pop_stream();
 
 			struct stream_impl *si = stream_to_impl( stream->parser->input );
 			si->funcs->unset_eof( si );
@@ -2718,7 +2714,7 @@ again:
 
 			stream_t *stream = vm_pop_stream();
 			tree_t *len = vm_pop_tree();
-			//struct pda_run *pda_run = exec->stream->parser != 0 ? exec->stream->parser->pda_run : 0;
+			//struct pda_run *pda_run = stream->parser != 0 ? stream->parser->pda_run : 0;
 			struct pda_run *pda_run = stream->parser != 0 ? stream->parser->pda_run : 0;
 			tree_t *string = stream_pull_bc( prg, sp, pda_run, stream, len );
 			colm_tree_upref( string );
@@ -2739,7 +2735,7 @@ again:
 
 			stream_t *stream = vm_pop_stream();
 			tree_t *len = vm_pop_tree();
-			//struct pda_run *pda_run = exec->stream->parser != 0 ? exec->stream->parser->pda_run : 0;
+			//struct pda_run *pda_run = stream->parser != 0 ? stream->parser->pda_run : 0;
 			struct pda_run *pda_run = stream->parser != 0 ? stream->parser->pda_run : 0;
 			tree_t *string = stream_pull_bc( prg, sp, pda_run, stream, len );
 			colm_tree_upref( string );
@@ -4633,7 +4629,6 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
 			consume_word(); //( parser );
-			consume_word(); //( pcr );
 			consume_word(); //( steps );
 
 			break;
