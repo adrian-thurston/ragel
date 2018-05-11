@@ -1052,7 +1052,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	if ( isFinishCall( lookup ) ) {
 		code.append( IN_GET_PARSER_STREAM );
 
-		LangTerm::parseFinish( pd, code, 0, revert );
+		LangTerm::parseFinish( pd, code, 0 );
 
 		code.append( IN_GET_STREAM_MEM_R );
 		code.appendHalf( 0 );
@@ -1442,9 +1442,9 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId )
 	}
 }
 
-void LangTerm::parseFinish( Compiler *pd, CodeVect &code, int stopId, bool revert )
+void LangTerm::parseFinish( Compiler *pd, CodeVect &code, int stopId )
 {
-	if ( pd->revertOn && revert ) {
+	if ( pd->revertOn ) {
 		code.append( IN_PARSE_LOAD );
 		code.append( IN_PARSE_FINISH_WV );
 		code.appendHalf( stopId );
@@ -1629,7 +1629,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 * Finish operation
 	 */
 
-	parseFinish( pd, code, stopId, true );
+	parseFinish( pd, code, stopId );
 
 	/* Pull out the error and save it off. */
 	code.append( IN_DUP_VAL );
@@ -1725,7 +1725,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 	}
 
 	if ( eof )
-		parseFinish( pd, code, 0, true );
+		parseFinish( pd, code, 0 );
 }
 
 UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
