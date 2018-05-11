@@ -2507,10 +2507,7 @@ again:
 			exec->iframe_ptr = vm_pop_type(tree_t**);
 			exec->frame_ptr =  vm_pop_type(tree_t**);
 
-			if ( instr == 0 ) {
-				flush_streams( prg );
-				goto out;
-			}
+			assert( instr != 0 );
 			break;
 		}
 
