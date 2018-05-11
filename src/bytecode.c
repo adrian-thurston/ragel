@@ -742,6 +742,8 @@ again:
 		case IN_LOAD_GLOBAL_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_WV\n" );
 
+			assert( exec->WV );
+
 			vm_push_struct( prg->global );
 
 			/* Set up the reverse instruction. */
@@ -751,6 +753,8 @@ again:
 		}
 		case IN_LOAD_GLOBAL_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_GLOBAL_WC\n" );
+
+			assert( !exec->WV );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
@@ -774,6 +778,8 @@ again:
 		case IN_LOAD_INPUT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_WV\n" );
 
+			assert( exec->WV );
+
 			assert( exec->stream->parser != 0 );
 			vm_push_stream( exec->stream->parser->input );
 
@@ -785,6 +791,8 @@ again:
 		}
 		case IN_LOAD_INPUT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_WC\n" );
+
+			assert( !exec->WV );
 
 			assert( exec->stream->parser != 0 );
 			vm_push_stream( exec->stream->parser->input );
@@ -810,6 +818,8 @@ again:
 		case IN_LOAD_CONTEXT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WV\n" );
 
+			assert( exec->WV );
+
 			vm_push_type( struct_t *, exec->stream->parser->pda_run->context );
 
 			/* Set up the reverse instruction. */
@@ -819,6 +829,8 @@ again:
 		}
 		case IN_LOAD_CONTEXT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WC\n" );
+
+			assert( !exec->WV );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
@@ -2432,7 +2444,7 @@ again:
 				frame_size = fi->frame_size;
 			}
 
-			vm_contiguous( 7 + frame_size );
+			vm_contiguous( 8 + frame_size );
 
 			vm_push_type( tree_t**, exec->frame_ptr );
 			vm_push_type( tree_t**, exec->iframe_ptr );
@@ -2440,6 +2452,7 @@ again:
 			vm_push_type( word_t, exec->steps );
 			vm_push_type( word_t, exec->pcr );
 			vm_push_stream( exec->stream );
+			vm_push_type( word_t, exec->WV );
 
 			/* Return location one instruction back. Depends on the size of of
 			 * the frag/finish. */
@@ -2453,6 +2466,7 @@ again:
 			exec->stream = stream;
 
 			instr = stream->parser->pda_run->code;
+			exec->WV = 1;
 
 			exec->frame_id = stream->parser->pda_run->frame_id;
 
@@ -2484,6 +2498,8 @@ again:
 			}
 
 			instr = vm_pop_type(code_t*);
+
+			exec->WV =         vm_pop_type(word_t);
 			exec->stream =     vm_pop_stream();
 			exec->pcr =        vm_pop_type(word_t);
 			exec->steps =      vm_pop_type(word_t);
@@ -2512,6 +2528,7 @@ again:
 			vm_push_stream( stream );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stop_id );
+			assert( !exec->WV );
 
 			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
 					stream->parser->input, stop_id, exec->pcr );
@@ -2525,6 +2542,7 @@ again:
 
 		case IN_PARSE_FRAG_EXIT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WC\n" );
+			assert( !exec->WV );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
@@ -2543,6 +2561,7 @@ again:
 			vm_push_stream( stream );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stop_id );
+			assert( exec->WV );
 
 			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
 					stream->parser->input, stop_id, exec->pcr );
@@ -2556,6 +2575,7 @@ again:
 
 		case IN_PARSE_FRAG_EXIT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WV \n" );
+			assert( exec->WV );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
@@ -2609,6 +2629,7 @@ again:
 			vm_push_stream( stream );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stop_id );
+			assert( !exec->WV );
 
 			tree_t *result = 0;
 			exec->pcr = colm_parse_finish( &result, prg, sp,
@@ -2626,6 +2647,7 @@ again:
 
 		case IN_PARSE_FINISH_EXIT_WC: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WC\n" );
+			assert( !exec->WV );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
@@ -2644,6 +2666,7 @@ again:
 			vm_push_stream( stream );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stop_id );
+			assert( exec->WV );
 
 			tree_t *result = 0;
 			exec->pcr = colm_parse_finish( &result, prg, sp,
@@ -2659,6 +2682,7 @@ again:
 
 		case IN_PARSE_FINISH_EXIT_WV: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WV\n" );
+			assert( exec->WV );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );

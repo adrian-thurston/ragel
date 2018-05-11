@@ -598,6 +598,7 @@ typedef struct colm_execution
 	long steps;
 	long pcr;
 	tree_t *ret_val;
+	char WV;
 } Execution;
 
 struct colm_execution;
