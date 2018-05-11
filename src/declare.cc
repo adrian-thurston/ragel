@@ -1399,10 +1399,10 @@ void Compiler::initListFields( GenericType *gen )
 void Compiler::initParserFunctions( GenericType *gen )
 {
 	initFunction( gen->elUt, gen->objDef, "finish",
-			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
+			IN_PARSE_FINISH_W, IN_PARSE_FINISH_W, true );
 
 	initFunction( gen->elUt, gen->objDef, "eof",
-			IN_PARSE_FINISH_WV, IN_PARSE_FINISH_WC, true );
+			IN_PARSE_FINISH_W, IN_PARSE_FINISH_W, true );
 
 	initFunction( uniqueTypeStream, gen->objDef, "gets",
 			IN_GET_PARSER_STREAM, IN_GET_PARSER_STREAM, true );

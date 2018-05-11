@@ -2517,15 +2517,14 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FRAG_WC: {
+		case IN_PARSE_FRAG_W: {
 			half_t stop_id;
 			read_half( stop_id );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WC %hd\n", stop_id );
-			assert( !exec->WV );
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_W %hd\n", stop_id );
 
 			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
 					stream->parser->input, stop_id, exec->pcr );
@@ -2537,57 +2536,25 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FRAG_EXIT_WC: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WC\n" );
-			assert( !exec->WV );
+		case IN_PARSE_FRAG_EXIT_W: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_W \n" );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
-			if ( prg->induce_exit )
-				goto out;
+			if ( exec->WV ) {
+				rcode_unit_start( exec );
+				rcode_code( exec, IN_PARSE_INIT_BKT );
+				rcode_word( exec, (word_t)stream );
+				rcode_word( exec, (word_t)exec->steps );
 
-			break;
-		}
+				rcode_code( exec, IN_PARSE_FRAG_BKT );
+				rcode_half( exec, 0 );
 
-		case IN_PARSE_FRAG_WV: {
-			half_t stop_id;
-			read_half( stop_id );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_WV %hd\n", stop_id );
-			assert( exec->WV );
-
-			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
-					stream->parser->input, stop_id, exec->pcr );
-
-			/* If done, jump to the terminating instruction, otherwise fall
-			 * through to call some code, then jump back here. */
-			if ( exec->pcr == PCR_DONE )
-				instr += SIZEOF_CODE;
-			break;
-		}
-
-		case IN_PARSE_FRAG_EXIT_WV: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_WV \n" );
-			assert( exec->WV );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			rcode_unit_start( exec );
-			rcode_code( exec, IN_PARSE_INIT_BKT );
-			rcode_word( exec, (word_t)stream );
-			rcode_word( exec, (word_t)exec->steps );
-
-			rcode_code( exec, IN_PARSE_FRAG_BKT );
-			rcode_half( exec, 0 );
-
-			rcode_code( exec, IN_PCR_CALL );
-			rcode_code( exec, IN_PARSE_FRAG_EXIT_BKT );
-			rcode_unit_term( exec );
+				rcode_code( exec, IN_PCR_CALL );
+				rcode_code( exec, IN_PARSE_FRAG_EXIT_BKT );
+				rcode_unit_term( exec );
+			}
 
 			if ( prg->induce_exit )
 				goto out;
@@ -2618,57 +2585,20 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FINISH_WC: {
+
+		case IN_PARSE_FINISH_W: {
 			half_t stop_id;
 			read_half( stop_id );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WC %hd\n", stop_id );
-			assert( !exec->WV );
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_W %hd\n", stop_id );
 
 			tree_t *result = 0;
 			exec->pcr = colm_parse_finish( &result, prg, sp,
 					stream->parser->pda_run,
-					stream->parser->input, false, exec->pcr );
-
-			stream->parser->result = result;
-
-			/* If done, jump to the terminating instruction, otherwise fall
-			 * through to call some code, then jump back here. */
-			if ( exec->pcr == PCR_DONE )
-				instr += SIZEOF_CODE;
-			break;
-		}
-
-		case IN_PARSE_FINISH_EXIT_WC: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WC\n" );
-			assert( !exec->WV );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			if ( prg->induce_exit )
-				goto out;
-
-			break;
-		}
-
-		case IN_PARSE_FINISH_WV: {
-			half_t stop_id;
-			read_half( stop_id );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_WV %hd\n", stop_id );
-			assert( exec->WV );
-
-			tree_t *result = 0;
-			exec->pcr = colm_parse_finish( &result, prg, sp,
-					stream->parser->pda_run,
-					stream->parser->input, true, exec->pcr );
+					stream->parser->input, exec->WV, exec->pcr );
 
 			stream->parser->result = result;
 
@@ -2677,25 +2607,26 @@ again:
 			break;
 		}
 
-		case IN_PARSE_FINISH_EXIT_WV: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_WV\n" );
-			assert( exec->WV );
+		case IN_PARSE_FINISH_EXIT_W: {
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_W\n" );
 
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
-			rcode_unit_start( exec );
+			if ( exec->WV ) {
+				rcode_unit_start( exec );
 
-			rcode_code( exec, IN_PARSE_INIT_BKT );
-			rcode_word( exec, (word_t)stream );
-			rcode_word( exec, (word_t)exec->steps );
+				rcode_code( exec, IN_PARSE_INIT_BKT );
+				rcode_word( exec, (word_t)stream );
+				rcode_word( exec, (word_t)exec->steps );
 
-			rcode_code( exec, IN_PARSE_FINISH_BKT );
-			rcode_half( exec, 0 );
+				rcode_code( exec, IN_PARSE_FINISH_BKT );
+				rcode_half( exec, 0 );
 
-			rcode_code( exec, IN_PCR_CALL );
-			rcode_code( exec, IN_PARSE_FINISH_EXIT_BKT );
-			rcode_unit_term( exec );
+				rcode_code( exec, IN_PCR_CALL );
+				rcode_code( exec, IN_PARSE_FINISH_EXIT_BKT );
+				rcode_unit_term( exec );
+			}
 
 			if ( prg->induce_exit )
 				goto out;

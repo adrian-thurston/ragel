@@ -260,11 +260,11 @@ typedef unsigned char uchar;
 #define IN_PARSE_LOAD            0xa0
 #define IN_PARSE_INIT_BKT        0xa1
 
-#define IN_PARSE_FRAG_WC         0xa2
-#define IN_PARSE_FRAG_EXIT_WC    0xa3
+#define IN_PARSE_FRAG_W          0xa2
+#define IN_PARSE_FRAG_EXIT_W     0xa3
 
-#define IN_PARSE_FRAG_WV         0xa4
-#define IN_PARSE_FRAG_EXIT_WV    0xa5
+//#define IN_PARSE_FRAG_WV         0xa4
+//#define IN_PARSE_FRAG_EXIT_WV    0xa5
 
 #define IN_PARSE_FRAG_BKT        0xa6
 #define IN_PARSE_FRAG_EXIT_BKT   0xa7
@@ -277,11 +277,11 @@ typedef unsigned char uchar;
 #define IN_SEND_STREAM_WV  0x90
 #define IN_SEND_STREAM_BKT 0x1c
 
-#define IN_PARSE_FINISH_WC       0xab
-#define IN_PARSE_FINISH_EXIT_WC  0xac
+#define IN_PARSE_FINISH_W        0xab
+#define IN_PARSE_FINISH_EXIT_W   0xac
 
-#define IN_PARSE_FINISH_WV       0xad
-#define IN_PARSE_FINISH_EXIT_WV  0xae
+//#define IN_PARSE_FINISH_WV       0xad
+//#define IN_PARSE_FINISH_EXIT_WV  0xae
 
 #define IN_PARSE_FINISH_BKT      0xaf
 #define IN_PARSE_FINISH_EXIT_BKT 0xb0

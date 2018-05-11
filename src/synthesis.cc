@@ -1025,8 +1025,7 @@ void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup,
 
 bool LangVarRef::isFinishCall( VarRefLookup &lookup ) const
 {
-	if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_WV ||
-			lookup.objMethod->opcodeWC == IN_PARSE_FINISH_WC )
+	if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_W )
 	{
 		return true;
 	}
@@ -1424,40 +1423,21 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 
 void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId )
 {
-	/* Parse instruction, dependent on whether or not we are producing
-	 * revert or commit code. */
-	if ( pd->revertOn ) {
-		code.append( IN_PARSE_LOAD );
-		code.append( IN_PARSE_FRAG_WV );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FRAG_EXIT_WV );
-	}
-	else {
-		code.append( IN_PARSE_LOAD );
-		code.append( IN_PARSE_FRAG_WC );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FRAG_EXIT_WC );
-	}
+	/* Parse instruction. */
+	code.append( IN_PARSE_LOAD );
+	code.append( IN_PARSE_FRAG_W );
+	code.appendHalf( stopId );
+	code.append( IN_PCR_CALL );
+	code.append( IN_PARSE_FRAG_EXIT_W );
 }
 
 void LangTerm::parseFinish( Compiler *pd, CodeVect &code, int stopId )
 {
-	if ( pd->revertOn ) {
-		code.append( IN_PARSE_LOAD );
-		code.append( IN_PARSE_FINISH_WV );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_EXIT_WV );
-	}
-	else {
-		code.append( IN_PARSE_LOAD );
-		code.append( IN_PARSE_FINISH_WC );
-		code.appendHalf( stopId );
-		code.append( IN_PCR_CALL );
-		code.append( IN_PARSE_FINISH_EXIT_WC );
-	}
+	code.append( IN_PARSE_LOAD );
+	code.append( IN_PARSE_FINISH_W );
+	code.appendHalf( stopId );
+	code.append( IN_PCR_CALL );
+	code.append( IN_PARSE_FINISH_EXIT_W );
 }
 
 UniqueType *LangTerm::evaluateReadReduce( Compiler *pd, CodeVect &code ) const
