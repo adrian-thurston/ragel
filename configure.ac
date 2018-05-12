@@ -31,6 +31,10 @@ AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_SUBST(PUBDATE)
+AC_CHECK_SIZEOF(void *)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_SIZEOF(unsigned long long)
 AC_CONFIG_HEADER([src/config.h src/defs.h])
 AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 

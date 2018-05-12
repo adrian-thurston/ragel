@@ -20,12 +20,21 @@
  * SOFTWARE.
  */
 
-#ifndef _CONFIG_H
-#define _CONFIG_H
+#ifndef _COLM_DEFS_H
+#define _COLM_DEFS_H
 
 /* Configuration */
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG
 
-#endif /* _CONFIG_H */
+/* The size of `unsigned long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG
+
+/* The size of `unsigned long long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG_LONG
+
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
+
+#endif /* _COLM_DEFS_H */

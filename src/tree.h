@@ -31,11 +31,18 @@ extern "C" {
 #include <colm/type.h>
 #include <colm/input.h>
 #include <colm/internal.h>
+#include <colm/defs.h>
 
 #define COLM_INDENT_OFF -1
 
 typedef unsigned char code_t;
-typedef unsigned long word_t;
+#if SIZEOF_UNSIGNED_LONG == SIZEOF_VOID_P
+	typedef unsigned long word_t;
+#elif SIZEOF_UNSIGNED_LONG_LONG == SIZEOF_VOID_P
+	typedef unsigned long long word_t;
+#else
+	#error "The type word_t was not declared"
+#endif
 typedef unsigned long half_t;
 
 struct bindings;

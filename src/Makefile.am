@@ -89,14 +89,14 @@ colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
-gen/parse1.c: bootstrap0
+gen/parse1.c: bootstrap0$(EXEEXT)
 	mkdir -p gen
 	$(builddir)/bootstrap0 -c -o gen/parse1.c -e gen/if1.h -x gen/if1.cc
 
 gen/if1.h: gen/parse1.c
 gen/if1.cc: gen/parse1.c
 
-gen/parse2.c: bootstrap1 colm.lm
+gen/parse2.c: bootstrap1$(EXEEXT) colm.lm
 	mkdir -p gen
 	$(builddir)/bootstrap1 -c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
 
