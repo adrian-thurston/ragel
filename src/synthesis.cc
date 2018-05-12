@@ -1634,6 +1634,11 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 	if ( varUt->parser() ) {
 		code.append( IN_GET_PARSER_STREAM );
 	}
+	else if ( varUt->listOf( pd->uniqueTypeStream ) ) {
+		code.append( IN_GET_VLIST_MEM_R );
+		code.appendHalf( varUt->generic->id );
+		code.appendHalf( 0 );
+	}
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
@@ -1713,6 +1718,8 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	UniqueType *varUt = varRef->lookup( pd );
 
 	if ( varUt == pd->uniqueTypeStream )
+		evaluateSendParser( pd, code, false );
+	else if ( varUt->listOf( pd->uniqueTypeStream ) )
 		evaluateSendParser( pd, code, false );
 	else if ( varUt->parser() )
 		evaluateSendParser( pd, code, true );

@@ -2077,6 +2077,9 @@ struct UniqueType : public AvlTreeEl<UniqueType>
 	bool ptr()
 		{ return typeId == TYPE_STRUCT || typeId == TYPE_GENERIC; }
 
+	bool listOf( UniqueType *ut )
+		{ return typeId == TYPE_GENERIC && generic->typeId == GEN_LIST && generic->valueUt == ut; }
+
 	bool val() {
 		return typeId == TYPE_STRUCT ||
 			typeId == TYPE_GENERIC ||
