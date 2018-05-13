@@ -4587,8 +4587,6 @@ again:
 			break;
 		}
 
-
-
 		/* Halt is a default instruction given by the compiler when it is
 		 * asked to generate and instruction it doesn't have. It is deliberate
 		 * and can represent "not implemented" or "compiler error" because a
