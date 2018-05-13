@@ -293,7 +293,8 @@ struct LoadColm
 			QualItemVect *qualItemVect = new QualItemVect;
 
 			LangVarRef *varRef = LangVarRef::cons( InputLoc(),
-					curNspace(), curStruct(), curScope(), nspaceQual, qualItemVect, String("Output") );
+					curNspace(), curStruct(), curScope(), nspaceQual,
+					qualItemVect, String("stds") );
 
 			ConsItemList *list = walkAccumulate( Statement.accumulate() );
 			bool eof = walkOptEos( Statement.opt_eos() );

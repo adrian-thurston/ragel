@@ -163,6 +163,7 @@ void BaseParser::init()
 
 	/* Internal variables. */
 	addArgvList();
+	addStdsList();
 }
 
 void BaseParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
@@ -446,6 +447,13 @@ void BaseParser::addArgvList()
 	TypeRef *valType = TypeRef::cons( internal, pd->uniqueTypeStr );
 	TypeRef *elType = TypeRef::cons( internal, TypeRef::ListEl, valType );
 	pd->argvTypeRef = TypeRef::cons( internal, TypeRef::List, 0, elType, valType );
+}
+
+void BaseParser::addStdsList()
+{
+	TypeRef *valType = TypeRef::cons( internal, pd->uniqueTypeStream );
+	TypeRef *elType = TypeRef::cons( internal, TypeRef::ListEl, valType );
+	pd->stdsTypeRef = TypeRef::cons( internal, TypeRef::List, 0, elType, valType );
 }
 
 ObjectDef *BaseParser::blockOpen()

@@ -959,6 +959,9 @@ void Compiler::resolvePass()
 	UniqueType *argvUT = argvTypeRef->resolveType( this );
 	argvElSel = argvUT->generic->elUt->structEl;
 
+	UniqueType *stdsUT = stdsTypeRef->resolveType( this );
+	stdsElSel = stdsUT->generic->elUt->structEl;
+
 	resolveReductionActions();
 
 	/* We must do this as the last step in the type resolution process because

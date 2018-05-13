@@ -392,6 +392,7 @@ typedef unsigned char uchar;
 #define IN_LOAD_ARGV             0x07
 #define IN_LOAD_ARG0             0x08
 #define IN_STOP                  0x0a
+#define IN_INIT_STDS             0x3e
 
 #define IN_LIST_PUSH_TAIL_WV     0x11
 #define IN_LIST_PUSH_TAIL_WC     0x12

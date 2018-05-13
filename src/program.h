@@ -71,6 +71,7 @@ struct colm_sections
 	long num_generics;
 
 	long argv_generic_id;
+	long stds_generic_id;
 
 	const char **litdata;
 	long *litlen;
@@ -98,6 +99,7 @@ struct colm_sections
 	long no_token_id;
 	long global_id;
 	long argv_el_id;
+	long stds_el_id;
 	long struct_inbuilt_id;
 	long struct_stream_id;
 

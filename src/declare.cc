@@ -1032,6 +1032,7 @@ void Compiler::declareGlobalFields()
 	addStdin();
 	addStdout();
 	addStderr();
+	addStds();
 	addArgv();
 	addError();
 	addDefineArgs();
@@ -1123,6 +1124,14 @@ void Compiler::addArgv()
 	el->isConst = true;
 	rootNamespace->rootScope->insertField( el->name, el );
 	arg0 = el;
+}
+
+void Compiler::addStds()
+{
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::StructFieldType, stdsTypeRef, "stds" );
+	rootNamespace->rootScope->insertField( el->name, el );
+	stds = el;
 }
 
 void Compiler::addError()

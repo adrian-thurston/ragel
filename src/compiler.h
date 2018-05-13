@@ -803,10 +803,12 @@ struct Compiler
 	void addStdout();
 	void addStderr();
 	void addArgv();
+	void addStds();
 	void addError();
 	void addDefineArgs();
 	int argvOffset();
 	int arg0Offset();
+	int stdsOffset();
 	void makeDefaultIterators();
 	void addLengthField( ObjectDef *objDef, code_t getLength );
 	ObjectDef *findObject( const String &name );
@@ -925,8 +927,10 @@ struct Compiler
 	ObjectDef *globalObjectDef;
 	ObjectField *arg0;
 	ObjectField *argv;
+	ObjectField *stds;
 	StructDef *argvEl;
 	StructEl *argvElSel;
+	StructEl *stdsElSel;
 
 	StructDef *stream;
 	StructEl *streamSel;
@@ -1031,6 +1035,7 @@ struct Compiler
 	long nextMatchEndNum;
 
 	TypeRef *argvTypeRef;
+	TypeRef *stdsTypeRef;
 
 	bool inContiguous;
 	int contiguousOffset;

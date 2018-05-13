@@ -87,6 +87,7 @@ struct BaseParser
 			ProdElList *prodElList, bool commit,
 			CodeBlock *redBlock, LangEl *predOf );
 	void addArgvList();
+	void addStdsList();
 	LexJoin *literalJoin( const InputLoc &loc, const String &data );
 
 	Reduction *createReduction( const InputLoc loc, const String &name );

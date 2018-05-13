@@ -2840,6 +2840,12 @@ int Compiler::argvOffset()
 	return argv->offset;
 }
 
+int Compiler::stdsOffset()
+{
+	globalObjectDef->referenceField( this, stds );
+	return stds->offset;
+}
+
 void Compiler::compileRootBlock( )
 {
 	CodeBlock *block = rootCodeBlock;
@@ -2864,6 +2870,10 @@ void Compiler::compileRootBlock( )
 	code.append( IN_FN );
 	code.append( IN_LOAD_ARGV );
 	code.appendHalf( argvOffset() );
+
+	code.append( IN_FN );
+	code.append( IN_INIT_STDS );
+	code.appendHalf( stdsOffset() );
 
 	block->compile( this, code );
 

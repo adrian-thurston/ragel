@@ -1614,6 +1614,7 @@ void Compiler::makeRuntimeData()
 	}
 
 	runtimeData->argv_generic_id = argvTypeRef->generic->id;
+	runtimeData->stds_generic_id = stdsTypeRef->generic->id;
 
 	/*
 	 * Literals
@@ -1689,6 +1690,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->no_token_id = noTokenLangEl->id;
 	runtimeData->global_id = globalSel->id;
 	runtimeData->argv_el_id = argvElSel->id;
+	runtimeData->stds_el_id = stdsElSel->id;
 	runtimeData->struct_inbuilt_id = structInbuiltId;
 	runtimeData->struct_stream_id = structStreamId;
 

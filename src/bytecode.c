@@ -114,10 +114,22 @@
 
 static void rcode_downref( program_t *prg, tree_t **sp, code_t *instr );
 
-static void open_stdout( program_t *prg )
+static void make_stdin( program_t *prg )
+{
+	if ( prg->stdin_val == 0 )
+		prg->stdin_val = colm_stream_open_fd( prg, "<stdin>", 0 );
+}
+
+static void make_stdout( program_t *prg )
 {
 	if ( prg->stdout_val == 0 )
 		prg->stdout_val = colm_stream_open_fd( prg, "<stdout>", 1 );
+}
+
+static void make_stderr( program_t *prg )
+{
+	if ( prg->stderr_val == 0 )
+		prg->stderr_val = colm_stream_open_fd( prg, "<stderr>", 2 );
 }
 
 static void flush_streams( program_t *prg )
@@ -414,6 +426,22 @@ static list_t *construct_argv( program_t *prg, int argc, const char **argv, cons
 	return list;
 }
 
+
+static list_t *construct_stds( program_t *prg )
+{
+	make_stdout( prg );
+
+	list_t *list = (list_t*)colm_construct_generic( prg, prg->rtd->stds_generic_id );
+
+	struct_t *strct = colm_struct_new_size( prg, 16 );
+	strct->id = prg->rtd->stds_el_id;
+	colm_struct_set_field( strct, stream_t*, 0, prg->stdout_val );
+	list_el_t *list_el = colm_struct_get_addr( strct, list_el_t*, 1 );
+	colm_list_append( list, list_el );
+	
+	return list;
+}
+
 /*
  * Execution environment
  */
@@ -536,7 +564,6 @@ tree_t *colm_run_func( struct colm_program *prg, int frame_id,
 
 	return prg->return_val;
 };
-
 
 int colm_make_reverse_code( struct pda_run *pda_run )
 {
@@ -3683,8 +3710,8 @@ again:
 
 					/* Pop the root object. */
 					vm_pop_tree();
-					if ( prg->stdin_val == 0 )
-						prg->stdin_val = colm_stream_open_fd( prg, "<stdin>", 0 );
+
+					make_stdin( prg );
 
 					vm_push_stream( prg->stdin_val );
 					break;
@@ -3694,7 +3721,7 @@ again:
 
 					/* Pop the root object. */
 					vm_pop_tree();
-					open_stdout( prg );
+					make_stdout( prg );
 
 					vm_push_stream( prg->stdout_val );
 					break;
@@ -3704,8 +3731,8 @@ again:
 
 					/* Pop the root object. */
 					vm_pop_tree();
-					if ( prg->stderr_val == 0 )
-						prg->stderr_val = colm_stream_open_fd( prg, "<stderr>", 2 );
+
+					make_stderr( prg );
 
 					vm_push_stream( prg->stderr_val );
 					break;
@@ -3869,6 +3896,15 @@ again:
 				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
 
 				list_t *list = construct_argv( prg, prg->argc, prg->argv, prg->argl );
+				colm_struct_set_field( prg->global, list_t*, field, list );
+				break;
+			}
+			case IN_INIT_STDS: {
+				half_t field;
+				read_half( field );
+				debug( prg, REALM_BYTECODE, "IN_INIT_STDS %lu\n", field );
+
+				list_t *list = construct_stds( prg );
 				colm_struct_set_field( prg->global, list_t*, field, list );
 				break;
 			}
