@@ -272,6 +272,7 @@ typedef unsigned char uchar;
 #define IN_SEND_TREE_WC       0xa8
 #define IN_SEND_TREE_WV       0xa9
 #define IN_SEND_TREE_BKT      0xaa
+#define IN_SEND_EOF           0x87
 
 #define IN_SEND_STREAM_WC  0x96
 #define IN_SEND_STREAM_WV  0x90

@@ -2385,6 +2385,16 @@ again:
 			break;
 		}
 
+		case IN_SEND_EOF: {
+			debug( prg, REALM_BYTECODE, "IN_SEND_EOF\n" );
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
+			if ( stream->parser == 0 )
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
+			break;
+		}
+
 		case IN_INPUT_CLOSE_WC: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_CLOSE_WC\n" );
 
