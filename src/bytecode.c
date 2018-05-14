@@ -214,6 +214,41 @@ static head_t *tree_to_str_postfix( program_t *prg, tree_t **sp, tree_t *tree, i
 }
 
 
+static word_t stream_append_text( program_t *prg, tree_t **sp, stream_t *dest, tree_t *input )
+{
+	long length = 0;
+	struct stream_impl *impl = stream_to_impl( dest );
+
+	if ( input->id == LEL_ID_STR  ) {
+		/* Collect the tree data. */
+		StrCollect collect;
+		init_str_collect( &collect );
+		colm_print_tree_collect( prg, sp, &collect, input, false );
+
+		/* Load it into the input. */
+		impl->funcs->append_data( impl, collect.data, collect.length );
+		length = collect.length;
+		str_collect_destroy( &collect );
+	}
+	else if ( input->id == LEL_ID_PTR ) {
+		colm_tree_upref( input );
+		impl->funcs->append_stream( impl, input );
+	}
+	else {
+		/* Collect the tree data. */
+		StrCollect collect;
+		init_str_collect( &collect );
+		colm_print_tree_collect( prg, sp, &collect, input, false );
+
+		/* Load it into the input. */
+		impl->funcs->append_data( impl, collect.data, collect.length );
+		length = collect.length;
+		str_collect_destroy( &collect );
+	}
+
+	return length;
+}
+
 static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, tree_t *input )
 {
 	long length = 0;
@@ -260,8 +295,7 @@ static void stream_undo_append( program_t *prg, tree_t **sp,
 	else if ( input->id == LEL_ID_PTR )
 		is->funcs->undo_append_stream( is );
 	else {
-		tree_t *tree = is->funcs->undo_append_tree( is );
-		colm_tree_downref( prg, sp, tree );
+		is->funcs->undo_append_data( is, length );
 	}
 }
 
@@ -2280,7 +2314,7 @@ again:
 			else {
 				parser_t *parser = stream->parser;
 
-				stream_append_tree( prg, sp, parser->input, input );
+				stream_append_text( prg, sp, stream, input );
 				vm_push_stream( stream );
 			}
 
@@ -2309,7 +2343,7 @@ again:
 			else {
 				parser_t *parser = stream->parser;
 
-				word_t len = stream_append_tree( prg, sp, parser->input, input );
+				word_t len = stream_append_text( prg, sp, parser->input, input );
 
 				vm_push_stream( stream );
 

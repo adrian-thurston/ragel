@@ -1691,12 +1691,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
-			if ( strings && ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
-			{
-				/* Convert it to a string. */
-				code.append( IN_TREE_TO_STR );
-			}
 			break;
 		}
 
