@@ -1578,12 +1578,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			if ( ut == pd->uniqueTypeStream )
 				isStream = true;
 
-			if ( !tree && ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
-			{
-				/* Convert it to a string. */
-				code.append( IN_TREE_TO_STR );
-			}
 			break;
 		}}
 
