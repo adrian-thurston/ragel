@@ -263,26 +263,25 @@ typedef unsigned char uchar;
 #define IN_PARSE_FRAG_W          0xa2
 #define IN_PARSE_FRAG_EXIT_W     0xa3
 
-//#define IN_PARSE_FRAG_WV         0xa4
-//#define IN_PARSE_FRAG_EXIT_WV    0xa5
-
 #define IN_PARSE_FRAG_BKT        0xa6
 #define IN_PARSE_FRAG_EXIT_BKT   0xa7
 
 #define IN_SEND_TREE_WC       0xa8
 #define IN_SEND_TREE_WV       0xa9
 #define IN_SEND_TREE_BKT      0xaa
-#define IN_SEND_EOF           0x87
+
+#define IN_SEND_TEXT_WC       0x88
+#define IN_SEND_TEXT_WV       0x89
+#define IN_SEND_TEXT_BKT      0x8a
 
 #define IN_SEND_STREAM_WC  0x96
 #define IN_SEND_STREAM_WV  0x90
 #define IN_SEND_STREAM_BKT 0x1c
 
+#define IN_SEND_EOF           0x87
+
 #define IN_PARSE_FINISH_W        0xab
 #define IN_PARSE_FINISH_EXIT_W   0xac
-
-//#define IN_PARSE_FINISH_WV       0xad
-//#define IN_PARSE_FINISH_EXIT_WV  0xae
 
 #define IN_PARSE_FINISH_BKT      0xaf
 #define IN_PARSE_FINISH_EXIT_BKT 0xb0

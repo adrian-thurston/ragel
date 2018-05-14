@@ -1593,11 +1593,17 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			else
 				code.append( IN_SEND_STREAM_WC );
 		}
-		else {
+		else if ( tree ) {
 			if ( pd->revertOn )
 				code.append( IN_SEND_TREE_WV );
 			else
 				code.append( IN_SEND_TREE_WC );
+		}
+		else {
+			if ( pd->revertOn )
+				code.append( IN_SEND_TEXT_WV );
+			else
+				code.append( IN_SEND_TEXT_WC );
 		}
 
 		/* Parse instruction, dependent on whether or not we are producing
@@ -1700,11 +1706,17 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			else
 				code.append( IN_SEND_STREAM_WC );
 		}
-		else {
+		else if ( !strings ) {
 			if ( pd->revertOn )
 				code.append( IN_SEND_TREE_WV );
 			else
 				code.append( IN_SEND_TREE_WC );
+		}
+		else {
+			if ( pd->revertOn )
+				code.append( IN_SEND_TEXT_WV );
+			else
+				code.append( IN_SEND_TEXT_WC );
 		}
 
 		parseFrag( pd, code, 0 );
