@@ -219,18 +219,7 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, stream_t *dest, t
 	long length = 0;
 	struct stream_impl *impl = stream_to_impl( dest );
 
-	if ( input->id == LEL_ID_STR  ) {
-		/* Collect the tree data. */
-		StrCollect collect;
-		init_str_collect( &collect );
-		colm_print_tree_collect( prg, sp, &collect, input, false );
-
-		/* Load it into the input. */
-		impl->funcs->append_data( impl, collect.data, collect.length );
-		length = collect.length;
-		str_collect_destroy( &collect );
-	}
-	else if ( input->id == LEL_ID_PTR ) {
+	if ( input->id == LEL_ID_PTR ) {
 		colm_tree_upref( input );
 		impl->funcs->append_stream( impl, input );
 	}
