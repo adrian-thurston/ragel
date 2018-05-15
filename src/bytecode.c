@@ -2495,7 +2495,8 @@ again:
 			vm_push_stream( stream );
 
 			si = stream_to_impl( stream );
-			si->funcs->set_eof( si );
+			if ( stream->parser != 0 )
+				si->funcs->set_eof( si );
 
 			if ( exec->WV ) {
 				rcode_unit_start( exec );
@@ -2515,10 +2516,11 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SEND_EOF_BKT\n" );
 
-			struct stream_impl *si = stream_to_impl( stream->parser->input );
-			si->funcs->unset_eof( si );
+			if ( stream->parser != 0 ) {
+				struct stream_impl *si = stream_to_impl( stream );
+				si->funcs->unset_eof( si );
+			}
 			break;
-
 		}
 
 		case IN_INPUT_CLOSE_WC: {
