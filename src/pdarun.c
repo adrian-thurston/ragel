@@ -2238,48 +2238,8 @@ long colm_parse_frag( program_t *prg, tree_t **sp,
 	return PCR_DONE;
 }
 
-long colm_parse_finish( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, stream_t *input, long entry )
-{
-	/* COROUTINE */
-	switch ( entry ) {
-	case PCR_START:
-
-	if ( ! pda_run->parse_error ) {
-		long pcr = colm_parse_loop( prg, sp, pda_run,
-				stream_to_impl( input ), entry );
-
-		while ( pcr != PCR_DONE ) {
-
-			/* COROUTINE */
-			return pcr;
-			case PCR_REDUCTION:
-			case PCR_GENERATION:
-			case PCR_PRE_EOF:
-			case PCR_REVERSE:
-
-			pcr = colm_parse_loop( prg, sp, pda_run,
-					stream_to_impl( input ), entry );
-		}
-	}
-
-	/* COROUTINE */
-	case PCR_DONE:
-	break; }
-
-	return PCR_DONE;
-}
-
-void colm_parse_reduce_commit( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run )
-{
-	/* Flush out anything not committed. */
-	if ( pda_run->reducer )
-		commit_reduce( prg, sp, pda_run );
-}
-
 long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, long steps, long entry )
+		stream_t *input, long entry, long steps )
 {
 	debug( prg, REALM_PARSE,
 			"undo parse frag, target steps: %ld, pdarun steps: %ld\n",
@@ -2323,5 +2283,13 @@ long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	break; }
 
 	return PCR_DONE;
+}
+
+void colm_parse_reduce_commit( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run )
+{
+	/* Flush out anything not committed. */
+	if ( pda_run->reducer )
+		commit_reduce( prg, sp, pda_run );
 }
 

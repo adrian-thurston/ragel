@@ -3145,7 +3145,6 @@ struct LangTerm
 	UniqueType *evaluateConstruct( Compiler *pd, CodeVect &code ) const;
 
 	static void parseFrag( Compiler *pd, CodeVect &code, int stopId );
-	static void parseFinish( Compiler *pd, CodeVect &code, int stopId );
 
 	UniqueType *evaluateParse( Compiler *pd, CodeVect &code, bool tree, bool stop ) const;
 	UniqueType *evaluateReadReduce( Compiler *pd, CodeVect &code ) const;

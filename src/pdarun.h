@@ -460,7 +460,7 @@ long colm_parse_frag( struct colm_program *prg, tree_t **sp,
 long colm_parse_finish( struct colm_program *prg, tree_t **sp,
 		struct pda_run *pda_run, stream_t *input, long entry );
 long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, long steps, long entry );
+		stream_t *input, long entry, long steps );
 
 void commit_clear_kid_list( program_t *prg, tree_t **sp, kid_t *kid );
 void commit_clear_parse_tree( program_t *prg, tree_t **sp,

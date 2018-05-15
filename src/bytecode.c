@@ -2298,7 +2298,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				stream_append_text( prg, sp, stream, input );
@@ -2325,7 +2325,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2377,7 +2377,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2406,7 +2406,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2506,7 +2506,7 @@ again:
 			}
 
 			if ( stream->parser == 0 )
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			break;
 		}
 
@@ -2621,7 +2621,7 @@ again:
 
 			/* Return location one instruction back. Depends on the size of of
 			 * the frag/finish. */
-			code_t *return_to = instr - ( SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF );
+			code_t *return_to = instr - ( SIZEOF_CODE + SIZEOF_CODE );
 			vm_push_type( code_t*, return_to );
 
 			exec->frame_ptr = 0;
@@ -2683,13 +2683,10 @@ again:
 		}
 
 		case IN_PARSE_FRAG_W: {
-			half_t stop_id;
-			read_half( stop_id );
-
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_W %hd\n", stop_id );
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_W\n" );
 
 			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
 					stream->parser->input, exec->pcr );
@@ -2713,10 +2710,7 @@ again:
 				rcode_code( exec, IN_PARSE_INIT_BKT );
 				rcode_word( exec, (word_t)stream );
 				rcode_word( exec, (word_t)exec->steps );
-
 				rcode_code( exec, IN_PARSE_FRAG_BKT );
-				rcode_half( exec, 0 );
-
 				rcode_code( exec, IN_PCR_CALL );
 				rcode_code( exec, IN_PARSE_FRAG_EXIT_BKT );
 				rcode_unit_term( exec );
@@ -2729,16 +2723,13 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT: {
-			half_t stop_id;
-			read_half( stop_id );
-
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
 
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT %hd\n", stop_id );
+			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 
 			exec->pcr = colm_parse_undo_frag( prg, sp, stream->parser->pda_run,
-					stream->parser->input, exec->steps, exec->pcr );
+					stream->parser->input, exec->pcr, exec->steps );
 
 			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;
@@ -4723,8 +4714,6 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT: {
-			half_t stop_id;
-			read_half( stop_id );
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 			break;
 		}
