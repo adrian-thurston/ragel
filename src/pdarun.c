@@ -2241,7 +2241,8 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 }
 
 long colm_parse_finish( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, stream_t *input , int revert_on, long entry )
+		struct pda_run *pda_run, stream_t *input,
+		int revert_on, long entry )
 {
 	struct stream_impl *si;
 
@@ -2250,7 +2251,6 @@ long colm_parse_finish( program_t *prg, tree_t **sp,
 	case PCR_START:
 
 	si = stream_to_impl( input );
-	si->funcs->set_eof( si );
 
 	if ( ! pda_run->parse_error ) {
 		si = stream_to_impl( input );
@@ -2269,12 +2269,6 @@ long colm_parse_finish( program_t *prg, tree_t **sp,
 			pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
 		}
 	}
-
-	/* FIXME: need something here to check that we are not stopped waiting for
-	 * more data when we are actually expected to finish. This check doesn't
-	 * work (at time of writing). */
-	//assert( (pdaRun->stopTarget > 0 && pdaRun->stopParsing) || 
-	//		streamToImpl( input )->eofSent );
 
 	/* Flush out anything not committed. */
 	if ( pda_run->reducer )

@@ -1050,7 +1050,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	
 	if ( isFinishCall( lookup ) ) {
 		code.append( IN_GET_PARSER_STREAM );
-		code.append( IN_SEND_EOF );
+		code.append( IN_SEND_EOF_W );
 
 		LangTerm::parseFinish( pd, code, 0 );
 
@@ -1610,7 +1610,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 */
 
 	if ( !stop ) {
-		code.append( IN_SEND_EOF );
+		code.append( IN_SEND_EOF_W );
 		parseFinish( pd, code, stopId );
 	}
 
@@ -1713,7 +1713,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 	}
 
 	if ( eof ) {
-		code.append( IN_SEND_EOF );
+		code.append( IN_SEND_EOF_W );
 		parseFinish( pd, code, 0 );
 	}
 }

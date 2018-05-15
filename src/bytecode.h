@@ -278,7 +278,8 @@ typedef unsigned char uchar;
 #define IN_SEND_STREAM_WV  0x90
 #define IN_SEND_STREAM_BKT 0x1c
 
-#define IN_SEND_EOF           0x87
+#define IN_SEND_EOF_W           0x87
+#define IN_SEND_EOF_BKT         0xa4
 
 #define IN_PARSE_FINISH_W        0xab
 #define IN_PARSE_FINISH_EXIT_W   0xac

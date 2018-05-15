@@ -2301,8 +2301,6 @@ again:
 				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
-				parser_t *parser = stream->parser;
-
 				stream_append_text( prg, sp, stream, input );
 				vm_push_stream( stream );
 			}
@@ -2489,14 +2487,38 @@ again:
 			break;
 		}
 
-		case IN_SEND_EOF: {
-			debug( prg, REALM_BYTECODE, "IN_SEND_EOF\n" );
+		case IN_SEND_EOF_W: {
+			struct stream_impl *si;
+
+			debug( prg, REALM_BYTECODE, "IN_SEND_EOF_W\n" );
 			stream_t *stream = vm_pop_stream();
 			vm_push_stream( stream );
+
+			si = stream_to_impl( stream );
+			si->funcs->set_eof( si );
+
+			if ( exec->WV ) {
+				rcode_unit_start( exec );
+				rcode_code( exec, IN_SEND_EOF_BKT );
+				rcode_word( exec, (word_t) stream );
+				rcode_unit_term( exec );
+			}
 
 			if ( stream->parser == 0 )
 				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_HALF + SIZEOF_CODE + SIZEOF_CODE;
 			break;
+		}
+
+		case IN_SEND_EOF_BKT: {
+			stream_t *stream;
+			read_stream( stream );
+
+			debug( prg, REALM_BYTECODE, "IN_SEND_EOF_BKT\n" );
+
+			struct stream_impl *si = stream_to_impl( stream->parser->input );
+			si->funcs->unset_eof( si );
+			break;
+
 		}
 
 		case IN_INPUT_CLOSE_WC: {
@@ -2791,10 +2813,7 @@ again:
 		case IN_PARSE_FINISH_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 
-			stream_t *stream = vm_pop_stream();
-
-			struct stream_impl *si = stream_to_impl( stream->parser->input );
-			si->funcs->unset_eof( si );
+			vm_pop_stream();
 			break;
 		}
 
@@ -4727,6 +4746,11 @@ again:
 			consume_word(); //( parser );
 			consume_word(); //( steps );
 
+			break;
+		}
+		case IN_SEND_EOF_BKT: {
+			debug( prg, REALM_BYTECODE, "IN_SEND_EOF_BKT\n" );
+			consume_word(); //( parser );
 			break;
 		}
 
