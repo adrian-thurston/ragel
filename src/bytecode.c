@@ -2346,8 +2346,7 @@ again:
 
 				vm_push_stream( stream );
 
-				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				stream_append_text( prg, sp, stream, input );
@@ -2374,8 +2373,7 @@ again:
 
 				vm_push_stream( stream );
 
-				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2427,8 +2425,7 @@ again:
 
 				vm_push_stream( stream );
 
-				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2457,8 +2454,7 @@ again:
 
 				vm_push_stream( stream );
 
-				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2558,8 +2554,7 @@ again:
 			}
 
 			if ( stream->parser == 0 )
-				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE;
 			break;
 		}
 
@@ -2700,29 +2695,20 @@ again:
 			 * through to call some code, then jump back here. */
 			if ( exec->pcr != PCR_DONE )
 				instr = pcr_call( prg, exec, &sp, instr, stream );
-			break;
-		}
+			else {
+				if ( exec->WV ) {
+					rcode_unit_start( exec );
 
-		case IN_PARSE_FRAG_EXIT_W: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_W \n" );
+					rcode_code( exec, IN_PARSE_INIT_BKT );
+					rcode_word( exec, (word_t)stream );
+					rcode_word( exec, (word_t)exec->steps );
+					rcode_code( exec, IN_PARSE_FRAG_BKT );
+					rcode_unit_term( exec );
+				}
 
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			if ( exec->WV ) {
-				rcode_unit_start( exec );
-
-				rcode_code( exec, IN_PARSE_INIT_BKT );
-				rcode_word( exec, (word_t)stream );
-				rcode_word( exec, (word_t)exec->steps );
-				rcode_code( exec, IN_PARSE_FRAG_BKT );
-				rcode_code( exec, IN_PARSE_FRAG_EXIT_BKT );
-				rcode_unit_term( exec );
+				if ( prg->induce_exit )
+					goto out;
 			}
-
-			if ( prg->induce_exit )
-				goto out;
-
 			break;
 		}
 
@@ -2737,13 +2723,9 @@ again:
 
 			if ( exec->pcr != PCR_DONE )
 				instr = pcr_call( prg, exec, &sp, instr, stream );
-			break;
-		}
-
-		case IN_PARSE_FRAG_EXIT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
-
-			vm_pop_stream();
+			else {
+				vm_pop_stream();
+			}
 			break;
 		}
 
@@ -4719,10 +4701,6 @@ again:
 
 		case IN_PARSE_FRAG_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
-			break;
-		}
-		case IN_PARSE_FRAG_EXIT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
 			break;
 		}
 		case IN_PCR_RET: {

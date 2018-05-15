@@ -1422,7 +1422,6 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId )
 {
 	code.append( IN_PARSE_LOAD );
 	code.append( IN_PARSE_FRAG_W );
-	code.append( IN_PARSE_FRAG_EXIT_W );
 }
 
 UniqueType *LangTerm::evaluateReadReduce( Compiler *pd, CodeVect &code ) const
