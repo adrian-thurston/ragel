@@ -257,10 +257,8 @@ typedef unsigned char uchar;
 
 #define IN_INPUT_CLOSE_WC        0xef
 
-#define IN_PARSE_LOAD            0xa0
-#define IN_PARSE_INIT_BKT        0xa1
-
 #define IN_PARSE_FRAG_W          0xa2
+#define IN_PARSE_INIT_BKT        0xa1
 #define IN_PARSE_FRAG_BKT        0xa6
 
 #define IN_SEND_TREE_WC       0xa8

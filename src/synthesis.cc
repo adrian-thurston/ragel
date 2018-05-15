@@ -1420,7 +1420,6 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 
 void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId )
 {
-	code.append( IN_PARSE_LOAD );
 	code.append( IN_PARSE_FRAG_W );
 }
 

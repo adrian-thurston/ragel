@@ -2346,11 +2346,14 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE;
 			}
 			else {
 				stream_append_text( prg, sp, stream, input );
 				vm_push_stream( stream );
+
+				exec->steps = stream->parser->pda_run->steps;
+				exec->pcr = PCR_START;
 			}
 
 			colm_tree_downref( prg, sp, input );
@@ -2373,7 +2376,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2388,6 +2391,9 @@ again:
 				rcode_word( exec, (word_t) input );
 				rcode_word( exec, (word_t) len );
 				rcode_unit_term( exec );
+
+				exec->steps = stream->parser->pda_run->steps;
+				exec->pcr = PCR_START;
 			}
 			break;
 		}
@@ -2425,13 +2431,16 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
 
 				stream_append_tree( prg, sp, parser->input, input );
 				vm_push_stream( stream );
+
+				exec->steps = stream->parser->pda_run->steps;
+				exec->pcr = PCR_START;
 			}
 
 			colm_tree_downref( prg, sp, input );
@@ -2454,7 +2463,7 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2469,6 +2478,9 @@ again:
 				rcode_word( exec, (word_t) input );
 				rcode_word( exec, (word_t) len );
 				rcode_unit_term( exec );
+
+				exec->steps = stream->parser->pda_run->steps;
+				exec->pcr = PCR_START;
 			}
 			break;
 		}
@@ -2499,6 +2511,10 @@ again:
 			vm_push_stream( stream );
 
 			stream_append_stream( prg, sp, stream->parser->input, input );
+
+			exec->steps = stream->parser->pda_run->steps;
+			exec->pcr = PCR_START;
+
 			break;
 		}
 		case IN_SEND_STREAM_WV: {
@@ -2517,6 +2533,10 @@ again:
 			rcode_word( exec, (word_t) input );
 			rcode_word( exec, (word_t) len );
 			rcode_unit_term( exec );
+
+			exec->steps = stream->parser->pda_run->steps;
+			exec->pcr = PCR_START;
+
 			break;
 		}
 
@@ -2554,7 +2574,11 @@ again:
 			}
 
 			if ( stream->parser == 0 )
-				instr += SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE;
+			else {
+				exec->steps = stream->parser->pda_run->steps;
+				exec->pcr = PCR_START;
+			}
 			break;
 		}
 
@@ -2617,17 +2641,6 @@ again:
 		 *   starting steps value from the start of parsing to the moment we
 		 *   write the backtrack instruction. Start fresh with a private value
 		 *   on a PCR_CALL by pushing and initializing. */
-
-		case IN_PARSE_LOAD: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			exec->steps = stream->parser->pda_run->steps;
-			exec->pcr = PCR_START;
-			break;
-		}
 
 		case IN_PARSE_INIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
@@ -4661,10 +4674,6 @@ static void rcode_downref( program_t *prg, tree_t **sp, code_t *instr )
 {
 again:
 	switch ( *instr++ ) {
-		case IN_PARSE_LOAD: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_LOAD\n" );
-			break;
-		}
 		case IN_PARSE_INIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_INIT_BKT\n" );
 
