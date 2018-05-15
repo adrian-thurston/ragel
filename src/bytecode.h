@@ -283,7 +283,6 @@ typedef unsigned char uchar;
 
 #define IN_REDUCE_COMMIT         0xa5
 
-#define IN_PCR_CALL              0xb1
 #define IN_PCR_RET               0xb2
 #define IN_PCR_END_DECK          0xb3
 

@@ -489,6 +489,54 @@ void colm_rcode_downref_all( program_t *prg, tree_t **sp, struct rt_code_vect *r
 	}
 }
 
+static code_t *pcr_call( program_t *prg, Execution *exec, tree_t ***psp, code_t *instr, stream_t *stream )
+{
+	tree_t **sp = *psp;
+
+	int frame_size = 0;
+	if ( stream->parser->pda_run->frame_id >= 0 )  {
+		struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
+		frame_size = fi->frame_size;
+	}
+
+	vm_contiguous( 8 + frame_size );
+
+	vm_push_type( tree_t**, exec->frame_ptr );
+	vm_push_type( tree_t**, exec->iframe_ptr );
+	vm_push_type( long, exec->frame_id );
+	vm_push_type( word_t, exec->steps );
+	vm_push_type( word_t, exec->pcr );
+	vm_push_stream( exec->stream );
+	vm_push_type( word_t, exec->WV );
+
+	/* Return back to this instruction. We are alternating between
+	 * parsing and calling instructions. */
+	code_t *return_to = instr - SIZEOF_CODE;
+	vm_push_type( code_t*, return_to );
+
+	exec->frame_ptr = 0;
+	exec->iframe_ptr = 0;
+	exec->frame_id = 0;
+	exec->steps = 0;
+	exec->stream = stream;
+
+	instr = stream->parser->pda_run->code;
+	exec->WV = 1;
+
+	exec->frame_id = stream->parser->pda_run->frame_id;
+
+	if ( stream->parser->pda_run->frame_id >= 0 )  {
+		struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
+
+		exec->frame_ptr = vm_ptop();
+		vm_pushn( fi->frame_size );
+		memset( vm_ptop(), 0, sizeof(word_t) * fi->frame_size );
+	}
+
+	*psp = sp;
+	return instr;
+}
+
 void colm_execute( program_t *prg, Execution *exec, code_t *code )
 {
 	tree_t **sp = prg->stack_root;
@@ -2298,7 +2346,8 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				stream_append_text( prg, sp, stream, input );
@@ -2325,7 +2374,8 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2377,7 +2427,8 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2406,7 +2457,8 @@ again:
 
 				vm_push_stream( stream );
 
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			}
 			else {
 				parser_t *parser = stream->parser;
@@ -2506,7 +2558,8 @@ again:
 			}
 
 			if ( stream->parser == 0 )
-				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				//instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
+				instr += SIZEOF_CODE + SIZEOF_CODE + SIZEOF_CODE;
 			break;
 		}
 
@@ -2597,54 +2650,6 @@ again:
 			break;
 		}
 
-		case IN_PCR_CALL: {
-			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			int frame_size = 0;
-			if ( stream->parser->pda_run->frame_id >= 0 )  {
-				struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
-				frame_size = fi->frame_size;
-			}
-
-			vm_contiguous( 8 + frame_size );
-
-			vm_push_type( tree_t**, exec->frame_ptr );
-			vm_push_type( tree_t**, exec->iframe_ptr );
-			vm_push_type( long, exec->frame_id );
-			vm_push_type( word_t, exec->steps );
-			vm_push_type( word_t, exec->pcr );
-			vm_push_stream( exec->stream );
-			vm_push_type( word_t, exec->WV );
-
-			/* Return location one instruction back. Depends on the size of of
-			 * the frag/finish. */
-			code_t *return_to = instr - ( SIZEOF_CODE + SIZEOF_CODE );
-			vm_push_type( code_t*, return_to );
-
-			exec->frame_ptr = 0;
-			exec->iframe_ptr = 0;
-			exec->frame_id = 0;
-			exec->steps = 0;
-			exec->stream = stream;
-
-			instr = stream->parser->pda_run->code;
-			exec->WV = 1;
-
-			exec->frame_id = stream->parser->pda_run->frame_id;
-
-			if ( stream->parser->pda_run->frame_id >= 0 )  {
-				struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
-
-				exec->frame_ptr = vm_ptop();
-				vm_pushn( fi->frame_size );
-				memset( vm_ptop(), 0, sizeof(word_t) * fi->frame_size );
-			}
-			break;
-		}
-
 		case IN_LOAD_RETVAL: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_RETVAL\n" );
 			vm_push_tree( exec->ret_val );
@@ -2693,8 +2698,8 @@ again:
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
-			if ( exec->pcr == PCR_DONE )
-				instr += SIZEOF_CODE;
+			if ( exec->pcr != PCR_DONE )
+				instr = pcr_call( prg, exec, &sp, instr, stream );
 			break;
 		}
 
@@ -2711,7 +2716,6 @@ again:
 				rcode_word( exec, (word_t)stream );
 				rcode_word( exec, (word_t)exec->steps );
 				rcode_code( exec, IN_PARSE_FRAG_BKT );
-				rcode_code( exec, IN_PCR_CALL );
 				rcode_code( exec, IN_PARSE_FRAG_EXIT_BKT );
 				rcode_unit_term( exec );
 			}
@@ -2731,8 +2735,8 @@ again:
 			exec->pcr = colm_parse_undo_frag( prg, sp, stream->parser->pda_run,
 					stream->parser->input, exec->pcr, exec->steps );
 
-			if ( exec->pcr == PCR_DONE )
-				instr += SIZEOF_CODE;
+			if ( exec->pcr != PCR_DONE )
+				instr = pcr_call( prg, exec, &sp, instr, stream );
 			break;
 		}
 
@@ -4719,10 +4723,6 @@ again:
 		}
 		case IN_PARSE_FRAG_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
-			break;
-		}
-		case IN_PCR_CALL: {
-			debug( prg, REALM_BYTECODE, "IN_PCR_CALL\n" );
 			break;
 		}
 		case IN_PCR_RET: {
