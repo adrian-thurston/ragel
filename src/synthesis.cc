@@ -1609,8 +1609,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 * Finish operation
 	 */
 
-	code.append( IN_SEND_EOF );
-	parseFinish( pd, code, stopId );
+	if ( !stop ) {
+		code.append( IN_SEND_EOF );
+		parseFinish( pd, code, stopId );
+	}
 
 	/* Pull out the error and save it off. */
 	code.append( IN_DUP_VAL );

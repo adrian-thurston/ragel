@@ -2249,26 +2249,24 @@ long colm_parse_finish( program_t *prg, tree_t **sp,
 	switch ( entry ) {
 	case PCR_START:
 
-	if ( pda_run->stop_target <= 0 ) {
+	si = stream_to_impl( input );
+	si->funcs->set_eof( si );
+
+	if ( ! pda_run->parse_error ) {
 		si = stream_to_impl( input );
-		si->funcs->set_eof( si );
+		long pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
 
-		if ( ! pda_run->parse_error ) {
+		while ( pcr != PCR_DONE ) {
+
+			/* COROUTINE */
+			return pcr;
+			case PCR_REDUCTION:
+			case PCR_GENERATION:
+			case PCR_PRE_EOF:
+			case PCR_REVERSE:
+
 			si = stream_to_impl( input );
-			long pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
-
-			while ( pcr != PCR_DONE ) {
-
-				/* COROUTINE */
-				return pcr;
-				case PCR_REDUCTION:
-				case PCR_GENERATION:
-				case PCR_PRE_EOF:
-				case PCR_REVERSE:
-
-				si = stream_to_impl( input );
-				pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
-			}
+			pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
 		}
 	}
 
