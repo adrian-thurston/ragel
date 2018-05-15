@@ -261,20 +261,17 @@ typedef unsigned char uchar;
 #define IN_PARSE_INIT_BKT        0xa1
 #define IN_PARSE_FRAG_BKT        0xa6
 
-#define IN_SEND_TREE_WC       0xa8
-#define IN_SEND_TREE_WV       0xa9
-#define IN_SEND_TREE_BKT      0xaa
+#define IN_SEND_TEXT_W      0x89
+#define IN_SEND_TEXT_BKT    0x8a
 
-#define IN_SEND_TEXT_WC       0x88
-#define IN_SEND_TEXT_WV       0x89
-#define IN_SEND_TEXT_BKT      0x8a
+#define IN_SEND_TREE_W      0xa9
+#define IN_SEND_TREE_BKT    0xaa
 
-#define IN_SEND_STREAM_WC  0x96
-#define IN_SEND_STREAM_WV  0x90
-#define IN_SEND_STREAM_BKT 0x1c
+#define IN_SEND_STREAM_W    0x90
+#define IN_SEND_STREAM_BKT  0x1c
 
-#define IN_SEND_EOF_W           0x87
-#define IN_SEND_EOF_BKT         0xa4
+#define IN_SEND_EOF_W       0x87
+#define IN_SEND_EOF_BKT     0xa4
 
 #define IN_REDUCE_COMMIT         0xa5
 

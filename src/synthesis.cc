@@ -1565,24 +1565,12 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			break;
 		}}
 
-		if ( isStream ) {
-			if ( pd->revertOn )
-				code.append( IN_SEND_STREAM_WV );
-			else
-				code.append( IN_SEND_STREAM_WC );
-		}
-		else if ( tree ) {
-			if ( pd->revertOn )
-				code.append( IN_SEND_TREE_WV );
-			else
-				code.append( IN_SEND_TREE_WC );
-		}
-		else {
-			if ( pd->revertOn )
-				code.append( IN_SEND_TEXT_WV );
-			else
-				code.append( IN_SEND_TEXT_WC );
-		}
+		if ( isStream )
+			code.append( IN_SEND_STREAM_W );
+		else if ( tree )
+			code.append( IN_SEND_TREE_W );
+		else
+			code.append( IN_SEND_TEXT_W );
 
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
@@ -1678,24 +1666,12 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			break;
 		}
 
-		if ( isStream ) {
-			if ( pd->revertOn )
-				code.append( IN_SEND_STREAM_WV );
-			else
-				code.append( IN_SEND_STREAM_WC );
-		}
-		else if ( !strings ) {
-			if ( pd->revertOn )
-				code.append( IN_SEND_TREE_WV );
-			else
-				code.append( IN_SEND_TREE_WC );
-		}
-		else {
-			if ( pd->revertOn )
-				code.append( IN_SEND_TEXT_WV );
-			else
-				code.append( IN_SEND_TEXT_WC );
-		}
+		if ( isStream )
+			code.append( IN_SEND_STREAM_W );
+		else if ( !strings )
+			code.append( IN_SEND_TREE_W );
+		else
+			code.append( IN_SEND_TEXT_W );
 
 		parseFrag( pd, code, 0 );
 	}
