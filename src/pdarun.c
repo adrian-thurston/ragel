@@ -2214,7 +2214,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	case PCR_START:
 
 	if ( ! pda_run->parse_error ) {
-		pda_run->stop_target = stop_id;
+		//pda_run->stop_target = stop_id;
 
 		long pcr = colm_parse_loop( prg, sp, pda_run, 
 				stream_to_impl( input ), entry );
@@ -2278,8 +2278,8 @@ long colm_parse_finish( program_t *prg, tree_t **sp,
 	 * if ( pda_run->fail_parsing )
 	 *   goto fail; */
 
-	if ( !revert_on )
-		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
+	//if ( !revert_on )
+	//	colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
 
 	/* COROUTINE */
 	case PCR_DONE:

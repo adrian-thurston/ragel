@@ -431,7 +431,7 @@ static tree_t *construct_arg0( program_t *prg, int argc, const char **argv, cons
 
 static list_t *construct_argv( program_t *prg, int argc, const char **argv, const int *argl )
 {
-	list_t *list = (list_t*)colm_construct_generic( prg, prg->rtd->argv_generic_id );
+	list_t *list = (list_t*)colm_construct_generic( prg, prg->rtd->argv_generic_id, 0 );
 	int i;
 	for ( i = 1; i < argc; i++ ) {
 		size_t len = argl != 0 ? argl[i] : strlen(argv[i]);
@@ -454,7 +454,7 @@ static list_t *construct_stds( program_t *prg )
 {
 	make_stdout( prg );
 
-	list_t *list = (list_t*)colm_construct_generic( prg, prg->rtd->stds_generic_id );
+	list_t *list = (list_t*)colm_construct_generic( prg, prg->rtd->stds_generic_id, 0 );
 
 	struct_t *strct = colm_struct_new_size( prg, 16 );
 	strct->id = prg->rtd->stds_el_id;
@@ -2932,11 +2932,13 @@ again:
 		}
 		case IN_CONS_GENERIC: {
 			half_t generic_id;
+			half_t stop_id;
 			read_half( generic_id );
+			read_half( stop_id );
 
-			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd\n", generic_id );
+			debug( prg, REALM_BYTECODE, "IN_CONS_GENERIC %hd %hd\n", generic_id, stop_id );
 
-			struct_t *gen = colm_construct_generic( prg, generic_id );
+			struct_t *gen = colm_construct_generic( prg, generic_id, stop_id );
 			vm_push_struct( gen );
 			break;
 		}

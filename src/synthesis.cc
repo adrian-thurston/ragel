@@ -1297,6 +1297,7 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	if ( newUT->typeId == TYPE_GENERIC ) {
 		code.append( IN_CONS_GENERIC );
 		code.appendHalf( newUT->generic->id );
+		code.appendHalf( 0 ); // stopId
 
 		if ( newUT->generic->typeId == GEN_PARSER ) {
 
@@ -1514,6 +1515,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	else {
 		code.append( IN_CONS_GENERIC );
 		code.appendHalf( parserUT->generic->id );
+		code.appendHalf( stopId );
 	}
 
 	/*

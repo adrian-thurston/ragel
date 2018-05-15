@@ -151,8 +151,7 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 #define colm_struct_to_map_el( prg, obj, genId ) \
 	colm_struct_get_addr( obj, map_el_t*, prg->rtd->generic_info[genId].el_offset )
 
-parser_t *colm_parser_new( struct colm_program *prg,
-		struct generic_info *gi, int reducer );
+parser_t *colm_parser_new( program_t *prg, struct generic_info *gi, int stop_id, int reducer );
 stream_t *colm_stream_new( struct colm_program *prg );
 stream_t *colm_stream_new_struct( struct colm_program *prg );
 
@@ -171,7 +170,7 @@ struct colm_struct *colm_map_el_get( struct colm_program *prg,
 struct colm_struct *colm_map_get( struct colm_program *prg, map_t *map,
 		word_t gen_id, word_t field );
 
-struct colm_struct *colm_construct_generic( struct colm_program *prg, long generic_id );
+struct colm_struct *colm_construct_generic( struct colm_program *prg, long generic_id, int stop_id );
 struct colm_struct *colm_construct_reducer( struct colm_program *prg, long generic_id, int reducer_id );
 
 #if defined(__cplusplus)
