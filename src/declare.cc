@@ -53,12 +53,13 @@ void Compiler::initUniqueTypes( )
 }
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC,
 		int nargs, UniqueType **args, bool isConst, bool useFnInstr,
 		GenericType *useGeneric )
 {
 	ObjectMethod *objMethod = new ObjectMethod( retType, name, 
 			methIdWV, methIdWC, nargs, args, 0, isConst );
+	objMethod->type = type;
 	objMethod->useFnInstr = useFnInstr;
 
 	if ( nspace != 0 )
@@ -75,29 +76,29 @@ ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *o
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, bool isConst,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, bool isConst,
 		bool useFnInstr, GenericType *useGeneric )
 {
-	return initFunction( retType, 0, obj, name, methIdWV, methIdWC,
+	return initFunction( retType, 0, obj, type, name, methIdWV, methIdWC,
 			0, 0, isConst, useFnInstr, useGeneric );
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
 		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1 };
-	return initFunction( retType, 0, obj, name, methIdWV, methIdWC,
+	return initFunction( retType, 0, obj, type, name, methIdWV, methIdWC,
 			1, args, isConst, useFnInstr, useGeneric );
 }
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, 
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2,
 		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1, arg2 };
-	return initFunction( retType, 0, obj, name, methIdWV, methIdWC,
+	return initFunction( retType, 0, obj, type, name, methIdWV, methIdWC,
 			2, args, isConst, useFnInstr, useGeneric );
 }
 
@@ -106,29 +107,29 @@ ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj,
  */
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, bool isConst,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, bool isConst,
 		bool useFnInstr, GenericType *useGeneric )
 {
-	return initFunction( retType, nspace, obj, name, methIdWV, methIdWC,
+	return initFunction( retType, nspace, obj, type, name, methIdWV, methIdWC,
 			0, 0, isConst, useFnInstr, useGeneric );
 }
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, UniqueType *arg1,
 		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1 };
-	return initFunction( retType, nspace, obj, name, methIdWV, methIdWC,
+	return initFunction( retType, nspace, obj, type, name, methIdWV, methIdWC,
 			1, args, isConst, useFnInstr, useGeneric );
 }
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, 
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2,
 		bool isConst, bool useFnInstr, GenericType *useGeneric )
 {
 	UniqueType *args[] = { arg1, arg2 };
-	return initFunction( retType, nspace, obj, name, methIdWV, methIdWC,
+	return initFunction( retType, nspace, obj, type, name, methIdWV, methIdWC,
 			2, args, isConst, useFnInstr, useGeneric );
 }
 
@@ -652,7 +653,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"triter", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "triter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Tree );
 		objMethod->iterDef = triter;
@@ -662,7 +663,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"child", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Child );
 		objMethod->iterDef = triter;
@@ -672,7 +673,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"rev_child", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "rev_child", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevChild );
 		objMethod->iterDef = triter;
@@ -682,7 +683,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"repeat", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::Repeat );
 		objMethod->iterDef = triter;
@@ -692,7 +693,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "rev_repeat", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevRepeat );
 		objMethod->iterDef = triter;
@@ -702,7 +703,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"list_iter", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "list_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::ListEl );
 		objMethod->iterDef = triter;
@@ -712,7 +713,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"rev_list_iter", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "rev_list_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::RevListVal );
 		objMethod->iterDef = triter;
@@ -722,7 +723,7 @@ void Compiler::makeDefaultIterators()
 	{
 		UniqueType *anyRefUT = findUniqueType( TYPE_REF, anyLangEl );
 		ObjectMethod *objMethod = initFunction( uniqueTypeAny, rootNamespace, globalObjectDef, 
-				"map_iter", IN_HALT, IN_HALT, anyRefUT, true );
+				ObjectMethod::Call, "map_iter", IN_HALT, IN_HALT, anyRefUT, true );
 
 		IterDef *triter = findIterDef( IterDef::MapEl );
 		objMethod->iterDef = triter;
@@ -796,7 +797,7 @@ void Compiler::declareIntFields( )
 	intObj = ObjectDef::cons( ObjectDef::BuiltinType, "int", nextObjectId++ );
 //	intLangEl->objectDef = intObj;
 
-	initFunction( uniqueTypeStr, intObj, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
+	initFunction( uniqueTypeStr, intObj, ObjectMethod::Call, "to_string", IN_INT_TO_STR, IN_INT_TO_STR, true );
 }
 
 void Compiler::declareStrFields( )
@@ -804,38 +805,39 @@ void Compiler::declareStrFields( )
 	strObj = ObjectDef::cons( ObjectDef::BuiltinType, "str", nextObjectId++ );
 	strLangEl->objectDef = strObj;
 
-	initFunction( uniqueTypeInt, strObj, "atoi",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "atoi",
 			IN_STR_ATOI,   IN_STR_ATOI, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "atoo",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "atoo",
 			IN_STR_ATOO,   IN_STR_ATOO, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "uord8",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "uord8",
 			IN_STR_UORD8,  IN_STR_UORD8, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "sord8",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "sord8",
 			IN_STR_SORD8,  IN_STR_SORD8, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "uord16",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "uord16",
 			IN_STR_UORD16, IN_STR_UORD16, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "sord16",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "sord16",
 			IN_STR_SORD16, IN_STR_SORD16, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "uord32",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "uord32",
 			IN_STR_UORD32, IN_STR_UORD32, true, true );
 
-	initFunction( uniqueTypeInt, strObj, "sord32",
+	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "sord32",
 			IN_STR_SORD32, IN_STR_SORD32, true, true );
 
-	initFunction( uniqueTypeStr, strObj, "prefix",
+	initFunction( uniqueTypeStr, strObj, ObjectMethod::Call, "prefix",
 			IN_STR_PREFIX, IN_STR_PREFIX, uniqueTypeInt, true, true );
 
-	initFunction( uniqueTypeStr, strObj, "suffix",
+	initFunction( uniqueTypeStr, strObj, ObjectMethod::Call, "suffix",
 			IN_STR_SUFFIX, IN_STR_SUFFIX, uniqueTypeInt, true, true );
 
-	initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "sprintf", 
-			IN_SPRINTF, IN_SPRINTF, uniqueTypeStr, uniqueTypeInt, true );
+	initFunction( uniqueTypeStr, rootNamespace, globalObjectDef,
+			ObjectMethod::Call, "sprintf", IN_SPRINTF, IN_SPRINTF,
+			uniqueTypeStr, uniqueTypeInt, true );
 
 	addLengthField( strObj, IN_STR_LENGTH );
 }
@@ -857,19 +859,19 @@ void Compiler::declareStreamFields( )
 {
 	streamObj = streamSel->structDef->objectDef;
 
-	initFunction( uniqueTypeStr, streamObj, "pull",  
+	initFunction( uniqueTypeStr, streamObj, ObjectMethod::Call, "pull",  
 			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
 
-	initFunction( uniqueTypeStr, streamObj, "push",  
+	initFunction( uniqueTypeStr, streamObj, ObjectMethod::Call, "push",  
 			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
 
-	initFunction( uniqueTypeStr, streamObj, "push_ignore",  
+	initFunction( uniqueTypeStr, streamObj, ObjectMethod::Call, "push_ignore",  
 			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
 
-	initFunction( uniqueTypeStr, streamObj, "push_stream",  
+	initFunction( uniqueTypeStr, streamObj, ObjectMethod::Call, "push_stream",  
 		IN_INPUT_PUSH_STREAM_WV, IN_INPUT_PUSH_STREAM_WV, uniqueTypeStream, false );
 
-	initFunction( uniqueTypeVoid, streamObj, "close",
+	initFunction( uniqueTypeVoid, streamObj, ObjectMethod::Call, "close",
 			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
 
 	declareStreamField( streamObj, 0 );
@@ -955,77 +957,77 @@ void Compiler::declareGlobalFields()
 {
 	ObjectMethod *method;
 
-	method = initFunction( uniqueTypeStream, rootNamespace, globalObjectDef, "open",
+	method = initFunction( uniqueTypeStream, rootNamespace, globalObjectDef, ObjectMethod::Call, "open",
 		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, uniqueTypeStr, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "tolower",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "tolower",
 		IN_TO_LOWER, IN_TO_LOWER, uniqueTypeStr, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "toupper",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "toupper",
 		IN_TO_UPPER, IN_TO_UPPER, uniqueTypeStr, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "atoi",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "atoi",
 			IN_STR_ATOI,   IN_STR_ATOI, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "atoo",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "atoo",
 			IN_STR_ATOO,   IN_STR_ATOO, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "prefix",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "prefix",
 			IN_PREFIX, IN_PREFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "suffix",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "suffix",
 			IN_SUFFIX, IN_SUFFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "uord8",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "uord8",
 			IN_STR_UORD8,  IN_STR_UORD8, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "sord8",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "sord8",
 			IN_STR_SORD8,  IN_STR_SORD8, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "uord16",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "uord16",
 			IN_STR_UORD16, IN_STR_UORD16, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "sord16",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "sord16",
 			IN_STR_SORD16, IN_STR_SORD16, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "uord32",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "uord32",
 			IN_STR_UORD32, IN_STR_UORD32, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "sord32",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "sord32",
 			IN_STR_SORD32, IN_STR_SORD32, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "exit",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "exit",
 		IN_EXIT, IN_EXIT, uniqueTypeInt, true, true );
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "exit_hard",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "exit_hard",
 		IN_EXIT_HARD, IN_EXIT_HARD, uniqueTypeInt, true, true );
 
-	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, "system",
+	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "system",
 		IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "xml",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "xml",
 		IN_TREE_TO_STR_XML, IN_TREE_TO_STR_XML, uniqueTypeAny, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "xmlac",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "xmlac",
 		IN_TREE_TO_STR_XML_AC, IN_TREE_TO_STR_XML_AC, uniqueTypeAny, true );
 	method->useCallObj = false;
 
-	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, "postfix",
+	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "postfix",
 		IN_TREE_TO_STR_POSTFIX, IN_TREE_TO_STR_POSTFIX, uniqueTypeAny, true );
 	method->useCallObj = false;
 
@@ -1178,26 +1180,26 @@ void Compiler::addDefineArgs()
 void Compiler::initMapFunctions( GenericType *gen )
 {
 	/* Value functions. */
-	initFunction( gen->valueUt, gen->objDef, "find", 
+	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "find", 
 			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUt, true, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "insert", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "insert", 
 			IN_VMAP_INSERT_WV, IN_VMAP_INSERT_WC, gen->keyUt, gen->valueUt,
 			false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "remove", 
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "remove", 
 			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUt, false, true, gen );
 
 	/*
 	 * Element Functions
 	 */
-	initFunction( gen->elUt, gen->objDef, "find_el", 
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "find_el", 
 			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUt, true, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "insert_el", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "insert_el", 
 			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->elUt, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "detach_el", 
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "detach_el", 
 			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->elUt, false, true, gen );
 }
 
@@ -1277,40 +1279,40 @@ void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 
 void Compiler::initListFunctions( GenericType *gen )
 {
-	initFunction( uniqueTypeInt, gen->objDef, "push_head", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_head", 
 			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "push_tail", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_tail", 
 			IN_VLIST_PUSH_TAIL_WV, IN_VLIST_PUSH_TAIL_WC, gen->valueUt, false, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "push", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push", 
 			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
 
-	initFunction( gen->valueUt, gen->objDef, "pop_head", 
+	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "pop_head", 
 			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
 
-	initFunction( gen->valueUt, gen->objDef, "pop_tail", 
+	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "pop_tail", 
 			IN_VLIST_POP_TAIL_WV, IN_VLIST_POP_TAIL_WC, false, true, gen );
 
-	initFunction( gen->valueUt, gen->objDef, "pop", 
+	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "pop", 
 			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "push_head_el", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_head_el", 
 			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "push_tail_el", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_tail_el", 
 			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
 
-	initFunction( uniqueTypeInt, gen->objDef, "push_el", 
+	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_el", 
 			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "pop_head_el", 
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "pop_head_el", 
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "pop_tail_el", 
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "pop_tail_el", 
 			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
 
-	initFunction( gen->elUt, gen->objDef, "pop_el", 
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "pop_el", 
 			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
 }
 
@@ -1407,13 +1409,13 @@ void Compiler::initListFields( GenericType *gen )
 
 void Compiler::initParserFunctions( GenericType *gen )
 {
-	initFunction( gen->elUt, gen->objDef, "finish",
-			IN_PARSE_FINISH_W, IN_PARSE_FINISH_W, true );
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::ParseFinish, "finish",
+			IN_PARSE_FRAG_W, IN_PARSE_FRAG_W, true );
 
-	initFunction( gen->elUt, gen->objDef, "eof",
-			IN_PARSE_FINISH_W, IN_PARSE_FINISH_W, true );
+	initFunction( gen->elUt, gen->objDef, ObjectMethod::ParseFinish, "eof",
+			IN_PARSE_FRAG_W, IN_PARSE_FRAG_W, true );
 
-	initFunction( uniqueTypeStream, gen->objDef, "gets",
+	initFunction( uniqueTypeStream, gen->objDef, ObjectMethod::Call, "gets",
 			IN_GET_PARSER_STREAM, IN_GET_PARSER_STREAM, true );
 }
 

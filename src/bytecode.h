@@ -281,12 +281,6 @@ typedef unsigned char uchar;
 #define IN_SEND_EOF_W           0x87
 #define IN_SEND_EOF_BKT         0xa4
 
-#define IN_PARSE_FINISH_W        0xab
-#define IN_PARSE_FINISH_EXIT_W   0xac
-
-#define IN_PARSE_FINISH_BKT      0xaf
-#define IN_PARSE_FINISH_EXIT_BKT 0xb0
-
 #define IN_REDUCE_COMMIT         0xa5
 
 #define IN_PCR_CALL              0xb1

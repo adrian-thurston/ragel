@@ -1025,11 +1025,7 @@ void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup,
 
 bool LangVarRef::isFinishCall( VarRefLookup &lookup ) const
 {
-	if ( lookup.objMethod->opcodeWV == IN_PARSE_FINISH_W )
-	{
-		return true;
-	}
-	return false;
+	return lookup.objMethod->type == ObjectMethod::ParseFinish;
 }
 
 void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &lookup ) const
@@ -1052,7 +1048,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 		code.append( IN_GET_PARSER_STREAM );
 		code.append( IN_SEND_EOF_W );
 
-		LangTerm::parseFinish( pd, code, 0 );
+		LangTerm::parseFrag( pd, code, 0 );
 
 		code.append( IN_GET_STREAM_MEM_R );
 		code.appendHalf( 0 );
@@ -1432,14 +1428,6 @@ void LangTerm::parseFrag( Compiler *pd, CodeVect &code, int stopId )
 	code.append( IN_PARSE_FRAG_EXIT_W );
 }
 
-void LangTerm::parseFinish( Compiler *pd, CodeVect &code, int stopId )
-{
-	code.append( IN_PARSE_LOAD );
-	code.append( IN_PARSE_FINISH_W );
-	code.appendHalf( stopId );
-	code.append( IN_PCR_CALL );
-	code.append( IN_PARSE_FINISH_EXIT_W );
-}
 
 UniqueType *LangTerm::evaluateReadReduce( Compiler *pd, CodeVect &code ) const
 {
@@ -1613,7 +1601,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	if ( !stop ) {
 		code.append( IN_SEND_EOF_W );
-		parseFinish( pd, code, stopId );
+		parseFrag( pd, code, stopId );
 	}
 
 	if ( parserText->reduce ) {
@@ -1720,7 +1708,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 	if ( eof ) {
 		code.append( IN_SEND_EOF_W );
-		parseFinish( pd, code, 0 );
+		parseFrag( pd, code, 0 );
 	}
 }
 

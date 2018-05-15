@@ -2206,15 +2206,15 @@ skip_send:
 }
 
 
-long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, long stop_id, long entry )
+long colm_parse_frag( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run, stream_t *input, long entry )
 {
 	/* COROUTINE */
 	switch ( entry ) {
 	case PCR_START:
 
 	if ( ! pda_run->parse_error ) {
-		long pcr = colm_parse_loop( prg, sp, pda_run, 
+		long pcr = colm_parse_loop( prg, sp, pda_run,
 				stream_to_impl( input ), entry );
 
 		while ( pcr != PCR_DONE ) {
@@ -2226,7 +2226,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			case PCR_PRE_EOF:
 			case PCR_REVERSE:
 
-			pcr = colm_parse_loop( prg, sp, pda_run, 
+			pcr = colm_parse_loop( prg, sp, pda_run,
 					stream_to_impl( input ), entry );
 		}
 	}
@@ -2239,20 +2239,15 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 }
 
 long colm_parse_finish( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, stream_t *input,
-		int revert_on, long entry )
+		struct pda_run *pda_run, stream_t *input, long entry )
 {
-	struct stream_impl *si;
-
 	/* COROUTINE */
 	switch ( entry ) {
 	case PCR_START:
 
-	si = stream_to_impl( input );
-
 	if ( ! pda_run->parse_error ) {
-		si = stream_to_impl( input );
-		long pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
+		long pcr = colm_parse_loop( prg, sp, pda_run,
+				stream_to_impl( input ), entry );
 
 		while ( pcr != PCR_DONE ) {
 
@@ -2263,8 +2258,8 @@ long colm_parse_finish( program_t *prg, tree_t **sp,
 			case PCR_PRE_EOF:
 			case PCR_REVERSE:
 
-			si = stream_to_impl( input );
-			pcr = colm_parse_loop( prg, sp, pda_run, si, entry );
+			pcr = colm_parse_loop( prg, sp, pda_run,
+					stream_to_impl( input ), entry );
 		}
 	}
 

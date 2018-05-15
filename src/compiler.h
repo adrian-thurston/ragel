@@ -1108,30 +1108,30 @@ void declareTypeAlias( Compiler *pd, Namespace *nspace,
 LangEl *findType( Compiler *pd, Namespace *nspace, const String &data );
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC,
 		bool isConst, bool useFnInstr = false, GenericType *useGeneric = 0 );
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC,
 		UniqueType *arg1, bool isConst, bool useFnInstr = false,
 		GenericType *useGeneric = 0 );
 
 ObjectMethod *initFunction( UniqueType *retType, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, 
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2, bool isConst,
 		bool useFnInstr = false, GenericType *useGeneric = 0 );
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC,
 		bool isConst, bool useFnInstr = false, GenericType *useGeneric = 0 );
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC,
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC,
 		UniqueType *arg1, bool isConst, bool useFnInstr = false,
 		GenericType *useGeneric = 0 );
 
 ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *obj, 
-		const String &name, int methIdWV, int methIdWC, 
+		ObjectMethod::Type type, const String &name, int methIdWV, int methIdWC, 
 		UniqueType *arg1, UniqueType *arg2, bool isConst,
 		bool useFnInstr = false, GenericType *useGeneric = 0 );
 

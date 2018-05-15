@@ -2425,10 +2425,17 @@ typedef DList<ObjectField> ParameterList;
 
 struct ObjectMethod
 {
+	enum Type
+	{
+		Call,
+		ParseFinish
+	};
+
 	ObjectMethod( TypeRef *returnTypeRef, String name, 
 			int opcodeWV, int opcodeWC, int numParams, 
 			UniqueType **types, ParameterList *paramList, bool isConst )
 	: 
+		type(Call),
 		returnUT(0),
 		returnTypeRef(returnTypeRef),
 		returnTypeId(0),
@@ -2454,6 +2461,7 @@ struct ObjectMethod
 			UniqueType **types, ParameterList *paramList,
 			bool isConst )
 	: 
+		type(Call),
 		returnUT(returnUT),
 		returnTypeRef(0),
 		returnTypeId(0),
@@ -2476,6 +2484,7 @@ struct ObjectMethod
 		memcpy( this->paramUTs, types, sizeof(UniqueType*)*numParams );
 	}
 
+	Type type;
 	UniqueType *returnUT;
 	TypeRef *returnTypeRef;
 	long returnTypeId;

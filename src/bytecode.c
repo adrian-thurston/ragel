@@ -2692,7 +2692,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_W %hd\n", stop_id );
 
 			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
-					stream->parser->input, stop_id, exec->pcr );
+					stream->parser->input, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
@@ -2709,6 +2709,7 @@ again:
 
 			if ( exec->WV ) {
 				rcode_unit_start( exec );
+
 				rcode_code( exec, IN_PARSE_INIT_BKT );
 				rcode_word( exec, (word_t)stream );
 				rcode_word( exec, (word_t)exec->steps );
@@ -2723,6 +2724,7 @@ again:
 
 			if ( prg->induce_exit )
 				goto out;
+
 			break;
 		}
 
@@ -2745,74 +2747,6 @@ again:
 
 		case IN_PARSE_FRAG_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
-
-			vm_pop_stream();
-			break;
-		}
-
-		case IN_PARSE_FINISH_W: {
-			half_t stop_id;
-			read_half( stop_id );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_W %hd\n", stop_id );
-
-			exec->pcr = colm_parse_finish( prg, sp, stream->parser->pda_run,
-					stream->parser->input, exec->WV, exec->pcr );
-
-			if ( exec->pcr == PCR_DONE )
-				instr += SIZEOF_CODE;
-			break;
-		}
-
-		case IN_PARSE_FINISH_EXIT_W: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_W\n" );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			if ( exec->WV ) {
-				rcode_unit_start( exec );
-
-				rcode_code( exec, IN_PARSE_INIT_BKT );
-				rcode_word( exec, (word_t)stream );
-				rcode_word( exec, (word_t)exec->steps );
-
-				rcode_code( exec, IN_PARSE_FINISH_BKT );
-				rcode_half( exec, 0 );
-
-				rcode_code( exec, IN_PCR_CALL );
-				rcode_code( exec, IN_PARSE_FINISH_EXIT_BKT );
-				rcode_unit_term( exec );
-			}
-
-			if ( prg->induce_exit )
-				goto out;
-
-			break;
-		}
-
-		case IN_PARSE_FINISH_BKT: {
-			half_t stop_id;
-			read_half( stop_id );
-
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT %hd\n", stop_id );
-
-			exec->pcr = colm_parse_undo_frag( prg, sp, stream->parser->pda_run,
-					stream->parser->input, exec->steps, exec->pcr );
-
-			if ( exec->pcr == PCR_DONE )
-				instr += SIZEOF_CODE;
-			break;
-		}
-
-		case IN_PARSE_FINISH_EXIT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 
 			vm_pop_stream();
 			break;
@@ -4796,16 +4730,6 @@ again:
 		}
 		case IN_PARSE_FRAG_EXIT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_EXIT_BKT\n" );
-			break;
-		}
-		case IN_PARSE_FINISH_BKT: {
-			half_t stop_id;
-			read_half( stop_id );
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_BKT\n" );
-			break;
-		}
-		case IN_PARSE_FINISH_EXIT_BKT: {
-			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_EXIT_BKT\n" );
 			break;
 		}
 		case IN_PCR_CALL: {

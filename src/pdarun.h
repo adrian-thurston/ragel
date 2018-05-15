@@ -455,10 +455,10 @@ kid_t *make_token_with_data( struct colm_program *prg, struct pda_run *pda_run,
 long colm_parse_loop( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run, 
 		struct stream_impl *input_stream, long entry );
 
-long colm_parse_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, long stop_id, long entry );
-long colm_parse_finish( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, int revert_on, long entry );
+long colm_parse_frag( struct colm_program *prg, tree_t **sp,
+		struct pda_run *pda_run, stream_t *input, long entry );
+long colm_parse_finish( struct colm_program *prg, tree_t **sp,
+		struct pda_run *pda_run, stream_t *input, long entry );
 long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
 		stream_t *input, long steps, long entry );
 
