@@ -2748,7 +2748,6 @@ again:
 			break;
 		}
 
-
 		case IN_PARSE_FINISH_W: {
 			half_t stop_id;
 			read_half( stop_id );
@@ -2816,6 +2815,17 @@ again:
 			vm_pop_stream();
 			break;
 		}
+
+		case IN_REDUCE_COMMIT: {
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+
+			debug( prg, REALM_BYTECODE, "IN_REDUCE_COMMIT\n" );
+
+			colm_parse_reduce_commit( prg, sp, stream->parser->pda_run );
+			break;
+		}
+
 
 		case IN_INPUT_PULL_WV: {
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PULL_WV\n" );

@@ -1616,6 +1616,10 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		parseFinish( pd, code, stopId );
 	}
 
+	if ( parserText->reduce ) {
+		code.append( IN_REDUCE_COMMIT );
+	}
+
 	/* Pull out the error and save it off. */
 	code.append( IN_DUP_VAL );
 	code.append( IN_GET_STREAM_MEM_R );

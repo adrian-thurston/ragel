@@ -2214,8 +2214,6 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	case PCR_START:
 
 	if ( ! pda_run->parse_error ) {
-		//pda_run->stop_target = stop_id;
-
 		long pcr = colm_parse_loop( prg, sp, pda_run, 
 				stream_to_impl( input ), entry );
 
@@ -2270,22 +2268,19 @@ long colm_parse_finish( program_t *prg, tree_t **sp,
 		}
 	}
 
-	/* Flush out anything not committed. */
-	if ( pda_run->reducer )
-		commit_reduce( prg, sp, pda_run );
-	
-	/* What to do here.
-	 * if ( pda_run->fail_parsing )
-	 *   goto fail; */
-
-	//if ( !revert_on )
-	//	colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
-
 	/* COROUTINE */
 	case PCR_DONE:
 	break; }
 
 	return PCR_DONE;
+}
+
+void colm_parse_reduce_commit( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run )
+{
+	/* Flush out anything not committed. */
+	if ( pda_run->reducer )
+		commit_reduce( prg, sp, pda_run );
 }
 
 long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,

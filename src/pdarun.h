@@ -470,6 +470,9 @@ void commit_reduce( program_t *prg, tree_t **root,
 
 tree_t *get_parsed_root( struct pda_run *pda_run, int stop );
 
+void colm_parse_reduce_commit( program_t *prg, tree_t **sp,
+		struct pda_run *pda_run );
+
 #ifdef __cplusplus
 }
 #endif
