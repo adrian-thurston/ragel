@@ -2736,12 +2736,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FINISH_W %hd\n", stop_id );
 
-			tree_t *result = 0;
-			exec->pcr = colm_parse_finish( &result, prg, sp,
-					stream->parser->pda_run,
+			exec->pcr = colm_parse_finish( prg, sp, stream->parser->pda_run,
 					stream->parser->input, exec->WV, exec->pcr );
-
-			stream->parser->result = result;
 
 			if ( exec->pcr == PCR_DONE )
 				instr += SIZEOF_CODE;

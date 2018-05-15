@@ -457,8 +457,8 @@ long colm_parse_loop( struct colm_program *prg, tree_t **sp, struct pda_run *pda
 
 long colm_parse_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
 		stream_t *input, long stop_id, long entry );
-long colm_parse_finish( tree_t **result, struct colm_program *prg, tree_t **sp,
-		struct pda_run *pda_run, stream_t *input , int revert_on, long entry );
+long colm_parse_finish( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
+		stream_t *input, int revert_on, long entry );
 long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
 		stream_t *input, long steps, long entry );
 
@@ -467,6 +467,8 @@ void commit_clear_parse_tree( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, parse_tree_t *pt );
 void commit_reduce( program_t *prg, tree_t **root,
 		struct pda_run *pda_run );
+
+tree_t *get_parsed_root( struct pda_run *pda_run, int stop );
 
 #ifdef __cplusplus
 }

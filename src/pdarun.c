@@ -1194,7 +1194,7 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct stream_i
 	return SCAN_ERROR;
 }
 
-static tree_t *get_parsed_root( struct pda_run *pda_run, int stop )
+tree_t *get_parsed_root( struct pda_run *pda_run, int stop )
 {
 	if ( pda_run->parse_error )
 		return 0;
@@ -2240,7 +2240,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	return PCR_DONE;
 }
 
-long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
+long colm_parse_finish( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, stream_t *input , int revert_on, long entry )
 {
 	struct stream_impl *si;
@@ -2288,17 +2288,6 @@ long colm_parse_finish( tree_t **result, program_t *prg, tree_t **sp,
 
 	if ( !revert_on )
 		colm_rcode_downref_all( prg, sp, &pda_run->reverse_code );
-	
-	tree_t *tree = get_parsed_root( pda_run, pda_run->stop_target > 0 );
-
-	if ( pda_run->reducer ) {
-		*result = 0;
-	}
-	else {
-		colm_tree_upref( tree );
-		*result = tree;
-	}
-
 
 	/* COROUTINE */
 	case PCR_DONE:

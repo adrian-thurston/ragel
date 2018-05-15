@@ -1435,7 +1435,8 @@ tree_t *get_parser_mem( parser_t *parser, word_t field )
 	tree_t *result = 0;
 	switch ( field ) {
 		case 0: {
-			result = parser->result;
+			tree_t *tree = get_parsed_root( parser->pda_run, parser->pda_run->stop_target > 0 );
+			result = tree;
 			break;
 		}
 		case 1: {
