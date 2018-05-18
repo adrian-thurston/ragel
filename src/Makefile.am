@@ -40,8 +40,8 @@ dist_libfsm_la_SOURCES = \
 	actloop.h actexp.h \
 	tables.h \
 	binary.h bingoto.h binvar.h \
-	flat.h flatgoto.h flatgotoloop.h flatgotoexp.h flatvar.h \
-	flatvarloop.h flatvarexp.h goto.h gotoloop.h gotoexp.h \
+	flat.h flatgoto.h flatvar.h \
+	goto.h gotoloop.h gotoexp.h \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \

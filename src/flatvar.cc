@@ -25,7 +25,6 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-
 void FlatVar::LOCATE_TRANS()
 {
 	if ( redFsm->classMap == 0 ) {

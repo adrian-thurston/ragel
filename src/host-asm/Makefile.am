@@ -3,7 +3,7 @@ COLM_LD     = @COLM_LD@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 
-noinst_PROGRAMS = ragel-asm
+bin_PROGRAMS = ragel-asm
 
 ragel_asm_CPPFLAGS = -I$(top_srcdir)/aapl
 
@@ -15,6 +15,8 @@ nodist_ragel_asm_SOURCES = \
 ragel_asm_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc
+
+EXTRA_DIST = rlparse.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<

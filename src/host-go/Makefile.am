@@ -3,7 +3,7 @@ COLM_LD     = @COLM_LD@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 
-noinst_PROGRAMS = ragel-go
+bin_PROGRAMS = ragel-go
 
 ragel_go_CPPFLAGS = -I$(top_srcdir)/aapl
 
@@ -15,6 +15,8 @@ nodist_ragel_go_SOURCES = \
 ragel_go_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
+
+EXTRA_DIST = rlparse.lm rlhc-go.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<

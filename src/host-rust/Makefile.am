@@ -3,7 +3,7 @@ COLM_LD     = @COLM_LD@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 
-noinst_PROGRAMS = ragel-rust
+bin_PROGRAMS = ragel-rust
 
 ragel_rust_CPPFLAGS = -I$(top_srcdir)/aapl
 
@@ -15,6 +15,8 @@ nodist_ragel_rust_SOURCES = \
 ragel_rust_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
+
+EXTRA_DIST = rlparse.lm rlhc-rust.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
