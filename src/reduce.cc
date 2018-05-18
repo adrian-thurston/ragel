@@ -505,7 +505,13 @@ void Compiler::writeReduceStructs()
 		"	read_reduce_node *next;\n"
 		"	read_reduce_node *child;\n"
 		"};\n"
-		"\n"
+		"\n";
+}
+
+
+void Compiler::writeUnescape()
+{
+	*outStream <<
 		"static void unescape( colm_data *tokdata )\n"
 		"{\n"
 		"	unsigned char *src = (unsigned char*)tokdata->data, *dest = (unsigned char*)tokdata->data;\n"
@@ -842,10 +848,15 @@ void Compiler::writePostfixReduce( Reduction *reduction )
 
 void Compiler::writePostfixReduce()
 {
+	bool unescape = false;
 	for ( ReductionVect::Iter r = rootNamespace->reductions; r.lte(); r++ ) {
 		Reduction *reduction = *r;
-		if ( reduction->postfixBased )
+		if ( reduction->postfixBased ) {
+			if ( !unescape )
+				writeUnescape();
+
 			writePostfixReduce( reduction );
+		}
 	}
 }
 

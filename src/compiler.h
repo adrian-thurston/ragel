@@ -1067,6 +1067,7 @@ struct Compiler
 	void writeCommit();
 	void writeReduceStructs();
 	void writeReduceDispatchers();
+	void writeUnescape();
 
 	void writeLhsRef( Production *production, ReduceTextItem *i );
 	void writeRhsRef( Production *production, ReduceTextItem *i );
