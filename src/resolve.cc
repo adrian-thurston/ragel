@@ -899,7 +899,7 @@ void Compiler::resolveReductionActions()
 Production *Compiler::findProductionByLabel( LangEl *langEl, String label )
 {
 	for ( LelDefList::Iter ldi = langEl->defList; ldi.lte(); ldi++ ) {
-		if ( strcmp( ldi->_name, label ) == 0 )
+		if ( ldi->_name != 0 && ( strcmp( ldi->_name, label ) == 0 ) )
 			return ldi;
 	}
 	return 0;
