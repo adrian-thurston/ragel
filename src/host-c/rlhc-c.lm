@@ -54,24 +54,20 @@ namespace c_gen
 	{
 		for Tok: host::tok in repeat(TL) {
 			switch Tok
-			case [host::`${ StmtList: stmt* host::`}$] {
-				send Parser
-					"{
-					"	[stmt_list( StmtList )]
-					"}
+			case Stmt {
+				"{
+				"	[stmt_list( Tok.StmtList )]
+				"}
 			}
-			case [host::`={ Expr: expr host::`}=] {
-				send Parser
-					"([expr( Expr )])"
+			case Expr {
+				"([expr( Tok.Expr )])"
 			}
-			case [E: escape] {
-				Str: str = $E
-				send Parser
-					"[Str.suffix( 1 )]"
+			case Escape {
+				Str: str = $Tok.escape
+				"[Str.suffix( 1 )]"
 			}
 			default {
-				send Parser
-					[Tok]
+				[Tok]
 			}
 		}
 	}
@@ -79,22 +75,19 @@ namespace c_gen
 	void embedded_host( EmbeddedHost: embedded_host )
 	{
 		switch EmbeddedHost
-		case [`host `( string `, uint `) `={ TL: host::tok* host::`}=]
+		case Expr
 		{
-			send Parser
-				"([tok_list( TL )])"
+			"([tok_list( EmbeddedHost.TL )])"
 		}
-		case [`host `( string `, uint `) `${ TL: host::tok* host::`}$]
+		case Stmt
 		{
-			send Parser 
-				"{
-				"	[tok_list( TL )]
-				"}
+			"{
+			"	[tok_list( EmbeddedHost.TL )]
+			"}
 		}
-		case [`host `( string `, uint `) `@{ TL: host::tok* host::`}@]
+		case Bare
 		{
-			send Parser
-				[tok_list( TL )]
+			[tok_list( EmbeddedHost.TL )]
 		}
 	}
 
@@ -103,45 +96,39 @@ namespace c_gen
 		switch ExprFactor
 		case [EH: embedded_host]
 		{
-			send Parser
-				[embedded_host( EH )]
+			[embedded_host( ExprFactor.embedded_host )]
 		}
-		case [`( E: expr `)]
+		case Paren
 		{
-			send Parser
-				"([expr(E)])"
+			"([expr( ExprFactor.expr )])"
 		}
-		case [I: ident `[ E: expr `]]
+		case ArraySub
 		{
-			send Parser
-				"[I]\[[expr( E )]\]"
+			"[ExprFactor.ident]\[[expr( ExprFactor.expr )]\]"
 		}
-		case [I: ident `[ E: expr `] `. F: ident]
+		case ArraySubField
 		{
-			send Parser
-				"[I]\[[expr( E )]\].[F]"
+			"[ExprFactor.ident]\[[expr( ExprFactor.expr )]\].[ExprFactor.Field]"
 		}
-		case [`offset `( ident `, expr `)]
+		case Offset
 		{
-			send Parser
-				[ExprFactor.ident ' + ' expr( ExprFactor.expr )]
+			"[ExprFactor.ident] + [expr( ExprFactor.expr )]"
 		}
-		case [`deref `( ident `, expr `)]
+		case Deref
 		{
-			send Parser
-				"(*( [expr(ExprFactor.expr)] ))
+			"(*( [expr(ExprFactor.expr)] ))
 		}
 		case [`TRUE]
 		{
-			send Parser "1"
+			"1"
 		}
 		case [`FALSE]
 		{
-			send Parser "1"
+			"1"
 		}
 		case [N: `nil]
 		{
-			send Parser "0"
+			"0"
 		}
 		case [Number: number]
 		{
@@ -155,12 +142,11 @@ namespace c_gen
 		}
 		case [`cast `( T: type `) F: expr_factor]
 		{
-			send Parser 
-				"( [type( T )] ) [expr_factor( F )]"
+			"( [type( T )] ) [expr_factor( F )]"
 		}
 		default {
 			# Catches cases not specified
-			send Parser [ExprFactor]
+			[ExprFactor]
 		}
 	}
 
@@ -169,18 +155,15 @@ namespace c_gen
 		switch ExprFactor
 		case [EH: embedded_host]
 		{
-			send Parser
-				[embedded_host( EH )]
+			[embedded_host( EH )]
 		}
 		case [ident O: `[ TL: expr C: `]]
 		{
-			send Parser
-				[ExprFactor.ident O expr( TL ) C]
+			[ExprFactor.ident O expr( TL ) C]
 		}
 		case [I: ident `[ E: expr `] `. F: ident]
 		{
-			send Parser
-				"[I]\[[ expr( E )]\].[F]
+			"[I]\[[ expr( E )]\].[F]
 		}
 		case [E1: embedded_host `-> E2: lvalue]
 		{
@@ -190,7 +173,7 @@ namespace c_gen
 		}
 		default {
 			# Catches cases not specified
-			send Parser [ExprFactor]
+			[ExprFactor]
 		}
 	}
 
@@ -199,13 +182,11 @@ namespace c_gen
 		switch ExprFactorOp
 		case [B: `! expr_factor_op]
 		{
-			send Parser [B]
-			expr_factor_op( ExprFactorOp._expr_factor_op )
+			"! [expr_factor_op( ExprFactorOp._expr_factor_op )]"
 		}
 		case [T: `~ expr_factor_op]
 		{
-			send Parser [T]
-			expr_factor_op( ExprFactorOp._expr_factor_op )
+			"~ [expr_factor_op( ExprFactorOp._expr_factor_op )]"
 		}
 		case [expr_factor]
 		{
@@ -218,9 +199,7 @@ namespace c_gen
 		switch ExprBitwise
 		case [expr_bitwise A: `& expr_factor_op]
 		{
-			expr_bitwise( ExprBitwise._expr_bitwise )
-			send Parser [A]
-			expr_factor_op( ExprBitwise.expr_factor_op )
+			"[expr_bitwise( ExprBitwise._expr_bitwise )] [A] [expr_factor_op( ExprBitwise.expr_factor_op )]"
 		}
 		case [expr_factor_op]
 		{
@@ -233,9 +212,7 @@ namespace c_gen
 		switch ExprMult
 		case [expr_mult T: `* expr_bitwise]
 		{
-			expr_mult( ExprMult._expr_mult )
-			send Parser [T]
-			expr_bitwise( ExprMult.expr_bitwise )
+			"[expr_mult( ExprMult._expr_mult )] [T] [expr_bitwise( ExprMult.expr_bitwise )]"
 		}
 		case [expr_bitwise]
 		{
@@ -248,9 +225,7 @@ namespace c_gen
 		switch ExprAdd
 		case [expr_add Op: add_op expr_mult]
 		{
-			expr_add( ExprAdd._expr_add )
-			send Parser [Op]
-			expr_mult( ExprAdd.expr_mult )
+			"[expr_add( ExprAdd._expr_add )] [Op] [expr_mult( ExprAdd.expr_mult )]"
 		}
 		case [expr_mult]
 		{
@@ -263,9 +238,7 @@ namespace c_gen
 		switch ExprShift
 		case [expr_shift Op: shift_op expr_add]
 		{
-			expr_shift( ExprShift._expr_shift )
-			send Parser [Op]
-			expr_add( ExprShift.expr_add )
+			"[expr_shift( ExprShift._expr_shift )] [Op] [expr_add( ExprShift.expr_add )]"
 		}
 		case [expr_add]
 		{
@@ -278,9 +251,7 @@ namespace c_gen
 		switch ExprTest
 		case [expr_test Op: test_op expr_shift]
 		{
-			expr_test( ExprTest._expr_test )
-			send Parser [Op]
-			expr_shift( ExprTest.expr_shift )
+			"[expr_test( ExprTest._expr_test )] [Op] [expr_shift( ExprTest.expr_shift )]"
 		}
 		case [expr_shift]
 		{
@@ -296,193 +267,171 @@ namespace c_gen
 	void type( Type: type )
 	{
 		switch Type
-		case "s8"
-			send Parser ['char ']
-		case "s16"
-			send Parser ['short ']
-		case "s32"
-			send Parser ['int ']
-		case "s64"
-			send Parser ['long ']
-		case "s128"
-			send Parser ['long long ']
+		case S8
+			['char ']
+		case S16
+			['short ']
+		case S32
+			['int ']
+		case S64
+			['long ']
+		case S128
+			['long long ']
 		case "uint"
-			send Parser ['unsigned int ']
+			['unsigned int ']
 		default
-			send Parser [Type]
+			[Type]
 	}
 
 	void number( Number: number )
 	{
 		switch Number
-		case [`u `( uint `) ]
-			send Parser "[Number.uint]u"
+		case Unsigned
+			"[Number.uint]u"
 		default
-			send Parser [Number]
+			[Number]
 	}
 
 	void num_list( NumList: num_list )
 	{
 		for Number: number in NumList
-			send Parser "[number( Number )], "
+			"[number( Number )], "
 	}
 
 	void stmt( Stmt: stmt )
 	{
 		switch Stmt
-		case [EH: embedded_host]
+		case EmbeddedHost
 		{
-			send Parser
-				[embedded_host( EH )]
+			[embedded_host( Stmt.embedded_host )]
 		}
 		case [A: static_array] {
-			send Parser
-				"static const [type(A.type)] "
-					"[A.ident] \[\] = { [num_list(A.num_list)] };
+			"static const [type(A.type)] "
+				"[A.ident] \[\] = { [num_list(A.num_list)] };
 		}
 		case [V: static_value] {
-			send Parser
-				"static const [V.type] [V.ident] = [V.number];
+			"static const [V.type] [V.ident] = [V.number];
 		}
 		case [
-				`if `( IfExpr: expr `) IfStmt: stmt
-				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+				`if `( IfExpr: expr `)
+					IfStmt: stmt
+				ElseIfClauseList: else_if_clause*
+				ElseClauseOpt: else_clause?
 		] {
-			send Parser
-				"if ( [expr(IfExpr)] )
-				"	[stmt(IfStmt)]
+			"if ( [expr(IfExpr)] )
+			"	[stmt(IfStmt)]
 
 			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 				match ElseIfClause
 					[`else `if `( ElseIfExpr: expr `) ElseIfStmt: stmt]
 
-				send Parser
-					"else if ( [expr(ElseIfExpr)] )
-					"	[stmt(ElseIfStmt)]
+				"else if ( [expr(ElseIfExpr)] )
+				"	[stmt(ElseIfStmt)]
 			}
 
 			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-				send Parser
-					"else
-					"	[stmt(ElseStmt)]
+				"else
+				"	[stmt(ElseStmt)]
 			}
 		}
 		case [`while `( WhileExpr: expr `) WhileStmt: stmt] {
-			send Parser
-				"while ( [expr(WhileExpr)] )
-				"	[stmt(WhileStmt)]
+			"while ( [expr(WhileExpr)] )
+			"	[stmt(WhileStmt)]
 		}
 		case [M: match_stmt] {
-			send Parser
-				"switch ( [expr(M.E)] ) {
+			"switch ( [expr(M.E)] ) {
 
 			for PB: pat_block in repeat( M.P ) {
-				send Parser
-					"case [expr( PB.expr )]:
-					"[stmt_list( PB._repeat_stmt )]
-					"break;
-
+				"case [expr( PB.expr )]:
+				"[stmt_list( PB._repeat_stmt )]
+				"break;
 			}
 
 			if match M.D [D: default_block] {
-				send Parser
-					"default:
-					"[stmt_list( D._repeat_stmt )]
-					"break;
+				"default:
+				"[stmt_list( D._repeat_stmt )]
+				"break;
 			}
 
-			send Parser
-				"}
+			"}
 		}
 		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
-			send Parser
-				"switch ( [expr(SwitchExpr)] ) {
-				"	[stmt_list(StmtList)]
-				"}
+			"switch ( [expr(SwitchExpr)] ) {
+			"	[stmt_list(StmtList)]
+			"}
 		}
-		case [ExprExpr: expr Semi: `;] {
-			send Parser
-				[expr(ExprExpr) Semi]
+		case ExprStmt {
+			"[expr(Stmt.expr_stmt.expr)];
 		}
-		case [L: `{ TL: stmt* R: `}] {
-			send Parser
-				[L stmt_list(TL) R]
+		case Block {
+			"{
+			"	[stmt_list(Stmt.block.StmtList)]
+			"}
 		}
 		case [
-			TypeList: opt_const Type: type 
+			OptConst: opt_const Type: type 
 			Ident: ident OptInit: opt_init Semi: `;
 		]
 		{
-			send Parser
-				[TypeList type(Type) Ident]
+			"[OptConst] [type(Type)] [Ident]"
 
-			if match OptInit [E: `= expr] {
-				send Parser
-					[E expr(OptInit.expr)]
+			if match OptInit [`= Init: expr] {
+				" = [expr(Init)]
 			}
 
-			send Parser
-				[Semi]
+			";
 		}
 		case [Export: export_stmt]
 		{
-			send Parser
-				"#define [Export.ident] [number(Export.number)] 
+			"#define [Export.ident] [number(Export.number)] 
 		}
 		case ['fallthrough' ';']
 		{
 			# Nothing needed here.
+			# C falls through by default.
 		}
 		case [Index: index_stmt]
 		{
-			send Parser
-				"const [type(Index.type)] *[Index.ident]
+			"const [type(Index.type)] *[Index.ident]
 
 			if match Index.opt_init [E: `= expr] {
-				send Parser
-					[E expr(Index.opt_init.expr)]
+				[E expr(Index.opt_init.expr)]
 			}
 
-			send Parser ";
+			";
 		}
 		case [case_block]
 		{
-			send Parser
-				"case [expr( Stmt.case_block.expr )]:
-				"[stmt_list( Stmt.case_block._repeat_stmt )]
-				"break;
+			"case [expr( Stmt.case_block.expr )]:
+			"[stmt_list( Stmt.case_block._repeat_stmt )]
+			"break;
 		}
 		case [default_block]
 		{
-			send Parser
-				"default:
-				"[stmt_list( Stmt.default_block._repeat_stmt )]
-				"break;
+			"default:
+			"[stmt_list( Stmt.default_block._repeat_stmt )]
+			"break;
 		}
 		case [case_label]
 		{
-			send Parser
-				"case [expr( Stmt.case_label.expr )]:
+			"case [expr( Stmt.case_label.expr )]:
 		}
 		case [label_stmt]
 		{
-			send Parser
-				"[Stmt.label_stmt.ident]:
-				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+			"[Stmt.label_stmt.ident]:
+			"[stmt_list( Stmt.label_stmt._repeat_stmt )]
 		}
 		case [entry_loop]
 		{
-			send Parser
-				[stmt_list( Stmt.entry_loop._repeat_stmt )]
+			[stmt_list( Stmt.entry_loop._repeat_stmt )]
 		}
 		case [AS: assign_stmt]
 		{
-			send Parser
-				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+			"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
 		}
 		default {
 			# catches unspecified cases
-			send Parser [Stmt]
+			[Stmt]
 		}
 	}
 
@@ -496,7 +445,9 @@ namespace c_gen
 	{
 		Parser = new parser<c_out::c_out>()
 
+		stds->push( Parser->gets() )
 		stmt_list( Start._repeat_stmt )
+		stds->pop()
 
 		CO: c_out::c_out = Parser->finish()
 

@@ -11,10 +11,10 @@ namespace host
 	end
 
 	def tok
-		[`${ stmt* `}$]
-	|	[`={ expr `}=]
-	|	[escape]
-	|	[host_any]
+		[`${ StmtList: stmt* `}$]  :Stmt
+	|	[`={ Expr: expr `}=]       :Expr
+	|	[escape]                   :Escape
+	|	[host_any]                 :Any
 end
 
 lex 
@@ -69,27 +69,27 @@ lex
 end
 
 def embedded_host
-	[`host `( string `, uint `) `={ host::tok* host::`}=]
-|	[`host `( string `, uint `) `${ host::tok* host::`}$]
-|	[`host `( string `, uint `) `@{ host::tok* host::`}@]
+	[`host `( string `, uint `) `={ TL: host::tok* host::`}=] :Expr
+|	[`host `( string `, uint `) `${ TL: host::tok* host::`}$] :Stmt
+|	[`host `( string `, uint `) `@{ TL: host::tok* host::`}@] :Bare
 
 def type
-	[ident]
-|	[ident ident]
-|	[`uint]
-|	[`s8]
-|	[`s16]
-|	[`s32]
-|	[`s64]
-|	[`s128]
+	[ident] :Ident
+|	[ident ident] :Ident2
+|	[`uint] :Uint
+|	[`s8]   :S8
+|	[`s16]  :S16
+|	[`s32]  :S32
+|	[`s64]  :S64
+|	[`s128] :S128
 
 def expr_factor
-	[embedded_host]
+	[embedded_host] 
 |	[ident]
-|	[ident `[ expr `]]
-|	[ident `[ expr `] `. ident]
-|	[`offset `( ident `, expr `)]
-|	[`deref `( ident `, expr `)]
+|	[ident `[ expr `]] :ArraySub
+|	[ident `[ expr `] `. Field: ident] :ArraySubField
+|	[`offset `( ident `, expr `)] :Offset
+|	[`deref `( ident `, expr `)]  :Deref
 |	[number]
 |	[`TRUE]
 |	[`FALSE]
@@ -97,8 +97,8 @@ def expr_factor
 |	[hex_number]
 |	[string]
 |	[embedded_host `-> expr_factor]
-|	[`( expr `)]
-|	[`cast `( type `) expr_factor]
+|	[`( expr `)] :Paren
+|	[`cast `( type `) expr_factor] :Cast
 
 def lvalue
 	[embedded_host]
@@ -150,9 +150,9 @@ def sint
 |	[`- uint]
 
 def number
-	[`u `( uint `)]
-|	[`c `( uint `)]
-|	[sint]
+	[`u `( uint `)] :Unsigned
+|	[`c `( uint `)] :Char
+|	[sint] :Number
 
 def comma_num
 	[`, number]
@@ -241,7 +241,7 @@ def break_stmt
 	[`break `;]
 
 def block
-	[`{ stmt* `}]
+	[`{ StmtList: stmt* `}]
 
 def expr_stmt
 	[expr `;]
@@ -253,14 +253,14 @@ def assign_stmt
 	[LValue: lvalue assign_op expr `;]
 
 def stmt
-	[embedded_host]
+	[embedded_host] :EmbeddedHost
 |	[static_array]
 |	[static_value]
 |	[declaration]
 |	[index_stmt]
 |	[export_stmt]
 |	[assign_stmt]
-|	[expr_stmt]
+|	[expr_stmt] :ExprStmt
 |	[entry_loop]
 |	[label_stmt]
 |	[while_stmt]
@@ -274,7 +274,7 @@ def stmt
 |	[goto_stmt]
 |	[fallthrough]
 |	[break_stmt]
-|	[block]
+|	[block] :Block
 
 def start
 	[stmt*]
