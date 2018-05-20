@@ -56,14 +56,14 @@ namespace c_gen
 			switch Tok
 			case Stmt {
 				"{
-				"	[stmt_list( Tok.StmtList )]
+				"	[stmt_list( StmtList )]
 				"}
 			}
 			case Expr {
-				"([expr( Tok.Expr )])"
+				"([expr( Expr )])"
 			}
 			case Escape {
-				Str: str = $Tok.escape
+				Str: str = $escape
 				"[Str.suffix( 1 )]"
 			}
 			default {
@@ -77,17 +77,17 @@ namespace c_gen
 		switch EmbeddedHost
 		case Expr
 		{
-			"([tok_list( EmbeddedHost.TL )])"
+			"([tok_list( TL )])"
 		}
 		case Stmt
 		{
 			"{
-			"	[tok_list( EmbeddedHost.TL )]
+			"	[tok_list( TL )]
 			"}
 		}
 		case Bare
 		{
-			[tok_list( EmbeddedHost.TL )]
+			[tok_list( TL )]
 		}
 	}
 
@@ -96,27 +96,27 @@ namespace c_gen
 		switch ExprFactor
 		case [EH: embedded_host]
 		{
-			[embedded_host( ExprFactor.embedded_host )]
+			[embedded_host( embedded_host )]
 		}
 		case Paren
 		{
-			"([expr( ExprFactor.expr )])"
+			"([expr( expr )])"
 		}
 		case ArraySub
 		{
-			"[ExprFactor.ident]\[[expr( ExprFactor.expr )]\]"
+			"[ident]\[[expr( expr )]\]"
 		}
 		case ArraySubField
 		{
-			"[ExprFactor.ident]\[[expr( ExprFactor.expr )]\].[ExprFactor.Field]"
+			"[ident]\[[expr( expr )]\].[Field]"
 		}
 		case Offset
 		{
-			"[ExprFactor.ident] + [expr( ExprFactor.expr )]"
+			"[ident] + [expr( expr )]"
 		}
 		case Deref
 		{
-			"(*( [expr(ExprFactor.expr)] ))
+			"(*( [expr(expr)] ))
 		}
 		case [`TRUE]
 		{
@@ -159,7 +159,7 @@ namespace c_gen
 		}
 		case [ident O: `[ TL: expr C: `]]
 		{
-			[ExprFactor.ident O expr( TL ) C]
+			[ident O expr( TL ) C]
 		}
 		case [I: ident `[ E: expr `] `. F: ident]
 		{
@@ -182,15 +182,15 @@ namespace c_gen
 		switch ExprFactorOp
 		case [B: `! expr_factor_op]
 		{
-			"! [expr_factor_op( ExprFactorOp._expr_factor_op )]"
+			"! [expr_factor_op( _expr_factor_op )]"
 		}
 		case [T: `~ expr_factor_op]
 		{
-			"~ [expr_factor_op( ExprFactorOp._expr_factor_op )]"
+			"~ [expr_factor_op( _expr_factor_op )]"
 		}
 		case [expr_factor]
 		{
-			expr_factor( ExprFactorOp.expr_factor )
+			expr_factor( expr_factor )
 		}
 	}
 
@@ -199,11 +199,11 @@ namespace c_gen
 		switch ExprBitwise
 		case [expr_bitwise A: `& expr_factor_op]
 		{
-			"[expr_bitwise( ExprBitwise._expr_bitwise )] [A] [expr_factor_op( ExprBitwise.expr_factor_op )]"
+			"[expr_bitwise( _expr_bitwise )] [A] [expr_factor_op( expr_factor_op )]"
 		}
 		case [expr_factor_op]
 		{
-			expr_factor_op( ExprBitwise.expr_factor_op )
+			expr_factor_op( expr_factor_op )
 		}
 	}
 
@@ -212,11 +212,11 @@ namespace c_gen
 		switch ExprMult
 		case [expr_mult T: `* expr_bitwise]
 		{
-			"[expr_mult( ExprMult._expr_mult )] [T] [expr_bitwise( ExprMult.expr_bitwise )]"
+			"[expr_mult( _expr_mult )] [T] [expr_bitwise( expr_bitwise )]"
 		}
 		case [expr_bitwise]
 		{
-			expr_bitwise( ExprMult.expr_bitwise )
+			expr_bitwise( expr_bitwise )
 		}
 	}
 
@@ -225,11 +225,11 @@ namespace c_gen
 		switch ExprAdd
 		case [expr_add Op: add_op expr_mult]
 		{
-			"[expr_add( ExprAdd._expr_add )] [Op] [expr_mult( ExprAdd.expr_mult )]"
+			"[expr_add( _expr_add )] [Op] [expr_mult( expr_mult )]"
 		}
 		case [expr_mult]
 		{
-			expr_mult( ExprAdd.expr_mult )
+			expr_mult( expr_mult )
 		}
 	}
 
@@ -238,11 +238,11 @@ namespace c_gen
 		switch ExprShift
 		case [expr_shift Op: shift_op expr_add]
 		{
-			"[expr_shift( ExprShift._expr_shift )] [Op] [expr_add( ExprShift.expr_add )]"
+			"[expr_shift( _expr_shift )] [Op] [expr_add( expr_add )]"
 		}
 		case [expr_add]
 		{
-			expr_add( ExprShift.expr_add )
+			expr_add( expr_add )
 		}
 	}
 
@@ -251,11 +251,11 @@ namespace c_gen
 		switch ExprTest
 		case [expr_test Op: test_op expr_shift]
 		{
-			"[expr_test( ExprTest._expr_test )] [Op] [expr_shift( ExprTest.expr_shift )]"
+			"[expr_test( _expr_test )] [Op] [expr_shift( expr_shift )]"
 		}
 		case [expr_shift]
 		{
-			expr_shift( ExprTest.expr_shift )
+			expr_shift( expr_shift )
 		}
 	}
 
@@ -400,30 +400,30 @@ namespace c_gen
 
 			";
 		}
-		case [case_block]
+		case [CB: case_block]
 		{
-			"case [expr( Stmt.case_block.expr )]:
-			"[stmt_list( Stmt.case_block._repeat_stmt )]
+			"case [expr( CB.expr )]:
+			"[stmt_list( CB._repeat_stmt )]
 			"break;
 		}
-		case [default_block]
+		case [DB: default_block]
 		{
 			"default:
-			"[stmt_list( Stmt.default_block._repeat_stmt )]
+			"[stmt_list( DB._repeat_stmt )]
 			"break;
 		}
-		case [case_label]
+		case [CL: case_label]
 		{
-			"case [expr( Stmt.case_label.expr )]:
+			"case [expr( CL.expr )]:
 		}
-		case [label_stmt]
+		case [LS: label_stmt]
 		{
-			"[Stmt.label_stmt.ident]:
-			"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+			"[LS.ident]:
+			"[stmt_list( LS._repeat_stmt )]
 		}
-		case [entry_loop]
+		case [EL: entry_loop]
 		{
-			[stmt_list( Stmt.entry_loop._repeat_stmt )]
+			[stmt_list( EL._repeat_stmt )]
 		}
 		case [AS: assign_stmt]
 		{
