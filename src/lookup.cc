@@ -20,11 +20,14 @@
  * SOFTWARE.
  */
 
+
 #include <assert.h>
-
 #include <iostream>
-
 #include "compiler.h"
+
+/*
+ * Variable Lookup
+ */
 
 using std::cout;
 using std::cerr;
@@ -136,6 +139,26 @@ bool LangVarRef::isLocalRef() const
 	return false;
 }
 
+/* For accesing production RHS values inside a switch case that limits our
+ * search to a particular productions. */
+bool LangVarRef::isProdRef( Compiler *pd ) const
+{
+	if ( scope->caseClauseVarRef != 0 ) {
+		UniqueType *varUt = scope->caseClauseVarRef->lookup( pd );
+		ObjectDef *searchObjDef = varUt->objectDef();
+
+		if ( qual->length() > 0 ) {
+			if ( searchObjDef->rootScope->findField( qual->data[0].data ) != 0 )
+				return true;
+		}
+		else if ( searchObjDef->rootScope->findField( name ) != 0 )
+			return true;
+		else if ( searchObjDef->rootScope->findMethod( name ) != 0 )
+			return true;
+	}
+	return false;
+}
+
 bool LangVarRef::isStructRef() const
 {
 	if ( structDef != 0 ) {
@@ -179,6 +202,11 @@ VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 	}
 	else if ( isLocalRef() )
 		rootScope = scope;
+	else if ( isProdRef( pd ) ) {
+		UniqueType *varUt = scope->caseClauseVarRef->lookup( pd );
+		ObjectDef *searchObjDef = varUt->objectDef();
+		rootScope = searchObjDef->rootScope;
+	}
 	else if ( isStructRef() )
 		rootScope = structDef->objectDef->rootScope;
 	else

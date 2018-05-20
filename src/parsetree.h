@@ -72,7 +72,7 @@ struct TemplateType;
 struct ObjectMethod;
 struct Reduction;
 struct Production;
-
+struct LangVarRef;
 
 /* 
  * Code Vector
@@ -831,7 +831,8 @@ struct NameScope
 	:
 		owningObj(0),
 		parentScope(0),
-		childIter(0)
+		childIter(0),
+		caseClauseVarRef(0)
 	{}
 
 	ObjectDef *owningObj;
@@ -843,6 +844,7 @@ struct NameScope
 
 	/* For iteration after declaration. */
 	NameScope *childIter;
+	LangVarRef *caseClauseVarRef;
 
 	NameScope *prev, *next;
 
@@ -862,6 +864,7 @@ struct NameScope
 
 	ObjectField *checkRedecl( const String &name );
 	void insertField( const String &name, ObjectField *value );
+
 };
 
 
@@ -2834,6 +2837,7 @@ struct LangVarRef
 
 	bool isInbuiltObject() const;
 	bool isLocalRef() const;
+	bool isProdRef( Compiler *pd ) const;
 	bool isStructRef() const;
 	void loadQualification( Compiler *pd, CodeVect &code, NameScope *rootScope, 
 			int lastPtrInQual, bool forWriting, bool revert ) const;

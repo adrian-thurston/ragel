@@ -674,6 +674,11 @@ void LangVarRef::loadObj( Compiler *pd, CodeVect &code,
 		loadInbuiltObject( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef() )
 		loadLocalObj( pd, code, lastPtrInQual, forWriting );
+	else if ( isProdRef( pd ) ) {
+		LangVarRef *dup = new LangVarRef( *this );
+		dup->qual->prepend( QualItem( QualItem::Dot, InputLoc(), scope->caseClauseVarRef->name ) );
+		dup->loadObj( pd, code, lastPtrInQual, forWriting );
+	}
 	else if ( isStructRef() )
 		loadContextObj( pd, code, lastPtrInQual, forWriting );
 	else

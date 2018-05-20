@@ -2218,6 +2218,8 @@ struct LoadColm
 
 		LangVarRef *varRef = walkVarRef( VarRef );
 
+		scopeTop->caseClauseVarRef = varRef;
+
 		LangExpr *expr = 0;
 
 		switch ( CaseClause.prodName() ) {
@@ -2246,7 +2248,9 @@ struct LoadColm
 
 		popScope();
 
-		return LangStmt::cons( LangStmt::IfType, expr, stmtList );
+		LangStmt *stmt = LangStmt::cons( LangStmt::IfType, expr, stmtList );
+
+		return stmt;
 	}
 
 	LangStmt *walkCaseClauseList( case_clause_list CaseClauseList, var_ref VarRef )
