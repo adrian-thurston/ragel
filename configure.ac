@@ -143,6 +143,13 @@ SED_SUBST=["\
 
 AC_SUBST(SED_SUBST)
 
+dnl START PRIVATE CASES
+dnl
+dnl NEED some solution stripping out private cases from AC_OUTPUT. Can't put
+dnl comments in AC_OUTPUT.
+dnl
+dnl END PRIVATE CASES
+
 dnl write output files
 AC_OUTPUT([
 		Makefile
@@ -150,6 +157,7 @@ AC_OUTPUT([
 		cases/ragel.d/Makefile
 		cases/aapl.d/Makefile
 		cases/colm.d/Makefile
+		cases/dummy.d/Makefile
 ])
 
 echo "configuration of ragel test package complete"

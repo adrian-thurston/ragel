@@ -1,15 +1,23 @@
 #!/bin/bash
 
-read -d '' DIRS <<EOF
-	aapl.d
-	ragel.d
+PRIVATE_CASES=""
+
+# START PRIVATE CASES
+PRIVATE_CASES="
 	pcre-ragel.d
-	colm.d
 	rlhc.d
 	trans.d
 	rlparse.d
 	pcre-colm.d
-EOF
+"
+# END PRIVATE CASES
+
+DIRS="
+	aapl.d
+	ragel.d
+	colm.d
+	${PRIVATE_CASES}
+"
 
 HERE=$(basename $(pwd))
 if [ "${HERE%.d}" != "$HERE" ]; then
