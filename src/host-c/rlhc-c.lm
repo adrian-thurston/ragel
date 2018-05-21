@@ -96,7 +96,7 @@ namespace c_gen
 		switch ExprFactor
 		case [EH: embedded_host]
 		{
-			[embedded_host( embedded_host )]
+			[embedded_host( EH )]
 		}
 		case Paren
 		{
@@ -301,9 +301,9 @@ namespace c_gen
 	void stmt( Stmt: stmt )
 	{
 		switch Stmt
-		case EmbeddedHost
+		case [EH: embedded_host]
 		{
-			[embedded_host( Stmt.embedded_host )]
+			[embedded_host( EH )]
 		}
 		case [A: static_array] {
 			"static const [type(A.type)] "
@@ -360,12 +360,12 @@ namespace c_gen
 			"	[stmt_list(StmtList)]
 			"}
 		}
-		case ExprStmt {
-			"[expr(Stmt.expr_stmt.expr)];
+		case [ES: expr_stmt] {
+			"[expr(ES.expr)];
 		}
-		case Block {
+		case [B: block] {
 			"{
-			"	[stmt_list(Stmt.block.StmtList)]
+			"	[stmt_list(B.StmtList)]
 			"}
 		}
 		case [
@@ -385,7 +385,7 @@ namespace c_gen
 		{
 			"#define [Export.ident] [number(Export.number)] 
 		}
-		case ['fallthrough' ';']
+		case [fallthrough]
 		{
 			# Nothing needed here.
 			# C falls through by default.

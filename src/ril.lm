@@ -253,14 +253,14 @@ def assign_stmt
 	[LValue: lvalue assign_op expr `;]
 
 def stmt
-	[embedded_host] :EmbeddedHost
+	[embedded_host]
 |	[static_array]
 |	[static_value]
 |	[declaration]
 |	[index_stmt]
 |	[export_stmt]
 |	[assign_stmt]
-|	[expr_stmt] :ExprStmt
+|	[expr_stmt]
 |	[entry_loop]
 |	[label_stmt]
 |	[while_stmt]
@@ -274,8 +274,7 @@ def stmt
 |	[goto_stmt]
 |	[fallthrough]
 |	[break_stmt]
-|	[block] :Block
+|	[block]
 
 def start
 	[stmt*]
-
