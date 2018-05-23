@@ -55,21 +55,17 @@ namespace go_gen
 		for Tok: host::tok in repeat(TL) {
 			switch Tok
 			case Stmt {
-				send Parser
-					"{[stmt_list( StmtList )]}"
+				"{[stmt_list( StmtList )]}"
 			}
 			case Expr {
-				send Parser
-					"([expr( Expr )])"
+				"([expr( Expr )])"
 			}
 			case Escape {
 				Str: str = $Tok
-				send Parser
-					"[Str.suffix( 1 )]"
+				"[Str.suffix( 1 )]"
 			}
 			default {
-				send Parser
-					[Tok]
+				[Tok]
 			}
 		}
 	}
@@ -79,18 +75,15 @@ namespace go_gen
 		switch EmbeddedHost
 		case Expr
 		{
-			send Parser
-				"([tok_list( TL )])"
+			"([tok_list( TL )])"
 		}
 		case Stmt
 		{
-			send Parser 
-				"{[tok_list( TL )]}
+			"{[tok_list( TL )]}
 		}
 		case Bare
 		{
-			send Parser
-				[tok_list( TL )]
+			[tok_list( TL )]
 		}
 	}
 
@@ -105,48 +98,48 @@ namespace go_gen
 		case
 			[O:`( TL: expr C: `)]
 		{
-			send Parser [O]
+			[O]
 			expr( TL )
-			send Parser [C]
+			[C]
 		}
 		case
 			[ident O: `[ TL: expr C: `]]
 		{
-			send Parser [ExprFactor.ident O]
+			[ExprFactor.ident O]
 			expr( TL )
-			send Parser [C]
+			[C]
 		}
 		case
 			[`offset `( ident `, expr `)]
 		{
-			send Parser ['int(']
+			['int(']
 			expr( ExprFactor.expr )
-			send Parser [')']
+			[')']
 		}
 		case
 			['deref' '(' ident ',' expr ')']
 		{
-			send Parser [ ExprFactor.ident '[']
+			[ ExprFactor.ident '[']
 			expr( ExprFactor.expr )
-			send Parser [']']
+			[']']
 		}
 		case
 				[T: `TRUE]
 		{
 			T.data = 'true'
-			send Parser [T]
+			[T]
 		}
 		case
 				[F: `FALSE]
 		{
 			F.data = '0'
-			send Parser [F]
+			[F]
 		}
 		case
 				[N: `nil]
 		{
 			N.data = '0'
-			send Parser [N]
+			[N]
 		}
 		case [E1: embedded_host `-> E2: expr_factor]
 		{
@@ -156,13 +149,13 @@ namespace go_gen
 		case [`cast '(' Type: type ')' expr_factor]
 		{
 			type( Type )
-			send Parser ['(']
+			['(']
 			expr_factor( ExprFactor._expr_factor )
-			send Parser [')']
+			[')']
 		}
 		default {
 			# Catches cases not specified
-			send Parser [ExprFactor]
+			[ExprFactor]
 		}
 	}
 
@@ -171,15 +164,14 @@ namespace go_gen
 		switch ExprFactor
 		case [EH: embedded_host]
 		{
-			send Parser
-				[embedded_host(EH)]
+			[embedded_host(EH)]
 		}
 		case
 			[ident O: `[ TL: expr C: `]]
 		{
-			send Parser [ExprFactor.ident O]
+			[ExprFactor.ident O]
 			expr( TL )
-			send Parser [C]
+			[C]
 		}
 		case [E1: embedded_host `-> E2: lvalue]
 		{
@@ -188,7 +180,7 @@ namespace go_gen
 		}
 		default {
 			# Catches cases not specified
-			send Parser [ExprFactor]
+			[ExprFactor]
 		}
 	}
 
@@ -197,12 +189,12 @@ namespace go_gen
 		switch ExprFactorOp
 		case [B: `! expr_factor_op]
 		{
-			send Parser [B]
+			[B]
 			expr_factor_op( ExprFactorOp._expr_factor_op )
 		}
 		case [T: `~ expr_factor_op]
 		{
-			send Parser ['^']
+			['^']
 			expr_factor_op( ExprFactorOp._expr_factor_op )
 		}
 		case [expr_factor]
@@ -217,7 +209,7 @@ namespace go_gen
 		case [expr_bitwise A: `& expr_factor_op]
 		{
 			expr_bitwise( ExprBitwise._expr_bitwise )
-			send Parser [A]
+			[A]
 			expr_factor_op( ExprBitwise.expr_factor_op )
 		}
 		case [expr_factor_op]
@@ -232,7 +224,7 @@ namespace go_gen
 		case [expr_mult T: `* expr_bitwise]
 		{
 			expr_mult( ExprMult._expr_mult )
-			send Parser [T]
+			[T]
 			expr_bitwise( ExprMult.expr_bitwise )
 		}
 		case [expr_bitwise]
@@ -247,7 +239,7 @@ namespace go_gen
 		case [expr_add Op: add_op expr_mult]
 		{
 			expr_add( ExprAdd._expr_add )
-			send Parser [Op]
+			[Op]
 			expr_mult( ExprAdd.expr_mult )
 		}
 		case [expr_mult]
@@ -262,7 +254,7 @@ namespace go_gen
 		case [expr_shift Op: shift_op expr_add]
 		{
 			expr_shift( ExprShift._expr_shift )
-			send Parser [Op]
+			[Op]
 			expr_add( ExprShift.expr_add )
 		}
 		case [expr_add]
@@ -277,7 +269,7 @@ namespace go_gen
 		case [expr_test Op: test_op expr_shift]
 		{
 			expr_test( ExprTest._expr_test )
-			send Parser [Op]
+			[Op]
 			expr_shift( ExprTest.expr_shift )
 		}
 		case [expr_shift]
@@ -295,15 +287,15 @@ namespace go_gen
 	{
 		switch Type
 		case "s8"
-			send Parser ['int8 ']
+			['int8 ']
 		case "s16"
-			send Parser ['int16 ']
+			['int16 ']
 		case "s32"
-			send Parser ['int32 ']
+			['int32 ']
 		case "s64"
-			send Parser ['int64 ']
+			['int64 ']
 		case "s128"
-			send Parser ['long long ']
+			['long long ']
 		default
 			send Parser [Type]
 	}
@@ -312,16 +304,16 @@ namespace go_gen
 	{
 		switch Number
 		case [`u `( uint `) ]
-			send Parser [Number.uint]
+			[Number.uint]
 		default
-			send Parser [Number]
+			[Number]
 	}
 
 	void num_list( NumList: num_list )
 	{
 		number( NumList.number )
 		for CommaNum: comma_num in NumList {
-			send Parser [', ']
+			[', ']
 			number( CommaNum.number )
 		}
 	}
@@ -331,151 +323,127 @@ namespace go_gen
 		switch Stmt
 		case [EH: embedded_host]
 		{
-			send Parser
-				[embedded_host(EH)]
+			[embedded_host(EH)]
 		}
 		case [A: static_array] {
-			send Parser
-				"var [A.ident] \[\] [type(A.type)] = \[\] "
-					"[type(A.type)] { [num_list(A.num_list)] }
+			"var [A.ident] \[\] [type(A.type)] = \[\] "
+				"[type(A.type)] { [num_list(A.num_list)] }
 		}
 		case [V: static_value] {
-			send Parser
-				"var [V.ident] [type(V.type)] = [V.number]
+			"var [V.ident] [type(V.type)] = [V.number]
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
 		] {
 			# if-statements with only the if clause can go out as an if.
-			send Parser
-				"if [expr(IfExpr)] {
-				"	[stmt(IfStmt)]
-				"}
+			"if [expr(IfExpr)] {
+			"	[stmt(IfStmt)]
+			"}
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
 				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 		] {
 			# If the if-statement has more than just an if clause it goes out as a switch.
-			send Parser 
-				"switch {
-				"	case [expr( IfExpr )]:
-				"		[stmt( IfStmt )]
+			"switch {
+			"	case [expr( IfExpr )]:
+			"		[stmt( IfStmt )]
 
 			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 				match ElseIfClause
 					['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
-				send Parser
-					"case [expr(ElseIfExpr)]:
-					"	[stmt(ElseIfStmt)]
+				"case [expr(ElseIfExpr)]:
+				"	[stmt(ElseIfStmt)]
 			}
 
 			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-				send Parser
-					"default:
-					"	[stmt(ElseStmt)]
+				"default:
+				"	[stmt(ElseStmt)]
 			}
-			send Parser
-				"}
+			"}
 		}
 		case ["while ( TRUE )" WhileStmt: stmt] {
-			send Parser
-				"for {
-				"	[stmt(WhileStmt)]
-				"}
+			"for {
+			"	[stmt(WhileStmt)]
+			"}
 		}
 		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
-			send Parser
-				"for [expr(WhileExpr)] {
-				"	[stmt(WhileStmt)]
-				"}
+			"for [expr(WhileExpr)] {
+			"	[stmt(WhileStmt)]
+			"}
 		}
 		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
-			send Parser
-				"switch [expr(SwitchExpr)] {
-				"	[stmt_list(StmtList)]
-				"}
+			"switch [expr(SwitchExpr)] {
+			"	[stmt_list(StmtList)]
+			"}
 		}
 		case [ExprExpr: expr Semi: `;] {
-			send Parser
-				[expr(ExprExpr) Semi]
+			[expr(ExprExpr) Semi]
 		}
 		case [L: `{ TL: stmt* R: `}] {
-			send Parser
-				[L stmt_list(TL) R]
+			[L stmt_list(TL) R]
 		}
 		case [D: declaration]
 		{
-			send Parser
-				"var  [D.ident] [type(D.type)]"
+			"var  [D.ident] [type(D.type)]"
 
 			if match D.opt_init ['=' Expr: expr] {
 				send Parser
 					"  = [expr(Expr)]"
 			}
-			send Parser ['\n']
+			['\n']
 		}
 		case [export_stmt]
 		{
-			send Parser
-				"#define  [Stmt.export_stmt.ident] [number(Stmt.export_stmt.number)]
+			"#define  [Stmt.export_stmt.ident] [number(Stmt.export_stmt.number)]
 		}
 		case ['fallthrough' ';']
 		{
-			send Parser
-				"fallthrough
+			"fallthrough
 		}
 		case [Index: index_stmt]
 		{
-			send Parser
-				"var [Index.ident] int"
+			"var [Index.ident] int"
 
 			if match Index.opt_init ['=' Expr: expr] {
-				send Parser
-					" = [expr(Expr)]"
+				" = [expr(Expr)]"
 			}
 
-			send Parser ['\n']
+			['\n']
 		}
 		case [case_block]
 		{
-			send Parser
-				"case [expr( Stmt.case_block.expr )]:
-				"[stmt_list( Stmt.case_block._repeat_stmt )]
-				"break;
+			"case [expr( Stmt.case_block.expr )]:
+			"[stmt_list( Stmt.case_block._repeat_stmt )]
+			"break;
 		}
 		case [default_block]
 		{
-			send Parser
-				"default:
-				"[stmt_list( Stmt.default_block._repeat_stmt )]
-				"break;
+			"default:
+			"[stmt_list( Stmt.default_block._repeat_stmt )]
+			"break;
 		}
 		case [case_label]
 		{
-			send Parser
-				"case [expr( Stmt.case_label.expr )]:
+			"case [expr( Stmt.case_label.expr )]:
 		}
 		case [label_stmt]
 		{
-			send Parser
-				"[Stmt.label_stmt.ident]:
-				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
+			"[Stmt.label_stmt.ident]:
+			"[stmt_list( Stmt.label_stmt._repeat_stmt )]
 		}
 		case [entry_loop]
 		{
-			send Parser
-				[stmt_list( Stmt.entry_loop._repeat_stmt )]
+			[stmt_list( Stmt.entry_loop._repeat_stmt )]
 		}
 		case [AS: assign_stmt]
 		{
-			send Parser
-				"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+			"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
 		}
 		default {
 			# catches unspecified cases
-			send Parser [Stmt]
+			[Stmt]
 		}
 	}
 
@@ -489,7 +457,9 @@ namespace go_gen
 	{
 		Parser = new parser<go_out::go_out>()
 
+		stds->push( Parser->gets() )
 		stmt_list( Start._repeat_stmt )
+		stds->pop()
 
 		GO: go_out::go_out = Parser->finish()
 
@@ -501,6 +471,7 @@ namespace go_gen
 			send stderr
 				"failed to parse output: [Parser->error]
 		}
+
 	}
 end
 
