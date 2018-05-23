@@ -1,8 +1,0 @@
-int f()
-{
-	print( 'hello world\n' )
-}
-
-f()
-##### EXP #####
-hello world
