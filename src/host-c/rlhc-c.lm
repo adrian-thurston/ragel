@@ -182,15 +182,15 @@ namespace c_gen
 		switch ExprFactorOp
 		case [B: `! expr_factor_op]
 		{
-			"! [expr_factor_op( _expr_factor_op )]"
+			['!' expr_factor_op( _expr_factor_op )]
 		}
 		case [T: `~ expr_factor_op]
 		{
-			"~ [expr_factor_op( _expr_factor_op )]"
+			['~' expr_factor_op( _expr_factor_op )]
 		}
 		case [expr_factor]
 		{
-			expr_factor( expr_factor )
+			[expr_factor( expr_factor )]
 		}
 	}
 
@@ -199,11 +199,11 @@ namespace c_gen
 		switch ExprBitwise
 		case [expr_bitwise A: `& expr_factor_op]
 		{
-			"[expr_bitwise( _expr_bitwise )] [A] [expr_factor_op( expr_factor_op )]"
+			[expr_bitwise( _expr_bitwise ) A expr_factor_op( expr_factor_op )]
 		}
 		case [expr_factor_op]
 		{
-			expr_factor_op( expr_factor_op )
+			[expr_factor_op( expr_factor_op )]
 		}
 	}
 
@@ -212,11 +212,11 @@ namespace c_gen
 		switch ExprMult
 		case [expr_mult T: `* expr_bitwise]
 		{
-			"[expr_mult( _expr_mult )] [T] [expr_bitwise( expr_bitwise )]"
+			[expr_mult( _expr_mult ) T expr_bitwise( expr_bitwise )]
 		}
 		case [expr_bitwise]
 		{
-			expr_bitwise( expr_bitwise )
+			[expr_bitwise( expr_bitwise )]
 		}
 	}
 
@@ -225,11 +225,11 @@ namespace c_gen
 		switch ExprAdd
 		case [expr_add Op: add_op expr_mult]
 		{
-			"[expr_add( _expr_add )] [Op] [expr_mult( expr_mult )]"
+			[expr_add( _expr_add ) Op expr_mult( expr_mult )]
 		}
 		case [expr_mult]
 		{
-			expr_mult( expr_mult )
+			[expr_mult( expr_mult )]
 		}
 	}
 
@@ -238,11 +238,11 @@ namespace c_gen
 		switch ExprShift
 		case [expr_shift Op: shift_op expr_add]
 		{
-			"[expr_shift( _expr_shift )] [Op] [expr_add( expr_add )]"
+			[expr_shift( _expr_shift ) Op expr_add( expr_add )]
 		}
 		case [expr_add]
 		{
-			expr_add( expr_add )
+			[expr_add( expr_add )]
 		}
 	}
 
@@ -251,11 +251,11 @@ namespace c_gen
 		switch ExprTest
 		case [expr_test Op: test_op expr_shift]
 		{
-			"[expr_test( _expr_test )] [Op] [expr_shift( expr_shift )]"
+			[expr_test( _expr_test ) Op expr_shift( expr_shift )]
 		}
 		case [expr_shift]
 		{
-			expr_shift( expr_shift )
+			[expr_shift( expr_shift )]
 		}
 	}
 
@@ -287,7 +287,7 @@ namespace c_gen
 	{
 		switch Number
 		case Unsigned
-			"[Number.uint]u"
+			"[uint]u"
 		default
 			[Number]
 	}

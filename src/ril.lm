@@ -84,19 +84,19 @@ def type
 |	[`s128] :S128
 
 def expr_factor
-	[embedded_host] 
-|	[ident]
+	[embedded_host] :EmbeddedHost
+|	[ident] :Ident
 |	[ident `[ expr `]] :ArraySub
 |	[ident `[ expr `] `. Field: ident] :ArraySubField
 |	[`offset `( ident `, expr `)] :Offset
 |	[`deref `( ident `, expr `)]  :Deref
-|	[number]
-|	[`TRUE]
-|	[`FALSE]
-|	[`nil]
-|	[hex_number]
-|	[string]
-|	[embedded_host `-> expr_factor]
+|	[number] :Number
+|	[`TRUE]  :True
+|	[`FALSE] :False
+|	[`nil]   :Nil
+|	[hex_number] :HexNumber
+|	[string]     :String
+|	[embedded_host `-> expr_factor] :Access
 |	[`( expr `)] :Paren
 |	[`cast `( type `) expr_factor] :Cast
 
