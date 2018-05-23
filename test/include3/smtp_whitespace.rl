@@ -1,4 +1,0 @@
-%%{
-  machine smtp_whitespace;
-
-}%%
