@@ -921,6 +921,7 @@ free_tree:
 void colm_tree_upref( program_t *prg, tree_t *tree )
 {
 	if ( tree != 0 ) {
+		assert( tree->id < prg->rtd->first_struct_el_id );
 		tree->refs += 1;
 	}
 }
@@ -928,6 +929,7 @@ void colm_tree_upref( program_t *prg, tree_t *tree )
 void colm_tree_downref( program_t *prg, tree_t **sp, tree_t *tree )
 {
 	if ( tree != 0 ) {
+		assert( tree->id < prg->rtd->first_struct_el_id );
 		assert( tree->refs > 0 );
 		tree->refs -= 1;
 		if ( tree->refs == 0 )
