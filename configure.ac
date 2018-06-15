@@ -160,4 +160,4 @@ AC_OUTPUT([
 		cases/dummy.d/Makefile
 ])
 
-echo "configuration of ragel test package complete"
+echo "configuration of testing package complete"
