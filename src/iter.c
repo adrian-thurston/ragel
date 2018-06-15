@@ -171,7 +171,7 @@ value_t colm_viter_deref_cur( program_t *prg, generic_iter_t *iter )
 
 	value_t value = colm_struct_get_field( s, value_t, 0 );
 	if ( gi->value_type == TYPE_TREE )
-		colm_tree_upref( (tree_t*)value );
+		colm_tree_upref( prg, (tree_t*)value );
 
 	return value;
 }

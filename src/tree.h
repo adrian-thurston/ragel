@@ -214,7 +214,8 @@ typedef struct colm_user_iter
 	long search_id;
 } user_iter_t;
 
-void colm_tree_upref( tree_t *tree );
+void colm_tree_upref_( tree_t *tree );
+void colm_tree_upref( struct colm_program *prg, tree_t *tree );
 void colm_tree_downref( struct colm_program *prg, tree_t **sp, tree_t *tree );
 long colm_cmp_tree( struct colm_program *prg, const tree_t *tree1, const tree_t *tree2 );
 

@@ -268,7 +268,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			parse_tree->flags &= ~PF_HAS_RCODE;
 		}
 
-		colm_tree_upref( parse_tree->shadow->tree );
+		colm_tree_upref( prg, parse_tree->shadow->tree );
 
 		send_back_tree( is, parse_tree->shadow->tree );
 	}
@@ -384,7 +384,7 @@ kid_t *make_token_with_data( program_t *prg, struct pda_run *pda_run,
 					pda_run->mark[ca->mark_leave] -
 							pda_run->mark[ca->mark_enter] );
 			tree_t *string = construct_string( prg, data );
-			colm_tree_upref( string );
+			colm_tree_upref( prg, string );
 			colm_tree_set_field( prg, input->tree, ca->offset, string );
 		}
 	}
@@ -452,7 +452,7 @@ static void report_parse_error( program_t *prg, tree_t **sp, struct pda_run *pda
 	tree_t *tree = construct_string( prg, error_head );
 	colm_tree_downref( prg, sp, pda_run->parse_error_text );
 	pda_run->parse_error_text = tree;
-	colm_tree_upref( pda_run->parse_error_text );
+	colm_tree_upref( prg, pda_run->parse_error_text );
 }
 
 static void attach_right_ignore( program_t *prg, tree_t **sp,
@@ -1080,7 +1080,7 @@ static void push_bt_point( program_t *prg, struct pda_run *pda_run )
 
 		kid_t *kid = kid_allocate( prg );
 		kid->tree = tree;
-		colm_tree_upref( tree );
+		colm_tree_upref( prg, tree );
 		kid->next = pda_run->bt_point;
 		pda_run->bt_point = kid;
 	}
@@ -1488,7 +1488,7 @@ again:
 
 			ref_t *ref = (ref_t*)kid_allocate( prg );
 			ref->kid = pda_run->lel->shadow;
-			//colm_tree_upref( pdaRun->tree );
+			//colm_tree_upref( prg, pdaRun->tree );
 			ref->next = pda_run->token_list;
 			pda_run->token_list = ref;
 		}
@@ -1638,7 +1638,7 @@ again:
 //
 //					/* Copy it in. */
 //					pdaRun->redLel->tree = newPt;
-//					colm_tree_upref( pdaRun->redLel->tree );
+//					colm_tree_upref( prg, pdaRun->redLel->tree );
 
 					/* Add the restore instruct. */
 					append_code_val( &pda_run->rcode_collect, IN_RESTORE_LHS );

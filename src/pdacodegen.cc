@@ -504,6 +504,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		"	" << runtimeData->global_size << ",\n"
 		"\n"
 		"	" << runtimeData->first_non_term_id << ",\n"
+		"	" << runtimeData->first_struct_el_id << ",\n"
 		"	" << runtimeData->integer_id << ",\n"
 		"	" << runtimeData->string_id << ",\n"
 		"	" << runtimeData->any_id << ",\n"

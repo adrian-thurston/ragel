@@ -253,7 +253,7 @@ static void ins_left_ignore( program_t *prg, tree_t *tree, tree_t *ignore_list )
 	/* Allocate. */
 	kid_t *kid = kid_allocate( prg );
 	kid->tree = ignore_list;
-	colm_tree_upref( ignore_list );
+	colm_tree_upref( prg, ignore_list );
 
 	/* Attach it. */
 	kid->next = tree->child;
@@ -269,7 +269,7 @@ static void ins_right_ignore( program_t *prg, tree_t *tree, tree_t *ignore_list 
 	/* Insert an ignore head in the child list. */
 	kid_t *kid = kid_allocate( prg );
 	kid->tree = ignore_list;
-	colm_tree_upref( ignore_list );
+	colm_tree_upref( prg, ignore_list );
 
 	/* Attach it. */
 	if ( tree->flags & AF_LEFT_IGNORE ) {
@@ -299,7 +299,7 @@ tree_t *push_right_ignore( program_t *prg, tree_t *push_to, tree_t *right_ignore
 		 * upreffed it in insLeftIgnore. */
 		cur_ignore->tree->refs -= 1;
 		cur_ignore->tree = right_ignore;
-		colm_tree_upref( right_ignore );
+		colm_tree_upref( prg, right_ignore );
 	}
 	else {
 		/* Attach The ignore list. */
@@ -324,7 +324,7 @@ tree_t *push_left_ignore( program_t *prg, tree_t *push_to, tree_t *left_ignore )
 		 * upreffed it in insRightIgnore. */
 		cur_ignore->tree->refs -= 1;
 		cur_ignore->tree = left_ignore;
-		colm_tree_upref( left_ignore );
+		colm_tree_upref( prg, left_ignore );
 	}
 	else {
 		/* Attach the ignore list. */
@@ -377,15 +377,15 @@ tree_t *pop_right_ignore( program_t *prg, tree_t **sp, tree_t *pop_from, tree_t 
 	 * right ignore. */
 	kid_t *li = tree_left_ignore_kid( prg, ri_kid->tree );
 	if ( li != 0 ) {
-		colm_tree_upref( li->tree );
+		colm_tree_upref( prg, li->tree );
 		rem_left_ignore( prg, sp, ri_kid->tree );
 		*right_ignore = ri_kid->tree;
-		colm_tree_upref( *right_ignore );
+		colm_tree_upref( prg, *right_ignore );
 		ri_kid->tree = li->tree;
 	}
 	else  {
 		*right_ignore = ri_kid->tree;
-		colm_tree_upref( *right_ignore );
+		colm_tree_upref( prg, *right_ignore );
 		rem_right_ignore( prg, sp, pop_from );
 	}
 
@@ -403,15 +403,15 @@ tree_t *pop_left_ignore( program_t *prg, tree_t **sp, tree_t *pop_from, tree_t *
 	 * left ignore. */
 	kid_t *ri = tree_right_ignore_kid( prg, li_kid->tree );
 	if ( ri != 0 ) {
-		colm_tree_upref( ri->tree );
+		colm_tree_upref( prg, ri->tree );
 		rem_right_ignore( prg, sp, li_kid->tree );
 		*left_ignore = li_kid->tree;
-		colm_tree_upref( *left_ignore );
+		colm_tree_upref( prg, *left_ignore );
 		li_kid->tree = ri->tree;
 	}
 	else {
 		*left_ignore = li_kid->tree;
-		colm_tree_upref( *left_ignore );
+		colm_tree_upref( prg, *left_ignore );
 		rem_left_ignore( prg, sp, pop_from );
 	}
 
@@ -593,7 +593,7 @@ tree_t *colm_construct_token( program_t *prg, tree_t **args, long nargs )
 		long i;
 		for ( i = 2; i < nargs; i++ ) {
 			colm_tree_set_attr( tree, i-2, args[i] );
-			colm_tree_upref( colm_get_attr( tree, i-2 ) );
+			colm_tree_upref( prg, colm_get_attr( tree, i-2 ) );
 		}
 	}
 	return tree;
@@ -704,7 +704,7 @@ tree_t *make_tree( program_t *prg, tree_t **args, long nargs )
 	for ( id = 1; id < nargs; id++ ) {
 		kid_t *kid = kid_allocate( prg );
 		kid->tree = args[id];
-		colm_tree_upref( kid->tree );
+		colm_tree_upref( prg, kid->tree );
 
 		if ( last == 0 )
 			child = kid;
@@ -758,7 +758,7 @@ kid_t *copy_kid_list( program_t *prg, kid_t *kid_list )
 		kid_t *new_ic = kid_allocate( prg );
 
 		new_ic->tree = ic->tree;
-		colm_tree_upref( new_ic->tree );
+		colm_tree_upref( prg, new_ic->tree );
 
 		/* List pointers. */
 		if ( last == 0 )
@@ -858,7 +858,7 @@ tree_t *split_tree( program_t *prg, tree_t *tree )
 		if ( tree->refs > 1 ) {
 			kid_t *old_next_down = 0, *new_next_down = 0;
 			tree_t *new_tree = colm_copy_tree( prg, tree, old_next_down, &new_next_down );
-			colm_tree_upref( new_tree );
+			colm_tree_upref( prg, new_tree );
 
 			/* Downref the original. Don't need to consider freeing because
 			 * refs were > 1. */
@@ -918,10 +918,11 @@ free_tree:
 	}
 }
 
-void colm_tree_upref( tree_t *tree )
+void colm_tree_upref( program_t *prg, tree_t *tree )
 {
-	if ( tree != 0 )
+	if ( tree != 0 ) {
 		tree->refs += 1;
+	}
 }
 
 void colm_tree_downref( program_t *prg, tree_t **sp, tree_t *tree )
@@ -1302,7 +1303,7 @@ void split_ref( program_t *prg, tree_t ***psp, ref_t *from_ref )
 
 			tree_t *new_tree = colm_copy_tree( prg, ref->kid->tree, 
 					old_next_kid_down, &new_next_kid_down );
-			colm_tree_upref( new_tree );
+			colm_tree_upref( prg, new_tree );
 			
 			/* Downref the original. Don't need to consider freeing because
 			 * refs were > 1. */

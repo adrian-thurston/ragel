@@ -91,7 +91,7 @@ value_t colm_vlist_detach_tail( struct colm_program *prg, list_t *list )
 	value_t val = colm_struct_get_field( s, value_t, 0 );
 
 	if ( list->generic_info->value_type == TYPE_TREE )
-		colm_tree_upref( (tree_t*)val );
+		colm_tree_upref( prg, (tree_t*)val );
 
 	return val;
 }
@@ -107,7 +107,7 @@ value_t colm_vlist_detach_head( struct colm_program *prg, list_t *list )
 	value_t val = colm_struct_get_field( s, value_t, 0 );
 
 	if ( list->generic_info->value_type == TYPE_TREE )
-		colm_tree_upref( (tree_t*) val );
+		colm_tree_upref( prg, (tree_t*) val );
 
 	return val;
 }

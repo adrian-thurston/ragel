@@ -91,6 +91,7 @@ struct colm_sections
 	long global_size;
 
 	long first_non_term_id;
+	long first_struct_el_id;
 
 	long integer_id;
 	long string_id;

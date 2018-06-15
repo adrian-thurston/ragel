@@ -240,6 +240,8 @@ void Compiler::makeLangElIds()
 
 void Compiler::makeStructElIds()
 {
+	firstStructElId = nextLelId;
+
 	/* Start at the next lang el id and go up from there. Using disjoint sets
 	 * allows us to verify that a tree is a tree and struct is a struct because
 	 * the ID field is at the same offset. */
@@ -1678,9 +1680,14 @@ void Compiler::makeRuntimeData()
 	runtimeData->global_size = globalObjectDef->size();
 
 	/*
-	 * firstNonTermId
+	 * Boundary between terms and non-terms.
 	 */
 	runtimeData->first_non_term_id = firstNonTermId;
+
+	/*
+	 * Boundary between trees and structs
+	 */
+	runtimeData->first_struct_el_id = firstStructElId;
 
 	/* Special trees. */
 	runtimeData->integer_id = -1; //intLangEl->id;

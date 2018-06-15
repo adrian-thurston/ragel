@@ -908,6 +908,7 @@ struct Compiler
 
 	int nextLelId;
 	int firstNonTermId;
+	int firstStructElId;
 	int structInbuiltId;
 	int structStreamId;
 
