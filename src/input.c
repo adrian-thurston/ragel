@@ -392,10 +392,9 @@ static int file_undo_consume_data( struct stream_impl *ss, const char *data, int
 	return length;
 }
 
-static int file_get_data_source( struct stream_impl *ss, char *dest, int length )
+static int file_get_data_source( struct stream_impl *si, char *dest, int length )
 {
-	size_t read = fread( dest, 1, length, ss->file );
-	return read;
+	return fread( dest, 1, length, si->file );
 }
 
 void init_file_funcs()
@@ -407,30 +406,13 @@ void init_file_funcs()
  * Text inputs
  */
 
-static int text_get_data( struct stream_impl *ss, char *dest, int length )
+static int text_get_data_source( struct stream_impl *si, char *dest, int want )
 {
-	return 0;
-}
-
-static int text_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
-{
-	return 0;
-}
-
-static int text_consume_data( program_t *prg, tree_t **sp,
-		struct stream_impl *ss, int length, location_t *loc )
-{
-	return 0;
-}
-
-static int text_undo_consume_data( struct stream_impl *ss, const char *data, int length )
-{
-	return 0;
-}
-
-static int text_get_data_source( struct stream_impl *ss, char *dest, int length )
-{
-	return 0;
+	long avail = si->dlen - si->offset;
+	long take = avail < want ? avail : want;
+	memcpy( dest, si->data + si->offset, take );
+	si->offset += take;
+	return take;
 }
 
 
@@ -847,7 +829,7 @@ static void stream_undo_consume_lang_el( struct stream_impl *is )
 	}
 }
 
-void stream_prepend_data2( struct stream_impl *si, const char *data, long length )
+static void stream_prepend_data( struct stream_impl *si, const char *data, long length )
 {
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
@@ -856,36 +838,6 @@ void stream_prepend_data2( struct stream_impl *si, const char *data, long length
 	new_buf->si = sub_si;
 
 	input_stream_prepend( si, new_buf );
-}
-
-static void stream_prepend_data( struct stream_impl *is, const char *data, long length )
-{
-	if ( is_source_stream( is ) && is->queue->si->funcs == &stream_funcs )
-	{
-		stream_prepend_data( is->queue->si, data, length );
-	}
-	else {
-		if ( is_source_stream( is ) ) {
-			/* Steal the location information. Note that name allocations are
-			 * managed separately from streams and so ptr overwrite transfer is
-			 * safe. */
-			is->line = is->queue->si->line;
-			is->column = is->queue->si->column;
-			is->byte = is->queue->si->byte;
-			is->name = strdup(is->queue->si->name);
-		}
-
-		/* Create a new buffer for the data. This is the easy implementation.
-		 * Something better is needed here. It puts a max on the amount of
-		 * data that can be pushed back to the inputStream. */
-		assert( length < FSM_BUFSIZE );
-
-		struct run_buf *new_buf = new_run_buf( 0 );
-		new_buf->length = length;
-		memcpy( new_buf->data, data, length );
-
-		input_stream_prepend( is, new_buf );
-	}
 }
 
 static void stream_prepend_tree( struct stream_impl *is, tree_t *tree, int ignore )
@@ -925,7 +877,7 @@ static int stream_undo_prepend_data( struct stream_impl *is, int length )
 
 		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
-			int slen = si->funcs->undo_prepend_data( si, length );
+			int slen = stream_undo_prepend_data( si, length );
 
 			consumed += slen;
 			length -= slen;
@@ -1085,7 +1037,7 @@ struct stream_funcs stream_funcs =
 	0, // source data get, not needed.
 	&stream_set_eof,
 	&stream_unset_eof,
-	&stream_prepend_data,
+	&stream_prepend_data2,
 	&stream_prepend_tree,
 	&stream_prepend_stream,
 	&stream_undo_prepend_data,
@@ -1105,15 +1057,17 @@ struct stream_funcs file_funcs =
 	.get_parse_block = &file_get_parse_block,
 	.consume_data = &file_consume_data,
 	.undo_consume_data = &file_undo_consume_data,
+
 	.get_data_source = &file_get_data_source,
 };
 
 struct stream_funcs text_funcs = 
 {
-	.get_data = &text_get_data,
-	.get_parse_block = &text_get_parse_block,
-	.consume_data = &text_consume_data,
-	.undo_consume_data = &text_undo_consume_data,
+	.get_data = &file_get_data,
+	.get_parse_block = &file_get_parse_block,
+	.consume_data = &file_consume_data,
+	.undo_consume_data = &file_undo_consume_data,
+
 	.get_data_source = &text_get_data_source,
 };
 
