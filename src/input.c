@@ -37,6 +37,8 @@
 #include <colm/pool.h>
 #include <colm/struct.h>
 
+static struct stream_impl *colm_impl_new_text( char *name, const char *data, int len );
+
 char *colm_filename_add( program_t *prg, const char *fn )
 {
 	/* Search for it. */
@@ -78,8 +80,8 @@ void init_pat_funcs();
 void init_cons_funcs();
 
 extern struct stream_funcs file_funcs;
-extern struct stream_funcs fd_funcs;
 extern struct stream_funcs stream_funcs;
+extern struct stream_funcs text_funcs;
 
 static bool loc_set( location_t *loc )
 {
@@ -228,9 +230,53 @@ static void source_stream_prepend( struct stream_impl *ss, struct run_buf *run_b
 	}
 }
 
-/* 
- * Base run-time input streams.
+/*
+ * File Inputs.
  */
+
+static int file_get_data( struct stream_impl *ss, char *dest, int length )
+{
+	int copied = 0;
+
+	/* Move over skip bytes. */
+	struct run_buf *buf = ss->queue;
+	while ( true ) {
+		if ( buf == 0 ) {
+			/* Got through the in-mem buffers without copying anything. */
+			struct run_buf *run_buf = new_run_buf( 0 );
+			source_stream_append( ss, run_buf );
+			int received = ss->funcs->get_data_source( ss, run_buf->data, FSM_BUFSIZE );
+			run_buf->length = received;
+			if ( received == 0 )
+				break;
+
+			buf = run_buf;
+		}
+
+		int avail = buf->length - buf->offset;
+
+		/* Anything available in the current buffer. */
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			char *src = &buf->data[buf->offset];
+
+			int slen = avail < length ? avail : length;
+			memcpy( dest+copied, src, slen ) ;
+			copied += slen;
+			length -= slen;
+		}
+
+		if ( length == 0 ) {
+			//debug( REALM_INPUT, "exiting get data\n", length );
+			break;
+		}
+
+		buf = buf->next;
+	}
+
+	return copied;
+}
+
 
 static int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
 {
@@ -291,49 +337,6 @@ static int file_get_parse_block( struct stream_impl *ss, int skip, char **pdp, i
 	return ret;
 }
 
-static int file_get_data( struct stream_impl *ss, char *dest, int length )
-{
-	int copied = 0;
-
-	/* Move over skip bytes. */
-	struct run_buf *buf = ss->queue;
-	while ( true ) {
-		if ( buf == 0 ) {
-			/* Got through the in-mem buffers without copying anything. */
-			struct run_buf *run_buf = new_run_buf( 0 );
-			source_stream_append( ss, run_buf );
-			int received = ss->funcs->get_data_source( ss, run_buf->data, FSM_BUFSIZE );
-			run_buf->length = received;
-			if ( received == 0 )
-				break;
-
-			buf = run_buf;
-		}
-
-		int avail = buf->length - buf->offset;
-
-		/* Anything available in the current buffer. */
-		if ( avail > 0 ) {
-			/* The source data from the current buffer. */
-			char *src = &buf->data[buf->offset];
-
-			int slen = avail < length ? avail : length;
-			memcpy( dest+copied, src, slen ) ;
-			copied += slen;
-			length -= slen;
-		}
-
-		if ( length == 0 ) {
-			//debug( REALM_INPUT, "exiting get data\n", length );
-			break;
-		}
-
-		buf = buf->next;
-	}
-
-	return copied;
-}
-
 static int file_consume_data( program_t *prg, tree_t **sp,
 		struct stream_impl *ss, int length, location_t *loc )
 {
@@ -389,10 +392,6 @@ static int file_undo_consume_data( struct stream_impl *ss, const char *data, int
 	return length;
 }
 
-/*
- * File
- */
-
 static int file_get_data_source( struct stream_impl *ss, char *dest, int length )
 {
 	size_t read = fread( dest, 1, length, ss->file );
@@ -403,6 +402,37 @@ void init_file_funcs()
 {
 	memset( &file_funcs, 0, sizeof(struct stream_funcs) );
 }
+
+/*
+ * Text inputs
+ */
+
+static int text_get_data( struct stream_impl *ss, char *dest, int length )
+{
+	return 0;
+}
+
+static int text_get_parse_block( struct stream_impl *ss, int skip, char **pdp, int *copied )
+{
+	return 0;
+}
+
+static int text_consume_data( program_t *prg, tree_t **sp,
+		struct stream_impl *ss, int length, location_t *loc )
+{
+	return 0;
+}
+
+static int text_undo_consume_data( struct stream_impl *ss, const char *data, int length )
+{
+	return 0;
+}
+
+static int text_get_data_source( struct stream_impl *ss, char *dest, int length )
+{
+	return 0;
+}
+
 
 /*
  * StreamImpl struct, this wraps the list of input streams.
@@ -817,6 +847,17 @@ static void stream_undo_consume_lang_el( struct stream_impl *is )
 	}
 }
 
+static void stream_prepend_data2( struct stream_impl *si, const char *data, long length )
+{
+	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
+
+	struct run_buf *new_buf = new_run_buf( 0 );
+	new_buf->type = RunBufSourceType;
+	new_buf->si = sub_si;
+
+	input_stream_prepend( si, new_buf );
+}
+
 static void stream_prepend_data( struct stream_impl *is, const char *data, long length )
 {
 	if ( is_source_stream( is ) && 
@@ -1069,6 +1110,14 @@ struct stream_funcs file_funcs =
 	.get_data_source = &file_get_data_source,
 };
 
+struct stream_funcs text_funcs = 
+{
+	.get_data = &text_get_data,
+	.get_parse_block = &text_get_parse_block,
+	.consume_data = &text_consume_data,
+	.undo_consume_data = &text_undo_consume_data,
+	.get_data_source = &text_get_data_source,
+};
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 {
@@ -1081,11 +1130,26 @@ static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 
 static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 {
-	struct stream_impl *ss = (struct stream_impl*)malloc(sizeof(struct stream_impl));
-	init_stream_impl( ss, name );
-	ss->funcs = &file_funcs;
-	ss->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
-	return ss;
+	struct stream_impl *si = (struct stream_impl*)malloc(sizeof(struct stream_impl));
+	init_stream_impl( si, name );
+	si->funcs = &file_funcs;
+	si->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
+	return si;
+}
+
+static struct stream_impl *colm_impl_new_text( char *name, const char *data, int len )
+{
+	struct stream_impl *si = (struct stream_impl*)malloc(sizeof(struct stream_impl));
+	init_stream_impl( si, name );
+	si->funcs = &text_funcs;
+
+	char *dest = (char*)malloc( len );
+	memcpy( dest, data, len );
+
+	si->data = data;
+	si->dlen = len;
+
+	return si;
 }
 
 struct stream_impl *colm_impl_new_generic( char *name )
@@ -1095,6 +1159,7 @@ struct stream_impl *colm_impl_new_generic( char *name )
 	ss->funcs = &stream_funcs;
 	return ss;
 }
+
 
 struct stream_impl *colm_impl_new_collect( char *name )
 {
