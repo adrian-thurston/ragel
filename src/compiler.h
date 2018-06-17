@@ -1137,5 +1137,8 @@ ObjectMethod *initFunction( UniqueType *retType, Namespace *nspace, ObjectDef *o
 		UniqueType *arg1, UniqueType *arg2, bool isConst,
 		bool useFnInstr = false, GenericType *useGeneric = 0 );
 
+extern "C" struct stream_impl *colm_impl_new_pat( char *name, struct Pattern *pattern );
+extern "C" struct stream_impl *colm_impl_new_cons( char *name, struct Constructor *constructor );
+
 #endif /* _COLM_PARSEDATA_H */
 

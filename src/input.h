@@ -42,10 +42,6 @@ extern "C" {
 #define INPUT_IGNORE   7
 
 struct LangEl;
-struct Pattern;
-struct PatternItem;
-struct Constructor;
-struct ConsItem;
 struct colm_tree;
 struct colm_stream;
 struct colm_location;
@@ -194,11 +190,6 @@ struct stream_impl
 
 	struct _StrCollect *collect;
 
-	struct Pattern *pattern;
-	struct PatternItem *pat_item;
-	struct Constructor *constructor;
-	struct ConsItem *cons_item;
-
 	int consumed;
 
 	/* Indentation. */
@@ -206,8 +197,6 @@ struct stream_impl
 	int indent;
 };
 
-struct stream_impl *colm_impl_new_pat( char *name, struct Pattern *pattern );
-struct stream_impl *colm_impl_new_cons( char *name, struct Constructor *constructor );
 struct stream_impl *colm_impl_new_generic( char *name );
 
 
