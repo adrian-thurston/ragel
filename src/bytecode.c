@@ -264,7 +264,7 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, t
 	return length;
 }
 
-static word_t stream_append_stream( program_t *prg, tree_t **sp, stream_t *dest, tree_t *stream )
+static word_t stream_append_stream( program_t *prg, tree_t **sp, stream_t *dest, stream_t *stream )
 {
 	long length = 0;
 
@@ -341,7 +341,7 @@ static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tr
 static long stream_push_stream( program_t *prg, tree_t **sp,
 		struct stream_impl *in, stream_t *stream )
 {
-	colm_stream_push_stream( in, (tree_t*)stream );
+	colm_stream_push_stream( in, stream );
 	return -1;
 }
 
@@ -2451,10 +2451,10 @@ again:
 		case IN_SEND_STREAM_W: {
 			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_W\n" );
 
-			tree_t *input = vm_pop_tree();
+			stream_t *to_send = vm_pop_stream();
 			stream_t *stream = vm_pop_stream();
 
-			word_t len = stream_append_stream( prg, sp, stream->parser->input, input );
+			word_t len = stream_append_stream( prg, sp, stream->parser->input, to_send );
 
 			vm_push_stream( stream );
 
@@ -2462,7 +2462,7 @@ again:
 				rcode_unit_start( exec );
 				rcode_code( exec, IN_SEND_STREAM_BKT );
 				rcode_word( exec, (word_t) stream );
-				rcode_word( exec, (word_t) input );
+				rcode_word( exec, (word_t) to_send );
 				rcode_word( exec, (word_t) len );
 				rcode_unit_term( exec );
 			}

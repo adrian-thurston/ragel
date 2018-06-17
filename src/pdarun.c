@@ -158,9 +158,9 @@ void colm_stream_push_tree( struct stream_impl *is, tree_t *tree, int ignore )
 	is->funcs->prepend_tree( is, tree, ignore );
 }
 
-void colm_stream_push_stream( struct stream_impl *is, tree_t *tree )
+void colm_stream_push_stream( struct stream_impl *is, stream_t *stream )
 {
-	is->funcs->prepend_stream( is, tree );
+	is->funcs->prepend_stream( is, stream );
 }
 
 void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is, long length )

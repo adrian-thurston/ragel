@@ -1002,7 +1002,7 @@ pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &lo
 	stream_t *stream = colm_stream_new_struct( prg );
 	stream->impl = sourceStream;
 
-	in->funcs->append_stream( in, (tree_t*)stream );
+	in->funcs->append_stream( in, stream );
 	in->funcs->set_eof( in );
 
 	long pcr = colm_parse_loop( prg, sp, pdaRun, in, PCR_START );

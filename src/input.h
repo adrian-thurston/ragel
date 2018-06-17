@@ -57,10 +57,10 @@ struct colm_stream;
 struct stream_impl;
 
 enum run_buf_type {
-	RunBufDataType = 0,
-	RunBufTokenType,
-	RunBufIgnoreType,
-	RunBufSourceType
+	RUN_BUF_DATA_TYPE = 0,
+	RUN_BUF_TOKEN_TYPE,
+	RUN_BUF_IGNORE_TYPE,
+	RUN_BUF_SOURCE_TYPE
 };
 
 struct run_buf
@@ -68,6 +68,7 @@ struct run_buf
 	enum run_buf_type type;
 	long length;
 	struct colm_tree *tree;
+	struct colm_stream *stream;
 	struct stream_impl *si;
 	long offset;
 	struct run_buf *next, *prev;
@@ -107,7 +108,8 @@ struct stream_funcs
 	/* Prepending to a stream. */
 	void (*prepend_data)( struct stream_impl *in, const char *data, long len );
 	void (*prepend_tree)( struct stream_impl *is, struct colm_tree *tree, int ignore );
-	void (*prepend_stream)( struct stream_impl *in, struct colm_tree *tree );
+	void (*prepend_stream)( struct stream_impl *in, struct colm_stream *stream );
+
 	int (*undo_prepend_data)( struct stream_impl *is, int length );
 	struct colm_tree *(*undo_prepend_tree)( struct stream_impl *is );
 	struct colm_tree *(*undo_prepend_stream)( struct stream_impl *in );
@@ -115,7 +117,8 @@ struct stream_funcs
 	/* Appending to a stream. */
 	void (*append_data)( struct stream_impl *in, const char *data, long len );
 	void (*append_tree)( struct stream_impl *in, struct colm_tree *tree );
-	void (*append_stream)( struct stream_impl *in, struct colm_tree *tree );
+	void (*append_stream)( struct stream_impl *in, struct colm_stream *stream );
+
 	struct colm_tree *(*undo_append_data)( struct stream_impl *in, int length );
 	struct colm_tree *(*undo_append_tree)( struct stream_impl *in );
 	struct colm_tree *(*undo_append_stream)( struct stream_impl *in );
