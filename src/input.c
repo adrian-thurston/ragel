@@ -774,7 +774,7 @@ static int stream_undo_consume_data( struct stream_impl *is, const char *data, i
 
 static tree_t *stream_consume_tree( struct stream_impl *is )
 {
-	while ( is->queue != 0 && is->queue->type == RUN_BUF_DATA_TYPE && 
+	while ( is->queue != 0 && ( is->queue->type == RUN_BUF_SOURCE_TYPE || is->queue->type == RUN_BUF_DATA_TYPE ) && 
 			is->queue->offset == is->queue->length )
 	{
 		struct run_buf *run_buf = input_stream_pop_head( is );
@@ -838,6 +838,17 @@ static void stream_prepend_data( struct stream_impl *si, const char *data, long 
 	new_buf->si = sub_si;
 
 	input_stream_prepend( si, new_buf );
+}
+
+static void stream_append_data( struct stream_impl *si, const char *data, long length )
+{
+	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
+
+	struct run_buf *new_buf = new_run_buf( 0 );
+	new_buf->type = RUN_BUF_SOURCE_TYPE;
+	new_buf->si = sub_si;
+
+	input_stream_append( si, new_buf );
 }
 
 static void stream_prepend_tree( struct stream_impl *is, tree_t *tree, int ignore )
@@ -910,7 +921,7 @@ static int stream_undo_prepend_data( struct stream_impl *is, int length )
 
 static tree_t *stream_undo_prepend_tree( struct stream_impl *is )
 {
-	while ( is->queue != 0 && is->queue->type == RUN_BUF_DATA_TYPE &&
+	while ( is->queue != 0 && ( is->queue->type == RUN_BUF_SOURCE_TYPE || is->queue->type == RUN_BUF_DATA_TYPE ) && 
 			is->queue->offset == is->queue->length )
 	{
 		struct run_buf *run_buf = input_stream_pop_head( is );
@@ -929,24 +940,6 @@ static tree_t *stream_undo_prepend_tree( struct stream_impl *is )
 	}
 
 	return 0;
-}
-
-static void stream_append_data( struct stream_impl *is, const char *data, long len )
-{
-	while ( len > 0 ) {
-		struct run_buf *ad = new_run_buf( 0 );
-		input_stream_append( is, ad );
-
-		long consume = 
-			len <= (long)sizeof(ad->data) ? 
-			len : (long)sizeof(ad->data);
-
-		memcpy( ad->data, data, consume );
-		ad->length = consume;
-
-		len -= consume;
-		data += consume;
-	}
 }
 
 static tree_t *stream_undo_append_data( struct stream_impl *is, int length )
@@ -1037,7 +1030,7 @@ struct stream_funcs stream_funcs =
 	0, // source data get, not needed.
 	&stream_set_eof,
 	&stream_unset_eof,
-	&stream_prepend_data2,
+	&stream_prepend_data,
 	&stream_prepend_tree,
 	&stream_prepend_stream,
 	&stream_undo_prepend_data,
@@ -1095,10 +1088,10 @@ static struct stream_impl *colm_impl_new_text( char *name, const char *data, int
 	init_stream_impl( si, name );
 	si->funcs = &text_funcs;
 
-	char *dest = (char*)malloc( len );
-	memcpy( dest, data, len );
+	char *buf = (char*)malloc( len );
+	memcpy( buf, data, len );
 
-	si->data = data;
+	si->data = buf;
 	si->dlen = len;
 
 	return si;
