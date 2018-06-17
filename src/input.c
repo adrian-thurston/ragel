@@ -543,7 +543,7 @@ static void stream_set_eof( struct stream_impl *is )
 static void stream_unset_eof( struct stream_impl *is )
 {
 	if ( is_source_stream( is ) ) {
-		struct stream_impl *si = stream_to_impl( is->queue->stream );
+		struct stream_impl *si = is->queue->si;
 		si->eof = false;
 	}
 	else {
@@ -566,7 +566,7 @@ static int stream_get_parse_block( struct stream_impl *is, int skip, char **pdp,
 		}
 
 		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
-			struct stream_impl *si = stream_to_impl( buf->stream );
+			struct stream_impl *si = buf->si;
 			int type = si->funcs->get_parse_block( si, skip, pdp, copied );
 
 //			if ( type == INPUT_EOD && !si->eosSent ) {
@@ -663,7 +663,7 @@ static int stream_get_data( struct stream_impl *is, char *dest, int length )
 		}
 
 		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
-			struct stream_impl *si = stream_to_impl( buf->stream );
+			struct stream_impl *si = buf->si;
 			int glen = si->funcs->get_data( si, dest+copied, length );
 
 			if ( glen == 0 ) {
@@ -721,7 +721,7 @@ static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl 
 			break;
 
 		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
-			struct stream_impl *si = stream_to_impl( buf->stream );
+			struct stream_impl *si = buf->si;
 			int slen = si->funcs->consume_data( prg, sp, si, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
@@ -775,7 +775,7 @@ static int stream_undo_consume_data( struct stream_impl *is, const char *data, i
 	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
 
 	if ( is->consumed == 0 && is_source_stream( is ) ) {
-		struct stream_impl *si = stream_to_impl( is->queue->stream );
+		struct stream_impl *si = is->queue->si;
 		int len = si->funcs->undo_consume_data( si, data, length );
 		return len;
 	}
@@ -828,7 +828,7 @@ static struct LangEl *stream_consume_lang_el( struct stream_impl *is, long *bind
 		char **data, long *length )
 {
 	if ( is_source_stream( is ) ) {
-		struct stream_impl *si = stream_to_impl( is->queue->stream );
+		struct stream_impl *si = is->queue->si;
 		return si->funcs->consume_lang_el( si, bind_id, data, length );
 	}
 	else {
@@ -839,7 +839,7 @@ static struct LangEl *stream_consume_lang_el( struct stream_impl *is, long *bind
 static void stream_undo_consume_lang_el( struct stream_impl *is )
 {
 	if ( is_source_stream( is ) ) {
-		struct stream_impl *si = stream_to_impl( is->queue->stream );
+		struct stream_impl *si = is->queue->si;
 		return si->funcs->undo_consume_lang_el( si );
 	}
 	else {
@@ -860,21 +860,19 @@ void stream_prepend_data2( struct stream_impl *si, const char *data, long length
 
 static void stream_prepend_data( struct stream_impl *is, const char *data, long length )
 {
-	if ( is_source_stream( is ) && 
-			stream_to_impl(is->queue->stream)->funcs == &stream_funcs )
+	if ( is_source_stream( is ) && is->queue->si->funcs == &stream_funcs )
 	{
-		stream_prepend_data( stream_to_impl( is->queue->stream ), data, length );
+		stream_prepend_data( is->queue->si, data, length );
 	}
 	else {
 		if ( is_source_stream( is ) ) {
 			/* Steal the location information. Note that name allocations are
 			 * managed separately from streams and so ptr overwrite transfer is
 			 * safe. */
-			stream_t *s = is->queue->stream;
-			is->line = s->impl->line;
-			is->column = s->impl->column;
-			is->byte = s->impl->byte;
-			is->name = strdup(s->impl->name);
+			is->line = is->queue->si->line;
+			is->column = is->queue->si->column;
+			is->byte = is->queue->si->byte;
+			is->name = strdup(is->queue->si->name);
 		}
 
 		/* Create a new buffer for the data. This is the easy implementation.
@@ -908,7 +906,7 @@ static void stream_prepend_stream( struct stream_impl *in, struct colm_stream *s
 	 * data that can be pushed back to the inputStream. */
 	struct run_buf *new_buf = new_run_buf( 0 );
 	new_buf->type = RUN_BUF_SOURCE_TYPE;
-	new_buf->stream = stream;
+	new_buf->si = stream_to_impl( stream );
 	input_stream_prepend( in, new_buf );
 }
 
@@ -926,7 +924,7 @@ static int stream_undo_prepend_data( struct stream_impl *is, int length )
 			break;
 
 		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
-			struct stream_impl *si = stream_to_impl( buf->stream );
+			struct stream_impl *si = buf->si;
 			int slen = si->funcs->undo_prepend_data( si, length );
 
 			consumed += slen;
@@ -1054,7 +1052,7 @@ static void stream_append_stream( struct stream_impl *in, struct colm_stream *st
 	input_stream_append( in, ad );
 
 	ad->type = RUN_BUF_SOURCE_TYPE;
-	ad->stream = stream;
+	ad->si = stream_to_impl(stream);
 	ad->length = 0;
 }
 

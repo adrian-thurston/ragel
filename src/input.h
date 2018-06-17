@@ -68,7 +68,6 @@ struct run_buf
 	enum run_buf_type type;
 	long length;
 	struct colm_tree *tree;
-	struct colm_stream *stream;
 	struct stream_impl *si;
 	long offset;
 	struct run_buf *next, *prev;
