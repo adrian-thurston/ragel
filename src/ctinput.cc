@@ -157,27 +157,6 @@ void inputStreamPatternBackup( struct stream_impl *ss )
 		ss->pat_item = ss->pat_item->prev;
 }
 
-void inputStreamPatternPushBackBuf( struct stream_impl *ss, struct run_buf *runBuf )
-{
-	char *data = runBuf->data + runBuf->offset;
-	long length = runBuf->length;
-
-	if ( length == 0 )
-		return;
-
-	/* While pushing back past the current pattern item start. */
-	while ( length > ss->offset ) {
-		length -= ss->offset;
-		if ( ss->offset > 0 )
-			assert( memcmp( ss->pat_item->data, data-length, ss->offset ) == 0 );
-		inputStreamPatternBackup( ss );
-		ss->offset = ss->pat_item->data.length();
-	}
-
-	ss->offset -= length;
-	assert( memcmp( &ss->pat_item->data[ss->offset], data, length ) == 0 );
-}
-
 void inputStreamPatternUndoConsumeLangEl( struct stream_impl *ss )
 {
 	inputStreamPatternBackup( ss );
@@ -369,31 +348,6 @@ void inputStreamConsBackup( struct stream_impl *ss )
 		ss->cons_item = ss->constructor->list->tail;
 	else
 		ss->cons_item = ss->cons_item->prev;
-}
-
-void inputStreamConsPushBackBuf( struct stream_impl *ss, struct run_buf *runBuf )
-{
-	char *data = runBuf->data + runBuf->offset;
-	long length = runBuf->length;
-
-	//cerr << "push back data: ";
-	//cerr.write( data, length );
-	//cerr << endl;
-
-	if ( length == 0 )
-		return;
-
-	/* While pushing back past the current pattern item start. */
-	while ( length > ss->offset ) {
-		length -= ss->offset;
-		if ( ss->offset > 0 ) 
-			assert( memcmp( ss->cons_item->data, data-length, ss->offset ) == 0 );
-		inputStreamConsBackup( ss );
-		ss->offset = ss->cons_item->data.length();
-	}
-
-	ss->offset -= length;
-	assert( memcmp( &ss->cons_item->data[ss->offset], data, length ) == 0 );
 }
 
 void inputStreamConsUndoConsumeLangEl( struct stream_impl *ss )
