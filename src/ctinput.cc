@@ -206,14 +206,14 @@ int inputStreamPatternUndoConsumeData( struct stream_impl *ss, const char *data,
 
 stream_funcs patternFuncs = 
 {
-	&inputStreamPatternGetParseBlock,
-	&inputStreamPatternGetData,
-	&inputStreamPatternConsumeData,
-	&inputStreamPatternUndoConsumeData,
+	(get_parse_block_t)   &inputStreamPatternGetParseBlock,
+	(get_data_t)          &inputStreamPatternGetData,
+	(consume_data_t)      &inputStreamPatternConsumeData,
+	(undo_consume_data_t) &inputStreamPatternUndoConsumeData,
 	0,
 	0,
-	&inputStreamPatternGetLangEl,
-	&inputStreamPatternUndoConsumeLangEl,
+	(consume_lang_el_t)      &inputStreamPatternGetLangEl,
+	(undo_consume_lang_el_t) &inputStreamPatternUndoConsumeLangEl,
 };
 
 
@@ -412,14 +412,14 @@ int inputStreamConsUndoConsumeData( struct stream_impl *ss, const char *data, in
 
 stream_funcs replFuncs =
 {
-	&inputStreamConsGetParseBlock,
-	&inputStreamConsGetData,
-	&inputStreamConsConsumeData,
-	&inputStreamConsUndoConsumeData,
+	(get_parse_block_t)   &inputStreamConsGetParseBlock,
+	(get_data_t)          &inputStreamConsGetData,
+	(consume_data_t)      &inputStreamConsConsumeData,
+	(undo_consume_data_t) &inputStreamConsUndoConsumeData,
 	0,
 	0,
-	&inputStreamConsGetLangEl,
-	&inputStreamConsUndoConsumeLangEl,
+	(consume_lang_el_t)      &inputStreamConsGetLangEl,
+	(undo_consume_lang_el_t) &inputStreamConsUndoConsumeLangEl,
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )
