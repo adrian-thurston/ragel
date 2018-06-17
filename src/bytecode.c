@@ -220,8 +220,7 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, stream_t *dest, t
 	struct stream_impl *impl = stream_to_impl( dest );
 
 	if ( input->id == LEL_ID_PTR ) {
-		colm_tree_upref( prg, input );
-		impl->funcs->append_stream( impl, input );
+		assert(false);
 	}
 	else {
 		/* Collect the tree data. */
@@ -243,7 +242,10 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, t
 	long length = 0;
 	struct stream_impl *impl = stream_to_impl( dest );
 
-	if ( input->id == LEL_ID_STR ) {
+	if ( input->id == LEL_ID_PTR ) {
+		assert(false);
+	}
+	else if ( input->id == LEL_ID_STR ) {
 		/* Collect the tree data. */
 		StrCollect collect;
 		init_str_collect( &collect );
@@ -253,10 +255,6 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, t
 		impl->funcs->append_data( impl, collect.data, collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
-	}
-	else if ( input->id == LEL_ID_PTR ) {
-		colm_tree_upref( prg, input );
-		impl->funcs->append_stream( impl, input );
 	}
 	else {
 		colm_tree_upref( prg, input );
@@ -279,10 +277,10 @@ static word_t stream_append_stream( program_t *prg, tree_t **sp, stream_t *dest,
 static void stream_undo_append( program_t *prg, tree_t **sp,
 		struct stream_impl *is, tree_t *input, long length )
 {
-	if ( input->id == LEL_ID_STR )
+	if ( input->id == LEL_ID_PTR )
+		assert(false);
+	else if ( input->id == LEL_ID_STR )
 		is->funcs->undo_append_data( is, length );
-	else if ( input->id == LEL_ID_PTR )
-		is->funcs->undo_append_stream( is );
 	else {
 		is->funcs->undo_append_data( is, length );
 	}
@@ -313,7 +311,11 @@ static void undo_pull( program_t *prg, stream_t *stream, tree_t *str )
 
 static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tree_t *tree, int ignore )
 {
-	if ( tree->id == LEL_ID_STR ) {
+	long length = -1;
+	if ( tree->id == LEL_ID_PTR ) {
+		assert(false);
+	}
+	else if ( tree->id == LEL_ID_STR ) {
 		/* This should become a compile error. If it's text, it's up to the
 		 * scanner to decide. Want to force it then send a token. */
 		assert( !ignore );
@@ -324,21 +326,16 @@ static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tr
 		colm_print_tree_collect( prg, sp, &collect, tree, false );
 
 		colm_stream_push_text( in, collect.data, collect.length );
-		long length = collect.length;
+		length = collect.length;
 		str_collect_destroy( &collect );
 
-		return length;
-	}
-	else if ( tree->id == LEL_ID_PTR ) {
-		colm_tree_upref( prg, tree );
-		colm_stream_push_stream( in, tree );
-		return -1;
 	}
 	else {
 		colm_tree_upref( prg, tree );
 		colm_stream_push_tree( in, tree, ignore );
-		return -1;
 	}
+
+	return length;
 }
 
 static long stream_push_stream( program_t *prg, tree_t **sp,
