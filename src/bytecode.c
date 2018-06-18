@@ -2340,10 +2340,7 @@ again:
 			if ( stream->parser == 0 ) {
 				struct stream_impl *si = stream_to_impl( stream );
 
-				if ( si->file != 0 )
-					colm_print_tree_file( prg, sp, si, input, false );
-				else if ( si->collect != 0 )
-					colm_print_tree_collect( prg, sp, si->collect, input, false );
+				si->funcs->print_tree( prg, sp, si, input, false );
 
 				vm_push_stream( stream );
 
@@ -2400,10 +2397,7 @@ again:
 			if ( stream->parser == 0 ) {
 				struct stream_impl *si = stream_to_impl( stream );
 
-				if ( si->file != 0 )
-					colm_print_tree_file( prg, sp, si, input, false );
-				else if ( si->collect != 0 )
-					colm_print_tree_collect( prg, sp, si->collect, input, false );
+				si->funcs->print_tree( prg, sp, si, input, false );
 
 				vm_push_stream( stream );
 

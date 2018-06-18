@@ -337,6 +337,15 @@ static void data_flush_stream( struct stream_impl_data *si )
 		fflush( si->file );
 }
 
+static void data_print_tree( struct colm_program *prg, tree_t **sp,
+		struct stream_impl_data *si, tree_t *tree, int trim )
+{
+	if ( si->file != 0 )
+		colm_print_tree_file( prg, sp, (struct stream_impl*)si, tree, false );
+	else if ( si->collect != 0 )
+		colm_print_tree_collect( prg, sp, si->collect, tree, false );
+}
+
 static int data_get_parse_block( struct stream_impl_data *ss, int skip, char **pdp, int *copied )
 {
 	int ret = 0;
@@ -622,6 +631,14 @@ static void stream_flush_stream( struct stream_impl_seq *si )
 {
 }
 
+static void stream_print_tree( struct colm_program *prg, tree_t **sp,
+		struct stream_impl_seq *si, tree_t *tree, int trim )
+{
+	if ( si->file != 0 )
+		colm_print_tree_file( prg, sp, (struct stream_impl*)si, tree, false );
+	else if ( si->collect != 0 )
+		colm_print_tree_collect( prg, sp, si->collect, tree, false );
+}
 
 static int stream_get_parse_block( struct stream_impl_seq *is, int skip, char **pdp, int *copied )
 {
@@ -1190,6 +1207,7 @@ struct stream_funcs_seq stream_funcs =
 	.destructor =  &stream_destructor,
 	.get_collect = &stream_get_collect,
 	.flush_stream = &stream_flush_stream,
+	.print_tree = &stream_print_tree,
 };
 
 struct stream_funcs_data file_funcs = 
@@ -1202,6 +1220,7 @@ struct stream_funcs_data file_funcs =
 	.destructor =        &data_destructor,
 	.get_collect =       &data_get_collect,
 	.flush_stream =      &data_flush_stream,
+	.print_tree =        &data_print_tree,
 };
 
 struct stream_funcs_data text_funcs = 
@@ -1214,6 +1233,7 @@ struct stream_funcs_data text_funcs =
 	.destructor =        &data_destructor,
 	.get_collect =       &data_get_collect,
 	.flush_stream =      &data_flush_stream,
+	.print_tree =        &data_print_tree,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )

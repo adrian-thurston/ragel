@@ -104,6 +104,8 @@ struct stream_funcs \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct stream_impl *si ); \
 	struct colm_str_collect *(*get_collect)( struct stream_impl *si ); \
 	void (*flush_stream)( struct stream_impl *si ); \
+	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
+			struct stream_impl *impl, struct colm_tree *tree, int trim ); \
 }
 
 DEF_STREAM_FUNCS( stream_funcs, stream_impl );
