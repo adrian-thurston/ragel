@@ -565,20 +565,19 @@ static int is_source_stream( struct stream_impl_seq *is )
 	return false;
 }
 
-static void stream_set_eof( struct stream_impl_seq *is )
+static void stream_set_eof( struct stream_impl_seq *si )
 {
-	//debug( REALM_INPUT, "setting EOF in input stream\n" );
-	is->eof = true;
+	si->eof = true;
 }
 
-static void stream_unset_eof( struct stream_impl_seq *is )
+static void stream_unset_eof( struct stream_impl_seq *si )
 {
-	if ( is_source_stream( is ) ) {
-		struct stream_impl *si = is->queue->si;
-		si->eof = false;
+	if ( is_source_stream( si ) ) {
+		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
+		sid->eof = false;
 	}
 	else {
-		is->eof = false;
+		si->eof = false;
 	}
 }
 
