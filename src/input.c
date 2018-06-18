@@ -354,6 +354,16 @@ static void data_print_tree( struct colm_program *prg, tree_t **sp,
 		colm_print_tree_collect( prg, sp, si->collect, tree, false );
 }
 
+char data_get_eof_sent( struct stream_impl_data *si )
+{
+	return si->eof_sent;
+}
+
+void data_set_eof_sent( struct stream_impl_data *si, char eof_sent )
+{
+	si->eof_sent = eof_sent;
+}
+
 static int data_get_parse_block( struct stream_impl_data *ss, int skip, char **pdp, int *copied )
 {
 	int ret = 0;
@@ -646,6 +656,16 @@ static void stream_close_stream( struct stream_impl_seq *si )
 static void stream_print_tree( struct colm_program *prg, tree_t **sp,
 		struct stream_impl_seq *si, tree_t *tree, int trim )
 {
+}
+
+char stream_get_eof_sent( struct stream_impl_seq *si )
+{
+	return si->eof_sent;
+}
+
+void stream_set_eof_sent( struct stream_impl_seq *si, char eof_sent )
+{
+	si->eof_sent = eof_sent;
 }
 
 static int stream_get_parse_block( struct stream_impl_seq *is, int skip, char **pdp, int *copied )
@@ -1217,6 +1237,8 @@ struct stream_funcs_seq stream_funcs =
 	.flush_stream = &stream_flush_stream,
 	.close_stream = &stream_close_stream,
 	.print_tree = &stream_print_tree,
+	.get_eof_sent = &stream_get_eof_sent,
+	.set_eof_sent = &stream_set_eof_sent,
 };
 
 struct stream_funcs_data file_funcs = 
@@ -1231,6 +1253,8 @@ struct stream_funcs_data file_funcs =
 	.flush_stream =      &data_flush_stream,
 	.close_stream =      &data_close_stream,
 	.print_tree =        &data_print_tree,
+	.get_eof_sent =      &data_get_eof_sent,
+	.set_eof_sent =      &data_set_eof_sent,
 };
 
 struct stream_funcs_data text_funcs = 
@@ -1245,6 +1269,8 @@ struct stream_funcs_data text_funcs =
 	.flush_stream =      &data_flush_stream,
 	.close_stream =      &data_close_stream,
 	.print_tree =        &data_print_tree,
+	.get_eof_sent =      &data_get_eof_sent,
+	.set_eof_sent =      &data_set_eof_sent,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )

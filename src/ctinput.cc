@@ -53,8 +53,21 @@ struct stream_impl_ct
 	struct Constructor *constructor;
 	struct ConsItem *cons_item;
 
+	char eof_sent;
+
 	int offset;
 };
+
+char inputStreamGetEofSent( struct stream_impl_ct *si )
+{
+	return si->eof_sent;
+}
+
+void inputStreamSetEofSent( struct stream_impl_ct *si, char eof_sent )
+{
+	si->eof_sent = eof_sent;
+}
+
 
 
 /*
@@ -246,7 +259,10 @@ stream_funcs_ct patternFuncs =
 
 	&inputStreamPatternDestructor,
 
-	0, 0, 0, 0
+	0, 0, 0, 0,
+
+	&inputStreamGetEofSent,
+	&inputStreamSetEofSent,
 };
 
 
@@ -465,7 +481,10 @@ stream_funcs_ct replFuncs =
 
 	&inputStreamConsDestructor,
 
-	0, 0, 0, 0
+	0, 0, 0, 0,
+
+	&inputStreamGetEofSent,
+	&inputStreamSetEofSent,
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )

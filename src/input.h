@@ -107,6 +107,8 @@ struct stream_funcs \
 	void (*close_stream)( struct stream_impl *si ); \
 	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
 			struct stream_impl *impl, struct colm_tree *tree, int trim ); \
+	char (*get_eof_sent)( struct stream_impl *impl ); \
+	void (*set_eof_sent)( struct stream_impl *impl, char eof_sent ); \
 }
 
 DEF_STREAM_FUNCS( stream_funcs, stream_impl );

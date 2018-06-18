@@ -286,7 +286,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( parse_tree->id == prg->rtd->eof_lel_ids[pda_run->parser_id] )
-			is->eof_sent = false;
+			is->funcs->set_eof_sent( is, false );
 
 		/* If the item is bound then store remove it from the bindings array. */
 		prg->rtd->pop_binding( pda_run, parse_tree );
@@ -2009,7 +2009,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		/* Check for EOF. */
 		if ( pda_run->token_id == SCAN_EOF ) {
-			is->eof_sent = true;
+			is->funcs->set_eof_sent( is, true );
 			send_eof( prg, sp, pda_run, is );
 
 			pda_run->frame_id = prg->rtd->region_info[pda_run->region].eof_frame_id;
@@ -2166,7 +2166,7 @@ skip_send:
 			break;
 		}
 
-		if ( is->eof_sent ) {
+		if ( is->funcs->get_eof_sent( is ) ) {
 			debug( prg, REALM_PARSE, "parsing stopped by EOF\n" );
 			break;
 		}
