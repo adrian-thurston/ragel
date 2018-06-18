@@ -246,7 +246,7 @@ stream_funcs_ct patternFuncs =
 
 	&inputStreamPatternDestructor,
 
-	0, 0, 0
+	0, 0, 0, 0
 };
 
 
@@ -465,7 +465,7 @@ stream_funcs_ct replFuncs =
 
 	&inputStreamConsDestructor,
 
-	0, 0, 0
+	0, 0, 0, 0
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )

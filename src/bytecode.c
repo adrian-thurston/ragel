@@ -2532,10 +2532,7 @@ again:
 			stream_t *stream = vm_pop_stream();
 			struct stream_impl *si = stream->impl;
 
-			if ( si->file != 0 ) {
-				colm_close_stream_file( si->file );
-				si->file = 0;
-			}
+			si->funcs->close_stream( si );
 
 			vm_push_stream( stream );
 			break;

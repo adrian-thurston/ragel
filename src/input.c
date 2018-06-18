@@ -337,6 +337,14 @@ static void data_flush_stream( struct stream_impl_data *si )
 		fflush( si->file );
 }
 
+static void data_close_stream( struct stream_impl_data *si )
+{
+	if ( si->file != 0 ) {
+		colm_close_stream_file( si->file );
+		si->file = 0;
+	}
+}
+
 static void data_print_tree( struct colm_program *prg, tree_t **sp,
 		struct stream_impl_data *si, tree_t *tree, int trim )
 {
@@ -628,6 +636,10 @@ static str_collect_t *stream_get_collect( struct stream_impl_seq *si )
 }
 
 static void stream_flush_stream( struct stream_impl_seq *si )
+{
+}
+
+static void stream_close_stream( struct stream_impl_seq *si )
 {
 }
 
@@ -1207,6 +1219,7 @@ struct stream_funcs_seq stream_funcs =
 	.destructor =  &stream_destructor,
 	.get_collect = &stream_get_collect,
 	.flush_stream = &stream_flush_stream,
+	.close_stream = &stream_close_stream,
 	.print_tree = &stream_print_tree,
 };
 
@@ -1220,6 +1233,7 @@ struct stream_funcs_data file_funcs =
 	.destructor =        &data_destructor,
 	.get_collect =       &data_get_collect,
 	.flush_stream =      &data_flush_stream,
+	.close_stream =      &data_close_stream,
 	.print_tree =        &data_print_tree,
 };
 
@@ -1233,6 +1247,7 @@ struct stream_funcs_data text_funcs =
 	.destructor =        &data_destructor,
 	.get_collect =       &data_get_collect,
 	.flush_stream =      &data_flush_stream,
+	.close_stream =      &data_close_stream,
 	.print_tree =        &data_print_tree,
 };
 
