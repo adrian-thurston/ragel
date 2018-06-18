@@ -132,24 +132,13 @@ struct stream_impl_seq
 	struct run_buf *queue;
 	struct run_buf *queue_tail;
 
-	const char *data;
-	long dlen;
-	int offset;
-
 	long line;
 	long column;
 	long byte;
 
 	char *name;
-	FILE *file;
-
-	struct colm_str_collect *collect;
 
 	int consumed;
-
-	/* Indentation. */
-	int level;
-	int indent;
 };
 
 /* List of source streams. Enables streams to be pushed/popped. */

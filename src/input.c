@@ -517,9 +517,6 @@ void init_stream_impl_seq( struct stream_impl_seq *is, char *name )
 	is->line = 1;
 	is->column = 1;
 	is->byte = 0;
-
-	/* Indentation turned off. */
-	is->level = COLM_INDENT_OFF;
 }
 
 void init_stream_impl_data( struct stream_impl_data *is, char *name )
@@ -622,14 +619,6 @@ static void stream_unset_eof( struct stream_impl_seq *si )
 static void stream_destructor( program_t *prg, tree_t **sp, struct stream_impl_seq *si )
 {
 	colm_clear_source_stream( prg, sp, si );
-
-	if ( si->file != 0 )
-		colm_close_stream_file( si->file );
-	
-	if ( si->collect != 0 ) {
-		str_collect_destroy( si->collect );
-		free( si->collect );
-	}
 
 	/* FIXME: Need to leak this for now. Until we can return strings to a
 	 * program loader and free them at a later date (after the colm program is
