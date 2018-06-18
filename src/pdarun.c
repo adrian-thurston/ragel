@@ -116,7 +116,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		is->funcs->get_data( is, dest, length );
 		location_t *loc = location_allocate( prg );
-		is->funcs->consume_data( prg, sp, is, length, loc );
+		is->funcs->consume_data( is, length, loc );
 
 		run_buf->length += length;
 
@@ -134,7 +134,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		is->funcs->get_data( is, dest, length );
 		location_t *loc = location_allocate( prg );
-		is->funcs->consume_data( prg, sp, is, length, loc );
+		is->funcs->consume_data( is, length, loc );
 		head->location = loc;
 
 		return head;
@@ -743,7 +743,7 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 
 	is->funcs->get_data( is, dest, length );
 	location_t *location = location_allocate( prg );
-	is->funcs->consume_data( prg, sp, is, length, location );
+	is->funcs->consume_data( is, length, location );
 
 	run_buf->length += length;
 
@@ -767,7 +767,7 @@ static head_t *extract_no_d( program_t *prg, tree_t **sp,
 
 	/* Just a consume, no data allocate. */
 	location_t *location = location_allocate( prg );
-	is->funcs->consume_data( prg, sp, is, length, location );
+	is->funcs->consume_data( is, length, location );
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;
@@ -803,7 +803,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 	/* Using a dummpy location. */
 	location_t location;
 	memset( &location, 0, sizeof( location ) );
-	is->funcs->consume_data( prg, sp, is, length, &location );
+	is->funcs->consume_data( is, length, &location );
 
 	run_buf->length += length;
 
@@ -829,7 +829,7 @@ static head_t *consume_match( program_t *prg, tree_t **sp,
 	/* No data or location returned. We just consume the data. */
 	location_t dummy_loc;
 	memset( &dummy_loc, 0, sizeof(dummy_loc) );
-	is->funcs->consume_data( prg, sp, is, length, &dummy_loc );
+	is->funcs->consume_data( is, length, &dummy_loc );
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;

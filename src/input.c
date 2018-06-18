@@ -376,8 +376,7 @@ static int data_get_parse_block( struct stream_impl_data *ss, int skip, char **p
 	return ret;
 }
 
-static int data_consume_data( program_t *prg, tree_t **sp,
-		struct stream_impl_data *ss, int length, location_t *loc )
+static int data_consume_data( struct stream_impl_data *ss, int length, location_t *loc )
 {
 	int consumed = 0;
 
@@ -755,8 +754,7 @@ static int stream_get_data( struct stream_impl_seq *is, char *dest, int length )
 	return copied;
 }
 
-static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl_seq *is,
-		int length, location_t *loc )
+static int stream_consume_data( struct stream_impl_seq *is, int length, location_t *loc )
 {
 	//debug( REALM_INPUT, "consuming %d bytes\n", length );
 
@@ -771,7 +769,7 @@ static int stream_consume_data( program_t *prg, tree_t **sp, struct stream_impl_
 
 		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
-			int slen = si->funcs->consume_data( prg, sp, si, length, loc );
+			int slen = si->funcs->consume_data( si, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
 
 			consumed += slen;

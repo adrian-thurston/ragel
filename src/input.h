@@ -81,8 +81,7 @@ typedef int (*get_parse_block_t)( struct stream_impl *si, int skip, char **pdp, 
 typedef int (*get_data_t)( struct stream_impl *si, char *dest, int length );
 
 /* Consuming data. */
-typedef int (*consume_data_t)( struct colm_program *prg, struct colm_tree **sp,
-		struct stream_impl *si, int length, struct colm_location *loc );
+typedef int (*consume_data_t)( struct stream_impl *si, int length, struct colm_location *loc );
 typedef int (*undo_consume_data_t)( struct stream_impl *si, const char *data, int length );
 
 /* Consuming trees. */
@@ -127,8 +126,7 @@ struct stream_funcs
 
 	int (*get_data)( struct stream_impl *si, char *dest, int length );
 
-	int (*consume_data)( struct colm_program *prg, struct colm_tree **sp,
-			struct stream_impl *si, int length, struct colm_location *loc );
+	int (*consume_data)( struct stream_impl *si, int length, struct colm_location *loc );
 	int (*undo_consume_data)( struct stream_impl *si, const char *data, int length );
 
 	struct colm_tree *(*consume_tree)( struct stream_impl *si );
