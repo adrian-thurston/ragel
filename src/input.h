@@ -107,8 +107,9 @@ struct stream_funcs \
 	void (*close_stream)( struct stream_impl *si ); \
 	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
 			struct stream_impl *impl, struct colm_tree *tree, int trim ); \
-	char (*get_eof_sent)( struct stream_impl *impl ); \
-	void (*set_eof_sent)( struct stream_impl *impl, char eof_sent ); \
+	char (*get_eof_sent)( struct stream_impl *si ); \
+	void (*set_eof_sent)( struct stream_impl *si, char eof_sent ); \
+	void (*transfer_loc)( struct colm_location *loc, struct stream_impl *si ); \
 }
 
 DEF_STREAM_FUNCS( stream_funcs, stream_impl );
@@ -117,32 +118,6 @@ DEF_STREAM_FUNCS( stream_funcs, stream_impl );
 struct stream_impl
 {
 	struct stream_funcs *funcs;
-
-	char eof_sent;
-	char eof;
-	char eos_sent;
-
-	struct run_buf *queue;
-	struct run_buf *queue_tail;
-
-	const char *data;
-	long dlen;
-	int offset;
-
-	long line;
-	long column;
-	long byte;
-
-	char *name;
-	FILE *file;
-
-	struct colm_str_collect *collect;
-
-	int consumed;
-
-	/* Indentation. */
-	int level;
-	int indent;
 };
 
 /* List of source streams. Enables streams to be pushed/popped. */

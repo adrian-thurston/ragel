@@ -68,6 +68,13 @@ void inputStreamSetEofSent( struct stream_impl_ct *si, char eof_sent )
 	si->eof_sent = eof_sent;
 }
 
+void inputStreamTransferLoc( location_t *loc, struct stream_impl_ct *si )
+{
+	loc->name = si->name;
+	loc->line = si->line;
+	loc->column = si->column;
+	loc->byte = si->byte;
+}
 
 
 /*

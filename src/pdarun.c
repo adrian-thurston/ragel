@@ -755,7 +755,7 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 
 	head->location = location;
 
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+	debug( prg, REALM_PARSE, "location byte: %d\n", head->location->byte );
 
 	return head;
 }
@@ -777,7 +777,7 @@ static head_t *extract_no_d( program_t *prg, tree_t **sp,
 
 	head->location = location;
 
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+	debug( prg, REALM_PARSE, "location byte: %d\n", head->location->byte );
 
 	return head;
 }
@@ -816,7 +816,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 	/* Don't pass the location. */
 	head->location = 0;
 
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+	debug( prg, REALM_PARSE, "location byte: %d\n", location.byte );
 
 	return head;
 }
@@ -835,7 +835,7 @@ static head_t *consume_match( program_t *prg, tree_t **sp,
 	pda_run->toklen = 0;
 	pda_run->tokstart = 0;
 
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+	debug( prg, REALM_PARSE, "location byte: %d\n", dummy_loc.byte );
 
 	return 0;
 }
@@ -862,11 +862,9 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
 	head->location = location_allocate( prg );
-	head->location->line = is->line;
-	head->location->column = is->column;
-	head->location->byte = is->byte;
+	is->funcs->transfer_loc( head->location, is );
 
-	debug( prg, REALM_PARSE, "location byte: %d\n", is->byte );
+	debug( prg, REALM_PARSE, "location byte: %d\n", head->location->byte );
 
 	return head;
 }
@@ -972,9 +970,7 @@ static void send_collect_ignore( program_t *prg, tree_t **sp,
 	/* Make the token data. */
 	head_t *tokdata = head_allocate( prg );
 	tokdata->location = location_allocate( prg );
-	tokdata->location->line = is->line;
-	tokdata->location->column = is->column;
-	tokdata->location->byte = is->byte;
+	is->funcs->transfer_loc( tokdata->location, is );
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lel_info[id].name,
@@ -1014,9 +1010,7 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run, stru
 
 	head_t *head = head_allocate( prg );
 	head->location = location_allocate( prg );
-	head->location->line = is->line;
-	head->location->column = is->column;
-	head->location->byte = is->byte;
+	is->funcs->transfer_loc( head->location, is );
 
 	kid_t *input = kid_allocate( prg );
 	input->tree = tree_allocate( prg );
@@ -1975,7 +1969,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	pda_run->stop = false;
 
 	while ( true ) {
-		debug( prg, REALM_PARSE, "parse loop start %d:%d\n", is->line, is->column );
+		debug( prg, REALM_PARSE, "parse loop start" );
 
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.

@@ -731,6 +731,7 @@ void colm_postfix_tree_collect( program_t *prg, tree_t **sp,
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
+#if 0
 void colm_postfix_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
 		tree_t *tree, int trim )
 {
@@ -744,6 +745,7 @@ void colm_postfix_tree_file( program_t *prg, tree_t **sp, struct stream_impl *im
 	//struct stream_impl *impl = (struct stream_impl*) args->arg;
 	fflush( impl->file );
 }
+#endif
 
 void colm_print_tree_collect_xml( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim )

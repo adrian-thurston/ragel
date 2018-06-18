@@ -1239,6 +1239,8 @@ struct stream_funcs_seq stream_funcs =
 	.print_tree = &stream_print_tree,
 	.get_eof_sent = &stream_get_eof_sent,
 	.set_eof_sent = &stream_set_eof_sent,
+
+	.transfer_loc = &transfer_loc_seq,
 };
 
 struct stream_funcs_data file_funcs = 
@@ -1255,6 +1257,7 @@ struct stream_funcs_data file_funcs =
 	.print_tree =        &data_print_tree,
 	.get_eof_sent =      &data_get_eof_sent,
 	.set_eof_sent =      &data_set_eof_sent,
+	.transfer_loc =      &transfer_loc_data,
 };
 
 struct stream_funcs_data text_funcs = 
@@ -1271,6 +1274,7 @@ struct stream_funcs_data text_funcs =
 	.print_tree =        &data_print_tree,
 	.get_eof_sent =      &data_get_eof_sent,
 	.set_eof_sent =      &data_set_eof_sent,
+	.transfer_loc =      &transfer_loc_data,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
