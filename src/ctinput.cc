@@ -181,7 +181,7 @@ void inputStreamPatternBackup( struct stream_impl_ct *ss )
 		ss->pat_item = ss->pat_item->prev;
 }
 
-void inputStreamPatternUndoConsumeLangEl( struct stream_impl_ct *ss )
+extern "C" void inputStreamPatternUndoConsumeLangEl( struct stream_impl_ct *ss )
 {
 	inputStreamPatternBackup( ss );
 	ss->offset = ss->pat_item->data.length();
@@ -229,15 +229,22 @@ int inputStreamPatternUndoConsumeData( struct stream_impl_ct *ss, const char *da
 
 stream_funcs_ct patternFuncs = 
 {
-	&inputStreamPatternDestructor,
 	&inputStreamPatternGetParseBlock,
 	&inputStreamPatternGetData,
+
 	&inputStreamPatternConsumeData,
-	&inputStreamPatternUndoConsumeData,
-	0,
-	0,
+	/* unused */ 0,
 	&inputStreamPatternGetLangEl,
+
+	&inputStreamPatternUndoConsumeData,
+	/* unused */ 0,
 	&inputStreamPatternUndoConsumeLangEl,
+
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
+
+	&inputStreamPatternDestructor,
 };
 
 
@@ -439,15 +446,22 @@ int inputStreamConsUndoConsumeData( struct stream_impl_ct *ss, const char *data,
 
 stream_funcs_ct replFuncs =
 {
-	&inputStreamConsDestructor,
 	&inputStreamConsGetParseBlock,
 	&inputStreamConsGetData,
+
 	&inputStreamConsConsumeData,
-	&inputStreamConsUndoConsumeData,
-	0,
-	0,
+	/* unused */ 0,
 	&inputStreamConsGetLangEl,
+
+	&inputStreamConsUndoConsumeData,
+	/* unused. */ 0,
 	&inputStreamConsUndoConsumeLangEl,
+
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0,
+
+	&inputStreamConsDestructor,
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )

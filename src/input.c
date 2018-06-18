@@ -1136,50 +1136,57 @@ static tree_t *stream_undo_append_stream( struct stream_impl_seq *is )
 
 struct stream_funcs_seq stream_funcs = 
 {
-	&stream_destructor,
-	&stream_get_parse_block,
-	&stream_get_data,
-	&stream_consume_data,
-	&stream_undo_consume_data,
-	&stream_consume_tree,
-	&stream_undo_consume_tree,
-	&stream_consume_lang_el,
-	&stream_undo_consume_lang_el,
-	0, // source data get, not needed.
-	&stream_set_eof,
-	&stream_unset_eof,
-	&stream_prepend_data,
-	&stream_prepend_tree,
-	&stream_prepend_stream,
-	&stream_seq_undo_prepend_data,
-	&stream_undo_prepend_tree,
-	0, // fixme: _add this.
-	&stream_append_data,
-	&stream_append_tree,
-	&stream_append_stream,
-	&stream_undo_append_data,
-	&stream_undo_append_tree,
-	&stream_undo_append_stream,
+	.get_parse_block =      &stream_get_parse_block,
+	.get_data =             &stream_get_data,
+
+	.consume_data =    &stream_consume_data,
+	.consume_tree =    &stream_consume_tree,
+	.consume_lang_el = &stream_consume_lang_el,
+
+	.undo_consume_data =    &stream_undo_consume_data,
+	.undo_consume_tree =    &stream_undo_consume_tree,
+	.undo_consume_lang_el = &stream_undo_consume_lang_el,
+
+	.set_eof =   &stream_set_eof,
+	.unset_eof = &stream_unset_eof,
+
+	.prepend_data =   &stream_prepend_data,
+	.prepend_tree =   &stream_prepend_tree,
+	.prepend_stream = &stream_prepend_stream,
+
+	.undo_prepend_data =   &stream_seq_undo_prepend_data,
+	.undo_prepend_tree =   &stream_undo_prepend_tree,
+	.undo_prepend_stream = 0, // fixme: _add this.
+
+	.append_data =   &stream_append_data,
+	.append_tree =   &stream_append_tree,
+	.append_stream = &stream_append_stream,
+
+	.undo_append_data =   &stream_undo_append_data,
+	.undo_append_tree =   &stream_undo_append_tree,
+	.undo_append_stream = &stream_undo_append_stream,
+
+	.destructor = &stream_destructor,
 };
 
 struct stream_funcs_data file_funcs = 
 {
-	.destructor =        &data_destructor,
 	.get_parse_block =   &data_get_parse_block,
 	.get_data =          &data_get_data,
 	.consume_data =      &data_consume_data,
 	.undo_consume_data = &data_undo_consume_data,
 	.get_data_source =   &file_get_data_source,
+	.destructor =        &data_destructor,
 };
 
 struct stream_funcs_data text_funcs = 
 {
-	.destructor =        &data_destructor,
 	.get_parse_block =   &data_get_parse_block,
 	.get_data =          &data_get_data,
 	.consume_data =      &data_consume_data,
 	.undo_consume_data = &data_undo_consume_data,
 	.get_data_source =   &text_get_data_source,
+	.destructor =        &data_destructor,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
@@ -1301,7 +1308,6 @@ str_t *collect_string( program_t *prg, stream_t *s )
 	str_t *str = (str_t*)construct_string( prg, head );
 	return str;
 }
-
 
 stream_t *colm_stream_open_collect( program_t *prg )
 {
