@@ -316,6 +316,9 @@ static int data_get_data( struct stream_impl_data *ss, char *dest, int length )
 	return copied;
 }
 
+static void data_destructor( struct stream_impl_data *si )
+{
+}
 
 static int data_get_parse_block( struct stream_impl_data *ss, int skip, char **pdp, int *copied )
 {
@@ -597,6 +600,10 @@ static void stream_unset_eof( struct stream_impl_seq *is )
 	else {
 		is->eof = false;
 	}
+}
+
+static void stream_destructor( struct stream_impl_seq *is )
+{
 }
 
 static int stream_get_parse_block( struct stream_impl_seq *is, int skip, char **pdp, int *copied )
@@ -1133,6 +1140,7 @@ static tree_t *stream_undo_append_stream( struct stream_impl_seq *is )
 
 struct stream_funcs stream_funcs = 
 {
+	(destructor_t)           &stream_destructor,
 	(get_parse_block_t)      &stream_get_parse_block,
 	(get_data_t)             &stream_get_data,
 	(consume_data_t)         &stream_consume_data,
@@ -1160,8 +1168,9 @@ struct stream_funcs stream_funcs =
 
 struct stream_funcs file_funcs = 
 {
-	.get_data =          (get_data_t)          &data_get_data,
+	.destructor =        (destructor_t)        &data_destructor,
 	.get_parse_block =   (get_parse_block_t)   &data_get_parse_block,
+	.get_data =          (get_data_t)          &data_get_data,
 	.consume_data =      (consume_data_t)      &data_consume_data,
 	.undo_consume_data = (undo_consume_data_t) &data_undo_consume_data,
 	.get_data_source =   (get_data_source_t)   &file_get_data_source,
@@ -1169,8 +1178,9 @@ struct stream_funcs file_funcs =
 
 struct stream_funcs text_funcs = 
 {
-	.get_data =          (get_data_t)          &data_get_data,
+	.destructor =        (destructor_t)        &data_destructor,
 	.get_parse_block =   (get_parse_block_t)   &data_get_parse_block,
+	.get_data =          (get_data_t)          &data_get_data,
 	.consume_data =      (consume_data_t)      &data_consume_data,
 	.undo_consume_data = (undo_consume_data_t) &data_undo_consume_data,
 	.get_data_source =   (get_data_source_t)   &text_get_data_source,

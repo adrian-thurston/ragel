@@ -82,6 +82,10 @@ LangEl *inputStreamPatternGetLangEl( struct stream_impl_ct *ss, long *bindId,
 	return klangEl;
 }
 
+void inputStreamPatternDestructor( struct stream_impl_ct *ss )
+{
+}
+
 int inputStreamPatternGetParseBlock( struct stream_impl_ct *ss, int skip,
 		char **pdp, int *copied )
 { 
@@ -223,6 +227,7 @@ int inputStreamPatternUndoConsumeData( struct stream_impl_ct *ss, const char *da
 
 stream_funcs patternFuncs = 
 {
+	(destructor_t)        &inputStreamPatternDestructor,
 	(get_parse_block_t)   &inputStreamPatternGetParseBlock,
 	(get_data_t)          &inputStreamPatternGetData,
 	(consume_data_t)      &inputStreamPatternConsumeData,
@@ -272,6 +277,10 @@ LangEl *inputStreamConsGetLangEl( struct stream_impl_ct *ss, long *bindId, char 
 	ss->cons_item = ss->cons_item->next;
 	ss->offset = 0;
 	return klangEl;
+}
+
+void inputStreamConsDestructor( struct stream_impl_ct *ss )
+{
 }
 
 int inputStreamConsGetParseBlock( struct stream_impl_ct *ss,
@@ -428,6 +437,7 @@ int inputStreamConsUndoConsumeData( struct stream_impl_ct *ss, const char *data,
 
 stream_funcs replFuncs =
 {
+	(destructor_t)        &inputStreamConsDestructor,
 	(get_parse_block_t)   &inputStreamConsGetParseBlock,
 	(get_data_t)          &inputStreamConsGetData,
 	(consume_data_t)      &inputStreamConsConsumeData,

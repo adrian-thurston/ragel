@@ -75,6 +75,8 @@ struct run_buf
 
 struct run_buf *new_run_buf( int sz );
 
+typedef void (*destructor_t)( struct stream_impl *si );
+
 typedef int (*get_parse_block_t)( struct stream_impl *si, int skip, char **pdp, int *copied );
 
 /* Probably this should be replaced with get_parse_block calls. */
@@ -122,6 +124,8 @@ typedef struct colm_tree *(*undo_append_stream_t)( struct stream_impl *si );
 
 struct stream_funcs
 {
+	destructor_t destructor;
+
 	int (*get_parse_block)( struct stream_impl *si, int skip, char **pdp, int *copied );
 
 	int (*get_data)( struct stream_impl *si, char *dest, int length );
