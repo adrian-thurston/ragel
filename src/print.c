@@ -100,7 +100,7 @@ void append_collect( struct colm_print_args *args, const char *data, int length 
 void append_file( struct colm_print_args *args, const char *data, int length )
 {
 	int level;
-	struct stream_impl *impl = (struct stream_impl*) args->arg;
+	struct stream_impl_data *impl = (struct stream_impl_data*) args->arg;
 
 restart:
 	if ( impl->indent ) {
@@ -468,7 +468,7 @@ void colm_print_term_tree( program_t *prg, tree_t **sp,
 	}
 
 	struct lang_el_info *lel_info = prg->rtd->lel_info;
-	struct stream_impl *impl = (struct stream_impl*) print_args->arg;
+	struct stream_impl_data *impl = (struct stream_impl_data*) print_args->arg;
 
 	if ( strcmp( lel_info[kid->tree->id].name, "_IN_" ) == 0 ) {
 		if ( impl->level == COLM_INDENT_OFF ) {
