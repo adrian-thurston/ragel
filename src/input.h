@@ -197,6 +197,70 @@ struct stream_impl
 	int indent;
 };
 
+/* List of source streams. Enables streams to be pushed/popped. */
+struct stream_impl_seq
+{
+	struct stream_funcs *funcs;
+
+	char eof_sent;
+	char eof;
+	char eos_sent;
+
+	struct run_buf *queue;
+	struct run_buf *queue_tail;
+
+	const char *data;
+	long dlen;
+	int offset;
+
+	long line;
+	long column;
+	long byte;
+
+	char *name;
+	FILE *file;
+
+	struct _StrCollect *collect;
+
+	int consumed;
+
+	/* Indentation. */
+	int level;
+	int indent;
+};
+
+/* List of source streams. Enables streams to be pushed/popped. */
+struct stream_impl_data
+{
+	struct stream_funcs *funcs;
+
+	char eof_sent;
+	char eof;
+	char eos_sent;
+
+	struct run_buf *queue;
+	struct run_buf *queue_tail;
+
+	const char *data;
+	long dlen;
+	int offset;
+
+	long line;
+	long column;
+	long byte;
+
+	char *name;
+	FILE *file;
+
+	struct _StrCollect *collect;
+
+	int consumed;
+
+	/* Indentation. */
+	int level;
+	int indent;
+};
+
 struct stream_impl *colm_impl_new_generic( char *name );
 
 
