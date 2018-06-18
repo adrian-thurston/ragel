@@ -102,6 +102,8 @@ struct stream_funcs \
 	struct colm_tree *(*undo_append_tree)( struct stream_impl *si ); \
 	struct colm_tree *(*undo_append_stream)( struct stream_impl *si ); \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct stream_impl *si ); \
+	struct colm_str_collect *(*get_collect)( struct stream_impl *si ); \
+	void (*flush_stream)( struct stream_impl *si ); \
 }
 
 DEF_STREAM_FUNCS( stream_funcs, stream_impl );
@@ -129,7 +131,7 @@ struct stream_impl
 	char *name;
 	FILE *file;
 
-	struct _StrCollect *collect;
+	struct colm_str_collect *collect;
 
 	int consumed;
 
@@ -161,7 +163,7 @@ struct stream_impl_seq
 	char *name;
 	FILE *file;
 
-	struct _StrCollect *collect;
+	struct colm_str_collect *collect;
 
 	int consumed;
 
@@ -193,7 +195,7 @@ struct stream_impl_data
 	char *name;
 	FILE *file;
 
-	struct _StrCollect *collect;
+	struct colm_str_collect *collect;
 
 	int consumed;
 

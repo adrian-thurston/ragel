@@ -295,24 +295,24 @@ tree_t *tree_iter_prev_repeat( struct colm_program *prg, tree_t ***psp, tree_ite
 
 /* An automatically grown buffer for collecting tokens. Always reuses space;
  * never down resizes. */
-typedef struct _StrCollect
+typedef struct colm_str_collect
 {
 	char *data;
 	int allocated;
 	int length;
-} StrCollect;
+} str_collect_t;
 
-void init_str_collect( StrCollect *collect );
-void str_collect_destroy( StrCollect *collect );
-void str_collect_append( StrCollect *collect, const char *data, long len );
-void str_collect_clear( StrCollect *collect );
+void init_str_collect( str_collect_t *collect );
+void str_collect_destroy( str_collect_t *collect );
+void str_collect_append( str_collect_t *collect, const char *data, long len );
+void str_collect_clear( str_collect_t *collect );
 tree_t *tree_trim( struct colm_program *prg, tree_t **sp, tree_t *tree );
 
 void colm_print_tree_collect( struct colm_program *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim );
+		str_collect_t *collect, tree_t *tree, int trim );
 
 void colm_print_tree_collect_a( struct colm_program *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim );
+		str_collect_t *collect, tree_t *tree, int trim );
 
 void colm_print_tree_file( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int trim );
@@ -320,7 +320,7 @@ void colm_print_xml_stdout( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int comm_attr, int trim );
 
 void colm_postfix_tree_collect( struct colm_program *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim );
+		str_collect_t *collect, tree_t *tree, int trim );
 void colm_postfix_tree_file( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *impl, tree_t *tree, int trim );
 
@@ -381,10 +381,10 @@ tree_t *construct_string( struct colm_program *prg, head_t *s );
 void free_kid_list( program_t *prg, kid_t *kid );
 
 void colm_print_tree_collect_xml( program_t *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim );
+		str_collect_t *collect, tree_t *tree, int trim );
 
 void colm_print_tree_collect_xml_ac( program_t *prg, tree_t **sp,
-		StrCollect *collect, tree_t *tree, int trim );
+		str_collect_t *collect, tree_t *tree, int trim );
 
 #if defined(__cplusplus)
 }

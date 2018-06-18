@@ -326,6 +326,17 @@ static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_dat
 	free( si );
 }
 
+static str_collect_t *data_get_collect( struct stream_impl_data *si )
+{
+	return 0;
+}
+
+static void data_flush_stream( struct stream_impl_data *si )
+{
+	if ( si->file != 0 )
+		fflush( si->file );
+}
+
 static int data_get_parse_block( struct stream_impl_data *ss, int skip, char **pdp, int *copied )
 {
 	int ret = 0;
@@ -601,6 +612,16 @@ static void stream_destructor( program_t *prg, tree_t **sp, struct stream_impl_s
 
 	free( si );
 }
+
+static str_collect_t *stream_get_collect( struct stream_impl_seq *si )
+{
+	return si->collect;
+}
+
+static void stream_flush_stream( struct stream_impl_seq *si )
+{
+}
+
 
 static int stream_get_parse_block( struct stream_impl_seq *is, int skip, char **pdp, int *copied )
 {
@@ -1166,7 +1187,9 @@ struct stream_funcs_seq stream_funcs =
 	.undo_append_tree =   &stream_undo_append_tree,
 	.undo_append_stream = &stream_undo_append_stream,
 
-	.destructor = &stream_destructor,
+	.destructor =  &stream_destructor,
+	.get_collect = &stream_get_collect,
+	.flush_stream = &stream_flush_stream,
 };
 
 struct stream_funcs_data file_funcs = 
@@ -1177,6 +1200,8 @@ struct stream_funcs_data file_funcs =
 	.undo_consume_data = &data_undo_consume_data,
 	.get_data_source =   &file_get_data_source,
 	.destructor =        &data_destructor,
+	.get_collect =       &data_get_collect,
+	.flush_stream =      &data_flush_stream,
 };
 
 struct stream_funcs_data text_funcs = 
@@ -1187,6 +1212,8 @@ struct stream_funcs_data text_funcs =
 	.undo_consume_data = &data_undo_consume_data,
 	.get_data_source =   &text_get_data_source,
 	.destructor =        &data_destructor,
+	.get_collect =       &data_get_collect,
+	.flush_stream =      &data_flush_stream,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
@@ -1235,7 +1262,7 @@ struct stream_impl *colm_impl_new_collect( char *name )
 	struct stream_impl_seq *ss = (struct stream_impl_seq*)malloc(sizeof(struct stream_impl_seq));
 	init_stream_impl_seq( ss, name );
 	ss->funcs = (struct stream_funcs*)&stream_funcs;
-	ss->collect = (StrCollect*) malloc( sizeof( StrCollect ) );
+	ss->collect = (struct colm_str_collect*) malloc( sizeof( struct colm_str_collect ) );
 	init_str_collect( ss->collect );
 	return (struct stream_impl*)ss;
 }
@@ -1304,7 +1331,8 @@ stream_t *colm_stream_new( program_t *prg )
 
 str_t *collect_string( program_t *prg, stream_t *s )
 {
-	head_t *head = string_alloc_full( prg, s->impl->collect->data, s->impl->collect->length );
+	str_collect_t *collect = s->impl->funcs->get_collect( s->impl );
+	head_t *head = string_alloc_full( prg, collect->data, collect->length );
 	str_t *str = (str_t*)construct_string( prg, head );
 	return str;
 }

@@ -134,11 +134,15 @@ static void make_stderr( program_t *prg )
 
 static void flush_streams( program_t *prg )
 {
-	if ( prg->stdout_val != 0 )
-		fflush( prg->stdout_val->impl->file );
+	if ( prg->stdout_val != 0 ) {
+		struct stream_impl *si = prg->stdout_val->impl;
+		si->funcs->flush_stream( si );
+	}
 
-	if ( prg->stderr_val != 0 )
-		fflush( prg->stderr_val->impl->file );
+	if ( prg->stderr_val != 0 ) {
+		struct stream_impl *si = prg->stderr_val->impl;
+		si->funcs->flush_stream( si );
+	}
 }
 
 void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, struct_t *val )
@@ -149,7 +153,7 @@ void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, str
 static head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
 {
 	/* Collect the tree data. */
-	StrCollect collect;
+	str_collect_t collect;
 	init_str_collect( &collect );
 
 	if ( attrs )
@@ -168,7 +172,7 @@ static head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim,
 static head_t *tree_to_str_xml( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
 {
 	/* Collect the tree data. */
-	StrCollect collect;
+	str_collect_t collect;
 	init_str_collect( &collect );
 
 	colm_print_tree_collect_xml( prg, sp, &collect, tree, trim );
@@ -184,7 +188,7 @@ static head_t *tree_to_str_xml( program_t *prg, tree_t **sp, tree_t *tree, int t
 static head_t *tree_to_str_xml_ac( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
 {
 	/* Collect the tree data. */
-	StrCollect collect;
+	str_collect_t collect;
 	init_str_collect( &collect );
 
 	colm_print_tree_collect_xml_ac( prg, sp, &collect, tree, trim );
@@ -200,7 +204,7 @@ static head_t *tree_to_str_xml_ac( program_t *prg, tree_t **sp, tree_t *tree, in
 static head_t *tree_to_str_postfix( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
 {
 	/* Collect the tree data. */
-	StrCollect collect;
+	str_collect_t collect;
 	init_str_collect( &collect );
 
 	colm_postfix_tree_collect( prg, sp, &collect, tree, trim );
@@ -224,7 +228,7 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, stream_t *dest, t
 	}
 	else {
 		/* Collect the tree data. */
-		StrCollect collect;
+		str_collect_t collect;
 		init_str_collect( &collect );
 		colm_print_tree_collect( prg, sp, &collect, input, false );
 
@@ -247,7 +251,7 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, t
 	}
 	else if ( input->id == LEL_ID_STR ) {
 		/* Collect the tree data. */
-		StrCollect collect;
+		str_collect_t collect;
 		init_str_collect( &collect );
 		colm_print_tree_collect( prg, sp, &collect, input, false );
 
@@ -321,7 +325,7 @@ static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tr
 		assert( !ignore );
 			
 		/* Collect the tree data. */
-		StrCollect collect;
+		str_collect_t collect;
 		init_str_collect( &collect );
 		colm_print_tree_collect( prg, sp, &collect, tree, false );
 
