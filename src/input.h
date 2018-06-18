@@ -75,8 +75,10 @@ struct run_buf
 
 struct run_buf *new_run_buf( int sz );
 
+/* Deleting a stream impl. */
 typedef void (*destructor_t)( struct stream_impl *si );
 
+/* Main get of items. */
 typedef int (*get_parse_block_t)( struct stream_impl *si, int skip, char **pdp, int *copied );
 
 /* Probably this should be replaced with get_parse_block calls. */
@@ -122,50 +124,36 @@ typedef struct colm_tree *(*undo_append_data_t)( struct stream_impl *si, int len
 typedef struct colm_tree *(*undo_append_tree_t)( struct stream_impl *si );
 typedef struct colm_tree *(*undo_append_stream_t)( struct stream_impl *si );
 
-struct stream_funcs
-{
-	destructor_t destructor;
+#define DEF_STREAM_FUNCS( stream_funcs, stream_impl ) \
+struct stream_funcs \
+{ \
+	void (*destructor)( struct stream_impl *si ); \
+	int (*get_parse_block)( struct stream_impl *si, int skip, char **pdp, int *copied ); \
+	int (*get_data)( struct stream_impl *si, char *dest, int length ); \
+	int (*consume_data)( struct stream_impl *si, int length, struct colm_location *loc ); \
+	int (*undo_consume_data)( struct stream_impl *si, const char *data, int length ); \
+	struct colm_tree *(*consume_tree)( struct stream_impl *si ); \
+	void (*undo_consume_tree)( struct stream_impl *si, struct colm_tree *tree, int ignore ); \
+	struct LangEl *(*consume_lang_el)( struct stream_impl *si, long *bind_id, char **data, long *length ); \
+	void (*undo_consume_lang_el)( struct stream_impl *si ); \
+	int (*get_data_source)( struct stream_impl *si, char *dest, int length ); \
+	void (*set_eof)( struct stream_impl *si ); \
+	void (*unset_eof)( struct stream_impl *si ); \
+	void (*prepend_data)( struct stream_impl *si, const char *data, long len ); \
+	void (*prepend_tree)( struct stream_impl *si, struct colm_tree *tree, int ignore ); \
+	void (*prepend_stream)( struct stream_impl *si, struct colm_stream *stream ); \
+	int (*undo_prepend_data)( struct stream_impl *si, int length ); \
+	struct colm_tree *(*undo_prepend_tree)( struct stream_impl *si ); \
+	struct colm_tree *(*undo_prepend_stream)( struct stream_impl *si ); \
+	void (*append_data)( struct stream_impl *si, const char *data, long len ); \
+	void (*append_tree)( struct stream_impl *si, struct colm_tree *tree ); \
+	void (*append_stream)( struct stream_impl *si, struct colm_stream *stream ); \
+	struct colm_tree *(*undo_append_data)( struct stream_impl *si, int length ); \
+	struct colm_tree *(*undo_append_tree)( struct stream_impl *si ); \
+	struct colm_tree *(*undo_append_stream)( struct stream_impl *si ); \
+}
 
-	int (*get_parse_block)( struct stream_impl *si, int skip, char **pdp, int *copied );
-
-	int (*get_data)( struct stream_impl *si, char *dest, int length );
-
-	int (*consume_data)( struct stream_impl *si, int length, struct colm_location *loc );
-	int (*undo_consume_data)( struct stream_impl *si, const char *data, int length );
-
-	struct colm_tree *(*consume_tree)( struct stream_impl *si );
-	void (*undo_consume_tree)( struct stream_impl *si,
-			struct colm_tree *tree, int ignore );
-
-	/* Language elments (compile-time). */
-	struct LangEl *(*consume_lang_el)( struct stream_impl *si,
-			long *bind_id, char **data, long *length );
-	void (*undo_consume_lang_el)( struct stream_impl *si );
-
-	/* Private implmentation for some shared get data functions. */
-	int (*get_data_source)( struct stream_impl *si, char *dest, int length );
-
-	void (*set_eof)( struct stream_impl *si );
-	void (*unset_eof)( struct stream_impl *si );
-
-	/* Prepending to a stream. */
-	void (*prepend_data)( struct stream_impl *si, const char *data, long len );
-	void (*prepend_tree)( struct stream_impl *si, struct colm_tree *tree, int ignore );
-	void (*prepend_stream)( struct stream_impl *si, struct colm_stream *stream );
-
-	int (*undo_prepend_data)( struct stream_impl *si, int length );
-	struct colm_tree *(*undo_prepend_tree)( struct stream_impl *si );
-	struct colm_tree *(*undo_prepend_stream)( struct stream_impl *si );
-
-	/* Appending to a stream. */
-	void (*append_data)( struct stream_impl *si, const char *data, long len );
-	void (*append_tree)( struct stream_impl *si, struct colm_tree *tree );
-	void (*append_stream)( struct stream_impl *si, struct colm_stream *stream );
-
-	struct colm_tree *(*undo_append_data)( struct stream_impl *si, int length );
-	struct colm_tree *(*undo_append_tree)( struct stream_impl *si );
-	struct colm_tree *(*undo_append_stream)( struct stream_impl *si );
-};
+DEF_STREAM_FUNCS( stream_funcs, stream_impl );
 
 /* List of source streams. Enables streams to be pushed/popped. */
 struct stream_impl

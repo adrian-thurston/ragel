@@ -79,9 +79,12 @@ void init_file_funcs();
 void init_pat_funcs();
 void init_cons_funcs();
 
-extern struct stream_funcs stream_funcs;
-extern struct stream_funcs file_funcs;
-extern struct stream_funcs text_funcs;
+DEF_STREAM_FUNCS( stream_funcs_seq, stream_impl_seq );
+DEF_STREAM_FUNCS( stream_funcs_data, stream_impl_data );
+
+extern struct stream_funcs_seq stream_funcs;
+extern struct stream_funcs_data file_funcs;
+extern struct stream_funcs_data text_funcs;
 
 static bool loc_set( location_t *loc )
 {
@@ -1138,59 +1141,59 @@ static tree_t *stream_undo_append_stream( struct stream_impl_seq *is )
 	return tree;
 }
 
-struct stream_funcs stream_funcs = 
+struct stream_funcs_seq stream_funcs = 
 {
-	(destructor_t)           &stream_destructor,
-	(get_parse_block_t)      &stream_get_parse_block,
-	(get_data_t)             &stream_get_data,
-	(consume_data_t)         &stream_consume_data,
-	(undo_consume_data_t)    &stream_undo_consume_data,
-	(consume_tree_t)         &stream_consume_tree,
-	(undo_consume_tree_t)    &stream_undo_consume_tree,
-	(consume_lang_el_t)      &stream_consume_lang_el,
-	(undo_consume_lang_el_t) &stream_undo_consume_lang_el,
+	&stream_destructor,
+	&stream_get_parse_block,
+	&stream_get_data,
+	&stream_consume_data,
+	&stream_undo_consume_data,
+	&stream_consume_tree,
+	&stream_undo_consume_tree,
+	&stream_consume_lang_el,
+	&stream_undo_consume_lang_el,
 	0, // source data get, not needed.
-	(set_eof_t)   &stream_set_eof,
-	(unset_eof_t) &stream_unset_eof,
-	(prepend_data_t)   &stream_prepend_data,
-	(prepend_tree_t)   &stream_prepend_tree,
-	(prepend_stream_t) &stream_prepend_stream,
-	(undo_prepend_data_t)   &stream_seq_undo_prepend_data,
-	(undo_prepend_tree_t)   &stream_undo_prepend_tree,
-	(undo_prepend_stream_t) 0, // fixme: _add this.
-	(append_data_t)   &stream_append_data,
-	(append_tree_t)   &stream_append_tree,
-	(append_stream_t) &stream_append_stream,
-	(undo_append_data_t)   &stream_undo_append_data,
-	(undo_append_tree_t)   &stream_undo_append_tree,
-	(undo_append_stream_t) &stream_undo_append_stream,
+	&stream_set_eof,
+	&stream_unset_eof,
+	&stream_prepend_data,
+	&stream_prepend_tree,
+	&stream_prepend_stream,
+	&stream_seq_undo_prepend_data,
+	&stream_undo_prepend_tree,
+	0, // fixme: _add this.
+	&stream_append_data,
+	&stream_append_tree,
+	&stream_append_stream,
+	&stream_undo_append_data,
+	&stream_undo_append_tree,
+	&stream_undo_append_stream,
 };
 
-struct stream_funcs file_funcs = 
+struct stream_funcs_data file_funcs = 
 {
-	.destructor =        (destructor_t)        &data_destructor,
-	.get_parse_block =   (get_parse_block_t)   &data_get_parse_block,
-	.get_data =          (get_data_t)          &data_get_data,
-	.consume_data =      (consume_data_t)      &data_consume_data,
-	.undo_consume_data = (undo_consume_data_t) &data_undo_consume_data,
-	.get_data_source =   (get_data_source_t)   &file_get_data_source,
+	.destructor =        &data_destructor,
+	.get_parse_block =   &data_get_parse_block,
+	.get_data =          &data_get_data,
+	.consume_data =      &data_consume_data,
+	.undo_consume_data = &data_undo_consume_data,
+	.get_data_source =   &file_get_data_source,
 };
 
-struct stream_funcs text_funcs = 
+struct stream_funcs_data text_funcs = 
 {
-	.destructor =        (destructor_t)        &data_destructor,
-	.get_parse_block =   (get_parse_block_t)   &data_get_parse_block,
-	.get_data =          (get_data_t)          &data_get_data,
-	.consume_data =      (consume_data_t)      &data_consume_data,
-	.undo_consume_data = (undo_consume_data_t) &data_undo_consume_data,
-	.get_data_source =   (get_data_source_t)   &text_get_data_source,
+	.destructor =        &data_destructor,
+	.get_parse_block =   &data_get_parse_block,
+	.get_data =          &data_get_data,
+	.consume_data =      &data_consume_data,
+	.undo_consume_data = &data_undo_consume_data,
+	.get_data_source =   &text_get_data_source,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 {
 	struct stream_impl_data *ss = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
 	init_stream_impl_data( ss, name );
-	ss->funcs = &file_funcs;
+	ss->funcs = (struct stream_funcs*)&file_funcs;
 	ss->file = file;
 	return (struct stream_impl*)ss;
 }
@@ -1199,7 +1202,7 @@ static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
 	init_stream_impl_data( si, name );
-	si->funcs = &file_funcs;
+	si->funcs = (struct stream_funcs*)&file_funcs;
 	si->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
 	return (struct stream_impl*)si;
 }
@@ -1208,7 +1211,7 @@ static struct stream_impl *colm_impl_new_text( char *name, const char *data, int
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
 	init_stream_impl_data( si, name );
-	si->funcs = &text_funcs;
+	si->funcs = (struct stream_funcs*)&text_funcs;
 
 	char *buf = (char*)malloc( len );
 	memcpy( buf, data, len );
@@ -1223,7 +1226,7 @@ struct stream_impl *colm_impl_new_generic( char *name )
 {
 	struct stream_impl_seq *ss = (struct stream_impl_seq*)malloc(sizeof(struct stream_impl_seq));
 	init_stream_impl_seq( ss, name );
-	ss->funcs = &stream_funcs;
+	ss->funcs = (struct stream_funcs*)&stream_funcs;
 	return (struct stream_impl*)ss;
 }
 
@@ -1231,7 +1234,7 @@ struct stream_impl *colm_impl_new_collect( char *name )
 {
 	struct stream_impl_seq *ss = (struct stream_impl_seq*)malloc(sizeof(struct stream_impl_seq));
 	init_stream_impl_seq( ss, name );
-	ss->funcs = &stream_funcs;
+	ss->funcs = (struct stream_funcs*)&stream_funcs;
 	ss->collect = (StrCollect*) malloc( sizeof( StrCollect ) );
 	init_str_collect( ss->collect );
 	return (struct stream_impl*)ss;

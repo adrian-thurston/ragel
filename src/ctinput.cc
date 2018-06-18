@@ -34,8 +34,10 @@
 using std::cerr;
 using std::endl;
 
-extern stream_funcs patternFuncs;
-extern stream_funcs replFuncs;
+DEF_STREAM_FUNCS( stream_funcs_ct, stream_impl_ct );
+
+extern stream_funcs_ct patternFuncs;
+extern stream_funcs_ct replFuncs;
 
 struct stream_impl_ct
 {
@@ -65,7 +67,7 @@ struct stream_impl *colm_impl_new_pat( char *name, Pattern *pattern )
 	memset( ss, 0, sizeof(struct stream_impl_ct) );
 	ss->pattern = pattern;
 	ss->pat_item = pattern->list->head;
-	ss->funcs = &patternFuncs;
+	ss->funcs = (struct stream_funcs*)&patternFuncs;
 	return (struct stream_impl*) ss;
 }
 
@@ -225,17 +227,17 @@ int inputStreamPatternUndoConsumeData( struct stream_impl_ct *ss, const char *da
 	return length;
 }
 
-stream_funcs patternFuncs = 
+stream_funcs_ct patternFuncs = 
 {
-	(destructor_t)        &inputStreamPatternDestructor,
-	(get_parse_block_t)   &inputStreamPatternGetParseBlock,
-	(get_data_t)          &inputStreamPatternGetData,
-	(consume_data_t)      &inputStreamPatternConsumeData,
-	(undo_consume_data_t) &inputStreamPatternUndoConsumeData,
+	&inputStreamPatternDestructor,
+	&inputStreamPatternGetParseBlock,
+	&inputStreamPatternGetData,
+	&inputStreamPatternConsumeData,
+	&inputStreamPatternUndoConsumeData,
 	0,
 	0,
-	(consume_lang_el_t)      &inputStreamPatternGetLangEl,
-	(undo_consume_lang_el_t) &inputStreamPatternUndoConsumeLangEl,
+	&inputStreamPatternGetLangEl,
+	&inputStreamPatternUndoConsumeLangEl,
 };
 
 
@@ -249,7 +251,7 @@ struct stream_impl *colm_impl_new_cons( char *name, Constructor *constructor )
 	memset( ss, 0, sizeof(struct stream_impl_ct) );
 	ss->constructor = constructor;
 	ss->cons_item = constructor->list->head;
-	ss->funcs = &replFuncs;
+	ss->funcs = (struct stream_funcs*)&replFuncs;
 	return (struct stream_impl*)ss;
 }
 
@@ -435,17 +437,17 @@ int inputStreamConsUndoConsumeData( struct stream_impl_ct *ss, const char *data,
 	return origLen;
 }
 
-stream_funcs replFuncs =
+stream_funcs_ct replFuncs =
 {
-	(destructor_t)        &inputStreamConsDestructor,
-	(get_parse_block_t)   &inputStreamConsGetParseBlock,
-	(get_data_t)          &inputStreamConsGetData,
-	(consume_data_t)      &inputStreamConsConsumeData,
-	(undo_consume_data_t) &inputStreamConsUndoConsumeData,
+	&inputStreamConsDestructor,
+	&inputStreamConsGetParseBlock,
+	&inputStreamConsGetData,
+	&inputStreamConsConsumeData,
+	&inputStreamConsUndoConsumeData,
 	0,
 	0,
-	(consume_lang_el_t)      &inputStreamConsGetLangEl,
-	(undo_consume_lang_el_t) &inputStreamConsUndoConsumeLangEl,
+	&inputStreamConsGetLangEl,
+	&inputStreamConsUndoConsumeLangEl,
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )
