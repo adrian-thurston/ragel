@@ -84,7 +84,7 @@ LangEl *inputStreamPatternGetLangEl( struct stream_impl_ct *ss, long *bindId,
 	return klangEl;
 }
 
-void inputStreamPatternDestructor( struct stream_impl_ct *ss )
+void inputStreamPatternDestructor( program_t *prg, tree_t **sp, struct stream_impl_ct *ss )
 {
 }
 
@@ -281,7 +281,7 @@ LangEl *inputStreamConsGetLangEl( struct stream_impl_ct *ss, long *bindId, char 
 	return klangEl;
 }
 
-void inputStreamConsDestructor( struct stream_impl_ct *ss )
+void inputStreamConsDestructor( program_t *prg, tree_t **sp, struct stream_impl_ct *ss )
 {
 }
 

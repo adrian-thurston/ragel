@@ -116,9 +116,9 @@ static void transfer_loc_data( location_t *loc, struct stream_impl_data *ss )
 }
 
 void colm_clear_source_stream( struct colm_program *prg,
-		tree_t **sp, struct stream_impl_seq *source_stream )
+		tree_t **sp, struct stream_impl_seq *si )
 {
-	struct run_buf *buf = source_stream->queue;
+	struct run_buf *buf = si->queue;
 	while ( buf != 0 ) {
 		switch ( buf->type ) {
 			case RUN_BUF_DATA_TYPE:
@@ -137,7 +137,7 @@ void colm_clear_source_stream( struct colm_program *prg,
 		buf = next;
 	}
 
-	source_stream->queue = 0;
+	si->queue = 0;
 }
 
 void colm_close_stream_file( FILE *file )
@@ -152,23 +152,9 @@ void colm_close_stream_file( FILE *file )
 void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 {
 	stream_t *stream = (stream_t*) s;
-	colm_clear_source_stream( prg, sp, (struct stream_impl_seq*)stream->impl );
+	struct stream_impl *si = stream->impl;
 
-	if ( stream->impl->file != 0 )
-		colm_close_stream_file( stream->impl->file );
-	
-	if ( stream->impl->collect != 0 ) {
-		str_collect_destroy( stream->impl->collect );
-		free( stream->impl->collect );
-	}
-
-	/* FIXME: Need to leak this for now. Until we can return strings to a
-	 * program loader and free them at a later date (after the colm program is
-	 * deleted). */
-	// if ( stream->impl->name != 0 )
-	//	free( stream->impl->name );
-
-	free( stream->impl );
+	si->funcs->destructor( prg, sp, si );
 }
 
 /* Keep the position up to date after consuming text. */
@@ -319,8 +305,25 @@ static int data_get_data( struct stream_impl_data *ss, char *dest, int length )
 	return copied;
 }
 
-static void data_destructor( struct stream_impl_data *si )
+static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_data *si )
 {
+//	colm_clear_source_stream( prg, sp, (struct stream_impl_seq*)stream->impl );
+
+	if ( si->file != 0 )
+		colm_close_stream_file( si->file );
+	
+	if ( si->collect != 0 ) {
+		str_collect_destroy( si->collect );
+		free( si->collect );
+	}
+
+	/* FIXME: Need to leak this for now. Until we can return strings to a
+	 * program loader and free them at a later date (after the colm program is
+	 * deleted). */
+	// if ( si->name != 0 )
+	//	free( si->name );
+
+	free( si );
 }
 
 static int data_get_parse_block( struct stream_impl_data *ss, int skip, char **pdp, int *copied )
@@ -494,32 +497,6 @@ void init_stream_impl_data( struct stream_impl_data *is, char *name )
 	is->level = COLM_INDENT_OFF;
 }
 
-void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp,
-		struct stream_impl *input_stream )
-{
-	struct run_buf *buf = input_stream->queue;
-	while ( buf != 0 ) {
-		switch ( buf->type ) {
-			case RUN_BUF_DATA_TYPE:
-				break;
-
-			case RUN_BUF_TOKEN_TYPE:
-			case RUN_BUF_IGNORE_TYPE:
-				colm_tree_downref( prg, sp, buf->tree );
-				break;
-
-			case RUN_BUF_SOURCE_TYPE:
-				break;
-		}
-
-		struct run_buf *next = buf->next;
-		free( buf );
-		buf = next;
-	}
-
-	input_stream->queue = 0;
-}
-
 static struct run_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
 {
 	struct run_buf *ret = is->queue;
@@ -605,8 +582,25 @@ static void stream_unset_eof( struct stream_impl_seq *is )
 	}
 }
 
-static void stream_destructor( struct stream_impl_seq *is )
+static void stream_destructor( program_t *prg, tree_t **sp, struct stream_impl_seq *si )
 {
+	colm_clear_source_stream( prg, sp, si );
+
+	if ( si->file != 0 )
+		colm_close_stream_file( si->file );
+	
+	if ( si->collect != 0 ) {
+		str_collect_destroy( si->collect );
+		free( si->collect );
+	}
+
+	/* FIXME: Need to leak this for now. Until we can return strings to a
+	 * program loader and free them at a later date (after the colm program is
+	 * deleted). */
+	// if ( stream->impl->name != 0 )
+	//	free( stream->impl->name );
+
+	free( si );
 }
 
 static int stream_get_parse_block( struct stream_impl_seq *is, int skip, char **pdp, int *copied )
