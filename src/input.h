@@ -59,12 +59,25 @@ enum run_buf_type {
 	RUN_BUF_SOURCE_TYPE
 };
 
-struct run_buf
+struct seq_buf
 {
 	enum run_buf_type type;
 	long length;
 	struct colm_tree *tree;
 	struct stream_impl *si;
+	long offset;
+	struct seq_buf *next, *prev;
+
+	/* Must be at the end. We will grow this struct to add data if the input
+	 * demands it. */
+	char data[FSM_BUFSIZE];
+};
+
+struct run_buf
+{
+	enum run_buf_type type;
+	long length;
+	struct colm_tree *tree;
 	long offset;
 	struct run_buf *next, *prev;
 
@@ -129,8 +142,8 @@ struct stream_impl_seq
 	char eof;
 	char eos_sent;
 
-	struct run_buf *queue;
-	struct run_buf *queue_tail;
+	struct seq_buf *queue;
+	struct seq_buf *queue_tail;
 
 	long line;
 	long column;

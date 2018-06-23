@@ -59,6 +59,21 @@ char *colm_filename_add( program_t *prg, const char *fn )
 	return (char*)prg->stream_fns[items];
 }
 
+struct seq_buf *new_seq_buf( int sz )
+{
+	struct seq_buf *rb;
+	if ( sz > FSM_BUFSIZE ) {
+		int ssz = sizeof(struct seq_buf) + sz - FSM_BUFSIZE;
+		rb = (struct seq_buf*) malloc( ssz );
+		memset( rb, 0, ssz );
+	}
+	else {
+		rb = (struct seq_buf*) malloc( sizeof(struct seq_buf) );
+		memset( rb, 0, sizeof(struct seq_buf) );
+	}
+	return rb;
+}
+
 struct run_buf *new_run_buf( int sz )
 {
 	struct run_buf *rb;
@@ -118,7 +133,7 @@ static void transfer_loc_data( location_t *loc, struct stream_impl_data *ss )
 void colm_clear_source_stream( struct colm_program *prg,
 		tree_t **sp, struct stream_impl_seq *si )
 {
-	struct run_buf *buf = si->queue;
+	struct seq_buf *buf = si->queue;
 	while ( buf != 0 ) {
 		switch ( buf->type ) {
 			case RUN_BUF_DATA_TYPE:
@@ -132,7 +147,7 @@ void colm_clear_source_stream( struct colm_program *prg,
 				break;
 		}
 
-		struct run_buf *next = buf->next;
+		struct seq_buf *next = buf->next;
 		free( buf );
 		buf = next;
 	}
@@ -532,9 +547,9 @@ void init_stream_impl_data( struct stream_impl_data *is, char *name )
 	is->level = COLM_INDENT_OFF;
 }
 
-static struct run_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
+static struct seq_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
 {
-	struct run_buf *ret = is->queue;
+	struct seq_buf *ret = is->queue;
 	is->queue = is->queue->next;
 	if ( is->queue == 0 )
 		is->queue_tail = 0;
@@ -543,23 +558,23 @@ static struct run_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
 	return ret;
 }
 
-static void input_stream_seq_append( struct stream_impl_seq *is, struct run_buf *run_buf )
+static void input_stream_seq_append( struct stream_impl_seq *is, struct seq_buf *seq_buf )
 {
 	if ( is->queue == 0 ) {
-		run_buf->prev = run_buf->next = 0;
-		is->queue = is->queue_tail = run_buf;
+		seq_buf->prev = seq_buf->next = 0;
+		is->queue = is->queue_tail = seq_buf;
 	}
 	else {
-		is->queue_tail->next = run_buf;
-		run_buf->prev = is->queue_tail;
-		run_buf->next = 0;
-		is->queue_tail = run_buf;
+		is->queue_tail->next = seq_buf;
+		seq_buf->prev = is->queue_tail;
+		seq_buf->next = 0;
+		is->queue_tail = seq_buf;
 	}
 }
 
-static struct run_buf *input_stream_seq_pop_tail( struct stream_impl_seq *is )
+static struct seq_buf *input_stream_seq_pop_tail( struct stream_impl_seq *is )
 {
-	struct run_buf *ret = is->queue_tail;
+	struct seq_buf *ret = is->queue_tail;
 	is->queue_tail = is->queue_tail->prev;
 	if ( is->queue_tail == 0 )
 		is->queue = 0;
@@ -568,17 +583,17 @@ static struct run_buf *input_stream_seq_pop_tail( struct stream_impl_seq *is )
 	return ret;
 }
 
-static void input_stream_seq_prepend( struct stream_impl_seq *is, struct run_buf *run_buf )
+static void input_stream_seq_prepend( struct stream_impl_seq *is, struct seq_buf *seq_buf )
 {
 	if ( is->queue == 0 ) {
-		run_buf->prev = run_buf->next = 0;
-		is->queue = is->queue_tail = run_buf;
+		seq_buf->prev = seq_buf->next = 0;
+		is->queue = is->queue_tail = seq_buf;
 	}
 	else {
-		is->queue->prev = run_buf;
-		run_buf->prev = 0;
-		run_buf->next = is->queue;
-		is->queue = run_buf;
+		is->queue->prev = seq_buf;
+		seq_buf->prev = 0;
+		seq_buf->next = is->queue;
+		is->queue = seq_buf;
 	}
 }
 
@@ -663,7 +678,7 @@ static int stream_get_parse_block( struct stream_impl_seq *is, int skip, char **
 	*copied = 0;
 
 	/* Move over skip bytes. */
-	struct run_buf *buf = is->queue;
+	struct seq_buf *buf = is->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
@@ -761,7 +776,7 @@ static int stream_get_data( struct stream_impl_seq *is, char *dest, int length )
 	int copied = 0;
 
 	/* Move over skip bytes. */
-	struct run_buf *buf = is->queue;
+	struct seq_buf *buf = is->queue;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
@@ -820,7 +835,7 @@ static int stream_consume_data( struct stream_impl_seq *is, int length, location
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		struct run_buf *buf = is->queue;
+		struct seq_buf *buf = is->queue;
 
 		if ( buf == 0 )
 			break;
@@ -864,12 +879,12 @@ static int stream_consume_data( struct stream_impl_seq *is, int length, location
 			break;
 		}
 
-		struct run_buf *run_buf = input_stream_seq_pop_head( is );
+		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 		//if ( run_Buf->type == RUN_BUF_SOURCE_TYPE ) {
 		//	stream_t *stream = runBuf->stream;
 		//	colm_tree_downref( prg, sp, (tree_t*) stream );
 		//}
-		free( run_buf );
+		free( seq_buf );
 	}
 
 	return consumed;
@@ -885,7 +900,7 @@ static int stream_undo_consume_data( struct stream_impl_seq *is, const char *dat
 		return len;
 	}
 	else {
-		struct run_buf *new_buf = new_run_buf( 0 );
+		struct seq_buf *new_buf = new_seq_buf( 0 );
 		new_buf->length = length;
 		memcpy( new_buf->data, data, length );
 		input_stream_seq_prepend( is, new_buf );
@@ -900,18 +915,18 @@ static tree_t *stream_consume_tree( struct stream_impl_seq *is )
 	while ( is->queue != 0 && ( is->queue->type == RUN_BUF_SOURCE_TYPE || is->queue->type == RUN_BUF_DATA_TYPE ) && 
 			is->queue->offset == is->queue->length )
 	{
-		struct run_buf *run_buf = input_stream_seq_pop_head( is );
-		free( run_buf );
+		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
+		free( seq_buf );
 	}
 
 	if ( is->queue != 0 && (is->queue->type == RUN_BUF_TOKEN_TYPE || 
 			is->queue->type == RUN_BUF_IGNORE_TYPE) )
 	{
-		struct run_buf *run_buf = input_stream_seq_pop_head( is );
+		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
-		tree_t *tree = run_buf->tree;
-		free(run_buf);
+		tree_t *tree = seq_buf->tree;
+		free(seq_buf);
 		return tree;
 	}
 
@@ -923,7 +938,7 @@ static void stream_undo_consume_tree( struct stream_impl_seq *is, tree_t *tree, 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	struct run_buf *new_buf = new_run_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf( 0 );
 	new_buf->type = ignore ? RUN_BUF_IGNORE_TYPE : RUN_BUF_TOKEN_TYPE;
 	new_buf->tree = tree;
 	input_stream_seq_prepend( is, new_buf );
@@ -956,7 +971,7 @@ static void stream_prepend_data( struct stream_impl_seq *si, const char *data, l
 {
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
-	struct run_buf *new_buf = new_run_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf( 0 );
 	new_buf->type = RUN_BUF_SOURCE_TYPE;
 	new_buf->si = sub_si;
 
@@ -967,7 +982,7 @@ static void stream_append_data( struct stream_impl_seq *si, const char *data, lo
 {
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
-	struct run_buf *new_buf = new_run_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf( 0 );
 	new_buf->type = RUN_BUF_SOURCE_TYPE;
 	new_buf->si = sub_si;
 
@@ -979,7 +994,7 @@ static void stream_prepend_tree( struct stream_impl_seq *is, tree_t *tree, int i
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	struct run_buf *new_buf = new_run_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf( 0 );
 	new_buf->type = ignore ? RUN_BUF_IGNORE_TYPE : RUN_BUF_TOKEN_TYPE;
 	new_buf->tree = tree;
 	input_stream_seq_prepend( is, new_buf );
@@ -990,7 +1005,7 @@ static void stream_prepend_stream( struct stream_impl_seq *in, struct colm_strea
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	struct run_buf *new_buf = new_run_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf( 0 );
 	new_buf->type = RUN_BUF_SOURCE_TYPE;
 	new_buf->si = stream_to_impl( stream );
 	input_stream_seq_prepend( in, new_buf );
@@ -1007,7 +1022,7 @@ static int stream_seq_undo_prepend_data( struct stream_impl_seq *is, int length 
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		struct run_buf *buf = is->queue;
+		struct seq_buf *buf = is->queue;
 
 		if ( buf == 0 )
 			break;
@@ -1038,7 +1053,7 @@ static int stream_seq_undo_prepend_data( struct stream_impl_seq *is, int length 
 		if ( length == 0 )
 			break;
 
-		struct run_buf *run_buf = input_stream_seq_pop_head( is );
+		struct seq_buf *run_buf = input_stream_seq_pop_head( is );
 		free( run_buf );
 	}
 
@@ -1058,14 +1073,7 @@ static int stream_data_undo_prepend_data( struct stream_impl_data *is, int lengt
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
-			struct stream_impl *si = buf->si;
-			int slen = stream_data_undo_prepend_data( (struct stream_impl_data*)si, length );
-
-			consumed += slen;
-			length -= slen;
-		}
-		else if ( buf->type == RUN_BUF_TOKEN_TYPE )
+		if ( buf->type == RUN_BUF_TOKEN_TYPE )
 			break;
 		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
 			break;
@@ -1096,18 +1104,18 @@ static tree_t *stream_undo_prepend_tree( struct stream_impl_seq *is )
 	while ( is->queue != 0 && ( is->queue->type == RUN_BUF_SOURCE_TYPE || is->queue->type == RUN_BUF_DATA_TYPE ) && 
 			is->queue->offset == is->queue->length )
 	{
-		struct run_buf *run_buf = input_stream_seq_pop_head( is );
-		free( run_buf );
+		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
+		free( seq_buf );
 	}
 
 	if ( is->queue != 0 && (is->queue->type == RUN_BUF_TOKEN_TYPE ||
 			is->queue->type == RUN_BUF_IGNORE_TYPE) )
 	{
-		struct run_buf *run_buf = input_stream_seq_pop_head( is );
+		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 
 		/* FIXME: using runbufs here for this is a poor use of memory. */
-		tree_t *tree = run_buf->tree;
-		free(run_buf);
+		tree_t *tree = seq_buf->tree;
+		free(seq_buf);
 		return tree;
 	}
 
@@ -1120,7 +1128,7 @@ static tree_t *stream_undo_append_data( struct stream_impl_seq *is, int length )
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		struct run_buf *buf = is->queue_tail;
+		struct seq_buf *buf = is->queue_tail;
 
 		if ( buf == 0 )
 			break;
@@ -1144,8 +1152,8 @@ static tree_t *stream_undo_append_data( struct stream_impl_seq *is, int length )
 		if ( length == 0 )
 			break;
 
-		struct run_buf *run_buf = input_stream_seq_pop_tail( is );
-		free( run_buf );
+		struct seq_buf *seq_buf = input_stream_seq_pop_tail( is );
+		free( seq_buf );
 	}
 
 	return 0;
@@ -1153,7 +1161,7 @@ static tree_t *stream_undo_append_data( struct stream_impl_seq *is, int length )
 
 static void stream_append_tree( struct stream_impl_seq *is, tree_t *tree )
 {
-	struct run_buf *ad = new_run_buf( 0 );
+	struct seq_buf *ad = new_seq_buf( 0 );
 
 	input_stream_seq_append( is, ad );
 
@@ -1164,7 +1172,7 @@ static void stream_append_tree( struct stream_impl_seq *is, tree_t *tree )
 
 static void stream_append_stream( struct stream_impl_seq *in, struct colm_stream *stream )
 {
-	struct run_buf *ad = new_run_buf( 0 );
+	struct seq_buf *ad = new_seq_buf( 0 );
 
 	input_stream_seq_append( in, ad );
 
@@ -1175,17 +1183,17 @@ static void stream_append_stream( struct stream_impl_seq *in, struct colm_stream
 
 static tree_t *stream_undo_append_tree( struct stream_impl_seq *is )
 {
-	struct run_buf *run_buf = input_stream_seq_pop_tail( is );
-	tree_t *tree = run_buf->tree;
-	free( run_buf );
+	struct seq_buf *seq_buf = input_stream_seq_pop_tail( is );
+	tree_t *tree = seq_buf->tree;
+	free( seq_buf );
 	return tree;
 }
 
 static tree_t *stream_undo_append_stream( struct stream_impl_seq *is )
 {
-	struct run_buf *run_buf = input_stream_seq_pop_tail( is );
-	tree_t *tree = run_buf->tree;
-	free( run_buf );
+	struct seq_buf *seq_buf = input_stream_seq_pop_tail( is );
+	tree_t *tree = seq_buf->tree;
+	free( seq_buf );
 	return tree;
 }
 
