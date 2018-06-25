@@ -1969,7 +1969,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	pda_run->stop = false;
 
 	while ( true ) {
-		debug( prg, REALM_PARSE, "parse loop start" );
+		debug( prg, REALM_PARSE, "parse loop start\n" );
 
 		/* Pull the current scanner from the parser. This can change during
 		 * parsing due to inputStream pushes, usually for the purpose of includes.

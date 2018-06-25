@@ -77,7 +77,6 @@ struct run_buf
 {
 	enum run_buf_type type;
 	long length;
-	struct colm_tree *tree;
 	long offset;
 	struct run_buf *next, *prev;
 
@@ -144,6 +143,8 @@ struct stream_impl_seq
 
 	struct seq_buf *queue;
 	struct seq_buf *queue_tail;
+
+	struct seq_buf *stash;
 
 	long line;
 	long column;

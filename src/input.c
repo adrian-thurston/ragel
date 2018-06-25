@@ -480,14 +480,21 @@ static int data_consume_data( struct stream_impl_data *ss, int length, location_
 	return consumed;
 }
 
-static int data_undo_consume_data( struct stream_impl_data *ss, const char *data, int length )
+static int data_undo_consume_data( struct stream_impl_data *si, const char *data, int length )
 {
-	struct run_buf *new_buf = new_run_buf( 0 );
-	new_buf->length = length;
-	memcpy( new_buf->data, data, length );
-	source_stream_data_prepend( ss, new_buf );
-	undo_position_data( ss, data, length );
-	ss->consumed -= length;
+	//printf( "data-undo-consume-data %p, undoing consume of %d bytes, consumed: %d\n", si, length, si->consumed );
+
+	if ( length > si->consumed )
+		length = si->consumed;
+
+	if ( length > 0 ) {
+		struct run_buf *new_buf = new_run_buf( 0 );
+		new_buf->length = length;
+		memcpy( new_buf->data, data, length );
+		source_stream_data_prepend( si, new_buf );
+		undo_position_data( si, data, length );
+		si->consumed -= length;
+	}
 
 	return length;
 }
@@ -545,6 +552,19 @@ void init_stream_impl_data( struct stream_impl_data *is, char *name )
 
 	/* Indentation turned off. */
 	is->level = COLM_INDENT_OFF;
+}
+
+static void input_stream_stash_head( struct stream_impl_seq *si, struct seq_buf *seq_buf )
+{
+	seq_buf->next = si->stash;
+	si->stash = seq_buf;
+}
+
+static struct seq_buf *input_stream_pop_stash( struct stream_impl_seq *si )
+{
+	struct seq_buf *seq_buf = si->stash;
+	si->stash = si->stash->next;
+	return seq_buf;
 }
 
 static struct seq_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
@@ -880,11 +900,7 @@ static int stream_consume_data( struct stream_impl_seq *is, int length, location
 		}
 
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
-		//if ( run_Buf->type == RUN_BUF_SOURCE_TYPE ) {
-		//	stream_t *stream = runBuf->stream;
-		//	colm_tree_downref( prg, sp, (tree_t*) stream );
-		//}
-		free( seq_buf );
+		input_stream_stash_head( is, seq_buf );
 	}
 
 	return consumed;
@@ -892,12 +908,19 @@ static int stream_consume_data( struct stream_impl_seq *is, int length, location
 
 static int stream_undo_consume_data( struct stream_impl_seq *is, const char *data, int length )
 {
-	//debug( REALM_INPUT, "undoing consume of %ld bytes\n", length );
+	//debug( REALM_INPUT, "stream %p, undoing consume of %ld bytes\n", is, length );
 
 	if ( is->consumed == 0 && is_source_stream( is ) ) {
 		struct stream_impl *si = is->queue->si;
-		int len = si->funcs->undo_consume_data( si, data, length );
-		return len;
+		int pushed_back = si->funcs->undo_consume_data( si, data, length );
+
+		if ( pushed_back < length ) {
+			struct seq_buf *b = input_stream_pop_stash( is );
+			input_stream_seq_prepend( is, b );
+			pushed_back += stream_undo_consume_data( is, data + pushed_back, length - pushed_back );
+		}
+
+		return pushed_back;
 	}
 	else {
 		struct seq_buf *new_buf = new_seq_buf( 0 );
