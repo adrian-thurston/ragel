@@ -52,16 +52,15 @@ struct colm_stream;
 
 struct stream_impl;
 
-enum run_buf_type {
-	RUN_BUF_DATA_TYPE = 0,
-	RUN_BUF_TOKEN_TYPE,
-	RUN_BUF_IGNORE_TYPE,
-	RUN_BUF_SOURCE_TYPE
+enum seq_buf_type {
+	SEQ_BUF_TOKEN_TYPE = 2,
+	SEQ_BUF_IGNORE_TYPE,
+	SEQ_BUF_SOURCE_TYPE
 };
 
 struct seq_buf
 {
-	enum run_buf_type type;
+	enum seq_buf_type type;
 	struct colm_tree *tree;
 	struct stream_impl *si;
 	struct seq_buf *next, *prev;
@@ -69,7 +68,6 @@ struct seq_buf
 
 struct run_buf
 {
-	enum run_buf_type type;
 	long length;
 	long offset;
 	struct run_buf *next, *prev;

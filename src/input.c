@@ -136,14 +136,12 @@ void colm_clear_source_stream( struct colm_program *prg,
 	struct seq_buf *buf = si->queue;
 	while ( buf != 0 ) {
 		switch ( buf->type ) {
-			case RUN_BUF_DATA_TYPE:
-				break;
 
-			case RUN_BUF_TOKEN_TYPE:
-			case RUN_BUF_IGNORE_TYPE:
+			case SEQ_BUF_TOKEN_TYPE:
+			case SEQ_BUF_IGNORE_TYPE:
 				colm_tree_downref( prg, sp, buf->tree );
 				break;
-			case RUN_BUF_SOURCE_TYPE:
+			case SEQ_BUF_SOURCE_TYPE:
 				break;
 		}
 
@@ -449,25 +447,19 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == RUN_BUF_TOKEN_TYPE )
-			break;
-		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
-			break;
-		else {
-			if ( !loc_set( loc ) )
-				transfer_loc_data( prg, loc, ss );
+		if ( !loc_set( loc ) )
+			transfer_loc_data( prg, loc, ss );
 
-			/* Anything available in the current buffer. */
-			int avail = buf->length - buf->offset;
-			if ( avail > 0 ) {
-				/* The source data from the current buffer. */
-				int slen = avail <= length ? avail : length;
-				consumed += slen;
-				length -= slen;
-				update_position_data( ss, buf->data + buf->offset, slen );
-				buf->offset += slen;
-				ss->consumed += slen;
-			}
+		/* Anything available in the current buffer. */
+		int avail = buf->length - buf->offset;
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			int slen = avail <= length ? avail : length;
+			consumed += slen;
+			length -= slen;
+			update_position_data( ss, buf->data + buf->offset, slen );
+			buf->offset += slen;
+			ss->consumed += slen;
 		}
 
 		if ( length == 0 )
@@ -630,7 +622,7 @@ static struct run_buf *input_stream_data_pop_head( struct stream_impl_data *is )
 
 static int is_source_stream( struct stream_impl_seq *is )
 {
-	if ( is->queue != 0 && is->queue->type == RUN_BUF_SOURCE_TYPE )
+	if ( is->queue != 0 && is->queue->type == SEQ_BUF_SOURCE_TYPE )
 		return true;
 	return false;
 }
@@ -706,7 +698,7 @@ static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_
 			break;
 		}
 
-		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
+		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
 			int type = si->funcs->get_parse_block( prg, si, skip, pdp, copied );
 
@@ -726,12 +718,12 @@ static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_
 			break;
 		}
 
-		if ( buf->type == RUN_BUF_TOKEN_TYPE ) {
+		if ( buf->type == SEQ_BUF_TOKEN_TYPE ) {
 			ret = INPUT_TREE;
 			break;
 		}
 
-		if ( buf->type == RUN_BUF_IGNORE_TYPE ) {
+		if ( buf->type == SEQ_BUF_IGNORE_TYPE ) {
 			ret = INPUT_IGNORE;
 			break;
 		}
@@ -777,7 +769,7 @@ static int stream_get_data( struct colm_program *prg, struct stream_impl_seq *is
 			break;
 		}
 
-		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
+		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
 			int glen = si->funcs->get_data( prg, si, dest+copied, length );
 
@@ -790,9 +782,9 @@ static int stream_get_data( struct colm_program *prg, struct stream_impl_seq *is
 			copied += glen;
 			length -= glen;
 		}
-		else if ( buf->type == RUN_BUF_TOKEN_TYPE )
+		else if ( buf->type == SEQ_BUF_TOKEN_TYPE )
 			break;
-		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
+		else if ( buf->type == SEQ_BUF_IGNORE_TYPE )
 			break;
 
 		if ( length == 0 ) {
@@ -819,7 +811,7 @@ static int stream_consume_data( struct colm_program *prg, struct stream_impl_seq
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
+		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
 			int slen = si->funcs->consume_data( prg, si, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
@@ -827,9 +819,9 @@ static int stream_consume_data( struct colm_program *prg, struct stream_impl_seq
 			consumed += slen;
 			length -= slen;
 		}
-		else if ( buf->type == RUN_BUF_TOKEN_TYPE )
+		else if ( buf->type == SEQ_BUF_TOKEN_TYPE )
 			break;
-		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
+		else if ( buf->type == SEQ_BUF_IGNORE_TYPE )
 			break;
 		else {
 			if ( !loc_set( loc ) ) {
@@ -872,16 +864,16 @@ static int stream_undo_consume_data( struct colm_program *prg, struct stream_imp
 
 static tree_t *stream_consume_tree( struct colm_program *prg, struct stream_impl_seq *is )
 {
-	while ( is->queue != 0 && ( is->queue->type == RUN_BUF_SOURCE_TYPE || is->queue->type == RUN_BUF_DATA_TYPE ) )
+	while ( is->queue != 0 && ( is->queue->type == SEQ_BUF_SOURCE_TYPE ) )
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 		free( seq_buf );
 	}
 
-	assert( is->queue != 0 && ( is->queue->type == RUN_BUF_TOKEN_TYPE || is->queue->type == RUN_BUF_IGNORE_TYPE ) );
+	assert( is->queue != 0 && ( is->queue->type == SEQ_BUF_TOKEN_TYPE || is->queue->type == SEQ_BUF_IGNORE_TYPE ) );
 
-	if ( is->queue != 0 && (is->queue->type == RUN_BUF_TOKEN_TYPE || 
-			is->queue->type == RUN_BUF_IGNORE_TYPE) )
+	if ( is->queue != 0 && (is->queue->type == SEQ_BUF_TOKEN_TYPE || 
+			is->queue->type == SEQ_BUF_IGNORE_TYPE) )
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 		input_stream_stash_head( is, seq_buf );
@@ -930,7 +922,7 @@ static void stream_prepend_data( struct colm_program *prg, struct stream_impl_se
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
 	struct seq_buf *new_buf = new_seq_buf( 0 );
-	new_buf->type = RUN_BUF_SOURCE_TYPE;
+	new_buf->type = SEQ_BUF_SOURCE_TYPE;
 	new_buf->si = sub_si;
 
 	input_stream_seq_prepend( si, new_buf );
@@ -941,7 +933,7 @@ static void stream_append_data( struct colm_program *prg, struct stream_impl_seq
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
 	struct seq_buf *new_buf = new_seq_buf( 0 );
-	new_buf->type = RUN_BUF_SOURCE_TYPE;
+	new_buf->type = SEQ_BUF_SOURCE_TYPE;
 	new_buf->si = sub_si;
 
 	input_stream_seq_append( si, new_buf );
@@ -953,7 +945,7 @@ static void stream_prepend_tree( struct colm_program *prg, struct stream_impl_se
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	struct seq_buf *new_buf = new_seq_buf( 0 );
-	new_buf->type = ignore ? RUN_BUF_IGNORE_TYPE : RUN_BUF_TOKEN_TYPE;
+	new_buf->type = ignore ? SEQ_BUF_IGNORE_TYPE : SEQ_BUF_TOKEN_TYPE;
 	new_buf->tree = tree;
 	input_stream_seq_prepend( is, new_buf );
 }
@@ -964,7 +956,7 @@ static void stream_prepend_stream( struct colm_program *prg, struct stream_impl_
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	struct seq_buf *new_buf = new_seq_buf( 0 );
-	new_buf->type = RUN_BUF_SOURCE_TYPE;
+	new_buf->type = SEQ_BUF_SOURCE_TYPE;
 	new_buf->si = stream_to_impl( stream );
 	input_stream_seq_prepend( in, new_buf );
 }
@@ -985,16 +977,16 @@ static int stream_seq_undo_prepend_data( struct colm_program *prg, struct stream
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == RUN_BUF_SOURCE_TYPE ) {
+		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
 			int slen = stream_data_undo_prepend_data( prg, (struct stream_impl_data*)si, length );
 
 			consumed += slen;
 			length -= slen;
 		}
-		else if ( buf->type == RUN_BUF_TOKEN_TYPE )
+		else if ( buf->type == SEQ_BUF_TOKEN_TYPE )
 			break;
-		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
+		else if ( buf->type == SEQ_BUF_IGNORE_TYPE )
 			break;
 		else {
 		}
@@ -1022,20 +1014,14 @@ static int stream_data_undo_prepend_data( struct colm_program *prg, struct strea
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == RUN_BUF_TOKEN_TYPE )
-			break;
-		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
-			break;
-		else {
-			/* Anything available in the current buffer. */
-			int avail = buf->length - buf->offset;
-			if ( avail > 0 ) {
-				/* The source data from the current buffer. */
-				int slen = avail <= length ? avail : length;
-				consumed += slen;
-				length -= slen;
-				buf->offset += slen;
-			}
+		/* Anything available in the current buffer. */
+		int avail = buf->length - buf->offset;
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			int slen = avail <= length ? avail : length;
+			consumed += slen;
+			length -= slen;
+			buf->offset += slen;
 		}
 
 		if ( length == 0 )
@@ -1050,14 +1036,14 @@ static int stream_data_undo_prepend_data( struct colm_program *prg, struct strea
 
 static tree_t *stream_undo_prepend_tree( struct colm_program *prg, struct stream_impl_seq *is )
 {
-	while ( is->queue != 0 && ( is->queue->type == RUN_BUF_SOURCE_TYPE || is->queue->type == RUN_BUF_DATA_TYPE ) )
+	while ( is->queue != 0 && ( is->queue->type == SEQ_BUF_SOURCE_TYPE ) )
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 		free( seq_buf );
 	}
 
-	if ( is->queue != 0 && (is->queue->type == RUN_BUF_TOKEN_TYPE ||
-			is->queue->type == RUN_BUF_IGNORE_TYPE) )
+	if ( is->queue != 0 && (is->queue->type == SEQ_BUF_TOKEN_TYPE ||
+			is->queue->type == SEQ_BUF_IGNORE_TYPE) )
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 
@@ -1079,9 +1065,9 @@ static tree_t *stream_undo_append_data( struct colm_program *prg, struct stream_
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == RUN_BUF_TOKEN_TYPE )
+		if ( buf->type == SEQ_BUF_TOKEN_TYPE )
 			break;
-		else if ( buf->type == RUN_BUF_IGNORE_TYPE )
+		else if ( buf->type == SEQ_BUF_IGNORE_TYPE )
 			break;
 		else {
 		}
@@ -1102,7 +1088,7 @@ static void stream_append_tree( struct colm_program *prg, struct stream_impl_seq
 
 	input_stream_seq_append( is, ad );
 
-	ad->type = RUN_BUF_TOKEN_TYPE;
+	ad->type = SEQ_BUF_TOKEN_TYPE;
 	ad->tree = tree;
 }
 
@@ -1112,7 +1098,7 @@ static void stream_append_stream( struct colm_program *prg, struct stream_impl_s
 
 	input_stream_seq_append( in, ad );
 
-	ad->type = RUN_BUF_SOURCE_TYPE;
+	ad->type = SEQ_BUF_SOURCE_TYPE;
 	ad->si = stream_to_impl(stream);
 }
 
