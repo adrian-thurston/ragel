@@ -942,14 +942,14 @@ static tree_t *stream_consume_tree( struct stream_impl_seq *is )
 		free( seq_buf );
 	}
 
+	assert( is->queue != 0 && ( is->queue->type == RUN_BUF_TOKEN_TYPE || is->queue->type == RUN_BUF_IGNORE_TYPE ) );
+
 	if ( is->queue != 0 && (is->queue->type == RUN_BUF_TOKEN_TYPE || 
 			is->queue->type == RUN_BUF_IGNORE_TYPE) )
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
-
-		/* FIXME: using runbufs here for this is a poor use of memory. */
+		input_stream_stash_head( is, seq_buf );
 		tree_t *tree = seq_buf->tree;
-		free(seq_buf);
 		return tree;
 	}
 
@@ -961,10 +961,9 @@ static void stream_undo_consume_tree( struct stream_impl_seq *is, tree_t *tree, 
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	struct seq_buf *new_buf = new_seq_buf( 0 );
-	new_buf->type = ignore ? RUN_BUF_IGNORE_TYPE : RUN_BUF_TOKEN_TYPE;
-	new_buf->tree = tree;
-	input_stream_seq_prepend( is, new_buf );
+
+	struct seq_buf *b = input_stream_pop_stash( is );
+	input_stream_seq_prepend( is, b );
 }
 
 static struct LangEl *stream_consume_lang_el( struct stream_impl_seq *is, long *bind_id,
