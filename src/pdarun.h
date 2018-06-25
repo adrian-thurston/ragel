@@ -70,8 +70,6 @@ struct fsm_tables
 	long num_action_switch;
 };
 
-void undo_stream_pull( struct colm_program *prg, struct stream_impl *input_stream, const char *data, long length );
-
 #if SIZEOF_LONG != 4 && SIZEOF_LONG != 8 
 	#error "SIZEOF_LONG contained an unexpected value"
 #endif

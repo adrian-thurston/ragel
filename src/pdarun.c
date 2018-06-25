@@ -141,12 +141,6 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	}
 }
 
-void undo_stream_pull( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
-{
-	//debug( REALM_PARSE, "undoing stream pull\n" );
-
-	is->funcs->prepend_data( prg, is, data, length );
-}
 
 void colm_stream_push_text( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
 {

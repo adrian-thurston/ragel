@@ -305,6 +305,13 @@ static tree_t *stream_pull_bc( program_t *prg, tree_t **sp, struct pda_run *pda_
 	return construct_string( prg, tokdata );
 }
 
+
+static void undo_stream_pull( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
+{
+	//debug( REALM_PARSE, "undoing stream pull\n" );
+	is->funcs->undo_consume_data( prg, is, data, length );
+}
+
 static void undo_pull( program_t *prg, stream_t *stream, tree_t *str )
 {
 	struct stream_impl *impl = stream_to_impl( stream );
