@@ -886,24 +886,17 @@ static tree_t *stream_consume_tree( struct colm_program *prg, struct stream_impl
 
 static void stream_undo_consume_tree( struct colm_program *prg, struct stream_impl_seq *is, tree_t *tree, int ignore )
 {
-	/* Create a new buffer for the data. This is the easy implementation.
-	 * Something better is needed here. It puts a max on the amount of
-	 * data that can be pushed back to the inputStream. */
-
 	struct seq_buf *b = input_stream_pop_stash( is );
 	input_stream_seq_prepend( is, b );
+	assert( b->tree == tree );
 }
 
 static struct LangEl *stream_consume_lang_el( struct colm_program *prg, struct stream_impl_seq *is, long *bind_id,
 		char **data, long *length )
 {
-	if ( is_source_stream( is ) ) {
-		struct stream_impl *si = is->queue->si;
-		return si->funcs->consume_lang_el( prg, si, bind_id, data, length );
-	}
-	else {
-		assert( false );
-	}
+	assert( is_source_stream( is ) );
+	struct stream_impl *si = is->queue->si;
+	return si->funcs->consume_lang_el( prg, si, bind_id, data, length );
 }
 
 static void stream_undo_consume_lang_el( struct colm_program *prg, struct stream_impl_seq *is )
@@ -1036,24 +1029,16 @@ static int stream_data_undo_prepend_data( struct colm_program *prg, struct strea
 
 static tree_t *stream_undo_prepend_tree( struct colm_program *prg, struct stream_impl_seq *is )
 {
-	while ( is->queue != 0 && ( is->queue->type == SEQ_BUF_SOURCE_TYPE ) )
-	{
-		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
-		free( seq_buf );
-	}
+	debug( prg, REALM_INPUT, "undo prepend tree\n" );
 
-	if ( is->queue != 0 && (is->queue->type == SEQ_BUF_TOKEN_TYPE ||
-			is->queue->type == SEQ_BUF_IGNORE_TYPE) )
-	{
-		struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
+	assert( is->queue != 0 && ( is->queue->type == SEQ_BUF_TOKEN_TYPE ||
+			is->queue->type == SEQ_BUF_IGNORE_TYPE ) );
 
-		/* FIXME: using runbufs here for this is a poor use of memory. */
-		tree_t *tree = seq_buf->tree;
-		free(seq_buf);
-		return tree;
-	}
+	struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 
-	return 0;
+	tree_t *tree = seq_buf->tree;
+	free(seq_buf);
+	return tree;
 }
 
 static tree_t *stream_undo_append_data( struct colm_program *prg, struct stream_impl_seq *is, int length )
