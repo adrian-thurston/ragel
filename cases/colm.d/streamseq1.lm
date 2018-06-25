@@ -1,0 +1,41 @@
+namespace fail
+	lex
+		ignore /space+/
+		literal `# `{ `} `!
+		token id /[a-zA-Z_]+/ 
+	end
+
+	def item
+		[id]
+	|	[`{ item* `}]
+
+	def start
+		[item* `!]
+end
+
+lex
+	ignore /space+/
+	literal `# `{ `}
+	token id /[a-zA-Z_]+/ 
+end
+
+def item
+	[id]
+|	[`{ item* `}]
+
+def start
+	[fail::start]
+|	[item*]
+
+new P: parser<start>()
+
+O1: stream = open( "streamseq1a", "r" )
+O2: stream = open( "streamseq1b", "r" )
+O3: stream = open( "streamseq1c", "r" )
+
+send P [O1]
+send P [O2]
+send P [O3]
+send P [] eos
+
+print [ P->tree ]
