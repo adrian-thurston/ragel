@@ -90,38 +90,38 @@ struct run_buf *new_run_buf( int sz );
 #define DEF_STREAM_FUNCS( stream_funcs, stream_impl ) \
 struct stream_funcs \
 { \
-	int (*get_parse_block)( struct stream_impl *si, int skip, char **pdp, int *copied ); \
-	int (*get_data)( struct stream_impl *si, char *dest, int length ); \
-	int (*consume_data)( struct stream_impl *si, int length, struct colm_location *loc ); \
-	struct colm_tree *(*consume_tree)( struct stream_impl *si ); \
-	struct LangEl *(*consume_lang_el)( struct stream_impl *si, long *bind_id, char **data, long *length ); \
-	int (*undo_consume_data)( struct stream_impl *si, const char *data, int length ); \
-	void (*undo_consume_tree)( struct stream_impl *si, struct colm_tree *tree, int ignore ); \
-	void (*undo_consume_lang_el)( struct stream_impl *si ); \
-	int (*get_data_source)( struct stream_impl *si, char *dest, int length ); \
-	void (*set_eof)( struct stream_impl *si ); \
-	void (*unset_eof)( struct stream_impl *si ); \
-	void (*prepend_data)( struct stream_impl *si, const char *data, long len ); \
-	void (*prepend_tree)( struct stream_impl *si, struct colm_tree *tree, int ignore ); \
-	void (*prepend_stream)( struct stream_impl *si, struct colm_stream *stream ); \
-	int (*undo_prepend_data)( struct stream_impl *si, int length ); \
-	struct colm_tree *(*undo_prepend_tree)( struct stream_impl *si ); \
-	struct colm_tree *(*undo_prepend_stream)( struct stream_impl *si ); \
-	void (*append_data)( struct stream_impl *si, const char *data, long len ); \
-	void (*append_tree)( struct stream_impl *si, struct colm_tree *tree ); \
-	void (*append_stream)( struct stream_impl *si, struct colm_stream *stream ); \
-	struct colm_tree *(*undo_append_data)( struct stream_impl *si, int length ); \
-	struct colm_tree *(*undo_append_tree)( struct stream_impl *si ); \
-	struct colm_tree *(*undo_append_stream)( struct stream_impl *si ); \
+	int (*get_parse_block)( struct colm_program *prg, struct stream_impl *si, int skip, char **pdp, int *copied ); \
+	int (*get_data)( struct colm_program *prg, struct stream_impl *si, char *dest, int length ); \
+	int (*consume_data)( struct colm_program *prg, struct stream_impl *si, int length, struct colm_location *loc ); \
+	struct colm_tree *(*consume_tree)( struct colm_program *prg, struct stream_impl *si ); \
+	struct LangEl *(*consume_lang_el)( struct colm_program *prg, struct stream_impl *si, long *bind_id, char **data, long *length ); \
+	int (*undo_consume_data)( struct colm_program *prg, struct stream_impl *si, const char *data, int length ); \
+	void (*undo_consume_tree)( struct colm_program *prg, struct stream_impl *si, struct colm_tree *tree, int ignore ); \
+	void (*undo_consume_lang_el)( struct colm_program *prg, struct stream_impl *si ); \
+	int (*get_data_source)( struct colm_program *prg, struct stream_impl *si, char *dest, int length ); \
+	void (*set_eof)( struct colm_program *prg, struct stream_impl *si ); \
+	void (*unset_eof)( struct colm_program *prg, struct stream_impl *si ); \
+	void (*prepend_data)( struct colm_program *prg, struct stream_impl *si, const char *data, long len ); \
+	void (*prepend_tree)( struct colm_program *prg, struct stream_impl *si, struct colm_tree *tree, int ignore ); \
+	void (*prepend_stream)( struct colm_program *prg, struct stream_impl *si, struct colm_stream *stream ); \
+	int (*undo_prepend_data)( struct colm_program *prg, struct stream_impl *si, int length ); \
+	struct colm_tree *(*undo_prepend_tree)( struct colm_program *prg, struct stream_impl *si ); \
+	struct colm_tree *(*undo_prepend_stream)( struct colm_program *prg, struct stream_impl *si ); \
+	void (*append_data)( struct colm_program *prg, struct stream_impl *si, const char *data, long len ); \
+	void (*append_tree)( struct colm_program *prg, struct stream_impl *si, struct colm_tree *tree ); \
+	void (*append_stream)( struct colm_program *prg, struct stream_impl *si, struct colm_stream *stream ); \
+	struct colm_tree *(*undo_append_data)( struct colm_program *prg, struct stream_impl *si, int length ); \
+	struct colm_tree *(*undo_append_tree)( struct colm_program *prg, struct stream_impl *si ); \
+	struct colm_tree *(*undo_append_stream)( struct colm_program *prg, struct stream_impl *si ); \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct stream_impl *si ); \
-	struct colm_str_collect *(*get_collect)( struct stream_impl *si ); \
-	void (*flush_stream)( struct stream_impl *si ); \
-	void (*close_stream)( struct stream_impl *si ); \
+	struct colm_str_collect *(*get_collect)( struct colm_program *prg, struct stream_impl *si ); \
+	void (*flush_stream)( struct colm_program *prg, struct stream_impl *si ); \
+	void (*close_stream)( struct colm_program *prg, struct stream_impl *si ); \
 	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
 			struct stream_impl *impl, struct colm_tree *tree, int trim ); \
-	char (*get_eof_sent)( struct stream_impl *si ); \
-	void (*set_eof_sent)( struct stream_impl *si, char eof_sent ); \
-	void (*transfer_loc)( struct colm_location *loc, struct stream_impl *si ); \
+	char (*get_eof_sent)( struct colm_program *prg, struct stream_impl *si ); \
+	void (*set_eof_sent)( struct colm_program *prg, struct stream_impl *si, char eof_sent ); \
+	void (*transfer_loc)( struct colm_program *prg, struct colm_location *loc, struct stream_impl *si ); \
 }
 
 DEF_STREAM_FUNCS( stream_funcs, stream_impl );

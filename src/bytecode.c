@@ -136,12 +136,12 @@ static void flush_streams( program_t *prg )
 {
 	if ( prg->stdout_val != 0 ) {
 		struct stream_impl *si = prg->stdout_val->impl;
-		si->funcs->flush_stream( si );
+		si->funcs->flush_stream( prg, si );
 	}
 
 	if ( prg->stderr_val != 0 ) {
 		struct stream_impl *si = prg->stderr_val->impl;
-		si->funcs->flush_stream( si );
+		si->funcs->flush_stream( prg, si );
 	}
 }
 
@@ -233,7 +233,7 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, stream_t *dest, t
 		colm_print_tree_collect( prg, sp, &collect, input, false );
 
 		/* Load it into the input. */
-		impl->funcs->append_data( impl, collect.data, collect.length );
+		impl->funcs->append_data( prg, impl, collect.data, collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
 	}
@@ -256,13 +256,13 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, t
 		colm_print_tree_collect( prg, sp, &collect, input, false );
 
 		/* Load it into the input. */
-		impl->funcs->append_data( impl, collect.data, collect.length );
+		impl->funcs->append_data( prg, impl, collect.data, collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
 	}
 	else {
 		colm_tree_upref( prg, input );
-		impl->funcs->append_tree( impl, input );
+		impl->funcs->append_tree( prg, impl, input );
 	}
 
 	return length;
@@ -273,7 +273,7 @@ static word_t stream_append_stream( program_t *prg, tree_t **sp, stream_t *dest,
 	long length = 0;
 
 	struct stream_impl *impl = stream_to_impl( dest );
-	impl->funcs->append_stream( impl, stream );
+	impl->funcs->append_stream( prg, impl, stream );
 
 	return length;
 }
@@ -284,16 +284,16 @@ static void stream_undo_append( program_t *prg, tree_t **sp,
 	if ( input->id == LEL_ID_PTR )
 		assert(false);
 	else if ( input->id == LEL_ID_STR )
-		is->funcs->undo_append_data( is, length );
+		is->funcs->undo_append_data( prg, is, length );
 	else {
-		is->funcs->undo_append_data( is, length );
+		is->funcs->undo_append_data( prg, is, length );
 	}
 }
 
 static void stream_undo_append_stream( program_t *prg, tree_t **sp, struct stream_impl *is,
 		tree_t *input, long length )
 {
-	is->funcs->undo_append_stream( is );
+	is->funcs->undo_append_stream( prg, is );
 }
 
 static tree_t *stream_pull_bc( program_t *prg, tree_t **sp, struct pda_run *pda_run,
@@ -310,7 +310,7 @@ static void undo_pull( program_t *prg, stream_t *stream, tree_t *str )
 	struct stream_impl *impl = stream_to_impl( stream );
 	const char *data = string_data( ( (str_t*)str )->value );
 	long length = string_length( ( (str_t*)str )->value );
-	undo_stream_pull( impl, data, length );
+	undo_stream_pull( prg, impl, data, length );
 }
 
 static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tree_t *tree, int ignore )
@@ -329,14 +329,14 @@ static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tr
 		init_str_collect( &collect );
 		colm_print_tree_collect( prg, sp, &collect, tree, false );
 
-		colm_stream_push_text( in, collect.data, collect.length );
+		colm_stream_push_text( prg, in, collect.data, collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
 
 	}
 	else {
 		colm_tree_upref( prg, tree );
-		colm_stream_push_tree( in, tree, ignore );
+		colm_stream_push_tree( prg, in, tree, ignore );
 	}
 
 	return length;
@@ -345,7 +345,7 @@ static long stream_push( program_t *prg, tree_t **sp, struct stream_impl *in, tr
 static long stream_push_stream( program_t *prg, tree_t **sp,
 		struct stream_impl *in, stream_t *stream )
 {
-	colm_stream_push_stream( in, stream );
+	colm_stream_push_stream( prg, in, stream );
 	return -1;
 }
 
@@ -2495,7 +2495,7 @@ again:
 
 			si = stream_to_impl( stream );
 			if ( stream->parser != 0 )
-				si->funcs->set_eof( si );
+				si->funcs->set_eof( prg, si );
 
 			if ( exec->WV ) {
 				rcode_unit_start( exec );
@@ -2521,7 +2521,7 @@ again:
 
 			if ( stream->parser != 0 ) {
 				struct stream_impl *si = stream_to_impl( stream );
-				si->funcs->unset_eof( si );
+				si->funcs->unset_eof( prg, si );
 			}
 			break;
 		}
@@ -2532,7 +2532,7 @@ again:
 			stream_t *stream = vm_pop_stream();
 			struct stream_impl *si = stream->impl;
 
-			si->funcs->close_stream( si );
+			si->funcs->close_stream( prg, si );
 
 			vm_push_stream( stream );
 			break;

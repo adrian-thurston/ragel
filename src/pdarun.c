@@ -114,9 +114,9 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		char *dest = run_buf->data + run_buf->length;
 
-		is->funcs->get_data( is, dest, length );
+		is->funcs->get_data( prg, is, dest, length );
 		location_t *loc = location_allocate( prg );
-		is->funcs->consume_data( is, length, loc );
+		is->funcs->consume_data( prg, is, length, loc );
 
 		run_buf->length += length;
 
@@ -132,52 +132,52 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		head_t *head = init_str_space( length );
 		char *dest = (char*)head->data;
 
-		is->funcs->get_data( is, dest, length );
+		is->funcs->get_data( prg, is, dest, length );
 		location_t *loc = location_allocate( prg );
-		is->funcs->consume_data( is, length, loc );
+		is->funcs->consume_data( prg, is, length, loc );
 		head->location = loc;
 
 		return head;
 	}
 }
 
-void undo_stream_pull( struct stream_impl *is, const char *data, long length )
+void undo_stream_pull( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
 {
 	//debug( REALM_PARSE, "undoing stream pull\n" );
 
-	is->funcs->prepend_data( is, data, length );
+	is->funcs->prepend_data( prg, is, data, length );
 }
 
-void colm_stream_push_text( struct stream_impl *is, const char *data, long length )
+void colm_stream_push_text( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
 {
-	is->funcs->prepend_data( is, data, length );
+	is->funcs->prepend_data( prg, is, data, length );
 }
 
-void colm_stream_push_tree( struct stream_impl *is, tree_t *tree, int ignore )
+void colm_stream_push_tree( struct colm_program *prg, struct stream_impl *is, tree_t *tree, int ignore )
 {
-	is->funcs->prepend_tree( is, tree, ignore );
+	is->funcs->prepend_tree( prg, is, tree, ignore );
 }
 
-void colm_stream_push_stream( struct stream_impl *is, stream_t *stream )
+void colm_stream_push_stream( struct colm_program *prg, struct stream_impl *is, stream_t *stream )
 {
-	is->funcs->prepend_stream( is, stream );
+	is->funcs->prepend_stream( prg, is, stream );
 }
 
 void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is, long length )
 {
 	if ( length < 0 ) {
-		tree_t *tree = is->funcs->undo_prepend_tree( is );
+		tree_t *tree = is->funcs->undo_prepend_tree( prg, is );
 		colm_tree_downref( prg, sp, tree );
 	}
 	else {
-		is->funcs->undo_prepend_data( is, length );
+		is->funcs->undo_prepend_data( prg, is, length );
 	}
 }
 
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-static void send_back_text( struct stream_impl *is, const char *data, long length )
+static void send_back_text( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
 {
 	//debug( REALM_PARSE, "push back of %ld characters\n", length );
 
@@ -187,12 +187,12 @@ static void send_back_text( struct stream_impl *is, const char *data, long lengt
 	//debug( REALM_PARSE, "sending back text: %.*s\n", 
 	//		(int)length, data );
 
-	is->funcs->undo_consume_data( is, data, length );
+	is->funcs->undo_consume_data( prg, is, data, length );
 }
 
-static void send_back_tree( struct stream_impl *is, tree_t *tree )
+static void send_back_tree( struct colm_program *prg, struct stream_impl *is, tree_t *tree )
 {
-	is->funcs->undo_consume_tree( is, tree, false );
+	is->funcs->undo_consume_tree( prg, is, tree, false );
 }
 
 /*
@@ -213,7 +213,7 @@ static void send_back_ignore( program_t *prg, tree_t **sp,
 	int artificial = parse_tree->flags & PF_ARTIFICIAL;
 
 	if ( head != 0 && !artificial )
-		send_back_text( is, string_data( head ), head->length );
+		send_back_text( prg, is, string_data( head ), head->length );
 
 	colm_decrement_steps( pda_run );
 
@@ -254,7 +254,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	if ( parse_tree->flags & PF_NAMED ) {
 		/* Send the named lang el back first, then send back any leading
 		 * whitespace. */
-		is->funcs->undo_consume_lang_el( is );
+		is->funcs->undo_consume_lang_el( prg, is );
 	}
 
 	colm_decrement_steps( pda_run );
@@ -270,7 +270,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		colm_tree_upref( prg, parse_tree->shadow->tree );
 
-		send_back_tree( is, parse_tree->shadow->tree );
+		send_back_tree( prg, is, parse_tree->shadow->tree );
 	}
 	else {
 		/* Check for reverse code. */
@@ -281,12 +281,12 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		}
 
 		/* Push back the token data. */
-		send_back_text( is, string_data( parse_tree->shadow->tree->tokdata ), 
+		send_back_text( prg, is, string_data( parse_tree->shadow->tree->tokdata ), 
 				string_length( parse_tree->shadow->tree->tokdata ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( parse_tree->id == prg->rtd->eof_lel_ids[pda_run->parser_id] )
-			is->funcs->set_eof_sent( is, false );
+			is->funcs->set_eof_sent( prg, is, false );
 
 		/* If the item is bound then store remove it from the bindings array. */
 		prg->rtd->pop_binding( pda_run, parse_tree );
@@ -741,9 +741,9 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 
 	char *dest = run_buf->data + run_buf->length;
 
-	is->funcs->get_data( is, dest, length );
+	is->funcs->get_data( prg, is, dest, length );
 	location_t *location = location_allocate( prg );
-	is->funcs->consume_data( is, length, location );
+	is->funcs->consume_data( prg, is, length, location );
 
 	run_buf->length += length;
 
@@ -767,7 +767,7 @@ static head_t *extract_no_d( program_t *prg, tree_t **sp,
 
 	/* Just a consume, no data allocate. */
 	location_t *location = location_allocate( prg );
-	is->funcs->consume_data( is, length, location );
+	is->funcs->consume_data( prg, is, length, location );
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;
@@ -798,12 +798,12 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 
 	char *dest = run_buf->data + run_buf->length;
 
-	is->funcs->get_data( is, dest, length );
+	is->funcs->get_data( prg, is, dest, length );
 
 	/* Using a dummpy location. */
 	location_t location;
 	memset( &location, 0, sizeof( location ) );
-	is->funcs->consume_data( is, length, &location );
+	is->funcs->consume_data( prg, is, length, &location );
 
 	run_buf->length += length;
 
@@ -829,7 +829,7 @@ static head_t *consume_match( program_t *prg, tree_t **sp,
 	/* No data or location returned. We just consume the data. */
 	location_t dummy_loc;
 	memset( &dummy_loc, 0, sizeof(dummy_loc) );
-	is->funcs->consume_data( is, length, &dummy_loc );
+	is->funcs->consume_data( prg, is, length, &dummy_loc );
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;
@@ -854,7 +854,7 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 
 	char *dest = run_buf->data + run_buf->length;
 
-	is->funcs->get_data( is, dest, length );
+	is->funcs->get_data( prg, is, dest, length );
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;
@@ -862,7 +862,7 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
 	head->location = location_allocate( prg );
-	is->funcs->transfer_loc( head->location, is );
+	is->funcs->transfer_loc( prg, head->location, is );
 
 	debug( prg, REALM_PARSE, "location byte: %d\n", head->location->byte );
 
@@ -941,7 +941,7 @@ static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		struct stream_impl *is )
 {
 	kid_t *input = kid_allocate( prg );
-	input->tree = is->funcs->consume_tree( is );
+	input->tree = is->funcs->consume_tree( prg, is );
 
 	colm_increment_steps( pda_run );
 
@@ -956,7 +956,7 @@ static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 static void send_ignore_tree( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct stream_impl *is )
 {
-	tree_t *tree = is->funcs->consume_tree( is );
+	tree_t *tree = is->funcs->consume_tree( prg, is );
 	ignore_tree_art( prg, pda_run, tree );
 }
 
@@ -970,7 +970,7 @@ static void send_collect_ignore( program_t *prg, tree_t **sp,
 	/* Make the token data. */
 	head_t *tokdata = head_allocate( prg );
 	tokdata->location = location_allocate( prg );
-	is->funcs->transfer_loc( tokdata->location, is );
+	is->funcs->transfer_loc( prg, tokdata->location, is );
 
 	debug( prg, REALM_PARSE, "token: %s  text: %.*s\n",
 		prg->rtd->lel_info[id].name,
@@ -1010,7 +1010,7 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run, stru
 
 	head_t *head = head_allocate( prg );
 	head->location = location_allocate( prg );
-	is->funcs->transfer_loc( head->location, is );
+	is->funcs->transfer_loc( prg, head->location, is );
 
 	kid_t *input = kid_allocate( prg );
 	input->tree = tree_allocate( prg );
@@ -1097,7 +1097,7 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct stream_i
 	while ( true ) {
 		char *pd = 0;
 		int len = 0;
-		int type = is->funcs->get_parse_block( is, pda_run->toklen, &pd, &len );
+		int type = is->funcs->get_parse_block( prg, is, pda_run->toklen, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
@@ -2003,7 +2003,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		/* Check for EOF. */
 		if ( pda_run->token_id == SCAN_EOF ) {
-			is->funcs->set_eof_sent( is, true );
+			is->funcs->set_eof_sent( prg, is, true );
 			send_eof( prg, sp, pda_run, is );
 
 			pda_run->frame_id = prg->rtd->region_info[pda_run->region].eof_frame_id;
@@ -2160,7 +2160,7 @@ skip_send:
 			break;
 		}
 
-		if ( is->funcs->get_eof_sent( is ) ) {
+		if ( is->funcs->get_eof_sent( prg, is ) ) {
 			debug( prg, REALM_PARSE, "parsing stopped by EOF\n" );
 			break;
 		}
