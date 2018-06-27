@@ -1,11 +1,3 @@
-# Common testing files.
-/tmp.lm
-/tmp.c
-/tmp
-/input[0-9]
-/input
-/output
-
 /*.o
 /*.lo
 /Makefile.in
@@ -38,3 +30,12 @@
 /*-config.cmake
 /*-config-version.cmake
 /*.exe
+
+# Common testing files.
+/tmp.lm
+/tmp.c
+/tmp
+/input[0-9]
+/input
+/output
+/log
