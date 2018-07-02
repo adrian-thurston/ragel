@@ -128,6 +128,7 @@ struct stream_impl
 struct stream_impl_seq
 {
 	struct stream_funcs *funcs;
+	char type;
 
 	char eof_sent;
 	char eof;
@@ -151,6 +152,7 @@ struct stream_impl_seq
 struct stream_impl_data
 {
 	struct stream_funcs *funcs;
+	char type;
 
 	char eof_sent;
 	char eof;
@@ -191,6 +193,11 @@ struct colm_str *collect_string( struct colm_program *prg, struct colm_stream *s
 struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 
 void colm_close_stream_file( FILE *file );
+
+void stream_set_eof( struct colm_program *prg, struct stream_impl_seq *si );
+void stream_unset_eof( struct colm_program *prg, struct stream_impl_seq *si );
+
+void transfer_loc_seq( struct colm_program *prg, struct colm_location *loc, struct stream_impl_seq *ss );
 
 #ifdef __cplusplus
 }
