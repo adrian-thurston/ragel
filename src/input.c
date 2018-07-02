@@ -115,7 +115,7 @@ static void default_loc( location_t *loc )
 	loc->byte = 1;
 }
 
-static void transfer_loc_seq( struct colm_program *prg, location_t *loc, struct stream_impl_seq *ss )
+void transfer_loc_seq( struct colm_program *prg, location_t *loc, struct stream_impl_seq *ss )
 {
 	loc->name = ss->name;
 	loc->line = ss->line;

@@ -54,6 +54,7 @@ struct stream_impl_ct
 	struct ConsItem *cons_item;
 
 	char eof_sent;
+	char eof;
 
 	int offset;
 };
@@ -118,7 +119,7 @@ int inputStreamPatternGetParseBlock( struct colm_program *prg, struct stream_imp
 
 	while ( true ) {
 		if ( buf == 0 )
-			return INPUT_EOD;
+			return INPUT_EOF;
 
 		if ( buf->form == PatternItem::TypeRefForm )
 			return INPUT_LANG_EL;
@@ -247,6 +248,46 @@ int inputStreamPatternUndoConsumeData( struct colm_program *prg, struct stream_i
 	return length;
 }
 
+void pat_stream_set_eof( struct colm_program *prg, struct stream_impl_ct *si )
+{
+	si->eof = true;
+}
+
+void pat_stream_unset_eof( struct colm_program *prg, struct stream_impl_ct *si )
+{
+//	if ( is_source_stream( si ) ) {
+//		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
+//		sid->eof = false;
+//	}
+//	else {
+		si->eof = false;
+//	}
+}
+
+void repl_stream_set_eof( struct colm_program *prg, struct stream_impl_ct *si )
+{
+	si->eof = true;
+}
+
+void repl_stream_unset_eof( struct colm_program *prg, struct stream_impl_ct *si )
+{
+//	if ( is_source_stream( si ) ) {
+//		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
+//		sid->eof = false;
+//	}
+//	else {
+		si->eof = false;
+//	}
+}
+
+void pat_transfer_loc_seq( struct colm_program *prg, location_t *loc, struct stream_impl_ct *ss )
+{
+	loc->name = ss->name;
+	loc->line = ss->line;
+	loc->column = ss->column;
+	loc->byte = ss->byte;
+}
+
 stream_funcs_ct patternFuncs = 
 {
 	&inputStreamPatternGetParseBlock,
@@ -260,9 +301,12 @@ stream_funcs_ct patternFuncs =
 	/* unused */ 0,
 	&inputStreamPatternUndoConsumeLangEl,
 
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
+	0,
+	
+	&pat_stream_set_eof, &pat_stream_unset_eof,
+	
+	0, 0, 0, 0, 0, 0, /* prepend. */
+	0, 0, 0, 0, 0, 0, /* append. */
 
 	&inputStreamPatternDestructor,
 
@@ -270,6 +314,8 @@ stream_funcs_ct patternFuncs =
 
 	&inputStreamGetEofSent,
 	&inputStreamSetEofSent,
+
+	&pat_transfer_loc_seq,
 };
 
 
@@ -327,7 +373,7 @@ int inputStreamConsGetParseBlock( struct colm_program *prg, struct stream_impl_c
 
 	while ( true ) {
 		if ( buf == 0 )
-			return INPUT_EOD;
+			return INPUT_EOF;
 
 		if ( buf->type == ConsItem::ExprType || buf->type == ConsItem::LiteralType )
 			return INPUT_LANG_EL;
@@ -416,6 +462,7 @@ void inputStreamConsUndoConsumeLangEl( struct colm_program *prg, struct stream_i
 	ss->offset = ss->cons_item->data.length();
 }
 
+
 int inputStreamConsConsumeData( struct colm_program *prg, struct stream_impl_ct *ss, int length, location_t *loc )
 {
 	int consumed = 0;
@@ -482,9 +529,12 @@ stream_funcs_ct replFuncs =
 	/* unused. */ 0,
 	&inputStreamConsUndoConsumeLangEl,
 
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0,
+	0,
+
+	&repl_stream_set_eof, &repl_stream_unset_eof,
+
+	0, 0, 0, 0, 0, 0, /* prepend. */
+	0, 0, 0, 0, 0, 0, /* append. */
 
 	&inputStreamConsDestructor,
 
@@ -492,6 +542,8 @@ stream_funcs_ct replFuncs =
 
 	&inputStreamGetEofSent,
 	&inputStreamSetEofSent,
+
+	&pat_transfer_loc_seq,
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )

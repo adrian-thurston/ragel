@@ -994,18 +994,10 @@ void Compiler::initEmptyScanners()
 pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &loc, 
 		int parserId, struct stream_impl *sourceStream )
 {
-	struct stream_impl *in = colm_impl_new_generic( strdup("<internal>") );
-
 	struct pda_run *pdaRun = new pda_run;
 	colm_pda_init( prg, pdaRun, pdaTables, parserId, 0, false, 0, false );
 
-	stream_t *stream = colm_stream_new_struct( prg );
-	stream->impl = sourceStream;
-
-	in->funcs->append_stream( prg, in, stream );
-	in->funcs->set_eof( prg, in );
-
-	long pcr = colm_parse_loop( prg, sp, pdaRun, in, PCR_START );
+	long pcr = colm_parse_loop( prg, sp, pdaRun, sourceStream, PCR_START );
 	assert( pcr == PCR_DONE );
 	if ( pdaRun->parse_error ) {
 		cerr << ( loc.fileName != 0 ? loc.fileName : "<input>" ) <<
