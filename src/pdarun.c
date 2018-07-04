@@ -206,8 +206,12 @@ static void send_back_ignore( program_t *prg, tree_t **sp,
 	head_t *head = parse_tree->shadow->tree->tokdata;
 	int artificial = parse_tree->flags & PF_ARTIFICIAL;
 
-	if ( head != 0 && !artificial )
-		send_back_text( prg, is, string_data( head ), head->length );
+	if ( head != 0 ) {
+		if ( artificial )
+			send_back_tree( prg, is, parse_tree->shadow->tree );
+		else
+			send_back_text( prg, is, string_data( head ), head->length );
+	}
 
 	colm_decrement_steps( pda_run );
 
@@ -1091,7 +1095,8 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct stream_i
 	while ( true ) {
 		char *pd = 0;
 		int len = 0;
-		int type = is->funcs->get_parse_block( prg, is, pda_run->toklen, &pd, &len );
+		int toklen = pda_run->toklen;
+		int type = is->funcs->get_parse_block( prg, is, &toklen, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
