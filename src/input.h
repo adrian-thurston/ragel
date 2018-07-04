@@ -82,7 +82,7 @@ struct run_buf *new_run_buf( int sz );
 #define DEF_STREAM_FUNCS( stream_funcs, stream_impl ) \
 struct stream_funcs \
 { \
-	int (*get_parse_block)( struct colm_program *prg, struct stream_impl *si, int skip, char **pdp, int *copied ); \
+	int (*get_parse_block)( struct colm_program *prg, struct stream_impl *si, int *pskip, char **pdp, int *copied ); \
 	int (*get_data)( struct colm_program *prg, struct stream_impl *si, char *dest, int length ); \
 	int (*consume_data)( struct colm_program *prg, struct stream_impl *si, int length, struct colm_location *loc ); \
 	struct colm_tree *(*consume_tree)( struct colm_program *prg, struct stream_impl *si ); \

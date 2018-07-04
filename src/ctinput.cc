@@ -109,7 +109,7 @@ void inputStreamPatternDestructor( program_t *prg, tree_t **sp, struct stream_im
 {
 }
 
-int inputStreamPatternGetParseBlock( struct colm_program *prg, struct stream_impl_ct *ss, int skip,
+int inputStreamPatternGetParseBlock( struct colm_program *prg, struct stream_impl_ct *ss, int *pskip,
 		char **pdp, int *copied )
 { 
 	*copied = 0;
@@ -133,16 +133,16 @@ int inputStreamPatternGetParseBlock( struct colm_program *prg, struct stream_imp
 			int slen = avail;
 
 			/* Need to skip? */
-			if ( skip > 0 && slen <= skip ) {
+			if ( *pskip > 0 && slen <= *pskip ) {
 				/* Skipping the the whole source. */
-				skip -= slen;
+				*pskip -= slen;
 			}
 			else {
 				/* Either skip is zero, or less than slen. Skip goes to zero.
 				 * Some data left over, copy it. */
-				src += skip;
-				slen -= skip;
-				skip = 0;
+				src += *pskip;
+				slen -= *pskip;
+				*pskip = 0;
 
 				*pdp = src;
 				*copied += slen;
@@ -364,7 +364,7 @@ void inputStreamConsDestructor( program_t *prg, tree_t **sp, struct stream_impl_
 }
 
 int inputStreamConsGetParseBlock( struct colm_program *prg, struct stream_impl_ct *ss,
-		int skip, char **pdp, int *copied )
+		int *pskip, char **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -387,16 +387,16 @@ int inputStreamConsGetParseBlock( struct colm_program *prg, struct stream_impl_c
 			int slen = avail;
 
 			/* Need to skip? */
-			if ( skip > 0 && slen <= skip ) {
+			if ( *pskip > 0 && slen <= *pskip ) {
 				/* Skipping the the whole source. */
-				skip -= slen;
+				*pskip -= slen;
 			}
 			else {
 				/* Either skip is zero, or less than slen. Skip goes to zero.
 				 * Some data left over, copy it. */
-				src += skip;
-				slen -= skip;
-				skip = 0;
+				src += *pskip;
+				slen -= *pskip;
+				*pskip = 0;
 
 				*pdp = src;
 				*copied += slen;

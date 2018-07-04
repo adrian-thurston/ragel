@@ -379,7 +379,7 @@ void data_set_eof_sent( struct colm_program *prg, struct stream_impl_data *si, c
 	si->eof_sent = eof_sent;
 }
 
-static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss, int skip, char **pdp, int *copied )
+static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss, int *pskip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -413,16 +413,16 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 			char *src = &buf->data[buf->offset];
 
 			/* Need to skip? */
-			if ( skip > 0 && skip >= avail ) {
+			if ( *pskip > 0 && *pskip >= avail ) {
 				/* Skipping the the whole source. */
-				skip -= avail;
+				*pskip -= avail;
 			}
 			else {
 				/* Either skip is zero, or less than slen. Skip goes to zero.
 				 * Some data left over, copy it. */
-				src += skip;
-				avail -= skip;
-				skip = 0;
+				src += *pskip;
+				avail -= *pskip;
+				*pskip = 0;
 
 				int slen = avail;
 				*pdp = src;
@@ -532,7 +532,7 @@ static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_
 	}
 
 	debug( prg, REALM_INPUT, "data_undo_consume_data: stream %p "
-			"undid consume of %d of %d bytes, consumed now %d, \n", si, amount, si->consumed );
+			"undid consume %d of %d bytes, consumed now %d, \n", si, amount, length, si->consumed );
 
 	return amount;
 }
@@ -710,7 +710,7 @@ void stream_set_eof_sent( struct colm_program *prg, struct stream_impl_seq *si, 
 }
 
 
-static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_seq *is, int skip, char **pdp, int *copied )
+static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_seq *is, int *pskip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -726,7 +726,7 @@ static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_
 
 		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
 			struct stream_impl *si = buf->si;
-			int type = si->funcs->get_parse_block( prg, si, skip, pdp, copied );
+			int type = si->funcs->get_parse_block( prg, si, pskip, pdp, copied );
 
 //			if ( type == INPUT_EOD && !si->eosSent ) {
 //				si->eosSent = 1;
