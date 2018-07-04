@@ -250,6 +250,7 @@ void Compiler::makeStructElIds()
 		sel->id = nextId++;
 
 	structInbuiltId = nextId++;
+	structInputId = nextId++;
 	structStreamId = nextId++;
 }
 
@@ -1700,6 +1701,7 @@ void Compiler::makeRuntimeData()
 	runtimeData->stds_el_id = stdsElSel->id;
 	runtimeData->struct_inbuilt_id = structInbuiltId;
 	runtimeData->struct_stream_id = structStreamId;
+	runtimeData->struct_input_id = structInputId;
 
 	runtimeData->fsm_execute = &internalFsmExecute;
 	runtimeData->send_named_lang_el = &internalSendNamedLangEl;

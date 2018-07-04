@@ -71,6 +71,7 @@ typedef struct colm_stream
 
 	struct stream_impl *impl;
 	parser_t *parser;
+	char not_owner;
 } stream_t;
 
 #define COLM_LIST_EL_SIZE 2

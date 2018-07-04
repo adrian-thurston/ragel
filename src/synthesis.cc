@@ -1524,6 +1524,7 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	code.append( IN_GET_PARSER_STREAM );
 	
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		bool isInput = false;
 		bool isStream = false;
 		switch ( item->type ) {
 		case ConsItem::LiteralType: {
@@ -1564,13 +1565,17 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
+			if ( ut == pd->uniqueTypeInput )
+				isInput = true;
 			if ( ut == pd->uniqueTypeStream )
 				isStream = true;
 
 			break;
 		}}
 
-		if ( isStream )
+		if ( isInput )
+			code.append( IN_REPLACE_STREAM );
+		else if ( isStream )
 			code.append( IN_SEND_STREAM_W );
 		else if ( tree )
 			code.append( IN_SEND_TREE_W );
@@ -1626,6 +1631,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		bool isInput = false;
 		bool isStream = false;
 		switch ( item->type ) {
 		case ConsItem::LiteralType: {
@@ -1662,6 +1668,8 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				continue;
 			}
 
+			if ( ut == pd->uniqueTypeInput )
+				isInput = true;
 			if ( ut == pd->uniqueTypeStream )
 				isStream = true;
 
@@ -1671,7 +1679,9 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 			break;
 		}
 
-		if ( isStream )
+		if ( isInput )
+			code.append( IN_REPLACE_STREAM );
+		else if ( isStream )
 			code.append( IN_SEND_STREAM_W );
 		else if ( !strings )
 			code.append( IN_SEND_TREE_W );

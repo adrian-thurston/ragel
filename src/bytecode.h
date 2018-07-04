@@ -267,6 +267,8 @@ typedef unsigned char uchar;
 #define IN_SEND_TREE_W      0xa9
 #define IN_SEND_TREE_BKT    0xaa
 
+#define IN_REPLACE_STREAM   0x88
+
 #define IN_SEND_STREAM_W    0x90
 #define IN_SEND_STREAM_BKT  0x1c
 

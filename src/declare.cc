@@ -38,6 +38,7 @@ void Compiler::initUniqueTypes( )
 	uniqueTypeIgnore = new UniqueType( TYPE_TREE, ignoreLangEl );
 	uniqueTypeAny = new UniqueType( TYPE_TREE, anyLangEl );
 
+	uniqueTypeInput = new UniqueType( TYPE_STRUCT, inputSel );
 	uniqueTypeStream = new UniqueType( TYPE_STRUCT, streamSel );
 
 	uniqeTypeMap.insert( uniqueTypeNil );
@@ -761,7 +762,7 @@ void Compiler::addMatchText( ObjectDef *frame, LangEl *lel )
 void Compiler::addInput( ObjectDef *frame )
 {
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInput );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,
@@ -842,6 +843,19 @@ void Compiler::declareStrFields( )
 	addLengthField( strObj, IN_STR_LENGTH );
 }
 
+void Compiler::declareInputField( ObjectDef *objDef, code_t getLength )
+{
+	/* Create the "length" field. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "tree" );
+	el->isConst = true;
+	el->inGetR = IN_GET_COLLECT_STRING;
+	el->inGetValR = IN_GET_COLLECT_STRING;
+
+	objDef->rootScope->insertField( el->name, el );
+}
+
 void Compiler::declareStreamField( ObjectDef *objDef, code_t getLength )
 {
 	/* Create the "length" field. */
@@ -853,6 +867,28 @@ void Compiler::declareStreamField( ObjectDef *objDef, code_t getLength )
 	el->inGetValR = IN_GET_COLLECT_STRING;
 
 	objDef->rootScope->insertField( el->name, el );
+}
+
+void Compiler::declareInputFields( )
+{
+	inputObj = inputSel->structDef->objectDef;
+
+	initFunction( uniqueTypeStr, inputObj, ObjectMethod::Call, "pull",  
+			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
+
+	initFunction( uniqueTypeStr, inputObj, ObjectMethod::Call, "push",  
+			IN_INPUT_PUSH_WV, IN_INPUT_PUSH_WV, uniqueTypeAny, false );
+
+	initFunction( uniqueTypeStr, inputObj, ObjectMethod::Call, "push_ignore",  
+			IN_INPUT_PUSH_IGNORE_WV, IN_INPUT_PUSH_IGNORE_WV, uniqueTypeAny, false );
+
+	initFunction( uniqueTypeStr, inputObj, ObjectMethod::Call, "push_stream",  
+		IN_INPUT_PUSH_STREAM_WV, IN_INPUT_PUSH_STREAM_WV, uniqueTypeStream, false );
+
+	initFunction( uniqueTypeVoid, inputObj, ObjectMethod::Call, "close",
+			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
+
+	declareInputField( inputObj, 0 );
 }
 
 void Compiler::declareStreamFields( )
@@ -1536,6 +1572,7 @@ void Compiler::declarePass()
 
 	declareIntFields();
 	declareStrFields();
+	declareInputFields();
 	declareStreamFields();
 	declareTokenFields();
 	declareGlobalFields();

@@ -133,15 +133,24 @@ void BaseParser::init()
 	pd->global = new StructDef( internal, global, pd->globalObjectDef );
 	pd->globalSel = declareStruct( pd, 0, global, pd->global );
 
+	/* Setup the input object. */
+	global = "_input";
+	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
+			global, pd->nextObjectId++ ); 
+
+	pd->input = new StructDef( internal, global, objectDef );
+	pd->inputSel = declareStruct( pd, pd->rootNamespace,
+			pd->input->name, pd->input );
+
 	/* Setup the stream object. */
 	global = "stream";
-	ObjectDef *objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
+	objectDef = ObjectDef::cons( ObjectDef::BuiltinType,
 			global, pd->nextObjectId++ ); 
 
 	pd->stream = new StructDef( internal, global, objectDef );
 	pd->streamSel = declareStruct( pd, pd->rootNamespace,
 			pd->stream->name, pd->stream );
-	
+
 	/* Initialize the dictionary of graphs. This is our symbol table. The
 	 * initialization needs to be done on construction which happens at the
 	 * beginning of a machine spec so any assignment operators can reference

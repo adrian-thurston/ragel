@@ -377,6 +377,7 @@ Compiler::Compiler( )
 	argv(0),
 
 	stream(0),
+	inputSel(0),
 	streamSel(0),
 
 	uniqueTypeNil(0),
@@ -386,6 +387,7 @@ Compiler::Compiler( )
 	uniqueTypeStr(0),
 	uniqueTypeIgnore(0),
 	uniqueTypeAny(0),
+	uniqueTypeInput(0),
 	uniqueTypeStream(0),
 	nextPatConsId(0),
 	nextGenericId(1),

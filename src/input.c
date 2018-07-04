@@ -168,7 +168,8 @@ void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 	stream_t *stream = (stream_t*) s;
 	struct stream_impl *si = stream->impl;
 
-	si->funcs->destructor( prg, sp, si );
+	if ( !stream->not_owner )
+		si->funcs->destructor( prg, sp, si );
 }
 
 /* Keep the position up to date after consuming text. */
@@ -759,7 +760,12 @@ static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_
 #if DEBUG
 	switch ( ret ) {
 		case INPUT_DATA:
-			debug( prg, REALM_INPUT, "get parse block: DATA: %d\n", *copied );
+			if ( *pdp != 0 ) {
+				debug( prg, REALM_INPUT, "get parse block: DATA: %d %.*s\n", *copied, (int)(*copied), *pdp );
+			}
+			else {
+				debug( prg, REALM_INPUT, "get parse block: DATA: %d\n", *copied );
+			}
 			break;
 		case INPUT_EOD:
 			debug( prg, REALM_INPUT, "get parse block: EOD\n" );

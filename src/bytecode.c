@@ -2453,6 +2453,22 @@ again:
 			break;
 		}
 
+		case IN_REPLACE_STREAM: {
+			debug( prg, REALM_BYTECODE, "IN_REPLACE_STREAM\n" );
+
+			stream_t *to_replace_with = vm_pop_stream();
+			stream_t *stream = vm_pop_stream();
+
+			stream->impl = to_replace_with->impl;
+			stream->not_owner = true;
+
+			vm_push_stream( stream );
+
+			exec->steps = stream->parser->pda_run->steps;
+			exec->pcr = PCR_START;
+
+			break;
+		}
 		case IN_SEND_STREAM_W: {
 			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_W\n" );
 

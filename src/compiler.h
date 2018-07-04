@@ -910,6 +910,7 @@ struct Compiler
 	int firstNonTermId;
 	int firstStructElId;
 	int structInbuiltId;
+	int structInputId;
 	int structStreamId;
 
 	LangEl **langElIndex;
@@ -933,7 +934,9 @@ struct Compiler
 	StructEl *argvElSel;
 	StructEl *stdsElSel;
 
+	StructDef *input;
 	StructDef *stream;
+	StructEl *inputSel;
 	StructEl *streamSel;
 
 	VectorTypeIdMap vectorTypeIdMap;
@@ -958,6 +961,7 @@ struct Compiler
 	UniqueType *uniqueTypeIgnore;
 	UniqueType *uniqueTypeAny;
 
+	UniqueType *uniqueTypeInput;
 	UniqueType *uniqueTypeStream;
 
 	UniqueTypeMap uniqeTypeMap;
@@ -967,6 +971,9 @@ struct Compiler
 	void declareGlobalFields();
 	void declareStrFields();
 
+	void declareInputField( ObjectDef *objDef, code_t getLength );
+	void declareInputFields();
+
 	void declareStreamField( ObjectDef *objDef, code_t getLength );
 	void declareStreamFields();
 
@@ -975,6 +982,7 @@ struct Compiler
 
 	ObjectDef *intObj;
 	ObjectDef *strObj;
+	ObjectDef *inputObj;
 	ObjectDef *streamObj;
 
 	struct fsm_tables *fsmTables;
