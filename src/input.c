@@ -659,13 +659,13 @@ void stream_set_eof( struct colm_program *prg, struct stream_impl_seq *si )
 
 void stream_unset_eof( struct colm_program *prg, struct stream_impl_seq *si )
 {
-	if ( is_source_stream( si ) ) {
-		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
-		sid->eof = false;
-	}
-	else {
+//	if ( is_source_stream( si ) ) {
+//		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
+//		sid->eof = false;
+//	}
+//	else {
 		si->eof = false;
-	}
+//	}
 }
 
 static void stream_destructor( program_t *prg, tree_t **sp, struct stream_impl_seq *si )
