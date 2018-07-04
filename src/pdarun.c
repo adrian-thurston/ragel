@@ -161,7 +161,7 @@ void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is,
 {
 	if ( length < 0 ) {
 		tree_t *tree = is->funcs->undo_prepend_tree( prg, is );
-		colm_tree_downref( prg, sp, tree );
+	//	colm_tree_downref( prg, sp, tree );
 	}
 	else {
 		is->funcs->undo_prepend_data( prg, is, length );
