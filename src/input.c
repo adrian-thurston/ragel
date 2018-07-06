@@ -1141,9 +1141,6 @@ struct stream_funcs_seq stream_funcs =
 	.consume_lang_el =      &stream_consume_lang_el,
 	.undo_consume_lang_el = &stream_undo_consume_lang_el,
 
-	/* EOF */
-	.set_eof =   &stream_set_eof,
-	.unset_eof = &stream_unset_eof,
 
 	/*
 	 * Prepend
@@ -1174,6 +1171,10 @@ struct stream_funcs_seq stream_funcs =
 	.flush_stream = &stream_flush_stream,
 	.close_stream = &stream_close_stream,
 	.print_tree = &stream_print_tree,
+
+	/* EOF */
+	.set_eof =   &stream_set_eof,
+	.unset_eof = &stream_unset_eof,
 	.get_eof_sent = &stream_get_eof_sent,
 	.set_eof_sent = &stream_set_eof_sent,
 
@@ -1184,16 +1185,20 @@ struct stream_funcs_data file_funcs =
 {
 	.get_parse_block =   &data_get_parse_block,
 	.get_data =          &data_get_data,
+	.get_data_source =   &file_get_data_source,
+
 	.consume_data =      &data_consume_data,
 	.undo_consume_data = &data_undo_consume_data,
-	.get_data_source =   &file_get_data_source,
+
 	.destructor =        &data_destructor,
 	.get_collect =       &data_get_collect,
 	.flush_stream =      &data_flush_stream,
 	.close_stream =      &data_close_stream,
 	.print_tree =        &data_print_tree,
+
 	.get_eof_sent =      &data_get_eof_sent,
 	.set_eof_sent =      &data_set_eof_sent,
+
 	.transfer_loc =      &transfer_loc_data,
 };
 
@@ -1201,16 +1206,20 @@ struct stream_funcs_data text_funcs =
 {
 	.get_parse_block =   &data_get_parse_block,
 	.get_data =          &data_get_data,
+	.get_data_source =   &text_get_data_source,
+
 	.consume_data =      &data_consume_data,
 	.undo_consume_data = &data_undo_consume_data,
-	.get_data_source =   &text_get_data_source,
+
 	.destructor =        &data_destructor,
 	.get_collect =       &data_get_collect,
 	.flush_stream =      &data_flush_stream,
 	.close_stream =      &data_close_stream,
 	.print_tree =        &data_print_tree,
+
 	.get_eof_sent =      &data_get_eof_sent,
 	.set_eof_sent =      &data_set_eof_sent,
+
 	.transfer_loc =      &transfer_loc_data,
 };
 

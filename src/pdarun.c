@@ -141,7 +141,6 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	}
 }
 
-
 void colm_stream_push_text( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
 {
 	is->funcs->prepend_data( prg, is, data, length );
@@ -160,8 +159,8 @@ void colm_stream_push_stream( struct colm_program *prg, struct stream_impl *is, 
 void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is, long length )
 {
 	if ( length < 0 ) {
-		tree_t *tree = is->funcs->undo_prepend_tree( prg, is );
-	//	colm_tree_downref( prg, sp, tree );
+		/* tree_t *tree = */ is->funcs->undo_prepend_tree( prg, is );
+		// colm_tree_downref( prg, sp, tree );
 	}
 	else {
 		is->funcs->undo_prepend_data( prg, is, length );

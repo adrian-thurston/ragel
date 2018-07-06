@@ -84,12 +84,16 @@ struct stream_funcs \
 { \
 	int (*get_parse_block)( struct colm_program *prg, struct stream_impl *si, int *pskip, char **pdp, int *copied ); \
 	int (*get_data)( struct colm_program *prg, struct stream_impl *si, char *dest, int length ); \
+\
 	int (*consume_data)( struct colm_program *prg, struct stream_impl *si, int length, struct colm_location *loc ); \
-	struct colm_tree *(*consume_tree)( struct colm_program *prg, struct stream_impl *si ); \
-	struct LangEl *(*consume_lang_el)( struct colm_program *prg, struct stream_impl *si, long *bind_id, char **data, long *length ); \
 	int (*undo_consume_data)( struct colm_program *prg, struct stream_impl *si, const char *data, int length ); \
+\
+	struct colm_tree *(*consume_tree)( struct colm_program *prg, struct stream_impl *si ); \
 	void (*undo_consume_tree)( struct colm_program *prg, struct stream_impl *si, struct colm_tree *tree, int ignore ); \
+\
+	struct LangEl *(*consume_lang_el)( struct colm_program *prg, struct stream_impl *si, long *bind_id, char **data, long *length ); \
 	void (*undo_consume_lang_el)( struct colm_program *prg, struct stream_impl *si ); \
+\
 	int (*get_data_source)( struct colm_program *prg, struct stream_impl *si, char *dest, int length ); \
 	void (*set_eof)( struct colm_program *prg, struct stream_impl *si ); \
 	void (*unset_eof)( struct colm_program *prg, struct stream_impl *si ); \

@@ -263,23 +263,27 @@ stream_funcs_ct pat_funcs =
 	&pat_get_data,
 
 	&pat_consume_data,
-	/* consume_tree */ 0,
-	&pat_get_lang_el,
-
 	&pat_undo_consume_data,
-	/* undo_consume_tree */ 0,
+
+	0, /* consume_tree */
+	0, /* undo_consume_tree */
+
+	&pat_get_lang_el,
 	&pat_undo_consume_lang_el,
 
-	0,
+	0, /* get_data_source */
 	
 	&ct_stream_set_eof, &ct_stream_unset_eof,
 	
-	0, 0, 0, 0, 0, 0, /* prepend. */
-	0, 0, 0, 0, 0, 0, /* append. */
+	0, 0, 0, 0, 0, 0, /* prepend funcs. */
+	0, 0, 0, 0, 0, 0, /* append funcs */
 
 	&ct_destructor,
 
-	0, 0, 0, 0,
+	0, /* get_collect */
+	0, /* flush_stream */
+	0, /* close_stream */
+	0, /* print_tree */
 
 	&ct_get_eof_sent,
 	&ct_set_eof_sent,
@@ -487,23 +491,28 @@ stream_funcs_ct repl_funcs =
 	&repl_get_data,
 
 	&repl_consume_data,
-	/* consume_tree */ 0,
-	&repl_get_lang_el,
-
 	&repl_undo_consume_data,
-	/* undo_consume_tree. */ 0,
+
+	0, /* consume_tree */
+	0, /* undo_consume_tree. */
+
+	&repl_get_lang_el,
 	&repl_undo_consume_lang_el,
 
-	0,
+	0, /* get_data_source */
 
-	&ct_stream_set_eof, &ct_stream_unset_eof,
+	&ct_stream_set_eof,
+	&ct_stream_unset_eof,
 
 	0, 0, 0, 0, 0, 0, /* prepend. */
 	0, 0, 0, 0, 0, 0, /* append. */
 
 	&ct_destructor,
 
-	0, 0, 0, 0,
+	0, /* get_collect */
+	0, /* flush_stream */
+	0, /* close_stream */
+	0, /* print_tree */
 
 	&ct_get_eof_sent,
 	&ct_set_eof_sent,
