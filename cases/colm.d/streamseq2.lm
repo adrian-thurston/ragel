@@ -29,24 +29,9 @@ def start
 
 new P: parser<start>()
 
-O1: stream = open( "streamseq1a.in", "r" )
-O2: stream = open( "streamseq1b.in", "r" )
-O3: stream = open( "streamseq1c.in", "r" )
+cons Id: id "D"
 
-if O1 && O2 && O3 {
-	send P [O1]
-	send P [O2]
-	send P [O3]
-}
-else {
-	print "could not open input files
-}
-
-
-send P [] eos
-
+send P ["a b c" Id "e f g\n" ] eos
 print [ P->tree ]
 ##### EXP #####
-a b c { d } e f g
-h i j { k } l m n
-o p q { r } s t u
+a b cDe f g
