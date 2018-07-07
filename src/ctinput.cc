@@ -87,19 +87,6 @@ struct stream_impl *colm_impl_new_pat( char *name, Pattern *pattern )
 	return (struct stream_impl*) ss;
 }
 
-LangEl *pat_get_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId,
-		char **data, long *length )
-{ 
-	LangEl *klangEl = ss->pat_item->prodEl->langEl;
-	*bindId = ss->pat_item->bindId;
-	*data = 0;
-	*length = 0;
-
-	ss->pat_item = ss->pat_item->next;
-	ss->offset = 0;
-	return klangEl;
-}
-
 int pat_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss, int *pskip,
 		char **pdp, int *copied )
 { 
@@ -148,6 +135,7 @@ int pat_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss, in
 	return INPUT_DATA;
 }
 
+
 int pat_get_data( struct colm_program *prg, struct stream_impl_ct *ss, char *dest, int length )
 { 
 	int copied = 0;
@@ -193,12 +181,6 @@ void pat_backup( struct stream_impl_ct *ss )
 		ss->pat_item = ss->pat_item->prev;
 }
 
-void pat_undo_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss )
-{
-	pat_backup( ss );
-	ss->offset = ss->pat_item->data.length();
-}
-
 int pat_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, int length, location_t *loc )
 {
 	//debug( REALM_INPUT, "consuming %ld bytes\n", length );
@@ -239,6 +221,25 @@ int pat_undo_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, 
 	return length;
 }
 
+LangEl *pat_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId,
+		char **data, long *length )
+{ 
+	LangEl *klangEl = ss->pat_item->prodEl->langEl;
+	*bindId = ss->pat_item->bindId;
+	*data = 0;
+	*length = 0;
+
+	ss->pat_item = ss->pat_item->next;
+	ss->offset = 0;
+	return klangEl;
+}
+
+void pat_undo_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss )
+{
+	pat_backup( ss );
+	ss->offset = ss->pat_item->data.length();
+}
+
 void ct_stream_set_eof( struct colm_program *prg, struct stream_impl_ct *si )
 {
 	si->eof = true;
@@ -262,38 +263,37 @@ stream_funcs_ct pat_funcs =
 	&pat_get_parse_block,
 	&pat_get_data,
 
+	0, /* get_data_source */
+
 	&pat_consume_data,
 	&pat_undo_consume_data,
 
 	0, /* consume_tree */
 	0, /* undo_consume_tree */
 
-	&pat_get_lang_el,
+	&pat_consume_lang_el,
 	&pat_undo_consume_lang_el,
-
-	0, /* get_data_source */
-	
-	&ct_stream_set_eof, &ct_stream_unset_eof,
 	
 	0, 0, 0, 0, 0, 0, /* prepend funcs. */
 	0, 0, 0, 0, 0, 0, /* append funcs */
 
-	&ct_destructor,
+	&ct_stream_set_eof,
+	&ct_stream_unset_eof,
+	&ct_get_eof_sent,
+	&ct_set_eof_sent,
 
+	&ct_transfer_loc_seq,
 	0, /* get_collect */
 	0, /* flush_stream */
 	0, /* close_stream */
 	0, /* print_tree */
 
-	&ct_get_eof_sent,
-	&ct_set_eof_sent,
-
-	&ct_transfer_loc_seq,
+	&ct_destructor,
 };
 
 
 /*
- * Constructor
+ * Replacements
  */
 
 struct stream_impl *colm_impl_new_cons( char *name, Constructor *constructor )
@@ -306,7 +306,7 @@ struct stream_impl *colm_impl_new_cons( char *name, Constructor *constructor )
 	return (struct stream_impl*)ss;
 }
 
-LangEl *repl_get_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId, char **data, long *length )
+LangEl *repl_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = ss->cons_item->type == ConsItem::ExprType ? 
 			ss->cons_item->langEl : ss->cons_item->prodEl->langEl;
@@ -490,34 +490,32 @@ stream_funcs_ct repl_funcs =
 	&repl_get_parse_block,
 	&repl_get_data,
 
+	0, /* get_data_source */
+
 	&repl_consume_data,
 	&repl_undo_consume_data,
 
 	0, /* consume_tree */
 	0, /* undo_consume_tree. */
 
-	&repl_get_lang_el,
+	&repl_consume_lang_el,
 	&repl_undo_consume_lang_el,
-
-	0, /* get_data_source */
-
-	&ct_stream_set_eof,
-	&ct_stream_unset_eof,
 
 	0, 0, 0, 0, 0, 0, /* prepend. */
 	0, 0, 0, 0, 0, 0, /* append. */
 
-	&ct_destructor,
+	&ct_stream_set_eof,
+	&ct_stream_unset_eof,
+	&ct_get_eof_sent,
+	&ct_set_eof_sent,
 
+	&ct_transfer_loc_seq,
 	0, /* get_collect */
 	0, /* flush_stream */
 	0, /* close_stream */
 	0, /* print_tree */
 
-	&ct_get_eof_sent,
-	&ct_set_eof_sent,
-
-	&ct_transfer_loc_seq,
+	&ct_destructor,
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )

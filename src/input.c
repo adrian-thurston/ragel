@@ -565,7 +565,6 @@ static int text_get_data_source( struct colm_program *prg, struct stream_impl_da
 	return take;
 }
 
-
 /*
  * StreamImpl struct, this wraps the list of input streams.
  */
@@ -1126,59 +1125,54 @@ static tree_t *stream_undo_append_stream( struct colm_program *prg, struct strea
 
 struct stream_funcs_seq stream_funcs = 
 {
-	.get_parse_block =      &stream_get_parse_block,
-	.get_data =             &stream_get_data,
+	&stream_get_parse_block,
+	&stream_get_data,
+	0 /* get_data_source */,
 
-	/* 
-	 * Consume.
-	 */
-	.consume_data =      &stream_consume_data,
-	.undo_consume_data = &stream_undo_consume_data,
+	/* Consume. */
+	&stream_consume_data,
+	&stream_undo_consume_data,
 
-	.consume_tree =      &stream_consume_tree,
-	.undo_consume_tree = &stream_undo_consume_tree,
+	&stream_consume_tree,
+	&stream_undo_consume_tree,
 
-	.consume_lang_el =      &stream_consume_lang_el,
-	.undo_consume_lang_el = &stream_undo_consume_lang_el,
+	&stream_consume_lang_el,
+	&stream_undo_consume_lang_el,
 
+	/* Prepend */
+	&stream_prepend_data,
+	&stream_undo_prepend_data,
 
-	/*
-	 * Prepend
-	 */
-	.prepend_data =      &stream_prepend_data,
-	.undo_prepend_data = &stream_undo_prepend_data,
+	&stream_prepend_tree,
+	&stream_undo_prepend_tree,
 
-	.prepend_tree =      &stream_prepend_tree,
-	.undo_prepend_tree = &stream_undo_prepend_tree,
+	&stream_prepend_stream,
+	&stream_undo_prepend_stream,
 
-	.prepend_stream =      &stream_prepend_stream,
-	.undo_prepend_stream = &stream_undo_prepend_stream,
+	/* Append */
+	&stream_append_data,
+	&stream_undo_append_data,
 
-	/*
-	 * Append
-	 */
-	.append_data =      &stream_append_data,
-	.undo_append_data = &stream_undo_append_data,
+	&stream_append_tree,
+	&stream_undo_append_tree,
 
-	.append_tree =      &stream_append_tree,
-	.undo_append_tree = &stream_undo_append_tree,
-
-	.append_stream =      &stream_append_stream,
-	.undo_append_stream = &stream_undo_append_stream,
-
-	.destructor =  &stream_destructor,
-	.get_collect = &stream_get_collect,
-	.flush_stream = &stream_flush_stream,
-	.close_stream = &stream_close_stream,
-	.print_tree = &stream_print_tree,
+	&stream_append_stream,
+	&stream_undo_append_stream,
 
 	/* EOF */
-	.set_eof =   &stream_set_eof,
-	.unset_eof = &stream_unset_eof,
-	.get_eof_sent = &stream_get_eof_sent,
-	.set_eof_sent = &stream_set_eof_sent,
+	&stream_set_eof,
+	&stream_unset_eof,
+	&stream_get_eof_sent,
+	&stream_set_eof_sent,
 
-	.transfer_loc = &transfer_loc_seq,
+	/* Util. */
+	&transfer_loc_seq,
+	&stream_get_collect,
+	&stream_flush_stream,
+	&stream_close_stream,
+	&stream_print_tree,
+
+	&stream_destructor,
 };
 
 struct stream_funcs_data file_funcs = 
