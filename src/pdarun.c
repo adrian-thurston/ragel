@@ -1316,7 +1316,8 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 		pda_run->parse_tree_pool = &prg->parse_tree_pool;
 	}
 
-	debug( prg, REALM_PARSE, "initializing struct pda_run\n" );
+	debug( prg, REALM_PARSE, "initializing struct pda_run %s\n",
+		prg->rtd->lel_info[prg->rtd->parser_lel_ids[parser_id]].name );
 
 	/* FIXME: need the right one here. */
 	pda_run->pda_cs = prg->rtd->start_states[pda_run->parser_id];

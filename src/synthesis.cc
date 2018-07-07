@@ -1291,7 +1291,7 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 			newUT->generic->elUt->langEl->contextIn != 0 )
 	{
 		if ( fieldInitArgs == 0 || fieldInitArgs->length() != 1 )
-			error(loc) << "parse command requires just input" << endp;
+			error(loc) << "parse command requires just context " << endp;
 		context = true;
 	}
 
@@ -1316,14 +1316,20 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
-		/* Eval the context. */
-		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
+		for ( int i = 0; i < fieldInitArgs->length(); i++ ) {
+			/* Eval what we are initializing with. */
+			UniqueType *argUT = fieldInitArgs->data[i]->expr->evaluate( pd, code );
 
-		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_STRUCT )
-			error(loc) << "context argument must be a stream or a tree" << endp;
-
-		/* Store the context. Leaves the parser on the stack. */
-		code.append( IN_SET_PARSER_CONTEXT );
+			if ( argUT == pd->uniqueTypeInput ) {
+				code.append( IN_SET_PARSER_INPUT );
+			}
+			else if ( argUT->typeId == TYPE_STRUCT ) {
+				code.append( IN_SET_PARSER_CONTEXT );
+			}
+			else {
+				error(loc) << "cannot initialize parser with this type, context or input only" << endp;
+			}
+		}
 	}
 
 	evaluateCapture( pd, code, newUT );
@@ -1474,9 +1480,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	int stopId = stop ? targetUT->langEl->id : 0;
 
 	bool context = false;
-	if ( targetUT->langEl->contextIn != 0 ) {
-		if ( fieldInitArgs == 0 || fieldInitArgs->length() != 1 )
-			error(loc) << "parse command requires just input" << endp;
+	if ( fieldInitArgs != 0 ) {
+		if ( fieldInitArgs == 0 || ( fieldInitArgs->length() != 1 && fieldInitArgs->length() != 2 ) )
+			error(loc) << "parse command requires just context and input" << endp;
 		context = true;
 	}
 
@@ -1509,82 +1515,97 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	 * First load the context into the parser.
 	 */
 	if ( context ) {
-		/* Eval the context. */
-		UniqueType *argUT = fieldInitArgs->data[0]->expr->evaluate( pd, code );
+		for ( int i = 0; i < fieldInitArgs->length(); i++ ) {
+			/* Eval what we are initializing with. */
+			UniqueType *argUT = fieldInitArgs->data[i]->expr->evaluate( pd, code );
 
-		if ( argUT != pd->uniqueTypeStream && argUT->typeId != TYPE_STRUCT )
-			error(loc) << "context argument must be a stream or a tree" << endp;
-
-		/* Store the context. */
-		code.append( IN_SET_PARSER_CONTEXT );
+			if ( argUT == pd->uniqueTypeInput ) {
+				code.append( IN_SET_PARSER_INPUT );
+			}
+			else if ( argUT->typeId == TYPE_STRUCT && targetUT->langEl->contextIn != 0 ) {
+				code.append( IN_SET_PARSER_CONTEXT );
+			}
+			else {
+				error(loc) << "cannot initialize parser with this type, context or input only" << endp;
+			}
+		}
 	}
 
 	/*****************************/
 
 	code.append( IN_GET_PARSER_STREAM );
 	
-	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-		bool isInput = false;
-		bool isStream = false;
-		switch ( item->type ) {
-		case ConsItem::LiteralType: {
-			String result;
-			bool unusedCI;
-			prepareLitString( result, unusedCI, 
-					item->prodEl->typeRef->pdaLiteral->data,
-					item->prodEl->typeRef->pdaLiteral->loc );
-
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( result, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
-
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ConsItem::InputText: {
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( item->data, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
-
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ConsItem::ExprType: {
-			UniqueType *ut = item->expr->evaluate( pd, code );
-
-			if ( ut->typeId == TYPE_VOID ) {
-				/* Clear it away if return type is void. */
-				code.append( IN_POP_VAL );
-				continue;
-			}
-
-			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
-				code.append( IN_INT_TO_STR );
-
-			if ( ut == pd->uniqueTypeInput )
-				isInput = true;
-			if ( ut == pd->uniqueTypeStream )
-				isStream = true;
-
-			break;
-		}}
-
-		if ( isInput )
-			code.append( IN_REPLACE_STREAM );
-		else if ( isStream )
-			code.append( IN_SEND_STREAM_W );
-		else if ( tree )
-			code.append( IN_SEND_TREE_W );
-		else
-			code.append( IN_SEND_TEXT_W );
+	if ( parserText->list->length() == 0 ) {
+		code.append( IN_SEND_NOTHING );
 
 		/* Parse instruction, dependent on whether or not we are producing
 		 * revert or commit code. */
 		parseFrag( pd, code, stopId );
+	}
+	else {
+		for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+			bool isInput = false;
+			bool isStream = false;
+			switch ( item->type ) {
+			case ConsItem::LiteralType: {
+				String result;
+				bool unusedCI;
+				prepareLitString( result, unusedCI, 
+						item->prodEl->typeRef->pdaLiteral->data,
+						item->prodEl->typeRef->pdaLiteral->loc );
+
+				/* Make sure we have this string. */
+				StringMapEl *mapEl = 0;
+				if ( pd->literalStrings.insert( result, &mapEl ) )
+					mapEl->value = pd->literalStrings.length()-1;
+
+				code.append( IN_LOAD_STR );
+				code.appendWord( mapEl->value );
+				break;
+			}
+			case ConsItem::InputText: {
+				/* Make sure we have this string. */
+				StringMapEl *mapEl = 0;
+				if ( pd->literalStrings.insert( item->data, &mapEl ) )
+					mapEl->value = pd->literalStrings.length()-1;
+
+				code.append( IN_LOAD_STR );
+				code.appendWord( mapEl->value );
+				break;
+			}
+			case ConsItem::ExprType: {
+				UniqueType *ut = item->expr->evaluate( pd, code );
+
+				if ( ut->typeId == TYPE_VOID ) {
+					/* Clear it away if return type is void. */
+					code.append( IN_POP_VAL );
+					continue;
+				}
+
+				if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+					code.append( IN_INT_TO_STR );
+
+				if ( ut == pd->uniqueTypeInput )
+					isInput = true;
+				if ( ut == pd->uniqueTypeStream )
+					isStream = true;
+
+				break;
+			}}
+
+			if ( isInput )
+				code.append( IN_REPLACE_STREAM );
+			else if ( isStream )
+				code.append( IN_SEND_STREAM_W );
+			else if ( tree )
+				code.append( IN_SEND_TREE_W );
+			else
+				code.append( IN_SEND_TEXT_W );
+
+			/* Parse instruction, dependent on whether or not we are producing
+			 * revert or commit code. */
+			parseFrag( pd, code, stopId );
+		}
 	}
 
 	/*
@@ -1629,66 +1650,76 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 		code.appendHalf( 0 );
 	}
 
-	/* Assign bind ids to the variables in the replacement. */
-	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-		bool isInput = false;
-		bool isStream = false;
-		switch ( item->type ) {
-		case ConsItem::LiteralType: {
-			String result;
-			bool unusedCI;
-			prepareLitString( result, unusedCI, 
-					item->prodEl->typeRef->pdaLiteral->data,
-					item->prodEl->typeRef->pdaLiteral->loc );
+	if ( parserText->list->length() == 0 ) {
+		code.append( IN_SEND_NOTHING );
 
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( result, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
+		/* Parse instruction, dependent on whether or not we are producing
+		 * revert or commit code. */
+		parseFrag( pd, code, 0 );
+	}
+	else {
 
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ConsItem::InputText: {
-			/* Make sure we have this string. */
-			StringMapEl *mapEl = 0;
-			if ( pd->literalStrings.insert( item->data, &mapEl ) )
-				mapEl->value = pd->literalStrings.length()-1;
+		/* Assign bind ids to the variables in the replacement. */
+		for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+			bool isInput = false;
+			bool isStream = false;
+			switch ( item->type ) {
+			case ConsItem::LiteralType: {
+				String result;
+				bool unusedCI;
+				prepareLitString( result, unusedCI, 
+						item->prodEl->typeRef->pdaLiteral->data,
+						item->prodEl->typeRef->pdaLiteral->loc );
 
-			code.append( IN_LOAD_STR );
-			code.appendWord( mapEl->value );
-			break;
-		}
-		case ConsItem::ExprType:
-			UniqueType *ut = item->expr->evaluate( pd, code );
-			if ( ut->typeId == TYPE_VOID ) {
-				/* Clear it away if return type is void. */
-				code.append( IN_POP_VAL );
-				continue;
+				/* Make sure we have this string. */
+				StringMapEl *mapEl = 0;
+				if ( pd->literalStrings.insert( result, &mapEl ) )
+					mapEl->value = pd->literalStrings.length()-1;
+
+				code.append( IN_LOAD_STR );
+				code.appendWord( mapEl->value );
+				break;
+			}
+			case ConsItem::InputText: {
+				/* Make sure we have this string. */
+				StringMapEl *mapEl = 0;
+				if ( pd->literalStrings.insert( item->data, &mapEl ) )
+					mapEl->value = pd->literalStrings.length()-1;
+
+				code.append( IN_LOAD_STR );
+				code.appendWord( mapEl->value );
+				break;
+			}
+			case ConsItem::ExprType:
+				UniqueType *ut = item->expr->evaluate( pd, code );
+				if ( ut->typeId == TYPE_VOID ) {
+					/* Clear it away if return type is void. */
+					code.append( IN_POP_VAL );
+					continue;
+				}
+
+				if ( ut == pd->uniqueTypeInput )
+					isInput = true;
+				if ( ut == pd->uniqueTypeStream )
+					isStream = true;
+
+				if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+					code.append( IN_INT_TO_STR );
+
+				break;
 			}
 
-			if ( ut == pd->uniqueTypeInput )
-				isInput = true;
-			if ( ut == pd->uniqueTypeStream )
-				isStream = true;
+			if ( isInput )
+				code.append( IN_REPLACE_STREAM );
+			else if ( isStream )
+				code.append( IN_SEND_STREAM_W );
+			else if ( !strings )
+				code.append( IN_SEND_TREE_W );
+			else
+				code.append( IN_SEND_TEXT_W );
 
-			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
-				code.append( IN_INT_TO_STR );
-
-			break;
+			parseFrag( pd, code, 0 );
 		}
-
-		if ( isInput )
-			code.append( IN_REPLACE_STREAM );
-		else if ( isStream )
-			code.append( IN_SEND_STREAM_W );
-		else if ( !strings )
-			code.append( IN_SEND_TREE_W );
-		else
-			code.append( IN_SEND_TEXT_W );
-
-		parseFrag( pd, code, 0 );
 	}
 
 	if ( eof ) {

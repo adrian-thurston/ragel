@@ -261,6 +261,7 @@ typedef unsigned char uchar;
 #define IN_PARSE_INIT_BKT        0xa1
 #define IN_PARSE_FRAG_BKT        0xa6
 
+#define IN_SEND_NOTHING     0xa0
 #define IN_SEND_TEXT_W      0x89
 #define IN_SEND_TEXT_BKT    0x8a
 
@@ -305,6 +306,7 @@ typedef unsigned char uchar;
 #define IN_LOAD_CONTEXT_BKT      0xcb
 
 #define IN_SET_PARSER_CONTEXT    0xd0
+#define IN_SET_PARSER_INPUT      0x96
 
 #define IN_SPRINTF               0xd6
 

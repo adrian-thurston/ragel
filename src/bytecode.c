@@ -951,7 +951,7 @@ again:
 		}
 
 		case IN_SET_PARSER_CONTEXT: {
-			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CTX_WC\n" );
+			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_CONTEXT\n" );
 
 			struct_t *strct = vm_pop_struct();
 			parser_t *parser = vm_pop_parser();
@@ -959,6 +959,20 @@ again:
 			colm_parser_set_context( prg, sp, parser, strct );
 
 			vm_push_parser( parser );
+			break;
+		}
+
+		case IN_SET_PARSER_INPUT: {
+			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_INPUT\n" );
+
+			stream_t *to_replace_with = vm_pop_stream();
+			parser_t *parser = vm_pop_parser();
+
+			parser->input->impl = to_replace_with->impl;
+			parser->input->not_owner = true;
+
+			vm_push_parser( parser );
+
 			break;
 		}
 
@@ -2467,6 +2481,13 @@ again:
 			exec->steps = stream->parser->pda_run->steps;
 			exec->pcr = PCR_START;
 
+			break;
+		}
+		case IN_SEND_NOTHING: {
+			stream_t *stream = vm_pop_stream();
+			vm_push_stream( stream );
+			exec->steps = stream->parser->pda_run->steps;
+			exec->pcr = PCR_START;
 			break;
 		}
 		case IN_SEND_STREAM_W: {
