@@ -12,7 +12,7 @@ lex
 
 	token open_paren /'('/ 
 	{
-		parse_stop NC: nested_comment[ input ]
+		parse_stop NC: nested_comment(input)[]
 		print( 'discarding: ', NC, '\n' )
 	}
 end
