@@ -848,7 +848,7 @@ void FsmCodeGen::writeExec()
 	setLabelsNeeded();
 
 	out <<
-		"static void fsm_execute( struct pda_run *pdaRun, struct stream_impl *inputStream )\n"
+		"static void fsm_execute( struct pda_run *pdaRun, struct input_impl *inputStream )\n"
 		"{\n"
 		"	" << BLOCK_START() << " = pdaRun->p;\n"
 		"/*_resume:*/\n";
@@ -901,7 +901,7 @@ void FsmCodeGen::writeCode()
 	 * should use the preprocessor to make these go away. */
 	out <<
 		"static void sendNamedLangEl( struct colm_program *prg, tree_t **tree,\n"
-		"		struct pda_run *pdaRun, struct stream_impl *inputStream ) { }\n"
+		"		struct pda_run *pda_run, struct input_impl *input ) { }\n"
 		"static void initBindings( struct pda_run *pdaRun ) {}\n"
 		"static void popBinding( struct pda_run *pdaRun, parse_tree_t *tree ) {}\n"
 		"\n"

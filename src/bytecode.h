@@ -525,6 +525,7 @@ enum LEL_ID {
 	({ SW r = *sp; (sp+1) >= prg->sb_end ? (sp = vm_bs_pop(prg, sp, 1)) : (sp += 1); (type)r; })
 
 #define vm_push_tree(i)   vm_push_type(tree_t*, i)
+#define vm_push_input(i)  vm_push_type(input_t*, i)
 #define vm_push_stream(i) vm_push_type(stream_t*, i)
 #define vm_push_struct(i) vm_push_type(struct_t*, i)
 #define vm_push_parser(i) vm_push_type(parser_t*, i)
@@ -536,6 +537,7 @@ enum LEL_ID {
 #define vm_push_ptree(i)  vm_push_type(parse_tree_t*, i)
 
 #define vm_pop_tree()   vm_pop_type(tree_t*)
+#define vm_pop_input()  vm_pop_type(input_t*)
 #define vm_pop_stream() vm_pop_type(stream_t*)
 #define vm_pop_struct() vm_pop_type(struct_t*)
 #define vm_pop_parser() vm_pop_type(parser_t*)
@@ -587,7 +589,7 @@ typedef struct colm_execution
 
 	long rcode_unit_len;
 
-	stream_t *stream;
+	input_t *input;
 	long steps;
 	long pcr;
 	tree_t *ret_val;

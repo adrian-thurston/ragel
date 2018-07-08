@@ -54,10 +54,24 @@ typedef struct colm_parser
 	void *buffer[10];
 
 	struct pda_run *pda_run;
-	struct colm_stream *input;
+	struct colm_input *input;
 	tree_t *result;
 } parser_t;
 
+/* Must overlay colm_inbuilt. */
+typedef struct colm_input
+{
+	short id;
+	struct colm_struct *prev, *next;
+	colm_destructor_t destructor;
+
+	/* Transitional, needed during ref semantics impl. */
+	void *buffer[8];
+
+	struct input_impl *impl;
+	parser_t *parser;
+	char not_owner;
+} input_t;
 
 /* Must overlay colm_inbuilt. */
 typedef struct colm_stream
@@ -153,7 +167,7 @@ struct colm_struct *colm_struct_inbuilt( struct colm_program *prg, int size,
 	colm_struct_get_addr( obj, map_el_t*, prg->rtd->generic_info[genId].el_offset )
 
 parser_t *colm_parser_new( program_t *prg, struct generic_info *gi, int stop_id, int reducer );
-stream_t *colm_stream_new( struct colm_program *prg );
+input_t *colm_input_new( struct colm_program *prg );
 stream_t *colm_stream_new_struct( struct colm_program *prg );
 
 list_t *colm_list_new( struct colm_program *prg );
@@ -173,6 +187,8 @@ struct colm_struct *colm_map_get( struct colm_program *prg, map_t *map,
 
 struct colm_struct *colm_construct_generic( struct colm_program *prg, long generic_id, int stop_id );
 struct colm_struct *colm_construct_reducer( struct colm_program *prg, long generic_id, int reducer_id );
+struct input_impl *input_to_impl( input_t *ptr );
+struct stream_impl *stream_to_impl( stream_t *ptr );
 
 #if defined(__cplusplus)
 }

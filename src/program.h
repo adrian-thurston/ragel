@@ -105,9 +105,9 @@ struct colm_sections
 	long struct_input_id;
 	long struct_stream_id;
 
-	void (*fsm_execute)( struct pda_run *pda_run, struct stream_impl *input_stream );
+	void (*fsm_execute)( struct pda_run *pda_run, struct input_impl *input_stream );
 	void (*send_named_lang_el)( struct colm_program *prg, tree_t **tree,
-			struct pda_run *pda_run, struct stream_impl *input_stream );
+			struct pda_run *pda_run, struct input_impl *input_stream );
 	void (*init_bindings)( struct pda_run *pda_run );
 	void (*pop_binding)( struct pda_run *pda_run, parse_tree_t *tree );
 

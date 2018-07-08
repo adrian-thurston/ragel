@@ -170,7 +170,7 @@ void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is,
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-static void send_back_text( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
+static void send_back_text( struct colm_program *prg, struct input_impl *is, const char *data, long length )
 {
 	//debug( REALM_PARSE, "push back of %ld characters\n", length );
 
@@ -183,7 +183,7 @@ static void send_back_text( struct colm_program *prg, struct stream_impl *is, co
 	is->funcs->undo_consume_data( prg, is, data, length );
 }
 
-static void send_back_tree( struct colm_program *prg, struct stream_impl *is, tree_t *tree )
+static void send_back_tree( struct colm_program *prg, struct input_impl *is, tree_t *tree )
 {
 	is->funcs->undo_consume_tree( prg, is, tree, false );
 }
@@ -193,7 +193,7 @@ static void send_back_tree( struct colm_program *prg, struct stream_impl *is, tr
  *   PCR_REVERSE
  */
 static void send_back_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is, parse_tree_t *parse_tree )
+		struct pda_run *pda_run, struct input_impl *is, parse_tree_t *parse_tree )
 {
 	#ifdef DEBUG
 	struct lang_el_info *lel_info = prg->rtd->lel_info;
@@ -243,7 +243,7 @@ static void reset_token( struct pda_run *pda_run )
  */
 
 static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
-		struct stream_impl *is, parse_tree_t *parse_tree )
+		struct input_impl *is, parse_tree_t *parse_tree )
 {
 	debug( prg, REALM_PARSE, "sending back: %s\n",
 			prg->rtd->lel_info[parse_tree->id].name );
@@ -352,7 +352,7 @@ static void ignore_tree_art( program_t *prg, struct pda_run *pda_run, tree_t *tr
 }
 
 kid_t *make_token_with_data( program_t *prg, struct pda_run *pda_run,
-		struct stream_impl *is, int id, head_t *tokdata )
+		struct input_impl *is, int id, head_t *tokdata )
 {
 	/* Make the token object. */
 	long object_length = prg->rtd->lel_info[id].object_length;
@@ -723,7 +723,7 @@ static void handle_error( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 }
 
 static head_t *extract_match( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is )
+		struct pda_run *pda_run, struct input_impl *is )
 {
 	long length = pda_run->toklen;
 
@@ -758,7 +758,7 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 }
 
 static head_t *extract_no_d( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is )
+		struct pda_run *pda_run, struct input_impl *is )
 {
 	long length = pda_run->toklen;
 
@@ -780,7 +780,7 @@ static head_t *extract_no_d( program_t *prg, tree_t **sp,
 }
 
 static head_t *extract_no_l( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is )
+		struct pda_run *pda_run, struct input_impl *is )
 {
 	long length = pda_run->toklen;
 
@@ -819,7 +819,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 }
 
 static head_t *consume_match( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is )
+		struct pda_run *pda_run, struct input_impl *is )
 {
 	long length = pda_run->toklen;
 
@@ -838,7 +838,7 @@ static head_t *consume_match( program_t *prg, tree_t **sp,
 }
 
 
-static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct stream_impl *is )
+static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct input_impl *is )
 {
 	long length = pda_run->toklen;
 
@@ -868,7 +868,7 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct strea
 
 
 static void send_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is, long id )
+		struct pda_run *pda_run, struct input_impl *is, long id )
 {
 	if ( prg->rtd->reducer_need_ign( prg, pda_run ) == RN_NONE ) {
 		consume_match( prg, sp, pda_run, is );
@@ -892,7 +892,7 @@ static void send_ignore( program_t *prg, tree_t **sp,
 }
 
 static void send_token( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is, long id )
+		struct pda_run *pda_run, struct input_impl *is, long id )
 {
 	int empty_ignore = pda_run->accum_ignore == 0;
 
@@ -935,7 +935,7 @@ static void send_token( program_t *prg, tree_t **sp,
 }
 
 static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run,
-		struct stream_impl *is )
+		struct input_impl *is )
 {
 	kid_t *input = kid_allocate( prg );
 	input->tree = is->funcs->consume_tree( prg, is );
@@ -951,14 +951,14 @@ static void send_tree( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 }
 
 static void send_ignore_tree( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is )
+		struct pda_run *pda_run, struct input_impl *is )
 {
 	tree_t *tree = is->funcs->consume_tree( prg, is );
 	ignore_tree_art( prg, pda_run, tree );
 }
 
 static void send_collect_ignore( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is, int id )
+		struct pda_run *pda_run, struct input_impl *is, int id )
 {
 	debug( prg, REALM_PARSE, "token: CI\n" );
 
@@ -999,7 +999,8 @@ static int get_next_pre_region( struct pda_run *pda_run )
 	return pda_run->pda_tables->token_pre_regions[pda_run->next_region_ind];
 }
 
-static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run, struct stream_impl *is )
+static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run,
+		struct input_impl *is )
 {
 	debug( prg, REALM_PARSE, "token: _EOF\n" );
 
@@ -1086,7 +1087,7 @@ static void push_bt_point( program_t *prg, struct pda_run *pda_run )
 #define SCAN_LANG_EL           -2
 #define SCAN_EOF               -1
 
-static long scan_token( program_t *prg, struct pda_run *pda_run, struct stream_impl *is )
+static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_impl *is )
 {
 	if ( pda_run->trigger_undo )
 		return SCAN_UNDO;
@@ -1387,7 +1388,7 @@ static long stack_top_target( program_t *prg, struct pda_run *pda_run )
  *   PCR_REVERSE
  */
 static long parse_token( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, struct stream_impl *is, long entry )
+		struct pda_run *pda_run, struct input_impl *is, long entry )
 {
 	int pos;
 	unsigned int *action;
@@ -1957,7 +1958,7 @@ _out:
  */
 
 long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run, 
-		struct stream_impl *is, long entry )
+		struct input_impl *is, long entry )
 {
 	struct lang_el_info *lel_info = prg->rtd->lel_info;
 
@@ -2200,7 +2201,7 @@ skip_send:
 
 
 long colm_parse_frag( program_t *prg, tree_t **sp,
-		struct pda_run *pda_run, stream_t *input, long entry )
+		struct pda_run *pda_run, input_t *input, long entry )
 {
 	/* COROUTINE */
 	switch ( entry ) {
@@ -2208,7 +2209,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp,
 
 	if ( ! pda_run->parse_error ) {
 		long pcr = colm_parse_loop( prg, sp, pda_run,
-				stream_to_impl( input ), entry );
+				input_to_impl( input ), entry );
 
 		while ( pcr != PCR_DONE ) {
 
@@ -2220,7 +2221,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp,
 			case PCR_REVERSE:
 
 			pcr = colm_parse_loop( prg, sp, pda_run,
-					stream_to_impl( input ), entry );
+					input_to_impl( input ), entry );
 		}
 	}
 
@@ -2232,7 +2233,7 @@ long colm_parse_frag( program_t *prg, tree_t **sp,
 }
 
 long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, long entry, long steps )
+		input_t *input, long entry, long steps )
 {
 	debug( prg, REALM_PARSE,
 			"undo parse frag, target steps: %ld, pdarun steps: %ld\n",
@@ -2252,7 +2253,7 @@ long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		pda_run->trigger_undo = 1;
 
 		/* The parse loop will recognise the situation. */
-		long pcr = colm_parse_loop( prg, sp, pda_run, stream_to_impl(input), entry );
+		long pcr = colm_parse_loop( prg, sp, pda_run, input_to_impl(input), entry );
 		while ( pcr != PCR_DONE ) {
 
 			/* COROUTINE */
@@ -2262,7 +2263,7 @@ long colm_parse_undo_frag( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			case PCR_PRE_EOF:
 			case PCR_REVERSE:
 
-			pcr = colm_parse_loop( prg, sp, pda_run, stream_to_impl(input), entry );
+			pcr = colm_parse_loop( prg, sp, pda_run, input_to_impl(input), entry );
 		}
 
 		/* Reset environment. */

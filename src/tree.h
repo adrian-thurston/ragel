@@ -350,7 +350,6 @@ void colm_uiter_destroy( struct colm_program *prg, tree_t ***psp, user_iter_t *u
 void colm_uiter_unwind( struct colm_program *prg, tree_t ***psp, user_iter_t *uiter );
 
 tree_t *cast_tree( struct colm_program *prg, int lang_el_id, tree_t *tree );
-struct stream_impl *stream_to_impl( stream_t *ptr );
 
 void colm_init_list_iter( generic_iter_t *list_iter, tree_t **stack_root,
 		long arg_size, long root_size, const ref_t *root_ref, int generic_id );

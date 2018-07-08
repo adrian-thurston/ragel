@@ -89,7 +89,7 @@ void execAction( struct pda_run *pdaRun, GenAction *genAction )
 		pdaRun->mark[genAction->markId-1] = pdaRun->p;
 }
 
-extern "C" void internalFsmExecute( struct pda_run *pdaRun, struct stream_impl *inputStream )
+extern "C" void internalFsmExecute( struct pda_run *pdaRun, struct input_impl *inputStream )
 {
 	int _klen;
 	unsigned int _trans;

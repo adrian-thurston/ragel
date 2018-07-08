@@ -447,17 +447,17 @@ void colm_undo_stream_push( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *input_stream, long length );
 
 kid_t *make_token_with_data( struct colm_program *prg, struct pda_run *pda_run,
-		struct stream_impl *input_stream, int id, head_t *tokdata );
+		struct input_impl *input_stream, int id, head_t *tokdata );
 
 long colm_parse_loop( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run, 
-		struct stream_impl *input_stream, long entry );
+		struct input_impl *input_stream, long entry );
 
 long colm_parse_frag( struct colm_program *prg, tree_t **sp,
-		struct pda_run *pda_run, stream_t *input, long entry );
+		struct pda_run *pda_run, input_t *input, long entry );
 long colm_parse_finish( struct colm_program *prg, tree_t **sp,
 		struct pda_run *pda_run, stream_t *input, long entry );
 long colm_parse_undo_frag( struct colm_program *prg, tree_t **sp, struct pda_run *pda_run,
-		stream_t *input, long entry, long steps );
+		input_t *input, long entry, long steps );
 
 void commit_clear_kid_list( program_t *prg, tree_t **sp, kid_t *kid );
 void commit_clear_parse_tree( program_t *prg, tree_t **sp,

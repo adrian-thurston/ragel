@@ -163,7 +163,7 @@ struct_t *colm_construct_generic( program_t *prg, long generic_id, int stop_id )
 		}
 		case GEN_PARSER: {
 			parser_t *parser = colm_parser_new( prg, generic_info, stop_id, 0 );
-			parser->input = colm_stream_new( prg );
+			parser->input = colm_input_new( prg );
 			parser->input->parser = parser;
 			new_generic = (struct_t*) parser;
 			break;
@@ -179,7 +179,7 @@ struct_t *colm_construct_reducer( program_t *prg, long generic_id, int reducer_i
 	struct_t *new_generic = 0;
 
 	parser_t *parser = colm_parser_new( prg, generic_info, 0, reducer_id );
-	parser->input = colm_stream_new( prg );
+	parser->input = colm_input_new( prg );
 	parser->input->parser = parser;
 	new_generic = (struct_t*) parser;
 

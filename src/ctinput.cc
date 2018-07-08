@@ -77,14 +77,14 @@ void ct_set_eof_sent( struct colm_program *prg, struct stream_impl_ct *si, char 
  * Pattern
  */
 
-struct stream_impl *colm_impl_new_pat( char *name, Pattern *pattern )
+struct input_impl *colm_impl_new_pat( char *name, Pattern *pattern )
 {
 	struct stream_impl_ct *ss = (struct stream_impl_ct*)malloc(sizeof(struct stream_impl_ct));
 	memset( ss, 0, sizeof(struct stream_impl_ct) );
 	ss->pattern = pattern;
 	ss->pat_item = pattern->list->head;
 	ss->funcs = (struct stream_funcs*)&pat_funcs;
-	return (struct stream_impl*) ss;
+	return (struct input_impl*) ss;
 }
 
 int pat_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss, int *pskip,
@@ -296,14 +296,14 @@ stream_funcs_ct pat_funcs =
  * Replacements
  */
 
-struct stream_impl *colm_impl_new_cons( char *name, Constructor *constructor )
+struct input_impl *colm_impl_new_cons( char *name, Constructor *constructor )
 {
 	struct stream_impl_ct *ss = (struct stream_impl_ct*)malloc(sizeof(struct stream_impl_ct));
 	memset( ss, 0, sizeof(struct stream_impl_ct) );
 	ss->constructor = constructor;
 	ss->cons_item = constructor->list->head;
 	ss->funcs = (struct stream_funcs*)&repl_funcs;
-	return (struct stream_impl*)ss;
+	return (struct input_impl*)ss;
 }
 
 LangEl *repl_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId, char **data, long *length )
@@ -525,7 +525,7 @@ void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )
 }
 
 extern "C" void internalSendNamedLangEl( program_t *prg, tree_t **sp,
-		struct pda_run *pdaRun, struct stream_impl *is )
+		struct pda_run *pdaRun, struct input_impl *is )
 {
 	/* All three set by consumeLangEl. */
 	long bindId;

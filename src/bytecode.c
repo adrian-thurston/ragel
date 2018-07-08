@@ -241,45 +241,45 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, stream_t *dest, t
 	return length;
 }
 
-static word_t stream_append_tree( program_t *prg, tree_t **sp, stream_t *dest, tree_t *input )
+static word_t stream_append_tree( program_t *prg, tree_t **sp, input_t *dest, tree_t *to_append )
 {
 	long length = 0;
-	struct stream_impl *impl = stream_to_impl( dest );
+	struct input_impl *impl = input_to_impl( dest );
 
-	if ( input->id == LEL_ID_PTR ) {
+	if ( to_append->id == LEL_ID_PTR ) {
 		assert(false);
 	}
-	else if ( input->id == LEL_ID_STR ) {
+	else if ( to_append->id == LEL_ID_STR ) {
 		/* Collect the tree data. */
 		str_collect_t collect;
 		init_str_collect( &collect );
-		colm_print_tree_collect( prg, sp, &collect, input, false );
+		colm_print_tree_collect( prg, sp, &collect, to_append, false );
 
-		/* Load it into the input. */
+		/* Load it into the to_append. */
 		impl->funcs->append_data( prg, impl, collect.data, collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
 	}
 	else {
-		colm_tree_upref( prg, input );
-		impl->funcs->append_tree( prg, impl, input );
+		colm_tree_upref( prg, to_append );
+		impl->funcs->append_tree( prg, impl, to_append );
 	}
 
 	return length;
 }
 
-static word_t stream_append_stream( program_t *prg, tree_t **sp, stream_t *dest, stream_t *stream )
+static word_t stream_append_stream( program_t *prg, tree_t **sp, input_t *dest, stream_t *stream )
 {
 	long length = 0;
 
-	struct stream_impl *impl = stream_to_impl( dest );
+	struct input_impl *impl = input_to_impl( dest );
 	impl->funcs->append_stream( prg, impl, stream );
 
 	return length;
 }
 
 static void stream_undo_append( program_t *prg, tree_t **sp,
-		struct stream_impl *is, tree_t *input, long length )
+		struct input_impl *is, tree_t *input, long length )
 {
 	if ( input->id == LEL_ID_PTR )
 		assert(false);
@@ -290,7 +290,7 @@ static void stream_undo_append( program_t *prg, tree_t **sp,
 	}
 }
 
-static void stream_undo_append_stream( program_t *prg, tree_t **sp, struct stream_impl *is,
+static void stream_undo_append_stream( program_t *prg, tree_t **sp, struct input_impl *is,
 		tree_t *input, long length )
 {
 	is->funcs->undo_append_stream( prg, is );
@@ -497,13 +497,13 @@ void colm_rcode_downref_all( program_t *prg, tree_t **sp, struct rt_code_vect *r
 	}
 }
 
-static code_t *pcr_call( program_t *prg, Execution *exec, tree_t ***psp, code_t *instr, stream_t *stream )
+static code_t *pcr_call( program_t *prg, Execution *exec, tree_t ***psp, code_t *instr, input_t *input )
 {
 	tree_t **sp = *psp;
 
 	int frame_size = 0;
-	if ( stream->parser->pda_run->frame_id >= 0 )  {
-		struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
+	if ( input->parser->pda_run->frame_id >= 0 )  {
+		struct frame_info *fi = &prg->rtd->frame_info[input->parser->pda_run->frame_id];
 		frame_size = fi->frame_size;
 	}
 
@@ -514,7 +514,7 @@ static code_t *pcr_call( program_t *prg, Execution *exec, tree_t ***psp, code_t 
 	vm_push_type( long, exec->frame_id );
 	vm_push_type( word_t, exec->steps );
 	vm_push_type( word_t, exec->pcr );
-	vm_push_stream( exec->stream );
+	vm_push_input( exec->input );
 	vm_push_type( word_t, exec->WV );
 
 	/* Return back to this instruction. We are alternating between
@@ -526,15 +526,15 @@ static code_t *pcr_call( program_t *prg, Execution *exec, tree_t ***psp, code_t 
 	exec->iframe_ptr = 0;
 	exec->frame_id = 0;
 	exec->steps = 0;
-	exec->stream = stream;
+	exec->input = input;
 
-	instr = stream->parser->pda_run->code;
+	instr = input->parser->pda_run->code;
 	exec->WV = 1;
 
-	exec->frame_id = stream->parser->pda_run->frame_id;
+	exec->frame_id = input->parser->pda_run->frame_id;
 
-	if ( stream->parser->pda_run->frame_id >= 0 )  {
-		struct frame_info *fi = &prg->rtd->frame_info[stream->parser->pda_run->frame_id];
+	if ( input->parser->pda_run->frame_id >= 0 )  {
+		struct frame_info *fi = &prg->rtd->frame_info[input->parser->pda_run->frame_id];
 
 		exec->frame_ptr = vm_ptop();
 		vm_pushn( fi->frame_size );
@@ -701,7 +701,7 @@ void colm_transfer_reverse_code( struct pda_run *pda_run, parse_tree_t *parse_tr
 
 static void rcode_unit_term( Execution *exec )
 {
-	append_code_val( &exec->stream->parser->pda_run->rcode_collect, exec->rcode_unit_len );
+	append_code_val( &exec->input->parser->pda_run->rcode_collect, exec->rcode_unit_len );
 	exec->rcode_unit_len = 0;
 }
 
@@ -712,19 +712,19 @@ static void rcode_unit_start( Execution *exec )
 
 static void rcode_code( Execution *exec, const code_t code )
 {
-	append_code_val( &exec->stream->parser->pda_run->rcode_collect, code );
+	append_code_val( &exec->input->parser->pda_run->rcode_collect, code );
 	exec->rcode_unit_len += SIZEOF_CODE;
 }
 
 static void rcode_half( Execution *exec, const half_t half )
 {
-	append_half( &exec->stream->parser->pda_run->rcode_collect, half );
+	append_half( &exec->input->parser->pda_run->rcode_collect, half );
 	exec->rcode_unit_len += SIZEOF_HALF;
 }
 
 static void rcode_word( Execution *exec, const word_t word )
 {
-	append_word( &exec->stream->parser->pda_run->rcode_collect, word );
+	append_word( &exec->input->parser->pda_run->rcode_collect, word );
 	exec->rcode_unit_len += SIZEOF_WORD;
 }
 
@@ -761,8 +761,8 @@ again:
 			read_tree( restore );
 
 			debug( prg, REALM_BYTECODE, "IN_RESTORE_LHS\n" );
-			colm_tree_downref( prg, sp, exec->stream->parser->pda_run->parse_input->shadow->tree );
-			exec->stream->parser->pda_run->parse_input->shadow->tree = restore;
+			colm_tree_downref( prg, sp, exec->input->parser->pda_run->parse_input->shadow->tree );
+			exec->input->parser->pda_run->parse_input->shadow->tree = restore;
 			break;
 		}
 		case IN_LOAD_NIL: {
@@ -877,8 +877,8 @@ again:
 		case IN_LOAD_INPUT_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_INPUT_R\n" );
 
-			assert( exec->stream->parser != 0 );
-			vm_push_stream( exec->stream->parser->input );
+			assert( exec->input->parser != 0 );
+			vm_push_input( exec->input->parser->input );
 			break;
 		}
 		case IN_LOAD_INPUT_WV: {
@@ -886,13 +886,13 @@ again:
 
 			assert( exec->WV );
 
-			assert( exec->stream->parser != 0 );
-			vm_push_stream( exec->stream->parser->input );
+			assert( exec->input->parser != 0 );
+			vm_push_input( exec->input->parser->input );
 
 			/* Set up the reverse instruction. */
 			rcode_unit_start( exec );
 			rcode_code( exec, IN_LOAD_INPUT_BKT );
-			rcode_word( exec, (word_t)exec->stream->parser->input );
+			rcode_word( exec, (word_t)exec->input->parser->input );
 			break;
 		}
 		case IN_LOAD_INPUT_WC: {
@@ -900,8 +900,8 @@ again:
 
 			assert( !exec->WV );
 
-			assert( exec->stream->parser != 0 );
-			vm_push_stream( exec->stream->parser->input );
+			assert( exec->input->parser != 0 );
+			vm_push_input( exec->input->parser->input );
 			break;
 		}
 		case IN_LOAD_INPUT_BKT: {
@@ -918,7 +918,7 @@ again:
 		case IN_LOAD_CONTEXT_R: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_R\n" );
 
-			vm_push_type( struct_t*, exec->stream->parser->pda_run->context );
+			vm_push_type( struct_t*, exec->input->parser->pda_run->context );
 			break;
 		}
 		case IN_LOAD_CONTEXT_WV: {
@@ -926,7 +926,7 @@ again:
 
 			assert( exec->WV );
 
-			vm_push_type( struct_t *, exec->stream->parser->pda_run->context );
+			vm_push_type( struct_t *, exec->input->parser->pda_run->context );
 
 			/* Set up the reverse instruction. */
 			rcode_unit_start( exec );
@@ -940,13 +940,13 @@ again:
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			vm_push_type( struct_t *, exec->stream->parser->pda_run->context );
+			vm_push_type( struct_t *, exec->input->parser->pda_run->context );
 			break;
 		}
 		case IN_LOAD_CONTEXT_BKT: {
 			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_BKT\n" );
 
-			vm_push_type( struct_t *, exec->stream->parser->pda_run->context );
+			vm_push_type( struct_t *, exec->input->parser->pda_run->context );
 			break;
 		}
 
@@ -965,7 +965,7 @@ again:
 		case IN_SET_PARSER_INPUT: {
 			debug( prg, REALM_BYTECODE, "IN_SET_PARSER_INPUT\n" );
 
-			stream_t *to_replace_with = vm_pop_stream();
+			input_t *to_replace_with = vm_pop_input();
 			parser_t *parser = vm_pop_parser();
 
 			parser->input->impl = to_replace_with->impl;
@@ -984,12 +984,12 @@ again:
 			/* If there are captures (this is a translate block) then copy them into
 			 * the local frame now. */
 			struct lang_el_info *lel_info = prg->rtd->lel_info;
-			struct pda_run *pda_run = exec->stream->parser->pda_run;
+			struct pda_run *pda_run = exec->input->parser->pda_run;
 			char **mark = pda_run->mark;
 
 			int i, num_capture_attr = lel_info[pda_run->token_id].num_capture_attr;
 			for ( i = 0; i < num_capture_attr; i++ ) {
-				struct lang_el_info *lei = &lel_info[exec->stream->parser->pda_run->token_id];
+				struct lang_el_info *lei = &lel_info[exec->input->parser->pda_run->token_id];
 				CaptureAttr *ca = &prg->rtd->capture_attr[lei->capture_attr + i];
 				head_t *data = string_alloc_full( prg, mark[ca->mark_enter],
 						mark[ca->mark_leave] - mark[ca->mark_enter] );
@@ -1007,7 +1007,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_INIT_RHS_EL %hd\n", field );
 
-			tree_t *val = get_rhs_el( prg, exec->stream->parser->pda_run->red_lel->shadow->tree, position );
+			tree_t *val = get_rhs_el( prg, exec->input->parser->pda_run->red_lel->shadow->tree, position );
 			colm_tree_upref( prg, val );
 			vm_set_local(exec, field, val);
 			break;
@@ -1020,13 +1020,13 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_INIT_LHS_EL %hd\n", field );
 
 			/* We transfer it to to the local field. Possibly take a copy. */
-			tree_t *val = exec->stream->parser->pda_run->red_lel->shadow->tree;
+			tree_t *val = exec->input->parser->pda_run->red_lel->shadow->tree;
 
 			/* Save it. */
 			colm_tree_upref( prg, val );
-			exec->stream->parser->pda_run->parsed = val;
+			exec->input->parser->pda_run->parsed = val;
 
-			exec->stream->parser->pda_run->red_lel->shadow->tree = 0;
+			exec->input->parser->pda_run->red_lel->shadow->tree = 0;
 			vm_set_local(exec, field, val);
 			break;
 		}
@@ -1038,7 +1038,7 @@ again:
 
 			tree_t *val = vm_get_local(exec, field);
 			vm_set_local(exec, field, 0);
-			exec->stream->parser->pda_run->red_lel->shadow->tree = val;
+			exec->input->parser->pda_run->red_lel->shadow->tree = val;
 			break;
 		}
 		case IN_UITER_ADVANCE: {
@@ -1777,7 +1777,7 @@ again:
 		}
 		case IN_REJECT: {
 			debug( prg, REALM_BYTECODE, "IN_REJECT\n" );
-			exec->stream->parser->pda_run->reject = true;
+			exec->input->parser->pda_run->reject = true;
 			break;
 		}
 
@@ -2402,7 +2402,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SEND_TEXT_BKT\n" );
 
-			struct stream_impl *si = stream_to_impl( stream->parser->input );
+			struct input_impl *si = input_to_impl( stream->parser->input );
 			stream_undo_append( prg, sp, si, input, len );
 
 			colm_tree_downref( prg, sp, input );
@@ -2460,7 +2460,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_BKT\n" );
 
-			struct stream_impl *si = stream_to_impl( stream->parser->input );
+			struct input_impl *si = input_to_impl( stream->parser->input );
 			stream_undo_append( prg, sp, si, input, len );
 
 			colm_tree_downref( prg, sp, input );
@@ -2470,23 +2470,23 @@ again:
 		case IN_REPLACE_STREAM: {
 			debug( prg, REALM_BYTECODE, "IN_REPLACE_STREAM\n" );
 
-			stream_t *to_replace_with = vm_pop_stream();
-			stream_t *stream = vm_pop_stream();
+			input_t *to_replace_with = vm_pop_input();
+			input_t *input = vm_pop_input();
 
-			stream->impl = to_replace_with->impl;
-			stream->not_owner = true;
+			input->impl = to_replace_with->impl;
+			input->not_owner = true;
 
-			vm_push_stream( stream );
+			vm_push_input( input );
 
-			exec->steps = stream->parser->pda_run->steps;
+			exec->steps = input->parser->pda_run->steps;
 			exec->pcr = PCR_START;
 
 			break;
 		}
 		case IN_SEND_NOTHING: {
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
-			exec->steps = stream->parser->pda_run->steps;
+			input_t *input = vm_pop_input();
+			vm_push_input( input );
+			exec->steps = input->parser->pda_run->steps;
 			exec->pcr = PCR_START;
 			break;
 		}
@@ -2525,7 +2525,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SEND_STREAM_BKT\n" );
 
-			struct stream_impl *si = stream_to_impl( stream->parser->input );
+			struct input_impl *si = input_to_impl( stream->parser->input );
 			stream_undo_append_stream( prg, sp, si, input, len );
 			break;
 		}
@@ -2650,7 +2650,7 @@ again:
 			instr = vm_pop_type(code_t*);
 
 			exec->WV =         vm_pop_type(word_t);
-			exec->stream =     vm_pop_stream();
+			exec->input =      vm_pop_input();
 			exec->pcr =        vm_pop_type(word_t);
 			exec->steps =      vm_pop_type(word_t);
 			exec->frame_id =   vm_pop_type(long);
@@ -2663,29 +2663,29 @@ again:
 
 		case IN_PCR_END_DECK: {
 			debug( prg, REALM_BYTECODE, "IN_PCR_END_DECK\n" );
-			exec->stream->parser->pda_run->on_deck = false;
+			exec->input->parser->pda_run->on_deck = false;
 			break;
 		}
 
 		case IN_PARSE_FRAG_W: {
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
+			input_t *input = vm_pop_input();
+			vm_push_input( input );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_W\n" );
 
-			exec->pcr = colm_parse_frag( prg, sp, stream->parser->pda_run,
-					stream->parser->input, exec->pcr );
+			exec->pcr = colm_parse_frag( prg, sp, input->parser->pda_run,
+					input->parser->input, exec->pcr );
 
 			/* If done, jump to the terminating instruction, otherwise fall
 			 * through to call some code, then jump back here. */
 			if ( exec->pcr != PCR_DONE )
-				instr = pcr_call( prg, exec, &sp, instr, stream );
+				instr = pcr_call( prg, exec, &sp, instr, input );
 			else {
 				if ( exec->WV ) {
 					rcode_unit_start( exec );
 
 					rcode_code( exec, IN_PARSE_INIT_BKT );
-					rcode_word( exec, (word_t)stream );
+					rcode_word( exec, (word_t)input );
 					rcode_word( exec, (word_t)exec->steps );
 					rcode_code( exec, IN_PARSE_FRAG_BKT );
 					rcode_unit_term( exec );
@@ -2698,18 +2698,18 @@ again:
 		}
 
 		case IN_PARSE_FRAG_BKT: {
-			stream_t *stream = vm_pop_stream();
-			vm_push_stream( stream );
+			input_t *input = vm_pop_input();
+			vm_push_input( input );
 
 			debug( prg, REALM_BYTECODE, "IN_PARSE_FRAG_BKT\n" );
 
-			exec->pcr = colm_parse_undo_frag( prg, sp, stream->parser->pda_run,
-					stream->parser->input, exec->pcr, exec->steps );
+			exec->pcr = colm_parse_undo_frag( prg, sp, input->parser->pda_run,
+					input->parser->input, exec->pcr, exec->steps );
 
 			if ( exec->pcr != PCR_DONE )
-				instr = pcr_call( prg, exec, &sp, instr, stream );
+				instr = pcr_call( prg, exec, &sp, instr, input );
 			else {
-				vm_pop_stream();
+				vm_pop_input();
 			}
 			break;
 		}
@@ -3175,14 +3175,14 @@ again:
 		case IN_GET_MATCH_LENGTH_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_MATCH_LENGTH_R\n" );
 
-			value_t integer = string_length(exec->stream->parser->pda_run->tokdata);
+			value_t integer = string_length(exec->input->parser->pda_run->tokdata);
 			vm_push_value( integer );
 			break;
 		}
 		case IN_GET_MATCH_TEXT_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_MATCH_TEXT_R\n" );
 
-			head_t *s = string_copy( prg, exec->stream->parser->pda_run->tokdata );
+			head_t *s = string_copy( prg, exec->input->parser->pda_run->tokdata );
 			tree_t *tree = construct_string( prg, s );
 			colm_tree_upref( prg, tree );
 			vm_push_tree( tree );
@@ -3334,7 +3334,7 @@ again:
 		case IN_GET_PARSER_STREAM: {
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_STREAM\n" );
 			parser_t *parser = vm_pop_parser();
-			vm_push_stream( parser->input );
+			vm_push_input( parser->input );
 			break;
 		}
 		case IN_GET_PARSER_MEM_R: {

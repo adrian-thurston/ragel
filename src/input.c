@@ -163,6 +163,15 @@ void colm_close_stream_file( FILE *file )
 	}
 }
 
+void colm_input_destroy( program_t *prg, tree_t **sp, struct_t *s )
+{
+	input_t *input = (input_t*) s;
+	struct input_impl *si = input->impl;
+
+	if ( !input->not_owner )
+		si->funcs->destructor( prg, sp, si );
+}
+
 void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 {
 	stream_t *stream = (stream_t*) s;
@@ -1275,23 +1284,23 @@ struct stream_impl *colm_impl_new_collect( char *name )
 	return (struct stream_impl*)ss;
 }
 
-struct stream_impl *colm_impl_new_generic( char *name )
+struct input_impl *colm_impl_new_generic( char *name )
 {
 	struct stream_impl_seq *ss = (struct stream_impl_seq*)malloc(sizeof(struct stream_impl_seq));
 	init_stream_impl_seq( ss, name );
 	ss->funcs = (struct stream_funcs*)&stream_funcs;
-	return (struct stream_impl*)ss;
+	return (struct input_impl*)ss;
 }
 
-stream_t *colm_stream_new_struct( program_t *prg )
+input_t *colm_input_new_struct( program_t *prg )
 {
-	size_t memsize = sizeof(struct colm_stream);
-	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
-	memset( stream, 0, memsize );
-	colm_struct_add( prg, (struct colm_struct *)stream );
-	stream->id = prg->rtd->struct_stream_id;
-	stream->destructor = &colm_stream_destroy;
-	return stream;
+	size_t memsize = sizeof(struct colm_input);
+	struct colm_input *input = (struct colm_input*) malloc( memsize );
+	memset( input, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)input );
+	input->id = prg->rtd->struct_input_id;
+	input->destructor = &colm_input_destroy;
+	return input;
 }
 
 stream_t *colm_stream_open_fd( program_t *prg, char *name, long fd )
@@ -1337,13 +1346,25 @@ stream_t *colm_stream_open_file( program_t *prg, tree_t *name, tree_t *mode )
 	return stream;
 }
 
-stream_t *colm_stream_new( program_t *prg )
+input_t *colm_input_new( program_t *prg )
 {
-	struct stream_impl *impl = colm_impl_new_generic( colm_filename_add( prg, "<internal>" ) );
-	struct colm_stream *stream = colm_stream_new_struct( prg );
-	stream->impl = impl;
+	struct input_impl *impl = colm_impl_new_generic( colm_filename_add( prg, "<internal>" ) );
+	struct colm_input *input = colm_input_new_struct( prg );
+	input->impl = impl;
+	return input;
+}
+
+stream_t *colm_stream_new_struct( program_t *prg )
+{
+	size_t memsize = sizeof(struct colm_stream);
+	struct colm_stream *stream = (struct colm_stream*) malloc( memsize );
+	memset( stream, 0, memsize );
+	colm_struct_add( prg, (struct colm_struct *)stream );
+	stream->id = prg->rtd->struct_stream_id;
+	stream->destructor = &colm_stream_destroy;
 	return stream;
 }
+
 
 str_t *collect_string( program_t *prg, stream_t *s )
 {
@@ -1367,6 +1388,11 @@ struct stream_impl *colm_stream_impl( struct colm_struct *s )
 }
 
 struct stream_impl *stream_to_impl( stream_t *ptr )
+{
+	return ptr->impl;
+}
+
+struct input_impl *input_to_impl( input_t *ptr )
 {
 	return ptr->impl;
 }
