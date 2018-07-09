@@ -1326,7 +1326,6 @@ struct LoadColm
 
 			ConsItemList *list = walkCallArgListAccum( printStmt.call_arg_list() );
 
-
 			bool eof = false; //walkOptEos( StmtOrFactor.opt_eos() );
 			LangExpr *expr = send( loc, varRef, list, eof );
 			stmt = LangStmt::cons( loc, LangStmt::ExprType, expr );

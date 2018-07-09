@@ -213,7 +213,7 @@ void colm_run_program2( program_t *prg, int argc, const char **argv, const int *
 	prg->argv = argv;
 	prg->argl = argl;
 
-	Execution execution;
+	execution_t execution;
 	memset( &execution, 0, sizeof(execution) );
 	execution.frame_id = prg->rtd->root_frame_id;
 

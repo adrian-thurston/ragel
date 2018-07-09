@@ -591,12 +591,12 @@ typedef struct colm_execution
 
 	long rcode_unit_len;
 
-	input_t *input;
+	parser_t *parser;
 	long steps;
 	long pcr;
 	tree_t *ret_val;
 	char WV;
-} Execution;
+} execution_t;
 
 struct colm_execution;
 
@@ -653,10 +653,10 @@ head_t *string_sprintf( program_t *prg, str_t *format, long integer );
 head_t *make_literal( struct colm_program *prg, long litoffset );
 head_t *int_to_str( struct colm_program *prg, word_t i );
 
-void colm_execute( struct colm_program *prg, Execution *exec, code_t *code );
-void reduction_execution( Execution *exec, tree_t **sp );
-void generation_execution( Execution *exec, tree_t **sp );
-void reverse_execution( Execution *exec, tree_t **sp, struct rt_code_vect *all_rev );
+void colm_execute( struct colm_program *prg, execution_t *exec, code_t *code );
+void reduction_execution( execution_t *exec, tree_t **sp );
+void generation_execution( execution_t *exec, tree_t **sp );
+void reverse_execution( execution_t *exec, tree_t **sp, struct rt_code_vect *all_rev );
 
 kid_t *alloc_attrs( struct colm_program *prg, long length );
 void free_attrs( struct colm_program *prg, kid_t *attrs );
@@ -672,7 +672,7 @@ void split_ref( struct colm_program *prg, tree_t ***sp, ref_t *from_ref );
 
 void alloc_global( struct colm_program *prg );
 tree_t **colm_execute_code( struct colm_program *prg,
-	Execution *exec, tree_t **sp, code_t *instr );
+	execution_t *exec, tree_t **sp, code_t *instr );
 code_t *colm_pop_reverse_code( struct rt_code_vect *all_rev );
 
 #ifdef __cplusplus

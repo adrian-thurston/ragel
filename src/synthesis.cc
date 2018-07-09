@@ -1050,12 +1050,11 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	bool unwind = false;
 	
 	if ( isFinishCall( lookup ) ) {
-		code.append( IN_GET_PARSER_STREAM );
 		code.append( IN_SEND_EOF_W );
 
 		LangTerm::parseFrag( pd, code, 0 );
 
-		code.append( IN_GET_STREAM_MEM_R );
+		code.append( IN_GET_PARSER_MEM_R );
 		code.appendHalf( 0 );
 	}
 	else {
@@ -1533,8 +1532,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	/*****************************/
 
-	code.append( IN_GET_PARSER_STREAM );
-	
 	if ( parserText->list->length() == 0 ) {
 		code.append( IN_SEND_NOTHING );
 
@@ -1544,7 +1541,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	}
 	else {
 		for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-			bool isInput = false;
 			bool isStream = false;
 			switch ( item->type ) {
 			case ConsItem::LiteralType: {
@@ -1585,17 +1581,13 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 					code.append( IN_INT_TO_STR );
 
-				if ( ut == pd->uniqueTypeInput )
-					isInput = true;
 				if ( ut == pd->uniqueTypeStream )
 					isStream = true;
 
 				break;
 			}}
 
-			if ( isInput )
-				code.append( IN_REPLACE_STREAM );
-			else if ( isStream )
+			if ( isStream )
 				code.append( IN_SEND_STREAM_W );
 			else if ( tree )
 				code.append( IN_SEND_TREE_W );
@@ -1623,12 +1615,12 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 
 	/* Pull out the error and save it off. */
 	code.append( IN_DUP_VAL );
-	code.append( IN_GET_STREAM_MEM_R );
+	code.append( IN_GET_PARSER_MEM_R );
 	code.appendHalf( 1 );
 	code.append( IN_SET_ERROR );
 
 	/* Replace the parser with the parsed tree. */
-	code.append( IN_GET_STREAM_MEM_R );
+	code.append( IN_GET_PARSER_MEM_R );
 	code.appendHalf( 0 );
 
 	/* Capture to the local var. */
@@ -1699,7 +1691,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 	UniqueType *varUt = varRef->evaluate( pd, code );
 
 	if ( varUt->parser() ) {
-		code.append( IN_GET_PARSER_STREAM );
 	}
 	else if ( varUt->listOf( pd->uniqueTypeStream ) ) {
 		code.append( IN_GET_VLIST_MEM_R );
@@ -1718,7 +1709,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 		/* Assign bind ids to the variables in the replacement. */
 		for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
-			bool isInput = false;
 			bool isStream = false;
 			switch ( item->type ) {
 			case ConsItem::LiteralType: {
@@ -1755,8 +1745,6 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 					continue;
 				}
 
-				if ( ut == pd->uniqueTypeInput )
-					isInput = true;
 				if ( ut == pd->uniqueTypeStream )
 					isStream = true;
 
@@ -1766,9 +1754,7 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				break;
 			}
 
-			if ( isInput )
-				code.append( IN_REPLACE_STREAM );
-			else if ( isStream )
+			if ( isStream )
 				code.append( IN_SEND_STREAM_W );
 			else if ( !strings )
 				code.append( IN_SEND_TREE_W );
