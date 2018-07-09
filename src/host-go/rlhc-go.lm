@@ -48,7 +48,7 @@ end
 
 namespace go_gen
 
-	global Parser: parser<go_out::go_out>
+	global _: parser<go_out::go_out>
 
 	void tok_list( TL: host::tok* )
 	{
@@ -351,8 +351,7 @@ namespace go_gen
 			"var  [D.ident] [type(D.type)]"
 
 			if match D.opt_init ['=' Expr: expr] {
-				send Parser
-					"  = [expr(Expr)]"
+				"  = [expr(Expr)]"
 			}
 			['\n']
 		}
@@ -417,13 +416,11 @@ namespace go_gen
 
 	void trans( Output: stream, Start: start )
 	{
-		Parser = new parser<go_out::go_out>()
+		_ = new parser<go_out::go_out>()
 
-		stds->push( Parser->gets() )
 		stmt_list( Start._repeat_stmt )
-		stds->pop()
 
-		GO: go_out::go_out = Parser->finish()
+		GO: go_out::go_out = _->finish()
 
 		if GO {
 			send Output
@@ -431,7 +428,7 @@ namespace go_gen
 		}
 		else {
 			send stderr
-				"failed to parse output: [Parser->error]
+				"failed to parse output: [_->error]
 		}
 
 	}

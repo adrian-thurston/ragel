@@ -306,7 +306,7 @@ namespace ragel
 				input->pull( match_length )
 
 				# Parse the include details, up to the the ';' and stop there.
-				parse_stop Spec: include_spec[input]
+				parse_stop Spec: include_spec(input)[]
 
 				Fn: str
 				Machine: str
@@ -331,7 +331,7 @@ namespace ragel
 				input->pull( match_length )
 
 				# Parse the import details, up to the the ';' and stop there.
-				parse_stop Spec: import_spec[input]
+				parse_stop Spec: import_spec(input)[]
 
 				Fn: str
 				if Spec.string

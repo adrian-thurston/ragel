@@ -1,6 +1,7 @@
 include 'ril.lm'
 
 namespace c_out
+
 	token _IN_ /''/
 	token _EX_ /''/
 
@@ -47,8 +48,7 @@ namespace c_out
 end
 
 namespace c_gen
-
-	global Parser: parser<c_out::c_out>
+	global _: parser<c_out::c_out>
 
 	void tok_list( TL: host::tok* )
 	{
@@ -443,13 +443,11 @@ namespace c_gen
 
 	void trans( Output: stream, Start: start )
 	{
-		Parser = new parser<c_out::c_out>()
+		_ = new parser<c_out::c_out>()
 
-		stds->push( Parser->gets() )
 		stmt_list( Start._repeat_stmt )
-		stds->pop()
 
-		CO: c_out::c_out = Parser->finish()
+		CO: c_out::c_out = _->finish()
 
 		if CO {
 			send Output
@@ -457,7 +455,7 @@ namespace c_gen
 		}
 		else {
 			send stderr
-				"failed to parse output: [Parser->error]
+				"failed to parse output: [_->error]
 		}
 	}
 end
