@@ -167,18 +167,14 @@ void colm_input_destroy( program_t *prg, tree_t **sp, struct_t *s )
 {
 	input_t *input = (input_t*) s;
 	struct input_impl *si = input->impl;
-
-	if ( !input->not_owner )
-		si->funcs->destructor( prg, sp, si );
+	si->funcs->destructor( prg, sp, si );
 }
 
 void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 {
 	stream_t *stream = (stream_t*) s;
 	struct stream_impl *si = stream->impl;
-
-	if ( !stream->not_owner )
-		si->funcs->destructor( prg, sp, si );
+	si->funcs->destructor( prg, sp, si );
 }
 
 /* Keep the position up to date after consuming text. */

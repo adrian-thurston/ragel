@@ -969,8 +969,7 @@ again:
 			input_t *to_replace_with = vm_pop_input();
 			parser_t *parser = vm_pop_parser();
 
-			parser->input->impl = to_replace_with->impl;
-			parser->input->not_owner = true;
+			parser->input = to_replace_with;
 
 			vm_push_parser( parser );
 
@@ -3304,20 +3303,6 @@ again:
 			parser_t *parser = vm_pop_parser();
 
 			tree_t *val = get_parser_mem( parser, field );
-
-			colm_tree_upref( prg, val );
-			vm_push_tree( val );
-			break;
-		}
-		case IN_GET_STREAM_MEM_R: {
-			short field;
-			read_half( field );
-
-			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_MEM_R %hd\n", field );
-
-			input_t *input = vm_pop_input();
-
-			tree_t *val = get_parser_mem( input->parser, field );
 
 			colm_tree_upref( prg, val );
 			vm_push_tree( val );

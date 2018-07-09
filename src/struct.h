@@ -69,8 +69,6 @@ typedef struct colm_input
 	void *buffer[8];
 
 	struct input_impl *impl;
-	parser_t *parser;
-	char not_owner;
 } input_t;
 
 /* Must overlay colm_inbuilt. */
@@ -84,8 +82,6 @@ typedef struct colm_stream
 	void *buffer[8];
 
 	struct stream_impl *impl;
-	parser_t *parser;
-	char not_owner;
 } stream_t;
 
 #define COLM_LIST_EL_SIZE 2
