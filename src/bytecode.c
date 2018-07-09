@@ -2353,43 +2353,42 @@ again:
 			break;
 		}
 
+		case IN_PRINT_TREE_W: {
+			debug( prg, REALM_BYTECODE, "IN_PRINT_TREE_W\n" );
+
+			tree_t *to_send = vm_pop_tree();
+			input_t *input = vm_pop_input();
+
+			struct input_impl *si = input_to_impl( input );
+			si->funcs->print_tree( prg, sp, si, to_send, false );
+			vm_push_input( input );
+			colm_tree_downref( prg, sp, to_send );
+			break;
+		}
+
 		case IN_SEND_TEXT_W: {
 			debug( prg, REALM_BYTECODE, "IN_SEND_TEXT_W\n" );
 
 			tree_t *to_send = vm_pop_tree();
 			input_t *input = vm_pop_input();
 
-			if ( input->parser == 0 ) {
-				struct input_impl *si = input_to_impl( input );
+			word_t len = stream_append_text( prg, sp, input, to_send );
 
-				si->funcs->print_tree( prg, sp, si, to_send, false );
+			vm_push_input( input );
 
-				vm_push_input( input );
-
-				instr += SIZEOF_CODE;
-
+			if ( !exec->WV )
 				colm_tree_downref( prg, sp, to_send );
-			}
 			else {
-				word_t len = stream_append_text( prg, sp, input, to_send );
-
-				vm_push_input( input );
-
-				if ( !exec->WV )
-					colm_tree_downref( prg, sp, to_send );
-				else {
-					rcode_unit_start( exec );
-					rcode_code( exec, IN_SEND_TEXT_BKT );
-					rcode_word( exec, (word_t) input );
-					rcode_word( exec, (word_t) to_send );
-					rcode_word( exec, (word_t) len );
-					rcode_unit_term( exec );
-				}
-
-				exec->steps = input->parser->pda_run->steps;
-				exec->pcr = PCR_START;
+				rcode_unit_start( exec );
+				rcode_code( exec, IN_SEND_TEXT_BKT );
+				rcode_word( exec, (word_t) input );
+				rcode_word( exec, (word_t) to_send );
+				rcode_word( exec, (word_t) len );
+				rcode_unit_term( exec );
 			}
 
+			exec->steps = input->parser->pda_run->steps;
+			exec->pcr = PCR_START;
 			break;
 		}
 
@@ -2414,54 +2413,41 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_W\n" );
 
 			tree_t *to_send = vm_pop_tree();
-			stream_t *stream = vm_pop_stream();
+			input_t *input = vm_pop_input();
 
-			if ( stream->parser == 0 ) {
-				struct stream_impl *si = stream_to_impl( stream );
+			parser_t *parser = input->parser;
 
-				si->funcs->print_tree( prg, sp, si, to_send, false );
+			word_t len = stream_append_tree( prg, sp, parser->input, to_send );
 
-				vm_push_stream( stream );
+			vm_push_input( input );
 
+			if ( !exec->WV )
 				colm_tree_downref( prg, sp, to_send );
-
-				instr += SIZEOF_CODE;
-			}
 			else {
-				parser_t *parser = stream->parser;
-
-				word_t len = stream_append_tree( prg, sp, parser->input, to_send );
-
-				vm_push_stream( stream );
-
-				if ( !exec->WV )
-					colm_tree_downref( prg, sp, to_send );
-				else {
-					rcode_unit_start( exec );
-					rcode_code( exec, IN_SEND_TREE_BKT );
-					rcode_word( exec, (word_t) stream );
-					rcode_word( exec, (word_t) to_send );
-					rcode_word( exec, (word_t) len );
-					rcode_unit_term( exec );
-				}
-
-				exec->steps = stream->parser->pda_run->steps;
-				exec->pcr = PCR_START;
+				rcode_unit_start( exec );
+				rcode_code( exec, IN_SEND_TREE_BKT );
+				rcode_word( exec, (word_t) input );
+				rcode_word( exec, (word_t) to_send );
+				rcode_word( exec, (word_t) len );
+				rcode_unit_term( exec );
 			}
+
+			exec->steps = input->parser->pda_run->steps;
+			exec->pcr = PCR_START;
 			break;
 		}
 
 		case IN_SEND_TREE_BKT: {
-			stream_t *stream;
+			input_t *input;
 			tree_t *sent;
 			word_t len;
-			read_stream( stream );
+			read_input( input );
 			read_tree( sent );
 			read_word( len );
 
 			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_BKT\n" );
 
-			struct input_impl *si = input_to_impl( stream->parser->input );
+			struct input_impl *si = input_to_impl( input->parser->input );
 			stream_undo_append( prg, sp, si, sent, len );
 
 			colm_tree_downref( prg, sp, sent );
@@ -2499,7 +2485,7 @@ again:
 
 			word_t len = stream_append_stream( prg, sp, input->parser->input, to_send );
 
-			vm_push_stream( input );
+			vm_push_input( input );
 
 			if ( exec->WV ) {
 				rcode_unit_start( exec );
@@ -2549,12 +2535,8 @@ again:
 				rcode_unit_term( exec );
 			}
 
-			if ( input->parser == 0 )
-				instr += SIZEOF_CODE;
-			else {
-				exec->steps = input->parser->pda_run->steps;
-				exec->pcr = PCR_START;
-			}
+			exec->steps = input->parser->pda_run->steps;
+			exec->pcr = PCR_START;
 			break;
 		}
 
@@ -2835,7 +2817,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_INPUT_PUSH_STREAM_BKT %d\n", len );
 
-			input_t *input = vm_pop_stream();
+			input_t *input = vm_pop_input();
 			colm_undo_stream_push( prg, sp, input_to_impl( input ), len );
 			break;
 		}
@@ -3358,7 +3340,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_MEM_R %hd\n", field );
 
-			input_t *input = vm_pop_stream();
+			input_t *input = vm_pop_input();
 
 			tree_t *val = get_parser_mem( input->parser, field );
 

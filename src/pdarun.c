@@ -156,7 +156,7 @@ void colm_stream_push_stream( struct colm_program *prg, struct input_impl *is, s
 	is->funcs->prepend_stream( prg, is, stream );
 }
 
-void colm_undo_stream_push( program_t *prg, tree_t **sp, struct stream_impl *is, long length )
+void colm_undo_stream_push( program_t *prg, tree_t **sp, struct input_impl *is, long length )
 {
 	if ( length < 0 ) {
 		/* tree_t *tree = */ is->funcs->undo_prepend_tree( prg, is );

@@ -444,7 +444,7 @@ void colm_stream_push_text( struct colm_program *prg, struct input_impl *input_s
 void colm_stream_push_tree( struct colm_program *prg, struct input_impl *input_stream, tree_t *tree, int ignore );
 void colm_stream_push_stream( struct colm_program *prg, struct input_impl *input_stream, stream_t *stream );
 void colm_undo_stream_push( struct colm_program *prg, tree_t **sp,
-		struct stream_impl *input_stream, long length );
+		struct input_impl *input_stream, long length );
 
 kid_t *make_token_with_data( struct colm_program *prg, struct pda_run *pda_run,
 		struct input_impl *input_stream, int id, head_t *tokdata );

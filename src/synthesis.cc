@@ -1637,6 +1637,63 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	return targetUT;
 }
 
+void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
+{
+	UniqueType *varUt = varRef->evaluate( pd, code );
+
+	if ( varUt->listOf( pd->uniqueTypeStream ) ) {
+		code.append( IN_GET_VLIST_MEM_R );
+		code.appendHalf( varUt->generic->id );
+		code.appendHalf( 0 );
+	}
+
+	/* Assign bind ids to the variables in the replacement. */
+	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		switch ( item->type ) {
+		case ConsItem::LiteralType: {
+			String result;
+			bool unusedCI;
+			prepareLitString( result, unusedCI, 
+					item->prodEl->typeRef->pdaLiteral->data,
+					item->prodEl->typeRef->pdaLiteral->loc );
+
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( result, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ConsItem::InputText: {
+			/* Make sure we have this string. */
+			StringMapEl *mapEl = 0;
+			if ( pd->literalStrings.insert( item->data, &mapEl ) )
+				mapEl->value = pd->literalStrings.length()-1;
+
+			code.append( IN_LOAD_STR );
+			code.appendWord( mapEl->value );
+			break;
+		}
+		case ConsItem::ExprType: {
+			UniqueType *ut = item->expr->evaluate( pd, code );
+			if ( ut->typeId == TYPE_VOID ) {
+				/* Clear it away if return type is void. */
+				code.append( IN_POP_VAL );
+				continue;
+			}
+
+			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
+				code.append( IN_INT_TO_STR );
+
+			break;
+		}}
+
+		code.append( IN_PRINT_TREE_W );
+	}
+}
+
 void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) const
 {
 	UniqueType *varUt = varRef->evaluate( pd, code );
@@ -1733,9 +1790,9 @@ UniqueType *LangTerm::evaluateSend( Compiler *pd, CodeVect &code ) const
 	UniqueType *varUt = varRef->lookup( pd );
 
 	if ( varUt == pd->uniqueTypeStream )
-		evaluateSendParser( pd, code, true );
+		evaluateSendStream( pd, code );
 	else if ( varUt->listOf( pd->uniqueTypeStream ) )
-		evaluateSendParser( pd, code, true );
+		evaluateSendStream( pd, code );
 	else if ( varUt->parser() )
 		evaluateSendParser( pd, code, true );
 	else
