@@ -43,7 +43,7 @@ void Compiler::writeCommitStub()
 		"int " << objectName << "_reducer_need_ign( program_t *prg, "
 				"struct pda_run *pda_run ) { return COLM_RN_BOTH; }\n"
 		"\n"
-		"void " << objectName << "_read_reduce( program_t *prg, int reducer, stream_t *stream ) {}\n"
+		"void " << objectName << "_read_reduce( program_t *prg, int reducer, input_t *stream ) {}\n"
 	;
 }
 

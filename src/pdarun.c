@@ -102,7 +102,7 @@ void colm_decrement_steps( struct pda_run *pda_run )
 }
 
 head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
-		struct stream_impl *is, long length )
+		struct input_impl *is, long length )
 {
 	if ( pda_run != 0 ) {
 		struct run_buf *run_buf = pda_run->consume_buf;
@@ -141,17 +141,17 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	}
 }
 
-void colm_stream_push_text( struct colm_program *prg, struct stream_impl *is, const char *data, long length )
+void colm_stream_push_text( struct colm_program *prg, struct input_impl *is, const char *data, long length )
 {
 	is->funcs->prepend_data( prg, is, data, length );
 }
 
-void colm_stream_push_tree( struct colm_program *prg, struct stream_impl *is, tree_t *tree, int ignore )
+void colm_stream_push_tree( struct colm_program *prg, struct input_impl *is, tree_t *tree, int ignore )
 {
 	is->funcs->prepend_tree( prg, is, tree, ignore );
 }
 
-void colm_stream_push_stream( struct colm_program *prg, struct stream_impl *is, stream_t *stream )
+void colm_stream_push_stream( struct colm_program *prg, struct input_impl *is, stream_t *stream )
 {
 	is->funcs->prepend_stream( prg, is, stream );
 }

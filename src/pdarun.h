@@ -437,12 +437,12 @@ void colm_clear_source_stream( struct colm_program *prg, tree_t **sp, struct str
 #define PCR_REVERSE       6
 
 head_t *colm_stream_pull( struct colm_program *prg, struct colm_tree **sp,
-		struct pda_run *pda_run, struct stream_impl *is, long length );
+		struct pda_run *pda_run, struct input_impl *is, long length );
 head_t *colm_string_alloc_pointer( struct colm_program *prg, const char *data, long length );
 
-void colm_stream_push_text( struct colm_program *prg, struct stream_impl *input_stream, const char *data, long length );
-void colm_stream_push_tree( struct colm_program *prg, struct stream_impl *input_stream, tree_t *tree, int ignore );
-void colm_stream_push_stream( struct colm_program *prg, struct stream_impl *input_stream, stream_t *stream );
+void colm_stream_push_text( struct colm_program *prg, struct input_impl *input_stream, const char *data, long length );
+void colm_stream_push_tree( struct colm_program *prg, struct input_impl *input_stream, tree_t *tree, int ignore );
+void colm_stream_push_stream( struct colm_program *prg, struct input_impl *input_stream, stream_t *stream );
 void colm_undo_stream_push( struct colm_program *prg, tree_t **sp,
 		struct stream_impl *input_stream, long length );
 
