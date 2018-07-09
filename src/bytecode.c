@@ -2677,12 +2677,12 @@ again:
 		}
 
 		case IN_REDUCE_COMMIT: {
-			input_t *input = vm_pop_input();
-			vm_push_input( input );
+			parser_t *parser = vm_pop_parser();
+			vm_push_parser( parser );
 
 			debug( prg, REALM_BYTECODE, "IN_REDUCE_COMMIT\n" );
 
-			colm_parse_reduce_commit( prg, sp, input->parser->pda_run );
+			colm_parse_reduce_commit( prg, sp, parser->pda_run );
 			break;
 		}
 
