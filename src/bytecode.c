@@ -2692,9 +2692,7 @@ again:
 
 			input_t *input = vm_pop_input();
 			tree_t *len = vm_pop_tree();
-			//struct pda_run *pda_run = input->parser != 0 ? input->parser->pda_run : 0;
-			struct pda_run *pda_run = input->parser != 0 ? input->parser->pda_run : 0;
-			tree_t *string = stream_pull_bc( prg, sp, pda_run, input, len );
+			tree_t *string = stream_pull_bc( prg, sp, 0, input, len );
 			colm_tree_upref( prg, string );
 			vm_push_tree( string );
 
@@ -2713,9 +2711,7 @@ again:
 
 			input_t *input = vm_pop_input();
 			tree_t *len = vm_pop_tree();
-			//struct pda_run *pda_run = input->parser != 0 ? input->parser->pda_run : 0;
-			struct pda_run *pda_run = input->parser != 0 ? input->parser->pda_run : 0;
-			tree_t *string = stream_pull_bc( prg, sp, pda_run, input, len );
+			tree_t *string = stream_pull_bc( prg, sp, 0, input, len );
 			colm_tree_upref( prg, string );
 			vm_push_tree( string );
 
