@@ -1,7 +1,6 @@
+_: stream = stdout
 
 "hello
-
-stds->push( stdout )
 
 "hello
 

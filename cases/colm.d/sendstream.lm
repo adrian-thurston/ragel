@@ -11,13 +11,20 @@ def g
 
 new Parser: parser<g>()
 
-Stream: stream = Parser->gets()
+Go: bool
 
-I: int = 2
-while ( I > 0 ) {
-	send Stream "  hello friend
-	Stream = stdout
-	I = I - 1
+Go = true
+while ( Go ) {
+	_: parser<g> = Parser
+	"  hello friend
+	Go = false
+}
+
+Go = true
+while ( Go ) {
+	_: stream = stdout
+	"  hello friend
+	Go = false
 }
 
 G: g = Parser->finish()
