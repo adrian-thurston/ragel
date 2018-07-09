@@ -52,7 +52,7 @@ namespace lang
 		token number /[0-9]+/
 
 		token hash /'#'/ {
-			parse_stop H: hash::hash[ input ]
+			parse_stop H: hash::hash(input)[]
 			if ( H ) {
 				if ( H.Inc ) {
 					FN: str = string::unquote( H.Inc )
@@ -66,7 +66,7 @@ namespace lang
 				}
 			}
 			else {
-				parse_stop L: rest_of_line[ input ]
+				parse_stop L: rest_of_line(input)[]
 				if ! L {
 					print[ "ERROR: stuck: " error ]
 					exit(1)
