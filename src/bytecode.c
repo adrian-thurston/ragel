@@ -2493,7 +2493,7 @@ again:
 			vm_push_parser( parser );
 
 			si = input_to_impl( parser->input );
-			si->funcs->set_eof( prg, si );
+			si->funcs->set_eof_mark( prg, si, true );
 
 			if ( exec->WV ) {
 				rcode_unit_start( exec );
@@ -2514,7 +2514,7 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_SEND_EOF_BKT\n" );
 
 			struct input_impl *si = input_to_impl( parser->input );
-			si->funcs->unset_eof( prg, si );
+			si->funcs->set_eof_mark( prg, si, false );
 			break;
 		}
 

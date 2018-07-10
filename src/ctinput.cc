@@ -53,8 +53,8 @@ struct input_impl_ct
 	struct Constructor *constructor;
 	struct ConsItem *cons_item;
 
+	char eof_mark;
 	char eof_sent;
-	char eof;
 
 	int offset;
 };
@@ -240,14 +240,9 @@ void pat_undo_consume_lang_el( struct colm_program *prg, struct input_impl_ct *s
 	ss->offset = ss->pat_item->data.length();
 }
 
-void ct_set_eof( struct colm_program *prg, struct input_impl_ct *si )
+void ct_set_eof_mark( struct colm_program *prg, struct input_impl_ct *si, char eof_mark )
 {
-	si->eof = true;
-}
-
-void ct_unset_eof( struct colm_program *prg, struct input_impl_ct *si )
-{
-	si->eof = false;
+	si->eof_mark = eof_mark;
 }
 
 void ct_transfer_loc_seq( struct colm_program *prg, location_t *loc, struct input_impl_ct *ss )
@@ -275,8 +270,7 @@ input_funcs_ct pat_funcs =
 	0, 0, 0, 0, 0, 0, /* prepend funcs. */
 	0, 0, 0, 0, 0, 0, /* append funcs */
 
-	&ct_set_eof,
-	&ct_unset_eof,
+	&ct_set_eof_mark,
 	&ct_get_eof_sent,
 	&ct_set_eof_sent,
 
@@ -495,8 +489,7 @@ input_funcs_ct repl_funcs =
 	0, 0, 0, 0, 0, 0, /* prepend. */
 	0, 0, 0, 0, 0, 0, /* append. */
 
-	&ct_set_eof,
-	&ct_unset_eof,
+	&ct_set_eof_mark,
 	&ct_get_eof_sent,
 	&ct_set_eof_sent,
 

@@ -634,14 +634,9 @@ static void input_stream_seq_prepend( struct input_impl_seq *is, struct seq_buf 
 	}
 }
 
-void stream_set_eof( struct colm_program *prg, struct input_impl_seq *si )
+void stream_set_eof_mark( struct colm_program *prg, struct input_impl_seq *si, char eof_mark )
 {
-	si->eof = true;
-}
-
-void stream_unset_eof( struct colm_program *prg, struct input_impl_seq *si )
-{
-	si->eof = false;
+	si->eof_mark = eof_mark;
 }
 
 static void stream_destructor( program_t *prg, tree_t **sp, struct input_impl_seq *si )
@@ -678,7 +673,7 @@ static int stream_get_parse_block( struct colm_program *prg, struct input_impl_s
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
-			ret = is->eof ? INPUT_EOF : INPUT_EOD;
+			ret = is->eof_mark ? INPUT_EOF : INPUT_EOD;
 			break;
 		}
 
@@ -1099,8 +1094,7 @@ struct input_funcs_seq input_funcs =
 	&stream_undo_append_stream,
 
 	/* EOF */
-	&stream_set_eof,
-	&stream_unset_eof,
+	&stream_set_eof_mark,
 	&stream_get_eof_sent,
 	&stream_set_eof_sent,
 
