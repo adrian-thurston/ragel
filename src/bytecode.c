@@ -1599,19 +1599,6 @@ again:
 			vm_popn( n );
 			break;
 		}
-		case IN_SPRINTF: {
-			debug( prg, REALM_BYTECODE, "IN_SPRINTF\n" );
-
-			vm_pop_tree();
-			value_t integer = vm_pop_value();
-			str_t *format = vm_pop_string();
-			head_t *res = string_sprintf( prg, format, (long)integer );
-			str_t *str = (str_t*)construct_string( prg, res );
-			colm_tree_upref( prg, (tree_t*)str );
-			vm_push_string( str );
-			colm_tree_downref( prg, sp, (tree_t*)format );
-			break;
-		}
 		case IN_INT_TO_STR: {
 			debug( prg, REALM_BYTECODE, "IN_INT_TO_STR\n" );
 
@@ -3772,8 +3759,8 @@ again:
 		case IN_FN: {
 			c = *instr++;
 			switch ( c ) {
-			case IN_STR_ATOI: {
-				debug( prg, REALM_BYTECODE, "IN_STR_ATOI\n" );
+			case FN_STR_ATOI: {
+				debug( prg, REALM_BYTECODE, "FN_STR_ATOI\n" );
 
 				str_t *str = vm_pop_string();
 				word_t res = str_atoi( str->value );
@@ -3782,8 +3769,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_STR_ATOO: {
-				debug( prg, REALM_BYTECODE, "IN_STR_ATOO\n" );
+			case FN_STR_ATOO: {
+				debug( prg, REALM_BYTECODE, "FN_STR_ATOO\n" );
 
 				str_t *str = vm_pop_string();
 				word_t res = str_atoo( str->value );
@@ -3792,8 +3779,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_STR_UORD8: {
-				debug( prg, REALM_BYTECODE, "IN_STR_UORD8\n" );
+			case FN_STR_UORD8: {
+				debug( prg, REALM_BYTECODE, "FN_STR_UORD8\n" );
 
 				str_t *str = vm_pop_string();
 				word_t res = str_uord8( str->value );
@@ -3802,8 +3789,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_STR_UORD16: {
-				debug( prg, REALM_BYTECODE, "IN_STR_UORD16\n" );
+			case FN_STR_UORD16: {
+				debug( prg, REALM_BYTECODE, "FN_STR_UORD16\n" );
 
 				str_t *str = vm_pop_string();
 				word_t res = str_uord16( str->value );
@@ -3812,8 +3799,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_STR_PREFIX: {
-				debug( prg, REALM_BYTECODE, "IN_STR_PREFIX\n" );
+			case FN_STR_PREFIX: {
+				debug( prg, REALM_BYTECODE, "FN_STR_PREFIX\n" );
 
 				str_t *str = vm_pop_string();
 				value_t len = vm_pop_value();
@@ -3824,8 +3811,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_STR_SUFFIX: {
-				debug( prg, REALM_BYTECODE, "IN_STR_SUFFIX\n" );
+			case FN_STR_SUFFIX: {
+				debug( prg, REALM_BYTECODE, "FN_STR_SUFFIX\n" );
 
 				str_t *str = vm_pop_string();
 				value_t pos = vm_pop_value();
@@ -3836,8 +3823,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_PREFIX: {
-				debug( prg, REALM_BYTECODE, "IN_PREFIX\n" );
+			case FN_PREFIX: {
+				debug( prg, REALM_BYTECODE, "FN_PREFIX\n" );
 
 				value_t len = vm_pop_value();
 				str_t *str = vm_pop_string();
@@ -3848,8 +3835,8 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_SUFFIX: {
-				debug( prg, REALM_BYTECODE, "IN_SUFFIX\n" );
+			case FN_SUFFIX: {
+				debug( prg, REALM_BYTECODE, "FN_SUFFIX\n" );
 
 				value_t pos = vm_pop_value();
 				str_t *str = vm_pop_string();
@@ -3860,10 +3847,23 @@ again:
 				colm_tree_downref( prg, sp, (tree_t*)str );
 				break;
 			}
-			case IN_LOAD_ARG0: {
+			case FN_SPRINTF: {
+				debug( prg, REALM_BYTECODE, "FN_SPRINTF\n" );
+
+				vm_pop_tree();
+				value_t integer = vm_pop_value();
+				str_t *format = vm_pop_string();
+				head_t *res = string_sprintf( prg, format, (long)integer );
+				str_t *str = (str_t*)construct_string( prg, res );
+				colm_tree_upref( prg, (tree_t*)str );
+				vm_push_string( str );
+				colm_tree_downref( prg, sp, (tree_t*)format );
+				break;
+			}
+			case FN_LOAD_ARG0: {
 				half_t field;
 				read_half( field );
-				debug( prg, REALM_BYTECODE, "IN_LOAD_ARG0 %lu\n", field );
+				debug( prg, REALM_BYTECODE, "FN_LOAD_ARG0 %lu\n", field );
 
 				/* tree_t comes back upreffed. */
 				tree_t *tree = construct_arg0( prg, prg->argc, prg->argv, prg->argl );
@@ -3872,36 +3872,36 @@ again:
 				colm_struct_set_field( prg->global, tree_t*, field, tree );
 				break;
 			}
-			case IN_LOAD_ARGV: {
+			case FN_LOAD_ARGV: {
 				half_t field;
 				read_half( field );
-				debug( prg, REALM_BYTECODE, "IN_LOAD_ARGV %lu\n", field );
+				debug( prg, REALM_BYTECODE, "FN_LOAD_ARGV %lu\n", field );
 
 				list_t *list = construct_argv( prg, prg->argc, prg->argv, prg->argl );
 				colm_struct_set_field( prg->global, list_t*, field, list );
 				break;
 			}
-			case IN_INIT_STDS: {
+			case FN_INIT_STDS: {
 				half_t field;
 				read_half( field );
-				debug( prg, REALM_BYTECODE, "IN_INIT_STDS %lu\n", field );
+				debug( prg, REALM_BYTECODE, "FN_INIT_STDS %lu\n", field );
 
 				list_t *list = construct_stds( prg );
 				colm_struct_set_field( prg->global, list_t*, field, list );
 				break;
 			}
-			case IN_STOP: {
-				debug( prg, REALM_BYTECODE, "IN_STOP\n" );
+			case FN_STOP: {
+				debug( prg, REALM_BYTECODE, "FN_STOP\n" );
 
 				flush_streams( prg );
 				goto out;
 			}
 
-			case IN_LIST_PUSH_HEAD_WC: {
+			case FN_LIST_PUSH_HEAD_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WC\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_HEAD_WC\n" );
 
 				list_t *list = vm_pop_list();
 				struct_t *s = vm_pop_struct();
@@ -3913,11 +3913,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_LIST_PUSH_HEAD_WV: {
+			case FN_LIST_PUSH_HEAD_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_WV\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_HEAD_WV\n" );
 
 				list_t *list = vm_pop_list();
 				struct_t *s = vm_pop_struct();
@@ -3930,22 +3930,22 @@ again:
 
 				/* Set up reverse code. Needs no args. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_LIST_PUSH_HEAD_BKT );
+				rcode_code( exec, FN_LIST_PUSH_HEAD_BKT );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_LIST_PUSH_HEAD_BKT: {
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+			case FN_LIST_PUSH_HEAD_BKT: {
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_HEAD_BKT\n" );
 
 				list_t *list = vm_pop_list();
 				colm_list_detach_head( list );
 				break;
 			}
-			case IN_LIST_PUSH_TAIL_WC: {
+			case FN_LIST_PUSH_TAIL_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WC\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_TAIL_WC\n" );
 
 				list_t *list = vm_pop_list();
 				struct_t *s = vm_pop_struct();
@@ -3957,11 +3957,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_LIST_PUSH_TAIL_WV: {
+			case FN_LIST_PUSH_TAIL_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_WV\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_TAIL_WV\n" );
 
 				list_t *list = vm_pop_list();
 				struct_t *s = vm_pop_struct();
@@ -3974,22 +3974,22 @@ again:
 
 				/* Set up reverse code. Needs no args. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_LIST_PUSH_TAIL_BKT );
+				rcode_code( exec, FN_LIST_PUSH_TAIL_BKT );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_LIST_PUSH_TAIL_BKT: {
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
+			case FN_LIST_PUSH_TAIL_BKT: {
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_TAIL_BKT\n" );
 
 				list_t *list = vm_pop_list();
 				colm_list_detach_tail( list );
 				break;
 			}
-			case IN_LIST_POP_TAIL_WC: {
+			case FN_LIST_POP_TAIL_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WC\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_TAIL_WC\n" );
 
 				list_t *list = vm_pop_list();
 
@@ -4000,11 +4000,11 @@ again:
 				vm_push_struct( s );
 				break;
 			}
-			case IN_LIST_POP_TAIL_WV: {
+			case FN_LIST_POP_TAIL_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_WV\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_TAIL_WV\n" );
 
 				list_t *list = vm_pop_list();
 
@@ -4016,19 +4016,19 @@ again:
 
 				/* Set up reverse. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_LIST_POP_TAIL_BKT );
+				rcode_code( exec, FN_LIST_POP_TAIL_BKT );
 				rcode_half( exec, gen_id );
 				rcode_word( exec, (word_t)s );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_LIST_POP_TAIL_BKT: {
+			case FN_LIST_POP_TAIL_BKT: {
 				short gen_id;
 				tree_t *val;
 				read_half( gen_id );
 				read_tree( val );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_TAIL_BKT\n" );
 
 				list_t *list = vm_pop_list();
 				struct_t *s = (struct_t*) val;
@@ -4038,11 +4038,11 @@ again:
 				colm_list_append( list, list_el );
 				break;
 			}
-			case IN_LIST_POP_HEAD_WC: {
+			case FN_LIST_POP_HEAD_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WC\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_HEAD_WC\n" );
 
 				list_t *list = vm_pop_list();
 
@@ -4053,11 +4053,11 @@ again:
 				vm_push_struct( s );
 				break;
 			}
-			case IN_LIST_POP_HEAD_WV: {
+			case FN_LIST_POP_HEAD_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_WV\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_HEAD_WV\n" );
 
 				list_t *list = vm_pop_list();
 
@@ -4070,19 +4070,19 @@ again:
 				/* Set up reverse. The result comes off the list downrefed.
 				 * Need it up referenced for the reverse code too. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_LIST_POP_HEAD_BKT );
+				rcode_code( exec, FN_LIST_POP_HEAD_BKT );
 				rcode_half( exec, gen_id );
 				rcode_word( exec, (word_t)s );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_LIST_POP_HEAD_BKT: {
+			case FN_LIST_POP_HEAD_BKT: {
 				short gen_id;
 				tree_t *val;
 				read_half( gen_id );
 				read_tree( val );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_HEAD_BKT\n" );
 
 				list_t *list = vm_pop_list();
 				struct_t *s = (struct_t*) val;
@@ -4092,11 +4092,11 @@ again:
 				colm_list_prepend( list, list_el );
 				break;
 			}
-			case IN_MAP_FIND: {
+			case FN_MAP_FIND: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_FIND %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_MAP_FIND %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				tree_t *key = vm_pop_tree();
@@ -4112,11 +4112,11 @@ again:
 					colm_tree_downref( prg, sp, key );
 				break;
 			}
-			case IN_MAP_INSERT_WC: {
+			case FN_MAP_INSERT_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				struct_t *s = vm_pop_struct();
@@ -4128,11 +4128,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_MAP_INSERT_WV: {
+			case FN_MAP_INSERT_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_WV %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_WV %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				struct_t *s = vm_pop_struct();
@@ -4145,7 +4145,7 @@ again:
 				vm_push_tree( prg->true_val );
 
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_MAP_INSERT_BKT );
+				rcode_code( exec, FN_MAP_INSERT_BKT );
 				rcode_half( exec, gen_id );
 				rcode_code( exec, inserted != 0 ? 1 : 0 );
 				rcode_word( exec, (word_t)map_el );
@@ -4153,7 +4153,7 @@ again:
 				break;
 			}
 
-			case IN_MAP_INSERT_BKT: {
+			case FN_MAP_INSERT_BKT: {
 				short gen_id;
 				uchar inserted;
 				word_t wmap_el;
@@ -4164,7 +4164,7 @@ again:
 
 				map_el_t *map_el = (map_el_t*)wmap_el;
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT %d\n",
+				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_BKT %d\n",
 						(int)inserted );
 
 				map_t *map = vm_pop_map();
@@ -4173,11 +4173,11 @@ again:
 					colm_map_detach( prg, map, map_el );
 				break;
 			}
-			case IN_MAP_DETACH_WC: {
+			case FN_MAP_DETACH_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_MAP_DETACH_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				struct_t *s = vm_pop_struct();
@@ -4190,8 +4190,8 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_MAP_DETACH_WV: {
-				debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_WV\n" );
+			case FN_MAP_DETACH_WV: {
+				debug( prg, REALM_BYTECODE, "FN_MAP_DETACH_WV\n" );
 
 				tree_t *obj = vm_pop_tree();
 				tree_t *key = vm_pop_tree();
@@ -4202,7 +4202,7 @@ again:
 
 				/* Reverse instruction. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_MAP_DETACH_BKT );
+				rcode_code( exec, FN_MAP_DETACH_BKT );
 				rcode_word( exec, (word_t)pair.key );
 				rcode_word( exec, (word_t)pair.val );
 				rcode_unit_term( exec );
@@ -4211,12 +4211,12 @@ again:
 				colm_tree_downref( prg, sp, key );
 				break;
 			}
-			case IN_MAP_DETACH_BKT: {
+			case FN_MAP_DETACH_BKT: {
 				tree_t *key, *val;
 				read_tree( key );
 				read_tree( val );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_MAP_DETACH_BKT\n" );
 
 				/* Either both or neither. */
 				assert( ( key == 0 ) ^ ( val != 0 ) );
@@ -4230,11 +4230,11 @@ again:
 				colm_tree_downref( prg, sp, obj );
 				break;
 			}
-			case IN_VMAP_INSERT_WC: {
+			case FN_VMAP_INSERT_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VMAP_INSERT_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				struct_t *value = vm_pop_struct();
@@ -4246,11 +4246,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_VMAP_INSERT_WV: {
+			case FN_VMAP_INSERT_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_WV %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VMAP_INSERT_WV %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				struct_t *value = vm_pop_struct();
@@ -4262,14 +4262,14 @@ again:
 				vm_push_tree( prg->true_val );
 
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_VMAP_INSERT_BKT );
+				rcode_code( exec, FN_VMAP_INSERT_BKT );
 				rcode_half( exec, gen_id );
 				rcode_code( exec, inserted != 0 ? 1 : 0 );
 				rcode_word( exec, (word_t)inserted );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_VMAP_INSERT_BKT: {
+			case FN_VMAP_INSERT_BKT: {
 				short gen_id;
 				uchar inserted;
 				word_t wmap_el;
@@ -4280,7 +4280,7 @@ again:
 
 				map_el_t *map_el = (map_el_t*)wmap_el;
 
-				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_BKT %d\n",
+				debug( prg, REALM_BYTECODE, "FN_VMAP_INSERT_BKT %d\n",
 						(int)inserted );
 
 				map_t *map = vm_pop_map();
@@ -4289,11 +4289,11 @@ again:
 					colm_map_detach( prg, map, map_el );
 				break;
 			}
-			case IN_VMAP_REMOVE_WC: {
+			case FN_VMAP_REMOVE_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VMAP_REMOVE_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VMAP_REMOVE_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				tree_t *key = vm_pop_tree();
@@ -4304,11 +4304,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_VMAP_FIND: {
+			case FN_VMAP_FIND: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VMAP_FIND %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VMAP_FIND %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
 				tree_t *key = vm_pop_tree();
@@ -4321,11 +4321,11 @@ again:
 					colm_tree_downref( prg, sp, key );
 				break;
 			}
-			case IN_VLIST_PUSH_TAIL_WC: {
+			case FN_VLIST_PUSH_TAIL_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_TAIL_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 				value_t value = vm_pop_value();
@@ -4335,11 +4335,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_VLIST_PUSH_TAIL_WV: {
+			case FN_VLIST_PUSH_TAIL_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_WV %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_TAIL_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 				value_t value = vm_pop_value();
@@ -4350,22 +4350,22 @@ again:
 
 				/* Set up reverse code. Needs no args. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_VLIST_PUSH_TAIL_BKT );
+				rcode_code( exec, FN_VLIST_PUSH_TAIL_BKT );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_VLIST_PUSH_TAIL_BKT: {
-				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_TAIL_BKT\n" );
+			case FN_VLIST_PUSH_TAIL_BKT: {
+				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_TAIL_BKT\n" );
 
 				list_t *list = vm_pop_list();
 				colm_list_detach_tail( list );
 				break;
 			}
-			case IN_VLIST_PUSH_HEAD_WC: {
+			case FN_VLIST_PUSH_HEAD_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_HEAD_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 				value_t value = vm_pop_value();
@@ -4375,11 +4375,11 @@ again:
 				vm_push_tree( prg->true_val );
 				break;
 			}
-			case IN_VLIST_PUSH_HEAD_WV: {
+			case FN_VLIST_PUSH_HEAD_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_WV %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_HEAD_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 				value_t value = vm_pop_value();
@@ -4390,22 +4390,22 @@ again:
 
 				/* Set up reverse code. Needs no args. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_VLIST_PUSH_HEAD_BKT );
+				rcode_code( exec, FN_VLIST_PUSH_HEAD_BKT );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_VLIST_PUSH_HEAD_BKT: {
-				debug( prg, REALM_BYTECODE, "IN_VLIST_PUSH_HEAD_BKT\n" );
+			case FN_VLIST_PUSH_HEAD_BKT: {
+				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_HEAD_BKT\n" );
 
 				list_t *list = vm_pop_list();
 				colm_list_detach_head( list );
 				break;
 			}
-			case IN_VLIST_POP_HEAD_WC: {
+			case FN_VLIST_POP_HEAD_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_HEAD_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_HEAD_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 
@@ -4413,11 +4413,11 @@ again:
 				vm_push_value( result );
 				break;
 			}
-			case IN_VLIST_POP_HEAD_WV: {
+			case FN_VLIST_POP_HEAD_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_HEAD_WV %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_HEAD_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 
@@ -4426,30 +4426,30 @@ again:
 
 				/* Set up reverse. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_VLIST_POP_HEAD_BKT );
+				rcode_code( exec, FN_VLIST_POP_HEAD_BKT );
 				rcode_half( exec, gen_id );
 				rcode_word( exec, (word_t)result );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_VLIST_POP_HEAD_BKT: {
+			case FN_VLIST_POP_HEAD_BKT: {
 				short gen_id;
 				tree_t *val;
 				read_half( gen_id );
 				read_tree( val );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_HEAD_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_HEAD_BKT\n" );
 
 				list_t *list = vm_pop_list();
 
 				colm_vlist_prepend( prg, list, (value_t)val );
 				break;
 			}
-			case IN_VLIST_POP_TAIL_WC: {
+			case FN_VLIST_POP_TAIL_WC: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_TAIL_WC %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_TAIL_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 
@@ -4457,11 +4457,11 @@ again:
 				vm_push_value( result );
 				break;
 			}
-			case IN_VLIST_POP_TAIL_WV: {
+			case FN_VLIST_POP_TAIL_WV: {
 				short gen_id;
 				read_half( gen_id );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_TAIL_WV %hd\n", gen_id );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_TAIL_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
 
@@ -4470,19 +4470,19 @@ again:
 
 				/* Set up reverse. */
 				rcode_code( exec, IN_FN );
-				rcode_code( exec, IN_VLIST_POP_TAIL_BKT );
+				rcode_code( exec, FN_VLIST_POP_TAIL_BKT );
 				rcode_half( exec, gen_id );
 				rcode_word( exec, (word_t)result );
 				rcode_unit_term( exec );
 				break;
 			}
-			case IN_VLIST_POP_TAIL_BKT: {
+			case FN_VLIST_POP_TAIL_BKT: {
 				short gen_id;
 				tree_t *val;
 				read_half( gen_id );
 				read_tree( val );
 
-				debug( prg, REALM_BYTECODE, "IN_VLIST_POP_TAIL_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_TAIL_BKT\n" );
 
 				list_t *list = vm_pop_list();
 
@@ -4490,21 +4490,21 @@ again:
 				break;
 			}
 
-			case IN_EXIT_HARD: {
-				debug( prg, REALM_BYTECODE, "IN_EXIT\n" );
+			case FN_EXIT_HARD: {
+				debug( prg, REALM_BYTECODE, "FN_EXIT\n" );
 
 				vm_pop_tree();
 				prg->exit_status = vm_pop_type(long);
 				prg->induce_exit = 1;
 				exit( prg->exit_status );
 			}
-			case IN_EXIT: {
+			case FN_EXIT: {
 				/* The unwind code follows the exit call (exception, see
 				 * synthesis). */
 				short unwind_len;
 				read_half( unwind_len );
 
-				debug( prg, REALM_BYTECODE, "IN_EXIT, unwind len: %hd\n", unwind_len );
+				debug( prg, REALM_BYTECODE, "FN_EXIT, unwind len: %hd\n", unwind_len );
 
 				vm_pop_tree();
 				prg->exit_status = vm_pop_type(long);
@@ -4518,7 +4518,7 @@ again:
 
 					struct frame_info *fi = &prg->rtd->frame_info[exec->frame_id];
 
-					debug( prg, REALM_BYTECODE, "IN_EXIT, popping frame %s, "
+					debug( prg, REALM_BYTECODE, "FN_EXIT, popping frame %s, "
 							"unwind-len %hd, arg-size %ld\n",
 							( fi->name != 0 ? fi->name : "<no-name>" ),
 							unwind_len, fi->arg_size );
@@ -4761,47 +4761,44 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_MAP_MEM_BKT %hd\n", field );
 			break;
 		}
-		case IN_STOP: {
-			return;
-		}
 		case IN_FN: {
 			switch ( *instr++ ) {
-			case IN_LIST_PUSH_HEAD_BKT: {
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_HEAD_BKT\n" );
+			case FN_LIST_PUSH_HEAD_BKT: {
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_HEAD_BKT\n" );
 				break;
 			}
-			case IN_LIST_POP_HEAD_BKT: {
+			case FN_LIST_POP_HEAD_BKT: {
 				consume_half(); //( genId );
 				consume_word(); //( val );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_HEAD_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_HEAD_BKT\n" );
 
 				break;
 			}
-			case IN_LIST_PUSH_TAIL_BKT: {
-				debug( prg, REALM_BYTECODE, "IN_LIST_PUSH_TAIL_BKT\n" );
+			case FN_LIST_PUSH_TAIL_BKT: {
+				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_TAIL_BKT\n" );
 				break;
 			}
-			case IN_LIST_POP_TAIL_BKT: {
+			case FN_LIST_POP_TAIL_BKT: {
 				consume_half(); //( genId );
 				consume_word(); //( val );
 
-				debug( prg, REALM_BYTECODE, "IN_LIST_POP_TAIL_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_LIST_POP_TAIL_BKT\n" );
 
 				break;
 			}
-			case IN_MAP_INSERT_BKT: {
+			case FN_MAP_INSERT_BKT: {
 				uchar inserted;
 
 				consume_half(); //( genId );
 				read_byte( inserted );
 				consume_word(); //( wmapEl );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_INSERT_BKT %d\n",
+				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_BKT %d\n",
 						(int)inserted );
 				break;
 			}
-			case IN_VMAP_INSERT_BKT: {
+			case FN_VMAP_INSERT_BKT: {
 				short gen_id;
 				uchar inserted;
 				//word_t wmap_el;
@@ -4812,32 +4809,32 @@ again:
 
 				//map_el_t *map_el = (map_el_t*)wmap_el;
 
-				debug( prg, REALM_BYTECODE, "IN_VMAP_INSERT_BKT %d\n",
+				debug( prg, REALM_BYTECODE, "FN_VMAP_INSERT_BKT %d\n",
 						(int)inserted );
 
 				break;
 			}
-			case IN_MAP_DETACH_BKT: {
+			case FN_MAP_DETACH_BKT: {
 				tree_t *key, *val;
 				read_tree( key );
 				read_tree( val );
 
-				debug( prg, REALM_BYTECODE, "IN_MAP_DETACH_BKT\n" );
+				debug( prg, REALM_BYTECODE, "FN_MAP_DETACH_BKT\n" );
 
 				colm_tree_downref( prg, sp, key );
 				colm_tree_downref( prg, sp, val );
 				break;
 			}
 
-			case IN_VLIST_PUSH_TAIL_BKT: {
+			case FN_VLIST_PUSH_TAIL_BKT: {
 				break;
 			}
 
-			case IN_VLIST_PUSH_HEAD_BKT: {
+			case FN_VLIST_PUSH_HEAD_BKT: {
 				break;
 			}
 
-			case IN_VLIST_POP_HEAD_BKT: {
+			case FN_VLIST_POP_HEAD_BKT: {
 				short gen_id;
 				//word_t result;
 				read_half( gen_id );
@@ -4845,7 +4842,7 @@ again:
 				break;
 			}
 
-			case IN_VLIST_POP_TAIL_BKT: {
+			case FN_VLIST_POP_TAIL_BKT: {
 				short gen_id;
 				//word_t result;
 				read_half( gen_id );

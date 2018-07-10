@@ -807,38 +807,38 @@ void Compiler::declareStrFields( )
 	strLangEl->objectDef = strObj;
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "atoi",
-			IN_STR_ATOI,   IN_STR_ATOI, true, true );
+			FN_STR_ATOI,   FN_STR_ATOI, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "atoo",
-			IN_STR_ATOO,   IN_STR_ATOO, true, true );
+			FN_STR_ATOO,   FN_STR_ATOO, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "uord8",
-			IN_STR_UORD8,  IN_STR_UORD8, true, true );
+			FN_STR_UORD8,  FN_STR_UORD8, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "sord8",
-			IN_STR_SORD8,  IN_STR_SORD8, true, true );
+			FN_STR_SORD8,  FN_STR_SORD8, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "uord16",
-			IN_STR_UORD16, IN_STR_UORD16, true, true );
+			FN_STR_UORD16, FN_STR_UORD16, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "sord16",
-			IN_STR_SORD16, IN_STR_SORD16, true, true );
+			FN_STR_SORD16, FN_STR_SORD16, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "uord32",
-			IN_STR_UORD32, IN_STR_UORD32, true, true );
+			FN_STR_UORD32, FN_STR_UORD32, true, true );
 
 	initFunction( uniqueTypeInt, strObj, ObjectMethod::Call, "sord32",
-			IN_STR_SORD32, IN_STR_SORD32, true, true );
+			FN_STR_SORD32, FN_STR_SORD32, true, true );
 
 	initFunction( uniqueTypeStr, strObj, ObjectMethod::Call, "prefix",
-			IN_STR_PREFIX, IN_STR_PREFIX, uniqueTypeInt, true, true );
+			FN_STR_PREFIX, FN_STR_PREFIX, uniqueTypeInt, true, true );
 
 	initFunction( uniqueTypeStr, strObj, ObjectMethod::Call, "suffix",
-			IN_STR_SUFFIX, IN_STR_SUFFIX, uniqueTypeInt, true, true );
+			FN_STR_SUFFIX, FN_STR_SUFFIX, uniqueTypeInt, true, true );
 
 	initFunction( uniqueTypeStr, rootNamespace, globalObjectDef,
-			ObjectMethod::Call, "sprintf", IN_SPRINTF, IN_SPRINTF,
-			uniqueTypeStr, uniqueTypeInt, true );
+			ObjectMethod::Call, "sprintf", FN_SPRINTF, FN_SPRINTF,
+			uniqueTypeStr, uniqueTypeInt, true, true );
 
 	addLengthField( strObj, IN_STR_LENGTH );
 }
@@ -1006,65 +1006,65 @@ void Compiler::declareGlobalFields()
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "atoi",
-			IN_STR_ATOI,   IN_STR_ATOI, uniqueTypeStr, true, true );
+			FN_STR_ATOI,   FN_STR_ATOI, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "atoo",
-			IN_STR_ATOO,   IN_STR_ATOO, uniqueTypeStr, true, true );
+			FN_STR_ATOO,   FN_STR_ATOO, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "prefix",
-			IN_PREFIX, IN_PREFIX, uniqueTypeStr, uniqueTypeInt, true, true );
+			FN_PREFIX, FN_PREFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "suffix",
-			IN_SUFFIX, IN_SUFFIX, uniqueTypeStr, uniqueTypeInt, true, true );
+			FN_SUFFIX, FN_SUFFIX, uniqueTypeStr, uniqueTypeInt, true, true );
 	method->useCallObj = false;
 
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "uord8",
-			IN_STR_UORD8,  IN_STR_UORD8, uniqueTypeStr, true, true );
+			FN_STR_UORD8,  FN_STR_UORD8, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "sord8",
-			IN_STR_SORD8,  IN_STR_SORD8, uniqueTypeStr, true, true );
+			FN_STR_SORD8,  FN_STR_SORD8, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "uord16",
-			IN_STR_UORD16, IN_STR_UORD16, uniqueTypeStr, true, true );
+			FN_STR_UORD16, FN_STR_UORD16, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "sord16",
-			IN_STR_SORD16, IN_STR_SORD16, uniqueTypeStr, true, true );
+			FN_STR_SORD16, FN_STR_SORD16, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "uord32",
-			IN_STR_UORD32, IN_STR_UORD32, uniqueTypeStr, true, true );
+			FN_STR_UORD32, FN_STR_UORD32, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "sord32",
-			IN_STR_SORD32, IN_STR_SORD32, uniqueTypeStr, true, true );
+			FN_STR_SORD32, FN_STR_SORD32, uniqueTypeStr, true, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "exit",
-		IN_EXIT, IN_EXIT, uniqueTypeInt, true, true );
+			FN_EXIT, FN_EXIT, uniqueTypeInt, true, true );
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "exit_hard",
-		IN_EXIT_HARD, IN_EXIT_HARD, uniqueTypeInt, true, true );
+			FN_EXIT_HARD, FN_EXIT_HARD, uniqueTypeInt, true, true );
 
 	method = initFunction( uniqueTypeInt, rootNamespace, globalObjectDef, ObjectMethod::Call, "system",
-		IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
+			IN_SYSTEM, IN_SYSTEM, uniqueTypeStr, true );
 
 	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "xml",
-		IN_TREE_TO_STR_XML, IN_TREE_TO_STR_XML, uniqueTypeAny, true );
+			IN_TREE_TO_STR_XML, IN_TREE_TO_STR_XML, uniqueTypeAny, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "xmlac",
-		IN_TREE_TO_STR_XML_AC, IN_TREE_TO_STR_XML_AC, uniqueTypeAny, true );
+			IN_TREE_TO_STR_XML_AC, IN_TREE_TO_STR_XML_AC, uniqueTypeAny, true );
 	method->useCallObj = false;
 
 	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "postfix",
-		IN_TREE_TO_STR_POSTFIX, IN_TREE_TO_STR_POSTFIX, uniqueTypeAny, true );
+			IN_TREE_TO_STR_POSTFIX, IN_TREE_TO_STR_POSTFIX, uniqueTypeAny, true );
 	method->useCallObj = false;
 
 	addStdin();
@@ -1217,26 +1217,26 @@ void Compiler::initMapFunctions( GenericType *gen )
 {
 	/* Value functions. */
 	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "find", 
-			IN_VMAP_FIND,      IN_VMAP_FIND, gen->keyUt, true, true, gen );
+			FN_VMAP_FIND,      FN_VMAP_FIND, gen->keyUt, true, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "insert", 
-			IN_VMAP_INSERT_WV, IN_VMAP_INSERT_WC, gen->keyUt, gen->valueUt,
+			FN_VMAP_INSERT_WV, FN_VMAP_INSERT_WC, gen->keyUt, gen->valueUt,
 			false, true, gen );
 
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "remove", 
-			IN_VMAP_REMOVE_WV, IN_VMAP_REMOVE_WC, gen->keyUt, false, true, gen );
+			FN_VMAP_REMOVE_WV, FN_VMAP_REMOVE_WC, gen->keyUt, false, true, gen );
 
 	/*
 	 * Element Functions
 	 */
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "find_el", 
-			IN_MAP_FIND,      IN_MAP_FIND, gen->keyUt, true, true, gen );
+			FN_MAP_FIND,      FN_MAP_FIND, gen->keyUt, true, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "insert_el", 
-			IN_MAP_INSERT_WV, IN_MAP_INSERT_WC, gen->elUt, false, true, gen );
+			FN_MAP_INSERT_WV, FN_MAP_INSERT_WC, gen->elUt, false, true, gen );
 
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "detach_el", 
-			IN_MAP_DETACH_WV, IN_MAP_DETACH_WC, gen->elUt, false, true, gen );
+			FN_MAP_DETACH_WV, FN_MAP_DETACH_WC, gen->elUt, false, true, gen );
 }
 
 void Compiler::initMapField( GenericType *gen, const char *name, int offset )
@@ -1316,40 +1316,40 @@ void Compiler::initMapElField( GenericType *gen, const char *name, int offset )
 void Compiler::initListFunctions( GenericType *gen )
 {
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_head", 
-			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
+			FN_VLIST_PUSH_HEAD_WV, FN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_tail", 
-			IN_VLIST_PUSH_TAIL_WV, IN_VLIST_PUSH_TAIL_WC, gen->valueUt, false, true, gen );
+			FN_VLIST_PUSH_TAIL_WV, FN_VLIST_PUSH_TAIL_WC, gen->valueUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push", 
-			IN_VLIST_PUSH_HEAD_WV, IN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
+			FN_VLIST_PUSH_HEAD_WV, FN_VLIST_PUSH_HEAD_WC, gen->valueUt, false, true, gen );
 
 	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "pop_head", 
-			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
+			FN_VLIST_POP_HEAD_WV, FN_VLIST_POP_HEAD_WC, false, true, gen );
 
 	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "pop_tail", 
-			IN_VLIST_POP_TAIL_WV, IN_VLIST_POP_TAIL_WC, false, true, gen );
+			FN_VLIST_POP_TAIL_WV, FN_VLIST_POP_TAIL_WC, false, true, gen );
 
 	initFunction( gen->valueUt, gen->objDef, ObjectMethod::Call, "pop", 
-			IN_VLIST_POP_HEAD_WV, IN_VLIST_POP_HEAD_WC, false, true, gen );
+			FN_VLIST_POP_HEAD_WV, FN_VLIST_POP_HEAD_WC, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_head_el", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
+			FN_LIST_PUSH_HEAD_WV, FN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_tail_el", 
-			IN_LIST_PUSH_TAIL_WV, IN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
+			FN_LIST_PUSH_TAIL_WV, FN_LIST_PUSH_TAIL_WC, gen->elUt, false, true, gen );
 
 	initFunction( uniqueTypeInt, gen->objDef, ObjectMethod::Call, "push_el", 
-			IN_LIST_PUSH_HEAD_WV, IN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
+			FN_LIST_PUSH_HEAD_WV, FN_LIST_PUSH_HEAD_WC, gen->elUt, false, true, gen );
 
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "pop_head_el", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+			FN_LIST_POP_HEAD_WV, FN_LIST_POP_HEAD_WC, false, true, gen );
 
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "pop_tail_el", 
-			IN_LIST_POP_TAIL_WV, IN_LIST_POP_TAIL_WC, false, true, gen );
+			FN_LIST_POP_TAIL_WV, FN_LIST_POP_TAIL_WC, false, true, gen );
 
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::Call, "pop_el", 
-			IN_LIST_POP_HEAD_WV, IN_LIST_POP_HEAD_WC, false, true, gen );
+			FN_LIST_POP_HEAD_WV, FN_LIST_POP_HEAD_WC, false, true, gen );
 }
 
 void Compiler::initListElField( GenericType *gen, const char *name, int offset )

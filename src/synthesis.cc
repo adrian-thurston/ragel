@@ -1060,7 +1060,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 	else {
 		if ( pd->revertOn && revert )  {
 			if ( lookup.objMethod->opcodeWV == IN_CALL_WV ||
-					lookup.objMethod->opcodeWC == IN_EXIT )
+					lookup.objMethod->opcodeWC == FN_EXIT )
 				unwind = true;
 
 			if ( lookup.objMethod->useFnInstr )
@@ -1069,7 +1069,7 @@ void LangVarRef::callOperation( Compiler *pd, CodeVect &code, VarRefLookup &look
 		}
 		else {
 			if ( lookup.objMethod->opcodeWC == IN_CALL_WC ||
-					lookup.objMethod->opcodeWC == IN_EXIT )
+					lookup.objMethod->opcodeWC == FN_EXIT )
 				unwind = true;
 
 			if ( lookup.objMethod->useFnInstr )
@@ -2922,21 +2922,21 @@ void Compiler::compileRootBlock( )
 	CodeVect &code = block->codeWC;
 
 	code.append( IN_FN );
-	code.append( IN_LOAD_ARG0 );
+	code.append( FN_LOAD_ARG0 );
 	code.appendHalf( arg0Offset() );
 
 	code.append( IN_FN );
-	code.append( IN_LOAD_ARGV );
+	code.append( FN_LOAD_ARGV );
 	code.appendHalf( argvOffset() );
 
 	code.append( IN_FN );
-	code.append( IN_INIT_STDS );
+	code.append( FN_INIT_STDS );
 	code.appendHalf( stdsOffset() );
 
 	block->compile( this, code );
 
 	code.append( IN_FN );
-	code.append( IN_STOP );
+	code.append( FN_STOP );
 
 	/* Make the local trees descriptor. */
 	findLocals( rootLocalFrame, block );

@@ -310,7 +310,6 @@ typedef unsigned char uchar;
 #define IN_SET_PARSER_CONTEXT    0xd0
 #define IN_SET_PARSER_INPUT      0x96
 
-#define IN_SPRINTF               0xd6
 
 #define IN_GET_RHS_VAL_R         0xd7
 #define IN_GET_RHS_VAL_WC        0xd8
@@ -370,68 +369,69 @@ typedef unsigned char uchar;
  * IN_FN instructions.
  */
 
-/* 0x09 */
-
 #define IN_FN                    0xff
-#define IN_STR_ATOI              0x1d
-#define IN_STR_ATOO              0x38
-#define IN_STR_UORD8             0x01
-#define IN_STR_SORD8             0x02
-#define IN_STR_UORD16            0x03
-#define IN_STR_SORD16            0x04
-#define IN_STR_UORD32            0x05
-#define IN_STR_SORD32            0x06
-#define IN_STR_PREFIX            0x36
-#define IN_STR_SUFFIX            0x37
-#define IN_LOAD_ARGV             0x07
-#define IN_LOAD_ARG0             0x08
-#define IN_STOP                  0x0a
-#define IN_INIT_STDS             0x3e
+#define FN_STOP                  0x0a
 
-#define IN_LIST_PUSH_TAIL_WV     0x11
-#define IN_LIST_PUSH_TAIL_WC     0x12
-#define IN_LIST_PUSH_TAIL_BKT    0x13
-#define IN_LIST_POP_TAIL_WV      0x14
-#define IN_LIST_POP_TAIL_WC      0x15
-#define IN_LIST_POP_TAIL_BKT     0x16
-#define IN_LIST_PUSH_HEAD_WV     0x17
-#define IN_LIST_PUSH_HEAD_WC     0x18
-#define IN_LIST_PUSH_HEAD_BKT    0x19
-#define IN_LIST_POP_HEAD_WV      0x1a
-#define IN_LIST_POP_HEAD_WC      0x1b
-#define IN_LIST_POP_HEAD_BKT     0x1c
+#define FN_STR_ATOI              0x1d
+#define FN_STR_ATOO              0x38
+#define FN_STR_UORD8             0x01
+#define FN_STR_SORD8             0x02
+#define FN_STR_UORD16            0x03
+#define FN_STR_SORD16            0x04
+#define FN_STR_UORD32            0x05
+#define FN_STR_SORD32            0x06
+#define FN_STR_PREFIX            0x36
+#define FN_STR_SUFFIX            0x37
+#define FN_SPRINTF               0xd6
+#define FN_LOAD_ARGV             0x07
+#define FN_LOAD_ARG0             0x08
+#define FN_INIT_STDS             0x3e
 
-#define IN_MAP_FIND              0x24
-#define IN_MAP_INSERT_WV         0x1e
-#define IN_MAP_INSERT_WC         0x1f
-#define IN_MAP_INSERT_BKT        0x20
-#define IN_MAP_DETACH_WV         0x21
-#define IN_MAP_DETACH_WC         0x22
-#define IN_MAP_DETACH_BKT        0x23
 
-#define IN_VMAP_FIND             0x29
-#define IN_VMAP_INSERT_WC        0x25
-#define IN_VMAP_INSERT_WV        0x26
-#define IN_VMAP_INSERT_BKT       0x3d
-#define IN_VMAP_REMOVE_WC        0x27
-#define IN_VMAP_REMOVE_WV        0x28
+#define FN_LIST_PUSH_TAIL_WV     0x11
+#define FN_LIST_PUSH_TAIL_WC     0x12
+#define FN_LIST_PUSH_TAIL_BKT    0x13
+#define FN_LIST_POP_TAIL_WV      0x14
+#define FN_LIST_POP_TAIL_WC      0x15
+#define FN_LIST_POP_TAIL_BKT     0x16
+#define FN_LIST_PUSH_HEAD_WV     0x17
+#define FN_LIST_PUSH_HEAD_WC     0x18
+#define FN_LIST_PUSH_HEAD_BKT    0x19
+#define FN_LIST_POP_HEAD_WV      0x1a
+#define FN_LIST_POP_HEAD_WC      0x1b
+#define FN_LIST_POP_HEAD_BKT     0x1c
 
-#define IN_VLIST_PUSH_TAIL_WV    0x2a
-#define IN_VLIST_PUSH_TAIL_WC    0x2b
-#define IN_VLIST_PUSH_TAIL_BKT   0x2c
-#define IN_VLIST_POP_TAIL_WV     0x2d
-#define IN_VLIST_POP_TAIL_WC     0x2e
-#define IN_VLIST_POP_TAIL_BKT    0x2f
-#define IN_VLIST_PUSH_HEAD_WV    0x30
-#define IN_VLIST_PUSH_HEAD_WC    0x31
-#define IN_VLIST_PUSH_HEAD_BKT   0x32
-#define IN_VLIST_POP_HEAD_WV     0x33
-#define IN_VLIST_POP_HEAD_WC     0x34
-#define IN_VLIST_POP_HEAD_BKT    0x35
-#define IN_EXIT                  0x39
-#define IN_EXIT_HARD             0x3a
-#define IN_PREFIX                0x3b
-#define IN_SUFFIX                0x3c
+#define FN_MAP_FIND              0x24
+#define FN_MAP_INSERT_WV         0x1e
+#define FN_MAP_INSERT_WC         0x1f
+#define FN_MAP_INSERT_BKT        0x20
+#define FN_MAP_DETACH_WV         0x21
+#define FN_MAP_DETACH_WC         0x22
+#define FN_MAP_DETACH_BKT        0x23
+
+#define FN_VMAP_FIND             0x29
+#define FN_VMAP_INSERT_WC        0x25
+#define FN_VMAP_INSERT_WV        0x26
+#define FN_VMAP_INSERT_BKT       0x3d
+#define FN_VMAP_REMOVE_WC        0x27
+#define FN_VMAP_REMOVE_WV        0x28
+
+#define FN_VLIST_PUSH_TAIL_WV    0x2a
+#define FN_VLIST_PUSH_TAIL_WC    0x2b
+#define FN_VLIST_PUSH_TAIL_BKT   0x2c
+#define FN_VLIST_POP_TAIL_WV     0x2d
+#define FN_VLIST_POP_TAIL_WC     0x2e
+#define FN_VLIST_POP_TAIL_BKT    0x2f
+#define FN_VLIST_PUSH_HEAD_WV    0x30
+#define FN_VLIST_PUSH_HEAD_WC    0x31
+#define FN_VLIST_PUSH_HEAD_BKT   0x32
+#define FN_VLIST_POP_HEAD_WV     0x33
+#define FN_VLIST_POP_HEAD_WC     0x34
+#define FN_VLIST_POP_HEAD_BKT    0x35
+#define FN_EXIT                  0x39
+#define FN_EXIT_HARD             0x3a
+#define FN_PREFIX                0x3b
+#define FN_SUFFIX                0x3c
 
 /* Types of Generics. */
 enum GEN {
