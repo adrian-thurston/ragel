@@ -155,7 +155,6 @@ struct input_impl_seq
 
 	char eof_sent;
 	char eof;
-	char eos_sent;
 
 	struct seq_buf *queue;
 	struct seq_buf *queue_tail;
@@ -179,7 +178,6 @@ struct stream_impl_data
 
 	char eof_sent;
 	char eof;
-	char eos_sent;
 
 	struct run_buf *queue;
 	struct run_buf *queue_tail;
