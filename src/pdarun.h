@@ -427,7 +427,6 @@ void colm_increment_steps( struct pda_run *pda_run );
 void colm_decrement_steps( struct pda_run *pda_run );
 
 void colm_clear_stream_impl( struct colm_program *prg, tree_t **sp, struct stream_impl *input_stream );
-void colm_clear_source_stream( struct colm_program *prg, tree_t **sp, struct stream_impl_seq *source_stream );
 
 #define PCR_START         1
 #define PCR_DONE          2

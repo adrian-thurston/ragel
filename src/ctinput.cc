@@ -34,14 +34,14 @@
 using std::cerr;
 using std::endl;
 
-DEF_STREAM_FUNCS( stream_funcs_ct, stream_impl_ct );
+DEF_INPUT_FUNCS( input_funcs_ct, input_impl_ct );
 
-extern stream_funcs_ct pat_funcs;
-extern stream_funcs_ct repl_funcs;
+extern input_funcs_ct pat_funcs;
+extern input_funcs_ct repl_funcs;
 
-struct stream_impl_ct
+struct input_impl_ct
 {
-	struct stream_funcs *funcs;
+	struct input_funcs *funcs;
 
 	char *name;
 	long line;
@@ -59,16 +59,16 @@ struct stream_impl_ct
 	int offset;
 };
 
-void ct_destructor( program_t *prg, tree_t **sp, struct stream_impl_ct *ss )
+void ct_destructor( program_t *prg, tree_t **sp, struct input_impl_ct *ss )
 {
 }
 
-char ct_get_eof_sent( struct colm_program *prg, struct stream_impl_ct *si )
+char ct_get_eof_sent( struct colm_program *prg, struct input_impl_ct *si )
 {
 	return si->eof_sent;
 }
 
-void ct_set_eof_sent( struct colm_program *prg, struct stream_impl_ct *si, char eof_sent )
+void ct_set_eof_sent( struct colm_program *prg, struct input_impl_ct *si, char eof_sent )
 {
 	si->eof_sent = eof_sent;
 }
@@ -79,15 +79,15 @@ void ct_set_eof_sent( struct colm_program *prg, struct stream_impl_ct *si, char 
 
 struct input_impl *colm_impl_new_pat( char *name, Pattern *pattern )
 {
-	struct stream_impl_ct *ss = (struct stream_impl_ct*)malloc(sizeof(struct stream_impl_ct));
-	memset( ss, 0, sizeof(struct stream_impl_ct) );
+	struct input_impl_ct *ss = (struct input_impl_ct*)malloc(sizeof(struct input_impl_ct));
+	memset( ss, 0, sizeof(struct input_impl_ct) );
 	ss->pattern = pattern;
 	ss->pat_item = pattern->list->head;
-	ss->funcs = (struct stream_funcs*)&pat_funcs;
+	ss->funcs = (struct input_funcs*)&pat_funcs;
 	return (struct input_impl*) ss;
 }
 
-int pat_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss, int *pskip,
+int pat_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss, int *pskip,
 		char **pdp, int *copied )
 { 
 	*copied = 0;
@@ -136,7 +136,7 @@ int pat_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss, in
 }
 
 
-int pat_get_data( struct colm_program *prg, struct stream_impl_ct *ss, char *dest, int length )
+int pat_get_data( struct colm_program *prg, struct input_impl_ct *ss, char *dest, int length )
 { 
 	int copied = 0;
 
@@ -173,7 +173,7 @@ int pat_get_data( struct colm_program *prg, struct stream_impl_ct *ss, char *des
 	return copied;
 }
 
-void pat_backup( struct stream_impl_ct *ss )
+void pat_backup( struct input_impl_ct *ss )
 {
 	if ( ss->pat_item == 0 )
 		ss->pat_item = ss->pattern->list->tail;
@@ -181,7 +181,7 @@ void pat_backup( struct stream_impl_ct *ss )
 		ss->pat_item = ss->pat_item->prev;
 }
 
-int pat_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, int length, location_t *loc )
+int pat_consume_data( struct colm_program *prg, struct input_impl_ct *ss, int length, location_t *loc )
 {
 	//debug( REALM_INPUT, "consuming %ld bytes\n", length );
 
@@ -215,13 +215,13 @@ int pat_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, int l
 	return consumed;
 }
 
-int pat_undo_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, const char *data, int length )
+int pat_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const char *data, int length )
 {
 	ss->offset -= length;
 	return length;
 }
 
-LangEl *pat_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId,
+LangEl *pat_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss, long *bindId,
 		char **data, long *length )
 { 
 	LangEl *klangEl = ss->pat_item->prodEl->langEl;
@@ -234,23 +234,23 @@ LangEl *pat_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss
 	return klangEl;
 }
 
-void pat_undo_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss )
+void pat_undo_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss )
 {
 	pat_backup( ss );
 	ss->offset = ss->pat_item->data.length();
 }
 
-void ct_stream_set_eof( struct colm_program *prg, struct stream_impl_ct *si )
+void ct_set_eof( struct colm_program *prg, struct input_impl_ct *si )
 {
 	si->eof = true;
 }
 
-void ct_stream_unset_eof( struct colm_program *prg, struct stream_impl_ct *si )
+void ct_unset_eof( struct colm_program *prg, struct input_impl_ct *si )
 {
 	si->eof = false;
 }
 
-void ct_transfer_loc_seq( struct colm_program *prg, location_t *loc, struct stream_impl_ct *ss )
+void ct_transfer_loc_seq( struct colm_program *prg, location_t *loc, struct input_impl_ct *ss )
 {
 	loc->name = ss->name;
 	loc->line = ss->line;
@@ -258,12 +258,10 @@ void ct_transfer_loc_seq( struct colm_program *prg, location_t *loc, struct stre
 	loc->byte = ss->byte;
 }
 
-stream_funcs_ct pat_funcs = 
+input_funcs_ct pat_funcs = 
 {
 	&pat_get_parse_block,
 	&pat_get_data,
-
-	0, /* get_data_source */
 
 	&pat_consume_data,
 	&pat_undo_consume_data,
@@ -277,17 +275,12 @@ stream_funcs_ct pat_funcs =
 	0, 0, 0, 0, 0, 0, /* prepend funcs. */
 	0, 0, 0, 0, 0, 0, /* append funcs */
 
-	&ct_stream_set_eof,
-	&ct_stream_unset_eof,
+	&ct_set_eof,
+	&ct_unset_eof,
 	&ct_get_eof_sent,
 	&ct_set_eof_sent,
 
 	&ct_transfer_loc_seq,
-	0, /* get_collect */
-	0, /* flush_stream */
-	0, /* close_stream */
-	0, /* print_tree */
-
 	&ct_destructor,
 };
 
@@ -298,15 +291,15 @@ stream_funcs_ct pat_funcs =
 
 struct input_impl *colm_impl_new_cons( char *name, Constructor *constructor )
 {
-	struct stream_impl_ct *ss = (struct stream_impl_ct*)malloc(sizeof(struct stream_impl_ct));
-	memset( ss, 0, sizeof(struct stream_impl_ct) );
+	struct input_impl_ct *ss = (struct input_impl_ct*)malloc(sizeof(struct input_impl_ct));
+	memset( ss, 0, sizeof(struct input_impl_ct) );
 	ss->constructor = constructor;
 	ss->cons_item = constructor->list->head;
-	ss->funcs = (struct stream_funcs*)&repl_funcs;
+	ss->funcs = (struct input_funcs*)&repl_funcs;
 	return (struct input_impl*)ss;
 }
 
-LangEl *repl_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss, long *bindId, char **data, long *length )
+LangEl *repl_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss, long *bindId, char **data, long *length )
 { 
 	LangEl *klangEl = ss->cons_item->type == ConsItem::ExprType ? 
 			ss->cons_item->langEl : ss->cons_item->prodEl->langEl;
@@ -332,7 +325,7 @@ LangEl *repl_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *s
 	return klangEl;
 }
 
-int repl_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss,
+int repl_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss,
 		int *pskip, char **pdp, int *copied )
 { 
 	*copied = 0;
@@ -380,7 +373,7 @@ int repl_get_parse_block( struct colm_program *prg, struct stream_impl_ct *ss,
 	return INPUT_DATA;
 }
 
-int repl_get_data( struct colm_program *prg, struct stream_impl_ct *ss, char *dest, int length )
+int repl_get_data( struct colm_program *prg, struct input_impl_ct *ss, char *dest, int length )
 { 
 	int copied = 0;
 
@@ -417,7 +410,7 @@ int repl_get_data( struct colm_program *prg, struct stream_impl_ct *ss, char *de
 	return copied;
 }
 
-void repl_backup( struct stream_impl_ct *ss )
+void repl_backup( struct input_impl_ct *ss )
 {
 	if ( ss->cons_item == 0 )
 		ss->cons_item = ss->constructor->list->tail;
@@ -425,14 +418,14 @@ void repl_backup( struct stream_impl_ct *ss )
 		ss->cons_item = ss->cons_item->prev;
 }
 
-void repl_undo_consume_lang_el( struct colm_program *prg, struct stream_impl_ct *ss )
+void repl_undo_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss )
 {
 	repl_backup( ss );
 	ss->offset = ss->cons_item->data.length();
 }
 
 
-int repl_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, int length, location_t *loc )
+int repl_consume_data( struct colm_program *prg, struct input_impl_ct *ss, int length, location_t *loc )
 {
 	int consumed = 0;
 
@@ -464,7 +457,7 @@ int repl_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, int 
 	return consumed;
 }
 
-int repl_undo_consume_data( struct colm_program *prg, struct stream_impl_ct *ss, const char *data, int length )
+int repl_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const char *data, int length )
 {
 	int origLen = length;
 	while ( true ) {
@@ -485,12 +478,10 @@ int repl_undo_consume_data( struct colm_program *prg, struct stream_impl_ct *ss,
 	return origLen;
 }
 
-stream_funcs_ct repl_funcs =
+input_funcs_ct repl_funcs =
 {
 	&repl_get_parse_block,
 	&repl_get_data,
-
-	0, /* get_data_source */
 
 	&repl_consume_data,
 	&repl_undo_consume_data,
@@ -504,17 +495,12 @@ stream_funcs_ct repl_funcs =
 	0, 0, 0, 0, 0, 0, /* prepend. */
 	0, 0, 0, 0, 0, 0, /* append. */
 
-	&ct_stream_set_eof,
-	&ct_stream_unset_eof,
+	&ct_set_eof,
+	&ct_unset_eof,
 	&ct_get_eof_sent,
 	&ct_set_eof_sent,
 
 	&ct_transfer_loc_seq,
-	0, /* get_collect */
-	0, /* flush_stream */
-	0, /* close_stream */
-	0, /* print_tree */
-
 	&ct_destructor,
 };
 

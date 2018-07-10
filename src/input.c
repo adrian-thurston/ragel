@@ -90,15 +90,10 @@ struct run_buf *new_run_buf( int sz )
 	return rb;
 }
 
-void init_fd_funcs();
-void init_file_funcs();
-void init_pat_funcs();
-void init_cons_funcs();
-
-DEF_STREAM_FUNCS( stream_funcs_seq, stream_impl_seq );
+DEF_INPUT_FUNCS( input_funcs_seq, input_impl_seq );
 DEF_STREAM_FUNCS( stream_funcs_data, stream_impl_data );
 
-extern struct stream_funcs_seq stream_funcs;
+extern struct input_funcs_seq input_funcs;
 extern struct stream_funcs_data file_funcs;
 extern struct stream_funcs_data text_funcs;
 
@@ -115,7 +110,7 @@ static void default_loc( location_t *loc )
 	loc->byte = 1;
 }
 
-void transfer_loc_seq( struct colm_program *prg, location_t *loc, struct stream_impl_seq *ss )
+void transfer_loc_seq( struct colm_program *prg, location_t *loc, struct input_impl_seq *ss )
 {
 	loc->name = ss->name;
 	loc->line = ss->line;
@@ -131,8 +126,8 @@ static void transfer_loc_data( struct colm_program *prg, location_t *loc, struct
 	loc->byte = ss->byte;
 }
 
-void colm_clear_source_stream( struct colm_program *prg,
-		tree_t **sp, struct stream_impl_seq *si )
+static void colm_clear_source_stream( struct colm_program *prg,
+		tree_t **sp, struct input_impl_seq *si )
 {
 	struct seq_buf *buf = si->queue;
 	while ( buf != 0 ) {
@@ -178,7 +173,7 @@ void colm_stream_destroy( program_t *prg, tree_t **sp, struct_t *s )
 }
 
 /* Keep the position up to date after consuming text. */
-void update_position_seq( struct stream_impl_seq *is, const char *data, long length )
+void update_position_seq( struct input_impl_seq *is, const char *data, long length )
 {
 	int i;
 	for ( i = 0; i < length; i++ ) {
@@ -194,7 +189,7 @@ void update_position_seq( struct stream_impl_seq *is, const char *data, long len
 }
 
 /* Keep the position up to date after sending back text. */
-void undo_position_seq( struct stream_impl_seq *is, const char *data, long length )
+void undo_position_seq( struct input_impl_seq *is, const char *data, long length )
 {
 	/* FIXME: this needs to fetch the position information from the parsed
 	 * token and restore based on that.. */
@@ -327,7 +322,7 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 
 static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_data *si )
 {
-//	colm_clear_source_stream( prg, sp, (struct stream_impl_seq*)stream->impl );
+//	colm_clear_source_stream( prg, sp, (struct input_impl_seq*)stream->impl );
 
 	if ( si->file != 0 )
 		colm_close_stream_file( si->file );
@@ -443,14 +438,14 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 	return ret;
 }
 
-static void input_stream_stash_head( struct colm_program *prg, struct stream_impl_seq *si, struct seq_buf *seq_buf )
+static void input_stream_stash_head( struct colm_program *prg, struct input_impl_seq *si, struct seq_buf *seq_buf )
 {
 	debug( prg, REALM_INPUT, "stash_head: stream %p buf %p\n", si, seq_buf );
 	seq_buf->next = si->stash;
 	si->stash = seq_buf;
 }
 
-static struct seq_buf *input_stream_pop_stash( struct colm_program *prg, struct stream_impl_seq *si )
+static struct seq_buf *input_stream_pop_stash( struct colm_program *prg, struct input_impl_seq *si )
 {
 	struct seq_buf *seq_buf = si->stash;
 	si->stash = si->stash->next;
@@ -461,7 +456,7 @@ static struct seq_buf *input_stream_pop_stash( struct colm_program *prg, struct 
 }
 
 
-static void maybe_split( struct colm_program *prg, struct stream_impl_seq *si )
+static void maybe_split( struct colm_program *prg, struct input_impl_seq *si )
 {
 	if ( si->queue != 0 && si->queue->type == SEQ_BUF_SOURCE_TYPE ) {
 
@@ -574,9 +569,9 @@ static int text_get_data_source( struct colm_program *prg, struct stream_impl_da
  * StreamImpl struct, this wraps the list of input streams.
  */
 
-void init_stream_impl_seq( struct stream_impl_seq *is, char *name )
+void init_input_impl_seq( struct input_impl_seq *is, char *name )
 {
-	memset( is, 0, sizeof(struct stream_impl_seq) );
+	memset( is, 0, sizeof(struct input_impl_seq) );
 
 	is->type = 'S';
 	is->name = name;
@@ -599,7 +594,7 @@ void init_stream_impl_data( struct stream_impl_data *is, char *name )
 	is->level = COLM_INDENT_OFF;
 }
 
-static struct seq_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
+static struct seq_buf *input_stream_seq_pop_head( struct input_impl_seq *is )
 {
 	struct seq_buf *ret = is->queue;
 	is->queue = is->queue->next;
@@ -610,7 +605,7 @@ static struct seq_buf *input_stream_seq_pop_head( struct stream_impl_seq *is )
 	return ret;
 }
 
-static void input_stream_seq_append( struct stream_impl_seq *is, struct seq_buf *seq_buf )
+static void input_stream_seq_append( struct input_impl_seq *is, struct seq_buf *seq_buf )
 {
 	if ( is->queue == 0 ) {
 		seq_buf->prev = seq_buf->next = 0;
@@ -624,7 +619,7 @@ static void input_stream_seq_append( struct stream_impl_seq *is, struct seq_buf 
 	}
 }
 
-static struct seq_buf *input_stream_seq_pop_tail( struct stream_impl_seq *is )
+static struct seq_buf *input_stream_seq_pop_tail( struct input_impl_seq *is )
 {
 	struct seq_buf *ret = is->queue_tail;
 	is->queue_tail = is->queue_tail->prev;
@@ -635,7 +630,7 @@ static struct seq_buf *input_stream_seq_pop_tail( struct stream_impl_seq *is )
 	return ret;
 }
 
-static void input_stream_seq_prepend( struct stream_impl_seq *is, struct seq_buf *seq_buf )
+static void input_stream_seq_prepend( struct input_impl_seq *is, struct seq_buf *seq_buf )
 {
 	if ( is->queue == 0 ) {
 		seq_buf->prev = seq_buf->next = 0;
@@ -649,30 +644,17 @@ static void input_stream_seq_prepend( struct stream_impl_seq *is, struct seq_buf
 	}
 }
 
-static int is_source_stream( struct stream_impl_seq *is )
-{
-	if ( is->queue != 0 && is->queue->type == SEQ_BUF_SOURCE_TYPE )
-		return true;
-	return false;
-}
-
-void stream_set_eof( struct colm_program *prg, struct stream_impl_seq *si )
+void stream_set_eof( struct colm_program *prg, struct input_impl_seq *si )
 {
 	si->eof = true;
 }
 
-void stream_unset_eof( struct colm_program *prg, struct stream_impl_seq *si )
+void stream_unset_eof( struct colm_program *prg, struct input_impl_seq *si )
 {
-//	if ( is_source_stream( si ) ) {
-//		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
-//		sid->eof = false;
-//	}
-//	else {
-		si->eof = false;
-//	}
+	si->eof = false;
 }
 
-static void stream_destructor( program_t *prg, tree_t **sp, struct stream_impl_seq *si )
+static void stream_destructor( program_t *prg, tree_t **sp, struct input_impl_seq *si )
 {
 	colm_clear_source_stream( prg, sp, si );
 
@@ -685,36 +667,18 @@ static void stream_destructor( program_t *prg, tree_t **sp, struct stream_impl_s
 	free( si );
 }
 
-static str_collect_t *stream_get_collect( struct colm_program *prg, struct stream_impl_seq *si )
-{
-	return 0;
-}
-
-static void stream_flush_stream( struct colm_program *prg, struct stream_impl_seq *si )
-{
-}
-
-static void stream_close_stream( struct colm_program *prg, struct stream_impl_seq *si )
-{
-}
-
-static void stream_print_tree( struct colm_program *prg, tree_t **sp,
-		struct stream_impl_seq *si, tree_t *tree, int trim )
-{
-}
-
-char stream_get_eof_sent( struct colm_program *prg, struct stream_impl_seq *si )
+char stream_get_eof_sent( struct colm_program *prg, struct input_impl_seq *si )
 {
 	return si->eof_sent;
 }
 
-void stream_set_eof_sent( struct colm_program *prg, struct stream_impl_seq *si, char eof_sent )
+void stream_set_eof_sent( struct colm_program *prg, struct input_impl_seq *si, char eof_sent )
 {
 	si->eof_sent = eof_sent;
 }
 
 
-static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_seq *is, int *pskip, char **pdp, int *copied )
+static int stream_get_parse_block( struct colm_program *prg, struct input_impl_seq *is, int *pskip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -792,7 +756,7 @@ static int stream_get_parse_block( struct colm_program *prg, struct stream_impl_
 	return ret;
 }
 
-static int stream_get_data( struct colm_program *prg, struct stream_impl_seq *is, char *dest, int length )
+static int stream_get_data( struct colm_program *prg, struct input_impl_seq *is, char *dest, int length )
 {
 	int copied = 0;
 
@@ -837,7 +801,7 @@ static int stream_get_data( struct colm_program *prg, struct stream_impl_seq *is
  * Consume
  */
 
-static int stream_consume_data( struct colm_program *prg, struct stream_impl_seq *si, int length, location_t *loc )
+static int stream_consume_data( struct colm_program *prg, struct input_impl_seq *si, int length, location_t *loc )
 {
 	debug( prg, REALM_INPUT, "stream_consume_data: stream %p consuming %d bytes\n", si, length );
 
@@ -883,7 +847,7 @@ static int stream_consume_data( struct colm_program *prg, struct stream_impl_seq
 	return consumed;
 }
 
-static int stream_undo_consume_data( struct colm_program *prg, struct stream_impl_seq *si, const char *data, int length )
+static int stream_undo_consume_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, int length )
 {
 	/* When we push back data we need to move backwards through the block of
 	 * text. The source stream type will */
@@ -912,7 +876,7 @@ static int stream_undo_consume_data( struct colm_program *prg, struct stream_imp
 	return tot;
 }
 
-static tree_t *stream_consume_tree( struct colm_program *prg, struct stream_impl_seq *si )
+static tree_t *stream_consume_tree( struct colm_program *prg, struct input_impl_seq *si )
 {
 	debug( prg, REALM_INPUT, "stream_consume_tree: stream %p\n", si );
 
@@ -936,7 +900,7 @@ static tree_t *stream_consume_tree( struct colm_program *prg, struct stream_impl
 	return 0;
 }
 
-static void stream_undo_consume_tree( struct colm_program *prg, struct stream_impl_seq *si, tree_t *tree, int ignore )
+static void stream_undo_consume_tree( struct colm_program *prg, struct input_impl_seq *si, tree_t *tree, int ignore )
 {
 	debug( prg, REALM_INPUT, "stream_undo_consume_tree: stream %p undo consume tree %p\n", si, tree );
 
@@ -958,29 +922,10 @@ static void stream_undo_consume_tree( struct colm_program *prg, struct stream_im
 	}
 }
 
-static struct LangEl *stream_consume_lang_el( struct colm_program *prg, struct stream_impl_seq *is, long *bind_id,
-		char **data, long *length )
-{
-	assert( is_source_stream( is ) );
-	struct stream_impl *si = is->queue->si;
-	return si->funcs->consume_lang_el( prg, si, bind_id, data, length );
-}
-
-static void stream_undo_consume_lang_el( struct colm_program *prg, struct stream_impl_seq *is )
-{
-	if ( is_source_stream( is ) ) {
-		struct stream_impl *si = is->queue->si;
-		return si->funcs->undo_consume_lang_el( prg, si );
-	}
-	else {
-		assert( false );
-	}
-}
-
 /*
  * Prepend
  */
-static void stream_prepend_data( struct colm_program *prg, struct stream_impl_seq *si, const char *data, long length )
+static void stream_prepend_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
 {
 	debug( prg, REALM_INPUT, "stream_prepend_data: stream %p prepend data length %d\n", si, length );
 
@@ -995,7 +940,7 @@ static void stream_prepend_data( struct colm_program *prg, struct stream_impl_se
 	input_stream_seq_prepend( si, new_buf );
 }
 
-static int stream_undo_prepend_data( struct colm_program *prg, struct stream_impl_seq *si, int length )
+static int stream_undo_prepend_data( struct colm_program *prg, struct input_impl_seq *si, int length )
 {
 	debug( prg, REALM_INPUT, "stream_undo_prepend_data: stream %p undo append data length %d\n", si, length );
 
@@ -1005,7 +950,7 @@ static int stream_undo_prepend_data( struct colm_program *prg, struct stream_imp
 	return 0;
 }
 
-static void stream_prepend_tree( struct colm_program *prg, struct stream_impl_seq *si, tree_t *tree, int ignore )
+static void stream_prepend_tree( struct colm_program *prg, struct input_impl_seq *si, tree_t *tree, int ignore )
 {
 	debug( prg, REALM_INPUT, "stream_prepend_tree: stream %p prepend tree %p\n", si, tree );
 
@@ -1020,7 +965,7 @@ static void stream_prepend_tree( struct colm_program *prg, struct stream_impl_se
 	input_stream_seq_prepend( si, new_buf );
 }
 
-static tree_t *stream_undo_prepend_tree( struct colm_program *prg, struct stream_impl_seq *si )
+static tree_t *stream_undo_prepend_tree( struct colm_program *prg, struct input_impl_seq *si )
 {
 	debug( prg, REALM_INPUT, "stream_undo_prepend_tree: stream %p undo prepend tree\n", si );
 
@@ -1038,7 +983,7 @@ static tree_t *stream_undo_prepend_tree( struct colm_program *prg, struct stream
 }
 
 
-static void stream_prepend_stream( struct colm_program *prg, struct stream_impl_seq *si, struct colm_stream *stream )
+static void stream_prepend_stream( struct colm_program *prg, struct input_impl_seq *si, struct colm_stream *stream )
 {
 	maybe_split( prg, si );
 
@@ -1053,14 +998,14 @@ static void stream_prepend_stream( struct colm_program *prg, struct stream_impl_
 	assert( ((struct stream_impl_data*)new_buf->si)->type == 'D' );
 }
 
-static tree_t *stream_undo_prepend_stream( struct colm_program *prg, struct stream_impl_seq *is )
+static tree_t *stream_undo_prepend_stream( struct colm_program *prg, struct input_impl_seq *is )
 {
 	struct seq_buf *seq_buf = input_stream_seq_pop_head( is );
 	free( seq_buf );
 	return 0;
 }
 
-static void stream_append_data( struct colm_program *prg, struct stream_impl_seq *si, const char *data, long length )
+static void stream_append_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
 {
 	debug( prg, REALM_INPUT, "stream_append_data: stream %p append data length %d\n", si, length );
 
@@ -1073,7 +1018,7 @@ static void stream_append_data( struct colm_program *prg, struct stream_impl_seq
 	input_stream_seq_append( si, new_buf );
 }
 
-static tree_t *stream_undo_append_data( struct colm_program *prg, struct stream_impl_seq *si, int length )
+static tree_t *stream_undo_append_data( struct colm_program *prg, struct input_impl_seq *si, int length )
 {
 	debug( prg, REALM_INPUT, "stream_undo append_data: stream %p undo append data length %d\n", si, length );
 
@@ -1083,7 +1028,7 @@ static tree_t *stream_undo_append_data( struct colm_program *prg, struct stream_
 	return 0;
 }
 
-static void stream_append_tree( struct colm_program *prg, struct stream_impl_seq *si, tree_t *tree )
+static void stream_append_tree( struct colm_program *prg, struct input_impl_seq *si, tree_t *tree )
 {
 	debug( prg, REALM_INPUT, "stream_append_tree: stream %p append tree %p\n", si, tree );
 
@@ -1095,7 +1040,7 @@ static void stream_append_tree( struct colm_program *prg, struct stream_impl_seq
 	ad->tree = tree;
 }
 
-static tree_t *stream_undo_append_tree( struct colm_program *prg, struct stream_impl_seq *si )
+static tree_t *stream_undo_append_tree( struct colm_program *prg, struct input_impl_seq *si )
 {
 	debug( prg, REALM_INPUT, "stream_undo_append_tree: stream %p undo append tree\n", si );
 
@@ -1105,7 +1050,7 @@ static tree_t *stream_undo_append_tree( struct colm_program *prg, struct stream_
 	return tree;
 }
 
-static void stream_append_stream( struct colm_program *prg, struct stream_impl_seq *si, struct colm_stream *stream )
+static void stream_append_stream( struct colm_program *prg, struct input_impl_seq *si, struct colm_stream *stream )
 {
 	debug( prg, REALM_INPUT, "stream_append_stream: stream %p append stream %p\n", si, stream );
 
@@ -1119,7 +1064,7 @@ static void stream_append_stream( struct colm_program *prg, struct stream_impl_s
 	assert( ((struct stream_impl_data*)ad->si)->type == 'D' );
 }
 
-static tree_t *stream_undo_append_stream( struct colm_program *prg, struct stream_impl_seq *si )
+static tree_t *stream_undo_append_stream( struct colm_program *prg, struct input_impl_seq *si )
 {
 	debug( prg, REALM_INPUT, "stream_undo_append_stream: stream %p undo append stream\n", si );
 
@@ -1128,11 +1073,10 @@ static tree_t *stream_undo_append_stream( struct colm_program *prg, struct strea
 	return 0;
 }
 
-struct stream_funcs_seq stream_funcs = 
+struct input_funcs_seq input_funcs = 
 {
 	&stream_get_parse_block,
 	&stream_get_data,
-	0 /* get_data_source */,
 
 	/* Consume. */
 	&stream_consume_data,
@@ -1141,8 +1085,8 @@ struct stream_funcs_seq stream_funcs =
 	&stream_consume_tree,
 	&stream_undo_consume_tree,
 
-	&stream_consume_lang_el,
-	&stream_undo_consume_lang_el,
+	0, /* consume_lang_el */
+	0, /* undo_consume_lang_el */
 
 	/* Prepend */
 	&stream_prepend_data,
@@ -1170,13 +1114,7 @@ struct stream_funcs_seq stream_funcs =
 	&stream_get_eof_sent,
 	&stream_set_eof_sent,
 
-	/* Util. */
 	&transfer_loc_seq,
-	&stream_get_collect,
-	&stream_flush_stream,
-	&stream_close_stream,
-	&stream_print_tree,
-
 	&stream_destructor,
 };
 
@@ -1282,9 +1220,9 @@ struct stream_impl *colm_impl_new_collect( char *name )
 
 struct input_impl *colm_impl_new_generic( char *name )
 {
-	struct stream_impl_seq *ss = (struct stream_impl_seq*)malloc(sizeof(struct stream_impl_seq));
-	init_stream_impl_seq( ss, name );
-	ss->funcs = (struct stream_funcs*)&stream_funcs;
+	struct input_impl_seq *ss = (struct input_impl_seq*)malloc(sizeof(struct input_impl_seq));
+	init_input_impl_seq( ss, name );
+	ss->funcs = (struct input_funcs*)&input_funcs;
 	return (struct input_impl*)ss;
 }
 

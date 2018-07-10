@@ -2352,15 +2352,15 @@ again:
 			break;
 		}
 
-		case IN_PRINT_TREE_W: {
-			debug( prg, REALM_BYTECODE, "IN_PRINT_TREE_W\n" );
+		case IN_PRINT_TREE: {
+			debug( prg, REALM_BYTECODE, "IN_PRINT_TREE\n" );
 
 			tree_t *to_send = vm_pop_tree();
-			input_t *input = vm_pop_input();
+			stream_t *stream = vm_pop_stream();
 
-			struct input_impl *si = input_to_impl( input );
+			struct stream_impl *si = stream_to_impl( stream );
 			si->funcs->print_tree( prg, sp, si, to_send, false );
-			vm_push_input( input );
+			vm_push_stream( stream );
 			colm_tree_downref( prg, sp, to_send );
 			break;
 		}

@@ -265,7 +265,7 @@ typedef unsigned char uchar;
 #define IN_SEND_TEXT_W      0x89
 #define IN_SEND_TEXT_BKT    0x8a
 
-#define IN_PRINT_TREE_W     0xa3
+#define IN_PRINT_TREE       0xa3
 
 #define IN_SEND_TREE_W      0xa9
 #define IN_SEND_TREE_BKT    0xaa

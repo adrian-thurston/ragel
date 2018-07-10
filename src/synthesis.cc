@@ -1682,7 +1682,7 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 			break;
 		}}
 
-		code.append( IN_PRINT_TREE_W );
+		code.append( IN_PRINT_TREE );
 	}
 }
 
