@@ -70,7 +70,7 @@ static void init_fsm_run( program_t *prg, struct pda_run *pda_run )
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;
-	pda_run->eof = 0;
+	pda_run->scan_eof = 0;
 
 	pda_run->pre_region = -1;
 }
@@ -234,7 +234,7 @@ static void reset_token( struct pda_run *pda_run )
 	if ( pda_run->tokstart != 0 ) {
 		pda_run->p = pda_run->pe = 0;
 		pda_run->toklen = 0;
-		pda_run->eof = 0;
+		pda_run->scan_eof = 0;
 	}
 }
 
@@ -283,7 +283,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		/* If eof was just sent back remember that it needs to be sent again. */
 		if ( parse_tree->id == prg->rtd->eof_lel_ids[pda_run->parser_id] )
-			is->funcs->set_eof_sent( prg, is, false );
+			pda_run->eof_term_recvd = false;
 
 		/* If the item is bound then store remove it from the bindings array. */
 		prg->rtd->pop_binding( pda_run, parse_tree );
@@ -1033,7 +1033,7 @@ static void new_token( program_t *prg, struct pda_run *pda_run )
 {
 	pda_run->p = pda_run->pe = 0;
 	pda_run->toklen = 0;
-	pda_run->eof = 0;
+	pda_run->scan_eof = 0;
 
 	/* Init the scanner vars. */
 	pda_run->act = 0;
@@ -1107,14 +1107,14 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_im
 			case INPUT_EOS:
 				pda_run->p = pda_run->pe = 0;
 				if ( pda_run->tokstart != 0 )
-					pda_run->eof = 1;
+					pda_run->scan_eof = 1;
 				debug( prg, REALM_SCAN, "EOS *******************\n" );
 				break;
 
 			case INPUT_EOF:
 				pda_run->p = pda_run->pe = 0;
 				if ( pda_run->tokstart != 0 )
-					pda_run->eof = 1;
+					pda_run->scan_eof = 1;
 				else 
 					return SCAN_EOF;
 				break;
@@ -1125,20 +1125,20 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_im
 
 			case INPUT_LANG_EL:
 				if ( pda_run->tokstart != 0 )
-					pda_run->eof = 1;
+					pda_run->scan_eof = 1;
 				else 
 					return SCAN_LANG_EL;
 				break;
 
 			case INPUT_TREE:
 				if ( pda_run->tokstart != 0 )
-					pda_run->eof = 1;
+					pda_run->scan_eof = 1;
 				else 
 					return SCAN_TREE;
 				break;
 			case INPUT_IGNORE:
 				if ( pda_run->tokstart != 0 )
-					pda_run->eof = 1;
+					pda_run->scan_eof = 1;
 				else
 					return SCAN_IGNORE;
 				break;
@@ -1175,7 +1175,7 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_im
 		}
 
 		/* Check for no match on eof (trailing data that partially matches a token). */
-		if ( pda_run->eof )
+		if ( pda_run->scan_eof )
 			return SCAN_ERROR;
 
 		/* Got here because the state machine didn't match a token or encounter
@@ -1357,6 +1357,7 @@ void colm_pda_init( program_t *prg, struct pda_run *pda_run, struct pda_tables *
 	pda_run->reject = false;
 
 	pda_run->rc_block_count = 0;
+	pda_run->eof_term_recvd = 0;
 
 	init_fsm_run( prg, pda_run );
 	new_token( prg, pda_run );
@@ -2003,7 +2004,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 		/* Check for EOF. */
 		if ( pda_run->token_id == SCAN_EOF ) {
-			is->funcs->set_eof_sent( prg, is, true );
+			pda_run->eof_term_recvd = true;
 			send_eof( prg, sp, pda_run, is );
 
 			pda_run->frame_id = prg->rtd->region_info[pda_run->region].eof_frame_id;
@@ -2086,7 +2087,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 			pda_run->p = pda_run->pe = 0;
 			pda_run->toklen = 0;
-			pda_run->eof = 0;
+			pda_run->scan_eof = 0;
 
 			pda_run->fi = &prg->rtd->frame_info[prg->rtd->lel_info[pda_run->token_id].frame_id];
 			pda_run->frame_id = prg->rtd->lel_info[pda_run->token_id].frame_id;
@@ -2160,7 +2161,7 @@ skip_send:
 			break;
 		}
 
-		if ( is->funcs->get_eof_sent( prg, is ) ) {
+		if ( pda_run->eof_term_recvd ) {
 			debug( prg, REALM_PARSE, "parsing stopped by EOF\n" );
 			break;
 		}

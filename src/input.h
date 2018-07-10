@@ -104,8 +104,6 @@ struct input_funcs \
 	void (*append_stream)( struct colm_program *prg, struct input_impl *si, struct colm_stream *stream ); \
 	struct colm_tree *(*undo_append_stream)( struct colm_program *prg, struct input_impl *si ); \
 	void (*set_eof_mark)( struct colm_program *prg, struct input_impl *si, char eof_mark ); \
-	char (*get_eof_sent)( struct colm_program *prg, struct input_impl *si ); \
-	void (*set_eof_sent)( struct colm_program *prg, struct input_impl *si, char eof_sent ); \
 	void (*transfer_loc)( struct colm_program *prg, struct colm_location *loc, struct input_impl *si ); \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct input_impl *si ); \
 }

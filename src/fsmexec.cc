@@ -193,7 +193,7 @@ _again:
 	if ( ++pdaRun->p != pdaRun->pe )
 		goto _loop_head;
 out:
-	if ( pdaRun->eof ) {
+	if ( pdaRun->scan_eof ) {
 		pdaRun->return_result = false;
 		pdaRun->skip_toklen = false;
 		_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->eof_actions[pdaRun->fsm_cs];

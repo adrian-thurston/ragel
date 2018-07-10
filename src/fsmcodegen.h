@@ -101,7 +101,7 @@ protected:
 
 	string P() { return ACCESS() + "p"; }
 	string PE() { return ACCESS() + "pe"; }
-	string DATA_EOF() { return ACCESS() + "eof"; }
+	string DATA_EOF() { return ACCESS() + "scan_eof"; }
 
 	string CS();
 	string TOP() { return ACCESS() + "top"; }

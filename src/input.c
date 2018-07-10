@@ -1095,8 +1095,6 @@ struct input_funcs_seq input_funcs =
 
 	/* EOF */
 	&stream_set_eof_mark,
-	&stream_get_eof_sent,
-	&stream_set_eof_sent,
 
 	&stream_transfer_loc,
 	&stream_destructor,

@@ -273,11 +273,11 @@ struct pda_run
 	long tokend;
 	long toklen;
 	char *p, *pe;
+	char scan_eof;
 
-	/* Bits. */
-	char eof;
 	char return_result;
 	char skip_toklen;
+	char eof_term_recvd;
 
 	char *mark[MARK_SLOTS];
 	long matched_token;

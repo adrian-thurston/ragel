@@ -271,8 +271,6 @@ input_funcs_ct pat_funcs =
 	0, 0, 0, 0, 0, 0, /* append funcs */
 
 	&ct_set_eof_mark,
-	&ct_get_eof_sent,
-	&ct_set_eof_sent,
 
 	&ct_transfer_loc_seq,
 	&ct_destructor,
@@ -490,8 +488,6 @@ input_funcs_ct repl_funcs =
 	0, 0, 0, 0, 0, 0, /* append. */
 
 	&ct_set_eof_mark,
-	&ct_get_eof_sent,
-	&ct_set_eof_sent,
 
 	&ct_transfer_loc_seq,
 	&ct_destructor,
