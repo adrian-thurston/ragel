@@ -119,10 +119,6 @@ struct stream_funcs \
 	int (*get_data_source)( struct colm_program *prg, struct stream_impl *si, char *dest, int length ); \
 	int (*consume_data)( struct colm_program *prg, struct stream_impl *si, int length, struct colm_location *loc ); \
 	int (*undo_consume_data)( struct colm_program *prg, struct stream_impl *si, const char *data, int length ); \
-	void (*set_eof)( struct colm_program *prg, struct stream_impl *si ); \
-	void (*unset_eof)( struct colm_program *prg, struct stream_impl *si ); \
-	char (*get_eof_sent)( struct colm_program *prg, struct stream_impl *si ); \
-	void (*set_eof_sent)( struct colm_program *prg, struct stream_impl *si, char eof_sent ); \
 	void (*transfer_loc)( struct colm_program *prg, struct colm_location *loc, struct stream_impl *si ); \
 	struct colm_str_collect *(*get_collect)( struct colm_program *prg, struct stream_impl *si ); \
 	void (*flush_stream)( struct colm_program *prg, struct stream_impl *si ); \
@@ -176,9 +172,6 @@ struct stream_impl_data
 	struct stream_funcs *funcs;
 	char type;
 
-	char eof_sent;
-	char eof;
-
 	struct run_buf *queue;
 	struct run_buf *queue_tail;
 
@@ -203,7 +196,6 @@ struct stream_impl_data
 };
 
 struct input_impl *colm_impl_new_generic( char *name );
-
 
 void update_position( struct stream_impl *input_stream, const char *data, long length );
 void undo_position( struct stream_impl *input_stream, const char *data, long length );

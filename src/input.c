@@ -110,7 +110,7 @@ static void default_loc( location_t *loc )
 	loc->byte = 1;
 }
 
-void transfer_loc_seq( struct colm_program *prg, location_t *loc, struct input_impl_seq *ss )
+void stream_transfer_loc( struct colm_program *prg, location_t *loc, struct input_impl_seq *ss )
 {
 	loc->name = ss->name;
 	loc->line = ss->line;
@@ -118,7 +118,7 @@ void transfer_loc_seq( struct colm_program *prg, location_t *loc, struct input_i
 	loc->byte = ss->byte;
 }
 
-static void transfer_loc_data( struct colm_program *prg, location_t *loc, struct stream_impl_data *ss )
+static void data_transfer_loc( struct colm_program *prg, location_t *loc, struct stream_impl_data *ss )
 {
 	loc->name = ss->name;
 	loc->line = ss->line;
@@ -369,16 +369,6 @@ static void data_print_tree( struct colm_program *prg, tree_t **sp,
 		colm_print_tree_collect( prg, sp, si->collect, tree, false );
 }
 
-char data_get_eof_sent( struct colm_program *prg, struct stream_impl_data *si )
-{
-	return si->eof_sent;
-}
-
-void data_set_eof_sent( struct colm_program *prg, struct stream_impl_data *si, char eof_sent )
-{
-	si->eof_sent = eof_sent;
-}
-
 static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss, int *pskip, char **pdp, int *copied )
 {
 	int ret = 0;
@@ -489,7 +479,7 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 			break;
 
 		if ( !loc_set( loc ) )
-			transfer_loc_data( prg, loc, si );
+			data_transfer_loc( prg, loc, si );
 
 		/* Anything available in the current buffer. */
 		int avail = buf->length - buf->offset;
@@ -829,7 +819,7 @@ static int stream_consume_data( struct colm_program *prg, struct input_impl_seq 
 		else {
 			if ( !loc_set( loc ) ) {
 				if ( si->line > 0 )
-					transfer_loc_seq( prg, loc, si );
+					stream_transfer_loc( prg, loc, si );
 				else
 					default_loc( loc );
 			}
@@ -1114,50 +1104,43 @@ struct input_funcs_seq input_funcs =
 	&stream_get_eof_sent,
 	&stream_set_eof_sent,
 
-	&transfer_loc_seq,
+	&stream_transfer_loc,
 	&stream_destructor,
 };
 
 struct stream_funcs_data file_funcs = 
 {
-	.get_parse_block =   &data_get_parse_block,
-	.get_data =          &data_get_data,
-	.get_data_source =   &file_get_data_source,
+	&data_get_parse_block,
+	&data_get_data,
+	&file_get_data_source,
 
-	.consume_data =      &data_consume_data,
-	.undo_consume_data = &data_undo_consume_data,
+	&data_consume_data,
+	&data_undo_consume_data,
 
-	.destructor =        &data_destructor,
-	.get_collect =       &data_get_collect,
-	.flush_stream =      &data_flush_stream,
-	.close_stream =      &data_close_stream,
-	.print_tree =        &data_print_tree,
-
-	.get_eof_sent =      &data_get_eof_sent,
-	.set_eof_sent =      &data_set_eof_sent,
-
-	.transfer_loc =      &transfer_loc_data,
+	&data_transfer_loc,
+	&data_get_collect,
+	&data_flush_stream,
+	&data_close_stream,
+	&data_print_tree,
+	&data_destructor,
 };
 
 struct stream_funcs_data text_funcs = 
 {
-	.get_parse_block =   &data_get_parse_block,
-	.get_data =          &data_get_data,
-	.get_data_source =   &text_get_data_source,
+	&data_get_parse_block,
+	&data_get_data,
+	&text_get_data_source,
 
-	.consume_data =      &data_consume_data,
-	.undo_consume_data = &data_undo_consume_data,
+	&data_consume_data,
+	&data_undo_consume_data,
 
-	.destructor =        &data_destructor,
-	.get_collect =       &data_get_collect,
-	.flush_stream =      &data_flush_stream,
-	.close_stream =      &data_close_stream,
-	.print_tree =        &data_print_tree,
+	&data_transfer_loc,
+	&data_get_collect,
+	&data_flush_stream,
+	&data_close_stream,
+	&data_print_tree,
 
-	.get_eof_sent =      &data_get_eof_sent,
-	.set_eof_sent =      &data_set_eof_sent,
-
-	.transfer_loc =      &transfer_loc_data,
+	&data_destructor,
 };
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
