@@ -38,6 +38,7 @@ extern "C" {
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
+#define IN_NONE                  0x00
 #define IN_LOAD_INT              0x01
 #define IN_LOAD_STR              0x02
 #define IN_LOAD_NIL              0x03
@@ -221,14 +222,6 @@ typedef unsigned char uchar;
 #define IN_GET_MAP_MEM_WC        0x7e
 #define IN_GET_MAP_MEM_BKT       0x7f
 
-#define IN_VECTOR_LENGTH         0x80
-#define IN_VECTOR_APPEND_WV      0x81
-#define IN_VECTOR_APPEND_WC      0x82
-#define IN_VECTOR_APPEND_BKT     0x83
-#define IN_VECTOR_INSERT_WV      0x84
-#define IN_VECTOR_INSERT_WC      0x85
-#define IN_VECTOR_INSERT_BKT     0x86
-
 #define IN_TREE_TO_STR_XML       0x6e
 #define IN_TREE_TO_STR_XML_AC    0x6f
 #define IN_TREE_TO_STR_POSTFIX   0xb6
@@ -310,7 +303,6 @@ typedef unsigned char uchar;
 #define IN_SET_PARSER_CONTEXT    0xd0
 #define IN_SET_PARSER_INPUT      0x96
 
-
 #define IN_GET_RHS_VAL_R         0xd7
 #define IN_GET_RHS_VAL_WC        0xd8
 #define IN_GET_RHS_VAL_WV        0xd9
@@ -320,12 +312,6 @@ typedef unsigned char uchar;
 #define IN_SET_RHS_VAL_BKT       0xdd
 
 #define IN_GET_PARSER_MEM_R      0x5b
-#define IN_GET_PARSER_MEM_WC     0x00
-#define IN_GET_PARSER_MEM_WV     0x00
-#define IN_GET_PARSER_MEM_BKT    0x00
-#define IN_SET_PARSER_MEM_WC     0x00
-#define IN_SET_PARSER_MEM_WV     0x00
-#define IN_SET_PARSER_MEM_BKT    0x00
 
 #define IN_GET_STREAM_MEM_R      0xb7
 
@@ -358,10 +344,10 @@ typedef unsigned char uchar;
 /*
  * Const things to get.
  */
-#define IN_CONST_STDIN           0x10
-#define IN_CONST_STDOUT          0x11
-#define IN_CONST_STDERR          0x12
-#define IN_CONST_ARG             0x13
+#define CONST_STDIN           0x10
+#define CONST_STDOUT          0x11
+#define CONST_STDERR          0x12
+#define CONST_ARG             0x13
 
 
 
@@ -370,6 +356,7 @@ typedef unsigned char uchar;
  */
 
 #define IN_FN                    0xff
+#define FN_NONE                  0x00
 #define FN_STOP                  0x0a
 
 #define FN_STR_ATOI              0x1d

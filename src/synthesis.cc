@@ -442,7 +442,7 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 	if ( el->isConstVal ) {
 		code.appendHalf( el->constValId );
 
-		if ( el->constValId == IN_CONST_ARG ) {
+		if ( el->constValId == CONST_ARG ) {
 			/* Make sure we have this string. */
 			StringMapEl *mapEl = 0;
 			if ( pd->literalStrings.insert( el->constValArg, &mapEl ) )

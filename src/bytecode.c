@@ -3674,8 +3674,8 @@ again:
 			read_half( constValId );
 
 			switch ( constValId ) {
-				case IN_CONST_STDIN: {
-					debug( prg, REALM_BYTECODE, "IN_CONST_STDIN\n" );
+				case CONST_STDIN: {
+					debug( prg, REALM_BYTECODE, "CONST_STDIN\n" );
 
 					/* Pop the root object. */
 					vm_pop_tree();
@@ -3685,8 +3685,8 @@ again:
 					vm_push_stream( prg->stdin_val );
 					break;
 				}
-				case IN_CONST_STDOUT: {
-					debug( prg, REALM_BYTECODE, "IN_CONST_STDOUT\n" );
+				case CONST_STDOUT: {
+					debug( prg, REALM_BYTECODE, "CONST_STDOUT\n" );
 
 					/* Pop the root object. */
 					vm_pop_tree();
@@ -3695,8 +3695,8 @@ again:
 					vm_push_stream( prg->stdout_val );
 					break;
 				}
-				case IN_CONST_STDERR: {
-					debug( prg, REALM_BYTECODE, "IN_CONST_STDERR\n" );
+				case CONST_STDERR: {
+					debug( prg, REALM_BYTECODE, "CONST_STDERR\n" );
 
 					/* Pop the root object. */
 					vm_pop_tree();
@@ -3706,11 +3706,11 @@ again:
 					vm_push_stream( prg->stderr_val );
 					break;
 				}
-				case IN_CONST_ARG: {
+				case CONST_ARG: {
 					word_t offset;
 					read_word( offset );
 
-					debug( prg, REALM_BYTECODE, "IN_CONST_ARG %d\n", offset );
+					debug( prg, REALM_BYTECODE, "CONST_ARG %d\n", offset );
 
 					/* Pop the root object. */
 					vm_pop_tree();

@@ -1095,7 +1095,7 @@ void Compiler::addStdin()
 	el->inGetValWV  = IN_GET_CONST;
 
 	el->isConstVal = true;
-	el->constValId  = IN_CONST_STDIN;
+	el->constValId  = CONST_STDIN;
 
 	rootNamespace->rootScope->insertField( el->name, el );
 }
@@ -1118,7 +1118,7 @@ void Compiler::addStdout()
 	el->inGetValWV  = IN_GET_CONST;
 
 	el->isConstVal = true;
-	el->constValId  = IN_CONST_STDOUT;
+	el->constValId  = CONST_STDOUT;
 
 	rootNamespace->rootScope->insertField( el->name, el );
 }
@@ -1141,7 +1141,7 @@ void Compiler::addStderr()
 	el->inGetValWV  = IN_GET_CONST;
 
 	el->isConstVal = true;
-	el->constValId  = IN_CONST_STDERR;
+	el->constValId  = CONST_STDERR;
 
 	rootNamespace->rootScope->insertField( el->name, el );
 }
@@ -1206,7 +1206,7 @@ void Compiler::addDefineArgs()
 		el->inGetValWV  = IN_GET_CONST;
 
 		el->isConstVal = true;
-		el->constValId = IN_CONST_ARG;
+		el->constValId = CONST_ARG;
 		el->constValArg = d->value;
 
 		rootNamespace->rootScope->insertField( el->name, el );
@@ -1463,10 +1463,10 @@ void Compiler::initParserField( GenericType *gen, const char *name,
 			ObjectField::InbuiltOffType, typeRef, name );
 
 	el->inGetR =  IN_GET_PARSER_MEM_R;
-	el->inGetWC = IN_GET_PARSER_MEM_WC;
-	el->inGetWV = IN_GET_PARSER_MEM_WV;
-	el->inSetWC = IN_SET_PARSER_MEM_WC;
-	el->inSetWV = IN_SET_PARSER_MEM_WV;
+	// el->inGetWC = IN_GET_PARSER_MEM_WC;
+	// el->inGetWV = IN_GET_PARSER_MEM_WV;
+	// el->inSetWC = IN_SET_PARSER_MEM_WC;
+	// el->inSetWV = IN_SET_PARSER_MEM_WV;
 
 	gen->objDef->rootScope->insertField( el->name, el );
 
