@@ -1,5 +1,7 @@
 (*
  * @LANG: ocaml
+ * @ENABLED: false
+ * Disabled because of memory usage problems in new input stream code.
  *)
 
 (*
