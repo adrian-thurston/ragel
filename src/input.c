@@ -60,18 +60,10 @@ char *colm_filename_add( program_t *prg, const char *fn )
 	return (char*)prg->stream_fns[items];
 }
 
-struct seq_buf *new_seq_buf( int sz )
+static struct seq_buf *new_seq_buf()
 {
-	struct seq_buf *rb;
-	if ( sz > FSM_BUFSIZE ) {
-		int ssz = sizeof(struct seq_buf) + sz - FSM_BUFSIZE;
-		rb = (struct seq_buf*) malloc( ssz );
-		memset( rb, 0, ssz );
-	}
-	else {
-		rb = (struct seq_buf*) malloc( sizeof(struct seq_buf) );
-		memset( rb, 0, sizeof(struct seq_buf) );
-	}
+	struct seq_buf *rb = (struct seq_buf*) malloc( sizeof(struct seq_buf) );
+	memset( rb, 0, sizeof(struct seq_buf) );
 	return rb;
 }
 
@@ -132,16 +124,27 @@ static void colm_clear_source_stream( struct colm_program *prg,
 	struct seq_buf *buf = si->queue;
 	while ( buf != 0 ) {
 		switch ( buf->type ) {
-
 			case SEQ_BUF_TOKEN_TYPE:
 			case SEQ_BUF_IGNORE_TYPE:
 				colm_tree_downref( prg, sp, buf->tree );
 				break;
 			case SEQ_BUF_SOURCE_TYPE:
+				if ( buf->own_si )
+					buf->si->funcs->destructor( prg, sp, buf->si );
 				break;
 		}
 
 		struct seq_buf *next = buf->next;
+		free( buf );
+		buf = next;
+	}
+
+	buf = si->stash;
+	while ( buf != 0 ) {
+		struct seq_buf *next = buf->next;
+		if ( buf->type == SEQ_BUF_SOURCE_TYPE && buf->own_si )
+			buf->si->funcs->destructor( prg, sp, buf->si );
+
 		free( buf );
 		buf = next;
 	}
@@ -322,8 +325,6 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 
 static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_data *si )
 {
-//	colm_clear_source_stream( prg, sp, (struct input_impl_seq*)stream->impl );
-
 	if ( si->file != 0 )
 		colm_close_stream_file( si->file );
 	
@@ -331,6 +332,18 @@ static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_dat
 		str_collect_destroy( si->collect );
 		free( si->collect );
 	}
+
+	struct run_buf *buf = si->queue;
+	while ( buf != 0 ) {
+		struct run_buf *next = buf->next;
+		free( buf );
+		buf = next;
+	}
+
+	si->queue = 0;
+
+	if ( si->data != 0 )
+		free( (char*)si->data );
 
 	/* FIXME: Need to leak this for now. Until we can return strings to a
 	 * program loader and free them at a later date (after the colm program is
@@ -457,9 +470,10 @@ static void maybe_split( struct colm_program *prg, struct input_impl_seq *si )
 			struct stream_impl *sub_si = colm_impl_consumed( "<text>", sid->consumed );
 			sid->consumed = 0;
 
-			struct seq_buf *new_buf = new_seq_buf( 0 );
+			struct seq_buf *new_buf = new_seq_buf();
 			new_buf->type = SEQ_BUF_SOURCE_TYPE;
 			new_buf->si = sub_si;
+			new_buf->own_si = 1;
 
 			input_stream_stash_head( prg, si, new_buf );
 		}
@@ -918,9 +932,10 @@ static void stream_prepend_data( struct colm_program *prg, struct input_impl_seq
 
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
-	struct seq_buf *new_buf = new_seq_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf();
 	new_buf->type = SEQ_BUF_SOURCE_TYPE;
 	new_buf->si = sub_si;
+	new_buf->own_si = 1;
 
 	input_stream_seq_prepend( si, new_buf );
 }
@@ -944,7 +959,7 @@ static void stream_prepend_tree( struct colm_program *prg, struct input_impl_seq
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	struct seq_buf *new_buf = new_seq_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf();
 	new_buf->type = ignore ? SEQ_BUF_IGNORE_TYPE : SEQ_BUF_TOKEN_TYPE;
 	new_buf->tree = tree;
 	input_stream_seq_prepend( si, new_buf );
@@ -975,7 +990,7 @@ static void stream_prepend_stream( struct colm_program *prg, struct input_impl_s
 	/* Create a new buffer for the data. This is the easy implementation.
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
-	struct seq_buf *new_buf = new_seq_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf();
 	new_buf->type = SEQ_BUF_SOURCE_TYPE;
 	new_buf->si = stream_to_impl( stream );
 	input_stream_seq_prepend( si, new_buf );
@@ -996,9 +1011,10 @@ static void stream_append_data( struct colm_program *prg, struct input_impl_seq 
 
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
-	struct seq_buf *new_buf = new_seq_buf( 0 );
+	struct seq_buf *new_buf = new_seq_buf();
 	new_buf->type = SEQ_BUF_SOURCE_TYPE;
 	new_buf->si = sub_si;
+	new_buf->own_si = 1;
 
 	input_stream_seq_append( si, new_buf );
 }
@@ -1017,7 +1033,7 @@ static void stream_append_tree( struct colm_program *prg, struct input_impl_seq 
 {
 	debug( prg, REALM_INPUT, "stream_append_tree: stream %p append tree %p\n", si, tree );
 
-	struct seq_buf *ad = new_seq_buf( 0 );
+	struct seq_buf *ad = new_seq_buf();
 
 	input_stream_seq_append( si, ad );
 
@@ -1039,7 +1055,7 @@ static void stream_append_stream( struct colm_program *prg, struct input_impl_se
 {
 	debug( prg, REALM_INPUT, "stream_append_stream: stream %p append stream %p\n", si, stream );
 
-	struct seq_buf *ad = new_seq_buf( 0 );
+	struct seq_buf *ad = new_seq_buf();
 
 	input_stream_seq_append( si, ad );
 

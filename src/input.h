@@ -62,6 +62,7 @@ enum seq_buf_type {
 struct seq_buf
 {
 	enum seq_buf_type type;
+	char own_si;
 	struct colm_tree *tree;
 	struct stream_impl *si;
 	struct seq_buf *next, *prev;
