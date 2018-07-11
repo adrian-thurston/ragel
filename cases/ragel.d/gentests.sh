@@ -97,7 +97,7 @@ csharp_compiler="mcs"
 go_compiler="go"
 ocaml_compiler="ocaml"
 rust_compiler="rustc"
-crack_interpreter="$HOME/pkgs/crack-0.11/bin/crack"
+crack_interpreter="$HOME/pkgs/crack/bin/crack"
 julia_interpreter="julia"
 
 function test_error
