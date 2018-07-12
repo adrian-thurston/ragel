@@ -205,6 +205,8 @@ struct colm_str *collect_string( struct colm_program *prg, struct colm_stream *s
 struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 
 void colm_close_stream_file( FILE *file );
+char *colm_filename_add( struct colm_program *prg, const char *fn );
+struct stream_impl *colm_impl_new_accum( char *name );
 
 #ifdef __cplusplus
 }
