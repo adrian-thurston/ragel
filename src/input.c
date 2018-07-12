@@ -40,6 +40,16 @@
 static struct stream_impl *colm_impl_consumed( char *name, int len );
 static struct stream_impl *colm_impl_new_text( char *name, const char *data, int len );
 
+static bool is_tree( struct seq_buf *b )
+{
+	return b->type == SB_TOKEN || b->type == SB_IGNORE;
+}
+
+static bool is_stream( struct seq_buf *b )
+{
+	return b->type == SB_SOURCE || b->type == SB_ACCUM;
+}
+
 char *colm_filename_add( program_t *prg, const char *fn )
 {
 	/* Search for it. */
@@ -87,7 +97,7 @@ DEF_STREAM_FUNCS( stream_funcs_data, stream_impl_data );
 
 extern struct input_funcs_seq input_funcs;
 extern struct stream_funcs_data file_funcs;
-extern struct stream_funcs_data text_funcs;
+extern struct stream_funcs_data accum_funcs;
 
 static bool loc_set( location_t *loc )
 {
@@ -118,38 +128,9 @@ static void data_transfer_loc( struct colm_program *prg, location_t *loc, struct
 	loc->byte = ss->byte;
 }
 
-static void colm_clear_source_stream( struct colm_program *prg,
-		tree_t **sp, struct input_impl_seq *si )
+static bool call_destructor( struct seq_buf *buf )
 {
-	struct seq_buf *buf = si->queue;
-	while ( buf != 0 ) {
-		switch ( buf->type ) {
-			case SEQ_BUF_TOKEN_TYPE:
-			case SEQ_BUF_IGNORE_TYPE:
-				colm_tree_downref( prg, sp, buf->tree );
-				break;
-			case SEQ_BUF_SOURCE_TYPE:
-				if ( buf->own_si )
-					buf->si->funcs->destructor( prg, sp, buf->si );
-				break;
-		}
-
-		struct seq_buf *next = buf->next;
-		free( buf );
-		buf = next;
-	}
-
-	buf = si->stash;
-	while ( buf != 0 ) {
-		struct seq_buf *next = buf->next;
-		if ( buf->type == SEQ_BUF_SOURCE_TYPE && buf->own_si )
-			buf->si->funcs->destructor( prg, sp, buf->si );
-
-		free( buf );
-		buf = next;
-	}
-
-	si->queue = 0;
+	return is_stream( buf ) && buf->own_si;
 }
 
 void colm_close_stream_file( FILE *file )
@@ -461,7 +442,7 @@ static struct seq_buf *input_stream_pop_stash( struct colm_program *prg, struct 
 
 static void maybe_split( struct colm_program *prg, struct input_impl_seq *si )
 {
-	if ( si->queue != 0 && si->queue->type == SEQ_BUF_SOURCE_TYPE ) {
+	if ( si->queue != 0 && is_stream( si->queue ) ) {
 
 		/* NOT A GOOD IDEA. Use func instead */
 		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue->si;
@@ -471,7 +452,7 @@ static void maybe_split( struct colm_program *prg, struct input_impl_seq *si )
 			sid->consumed = 0;
 
 			struct seq_buf *new_buf = new_seq_buf();
-			new_buf->type = SEQ_BUF_SOURCE_TYPE;
+			new_buf->type = SB_ACCUM;
 			new_buf->si = sub_si;
 			new_buf->own_si = 1;
 
@@ -559,7 +540,7 @@ void init_file_funcs()
  * Text inputs
  */
 
-static int text_get_data_source( struct colm_program *prg, struct stream_impl_data *si, char *dest, int want )
+static int accum_get_data_source( struct colm_program *prg, struct stream_impl_data *si, char *dest, int want )
 {
 	long avail = si->dlen - si->offset;
 	long take = avail < want ? avail : want;
@@ -655,7 +636,30 @@ void input_set_eof_mark( struct colm_program *prg, struct input_impl_seq *si, ch
 
 static void input_destructor( program_t *prg, tree_t **sp, struct input_impl_seq *si )
 {
-	colm_clear_source_stream( prg, sp, si );
+	struct seq_buf *buf = si->queue;
+	while ( buf != 0 ) {
+		if ( is_tree( buf ) )
+			colm_tree_downref( prg, sp, buf->tree );
+
+		if ( call_destructor( buf ) )
+			buf->si->funcs->destructor( prg, sp, buf->si );
+
+		struct seq_buf *next = buf->next;
+		free( buf );
+		buf = next;
+	}
+
+	buf = si->stash;
+	while ( buf != 0 ) {
+		struct seq_buf *next = buf->next;
+		if ( call_destructor( buf ) )
+			buf->si->funcs->destructor( prg, sp, buf->si );
+
+		free( buf );
+		buf = next;
+	}
+
+	si->queue = 0;
 
 	/* FIXME: Need to leak this for now. Until we can return strings to a
 	 * program loader and free them at a later date (after the colm program is
@@ -691,7 +695,7 @@ static int input_get_parse_block( struct colm_program *prg, struct input_impl_se
 			break;
 		}
 
-		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
+		if ( is_stream( buf ) ) {
 			struct stream_impl *si = buf->si;
 			int type = si->funcs->get_parse_block( prg, si, pskip, pdp, copied );
 
@@ -704,12 +708,12 @@ static int input_get_parse_block( struct colm_program *prg, struct input_impl_se
 			break;
 		}
 
-		if ( buf->type == SEQ_BUF_TOKEN_TYPE ) {
+		if ( buf->type == SB_TOKEN ) {
 			ret = INPUT_TREE;
 			break;
 		}
 
-		if ( buf->type == SEQ_BUF_IGNORE_TYPE ) {
+		if ( buf->type == SB_IGNORE ) {
 			ret = INPUT_IGNORE;
 			break;
 		}
@@ -760,7 +764,7 @@ static int input_get_data( struct colm_program *prg, struct input_impl_seq *is, 
 			break;
 		}
 
-		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
+		if ( is_stream( buf ) ) {
 			struct stream_impl *si = buf->si;
 			int glen = si->funcs->get_data( prg, si, dest+copied, length );
 
@@ -773,9 +777,9 @@ static int input_get_data( struct colm_program *prg, struct input_impl_seq *is, 
 			copied += glen;
 			length -= glen;
 		}
-		else if ( buf->type == SEQ_BUF_TOKEN_TYPE )
+		else if ( buf->type == SB_TOKEN )
 			break;
-		else if ( buf->type == SEQ_BUF_IGNORE_TYPE )
+		else if ( buf->type == SB_IGNORE )
 			break;
 
 		if ( length == 0 ) {
@@ -806,7 +810,7 @@ static int input_consume_data( struct colm_program *prg, struct input_impl_seq *
 		if ( buf == 0 )
 			break;
 
-		if ( buf->type == SEQ_BUF_SOURCE_TYPE ) {
+		if ( is_stream( buf ) ) {
 			struct stream_impl *sub = buf->si;
 			int slen = sub->funcs->consume_data( prg, sub, length, loc );
 			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
@@ -814,9 +818,9 @@ static int input_consume_data( struct colm_program *prg, struct input_impl_seq *
 			consumed += slen;
 			length -= slen;
 		}
-		else if ( buf->type == SEQ_BUF_TOKEN_TYPE )
+		else if ( buf->type == SB_TOKEN )
 			break;
-		else if ( buf->type == SEQ_BUF_IGNORE_TYPE )
+		else if ( buf->type == SB_IGNORE )
 			break;
 		else {
 			if ( !loc_set( loc ) ) {
@@ -851,7 +855,7 @@ static int input_undo_consume_data( struct colm_program *prg, struct input_impl_
 	int remaining = length;
 
 	while ( true ) {
-		if ( si->queue->type == SEQ_BUF_SOURCE_TYPE ) {
+		if ( is_stream( si->queue ) ) {
 			struct stream_impl *sub = si->queue->si;
 			int pushed_back = sub->funcs->undo_consume_data( prg, sub, data, remaining );
 			remaining -= pushed_back;
@@ -872,14 +876,14 @@ static tree_t *input_consume_tree( struct colm_program *prg, struct input_impl_s
 {
 	debug( prg, REALM_INPUT, "input_consume_tree: stream %p\n", si );
 
-	while ( si->queue != 0 && ( si->queue->type == SEQ_BUF_SOURCE_TYPE ) )
+	while ( si->queue != 0 && is_stream( si->queue ) )
 	{
 		debug( prg, REALM_INPUT, "  stream %p consume: clearing source type\n", si );
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( si );
 		input_stream_stash_head( prg, si, seq_buf );
 	}
 
-	assert( si->queue != 0 && ( si->queue->type == SEQ_BUF_TOKEN_TYPE || si->queue->type == SEQ_BUF_IGNORE_TYPE ) );
+	assert( si->queue != 0 && ( si->queue->type == SB_TOKEN || si->queue->type == SB_IGNORE ) );
 
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( si );
@@ -892,22 +896,18 @@ static tree_t *input_consume_tree( struct colm_program *prg, struct input_impl_s
 	return 0;
 }
 
+
 static void input_undo_consume_tree( struct colm_program *prg, struct input_impl_seq *si, tree_t *tree, int ignore )
 {
 	debug( prg, REALM_INPUT, "input_undo_consume_tree: stream %p undo consume tree %p\n", si, tree );
 
-	while ( true )
-	{
+	while ( true ) {
 		debug( prg, REALM_INPUT, "  stream %p consume: clearing source type\n", si );
 
 		struct seq_buf *b = input_stream_pop_stash( prg, si );
 		input_stream_seq_prepend( si, b );
 
-		if ( b->type == SEQ_BUF_SOURCE_TYPE )
-		{
-		}
-		else
-		{
+		if ( is_tree( b ) ) {
 			assert( b->tree->id == tree->id );
 			break;
 		}
@@ -926,7 +926,7 @@ static void input_prepend_data( struct colm_program *prg, struct input_impl_seq 
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
 	struct seq_buf *new_buf = new_seq_buf();
-	new_buf->type = SEQ_BUF_SOURCE_TYPE;
+	new_buf->type = SB_ACCUM;
 	new_buf->si = sub_si;
 	new_buf->own_si = 1;
 
@@ -953,7 +953,7 @@ static void input_prepend_tree( struct colm_program *prg, struct input_impl_seq 
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	struct seq_buf *new_buf = new_seq_buf();
-	new_buf->type = ignore ? SEQ_BUF_IGNORE_TYPE : SEQ_BUF_TOKEN_TYPE;
+	new_buf->type = ignore ? SB_IGNORE : SB_TOKEN;
 	new_buf->tree = tree;
 	input_stream_seq_prepend( si, new_buf );
 }
@@ -962,8 +962,8 @@ static tree_t *input_undo_prepend_tree( struct colm_program *prg, struct input_i
 {
 	debug( prg, REALM_INPUT, "input_undo_prepend_tree: stream %p undo prepend tree\n", si );
 
-	assert( si->queue != 0 && ( si->queue->type == SEQ_BUF_TOKEN_TYPE ||
-			si->queue->type == SEQ_BUF_IGNORE_TYPE ) );
+	assert( si->queue != 0 && ( si->queue->type == SB_TOKEN ||
+			si->queue->type == SB_IGNORE ) );
 
 	struct seq_buf *seq_buf = input_stream_seq_pop_head( si );
 
@@ -984,7 +984,7 @@ static void input_prepend_stream( struct colm_program *prg, struct input_impl_se
 	 * Something better is needed here. It puts a max on the amount of
 	 * data that can be pushed back to the inputStream. */
 	struct seq_buf *new_buf = new_seq_buf();
-	new_buf->type = SEQ_BUF_SOURCE_TYPE;
+	new_buf->type = SB_SOURCE;
 	new_buf->si = stream_to_impl( stream );
 	input_stream_seq_prepend( si, new_buf );
 
@@ -1003,7 +1003,7 @@ static void input_append_data( struct colm_program *prg, struct input_impl_seq *
 	debug( prg, REALM_INPUT, "input_append_data: stream %p append data length %d\n", si, length );
 
 #if 0
-	if ( si->queue_tail != 0 && si->queue_tail->type == SEQ_BUF_SOURCE_TYPE ) { 
+	if ( si->queue_tail != 0 && si->queue_tail->type == SB_SOURCE ) { 
 		struct stream_impl_data *sub_si = (struct stream_impl_data*)si->queue_tail->si;
 
 		struct run_buf *tail = sub_si->queue_tail;
@@ -1021,7 +1021,7 @@ static void input_append_data( struct colm_program *prg, struct input_impl_seq *
 		struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
 
 		struct seq_buf *new_buf = new_seq_buf();
-		new_buf->type = SEQ_BUF_SOURCE_TYPE;
+		new_buf->type = SB_ACCUM;
 		new_buf->si = sub_si;
 		new_buf->own_si = 1;
 
@@ -1059,7 +1059,7 @@ static void input_append_tree( struct colm_program *prg, struct input_impl_seq *
 
 	input_stream_seq_append( si, ad );
 
-	ad->type = SEQ_BUF_TOKEN_TYPE;
+	ad->type = SB_TOKEN;
 	ad->tree = tree;
 }
 
@@ -1081,7 +1081,7 @@ static void input_append_stream( struct colm_program *prg, struct input_impl_seq
 
 	input_stream_seq_append( si, ad );
 
-	ad->type = SEQ_BUF_SOURCE_TYPE;
+	ad->type = SB_SOURCE;
 	ad->si = stream_to_impl( stream );
 
 	assert( ((struct stream_impl_data*)ad->si)->type == 'D' );
@@ -1155,11 +1155,11 @@ struct stream_funcs_data file_funcs =
 	&data_destructor,
 };
 
-struct stream_funcs_data text_funcs = 
+struct stream_funcs_data accum_funcs = 
 {
 	&data_get_parse_block,
 	&data_get_data,
-	&text_get_data_source,
+	&accum_get_data_source,
 
 	&data_consume_data,
 	&data_undo_consume_data,
@@ -1195,7 +1195,7 @@ static struct stream_impl *colm_impl_consumed( char *name, int len )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
 	init_stream_impl_data( si, name );
-	si->funcs = (struct stream_funcs*)&text_funcs;
+	si->funcs = (struct stream_funcs*)&accum_funcs;
 
 	si->data = 0;
 	si->consumed = len;
@@ -1210,7 +1210,7 @@ static struct stream_impl *colm_impl_new_text( char *name, const char *data, int
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
 	init_stream_impl_data( si, name );
-	si->funcs = (struct stream_funcs*)&text_funcs;
+	si->funcs = (struct stream_funcs*)&accum_funcs;
 
 #if 0
 	struct run_buf *run_buf = new_run_buf( len );
@@ -1233,7 +1233,7 @@ struct stream_impl *colm_impl_new_collect( char *name )
 {
 	struct stream_impl_data *ss = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
 	init_stream_impl_data( ss, name );
-	ss->funcs = (struct stream_funcs*)&text_funcs;
+	ss->funcs = (struct stream_funcs*)&accum_funcs;
 	ss->collect = (struct colm_str_collect*) malloc( sizeof( struct colm_str_collect ) );
 	init_str_collect( ss->collect );
 	return (struct stream_impl*)ss;

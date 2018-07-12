@@ -54,9 +54,10 @@ struct input_impl;
 struct stream_impl;
 
 enum seq_buf_type {
-	SEQ_BUF_TOKEN_TYPE = 2,
-	SEQ_BUF_IGNORE_TYPE,
-	SEQ_BUF_SOURCE_TYPE
+	SB_TOKEN = 1,
+	SB_IGNORE,
+	SB_SOURCE,
+	SB_ACCUM
 };
 
 struct seq_buf
