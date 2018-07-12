@@ -151,16 +151,12 @@ struct input_impl_seq
 	char eof_mark;
 	char eof_sent;
 
-	struct seq_buf *queue;
-	struct seq_buf *queue_tail;
+	struct {
+		struct seq_buf *head;
+		struct seq_buf *tail;
+	} queue;
 
 	struct seq_buf *stash;
-
-	long line;
-	long column;
-	long byte;
-
-	char *name;
 
 	int consumed;
 };
@@ -171,8 +167,10 @@ struct stream_impl_data
 	struct stream_funcs *funcs;
 	char type;
 
-	struct run_buf *queue;
-	struct run_buf *queue_tail;
+	struct {
+		struct run_buf *head;
+		struct run_buf *tail;
+	} queue;
 
 	const char *data;
 	long dlen;
@@ -204,9 +202,10 @@ struct stream_impl *colm_stream_impl( struct colm_struct *s );
 struct colm_str *collect_string( struct colm_program *prg, struct colm_stream *s );
 struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 
-void colm_close_stream_file( FILE *file );
 char *colm_filename_add( struct colm_program *prg, const char *fn );
 struct stream_impl *colm_impl_new_accum( char *name );
+struct stream_impl *colm_impl_consumed( char *name, int len );
+struct stream_impl *colm_impl_new_text( char *name, const char *data, int len );
 
 #ifdef __cplusplus
 }

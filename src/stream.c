@@ -47,7 +47,16 @@ static bool loc_set( location_t *loc )
 	return loc->line != 0;
 }
 
-void init_stream_impl_data( struct stream_impl_data *is, char *name )
+static void close_stream_file( FILE *file )
+{
+	if ( file != stdin && file != stdout && file != stderr &&
+			fileno(file) != 0 && fileno( file) != 1 && fileno(file) != 2 )
+	{
+		fclose( file );
+	}
+}
+
+static void si_data_init( struct stream_impl_data *is, char *name )
 {
 	memset( is, 0, sizeof(struct stream_impl_data) );
 
@@ -60,55 +69,58 @@ void init_stream_impl_data( struct stream_impl_data *is, char *name )
 	/* Indentation turned off. */
 	is->level = COLM_INDENT_OFF;
 }
+
+static void si_data_push_tail( struct stream_impl_data *ss, struct run_buf *run_buf )
+{
+	if ( ss->queue.head == 0 ) {
+		run_buf->prev = run_buf->next = 0;
+		ss->queue.head = ss->queue.tail = run_buf;
+	}
+	else {
+		ss->queue.tail->next = run_buf;
+		run_buf->prev = ss->queue.tail;
+		run_buf->next = 0;
+		ss->queue.tail = run_buf;
+	}
+}
+
+static struct run_buf *si_data_pop_tail( struct stream_impl_data *ss )
+{
+	struct run_buf *ret = ss->queue.tail;
+	ss->queue.tail = ss->queue.tail->prev;
+	if ( ss->queue.tail == 0 )
+		ss->queue.head = 0;
+	else
+		ss->queue.tail->next = 0;
+	return ret;
+}
+
+
+static void si_data_push_head( struct stream_impl_data *ss, struct run_buf *run_buf )
+{
+	if ( ss->queue.head == 0 ) {
+		run_buf->prev = run_buf->next = 0;
+		ss->queue.head = ss->queue.tail = run_buf;
+	}
+	else {
+		ss->queue.head->prev = run_buf;
+		run_buf->prev = 0;
+		run_buf->next = ss->queue.head;
+		ss->queue.head = run_buf;
+	}
+}
+
 static struct run_buf *source_stream_data_pop_head( struct stream_impl_data *ss )
 {
-	struct run_buf *ret = ss->queue;
-	ss->queue = ss->queue->next;
-	if ( ss->queue == 0 )
-		ss->queue_tail = 0;
+	struct run_buf *ret = ss->queue.head;
+	ss->queue.head = ss->queue.head->next;
+	if ( ss->queue.head == 0 )
+		ss->queue.tail = 0;
 	else
-		ss->queue->prev = 0;
+		ss->queue.head->prev = 0;
 	return ret;
 }
 
-static struct run_buf *source_stream_data_pop_tail( struct stream_impl_data *ss )
-{
-	struct run_buf *ret = ss->queue_tail;
-	ss->queue_tail = ss->queue_tail->prev;
-	if ( ss->queue_tail == 0 )
-		ss->queue = 0;
-	else
-		ss->queue_tail->next = 0;
-	return ret;
-}
-
-static void source_stream_data_append( struct stream_impl_data *ss, struct run_buf *run_buf )
-{
-	if ( ss->queue == 0 ) {
-		run_buf->prev = run_buf->next = 0;
-		ss->queue = ss->queue_tail = run_buf;
-	}
-	else {
-		ss->queue_tail->next = run_buf;
-		run_buf->prev = ss->queue_tail;
-		run_buf->next = 0;
-		ss->queue_tail = run_buf;
-	}
-}
-
-static void source_stream_data_prepend( struct stream_impl_data *ss, struct run_buf *run_buf )
-{
-	if ( ss->queue == 0 ) {
-		run_buf->prev = run_buf->next = 0;
-		ss->queue = ss->queue_tail = run_buf;
-	}
-	else {
-		ss->queue->prev = run_buf;
-		run_buf->prev = 0;
-		run_buf->next = ss->queue;
-		ss->queue = run_buf;
-	}
-}
 
 struct run_buf *new_run_buf( int sz )
 {
@@ -177,12 +189,12 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 	int copied = 0;
 
 	/* Move over skip bytes. */
-	struct run_buf *buf = ss->queue;
+	struct run_buf *buf = ss->queue.head;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			struct run_buf *run_buf = new_run_buf( 0 );
-			source_stream_data_append( ss, run_buf );
+			si_data_push_tail( ss, run_buf );
 			int received = ss->funcs->get_data_source( prg, (struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
 			run_buf->length = received;
 			if ( received == 0 )
@@ -219,21 +231,21 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_data *si )
 {
 	if ( si->file != 0 )
-		colm_close_stream_file( si->file );
+		close_stream_file( si->file );
 	
 	if ( si->collect != 0 ) {
 		str_collect_destroy( si->collect );
 		free( si->collect );
 	}
 
-	struct run_buf *buf = si->queue;
+	struct run_buf *buf = si->queue.head;
 	while ( buf != 0 ) {
 		struct run_buf *next = buf->next;
 		free( buf );
 		buf = next;
 	}
 
-	si->queue = 0;
+	si->queue.head = 0;
 
 	if ( si->data != 0 )
 		free( (char*)si->data );
@@ -261,7 +273,7 @@ static void data_flush_stream( struct colm_program *prg, struct stream_impl_data
 static void data_close_stream( struct colm_program *prg, struct stream_impl_data *si )
 {
 	if ( si->file != 0 ) {
-		colm_close_stream_file( si->file );
+		close_stream_file( si->file );
 		si->file = 0;
 	}
 }
@@ -281,12 +293,12 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 	*copied = 0;
 
 	/* Move over skip bytes. */
-	struct run_buf *buf = ss->queue;
+	struct run_buf *buf = ss->queue.head;
 	while ( true ) {
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			struct run_buf *run_buf = new_run_buf( 0 );
-			source_stream_data_append( ss, run_buf );
+			si_data_push_tail( ss, run_buf );
 			int received = ss->funcs->get_data_source( prg, (struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
 				ret = INPUT_EOD;
@@ -341,7 +353,7 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		struct run_buf *buf = si->queue;
+		struct run_buf *buf = si->queue.head;
 
 		if ( buf == 0 )
 			break;
@@ -384,7 +396,7 @@ static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_
 		struct run_buf *new_buf = new_run_buf( 0 );
 		new_buf->length = amount;
 		memcpy( new_buf->data, data + ( length - amount ), amount );
-		source_stream_data_prepend( si, new_buf );
+		si_data_push_head( si, new_buf );
 		undo_position_data( si, data, amount );
 		si->consumed -= amount;
 	}
@@ -466,7 +478,7 @@ struct stream_funcs_data accum_funcs =
 struct stream_impl *colm_impl_new_accum( char *name )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
-	init_stream_impl_data( si, name );
+	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
 	return (struct stream_impl*)si;
@@ -476,7 +488,7 @@ struct stream_impl *colm_impl_new_accum( char *name )
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 {
 	struct stream_impl_data *ss = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
-	init_stream_impl_data( ss, name );
+	si_data_init( ss, name );
 	ss->funcs = (struct stream_funcs*)&file_funcs;
 	ss->file = file;
 	return (struct stream_impl*)ss;
@@ -485,7 +497,7 @@ static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
-	init_stream_impl_data( si, name );
+	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&file_funcs;
 	si->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
 	return (struct stream_impl*)si;
@@ -494,7 +506,7 @@ static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 struct stream_impl *colm_impl_consumed( char *name, int len )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
-	init_stream_impl_data( si, name );
+	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
 	si->data = 0;
@@ -509,7 +521,7 @@ struct stream_impl *colm_impl_consumed( char *name, int len )
 struct stream_impl *colm_impl_new_text( char *name, const char *data, int len )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
-	init_stream_impl_data( si, name );
+	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
 	char *buf = (char*)malloc( len );
@@ -524,7 +536,7 @@ struct stream_impl *colm_impl_new_text( char *name, const char *data, int len )
 struct stream_impl *colm_impl_new_collect( char *name )
 {
 	struct stream_impl_data *ss = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
-	init_stream_impl_data( ss, name );
+	si_data_init( ss, name );
 	ss->funcs = (struct stream_funcs*)&accum_funcs;
 	ss->collect = (struct colm_str_collect*) malloc( sizeof( struct colm_str_collect ) );
 	init_str_collect( ss->collect );
