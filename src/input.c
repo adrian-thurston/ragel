@@ -550,13 +550,10 @@ static tree_t *input_undo_prepend_stream( struct colm_program *prg, struct input
 	return 0;
 }
 
-#define OPTIM_APPEND
-
 static void input_append_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_append_data: stream %p append data length %d\n", si, length );
 
-#ifdef OPTIM_APPEND
 	if ( si->queue.tail == 0 || si->queue.tail->type != SB_ACCUM ) { 
 		debug( prg, REALM_INPUT, "input_append_data: creating accum\n" );
 
@@ -571,25 +568,12 @@ static void input_append_data( struct colm_program *prg, struct input_impl_seq *
 	}
 
 	si->queue.tail->si->funcs->append_data( prg, si->queue.tail->si, data, length );
-
-#else
-
-	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
-
-	struct seq_buf *new_buf = new_seq_buf();
-	new_buf->type = SB_ACCUM;
-	new_buf->si = sub_si;
-	new_buf->own_si = 1;
-
-	input_stream_seq_append( si, new_buf );
-#endif
 }
 
 static tree_t *input_undo_append_data( struct colm_program *prg, struct input_impl_seq *si, int length )
 {
 	debug( prg, REALM_INPUT, "input_undo_append_data: stream %p undo append data length %d\n", si, length );
 
-#ifdef OPTIM_APPEND
 	while ( true ) {
 		struct seq_buf *buf = si->queue.tail;
 
@@ -619,10 +603,6 @@ static tree_t *input_undo_append_data( struct colm_program *prg, struct input_im
 		struct seq_buf *seq_buf = input_stream_seq_pop_tail( si );
 		free( seq_buf );
 	}
-#else
-	struct seq_buf *seq_buf = input_stream_seq_pop_tail( si );
-	free( seq_buf );
-#endif
 	return 0;
 }
 

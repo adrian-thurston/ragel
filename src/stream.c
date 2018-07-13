@@ -193,11 +193,14 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			struct run_buf *run_buf = new_run_buf( 0 );
-			si_data_push_tail( ss, run_buf );
 			int received = ss->funcs->get_data_source( prg, (struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
-			run_buf->length = received;
-			if ( received == 0 )
+			if ( received == 0 ) {
+				free( run_buf );
 				break;
+			}
+
+			run_buf->length = received;
+			si_data_push_tail( ss, run_buf );
 
 			buf = run_buf;
 		}
@@ -241,12 +244,12 @@ int data_append_data( struct colm_program *prg, struct stream_impl_data *sid, co
 {
 	struct run_buf *tail = sid->queue.tail;
 	if ( tail == 0 || length > (FSM_BUFSIZE - tail->length) ) {
-		debug( prg, REALM_INPUT, "input_append_data: allocating run buf\n" );
+		debug( prg, REALM_INPUT, "data_append_data: allocating run buf\n" );
 		tail = new_run_buf( length );
 		si_data_push_tail( sid, tail );
 	}
 
-	debug( prg, REALM_INPUT, "input_append_data: appending to "
+	debug( prg, REALM_INPUT, "data_append_data: appending to "
 			"accum tail, offset: %d, length: %d, dlen: %d\n",
 			tail->offset, tail->length, length );
 
@@ -371,13 +374,15 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			struct run_buf *run_buf = new_run_buf( 0 );
-			si_data_push_tail( ss, run_buf );
 			int received = ss->funcs->get_data_source( prg, (struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
+				free( run_buf );
 				ret = INPUT_EOD;
 				break;
 			}
+
 			run_buf->length = received;
+			si_data_push_tail( ss, run_buf );
 
 			int slen = received;
 			*pdp = run_buf->data;
