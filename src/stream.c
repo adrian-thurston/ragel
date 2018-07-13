@@ -470,16 +470,33 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 
 static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_data *sid, const char *data, int length )
 {
+	const char *end = data + length;
 	int amount = length;
 	if ( amount > sid->consumed )
 		amount = sid->consumed;
 
-	if ( amount > 0 ) {
+	int remaining = amount;
+	struct run_buf *head = sid->queue.head;
+	if ( head != 0 && head->offset > 0 ) {
+		/* Fill into the offset space. */
+		int fill = remaining > head->offset ? head->offset : remaining;
+		end -= fill;
+		remaining -= fill;
+
+		undo_position_data( sid, end, fill );
+		memcpy( head->data + (head->offset - fill), end, fill );
+
+		head->offset -= fill;
+		sid->consumed -= fill;
+	}
+
+	if ( remaining > 0 ) {
+		end -= remaining;
 		struct run_buf *new_buf = new_run_buf( 0 );
-		new_buf->length = amount;
-		memcpy( new_buf->data, data + ( length - amount ), amount );
+		new_buf->length = remaining;
+		undo_position_data( sid, end, remaining );
+		memcpy( new_buf->data, end, remaining );
 		si_data_push_head( sid, new_buf );
-		undo_position_data( sid, data, amount );
 		sid->consumed -= amount;
 	}
 
