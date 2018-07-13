@@ -110,24 +110,22 @@ static struct seq_buf *input_stream_pop_stash( struct colm_program *prg, struct 
 	return seq_buf;
 }
 
-
-static void maybe_split( struct colm_program *prg, struct input_impl_seq *si )
+static void maybe_split( struct colm_program *prg, struct input_impl_seq *iis )
 {
-	if ( si->queue.head != 0 && is_stream( si->queue.head ) ) {
-
-		/* NOT A GOOD IDEA. Use func instead */
-		struct stream_impl_data *sid = (struct stream_impl_data*)si->queue.head->si;
-		if ( sid->consumed > 0 ) {
+	struct seq_buf *head = iis->queue.head;
+	if ( head != 0 && is_stream( head ) ) {
+		/* Maybe the stream will split itself off. */
+		struct stream_impl *split_off = head->si->funcs->split_consumed( prg, head->si );
+		
+		if ( split_off != 0 ) {
 			debug( prg, REALM_INPUT, "maybe split: consumed is > 0, splitting\n" );
-			struct stream_impl *sub_si = colm_impl_consumed( "<text>", sid->consumed );
-			sid->consumed = 0;
 
 			struct seq_buf *new_buf = new_seq_buf();
 			new_buf->type = SB_ACCUM;
-			new_buf->si = sub_si;
+			new_buf->si = split_off;
 			new_buf->own_si = 1;
 
-			input_stream_stash_head( prg, si, new_buf );
+			input_stream_stash_head( prg, iis, new_buf );
 		}
 	}
 }

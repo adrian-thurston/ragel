@@ -56,20 +56,6 @@ static void close_stream_file( FILE *file )
 	}
 }
 
-static void si_data_init( struct stream_impl_data *is, char *name )
-{
-	memset( is, 0, sizeof(struct stream_impl_data) );
-
-	is->type = 'D';
-	is->name = name;
-	is->line = 1;
-	is->column = 1;
-	is->byte = 0;
-
-	/* Indentation turned off. */
-	is->level = COLM_INDENT_OFF;
-}
-
 static void si_data_push_tail( struct stream_impl_data *ss, struct run_buf *run_buf )
 {
 	if ( ss->queue.head == 0 ) {
@@ -227,6 +213,16 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 	return copied;
 }
 
+static struct stream_impl *data_split_consumed( program_t *prg, struct stream_impl_data *sid )
+{
+	struct stream_impl *split_off = 0;
+	if ( sid->consumed > 0 ) {
+		debug( prg, REALM_INPUT, "maybe split: consumed is > 0, splitting\n" );
+		split_off = colm_impl_consumed( "<text>", sid->consumed );
+		sid->consumed = 0;
+	}
+	return split_off;
+}
 
 static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_data *si )
 {
@@ -454,6 +450,7 @@ struct stream_funcs_data file_funcs =
 	&data_flush_stream,
 	&data_close_stream,
 	&data_print_tree,
+	&data_split_consumed,
 	&data_destructor,
 };
 
@@ -472,8 +469,23 @@ struct stream_funcs_data accum_funcs =
 	&data_close_stream,
 	&data_print_tree,
 
+	&data_split_consumed,
 	&data_destructor,
 };
+
+static void si_data_init( struct stream_impl_data *is, char *name )
+{
+	memset( is, 0, sizeof(struct stream_impl_data) );
+
+	is->type = 'D';
+	is->name = name;
+	is->line = 1;
+	is->column = 1;
+	is->byte = 0;
+
+	/* Indentation turned off. */
+	is->level = COLM_INDENT_OFF;
+}
 
 struct stream_impl *colm_impl_new_accum( char *name )
 {
@@ -483,7 +495,6 @@ struct stream_impl *colm_impl_new_accum( char *name )
 
 	return (struct stream_impl*)si;
 }
-
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 {
