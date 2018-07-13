@@ -96,7 +96,7 @@ static void si_data_push_head( struct stream_impl_data *ss, struct run_buf *run_
 	}
 }
 
-static struct run_buf *source_stream_data_pop_head( struct stream_impl_data *ss )
+static struct run_buf *si_data_pop_head( struct stream_impl_data *ss )
 {
 	struct run_buf *ret = ss->queue.head;
 	ss->queue.head = ss->queue.head->next;
@@ -222,6 +222,62 @@ static struct stream_impl *data_split_consumed( program_t *prg, struct stream_im
 		sid->consumed = 0;
 	}
 	return split_off;
+}
+
+int data_append_data( struct colm_program *prg, struct stream_impl_data *sid, const char *data, int length )
+{
+	struct run_buf *tail = sid->queue.tail;
+	if ( tail == 0 || length > (FSM_BUFSIZE - tail->length) ) {
+		debug( prg, REALM_INPUT, "input_append_data: allocating run buf\n" );
+		tail = new_run_buf( length );
+		si_data_push_tail( sid, tail );
+	}
+
+	debug( prg, REALM_INPUT, "input_append_data: appending to "
+			"accum tail, offset: %d, length: %d, dlen: %d\n",
+			tail->offset, tail->length, length );
+
+	memcpy( tail->data + tail->length, data, length );
+	tail->length += length;
+
+	return length;
+}
+
+int data_undo_append_data( struct colm_program *prg, struct stream_impl_data *sid, int length )
+{
+	int consumed = 0;
+	int remaining = length;
+
+	/* Move over skip bytes. */
+	while ( true ) {
+		struct run_buf *buf = sid->queue.tail;
+
+		if ( buf == 0 )
+			break;
+
+		/* Anything available in the current buffer. */
+		int avail = buf->length; // - buf->offset;
+		if ( avail > 0 ) {
+			/* The source data from the current buffer. */
+			int slen = avail <= remaining ? avail : remaining;
+			consumed += slen;
+			remaining -= slen;
+			buf->length -= slen;
+			//sid->consumed += slen;
+		}
+
+		if ( remaining == 0 )
+			break;
+
+		struct run_buf *run_buf = si_data_pop_tail( sid );
+		free( run_buf );
+	}
+
+	debug( prg, REALM_INPUT, "data_undo_append_data: stream %p "
+			"ask: %d, consumed: %d, now: %d\n", sid, length, consumed );
+
+	return consumed;
+
 }
 
 static void data_destructor( program_t *prg, tree_t **sp, struct stream_impl_data *si )
@@ -372,7 +428,7 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 		if ( remaining == 0 )
 			break;
 
-		struct run_buf *run_buf = source_stream_data_pop_head( si );
+		struct run_buf *run_buf = si_data_pop_head( si );
 		free( run_buf );
 	}
 
@@ -451,6 +507,8 @@ struct stream_funcs_data file_funcs =
 	&data_close_stream,
 	&data_print_tree,
 	&data_split_consumed,
+	&data_append_data,
+	&data_undo_append_data,
 	&data_destructor,
 };
 
@@ -470,6 +528,8 @@ struct stream_funcs_data accum_funcs =
 	&data_print_tree,
 
 	&data_split_consumed,
+	&data_append_data,
+	&data_undo_append_data,
 	&data_destructor,
 };
 

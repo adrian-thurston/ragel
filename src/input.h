@@ -99,7 +99,7 @@ struct input_funcs \
 	struct colm_tree *(*undo_prepend_tree)( struct colm_program *prg, struct _input_impl *si ); \
 	void (*prepend_stream)( struct colm_program *prg, struct _input_impl *si, struct colm_stream *stream ); \
 	struct colm_tree *(*undo_prepend_stream)( struct colm_program *prg, struct _input_impl *si ); \
-	void (*append_data)( struct colm_program *prg, struct _input_impl *si, const char *data, long len ); \
+	void (*append_data)( struct colm_program *prg, struct _input_impl *si, const char *data, long length ); \
 	struct colm_tree *(*undo_append_data)( struct colm_program *prg, struct _input_impl *si, int length ); \
 	void (*append_tree)( struct colm_program *prg, struct _input_impl *si, struct colm_tree *tree ); \
 	struct colm_tree *(*undo_append_tree)( struct colm_program *prg, struct _input_impl *si ); \
@@ -125,6 +125,8 @@ struct stream_funcs \
 	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
 			struct _stream_impl *impl, struct colm_tree *tree, int trim ); \
 	struct stream_impl *(*split_consumed)( struct colm_program *prg, struct _stream_impl *si ); \
+	int (*append_data)( struct colm_program *prg, struct _stream_impl *si, const char *data, int len ); \
+	int (*undo_append_data)( struct colm_program *prg, struct _stream_impl *si, int length ); \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct _stream_impl *si ); \
 }
 

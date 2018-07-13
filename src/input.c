@@ -550,6 +550,8 @@ static tree_t *input_undo_prepend_stream( struct colm_program *prg, struct input
 	return 0;
 }
 
+//#define OPTIM_APPEND
+
 static void input_append_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_append_data: stream %p append data length %d\n", si, length );
@@ -568,21 +570,8 @@ static void input_append_data( struct colm_program *prg, struct input_impl_seq *
 		input_stream_seq_append( si, new_buf );
 	}
 
-	struct stream_impl_data *sub_si = (struct stream_impl_data*)si->queue.tail->si;
+	si->queue.tail->si->funcs->append_data( prg, si->queue.tail->si, data, length );
 
-	struct run_buf *tail = sub_si->queue.tail;
-	if ( tail == 0 || length > (FSM_BUFSIZE - tail->length) ) {
-		debug( prg, REALM_INPUT, "input_append_data: allocating run buf\n" );
-		tail = new_run_buf( length );
-		source_stream_data_append( sub_si, tail );
-	}
-
-	debug( prg, REALM_INPUT, "input_append_data: appending to "
-			"accum tail, offset: %d, length: %d, dlen: %d\n",
-			tail->offset, tail->length, length );
-
-	memcpy( tail->data + tail->length, data, length );
-	tail->length += length;
 #else
 
 	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
@@ -601,37 +590,34 @@ static tree_t *input_undo_append_data( struct colm_program *prg, struct input_im
 	debug( prg, REALM_INPUT, "input_undo_append_data: stream %p undo append data length %d\n", si, length );
 
 #ifdef OPTIM_APPEND
-	struct stream_impl_data *sub_si = (struct stream_impl_data*)si->queue.tail->si;
+	while ( true ) {
+		struct seq_buf *buf = si->queue.tail;
 
-	while ( sub_si->queue.tail->length == 0 )
-		source_stream_data_pop_tail( sub_si );
-		
-	while ( length > 0 ) {
-		struct run_buf *tail = sub_si->queue.tail;
+		if ( buf == 0 )
+			break;
 
-		debug( prg, REALM_INPUT, "input_undo_append_data: removing from "
-				"accum tail, offset: %d, length: %d, dlen: %d\n", tail->offset, tail->length, length );
-
-		int avail = length > tail->length ? tail->length : length;
-
-		tail->length -= avail;
-		length -= avail;
-
-		if ( tail->length == 0 ) {
-			source_stream_data_pop_tail( sub_si );
-
-			debug( prg, REALM_INPUT, "input_undo_append_data: removing tail\n" );
+		if ( is_stream( buf ) ) {
+			struct stream_impl *sub = buf->si;
+			int slen = sub->funcs->undo_append_data( prg, sub, length );
+			//debug( REALM_INPUT, " got %d bytes from source\n", slen );
+			//consumed += slen;
+			length -= slen;
+		}
+		else if ( buf->type == SB_TOKEN )
+			break;
+		else if ( buf->type == SB_IGNORE )
+			break;
+		else {
+			assert(false);
 		}
 
-		while ( sub_si->queue.tail->length == 0 )
-			source_stream_data_pop_tail( sub_si );
-
-		if ( sub_si->queue == 0 ) {
-			input_stream_seq_pop_tail( si );
-			sub_si = (struct stream_impl_data*)si->queue.tail->si;
-			debug( prg, REALM_INPUT, "input_undo_append_data: removing sub_si\n" );
+		if ( length == 0 ) {
+			//debug( REALM_INPUT, "exiting consume\n", length );
+			break;
 		}
 
+		struct seq_buf *seq_buf = input_stream_seq_pop_tail( si );
+		free( seq_buf );
 	}
 #else
 	struct seq_buf *seq_buf = input_stream_seq_pop_tail( si );
