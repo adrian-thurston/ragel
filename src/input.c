@@ -550,7 +550,7 @@ static tree_t *input_undo_prepend_stream( struct colm_program *prg, struct input
 	return 0;
 }
 
-//#define OPTIM_APPEND
+#define OPTIM_APPEND
 
 static void input_append_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
 {

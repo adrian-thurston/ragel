@@ -53,35 +53,6 @@ struct colm_stream;
 struct input_impl;
 struct stream_impl;
 
-enum seq_buf_type {
-	SB_TOKEN = 1,
-	SB_IGNORE,
-	SB_SOURCE,
-	SB_ACCUM
-};
-
-struct seq_buf
-{
-	enum seq_buf_type type;
-	char own_si;
-	struct colm_tree *tree;
-	struct stream_impl *si;
-	struct seq_buf *next, *prev;
-};
-
-struct run_buf
-{
-	long length;
-	long offset;
-	struct run_buf *next, *prev;
-
-	/* Must be at the end. We will grow this struct to add data if the input
-	 * demands it. */
-	char data[FSM_BUFSIZE];
-};
-
-struct run_buf *new_run_buf( int sz );
-
 #define DEF_INPUT_FUNCS( input_funcs, _input_impl ) \
 struct input_funcs \
 { \
@@ -145,6 +116,22 @@ struct stream_impl
 	struct stream_funcs *funcs;
 };
 
+enum seq_buf_type {
+	SB_TOKEN = 1,
+	SB_IGNORE,
+	SB_SOURCE,
+	SB_ACCUM
+};
+
+struct seq_buf
+{
+	enum seq_buf_type type;
+	char own_si;
+	struct colm_tree *tree;
+	struct stream_impl *si;
+	struct seq_buf *next, *prev;
+};
+
 /* List of source streams. Enables streams to be pushed/popped. */
 struct input_impl_seq
 {
@@ -164,7 +151,19 @@ struct input_impl_seq
 	int consumed;
 };
 
-/* List of source streams. Enables streams to be pushed/popped. */
+struct run_buf
+{
+	long length;
+	long offset;
+	struct run_buf *next, *prev;
+
+	/* Must be at the end. We will grow this struct to add data if the input
+	 * demands it. */
+	char data[FSM_BUFSIZE];
+};
+
+struct run_buf *new_run_buf( int sz );
+
 struct stream_impl_data
 {
 	struct stream_funcs *funcs;

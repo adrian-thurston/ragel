@@ -42,6 +42,19 @@ DEF_STREAM_FUNCS( stream_funcs_data, stream_impl_data );
 extern struct stream_funcs_data file_funcs;
 extern struct stream_funcs_data accum_funcs;
 
+static void dump_contents( struct colm_program *prg, struct stream_impl_data *sid )
+{
+	struct run_buf *rb = sid->queue.head;
+	while ( rb != 0 ) {
+		debug( prg, REALM_INPUT, " %p contents |%d|%d|%d|%.*s|\n", sid,
+				rb->offset, rb->length,
+				rb->length - rb->offset,
+				(int)rb->length - rb->offset,
+				rb->data + rb->offset );
+		rb = rb->next;
+	}
+}
+
 static bool loc_set( location_t *loc )
 {
 	return loc->line != 0;
@@ -240,6 +253,10 @@ int data_append_data( struct colm_program *prg, struct stream_impl_data *sid, co
 	memcpy( tail->data + tail->length, data, length );
 	tail->length += length;
 
+#ifdef DEBUG
+	dump_contents( prg, sid );
+#endif
+
 	return length;
 }
 
@@ -256,7 +273,7 @@ int data_undo_append_data( struct colm_program *prg, struct stream_impl_data *si
 			break;
 
 		/* Anything available in the current buffer. */
-		int avail = buf->length; // - buf->offset;
+		int avail = buf->length - buf->offset;
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
 			int slen = avail <= remaining ? avail : remaining;
@@ -275,6 +292,10 @@ int data_undo_append_data( struct colm_program *prg, struct stream_impl_data *si
 
 	debug( prg, REALM_INPUT, "data_undo_append_data: stream %p "
 			"ask: %d, consumed: %d, now: %d\n", sid, length, consumed );
+
+#ifdef DEBUG
+	dump_contents( prg, sid );
+#endif
 
 	return consumed;
 
@@ -398,20 +419,20 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 	return ret;
 }
 
-static int data_consume_data( struct colm_program *prg, struct stream_impl_data *si, int length, location_t *loc )
+static int data_consume_data( struct colm_program *prg, struct stream_impl_data *sid, int length, location_t *loc )
 {
 	int consumed = 0;
 	int remaining = length;
 
 	/* Move over skip bytes. */
 	while ( true ) {
-		struct run_buf *buf = si->queue.head;
+		struct run_buf *buf = sid->queue.head;
 
 		if ( buf == 0 )
 			break;
 
 		if ( !loc_set( loc ) )
-			data_transfer_loc( prg, loc, si );
+			data_transfer_loc( prg, loc, sid );
 
 		/* Anything available in the current buffer. */
 		int avail = buf->length - buf->offset;
@@ -420,41 +441,49 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 			int slen = avail <= remaining ? avail : remaining;
 			consumed += slen;
 			remaining -= slen;
-			update_position_data( si, buf->data + buf->offset, slen );
+			update_position_data( sid, buf->data + buf->offset, slen );
 			buf->offset += slen;
-			si->consumed += slen;
+			sid->consumed += slen;
 		}
 
 		if ( remaining == 0 )
 			break;
 
-		struct run_buf *run_buf = si_data_pop_head( si );
+		struct run_buf *run_buf = si_data_pop_head( sid );
 		free( run_buf );
 	}
 
 	debug( prg, REALM_INPUT, "data_consume_data: stream %p "
-			"ask: %d, consumed: %d, now: %d\n", si, length, consumed, si->consumed );
+			"ask: %d, consumed: %d, now: %d\n", sid, length, consumed, sid->consumed );
+
+#ifdef DEBUG
+	dump_contents( prg, sid );
+#endif
 
 	return consumed;
 }
 
-static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_data *si, const char *data, int length )
+static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_data *sid, const char *data, int length )
 {
 	int amount = length;
-	if ( amount > si->consumed )
-		amount = si->consumed;
+	if ( amount > sid->consumed )
+		amount = sid->consumed;
 
 	if ( amount > 0 ) {
 		struct run_buf *new_buf = new_run_buf( 0 );
 		new_buf->length = amount;
 		memcpy( new_buf->data, data + ( length - amount ), amount );
-		si_data_push_head( si, new_buf );
-		undo_position_data( si, data, amount );
-		si->consumed -= amount;
+		si_data_push_head( sid, new_buf );
+		undo_position_data( sid, data, amount );
+		sid->consumed -= amount;
 	}
 
 	debug( prg, REALM_INPUT, "data_undo_consume_data: stream %p "
-			"undid consume %d of %d bytes, consumed now %d, \n", si, amount, length, si->consumed );
+			"undid consume %d of %d bytes, consumed now %d, \n", sid, amount, length, sid->consumed );
+
+#ifdef DEBUG
+	dump_contents( prg, sid );
+#endif
 
 	return amount;
 }
