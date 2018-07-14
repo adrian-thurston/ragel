@@ -349,6 +349,8 @@ struct InputData
 	std::ifstream *tryOpenInclude( const char **pathChecks, long &found );
 	int main( int argc, const char **argv );
 
+	void wait( const char *what, pid_t pid );
+
 	int rlhcRun( int argc, const char **argv );
 	int rlhcMain( int argc, const char **argv );
 };

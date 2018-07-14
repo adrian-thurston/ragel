@@ -1154,9 +1154,16 @@ int InputData::rlhcRun( int argc, const char **argv )
 	return exit_status;
 }
 
-int InputData::rlhcMain( int argc, const char **argv )
+void InputData::wait( const char *what, pid_t pid )
 {
 	int status = 0;
+	waitpid( pid, &status, 0 );
+	if ( WIFSIGNALED(status) )
+		error() << what << " stopped by signal: " << WTERMSIG(status) << std::endl;
+}
+
+int InputData::rlhcMain( int argc, const char **argv )
+{
 	pid_t pid = 0;
 
 	parseArgs( argc, argv );
@@ -1172,7 +1179,7 @@ int InputData::rlhcMain( int argc, const char **argv )
 		exit( 0 );
 	}
 
-	waitpid( pid, &status, 0 );
+	wait( "frontend", pid );
 
 	pid = fork();
 	if ( pid == 0 ) {
@@ -1183,6 +1190,6 @@ int InputData::rlhcMain( int argc, const char **argv )
 		rlhcRun( 3, _argv );
 	}
 
-	waitpid( pid, &status, 0 );
+	wait( "rlhc", pid );
 	return 0;
 }
