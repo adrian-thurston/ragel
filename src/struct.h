@@ -51,8 +51,6 @@ typedef struct colm_parser
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
-	void *buffer[10];
-
 	struct pda_run *pda_run;
 	struct colm_input *input;
 	tree_t *result;
@@ -65,9 +63,6 @@ typedef struct colm_input
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
 
-	/* Transitional, needed during ref semantics impl. */
-	void *buffer[8];
-
 	struct input_impl *impl;
 } input_t;
 
@@ -77,9 +72,6 @@ typedef struct colm_stream
 	short id;
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
-
-	/* Transitional, needed during ref semantics impl. */
-	void *buffer[8];
 
 	struct stream_impl *impl;
 } stream_t;
@@ -97,9 +89,6 @@ typedef struct colm_list
 	short id;
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
-
-	/* Transitional, needed during ref semantics impl. */
-	void *buffer[8];
 
 	list_el_t *head, *tail;
 	long list_len;
@@ -123,9 +112,6 @@ typedef struct colm_map
 	short id;
 	struct colm_struct *prev, *next;
 	colm_destructor_t destructor;
-
-	/* Transitional, needed during ref semantics impl. */
-	void *buffer[8];
 
 	struct colm_map_el *head, *tail, *root;
 	long tree_size;
