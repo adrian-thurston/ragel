@@ -1,0 +1,49 @@
+#!/bin/bash
+
+PRIVATE_CASES=""
+
+# START PRIVATE CASES
+PRIVATE_CASES="
+	pcre-ragel.d
+	rlhc.d
+	trans.d
+	rlparse.d
+	pcre-colm.d
+"
+# END PRIVATE CASES
+
+DIRS="
+	aapl.d
+	ragel.d
+	colm.d
+	${PRIVATE_CASES}
+"
+
+HERE=$(basename $(pwd))
+if [ "${HERE%.d}" != "$HERE" ]; then
+	# In a test directory. Pass the arguments to the local gentests.
+	DIRS=.
+	ARGS="$@"
+else
+	# Assuming called from the parent cases directory. use the args as the list
+	# of dirs to test in.
+	if [ $# == 0 ]; then
+		DIRS="*.d"
+	else
+		DIRS="$@"
+	fi
+fi
+
+for D in $DIRS; do
+	cd $D
+	echo ------- $D
+	./gentests $ARGS | xargs -n1 -P4 bash
+	WORKING="$WORKING $D/working"
+	cd $OLDPWD
+done
+
+echo ----  cases   ------
+find $WORKING -name '*.sh' -not -size 0 | wc -l
+
+echo ---- failures ------
+find $WORKING -name '*.diff' -not -size 0 | wc -l
