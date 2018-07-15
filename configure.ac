@@ -32,15 +32,13 @@ AC_ARG_WITH(ragel,
 		if test -d "$withval/bin"; then
 			RAGEL_BIN="$withval/bin/ragel"
 			RAGEL_CPPFLAGS="-I$withval/include"
-			RAGEL_LDFLAGS="-L$withval/lib"
+			RAGEL_LDFLAGS="-L$withval/lib -Wl,-rpath,${withval}/lib"
 			RAGEL_LM="${withval}/share"
-			LD_LIBRARY_PATH="$withval/lib"
 		else
 			RAGEL_BIN="${withval}/src/ragel"
 			RAGEL_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
-			RAGEL_LDFLAGS="-L${withval}/src/.libs"
+			RAGEL_LDFLAGS="-L${withval}/src/.libs -Wl,-rpath,${withval}/src/.libs"
 			RAGEL_LM="${withval}/src"
-			LD_LIBRARY_PATH="${withval}/src/.libs"
 		fi
 	],
 	[AC_ERROR(["require --with-ragel"])]
@@ -69,25 +67,17 @@ if test -z "$EXPECTED_COLM_VER"; then
 	AC_ERROR( [check colm: expected version not passed in] )
 fi
 
-AC_ARG_WITH(deps,
-	[AC_HELP_STRING([--with-deps], [generic dependency location])],
-	[DEPS="$withval"],
-	[DEPS="/opt/colm"]
-)
-
 AC_ARG_WITH(colm,
 	[AC_HELP_STRING([--with-colm], [location of colm to test (source or installed)])],
 	[
 		if test -d "${withval}/bin"; then
 			COLM_BIN="${withval}/bin/colm"
 			COLM_CPPFLAGS="-I${withval}/include"
-			COLM_LDFLAGS="${LDFLAGS} -L${withval}/lib"
-			LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${withval}/lib"
+			COLM_LDFLAGS="${LDFLAGS} -L${withval}/lib -Wl,-rpath,${withval}/lib"
 		else
 			COLM_BIN="${withval}/src/colm"
 			COLM_CPPFLAGS="-I${withval}/src/include"
-			COLM_LDFLAGS="-L${withval}/src/.libs"
-			LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${withval}/src/.libs"
+			COLM_LDFLAGS="-L${withval}/src/.libs -Wl,-rpath,${withval}/src/.libs"
 		fi
 	],
 	[AC_ERROR(["require --with-colm"])]
@@ -102,8 +92,6 @@ AC_CHECK_FILES(
 AC_SUBST(COLM_BIN)
 AC_SUBST(COLM_CPPFLAGS)
 AC_SUBST(COLM_LDFLAGS)
-
-AC_SUBST(LD_LIBRARY_PATH)
 
 INSTALLED_VER=`$COLM_BIN -v | sed -n -e '1 { s/^.*version //; s/ .*$//; p; }'`
 if test "x$INSTALLED_VER" != "x$EXPECTED_COLM_VER"; then
@@ -136,7 +124,6 @@ SED_SUBST=["\
 	-e 's|@COLM_CPPFLAGS@|${COLM_CPPFLAGS}|g' \
 	-e 's|@COLM_LDFLAGS@|${COLM_LDFLAGS}|g' \
 	-e 's|@AAPL_CPPFLAGS@|${AAPL_CPPFLAGS}|g' \
-	-e 's|@LD_LIBRARY_PATH@|${LD_LIBRARY_PATH}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
 "]
