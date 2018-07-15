@@ -467,7 +467,8 @@ void compileOutput( const char *argv0, const bool inSource, char *srcLocation )
 		sprintf( command,
 				COMPILE_COMMAND_STRING
 				" -I" PREFIX "/include"
-				" -L" PREFIX "/lib",
+				" -L" PREFIX "/lib"
+				" -Wl,-rpath," PREFIX "/lib",
 				binaryFn, intermedFn );
 	}
 #undef COMPILE_COMMAND_STRING
