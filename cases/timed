@@ -9,6 +9,7 @@ PRIVATE_CASES="
 	trans.d
 	rlparse.d
 	pcre-colm.d
+	yellowbrick.d
 "
 # END PRIVATE CASES
 
