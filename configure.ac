@@ -36,7 +36,7 @@ AC_ARG_WITH(ragel,
 			RAGEL_LM="${withval}/share"
 		else
 			RAGEL_BIN="${withval}/src/ragel"
-			RAGEL_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
+			RAGEL_CPPFLAGS="-I${withval}/src/include -I${withval}/aapl"
 			RAGEL_LDFLAGS="-L${withval}/src/.libs -Wl,-rpath,${withval}/src/.libs"
 			RAGEL_LM="${withval}/src"
 		fi
@@ -145,6 +145,8 @@ AC_OUTPUT([
 		cases/aapl.d/Makefile
 		cases/colm.d/Makefile
 		cases/dummy.d/Makefile
+		cases/yellowbrick.d/Makefile
+		cases/yellowbrick.d/src/Makefile
 ])
 
 echo "configuration of testing package complete"

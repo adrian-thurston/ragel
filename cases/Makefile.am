@@ -6,6 +6,7 @@ PRIVATE_CASES = \
 	rlhc.d \
 	rlparse.d \
 	trans.d \
+	yellowbrick.d \
 	genf.d
 
 # END PRIVATE CASES
