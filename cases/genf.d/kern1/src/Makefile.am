@@ -1,3 +1,5 @@
+include genf.mk
+
 GENF = @SUBJECT@
 
 data_DATA = ring.ko

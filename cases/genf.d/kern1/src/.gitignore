@@ -9,3 +9,10 @@
 /attribute.h
 /Kbuild
 /Makefile
+/bootstrap.sh
+/bootstrap
+/genf.h.in
+/genf.h
+/genf.mk
+/init.d
+/init.d.sh

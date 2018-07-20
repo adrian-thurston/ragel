@@ -1,4 +1,4 @@
-AC_INIT([app1], [1.0.1])
+AC_INIT([kern1], [1.0.1])
 AM_INIT_AUTOMAKE
 
 AC_CONFIG_MACRO_DIR([m4])
