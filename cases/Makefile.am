@@ -5,7 +5,8 @@ PRIVATE_CASES = \
 	pcre-colm.d \
 	rlhc.d \
 	rlparse.d \
-	trans.d
+	trans.d \
+	genf.d
 
 # END PRIVATE CASES
 

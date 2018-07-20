@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+
+wk=working
+test -d $wk || mkdir $wk
+
+SH=working/app1.sh
+OUT=working/app1.out
+LOG=working/app1.log
+DIFF=working/app1.diff
+
+rm -f $SH
+echo echo executing ./app1/src/app1 >> $SH
+echo ./app1/src/app1 '>' $OUT '2>' $LOG >> $SH
+echo diff app1/expected $OUT '>' $DIFF >> $SH
+
+echo $SH

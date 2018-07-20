@@ -12,35 +12,44 @@ extern const char data2[];
 void MainThread::recvSmallPacket( SelectFd *fd, Record::SmallPacket *pkt )
 {
 	static int sign = 1;
+	bool failed = false;
 
 	log_message( "received SmallPacket: " << sign );
 
-	log_message( "l1 check   ... " << ( ( pkt->l1 != ::l1 ) == 0 ? "OK" : "FAILED" ) );
-	log_message( "l2 check   ... " << ( ( pkt->l2 != ::l2 ) == 0 ? "OK" : "FAILED" ) );
-	log_message( "l3 check   ... " << ( ( pkt->l3 != ::l3 ) == 0 ? "OK" : "FAILED" ) );
+	log_message( "l1 check   ... " << ( ( pkt->l1 != ::l1 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+	log_message( "l2 check   ... " << ( ( pkt->l2 != ::l2 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+	log_message( "l3 check   ... " << ( ( pkt->l3 != ::l3 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
 
 	for ( Record::SmallRec sr( pkt->rope, pkt->head_sr ); sr.valid(); sr.advance() ) {
 
 		log_message( "sr check   ... " <<
-				( ( sr.l1 != ::l2 ) == 0 ? "OK" : "FAILED" ) );
+				( ( sr.l1 != ::l2 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
 	}
 
+	std::cout << "small packet " << sign << " " << ( failed ? "FAILED" : "ok" ) << std::endl;
+
 	sign += 1;
+
+	if ( sign > 10 )
+		breakLoop();
 }
 
 void MainThread::recvBigPacket( SelectFd *fd, Record::BigPacket *pkt )
 {
 	static int bign = 1;
+	bool failed = false;
 
 	log_message( "received BigPacket: " << bign );
 
-	log_message( "big1 check ... " << ( strcmp( pkt->big1, ::data1 ) == 0 ? "OK" : "FAILED" ) );
-	log_message( "big2 check ... " << ( strcmp( pkt->big2, ::data2 ) == 0 ? "OK" : "FAILED" ) );
-	log_message( "big3 check ... " << ( strcmp( pkt->big3, ::data3 ) == 0 ? "OK" : "FAILED" ) );
+	log_message( "big1 check ... " << ( strcmp( pkt->big1, ::data1 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+	log_message( "big2 check ... " << ( strcmp( pkt->big2, ::data2 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+	log_message( "big3 check ... " << ( strcmp( pkt->big3, ::data3 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
 
-	log_message( "l1 check   ... " << ( ( pkt->l1 != ::l1 ) == 0 ? "OK" : "FAILED" ) );
-	log_message( "l2 check   ... " << ( ( pkt->l2 != ::l2 ) == 0 ? "OK" : "FAILED" ) );
-	log_message( "l3 check   ... " << ( ( pkt->l3 != ::l3 ) == 0 ? "OK" : "FAILED" ) );
+	log_message( "l1 check   ... " << ( ( pkt->l1 != ::l1 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+	log_message( "l2 check   ... " << ( ( pkt->l2 != ::l2 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+	log_message( "l3 check   ... " << ( ( pkt->l3 != ::l3 ) == 0 ? "OK" : (failed=true,"FAILED") ) );
+
+	std::cout << "big packet " << bign << " " << ( failed ? "FAILED" : "ok" ) << std::endl;
 
 	bign += 1;
 }
