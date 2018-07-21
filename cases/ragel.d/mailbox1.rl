@@ -1,6 +1,5 @@
 /*
  * @LANG: c++
- * @CFLAGS: -I../aapl
  *
  * Test works with split code gen.
  */

@@ -1,6 +1,5 @@
 /*
  * @LANG: c++
- * @CFLAGS: -I../aapl
  */
 
 #include <iostream>

@@ -316,16 +316,9 @@ function run_test()
 
 	# Some langs are just interpreted.
 	if [ $interpreted != "true" ]; then
-		scode=""
-		if [ -n "$support" ]; then
-			echo $ragel -o $wk/$code_src-support.c $support
-			$ragel -o $wk/$code_src-support.c $support
-			scode="$wk/$code_src-support.c"
-		fi
-
 		cat >> $_sh <<-EOF
 		$compiler $flags $out_args $wk/$_code_src \
-				$scode $libs >>$wk/$_log 2>>$wk/$_log
+				$libs >>$wk/$_log 2>>$wk/$_log
 		EOF
 	fi
 
@@ -376,29 +369,6 @@ function run_options()
 	unset gen_opt
 }
 
-function run_internal()
-{
-	test_case=$1
-
-	root=`basename $test_case`
-	root=${root%.rl};
-
-	output=$root.out;
-	args="-I. $internal -o $wk/unused $test_case"
-	exec_cmd="$ragel $args"
-
-	echo -n "running: $exec_cmd ... "
-
-	$exec_cmd 2>&1 > $wk/$output;
-	if diff --strip-trailing-cr $wk/$expected_out $wk/$output > $wk/$diff
-	then
-		echo "passed";
-	else
-		echo "FAILED";
-		test_error;
-	fi;
-}
-
 function run_translate()
 {
 	test_case=$1
@@ -436,67 +406,58 @@ function run_translate()
 
 	sed '1,/^#\+ * OUTPUT #\+/{ d };' $test_case > $wk/$expected_out
 
-	# internal consistency check?
-	internal=`sed '/@INTERNAL:/{s/^.*: *//;s/ *$//;p};d' $test_case`
-	if [ -n "$internal" ]; then
-		run_internal $test_case
-	else 
-		prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
+	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
 
-		# Add these into the langugage-specific defaults selected in run_options
-		case_prohibit_flags=`sed '/@PROHIBIT_FLAGS:/s/^.*: *//p;d' $test_case`
+	# Add these into the langugage-specific defaults selected in run_options
+	case_prohibit_flags=`sed '/@PROHIBIT_FLAGS:/s/^.*: *//p;d' $test_case`
 
-		additional_cflags=`sed '/@CFLAGS:/s/^.*: *//p;d' $test_case`
-		support=`sed '/@SUPPORT:/s/^.*: *//p;d' $test_case`
+	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
+	if [ -z "$lang" ]; then
+		echo "$test_case: language unset"; >&2
+		exit 1;
+	fi
 
-		lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
-		if [ -z "$lang" ]; then
-			echo "$test_case: language unset"; >&2
-			exit 1;
+	cases=""
+
+	if [ $lang == indep ]; then
+		for lang in c asm d csharp go java ruby ocaml rust crack julia; do
+			case $lang in 
+				c) lf="-C" ;;
+				asm) lf="--asm" ;;
+				d) lf="-D" ;;
+				csharp) lf="-A" ;;
+				go) lf="-Z" ;;
+				java) lf="-J" ;;
+				ruby) lf="-R" ;;
+				ocaml) lf="-O" ;;
+				rust) lf="-U" ;;
+				crack) lf="-K" ;;
+				julia) lf="-Y" ;;
+			esac
+
+			echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
+			echo "$langflags" | grep -qe $lf || continue
+
+			# Translate to target language and strip off output.
+			targ=${root}_$lang.rl
+
+			$TRANS $lang $wk/$targ $test_case ${root}_${lang}
+
+			cases="$cases $wk/$targ"
+
+			run_options $wk/$targ
+		done
+	else
+
+		sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
+
+		cases=$wk/$case_rl
+
+		if [ -n "$RAGEL_FILE" ]; then
+			cases="$RAGEL_FILE"
 		fi
 
-		cases=""
-
-		if [ $lang == indep ]; then
-			for lang in c asm d csharp go java ruby ocaml rust crack julia; do
-				case $lang in 
-					c) lf="-C" ;;
-					asm) lf="--asm" ;;
-					d) lf="-D" ;;
-					csharp) lf="-A" ;;
-					go) lf="-Z" ;;
-					java) lf="-J" ;;
-					ruby) lf="-R" ;;
-					ocaml) lf="-O" ;;
-					rust) lf="-U" ;;
-					crack) lf="-K" ;;
-					julia) lf="-Y" ;;
-				esac
-
-				echo "$prohibit_languages" | grep -q "\<$lang\>" && continue;
-				echo "$langflags" | grep -qe $lf || continue
-
-				# Translate to target language and strip off output.
-				targ=${root}_$lang.rl
-
-				$TRANS $lang $wk/$targ $test_case ${root}_${lang}
-
-				cases="$cases $wk/$targ"
-
-				run_options $wk/$targ
-			done
-		else
-
-			sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
-
-			cases=$wk/$case_rl
-
-			if [ -n "$RAGEL_FILE" ]; then
-				cases="$RAGEL_FILE"
-			fi
-
-			run_options $cases
-		fi
+		run_options $cases
 	fi
 }
 
