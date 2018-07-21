@@ -39,7 +39,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 			gen_opts="$gen_opts -$opt$OPTARG"
 		;;
 		n|m|l|e) 
-			minflags="$minflags -$opt"
+			genflags="$genflags -$opt"
 			gen_opts="$gen_opts -$opt"
 		;;
 		c) 
@@ -59,11 +59,7 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 					gen_opts="$gen_opts --$OPTARG"
 				;;
 				integral-tables|string-tables)
-					encflags="$encflags --$OPTARG"
-					gen_opts="$gen_opts --$OPTARG"
-				;;
-				var-backend|goto-backend)
-					featflags="$featflags --$OPTARG"
+					genflags="$genflags --$OPTARG"
 					gen_opts="$gen_opts --$OPTARG"
 				;;
 				*)
@@ -75,11 +71,8 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 	esac
 done
 
-[ -z "$minflags" ]    && minflags="-n -m -l -e"
-[ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2"
-[ -z "$encflags" ]    && encflags="--integral-tables --string-tables"
 [ -z "$langflags" ]   && langflags="-C --asm -R -Y -O -U -J -Z -D -A -K"
-[ -z "$featflags" ]   && featflags="--goto-backend"
+[ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2 -n -m -e --string-tables"
 
 shift $((OPTIND - 1));
 
@@ -295,7 +288,7 @@ function lang_opts()
 
 function run_test()
 {
-	_lroot=`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot | sed 's/-\+/_/g'`
+	_lroot=`echo s$gen_opt$min_opt$enc_opt$f_opt-$lroot | sed 's/-\+/_/g'`
 	_code_src=`echo s$min_opt$gen_opt$enc_opt$f_opt-$code_src | sed 's/-\+/_/g'`
 	_binary=`echo s$min_opt$gen_opt$enc_opt$f_opt-$binary | sed 's/-\+/_/g'`
 	_output=`echo s$min_opt$gen_opt$enc_opt$f_opt-$output | sed 's/-\+/_/g'`
@@ -303,11 +296,11 @@ function run_test()
 	_sh=$wk/`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot.sh | sed 's/-\+/_/g'`
 	_log=`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot.log | sed 's/-\+/_/g'`
 
-	opts="$min_opt $gen_opt $enc_opt $f_opt"
+	opts="$gen_opt $min_opt $enc_opt $f_opt"
 	args="-I. $opts -o $wk/$_code_src $translated"
 
 	cat >> $_sh <<-EOF
-	echo "testing $lroot $opts"
+	echo testing $lroot $opts
 	$host_ragel $args
 	EOF
 
@@ -374,22 +367,13 @@ function run_options()
 	# Make sure that we are interested in the host language.
 	echo "$langflags" | grep -qe $lang_opt || return
 
-	for min_opt in $minflags; do
+	for gen_opt in $genflags; do
 		echo "" "$prohibit_flags" | \
-				grep -e $min_opt >/dev/null && continue
+				grep -e $gen_opt >/dev/null && continue
 
-		for gen_opt in $genflags; do
-			echo "" "$prohibit_flags" | \
-					grep -e $gen_opt >/dev/null && continue
-
-			for enc_opt in $encflags; do
-				echo "" "$prohibit_flags" | \
-						grep -e $enc_opt >/dev/null && continue
-
-				run_test
-			done
-		done
+		run_test
 	done
+	unset gen_opt
 }
 
 function run_internal()
