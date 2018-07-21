@@ -103,30 +103,23 @@ function exec_cmd()
 	lang=$1
 
 	case $lang in
-		c) exec_cmd=./$wk/$_binary ;;
-		c++) exec_cmd=./$wk/$_binary ;;
-		obj-c) exec_cmd=./$wk/$_binary ;;
-		d) exec_cmd=./$wk/$_binary ;;
-		java) exec_cmd="java -classpath $wk $_lroot" ;;
-		ruby) exec_cmd="ruby $wk/$_code_src" ;;
-		csharp) exec_cmd="mono $wk/$_binary" ;;
-		go) exec_cmd=./$wk/$_binary ;;
-		ocaml) exec_cmd="ocaml $wk/$_code_src" ;;
-		asm) exec_cmd=./$wk/$_binary ;;
-		rust) exec_cmd=./$wk/$_binary ;;
-		crack) exec_cmd="$crack_interpreter $wk/$_code_src" ;;
-		julia) exec_cmd="$julia_interpreter $wk/$_code_src" ;;
+		c) exec_cmd=./$binary ;;
+		c++) exec_cmd=./$binary ;;
+		obj-c) exec_cmd=./$binary ;;
+		d) exec_cmd=./$binary ;;
+		java) exec_cmd="java -classpath $wk $classname" ;;
+		ruby) exec_cmd="ruby $code_src" ;;
+		csharp) exec_cmd="mono $binary" ;;
+		go) exec_cmd=./$binary ;;
+		ocaml) exec_cmd="ocaml $code_src" ;;
+		asm) exec_cmd=./$binary ;;
+		rust) exec_cmd=./$binary ;;
+		crack) exec_cmd="$crack_interpreter $code_src" ;;
+		julia) exec_cmd="$julia_interpreter $code_src" ;;
 		indep) ;;
 	esac
 }
 
-function file_names()
-{
-	code_src=$lroot.$code_suffix;
-	binary=$lroot.bin;
-	output=$lroot.out;
-	diff=$lroot.diff;
-}
 
 function lang_opts()
 {
@@ -143,7 +136,6 @@ function lang_opts()
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_flags=""
-			file_names;
 		;;
 		c++)
 			lang_opt=-C;
@@ -155,7 +147,6 @@ function lang_opts()
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_flags=""
-			file_names;
 		;;
 		obj-c)
 			lang_opt=-C;
@@ -167,7 +158,6 @@ function lang_opts()
 			flags="`gnustep-config --objc-flags`"
 			libs="-lobjc -lgnustep-base"
 			prohibit_flags=""
-			file_names;
 		;;
 		d)
 			lang_opt=-D;
@@ -178,7 +168,6 @@ function lang_opts()
 			flags="-Wall -O3"
 			libs=""
 			prohibit_flags="--string-tables"
-			file_names;
 		;;
 		java)
 			lang_opt=-J;
@@ -189,7 +178,6 @@ function lang_opts()
 			flags=""
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
-			file_names;
 		;;
 		ruby)
 			lang_opt=-R;
@@ -200,7 +188,6 @@ function lang_opts()
 			flags=""
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
-			file_names;
 		;;
 		csharp)
 			lang_opt="-A";
@@ -211,7 +198,6 @@ function lang_opts()
 			flags=""
 			libs=""
 			prohibit_flags="-G2 --string-tables"
-			file_names;
 		;;
 		go)
 			lang_opt="-Z"
@@ -222,7 +208,6 @@ function lang_opts()
 			flags="build"
 			libs=""
 			prohibit_flags="--string-tables"
-			file_names;
 		;;
 		ocaml)
 			lang_opt="-O"
@@ -233,7 +218,6 @@ function lang_opts()
 			flags=""
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
-			file_names;
 		;;
 		asm)
 			lang_opt="--asm"
@@ -244,7 +228,6 @@ function lang_opts()
 			flags=""
 			libs=""
 			prohibit_flags="-T0 -T1 -F0 -F1 -G0 -G1 --string-tables"
-			file_names;
 		;;
 		rust)
 			lang_opt="-U"
@@ -255,7 +238,6 @@ function lang_opts()
 			flags="-A non_upper_case_globals -A dead_code -A unused_variables -A unused_assignments -A unused_mut -A unused_parens"
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
-			file_names;
 		;;
 		crack)
 			lang_opt="-K"
@@ -264,7 +246,6 @@ function lang_opts()
 			compiler=$crack_interpreter
 			host_ragel=`dirname $ragel`/host-crack/ragel-crack
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
-			file_names;
 		;;
 		julia)
 			lang_opt="-Y"
@@ -273,7 +254,6 @@ function lang_opts()
 			compiler=$julia_interpreter
 			host_ragel=`dirname $ragel`/host-julia/ragel-julia
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
-			file_names;
 		;;
 		indep)
 		;;
@@ -288,37 +268,39 @@ function lang_opts()
 
 function run_test()
 {
-	_lroot=`echo s$gen_opt$min_opt$enc_opt$f_opt-$lroot | sed 's/-\+/_/g'`
-	_code_src=`echo s$min_opt$gen_opt$enc_opt$f_opt-$code_src | sed 's/-\+/_/g'`
-	_binary=`echo s$min_opt$gen_opt$enc_opt$f_opt-$binary | sed 's/-\+/_/g'`
-	_output=`echo s$min_opt$gen_opt$enc_opt$f_opt-$output | sed 's/-\+/_/g'`
-	_diff=`echo s$min_opt$gen_opt$enc_opt$f_opt-$diff | sed 's/-\+/_/g'`
-	_sh=$wk/`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot.sh | sed 's/-\+/_/g'`
-	_log=`echo s$min_opt$gen_opt$enc_opt$f_opt-$lroot.log | sed 's/-\+/_/g'`
+	code_src=$wk/`echo $lroot$gen_opt.$code_suffix | sed 's/-\+/_/g'`
+	binary=$wk/`echo $lroot$gen_opt.bin | sed 's/-\+/_/g'`
+	output=$wk/`echo $lroot$gen_opt.out | sed 's/-\+/_/g'`
+	diff=$wk/`echo $lroot$gen_opt.diff | sed 's/-\+/_/g'`
+	sh=$wk/`echo $lroot$gen_opt.sh | sed 's/-\+/_/g'`
+	log=$wk/`echo $lroot$gen_opt.log | sed 's/-\+/_/g'`
+	intermed=$wk/`echo $lroot$gen_opt.ri | sed 's/-\+/_/g'`
+	classfile=$wk/`echo $lroot$gen_opt.class | sed 's/-\+/_/g'`
+	classname=`echo $lroot$gen_opt | sed 's/-\+/_/g'`
 
 	opts="$gen_opt $min_opt $enc_opt $f_opt"
-	args="-I. $opts -o $wk/$_code_src $translated"
+	args="-I. $opts -o $code_src $translated"
 
-	cat >> $_sh <<-EOF
+	cat >> $sh <<-EOF
 	echo testing $lroot $opts
 	$host_ragel $args
 	EOF
 
 	if [ $lang == java ]; then
-		cat >> $_sh <<-EOF
-		sed -i 's/\<$lroot\>/$_lroot/g' $wk/$_code_src
+		cat >> $sh <<-EOF
+		sed -i 's/\<$lroot\>/$classname/g' $code_src
 		EOF
 	fi
 
 	out_args=""
-	[ $lang != java ] && out_args="-o $wk/$_binary";
-	[ $lang == csharp ] && out_args="-out:$wk/$_binary";
+	[ $lang != java ] && out_args="-o $binary";
+	[ $lang == csharp ] && out_args="-out:$binary";
 
 	# Some langs are just interpreted.
 	if [ $interpreted != "true" ]; then
-		cat >> $_sh <<-EOF
-		$compiler $flags $out_args $wk/$_code_src \
-				$libs >>$wk/$_log 2>>$wk/$_log
+		cat >> $sh <<-EOF
+		$compiler $flags $out_args $code_src \
+				$libs >>$log 2>>$log
 		EOF
 	fi
 
@@ -328,18 +310,18 @@ function run_test()
 			exec_cmd="$exec_cmd | $FILTER"
 		fi		
 
-		cat >> $_sh <<-EOF
-		$exec_cmd 2>> $wk/$_log >> $wk/$_output
+		cat >> $sh <<-EOF
+		$exec_cmd 2>> $log >> $output
 		EOF
 
-		cat >> $_sh <<-EOF
-		diff -u --strip-trailing-cr $wk/$expected_out $wk/$_output > $wk/$_diff
-		rm -f $wk/$_lroot.ri $wk/$_code_src $wk/$_binary $wk/$_lroot.class $wk/$_output 
+		cat >> $sh <<-EOF
+		diff -u --strip-trailing-cr $expected_out $output > $diff
+		rm -f $intermed $code_src $binary $classfile $output 
 		EOF
 
 	fi
 
-	echo $_sh
+	echo $sh
 }
 
 
@@ -401,10 +383,10 @@ function run_translate()
 		cp -a $root working/
 	fi
 
-	expected_out=$root.exp;
+	expected_out=$wk/$root.exp;
 	case_rl=${root}.rl
 
-	sed '1,/^#\+ * OUTPUT #\+/{ d };' $test_case > $wk/$expected_out
+	sed '1,/^#\+ * OUTPUT #\+/{ d };' $test_case > $expected_out
 
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
 
