@@ -8,3 +8,9 @@ pkginclude_HEADERS = \
 
 EXTRA_DIST = README COPYING
 
+BUILT_SOURCES = \
+	include/ragel
+
+include/ragel:
+	mkdir -p include
+	ln -s .. include/ragel

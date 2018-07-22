@@ -63,7 +63,7 @@ libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 
 dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
-	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc
+	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc
 
 #
 # ragel program.
@@ -81,7 +81,12 @@ ragel_DEPENDENCIES = libragel.la libfsm.la $(COLM_LIBDEP)
 
 BUILT_SOURCES = \
 	version.h \
-	parse.c rlreduce.cc
+	parse.c rlreduce.cc \
+	include/ragel
+
+include/ragel:
+	mkdir -p include
+	ln -s .. include/ragel
 
 if WITH_RAGEL_KELBT
 nodist_ragel_SOURCES += \

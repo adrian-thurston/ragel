@@ -27,3 +27,6 @@
 /cmake_install.cmake
 /install_manifest.txt
 /*.user
+
+/aapl/include
+/src/include
