@@ -4,36 +4,30 @@ PRIVATE_CASES=""
 
 # START PRIVATE CASES
 PRIVATE_CASES="
-	pcre-ragel.d
-	rlhc.d
-	trans.d
-	rlparse.d
-	pcre-colm.d
-	yellowbrick.d
+	cases/pcre-ragel.d
+	cases/rlhc.d
+	cases/trans.d
+	cases/rlparse.d
+	cases/pcre-colm.d
+	cases/yellowbrick.d
 	genf.d
 "
 # END PRIVATE CASES
 
 DIRS="
-	aapl.d
-	ragel.d
-	colm.d
+	public/aapl.d
+	public/ragel.d
+	public/colm.d
 	${PRIVATE_CASES}
 "
 
 HERE=$(basename $(pwd))
 if [ "${HERE%.d}" != "$HERE" ]; then
 	# In a test directory. Pass the arguments to the local gentests.
-	DIRS=.
 	ARGS="$@"
-else
-	# Assuming called from the parent cases directory. use the args as the list
-	# of dirs to test in.
-	if [ $# == 0 ]; then
-		DIRS="*.d"
-	else
-		DIRS="$@"
-	fi
+	DIRS=.
+elif [ $# != 0 ]; then
+	DIRS="$@"
 fi
 
 for D in $DIRS; do
