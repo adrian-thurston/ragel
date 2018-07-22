@@ -1,5 +1,5 @@
 
-include ../../public/colm.d/subject.mk
+include ../colm.mk
 
 all: rlhc
 

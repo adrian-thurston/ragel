@@ -13,3 +13,7 @@
 /test-driver
 /config.h
 /config.h.in
+/colm.mk
+/colm.sh
+/ragel.mk
+/ragel.sh

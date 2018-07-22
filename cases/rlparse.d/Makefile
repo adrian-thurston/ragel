@@ -1,4 +1,4 @@
-include ../../public/colm.d/subject.mk
+include ../colm.mk
 
 COLM = $(SUBJECT_BIN)
 COLM_INC = $(SUBJECT_CPPFLAGS)
