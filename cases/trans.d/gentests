@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-. ../colm.d/subject.sh
+. ../../public/colm.d/subject.sh
 
 langs='asm crack c cs d go java julia ocaml'
 

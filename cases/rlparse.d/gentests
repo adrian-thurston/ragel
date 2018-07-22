@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ../colm.d/subject.sh
+. ../../public/colm.d/subject.sh
 
 export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
 
