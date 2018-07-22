@@ -104,10 +104,10 @@ dnl
 AC_ARG_WITH(aapl,
 	[AC_HELP_STRING([--with-aapl], [location of aapl to test (source or installed)])],
 	[
-		if test -d "$withval/bin"; then
-			AAPL_CPPFLAGS="-I$withval/include"
-		else
+		if test -d "$withval/src"; then
 			AAPL_CPPFLAGS="-I${withval}/src -I${withval}/aapl"
+		else
+			AAPL_CPPFLAGS="-I$withval/include/aapl"
 		fi
 	],
 	[AC_ERROR(["require --with-aapl"])]

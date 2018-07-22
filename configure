@@ -1,0 +1,44 @@
+#!/bin/bash
+#
+
+while getopts "h-:" opt; do
+	case $opt in
+		-)
+			WITH=${OPTARG/=*/}
+			VAL=${OPTARG/*=/}
+			case $WITH in
+				with-aapl)
+					WITH_AAPL=$VAL
+				;;
+				with-colm)
+					WITH_COLM=$VAL
+				;;
+				with-ragel)
+					WITH_RAGEL=$VAL
+				;;
+				with-genf)
+					WITH_GENF=$VAL
+				;;
+				*)
+					echo "$0: unrecognized option --$OPTARG" >&2
+					exit 1
+				;;
+			esac
+		;;
+	esac
+done
+
+set -x
+
+cd public
+./configure --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
+cd ..
+
+cd cases
+./configure --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
+cd ..
+
+root=$(pwd)
+cd genf.d/app1
+./configure --prefix=$root/genf.d/working/app1 --with-aapl=$WITH_AAPL --with-subject=$WITH_GENF
+cd ../..
