@@ -1,5 +1,5 @@
 dnl 
-dnl   Copyright 2001-2013 Adrian Thurston <thurston@complang.org>
+dnl   Copyright 2001-2018 Adrian Thurston <thurston@colm.net>
 dnl
   
 AC_INIT(test-suite, 1.0.1)
@@ -130,23 +130,11 @@ SED_SUBST=["\
 
 AC_SUBST(SED_SUBST)
 
-dnl START PRIVATE CASES
-dnl
-dnl NEED some solution stripping out private cases from AC_OUTPUT. Can't put
-dnl comments in AC_OUTPUT.
-dnl
-dnl END PRIVATE CASES
-
-dnl write output files
 AC_OUTPUT([
 		Makefile
-		cases/Makefile
-		cases/ragel.d/Makefile
-		cases/aapl.d/Makefile
-		cases/colm.d/Makefile
-		cases/dummy.d/Makefile
-		cases/yellowbrick.d/Makefile
-		cases/yellowbrick.d/src/Makefile
+		ragel.d/Makefile
+		aapl.d/Makefile
+		colm.d/Makefile
 ])
 
 echo "configuration of testing package complete"
