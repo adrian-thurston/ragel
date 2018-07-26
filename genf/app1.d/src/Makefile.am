@@ -1,6 +1,6 @@
 include genf.mk
 
-GENF = @SUBJECT@
+GENF = @GENF@
 
 bin_PROGRAMS = app1
 

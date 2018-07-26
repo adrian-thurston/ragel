@@ -43,11 +43,11 @@ cd ..
 root=$(pwd)
 
 cd genf/app1.d
-./configure --prefix=$root/genf/inst/app1 --with-aapl=$WITH_AAPL --with-subject=$WITH_GENF
+./configure --prefix=$root/genf/inst/app1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
 cd genf/kern1.d
-./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-subject=$WITH_GENF
+./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
 

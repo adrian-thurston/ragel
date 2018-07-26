@@ -11,7 +11,7 @@ if [ "${HERE%.d}" != "$HERE" ]; then
 	ARGS="$@"
 elif [ $# != 0 ]; then
 	# Args on the command line, but not in .d. Assume they are test cases.
-	DIRS="$@"
+	DIRS=$(find "$@" -type d -name '*.d')
 fi
 
 for D in $DIRS; do
