@@ -1,32 +1,16 @@
 #!/bin/bash
 
-PRIVATE_CASES=""
-
-# START PRIVATE CASES
-PRIVATE_CASES="
-	cases/pcre-ragel.d
-	cases/rlhc.d
-	cases/trans.d
-	cases/rlparse.d
-	cases/pcre-colm.d
-	cases/yellowbrick.d
-	genf.d
-"
-# END PRIVATE CASES
-
-DIRS="
-	public/aapl.d
-	public/ragel.d
-	public/colm.d
-	${PRIVATE_CASES}
-"
+# Default to all .d direcories.
+DIRS=$(find -type d -name '*.d')
 
 HERE=$(basename $(pwd))
 if [ "${HERE%.d}" != "$HERE" ]; then
-	# In a test directory. Pass the arguments to the local gentests.
-	ARGS="$@"
+	# In a test directory. Set DIR to . and pass any arguments to the local
+	# gentests.
 	DIRS=.
+	ARGS="$@"
 elif [ $# != 0 ]; then
+	# Args on the command line, but not in .d. Assume they are test cases.
 	DIRS="$@"
 fi
 

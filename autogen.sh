@@ -11,7 +11,11 @@ cd cases
 ./autogen.sh
 cd ..
 
-cd genf.d/app1
+cd genf/app1.d
+$HOME/pkgs/pkgbuild/bin/autogen.sh
+cd ../..
+
+cd genf/kern1.d
 $HOME/pkgs/pkgbuild/bin/autogen.sh
 cd ../..
 

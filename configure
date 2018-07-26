@@ -6,6 +6,7 @@ while getopts "h-:" opt; do
 		-)
 			WITH=${OPTARG/=*/}
 			VAL=${OPTARG/*=/}
+			LOG_ARGS="$LOG_ARGS --$OPTARG"
 			case $WITH in
 				with-aapl)
 					WITH_AAPL=$VAL
@@ -24,11 +25,12 @@ while getopts "h-:" opt; do
 					exit 1
 				;;
 			esac
+
 		;;
 	esac
 done
 
-set -x
+set -xe
 
 cd public
 ./configure --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
@@ -39,6 +41,14 @@ cd cases
 cd ..
 
 root=$(pwd)
-cd genf.d/app1
-./configure --prefix=$root/genf.d/working/app1 --with-aapl=$WITH_AAPL --with-subject=$WITH_GENF
+
+cd genf/app1.d
+./configure --prefix=$root/genf/inst/app1 --with-aapl=$WITH_AAPL --with-subject=$WITH_GENF
 cd ../..
+
+cd genf/kern1.d
+./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-subject=$WITH_GENF
+cd ../..
+
+
+echo ./configure $LOG_ARGS > config.log

@@ -10,8 +10,8 @@ LOG=working/app1.log
 DIFF=working/app1.diff
 
 rm -f $SH
-echo echo executing ./app1/src/app1 >> $SH
-echo ./app1/src/app1 '>' $OUT '2>' $LOG >> $SH
-echo diff app1/expected $OUT '>' $DIFF >> $SH
+echo echo executing ./src/app1 >> $SH
+echo ./src/app1 '>' $OUT '2>' $LOG >> $SH
+echo diff expected $OUT '>' $DIFF >> $SH
 
 echo $SH
