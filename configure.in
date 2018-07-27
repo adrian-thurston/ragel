@@ -1,40 +1,50 @@
 #!/bin/bash
 #
 
+# vim: syntax=sh
+
+set -e
+
 while getopts "h-:" opt; do
 	case $opt in
 		-)
 			WITH=${OPTARG/=*/}
 			VAL=${OPTARG/*=/}
-			LOG_ARGS="$LOG_ARGS --$OPTARG"
 			case $WITH in
-				with-aapl)
-					WITH_AAPL=$VAL
-				;;
-				with-colm)
-					WITH_COLM=$VAL
-				;;
-				with-ragel)
-					WITH_RAGEL=$VAL
-				;;
-				with-genf)
-					WITH_GENF=$VAL
-				;;
-				*)
-					echo "$0: unrecognized option --$OPTARG" >&2
-					exit 1
-				;;
+				with-aapl) WITH_AAPL=$VAL;;
+				with-colm) WITH_COLM=$VAL;;
+				with-ragel) WITH_RAGEL=$VAL;;
+				prefix) PREFIX=$VAL;;
 			esac
 
 		;;
 	esac
 done
 
-set -xe
+set -x
 
 cd public
 ./configure --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
 cd ..
+
+# END PUBLIC
+
+set +x
+OPTIND=0
+while getopts "h-:" opt; do
+	case $opt in
+		-)
+			WITH=${OPTARG/=*/}
+			VAL=${OPTARG/*=/}
+			case $WITH in
+				with-genf) WITH_GENF=$VAL;;
+			esac
+
+		;;
+	esac
+done
+
+set -x
 
 cd cases
 ./configure --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
@@ -50,5 +60,10 @@ cd genf/kern1.d
 ./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
+# BEGIN PUBLIC
 
-echo ./configure $LOG_ARGS > config.log
+echo ./configure "$@" > config.log
+
+rm -f Makefile
+cp Makefile.in Makefile
+chmod -w Makefile

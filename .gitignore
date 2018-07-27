@@ -1,2 +1,4 @@
 /config.log
 /testing-*.tar.gz
+/configure
+/Makefile

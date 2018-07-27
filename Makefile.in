@@ -1,4 +1,7 @@
-DIRS = public cases genf
+DIRS = public 
 
 all:
 	set -x; for D in $(DIRS); do cd $$D; make; cd ..; done
+
+# END PUBLIC
+DIRS += cases genf
