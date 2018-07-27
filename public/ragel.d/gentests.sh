@@ -19,6 +19,18 @@ export RAGEL_CPPFLAGS="@RAGEL_CPPFLAGS@"
 export RAGEL_LDFLAGS="@RAGEL_LDFLAGS@"
 export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
 
+export RAGEL_C_BIN="@RAGEL_C_BIN@"
+export RAGEL_D_BIN="@RAGEL_D_BIN@"
+export RAGEL_JAVA_BIN="@RAGEL_JAVA_BIN@"
+export RAGEL_RUBY_BIN="@RAGEL_RUBY_BIN@"
+export RAGEL_CSHARP_BIN="@RAGEL_CSHARP_BIN@"
+export RAGEL_GO_BIN="@RAGEL_GO_BIN@"
+export RAGEL_OCAML_BIN="@RAGEL_OCAML_BIN@"
+export RAGEL_ASM_BIN="@RAGEL_ASM_BIN@"
+export RAGEL_RUST_BIN="@RAGEL_RUST_BIN@"
+export RAGEL_CRACK_BIN="@RAGEL_CRACK_BIN@"
+export RAGEL_JULIA_BIN="@RAGEL_JULIA_BIN@"
+
 function sig_exit()
 {
 	echo
@@ -131,8 +143,8 @@ function lang_opts()
 			code_suffix=c;
 			interpreted=false
 			compiler=$c_compiler;
-			#host_ragel=$ragel
-			host_ragel=`dirname $ragel`/host-c/ragel-c
+			#host_ragel=ragel
+			host_ragel=$RAGEL_C_BIN
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_flags=""
@@ -143,7 +155,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$cxx_compiler;
 			#host_ragel=$ragel
-			host_ragel=`dirname $ragel`/host-c/ragel-c
+			host_ragel=$RAGEL_C_BIN
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_flags=""
@@ -154,7 +166,7 @@ function lang_opts()
 			interpreted=false
 			compiler=$objc_compiler
 			#host_ragel=$ragel
-			host_ragel=`dirname $ragel`/host-c/ragel-c
+			host_ragel=$RAGEL_C_BIN
 			flags="`gnustep-config --objc-flags`"
 			libs="-lobjc -lgnustep-base"
 			prohibit_flags=""
@@ -164,7 +176,7 @@ function lang_opts()
 			code_suffix=d;
 			interpreted=false
 			compiler=$d_compiler;
-			host_ragel=`dirname $ragel`/host-d/ragel-d
+			host_ragel=$RAGEL_D_BIN
 			flags="-Wall -O3"
 			libs=""
 			prohibit_flags="--string-tables"
@@ -174,7 +186,7 @@ function lang_opts()
 			code_suffix=java;
 			interpreted=false
 			compiler=$java_compiler
-			host_ragel=`dirname $ragel`/host-java/ragel-java
+			host_ragel=$RAGEL_JAVA_BIN
 			flags=""
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
@@ -184,7 +196,7 @@ function lang_opts()
 			code_suffix=rb;
 			interpreted=true
 			compiler=$ruby_engine
-			host_ragel=`dirname $ragel`/host-ruby/ragel-ruby
+			host_ragel=$RAGEL_RUBY_BIN
 			flags=""
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
@@ -194,7 +206,7 @@ function lang_opts()
 			code_suffix=cs;
 			interpreted=false
 			compiler=$csharp_compiler
-			host_ragel=`dirname $ragel`/host-csharp/ragel-csharp
+			host_ragel=$RAGEL_CSHARP_BIN
 			flags=""
 			libs=""
 			prohibit_flags="-G2 --string-tables"
@@ -204,7 +216,7 @@ function lang_opts()
 			code_suffix=go
 			interpreted=false
 			compiler=$go_compiler
-			host_ragel=`dirname $ragel`/host-go/ragel-go
+			host_ragel=$RAGEL_GO_BIN
 			flags="build"
 			libs=""
 			prohibit_flags="--string-tables"
@@ -214,7 +226,7 @@ function lang_opts()
 			code_suffix=ml
 			interpreted=true
 			compiler=$ocaml_compiler
-			host_ragel=`dirname $ragel`/host-ocaml/ragel-ocaml
+			host_ragel=$RAGEL_OCAML_BIN
 			flags=""
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
@@ -224,7 +236,7 @@ function lang_opts()
 			code_suffix=s
 			interpreted=false
 			compiler="gcc"
-			host_ragel=`dirname $ragel`/host-asm/ragel-asm
+			host_ragel=$RAGEL_ASM_BIN
 			flags=""
 			libs=""
 			prohibit_flags="-T0 -T1 -F0 -F1 -G0 -G1 --string-tables"
@@ -234,7 +246,7 @@ function lang_opts()
 			code_suffix=rs
 			interpreted=false
 			compiler=$rust_compiler
-			host_ragel=`dirname $ragel`/host-rust/ragel-rust
+			host_ragel=$RAGEL_RUST_BIN
 			flags="-A non_upper_case_globals -A dead_code -A unused_variables -A unused_assignments -A unused_mut -A unused_parens"
 			libs=""
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
@@ -244,7 +256,7 @@ function lang_opts()
 			code_suffix=crk
 			interpreted=true
 			compiler=$crack_interpreter
-			host_ragel=`dirname $ragel`/host-crack/ragel-crack
+			host_ragel=$RAGEL_CRACK_BIN
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 		;;
 		julia)
@@ -252,7 +264,7 @@ function lang_opts()
 			code_suffix=jl
 			interpreted=true
 			compiler=$julia_interpreter
-			host_ragel=`dirname $ragel`/host-julia/ragel-julia
+			host_ragel=$RAGEL_JULIA_BIN
 			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
 		;;
 		indep)

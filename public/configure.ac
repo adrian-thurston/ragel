@@ -23,6 +23,7 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+
 dnl
 dnl Which ragel are we testing. Can use a src or install directory.
 dnl
@@ -34,11 +35,35 @@ AC_ARG_WITH(ragel,
 			RAGEL_CPPFLAGS="-I$withval/include"
 			RAGEL_LDFLAGS="-L$withval/lib -Wl,-rpath,${withval}/lib"
 			RAGEL_LM="${withval}/share"
+
+			RAGEL_C_BIN="$withval/bin/ragel-c"
+			RAGEL_D_BIN="$withval/bin/ragel-d"
+			RAGEL_JAVA_BIN="$withval/bin/ragel-java"
+			RAGEL_RUBY_BIN="$withval/bin/ragel-ruby"
+			RAGEL_CSHARP_BIN="$withval/bin/ragel-csharp"
+			RAGEL_GO_BIN="$withval/bin/ragel-go"
+			RAGEL_OCAML_BIN="$withval/bin/ragel-ocaml"
+			RAGEL_ASM_BIN="$withval/bin/ragel-asm"
+			RAGEL_RUST_BIN="$withval/bin/ragel-rust"
+			RAGEL_CRACK_BIN="$withval/bin/ragel-crack"
+			RAGEL_JULIA_BIN="$withval/bin/ragel-julia"
 		else
 			RAGEL_BIN="${withval}/src/ragel"
 			RAGEL_CPPFLAGS="-I${withval}/src/include -I${withval}/aapl"
 			RAGEL_LDFLAGS="-L${withval}/src/.libs -Wl,-rpath,${withval}/src/.libs"
 			RAGEL_LM="${withval}/src"
+
+			RAGEL_C_BIN="$withval/src/host-c/ragel-c"
+			RAGEL_D_BIN="$withval/src/host-d/ragel-d"
+			RAGEL_JAVA_BIN="$withval/src/host-java/ragel-java"
+			RAGEL_RUBY_BIN="$withval/src/host-ruby/ragel-ruby"
+			RAGEL_CSHARP_BIN="$withval/src/host-csharp/ragel-csharp"
+			RAGEL_GO_BIN="$withval/src/host-go/ragel-go"
+			RAGEL_OCAML_BIN="$withval/src/host-ocaml/ragel-ocaml"
+			RAGEL_ASM_BIN="$withval/src/host-asm/ragel-asm"
+			RAGEL_RUST_BIN="$withval/src/host-rust/ragel-rust"
+			RAGEL_CRACK_BIN="$withval/src/host-crack/ragel-crack"
+			RAGEL_JULIA_BIN="$withval/src/host-julia/ragel-julia"
 		fi
 	],
 	[AC_ERROR(["require --with-ragel"])]
@@ -57,7 +82,7 @@ AC_ARG_WITH(ragel-src,
 AC_CHECK_FILES(
 	[$RAGEL_BIN],
 	[],
-	[AC_ERROR([colm is required to build this package])]
+	[AC_ERROR([ragel is required to build this package])]
 )
 
 AC_SUBST(RAGEL_SRC)
@@ -114,9 +139,20 @@ AC_ARG_WITH(aapl,
 )
 
 AC_SUBST(AAPL_CPPFLAGS)
-
+			
 SED_SUBST=["\
 	-e 's|@RAGEL_BIN@|${RAGEL_BIN}|g' \
+	-e 's|@RAGEL_C_BIN@|${RAGEL_C_BIN}|g' \
+	-e 's|@RAGEL_D_BIN@|${RAGEL_D_BIN}|g' \
+	-e 's|@RAGEL_JAVA_BIN@|${RAGEL_JAVA_BIN}|g' \
+	-e 's|@RAGEL_RUBY_BIN@|${RAGEL_RUBY_BIN}|g' \
+	-e 's|@RAGEL_CSHARP_BIN@|${RAGEL_CSHARP_BIN}|g' \
+	-e 's|@RAGEL_GO_BIN@|${RAGEL_GO_BIN}|g' \
+	-e 's|@RAGEL_OCAML_BIN@|${RAGEL_OCAML_BIN}|g' \
+	-e 's|@RAGEL_ASM_BIN@|${RAGEL_ASM_BIN}|g' \
+	-e 's|@RAGEL_RUST_BIN@|${RAGEL_RUST_BIN}|g' \
+	-e 's|@RAGEL_CRACK_BIN@|${RAGEL_CRACK_BIN}|g' \
+	-e 's|@RAGEL_JULIA_BIN@|${RAGEL_JULIA_BIN}|g' \
 	-e 's|@RAGEL_CPPFLAGS@|${RAGEL_CPPFLAGS}|g' \
 	-e 's|@RAGEL_LDFLAGS@|${RAGEL_LDFLAGS}|g' \
 	-e 's|@RAGEL_LM@|${RAGEL_LM}|g' \
