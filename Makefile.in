@@ -5,3 +5,6 @@ all:
 
 # END PUBLIC
 DIRS += cases genf
+
+install:
+	echo dud
