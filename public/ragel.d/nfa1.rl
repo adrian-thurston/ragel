@@ -1,5 +1,6 @@
 /*
  * @LANG: c
+ * @FILTER: sort
  */
 
 #include <string.h>
@@ -111,31 +112,31 @@ int main( )
 }
 
 ##### OUTPUT #####
+
+
+
+
+
+
+
+
+
+
 1
--> accept
-
-12
--> accept
-
-saw 80808080
 1002000000002
--> accept
-
-222222
--> accept
-
-2123
--> accept
-
+12
 -12321
--> accept
-
+2123
+222222
 -99
 -> accept
-
+-> accept
+-> accept
+-> accept
+-> accept
+-> accept
+-> accept
 -> fail
-
 -> fail
-
 -> fail
-
+saw 80808080
