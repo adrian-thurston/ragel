@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+
+set -xe
+
+TMP=$(mktemp -d /tmp/testing.XXXXXX)
+
+git clone . $TMP/testing
+
+VERSION=$(git -C $TMP/testing log -n 1 master | sed -n '1{ s/commit \(........\).*/\1/; p }')
+
+echo $VERSION
+
+tar -C $TMP/testing --xform "s,^,testing-$VERSION/," -czf testing-$VERSION.tar.gz \
+	autogen.sh configure Makefile runtests timed public
+
+rm -Rf $TMP/testing
