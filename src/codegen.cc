@@ -1096,8 +1096,8 @@ void CodeGen::NFA_PUSH( std::string state )
 
 		if ( redFsm->bAnyNfaPops ) {
 			out <<
-				"			nfa_bp[nfa_len].popTrans = " << CAST("long") <<
-								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt;\n"
+				"			nfa_bp[nfa_len].popTrans = " << ARR_REF( nfaPopTrans ) << "[" << CAST("long") <<
+								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt];\n"
 				"\n"
 				;
 		}

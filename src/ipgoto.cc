@@ -485,7 +485,53 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 {
 	std::stringstream ss;
 	ss << state->id;
-	CodeGen::NFA_PUSH( ss.str() );
+	std::string _state = ss.str();
+
+	if ( redFsm->anyNfaStates() ) {
+
+		if ( state->nfaTargs != 0 ) {
+			out <<
+				"	if ( " << ARR_REF( nfaOffsets ) << "[" << _state << "] ) {\n"
+				"		int new_recs = " << state->nfaTargs->length() << ";\n";
+
+			if ( red->nfaPrePushExpr != 0 ) {
+				out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
+				INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
+				out << CLOSE_HOST_BLOCK();
+			}
+
+			int alt = 0;
+			for ( RedNfaTargs::Iter nt = *state->nfaTargs; nt.lte(); nt++ ) {
+				out <<
+					"			nfa_bp[nfa_len].state = " << nt->state->id << ";\n"
+					"			nfa_bp[nfa_len].p = " << P() << ";\n";
+
+				if ( nt->popTest != 0 ) {
+					out <<
+						"			nfa_bp[nfa_len].popTrans = " << (nt->popTest->actListId+1) << ";\n"
+						"\n"
+						;
+				}
+				else if ( redFsm->bAnyNfaPops ) {
+					out <<
+						"			nfa_bp[nfa_len].popTrans = 0;\n";
+				}
+
+				if ( nt->push != 0 )  {
+					for ( GenActionTable::Iter item = nt->push->key; item.lte(); item++ )
+						ACTION( out, item->value, IlOpts( 0, false, false ) );
+				}
+
+				out <<
+					"			nfa_len += 1;\n";
+
+				alt += 1;
+			}
+			out <<
+				"	}\n"
+				;
+		}
+	}
 }
 
 std::ostream &IpGoto::STATE_GOTOS()

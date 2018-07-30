@@ -130,8 +130,7 @@ void TabVar::NFA_POP()
 			NFA_FROM_STATE_ACTION_EXEC();
 
 			out << 
-				"		switch ( " << ARR_REF( nfaPopTrans ) <<
-							"[nfa_bp[nfa_len].popTrans] ) {\n";
+				"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
