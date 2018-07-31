@@ -711,7 +711,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "r:o:dnmleabjkS:M:I:CEJZRAOKUYvHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "o:dnmleabjkS:M:I:vHh?-:sT:F:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -818,40 +818,6 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				break;
 
-			/* Host language types. */
-			case 'C':
-				hostLang = &hostLangC;
-				break;
-//			case 'D':
-//				hostLang = &hostLangD;
-//				break;
-//			case 'Z':
-//				hostLang = &hostLangGo;
-//				break;
-//			case 'J':
-//				hostLang = &hostLangJava;
-//				break;
-//			case 'R':
-//				hostLang = &hostLangRuby;
-//				break;
-//			case 'A':
-//				hostLang = &hostLangCSharp;
-//				break;
-//			case 'O':
-//				hostLang = &hostLangOCaml;
-//				break;
-//			case 'K':
-//				hostLang = &hostLangCrack;
-//				break;
-//			case 'U':
-//				hostLang = &hostLangRust;
-//				break;
-//			case 'Y':
-//				hostLang = &hostLangJulia;
-//				break;
-//			case 'P':
-//				hostLang = &hostLangJS;
-//				break;
 
 			/* Version and help. */
 			case 'v':
@@ -884,8 +850,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					else
 						error() << "invalid value for error-format" << endl;
 				}
-				else if ( strcmp( arg, "rbx" ) == 0 )
-					rubyImpl = Rubinius;
 				else if ( strcmp( arg, "rlhc" ) == 0 )
 					rlhc = true;
 				else if ( strcmp( arg, "no-intermediate" ) == 0 )
@@ -920,12 +884,14 @@ void InputData::parseArgs( int argc, const char **argv )
 					showBackends();
 				else if ( strcmp( arg, "save-temps" ) == 0 )
 					saveTemps = true;
+
 				else if ( strcmp( arg, "prior-interaction" ) == 0 )
 					checkPriorInteraction = true;
 				else if ( strcmp( arg, "conds-depth" ) == 0 )
 					condsCheckDepth = strtol( eq, 0, 10 );
 				else if ( strcmp( arg, "state-limit" ) == 0 )
 					stateLimit = strtol( eq, 0, 10 );
+
 				else if ( strcmp( arg, "breadth-check" ) == 0 ) {
 					char *ptr = 0;
 					while ( true ) {
@@ -939,8 +905,6 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				else if ( strcmp( arg, "input-histogram" ) == 0 )
 					histogramFn = strdup(eq);
-				else if ( strcmp( arg, "force-libragel" ) == 0 )
-					forceLibRagel = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;

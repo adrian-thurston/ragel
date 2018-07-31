@@ -189,7 +189,6 @@ struct InputData
 		noLineDirectives(false),
 		maxTransitions(LONG_MAX),
 		numSplitPartitions(0),
-		rubyImpl(MRI),
 		rlhc(false),
 		rlhcShowCmd(false),
 		noIntermediate(false),
@@ -204,12 +203,8 @@ struct InputData
 		varBackend(false),
 		histogramFn(0),
 		histogram(0),
-		input(0),
-		forceLibRagel(false)
-	{
-		
-	
-	}
+		input(0)
+	{}
 
 	~InputData();
 
@@ -272,9 +267,6 @@ struct InputData
 	long maxTransitions;
 	int numSplitPartitions;
 
-	/* Target ruby impl */
-	RubyImplEnum rubyImpl;
-
 	bool rlhc;
 	bool rlhcShowCmd;
 	bool noIntermediate;
@@ -300,8 +292,6 @@ struct InputData
 	const char *input;
 
 	Vector<const char**> streamFileNames;
-
-	bool forceLibRagel;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
