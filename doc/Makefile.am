@@ -51,4 +51,7 @@ ragel-guide.html: bmconcat.png bmregex.png dropdown.png exdoneact.png \
 	bmrange.png conds2.png exconcat.png exor.png exstar.png lines1.png \
 	opstar.png
 
+ragel-guide.pdf: ragel-guide.txt
+	a2x --verbose -f pdf -d book $<
+
 endif
