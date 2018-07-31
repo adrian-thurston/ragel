@@ -1,3 +1,32 @@
+Ragel 7.0.1 - Aug XXX, 2018
+===========================
+ -Condition implemenation rewritten. Previously utilized an extension of the
+  alphabet space to encode "character when A". The character was looked up, the
+  applicable condition set determined, a constant value was added to the
+  character value, then the real transition looked up. Now a more natural
+  implemation has the transition encoded in two levels of lists. The first
+  level is indexed by the alphabet character, which is unmodified. This tells
+  us which condition set to execute. The result of the condition execution is
+  an integer that is looked up in a second level list. This new condition
+  implementation allows for a much less complicated implemation, and does not
+  rely on available bits in the alphabet space.
+ -Conditions now properly execution on EOF.
+ -Added a Condition-based repetition operator.
+ -Ragel frontend is now colm-based. The grammar is separated into a core ragel
+  grammar that can then be extended for different host languages.
+ -Intermediate codegen language was added and non-C/ASM code generators are now
+  based on the intermediate language. Separate ragel executable files are used
+  to implement the different host languages.
+ -Restrictions on action-based jumping to and calling of state machines in
+  languages where it cannot be implemented properly (no goto in host language).
+  These statements must be replaced with the "next" version, which does not
+  jump out of the action, but instead causes the jump/call after the action
+  list.
+ -Added NFA features. This includes repetition and support for large unions of
+  expressions. The operator can create a deterministic prefix, the depth of
+  which is configurable, before NFA alternation begins.
+ -Consolodating code in the different code generation styles.
+
 Ragel 6.10 - Mar 24, 2017
 =========================
  -C codegen: test P vs PE in goto/call/ret statements in EOF actions, just
