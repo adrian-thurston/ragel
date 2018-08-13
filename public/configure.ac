@@ -23,6 +23,13 @@ AC_LANG_CPLUSPLUS
 dnl Check for definition of MAKE.
 AC_PROG_MAKE_SET
 
+AC_ARG_WITH(crack,
+	[AC_HELP_STRING([--with-crack], [location of crack install])],
+	[CRACK_BIN="$withval/bin/crack"],
+	[AC_ERROR(["require --with-crack"])]
+)
+
+AC_SUBST(CRACK_BIN)
 
 dnl
 dnl Which ragel are we testing. Can use a src or install directory.
@@ -141,6 +148,7 @@ AC_ARG_WITH(aapl,
 AC_SUBST(AAPL_CPPFLAGS)
 			
 SED_SUBST=["\
+	-e 's|@CRACK_BIN@|${CRACK_BIN}|g' \
 	-e 's|@RAGEL_BIN@|${RAGEL_BIN}|g' \
 	-e 's|@RAGEL_C_BIN@|${RAGEL_C_BIN}|g' \
 	-e 's|@RAGEL_D_BIN@|${RAGEL_D_BIN}|g' \

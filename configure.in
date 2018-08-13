@@ -11,6 +11,7 @@ while getopts "h-:" opt; do
 			WITH=${OPTARG/=*/}
 			VAL=${OPTARG/*=/}
 			case $WITH in
+				with-crack) WITH_CRACK=$VAL;;
 				with-aapl) WITH_AAPL=$VAL;;
 				with-colm) WITH_COLM=$VAL;;
 				with-ragel) WITH_RAGEL=$VAL;;
@@ -24,7 +25,7 @@ done
 set -x
 
 cd public
-./configure --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
+./configure --with-crack=$WITH_CRACK --with-aapl=$WITH_AAPL --with-colm=$WITH_COLM --with-ragel=$WITH_RAGEL
 cd ..
 
 # END PUBLIC
