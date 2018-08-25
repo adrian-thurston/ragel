@@ -1,0 +1,15 @@
+/*_gen.h
+/*_gen.cc
+/.libs
+/genf.h.in
+/genf.h
+/genf.mk
+/init.d
+/init.d.sh
+/bootstrap.sh
+/bootstrap
+/Makefile
+/Makefile.in
+/*.o
+/.deps
+/process1

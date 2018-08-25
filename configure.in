@@ -61,6 +61,10 @@ cd genf/kern1.d
 ./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
+cd genf/process1.d
+./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
+cd ../..
+
 # BEGIN PUBLIC
 
 echo ./configure "$@" > config.log
