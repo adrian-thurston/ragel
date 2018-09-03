@@ -21,6 +21,10 @@ cd genf/kern1.d
 $HOME/pkgs/pkgbuild/bin/autogen.sh
 cd ../..
 
+cd genf/process1.d
+$HOME/pkgs/pkgbuild/bin/autogen.sh
+cd ../..
+
 # BEGIN PUBLIC
 
 rm -f configure
