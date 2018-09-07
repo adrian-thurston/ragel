@@ -495,10 +495,10 @@ import "inputfile.h";
 The +import+ statement scrapes a file for sequences of tokens that match the
 following forms. Ragel treats these forms as state machine definitions.
 
-* +name '=' number+
-* +name '=' lit_string+
-* +'define' name number+
-* +'define' name lit_string+
+* name '=' number
+* name '=' lit_string
+* 'define' name number
+* 'define' name lit_string
 
 If the input file is a Ragel program then tokens inside any Ragel
 specifications are ignored. See the section on <<export, Write Exports>> for a
