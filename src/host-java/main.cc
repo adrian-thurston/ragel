@@ -22,6 +22,7 @@
 
 #include "inputdata.h"
 
+extern struct colm_sections rl_parse;
 extern struct colm_sections rlhc;
 
 /*
@@ -59,6 +60,6 @@ const HostLang hostLangJava = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJava, &rlhc );
+	InputData id( &hostLangJava, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

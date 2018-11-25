@@ -51,9 +51,10 @@ struct SectionPass;
 
 struct TopLevel
 {
-	TopLevel( InputData *id, const HostLang *hostLang,
+	TopLevel( struct colm_sections *frontendSections, InputData *id, const HostLang *hostLang,
 			MinimizeLevel minimizeLevel, MinimizeOpt minimizeOpt )
 	:
+		frontendSections(frontendSections),
 		id(id),
 		section(0),
 		pd(0),
@@ -74,6 +75,7 @@ struct TopLevel
 		exportContext.append( false );
 	}
 
+	struct colm_sections *frontendSections;
 	InputData *id;
 	Section *section;
 	SectionPass *sectionPass;

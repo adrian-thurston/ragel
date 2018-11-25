@@ -476,7 +476,7 @@ bool InputData::parseReduce()
 	 * Colm-based reduction parser introduced in ragel 7. 
 	 */
 
-	TopLevel *topLevel = new TopLevel( this, hostLang,
+	TopLevel *topLevel = new TopLevel( frontendSections, this, hostLang,
 			minimizeLevel, minimizeOpt );
 
 	/* Check input file. File is actually opened by colm code. We don't

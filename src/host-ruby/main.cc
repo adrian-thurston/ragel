@@ -22,6 +22,7 @@
 
 #include "inputdata.h"
 
+extern struct colm_sections rl_parse;
 extern struct colm_sections rlhc;
 
 /* What are the appropriate types for ruby? */
@@ -53,6 +54,6 @@ static const HostLang hostLangRuby = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangRuby, &rlhc );
+	InputData id( &hostLangRuby, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

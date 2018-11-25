@@ -23,6 +23,7 @@
 #include "inputdata.h"
 #include "asm.h"
 
+extern struct colm_sections rl_parse;
 extern struct colm_sections rlhc;
 
 const HostLang hostLangC_translated = {
@@ -42,7 +43,7 @@ const HostLang hostLangC_translated = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangC_translated, &rlhc );
+	InputData id( &hostLangC_translated, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }
 

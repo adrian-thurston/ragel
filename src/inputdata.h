@@ -169,7 +169,7 @@ struct InputData
 :
 	public FsmGbl
 {
-	InputData( const HostLang *hostLang, struct colm_sections *rlhcSections = 0 )
+	InputData( const HostLang *hostLang, struct colm_sections *frontendSections, struct colm_sections *rlhcSections )
 	: 
 		FsmGbl(hostLang),
 		rlhcSections(rlhcSections),
@@ -215,6 +215,7 @@ struct InputData
 	void showFrontends();
 	void showBackends();
 
+	struct colm_sections *frontendSections;
 	struct colm_sections *rlhcSections;
 	std::string dirName;
 

@@ -22,6 +22,7 @@
 
 #include "inputdata.h"
 
+extern struct colm_sections rl_parse;
 extern struct colm_sections rlhc;
 
 /*
@@ -54,6 +55,6 @@ const HostLang hostLangOCaml = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rlhc );
+	InputData id( &hostLangOCaml, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

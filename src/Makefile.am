@@ -56,6 +56,8 @@ dist_libfsm_la_SOURCES = \
 nodist_libfsm_la_SOURCES = \
 	version.h
 
+libfsm_la_LDFLAGS = -Wl,--no-undefined
+
 #
 # libragel: ragel program minus host-specific code
 #
@@ -64,6 +66,10 @@ libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
 dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
 	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc
+
+libragel_la_LDFLAGS = -Wl,--no-undefined
+libragel_la_LIBADD = libfsm.la $(COLM_LD)
+
 
 #
 # ragel program.
