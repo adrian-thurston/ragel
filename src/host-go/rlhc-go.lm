@@ -290,9 +290,11 @@ namespace go_gen
 		case [A: static_array] {
 			"var [A.ident] \[\] [type(A.type)] = \[\] "
 				"[type(A.type)] { [num_list(A.num_list)] }
+			"_ = [A.ident]
 		}
 		case [V: static_value] {
 			"var [V.ident] [type(V.type)] = [V.number]
+			"_ = [V.ident]
 		}
 		case [
 				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
