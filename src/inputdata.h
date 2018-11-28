@@ -172,6 +172,7 @@ struct InputData
 	InputData( const HostLang *hostLang, struct colm_sections *frontendSections, struct colm_sections *rlhcSections )
 	: 
 		FsmGbl(hostLang),
+		frontendSections(frontendSections),
 		rlhcSections(rlhcSections),
 		inputFileName(0),
 		outputFileName(0),
