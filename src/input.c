@@ -475,7 +475,7 @@ static void input_prepend_data( struct colm_program *prg, struct input_impl_seq 
 
 	maybe_split( prg, si );
 
-	struct stream_impl *sub_si = colm_impl_new_text( "<text>", data, length );
+	struct stream_impl *sub_si = colm_impl_new_text( "<text1>", data, length );
 
 	struct seq_buf *new_buf = new_seq_buf();
 	new_buf->type = SB_ACCUM;
@@ -557,7 +557,7 @@ static void input_append_data( struct colm_program *prg, struct input_impl_seq *
 	if ( si->queue.tail == 0 || si->queue.tail->type != SB_ACCUM ) { 
 		debug( prg, REALM_INPUT, "input_append_data: creating accum\n" );
 
-		struct stream_impl *sub_si = colm_impl_new_accum( "<text>" );
+		struct stream_impl *sub_si = colm_impl_new_accum( "<text2>" );
 
 		struct seq_buf *new_buf = new_seq_buf();
 		new_buf->type = SB_ACCUM;

@@ -3093,14 +3093,17 @@ again:
 			colm_tree_downref( prg, sp, tree );
 			break;
 		}
-		case IN_GET_TOKEN_POS_R: {
-			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_POS_R\n" );
-
+		case IN_GET_TOKEN_FILE_R: {
+			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_FILE_R\n" );
 			tree_t *tree = vm_pop_tree();
-			value_t integer = 0;
-			if ( tree->tokdata->location )
-				integer = tree->tokdata->location->byte;
-			vm_push_value( integer );
+			tree_t *str = 0;
+			if ( tree->tokdata->location ) {
+				const char *fn = tree->tokdata->location->name;
+				head_t *data = string_alloc_full( prg, fn, strlen(fn) );
+				str = construct_string( prg, data );
+				colm_tree_upref( prg, str );
+			}
+			vm_push_tree( str );
 			colm_tree_downref( prg, sp, tree );
 			break;
 		}
@@ -3111,7 +3114,28 @@ again:
 			value_t integer = 0;
 			if ( tree->tokdata->location )
 				integer = tree->tokdata->location->line;
+			vm_push_value( integer );
+			colm_tree_downref( prg, sp, tree );
+			break;
+		}
+		case IN_GET_TOKEN_COL_R: {
+			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_COL_R\n" );
 
+			tree_t *tree = vm_pop_tree();
+			value_t integer = 0;
+			if ( tree->tokdata->location )
+				integer = tree->tokdata->location->column;
+			vm_push_value( integer );
+			colm_tree_downref( prg, sp, tree );
+			break;
+		}
+		case IN_GET_TOKEN_POS_R: {
+			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_POS_R\n" );
+
+			tree_t *tree = vm_pop_tree();
+			value_t integer = 0;
+			if ( tree->tokdata->location )
+				integer = tree->tokdata->location->byte;
 			vm_push_value( integer );
 			colm_tree_downref( prg, sp, tree );
 			break;

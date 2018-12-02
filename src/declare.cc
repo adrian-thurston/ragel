@@ -926,6 +926,45 @@ ObjectField *Compiler::makeDataEl()
 	return el;
 }
 
+ObjectField *Compiler::makeFileEl()
+{
+	/* Create the "file" field. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "file" );
+
+	el->isConst = true;
+	el->inGetR = IN_GET_TOKEN_FILE_R;
+	el->inGetValR = IN_GET_TOKEN_FILE_R;
+	return el;
+}
+
+ObjectField *Compiler::makeLineEl()
+{
+	/* Create the "line" field. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "line" );
+
+	el->isConst = true;
+	el->inGetR = IN_GET_TOKEN_LINE_R;
+	el->inGetValR = IN_GET_TOKEN_LINE_R;
+	return el;
+}
+
+ObjectField *Compiler::makeColEl()
+{
+	/* Create the "col" field. */
+	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
+	ObjectField *el = ObjectField::cons( internal,
+			ObjectField::InbuiltFieldType, typeRef, "col" );
+
+	el->isConst = true;
+	el->inGetR = IN_GET_TOKEN_COL_R;
+	el->inGetValR = IN_GET_TOKEN_COL_R;
+	return el;
+}
+
 ObjectField *Compiler::makePosEl()
 {
 	/* Create the "data" field. */
@@ -936,19 +975,6 @@ ObjectField *Compiler::makePosEl()
 	el->isConst = true;
 	el->inGetR = IN_GET_TOKEN_POS_R;
 	el->inGetValR = IN_GET_TOKEN_POS_R;
-	return el;
-}
-
-ObjectField *Compiler::makeLineEl()
-{
-	/* Create the "data" field. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeInt );
-	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, "line" );
-
-	el->isConst = true;
-	el->inGetR = IN_GET_TOKEN_LINE_R;
-	el->inGetValR = IN_GET_TOKEN_LINE_R;
 	return el;
 }
 
@@ -977,13 +1003,21 @@ void Compiler::declareTokenFields( )
 				ObjectField *dataEl = makeDataEl();
 				lel->objectDef->rootScope->insertField( dataEl->name, dataEl );
 
-				/* Create the "pos" field. */
-				ObjectField *posEl = makePosEl();
-				lel->objectDef->rootScope->insertField( posEl->name, posEl );
+				/* Create the "file" field. */
+				ObjectField *fileEl = makeFileEl();
+				lel->objectDef->rootScope->insertField( fileEl->name, fileEl );
 
 				/* Create the "line" field. */
 				ObjectField *lineEl = makeLineEl();
 				lel->objectDef->rootScope->insertField( lineEl->name, lineEl );
+
+				/* Create the "col" field. */
+				ObjectField *colEl = makeColEl();
+				lel->objectDef->rootScope->insertField( colEl->name, colEl );
+
+				/* Create the "pos" field. */
+				ObjectField *posEl = makePosEl();
+				lel->objectDef->rootScope->insertField( posEl->name, posEl );
 			}
 		}
 	}

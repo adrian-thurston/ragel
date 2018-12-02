@@ -1012,8 +1012,10 @@ struct Compiler
 	CodeVect unwindCode;
 
 	ObjectField *makeDataEl();
-	ObjectField *makePosEl();
+	ObjectField *makeFileEl();
 	ObjectField *makeLineEl();
+	ObjectField *makeColEl();
+	ObjectField *makePosEl();
 
 	IterDef *findIterDef( IterDef::Type type, GenericType *generic );
 	IterDef *findIterDef( IterDef::Type type, Function *func );

@@ -234,7 +234,7 @@ static struct stream_impl *data_split_consumed( program_t *prg, struct stream_im
 	struct stream_impl *split_off = 0;
 	if ( sid->consumed > 0 ) {
 		debug( prg, REALM_INPUT, "maybe split: consumed is > 0, splitting\n" );
-		split_off = colm_impl_consumed( "<text>", sid->consumed );
+		split_off = colm_impl_consumed( "<text3>", sid->consumed );
 		sid->consumed = 0;
 	}
 	return split_off;
