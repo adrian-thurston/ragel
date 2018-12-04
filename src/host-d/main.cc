@@ -54,7 +54,6 @@ HostType hostTypesD[] =
 const HostLang hostLangD = {
 	"D",
 	"-D",
-	(HostLang::Lang)-1,
 	hostTypesD, 9,
 	hostTypesD+2,
 	true,

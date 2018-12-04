@@ -55,7 +55,6 @@ HostType hostTypesC[] =
 const HostLang hostLangC = {
 	"C",
 	"-C",
-	(HostLang::Lang)-1,
 	hostTypesC, 8,
 	hostTypesC+0,
 	true,
@@ -91,7 +90,6 @@ HostType hostTypesAsm[] =
 const HostLang hostLangAsm = {
 	"ASM",
 	"--asm",
-	(HostLang::Lang)-1,
 	hostTypesAsm, 8,
 	hostTypesAsm+0,
 	true,

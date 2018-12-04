@@ -40,7 +40,6 @@ const char *ruby_defaultOutFn( const char *inputFileName )
 static const HostLang hostLangRuby = {
 	"Ruby",
 	"-R",
-	(HostLang::Lang)-1,
 	hostTypesRuby, 2,
 	hostTypesRuby+0,
 	false,

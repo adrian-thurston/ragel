@@ -227,12 +227,10 @@ void InputData::writeOutput( InputItem *ii )
 		case InputItem::HostData: {
 			switch ( hostLang->backend ) {
 				case Direct:
-					if ( hostLang->_lang == HostLang::C ) {
-						if ( ii->loc.fileName != 0 ) {
-							if ( !noLineDirectives ) {
-								*outStream << "\n#line " << ii->loc.line <<
-										" \"" << ii->loc.fileName << "\"\n";
-							}
+					if ( ii->loc.fileName != 0 ) {
+						if ( !noLineDirectives ) {
+							*outStream << "\n#line " << ii->loc.line <<
+									" \"" << ii->loc.fileName << "\"\n";
 						}
 					}
 						

@@ -41,7 +41,6 @@ HostType hostTypesJulia[] =
 const HostLang hostLangJulia = {
 	"Julia",
 	"-Y",
-	(HostLang::Lang)-1,
 	hostTypesJulia, 1,
 	hostTypesJulia+0,
 	false,

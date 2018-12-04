@@ -48,7 +48,6 @@ HostType hostTypesJS[] =
 const HostLang hostLangJS = {
 	"JavaScript",
 	"-P",
-	(HostLang::Lang)-1,
 	hostTypesJS, 7,
 	hostTypesJS+1,
 	false,

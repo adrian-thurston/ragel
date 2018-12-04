@@ -54,7 +54,6 @@ HostType hostTypesCSharp[] =
 const HostLang hostLangCSharp = {
 	"C#",
 	"-A",
-	(HostLang::Lang)-1,
 	hostTypesCSharp, 9,
 	hostTypesCSharp+4,
 	true,

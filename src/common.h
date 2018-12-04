@@ -218,15 +218,8 @@ struct HostType
 
 struct HostLang
 {
-	/* Target language. */
-	enum Lang
-	{
-		C,
-	};
-
 	const char *name;
 	const char *arg;
-	Lang _lang;
 	HostType *hostTypes;
 	int numHostTypes;
 	HostType *defaultAlphType;

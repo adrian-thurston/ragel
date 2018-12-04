@@ -29,7 +29,6 @@ extern struct colm_sections rlhc;
 const HostLang hostLangC_translated = {
 	"C",
 	"-C",
-	HostLang::C,
 	hostTypesC, 8,
 	hostTypesC+0,
 	true,

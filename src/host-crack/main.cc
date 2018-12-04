@@ -45,7 +45,6 @@ HostType hostTypesCrack[] =
 const HostLang hostLangCrack = {
 	"Crack",
 	"-K",
-	(HostLang::Lang)-1,
 	hostTypesCrack, 5,
 	hostTypesCrack+0,
 	true,

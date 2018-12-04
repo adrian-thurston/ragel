@@ -45,7 +45,6 @@ HostType hostTypesJava[] =
 const HostLang hostLangJava = {
 	"Java",
 	"-J",
-	(HostLang::Lang)-1,
 	hostTypesJava, 4,
 	hostTypesJava+2,
 	false,

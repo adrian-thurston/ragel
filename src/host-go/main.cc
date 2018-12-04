@@ -51,7 +51,6 @@ HostType hostTypesGo[] =
 const HostLang hostLangGo = {
 	"Go",
 	"-Z",
-	(HostLang::Lang)-1,
 	hostTypesGo, 10,
 	hostTypesGo+0,
 	false,

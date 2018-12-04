@@ -41,7 +41,6 @@ HostType hostTypesRust[] =
 const HostLang hostLangRust = {
 	"Rust",
 	"-U",
-	(HostLang::Lang)-1,
 	hostTypesRust, 1,
 	hostTypesRust+0,
 	false,

@@ -41,7 +41,6 @@ HostType hostTypesOCaml[] =
 const HostLang hostLangOCaml = {
 	"OCaml",
 	"-O",
-	(HostLang::Lang)-1,
 	hostTypesOCaml, 1,
 	hostTypesOCaml+0,
 	false,
