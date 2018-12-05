@@ -378,13 +378,11 @@ namespace go_gen
 		{
 			"case [expr( CB.expr )]:
 			"[stmt_list( CB._repeat_stmt )]
-			"break;
 		}
 		case [DB: default_block]
 		{
 			"default:
 			"[stmt_list( DB._repeat_stmt )]
-			"break;
 		}
 		case [CL: case_label]
 		{
