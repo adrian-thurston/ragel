@@ -64,7 +64,8 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 	codeGen(codeGen),
 	out(codeGen.out),
 	ln(0),
-	isReferenced(false)
+	isReferenced(false),
+	started(false)
 {
 	codeGen.arrayVector.append( this );
 }
@@ -288,6 +289,8 @@ void TableArray::finishGenerate()
 
 void TableArray::start()
 {
+	assert( !started );
+	started = true;
 	switch ( state ) {
 		case InitialState:
 			break;
@@ -303,6 +306,7 @@ void TableArray::start()
 
 void TableArray::value( long long v )
 {
+	assert( started );
 	switch ( state ) {
 		case InitialState:
 			break;
@@ -318,6 +322,8 @@ void TableArray::value( long long v )
 
 void TableArray::finish()
 {
+	assert( started );
+	started = false;
 	switch ( state ) {
 		case InitialState:
 			break;

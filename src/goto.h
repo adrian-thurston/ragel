@@ -55,11 +55,7 @@ public:
 		actions(           "actions",             *this ),
 		toStateActions(    "to_state_actions",    *this ),
 		fromStateActions(  "from_state_actions",  *this ),
-		eofActions(        "eof_actions",         *this ),
-		nfaTargs(          "nfa_targs",           *this ),
-		nfaOffsets(        "nfa_offsets",         *this ),
-		nfaPushActions(    "nfa_push_actions",    *this ),
-		nfaPopTrans(       "nfa_pop_trans",        *this )
+		eofActions(        "eof_actions",         *this )
 	{}
 
 	void tableDataPass();
@@ -81,10 +77,6 @@ public:
 	TableArray toStateActions;
 	TableArray fromStateActions;
 	TableArray eofActions;
-	TableArray nfaTargs;
-	TableArray nfaOffsets;
-	TableArray nfaPushActions;
-	TableArray nfaPopTrans;
 
 	void taActions();
 	void taToStateActions();

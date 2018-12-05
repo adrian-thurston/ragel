@@ -122,6 +122,7 @@ struct TableArray
 	std::ostream &out;
 	int ln;
 	bool isReferenced;
+	bool started;
 };
 
 struct IlOpts

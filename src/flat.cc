@@ -219,9 +219,9 @@ void Flat::taEofConds()
 	eofCondSpaces.start();
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->outCondSpace != 0 )
-			transCondSpaces.value( st->outCondSpace->condSpaceId );
+			eofCondSpaces.value( st->outCondSpace->condSpaceId );
 		else
-			transCondSpaces.value( -1 );
+			eofCondSpaces.value( -1 );
 	}
 	eofCondSpaces.finish();
 
