@@ -383,7 +383,8 @@ struct CodeGenData
 		noError(false),
 		noCS(false),
 		lineDirectives(args.lineDirectives),
-		cleared(false)
+		cleared(false),
+		referencesCollected(false)
 	{
 	}
 
@@ -444,6 +445,9 @@ protected:
 
 	bool lineDirectives;
 	bool cleared;
+
+	void collectReferences();
+	bool referencesCollected;
 };
 
 /* Selects and constructs the codegen based on the output options. */

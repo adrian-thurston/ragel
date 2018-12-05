@@ -90,7 +90,7 @@ struct TableArray
 		this->isChar = isChar;
 	}
 
-	std::string ref() const;
+	std::string ref();
 
 	void value( long long v );
 
@@ -121,6 +121,7 @@ struct TableArray
 	CodeGen &codeGen;
 	std::ostream &out;
 	int ln;
+	bool isReferenced;
 };
 
 struct IlOpts
@@ -207,7 +208,7 @@ protected:
 	string ARR_TYPE( const TableArray &ta )
 		{ return ta.type; }
 
-	string ARR_REF( const TableArray &ta )
+	string ARR_REF( TableArray &ta )
 		{ return ta.ref(); }
 
 	void INLINE_EXPR( ostream &ret, GenInlineList *inlineList );

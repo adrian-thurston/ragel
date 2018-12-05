@@ -1560,6 +1560,22 @@ void CodeGenData::writeClear()
 	cleared = true;
 }
 
+void CodeGenData::collectReferences()
+{
+	/* Do this once only. */
+	if ( !referencesCollected ) {
+		referencesCollected = true;
+
+		/* Nullify the output and execute the write. We use this pass to collect references. */
+		nullbuf nb;
+		std::streambuf *filt = out.rdbuf( &nb );
+		writeExec();
+
+		/* Restore the output for whatever writing comes next. */
+		out.rdbuf( filt );
+	}
+}
+
 void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		std::vector<std::string> &args, bool generateDot, const HostLang *hostLang )
 {
@@ -1588,6 +1604,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 			red->id->stats() << "fsm-states\t" << redFsm->stateList.length() << std::endl;
 		}
 
+		collectReferences();
 		writeData();
 		statsSummary();
 	}
@@ -1607,14 +1624,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 			else
 				write_option_error( loc, args[i] );
 		}
-		nullbuf nb;
-
-		/* Nullify the output and execute the write. We use this pass to collect references. */
-		std::streambuf *filt = out.rdbuf( &nb );
-		writeExec();
-
-		/* Restore the output and do the actual write. */
-		out.rdbuf( filt );
+		collectReferences();
 		writeExec();
 	}
 	else if ( args[0] == "exports" ) {

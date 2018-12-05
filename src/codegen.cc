@@ -63,13 +63,15 @@ TableArray::TableArray( const char *name, CodeGen &codeGen )
 
 	codeGen(codeGen),
 	out(codeGen.out),
-	ln(0)
+	ln(0),
+	isReferenced(false)
 {
 	codeGen.arrayVector.append( this );
 }
 
-std::string TableArray::ref() const
+std::string TableArray::ref()
 {
+	isReferenced = true;
 	return string("_") + codeGen.DATA_PREFIX() + name;
 }
 
@@ -293,7 +295,8 @@ void TableArray::start()
 			startAnalyze();
 			break;
 		case GeneratePass:
-			startGenerate();
+			if ( isReferenced )
+				startGenerate();
 			break;
 	}
 }
@@ -307,7 +310,8 @@ void TableArray::value( long long v )
 			valueAnalyze( v );
 			break;
 		case GeneratePass:
-			valueGenerate( v );
+			if ( isReferenced )
+				valueGenerate( v );
 			break;
 	}
 }
@@ -321,7 +325,8 @@ void TableArray::finish()
 			finishAnalyze();
 			break;
 		case GeneratePass:
-			finishGenerate();
+			if ( isReferenced )
+				finishGenerate();
 			break;
 	}
 }
