@@ -99,13 +99,8 @@ namespace host
 		token c_any / any /
 	end
 
-	token no_match //
-
 	def tok
-		[no_match ident whitespace number] :ImportNum
-	|	[no_match ident whitespace string] :ImportStr
-	|	[no_match ident] :Else
-	|	[`define whitespace ident whitespace? number]  :ImportDefNum
+		[`define whitespace ident whitespace? number]  :ImportDefNum
 	|	[`define whitespace ident whitespace? string]  :ImportDefStr
 	|	[ident whitespace? `= whitespace? number]      :ImportAssignNum
 	|	[ident whitespace? `= whitespace? string]      :ImportAssignStr
@@ -118,11 +113,6 @@ namespace host
 	|	[string] :String
 	|	[whitespace] :Whitespace
 	|	[c_any] :Any
-		{
-			NM: no_match = make_token( typeid<no_match>, "" )
-			I: ident = make_token( typeid<ident>, $lhs.c_any )
-			lhs = cons tok [NM I]
-		}
 end
 
 reduction TopLevel
@@ -277,11 +267,6 @@ reduction TopLevel
 	{
 		if ( !isImport && includeDepth == 0 )
 			id->curItem->data.write( $c_any->data, $c_any->length );
-	}
-	host::tok :Else
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $ident->data, $ident->length );
 	}
 
 	host::section :MultiLine
