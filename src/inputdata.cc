@@ -229,7 +229,9 @@ void InputData::writeOutput( InputItem *ii )
 				case Direct:
 					if ( ii->loc.fileName != 0 ) {
 						if ( !noLineDirectives ) {
-							*outStream << "\n#line " << ii->loc.line <<
+							if ( ii->prev != 0 )
+								*outStream << "\n";
+							*outStream << "#line " << ii->loc.line <<
 									" \"" << ii->loc.fileName << "\"\n";
 						}
 					}
