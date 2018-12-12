@@ -192,7 +192,13 @@ struct stream_impl_data
 	/* Indentation. */
 	int level;
 	int indent;
+
+	int *line_len;
+	int lines_alloc;
 };
+
+void stream_impl_push_line( struct stream_impl_data *ss, int line, int ll );
+int stream_impl_pop_line( struct stream_impl_data *ss, int line );
 
 struct input_impl *colm_impl_new_generic( char *name );
 

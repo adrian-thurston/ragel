@@ -42,6 +42,28 @@ DEF_STREAM_FUNCS( stream_funcs_data, stream_impl_data );
 extern struct stream_funcs_data file_funcs;
 extern struct stream_funcs_data accum_funcs;
 
+void stream_impl_push_line( struct stream_impl_data *ss, int line, int ll )
+{
+	if ( ss->line_len == 0 ) {
+		ss->lines_alloc = 16;
+		ss->line_len = malloc( sizeof(int) * ss->lines_alloc );
+	}
+	else if ( line > ss->lines_alloc ) {
+		int lines_alloc_new = ss->lines_alloc * 2;
+		int *line_len_new = malloc( sizeof(int) * lines_alloc_new );
+		memcpy( line_len_new, ss->line_len, sizeof(int) * ss->lines_alloc );
+		ss->lines_alloc = lines_alloc_new;
+		ss->line_len = line_len_new;
+	}
+
+	ss->line_len[ line - 1 ] = ll;
+}
+
+int stream_impl_pop_line( struct stream_impl_data *ss, int line )
+{
+	return ss->line_len[line - 1];
+}
+
 static void dump_contents( struct colm_program *prg, struct stream_impl_data *sid )
 {
 	struct run_buf *rb = sid->queue.head;
@@ -141,11 +163,13 @@ void update_position_data( struct stream_impl_data *is, const char *data, long l
 {
 	int i;
 	for ( i = 0; i < length; i++ ) {
-		if ( data[i] != '\n' )
-			is->column += 1;
-		else {
+		if ( data[i] == '\n' ) {
+			stream_impl_push_line( is, is->line, is->column );
 			is->line += 1;
 			is->column = 1;
+		}
+		else {
+			is->column += 1;
 		}
 	}
 
@@ -159,8 +183,13 @@ void undo_position_data( struct stream_impl_data *is, const char *data, long len
 	 * token and restore based on that.. */
 	int i;
 	for ( i = 0; i < length; i++ ) {
-		if ( data[i] == '\n' )
+		if ( data[i] == '\n' ) {
 			is->line -= 1;
+			is->column = stream_impl_pop_line( is, is->line );
+		}
+		else {
+			is->column -= 1;
+		}
 	}
 
 	is->byte -= length;
