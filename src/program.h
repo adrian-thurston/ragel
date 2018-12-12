@@ -136,6 +136,7 @@ struct colm_program
 	const int *argl;
 
 	unsigned char ctx_dep_parsing;
+	unsigned char reduce_clean;
 	struct colm_sections *rtd;
 	struct colm_struct *global;
 	int induce_exit;

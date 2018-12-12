@@ -435,7 +435,7 @@ void Compiler::writeNeeds()
 		"extern \"C\" int " << objectName << "_reducer_need_tok( program_t *prg, "
 				"struct pda_run *pda_run, int id )\n"
 		"{\n"
-		"	if ( pda_run->reducer > 0 ) {\n"
+		"	if ( prg->reduce_clean && pda_run->reducer > 0 ) {\n"
 		/* Note we are forcing the reducer need for data. Enabling requires finding
 		 * a solution for backtracking push. */
 		"		return COLM_RN_DATA | ri[pda_run->reducer].need_data[id] | \n"
@@ -700,9 +700,11 @@ void Compiler::writeParseReduce( Reduction *reduction )
 		"	}\n"
 		"\n"
 		"	commit_clear_parse_tree( prg, sp, pda_run, lel->child );\n"
-		"	commit_clear_kid_list( prg, sp, kid->tree->child );\n"
-		"	kid->tree->child = 0;\n"
-		"	kid->tree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );\n"
+		"	if ( prg->reduce_clean ) {\n"
+		"		commit_clear_kid_list( prg, sp, kid->tree->child );\n"
+		"		kid->tree->child = 0;\n"
+		"		kid->tree->flags &= ~( AF_LEFT_IGNORE | AF_RIGHT_IGNORE );\n"
+		"	}\n"
 		"	lel->child = 0;\n"
 		"\n"
 		"	if ( sp != root )\n"

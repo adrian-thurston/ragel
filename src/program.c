@@ -170,6 +170,11 @@ void colm_set_debug( program_t *prg, long active_realm )
 	prg->active_realm = active_realm;
 }
 
+void colm_set_reduce_clean( struct colm_program *prg, unsigned char reduce_clean )
+{
+	prg->reduce_clean = reduce_clean;
+}
+
 program_t *colm_new_program( struct colm_sections *rtd )
 {
 	program_t *prg = malloc(sizeof(program_t));
@@ -180,6 +185,7 @@ program_t *colm_new_program( struct colm_sections *rtd )
 
 	prg->rtd = rtd;
 	prg->ctx_dep_parsing = 1;
+	prg->reduce_clean = 1;
 
 	init_pool_alloc( &prg->kid_pool, sizeof(kid_t) );
 	init_pool_alloc( &prg->tree_pool, sizeof(tree_t) );

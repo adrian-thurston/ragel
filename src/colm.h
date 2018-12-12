@@ -131,6 +131,7 @@ int colm_delete_program( struct colm_program *prg );
 /* Set the pointer to the reduce struct used. */
 void *colm_get_reduce_ctx( struct colm_program *prg );
 void colm_set_reduce_ctx( struct colm_program *prg, void *ctx );
+void colm_set_reduce_clean( struct colm_program *prg, unsigned char reduce_clean );
 
 const char *colm_error( struct colm_program *prg, int *length );
 
