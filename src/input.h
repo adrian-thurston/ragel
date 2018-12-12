@@ -195,10 +195,11 @@ struct stream_impl_data
 
 	int *line_len;
 	int lines_alloc;
+	int lines_cur;
 };
 
-void stream_impl_push_line( struct stream_impl_data *ss, int line, int ll );
-int stream_impl_pop_line( struct stream_impl_data *ss, int line );
+void stream_impl_push_line( struct stream_impl_data *ss, int ll );
+int stream_impl_pop_line( struct stream_impl_data *ss );
 
 struct input_impl *colm_impl_new_generic( char *name );
 

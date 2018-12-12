@@ -42,13 +42,14 @@ DEF_STREAM_FUNCS( stream_funcs_data, stream_impl_data );
 extern struct stream_funcs_data file_funcs;
 extern struct stream_funcs_data accum_funcs;
 
-void stream_impl_push_line( struct stream_impl_data *ss, int line, int ll )
+void stream_impl_push_line( struct stream_impl_data *ss, int ll )
 {
 	if ( ss->line_len == 0 ) {
+		ss->lines_cur = 0;
 		ss->lines_alloc = 16;
 		ss->line_len = malloc( sizeof(int) * ss->lines_alloc );
 	}
-	else if ( line > ss->lines_alloc ) {
+	else if ( ss->lines_cur == ss->lines_alloc ) {
 		int lines_alloc_new = ss->lines_alloc * 2;
 		int *line_len_new = malloc( sizeof(int) * lines_alloc_new );
 		memcpy( line_len_new, ss->line_len, sizeof(int) * ss->lines_alloc );
@@ -56,12 +57,18 @@ void stream_impl_push_line( struct stream_impl_data *ss, int line, int ll )
 		ss->line_len = line_len_new;
 	}
 
-	ss->line_len[ line - 1 ] = ll;
+	ss->line_len[ ss->lines_cur ] = ll;
+	ss->lines_cur += 1;
 }
 
-int stream_impl_pop_line( struct stream_impl_data *ss, int line )
+int stream_impl_pop_line( struct stream_impl_data *ss )
 {
-	return ss->line_len[line - 1];
+	int len = 0;
+	if ( ss->lines_cur > 0 ) {
+		ss->lines_cur -= 1;
+		len = ss->line_len[ss->lines_cur];
+	}
+	return len;
 }
 
 static void dump_contents( struct colm_program *prg, struct stream_impl_data *sid )
@@ -164,7 +171,7 @@ void update_position_data( struct stream_impl_data *is, const char *data, long l
 	int i;
 	for ( i = 0; i < length; i++ ) {
 		if ( data[i] == '\n' ) {
-			stream_impl_push_line( is, is->line, is->column );
+			stream_impl_push_line( is, is->column );
 			is->line += 1;
 			is->column = 1;
 		}
@@ -185,7 +192,7 @@ void undo_position_data( struct stream_impl_data *is, const char *data, long len
 	for ( i = 0; i < length; i++ ) {
 		if ( data[i] == '\n' ) {
 			is->line -= 1;
-			is->column = stream_impl_pop_line( is, is->line );
+			is->column = stream_impl_pop_line( is );
 		}
 		else {
 			is->column -= 1;
