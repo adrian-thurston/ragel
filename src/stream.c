@@ -465,12 +465,13 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 		if ( buf == 0 )
 			break;
 
-		if ( !loc_set( loc ) )
-			data_transfer_loc( prg, loc, sid );
-
 		/* Anything available in the current buffer. */
 		int avail = buf->length - buf->offset;
 		if ( avail > 0 ) {
+
+			if ( !loc_set( loc ) )
+				data_transfer_loc( prg, loc, sid );
+
 			/* The source data from the current buffer. */
 			int slen = avail <= remaining ? avail : remaining;
 			consumed += slen;
