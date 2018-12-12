@@ -385,6 +385,8 @@ void colm_print_tree_collect_xml( program_t *prg, tree_t **sp,
 void colm_print_tree_collect_xml_ac( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim );
 
+head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs );
+
 #if defined(__cplusplus)
 }
 #endif

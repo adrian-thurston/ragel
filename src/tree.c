@@ -1599,3 +1599,22 @@ struct colm_location *colm_find_location( program_t *prg, tree_t *tree )
 	return loc_search( prg, tree );
 }
 
+head_t *tree_to_str( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
+{
+	/* Collect the tree data. */
+	str_collect_t collect;
+	init_str_collect( &collect );
+
+	if ( attrs )
+		colm_print_tree_collect_a( prg, sp, &collect, tree, trim );
+	else
+		colm_print_tree_collect( prg, sp, &collect, tree, trim );
+
+	/* Set up the input stream. */
+	head_t *ret = string_alloc_full( prg, collect.data, collect.length );
+
+	str_collect_destroy( &collect );
+
+	return ret;
+}
+
