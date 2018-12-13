@@ -118,6 +118,12 @@ end
 
 reduction TopLevel
 
+	host::section :Token
+	{
+		if ( id->curItem->loc.fileName == 0 )
+			id->curItem->loc = @1;
+	}
+
 	# Pass Through.
 	# def tok
 	#	[`define ident number] :Def1
@@ -287,9 +293,7 @@ reduction TopLevel
 			 * we use the last line, which will count the newline. */
 			inputItem = new InputItem;
 			inputItem->type = InputItem::HostData;
-			inputItem->loc = @5;
-			if ( inputItem->loc.fileName == 0 )
-				inputItem->loc = @1;
+			inputItem->loc.fileName = 0;
 						
 			id->inputItems.append( inputItem );
 

@@ -210,6 +210,7 @@ void TopLevel::reduceFile( const char *cmd, const char *inputFileName )
 
 	colm_program *program = colm_new_program( frontendSections );
 	colm_set_debug( program, 0 );
+	colm_set_reduce_clean( program, 0 );
 	colm_set_reduce_ctx( program, this );
 	colm_run_program( program, baseN + id->includePaths.length(), argv );
 	id->streamFileNames.append( colm_extract_fns( program ) );
