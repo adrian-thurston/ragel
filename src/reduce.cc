@@ -880,7 +880,8 @@ void Compiler::writeCommit()
 		"#include <errno.h>\n"
 		"\n"
 		"#include <iostream>\n"
-		"#include <ext/stdio_filebuf.h>\n"
+		/* Not available on MAC OS. */
+		// "#include <ext/stdio_filebuf.h>\n"
 		"#include <fstream>\n"
 		"\n"
 		"using std::endl;\n"
@@ -894,7 +895,7 @@ void Compiler::writeCommit()
 	
 	writeReduceDispatchers();
 
-	writePostfixReduce();
+	//writePostfixReduce();
 
 	writeParseReduce();
 
