@@ -196,6 +196,9 @@ AM_CONDITIONAL([BUILD_PROGRAM],    [test "x$build_program" = "xyes"])
 AM_CONDITIONAL([BUILD_MANUAL],     [test "x$build_manual" = "xyes"])
 AM_CONDITIONAL([WITH_RAGEL_KELBT], [test "x$RAGEL_KELBT" = "xyes"])
 
+AC_CANONICAL_HOST()
+AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
+
 dnl write output files
 AC_OUTPUT([
 		Makefile
