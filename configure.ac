@@ -84,6 +84,9 @@ AC_CHECK_PROG([ASCIIDOC], [asciidoc], [asciidoc])
 AC_CHECK_PROG([PYGMENTIZE], [pygmentize], [pygmentize])
 AM_CONDITIONAL([BUILD_MANUAL], [test "x$ASCIIDOC" != x && test "x$PYGMENTIZE" != x])
 
+AC_CANONICAL_HOST()
+AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
+
 dnl write output files
 AC_OUTPUT([
 	Makefile

@@ -42,7 +42,11 @@ lib_LTLIBRARIES = libcolm.la
 noinst_LIBRARIES = libprog.a
 
 libcolm_la_SOURCES = $(RUNTIME_SRC)
-libcolm_la_LDFLAGS = -release ${PACKAGE_VERSION}
+libcolm_la_LDFLAGS = -release ${PACKAGE_VERSION} -no-undefined
+
+if LINKER_NO_UNDEFINED
+libcolm_la_LDFLAGS += -Wl,--no-undefined
+endif
 
 common_CFLAGS = \
 	-Wall \
