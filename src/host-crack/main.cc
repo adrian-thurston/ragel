@@ -58,6 +58,7 @@ const HostLang hostLangCrack = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangCrack, &rl_parse, &rlhc );
+	LangFuncsTrans li;
+	InputData id( &li, &hostLangCrack, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

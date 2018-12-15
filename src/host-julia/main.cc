@@ -55,6 +55,7 @@ const HostLang hostLangJulia = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJulia, &rl_parse, &rlhc );
+	LangFuncsTrans li;
+	InputData id( &li, &hostLangJulia, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

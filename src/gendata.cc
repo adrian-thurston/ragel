@@ -1587,6 +1587,8 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		return;
 	}
 
+	langFuncs->genOutputLineDirective( out );
+
 	if ( args[0] == "data" ) {
 		for ( int i = 1; i < nargs; i++ ) {
 			if ( args[i] == "noerror" )

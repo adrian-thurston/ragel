@@ -59,6 +59,7 @@ const HostLang hostLangJava = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJava, &rl_parse, &rlhc );
+	LangFuncsTrans li;
+	InputData id( &li, &hostLangJava, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

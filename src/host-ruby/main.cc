@@ -53,6 +53,7 @@ static const HostLang hostLangRuby = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangRuby, &rl_parse, &rlhc );
+	LangFuncsTrans li;
+	InputData id( &li, &hostLangRuby, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

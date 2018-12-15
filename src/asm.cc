@@ -108,13 +108,6 @@ void AsmCodeGen::genAnalysis()
 	red->analyzeMachine();
 }
 
-void AsmCodeGen::genLineDirective( ostream &out )
-{
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	asmLineDirective( out, filter->fileName, filter->line + 1 );
-}
-
 /* Write out the fsm name. */
 string AsmCodeGen::FSM_NAME()
 {

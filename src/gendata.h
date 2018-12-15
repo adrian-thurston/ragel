@@ -341,9 +341,11 @@ public:
 
 struct CodeGenArgs
 {
-	CodeGenArgs( FsmGbl *id, Reducer *red, HostType *alphType, int machineId, std::string sourceFileName,
+	CodeGenArgs( LangFuncs *langFuncs, FsmGbl *id, Reducer *red, HostType *alphType,
+			int machineId, std::string sourceFileName,
 			std::string fsmName, std::ostream &out, CodeStyle codeStyle )
 	:
+		langFuncs(langFuncs),
 		id(id),
 		red(red),
 		alphType(alphType),
@@ -355,6 +357,7 @@ struct CodeGenArgs
 		lineDirectives(true)
 	{}
 
+	LangFuncs *langFuncs;
 	FsmGbl *id;
 	Reducer *red;
 	HostType *alphType;
@@ -370,6 +373,7 @@ struct CodeGenData
 {
 	CodeGenData( const CodeGenArgs &args )
 	:
+		langFuncs(args.langFuncs),
 		red(args.red),
 		redFsm(args.red->redFsm),
 		sourceFileName(args.sourceFileName),
@@ -426,6 +430,7 @@ struct CodeGenData
 
 protected:
 
+	LangFuncs *langFuncs;
 	Reducer *red;
 	RedFsmAp *redFsm;
 	std::string sourceFileName;

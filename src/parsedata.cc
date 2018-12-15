@@ -1440,7 +1440,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, sectionName, machineId );
 	red->make( hostLang, alphType );
 
-	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
+	CodeGenArgs args( this->id->langFuncs, this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
 
 	args.lineDirectives = !id->noLineDirectives;
 

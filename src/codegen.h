@@ -284,8 +284,13 @@ protected:
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
 		if ( backend == Direct ) {
-			if ( lineDirectives )
-				return "{\n#line " + STR(line) + " \"" + fileName + "\"\n";
+			if ( lineDirectives ) {
+				std::stringstream ss;
+				ss << "{\n" ;
+				langFuncs->genLineDirective( ss, line, fileName.c_str() );
+				ss << "\n";
+				return ss.str();
+			}
 			else
 				return "{\n";
 		}

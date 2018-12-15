@@ -888,6 +888,8 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )
 	ret << OPEN_HOST_BLOCK( action->loc.fileName, action->loc.line );
 	INLINE_LIST( ret, action->inlineList, opts.targState, opts.inFinish, opts.csForced );
 	ret << CLOSE_HOST_BLOCK();
+	ret << "\n";
+	langFuncs->genOutputLineDirective( ret );
 }
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
@@ -895,6 +897,8 @@ void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 	ret << OPEN_HOST_EXPR( condition->loc.fileName, condition->loc.line );
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 	ret << CLOSE_HOST_EXPR();
+	ret << "\n";
+	langFuncs->genOutputLineDirective( ret );
 }
 
 void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
@@ -905,7 +909,6 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 	{
 		GenAction *action = condition->inlineList->head->wrappedAction;
 		ACTION( out, action, IlOpts( 0, false, false ) );
-		ret << "\n";
 	}
 	else if ( condition->inlineList->length() == 1 &&
 			condition->inlineList->head->type == 
@@ -1094,6 +1097,8 @@ void CodeGen::NFA_PUSH( std::string state )
 			out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
 			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
 			out << CLOSE_HOST_BLOCK();
+			out << "\n";
+			langFuncs->genOutputLineDirective( out );
 		}
 
 		out <<

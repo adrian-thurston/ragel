@@ -323,10 +323,12 @@ restart:
 				tabs -= 1;
 			}
 
-			/* Found some data, print the indentation and turn off indentation
-			 * mode. */
-			for ( l = 0; l < tabs; l++ )
-				countAndWrite( "\t", 1 );
+			if ( *s != '#' ) {
+				/* Found some data, print the indentation and turn off indentation
+				 * mode. */
+				for ( l = 0; l < tabs; l++ )
+					countAndWrite( "\t", 1 );
+			}
 
 			indent = 0;
 
@@ -416,4 +418,30 @@ void operator<<( std::ostream &out, exit_object & )
 {
 	out << std::endl;
 	throw AbortCompile( 1 );
+}
+
+void LangFuncsC::genOutputLineDirective( std::ostream &out )
+{
+	if ( backend == Direct ) {
+		std::streambuf *sbuf = out.rdbuf();
+		output_filter *filter = static_cast<output_filter*>(sbuf);
+		genLineDirective( out, filter->line + 1, filter->fileName );
+	}
+}
+
+void LangFuncsC::genLineDirective( std::ostream &out, int line, const char *fileName )
+{
+	if ( backend == Direct ) {
+		out << "#line " << line  << " \"";
+		for ( const char *pc = fileName; *pc != 0; pc++ ) {
+			if ( *pc == '\\' )
+				out << "\\\\";
+			else if ( *pc == '"' )
+				out << "\\\"";
+			else
+				out << *pc;
+		}
+		out << '"';
+		out << '\n';
+	}
 }

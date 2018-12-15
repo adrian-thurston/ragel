@@ -231,8 +231,7 @@ void InputData::writeOutput( InputItem *ii )
 						if ( !noLineDirectives ) {
 							if ( ii->prev != 0 )
 								*outStream << "\n";
-							*outStream << "#line " << ii->loc.line <<
-									" \"" << ii->loc.fileName << "\"\n";
+							langFuncs->genLineDirective( *outStream, ii->loc.line, ii->loc.fileName );
 						}
 					}
 						

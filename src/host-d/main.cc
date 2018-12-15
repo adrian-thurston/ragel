@@ -68,6 +68,7 @@ const HostLang hostLangD = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangD, &rl_parse, &rlhc );
+	LangFuncsTrans li;
+	InputData id( &li, &hostLangD, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

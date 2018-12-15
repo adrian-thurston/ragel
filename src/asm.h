@@ -160,8 +160,6 @@ protected:
 	long nextLmSwitchLabel;
 	bool stackCS;
 
-	void genLineDirective( ostream &out );
-
 	void NBREAK( ostream &ret, int targState, bool csForced );
 	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
 	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
@@ -248,6 +246,9 @@ public:
 	void setLabelsNeeded();
 
 	void setNfaIds();
+
+	void genOutputLineDirective( ostream &out ) {}
+	void genLineDirective( ostream &out, int line, const char *file ) {}
 };
 
 #endif

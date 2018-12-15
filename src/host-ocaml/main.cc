@@ -54,6 +54,7 @@ const HostLang hostLangOCaml = {
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rl_parse, &rlhc );
+	LangFuncsTrans li;
+	InputData id( &li, &hostLangOCaml, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

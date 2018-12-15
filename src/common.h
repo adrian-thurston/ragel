@@ -23,6 +23,7 @@
 #ifndef _COMMON_H
 #define _COMMON_H
 
+#include <iostream>
 #include <fstream>
 #include <climits>
 #include "dlist.h"
@@ -230,6 +231,40 @@ struct HostLang
 	CodeGenData *(*makeCodeGen)( const HostLang *hostLang, const CodeGenArgs &args );
 	RagelBackend backend;
 	BackendFeature feature;
+};
+
+struct LangFuncs
+{
+	virtual void genOutputLineDirective( std::ostream &out ) = 0;
+	virtual void genLineDirective( std::ostream &out, int line, const char *file ) = 0;
+};
+
+struct LangFuncsC
+:
+	public LangFuncs
+{
+	LangFuncsC( RagelBackend backend ) : backend(backend) {}
+
+	RagelBackend backend;
+
+	void genOutputLineDirective( std::ostream &out );
+	void genLineDirective( std::ostream &out, int line, const char *file );
+};
+
+class LangFuncsAsm
+:
+	public LangFuncs
+{
+	void genOutputLineDirective( std::ostream &out ) {}
+	void genLineDirective( std::ostream &out, int line, const char *file ) {}
+};
+
+struct LangFuncsTrans
+:
+	public LangFuncs
+{
+	void genOutputLineDirective( std::ostream &out ) {}
+	void genLineDirective( std::ostream &out, int line, const char *file ) {}
 };
 
 extern const HostLang hostLangC;
