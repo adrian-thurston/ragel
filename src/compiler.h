@@ -1056,7 +1056,7 @@ struct Compiler
 
 	void initReductionNeeds( Reduction *reduction );
 
-	void findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed,
+	void findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed, Vector<ProdEl*> &treeUsed,
 			Vector<ProdEl*> &locUsed, Reduction *reduction, Production *production,
 			const ReduceTextItemList &list );
 
@@ -1082,6 +1082,7 @@ struct Compiler
 
 	void writeLhsRef( Production *production, ReduceTextItem *i );
 	void writeRhsRef( Production *production, ReduceTextItem *i );
+	void writeTreeRef( Production *production, ReduceTextItem *i );
 	void writeRhsLoc( Production *production, ReduceTextItem *i );
 	void writeHostItemList( Production *production, const ReduceTextItemList &list );
 	void writeCommitStub();

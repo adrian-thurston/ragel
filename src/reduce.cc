@@ -47,13 +47,14 @@ void Compiler::writeCommitStub()
 	;
 }
 
-void Compiler::findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed,
+void Compiler::findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed, Vector<ProdEl*> &treeUsed,
 		Vector<ProdEl*> &locUsed, Reduction *reduction, Production *production,
 		const ReduceTextItemList &list )
 {
 	ObjectDef *objectDef = production->prodName->objectDef;
 
 	rhsUsed.setAsNew( production->prodElList->length() );
+	treeUsed.setAsNew( production->prodElList->length() );
 	locUsed.setAsNew( production->prodElList->length() );
 
 	for ( ReduceTextItemList::Iter i = list; i.lte(); i++ ) {
@@ -61,7 +62,10 @@ void Compiler::findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed,
 			lhsUsed = true;
 		}
 
-		if ( i->type == ReduceTextItem::RhsRef || i->type == ReduceTextItem::RhsLoc ) {
+		if ( i->type == ReduceTextItem::RhsRef ||
+				i->type == ReduceTextItem::RhsLoc ||
+				i->type == ReduceTextItem::TreeRef )
+		{
 			if ( i->n > 0 ) {
 				/* Numbered. */
 				ProdEl *prodEl = production->prodElList->head;
@@ -73,6 +77,8 @@ void Compiler::findRhsRefs( bool &lhsUsed, Vector<ProdEl*> &rhsUsed,
 
 				if ( i->type == ReduceTextItem::RhsLoc )
 					locUsed[i->n-1] = prodEl;
+				else if ( i->type == ReduceTextItem::TreeRef )
+					treeUsed[i->n-1] = prodEl;
 				else
 					rhsUsed[i->n-1] = prodEl;
 			}
@@ -100,9 +106,10 @@ void Compiler::computeNeeded( Reduction *reduction, Production *production,
 {
 	bool lhsUsed = false;
 	Vector<ProdEl*> rhsUsed;
+	Vector<ProdEl*> treeUsed;
 	Vector<ProdEl*> locUsed;
 
-	findRhsRefs( lhsUsed, rhsUsed, locUsed, reduction, production, list );
+	findRhsRefs( lhsUsed, rhsUsed, treeUsed, locUsed, reduction, production, list );
 
 	/* Same length, can concurrently walk with one test. */
 	Vector<ProdEl*>::Iter rhs = rhsUsed;
@@ -126,9 +133,10 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 {
 	bool lhsUsed = false;
 	Vector<ProdEl*> rhsUsed;
+	Vector<ProdEl*> treeUsed;
 	Vector<ProdEl*> locUsed;
 
-	findRhsRefs( lhsUsed, rhsUsed, locUsed, reduction, production, list );
+	findRhsRefs( lhsUsed, rhsUsed, treeUsed, locUsed, reduction, production, list );
 
 	if ( lhsUsed ) {
 		*outStream << "	lel_" << production->prodName->fullName << " *_lhs = ";
@@ -200,15 +208,20 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 		}
 	}
 
-	/* In the second pass we load using a tree cursor. This is for token data
-	 * and locations.
-	 */
+	/* In the second pass we load using a tree cursor. This is for token/tree
+	 * data and locations. */
 
 	useCursor = false;
 	for ( Vector<ProdEl*>::Iter rhs = rhsUsed; rhs.lte(); rhs++ ) {
 		if ( *rhs != 0 && (*rhs)->production == production &&
 				(*rhs)->langEl->type == LangEl::Term )
 		{
+			useCursor = true;
+			break;
+		}
+	}
+	for ( Vector<ProdEl*>::Iter rhs = treeUsed; rhs.lte(); rhs++ ) {
+		if ( *rhs != 0 ) {
 			useCursor = true;
 			break;
 		}
@@ -234,12 +247,12 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 
 		/* Same length, can concurrently walk with one test. */
 		Vector<ProdEl*>::Iter rhs = rhsUsed;
+		Vector<ProdEl*>::Iter tree = treeUsed;
 		Vector<ProdEl*>::Iter loc = locUsed;
 		
 		for ( ; rhs.lte(); rhs++, loc++ ) {
 
 			ProdEl *prodEl = *rhs;
-
 			if ( prodEl != 0 ) {
 				if ( prodEl->production == production ) {
 					if ( prodEl->langEl->type == LangEl::Term ) {
@@ -262,7 +275,20 @@ void Compiler::loadRefs( Reduction *reduction, Production *production,
 						}
 					}
 				}
+			}
 
+			ProdEl *treeEl = *tree;
+			if ( treeEl != 0 ) {
+				if ( treeEl->production == production ) {
+					while ( cursorPos < rhs.pos() ) {
+						*outStream <<
+							"	_tree_cursor = _tree_cursor->next;\n";
+						cursorPos += 1;
+					}
+
+					*outStream << "	colm_tree *_tree" << rhs.pos() << " = ";
+					*outStream << "_tree_cursor->tree;\n";
+				}
 			}
 
 			ProdEl *locEl = *loc;
@@ -313,6 +339,28 @@ void Compiler::writeRhsRef( Production *production, ReduceTextItem *i )
 	}
 }
 
+void Compiler::writeTreeRef( Production *production, ReduceTextItem *i )
+{
+	if ( i->n > 0 ) {
+		*outStream << "_tree" << ( i->n - 1 );
+	}
+	else {
+		ObjectDef *objectDef = production->prodName->objectDef;
+		String name( i->txt.data + 1, i->txt.length() - 1 );
+
+		/* Find the field in the rhsVal using capture field. */
+		ObjectField *field = objectDef->rootScope->findField( name );
+		if ( field != 0 ) {
+			for ( Vector<RhsVal>::Iter r = field->rhsVal;
+					r.lte(); r++ )
+			{
+				if ( r->prodEl->production == production )
+					*outStream << "_tree" << r->prodEl->pos;
+			}
+		}
+	}
+}
+
 void Compiler::writeRhsLoc( Production *production, ReduceTextItem *i )
 {
 	if ( i->n > 0 ) {
@@ -350,6 +398,9 @@ void Compiler::writeHostItemList( Production *production,
 				break;
 			case ReduceTextItem::RhsRef:
 				writeRhsRef( production, i );
+				break;
+			case ReduceTextItem::TreeRef:
+				writeTreeRef( production, i );
 				break;
 			case ReduceTextItem::RhsLoc:
 				writeRhsLoc( production, i );

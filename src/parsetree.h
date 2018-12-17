@@ -928,6 +928,7 @@ struct ReduceTextItem
 	enum Type {
 		LhsRef,
 		RhsRef,
+		TreeRef,
 		RhsLoc,
 		Txt
 	};

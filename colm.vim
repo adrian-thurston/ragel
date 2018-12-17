@@ -100,8 +100,10 @@ syntax match redLiteral "\"\(\\.\|[^\"\\]\)*\"" contained
 
 syntax match redRef "\$\$" contained
 syntax match redRef "\$[a-zA-Z_][a-zA-Z0-9_]*" contained
+syntax match redRef "\$\*[a-zA-Z_][a-zA-Z0-9_]*" contained
 syntax match redRef "@[a-zA-Z_][a-zA-Z0-9_]*" contained
 syntax match redRef "\$[0-9]\+" contained
+syntax match redRef "\$\*[0-9]\+" contained
 syntax match redRef "@[0-9]\+" contained
 
 syntax match redNumber "[0-9][0-9]*" contained

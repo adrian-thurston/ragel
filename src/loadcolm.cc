@@ -2474,6 +2474,12 @@ struct LoadColm
 			rti->txt = item.RED_RHS_REF().text().c_str();
 			list.append( rti );
 		}
+		else if ( item.RED_TREE_REF() != 0 ) {
+			ReduceTextItem *rti = new ReduceTextItem;
+			rti->type = ReduceTextItem::TreeRef;
+			rti->txt = item.RED_TREE_REF().text().c_str();
+			list.append( rti );
+		}
 		else if ( item.RED_RHS_LOC() != 0 ) {
 			ReduceTextItem *rti = new ReduceTextItem;
 			rti->type = ReduceTextItem::RhsLoc;
@@ -2484,6 +2490,12 @@ struct LoadColm
 			ReduceTextItem *rti = new ReduceTextItem;
 			rti->type = ReduceTextItem::RhsRef;
 			rti->n = atoi( item.RED_RHS_NREF().text().c_str() + 1 );
+			list.append( rti );
+		}
+		else if ( item.RED_TREE_NREF() != 0 ) {
+			ReduceTextItem *rti = new ReduceTextItem;
+			rti->type = ReduceTextItem::TreeRef;
+			rti->n = atoi( item.RED_TREE_NREF().text().c_str() + 2 );
 			list.append( rti );
 		}
 		else if ( item.RED_RHS_NLOC() != 0 ) {

@@ -364,9 +364,11 @@ lex
 	token RED_LHS / '$' . '$' /
 	token RED_RHS_REF / '$' . red_id /
 	token RED_RHS_LOC / '@' . red_id /
+	token RED_TREE_REF / '$*' . red_id /
 
 	token RED_RHS_NREF / '$' . ('1' .. '9') . ('0' .. '9')* /
 	token RED_RHS_NLOC / '@' . ('1' .. '9') . ('0' .. '9')* /
+	token RED_TREE_NREF / '$*' . ('1' .. '9') . ('0' .. '9')* /
 
 	token red_any / any /
 end
@@ -385,8 +387,10 @@ def host_item
 |	[red_any]
 |	[RED_LHS]
 |	[RED_RHS_REF]
+|	[RED_TREE_REF]
 |	[RED_RHS_LOC]
 |	[RED_RHS_NREF]
+|	[RED_TREE_NREF]
 |	[RED_RHS_NLOC]
 |	[RED_OPEN HostItems: host_item* RED_CLOSE]
 
