@@ -422,26 +422,44 @@ void operator<<( std::ostream &out, exit_object & )
 
 void LangFuncsC::genOutputLineDirective( std::ostream &out )
 {
-	if ( backend == Direct ) {
-		std::streambuf *sbuf = out.rdbuf();
-		output_filter *filter = static_cast<output_filter*>(sbuf);
-		genLineDirective( out, filter->line + 1, filter->fileName );
-	}
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	genLineDirective( out, filter->line + 1, filter->fileName );
 }
 
 void LangFuncsC::genLineDirective( std::ostream &out, int line, const char *fileName )
 {
-	if ( backend == Direct ) {
-		out << "#line " << line  << " \"";
-		for ( const char *pc = fileName; *pc != 0; pc++ ) {
-			if ( *pc == '\\' )
-				out << "\\\\";
-			else if ( *pc == '"' )
-				out << "\\\"";
-			else
-				out << *pc;
-		}
-		out << '"';
-		out << '\n';
+	out << "#line " << line  << " \"";
+	for ( const char *pc = fileName; *pc != 0; pc++ ) {
+		if ( *pc == '\\' )
+			out << "\\\\";
+		else if ( *pc == '"' )
+			out << "\\\"";
+		else
+			out << *pc;
 	}
+	out << '"';
+	out << '\n';
+}
+
+void LangFuncsAsm::genOutputLineDirective( std::ostream &out )
+{
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	genLineDirective( out, filter->line + 1, filter->fileName );
+}
+
+void LangFuncsAsm::genLineDirective( std::ostream &out, int line, const char *fileName )
+{
+	out << "/* #line " << line  << " \"";
+	for ( const char *pc = fileName; *pc != 0; pc++ ) {
+		if ( *pc == '\\' )
+			out << "\\\\";
+		else if ( *pc == '"' )
+			out << "\\\"";
+		else
+			out << *pc;
+	}
+	out << '"';
+	out << " */\n";
 }

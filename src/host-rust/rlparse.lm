@@ -117,6 +117,17 @@ end
 
 reduction TopLevel
 
+	host::section :Token
+	{
+		if ( !isImport && includeDepth == 0 ) {
+			if ( id->curItem->loc.fileName == 0 )
+				id->curItem->loc = @1;
+
+			head_t *head = tree_to_str( prg, sp, $*1, false, false );
+			id->curItem->data.write( head->data, head->length );
+		}
+	}
+
 	# Pass Through.
 	# def tok
 	#	[`define ident number] :Def1
@@ -148,15 +159,6 @@ reduction TopLevel
 			string name( $ident->data, $ident->length );
 			import( @ident, name, lit );
 		}
-		else
-		{
-			if ( includeDepth == 0 ) {
-				id->curItem->data.write( "define ", 7 );
-				id->curItem->data.write( $ident->data, $ident->length );
-				id->curItem->data.write( " ", 1 );
-				id->curItem->data.write( $number->data, $number->length );
-			}
-		}
 	}
 	host::tok  :ImportDefStr
 	{
@@ -166,15 +168,6 @@ reduction TopLevel
 					$string->data, $string->length, Literal::LitString );
 			string name( $ident->data, $ident->length );
 			import( @ident, name, lit );
-		}
-		else
-		{
-			if ( includeDepth == 0 ) {
-				id->curItem->data.write( "define ", 7 );
-				id->curItem->data.write( $ident->data, $ident->length );
-				id->curItem->data.write( " ", 1 );
-				id->curItem->data.write( $string->data, $string->length );
-			}
 		}
 	}
 	host::tok  :ImportAssignNum
@@ -187,14 +180,6 @@ reduction TopLevel
 			string name( $ident->data, $ident->length );
 			import( @ident, name, lit );
 		}
-		else
-		{
-			if ( includeDepth == 0 ) {
-				id->curItem->data.write( $ident->data, $ident->length );
-				id->curItem->data.write( "=", 1 );
-				id->curItem->data.write( $number->data, $number->length );
-			}
-		}
 	}
 	host::tok  :ImportAssignStr
 	{
@@ -206,67 +191,6 @@ reduction TopLevel
 			string name( $ident->data, $ident->length );
 			import( @ident, name, lit );
 		}
-		else
-		{
-			if ( includeDepth == 0 ) {
-				id->curItem->data.write( $ident->data, $ident->length );
-				id->curItem->data.write( "=", 1 );
-				id->curItem->data.write( $string->data, $string->length );
-			}
-		}
-	}
-	host::tok  :Def
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( "define", 6 );
-
-	}
-	host::tok  :Eq
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( "=", 1 );
-	}
-
-	host::tok :Ident
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $ident->data, $ident->length );
-	}
-
-	host::tok :Number
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $number->data, $number->length );
-	}
-
-	host::tok :HexNumber
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $hex_number->data, $hex_number->length );
-	}
-
-	host::tok :Comment
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $comment->data, $comment->length );
-	}
-
-	host::tok :String
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $string->data, $string->length );
-	}
-
-	host::tok :Whitespace
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $whitespace->data, $whitespace->length );
-	}
-
-	host::tok :Any
-	{
-		if ( !isImport && includeDepth == 0 )
-			id->curItem->data.write( $c_any->data, $c_any->length );
 	}
 
 	host::section :MultiLine
@@ -286,9 +210,7 @@ reduction TopLevel
 			 * we use the last line, which will count the newline. */
 			inputItem = new InputItem;
 			inputItem->type = InputItem::HostData;
-			inputItem->loc = @5;
-			if ( inputItem->loc.fileName == 0 )
-				inputItem->loc = @1;
+			inputItem->loc.fileName = 0;
 						
 			id->inputItems.append( inputItem );
 

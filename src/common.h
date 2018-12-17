@@ -255,8 +255,8 @@ class LangFuncsAsm
 :
 	public LangFuncs
 {
-	void genOutputLineDirective( std::ostream &out ) {}
-	void genLineDirective( std::ostream &out, int line, const char *file ) {}
+	void genOutputLineDirective( std::ostream &out );
+	void genLineDirective( std::ostream &out, int line, const char *file );
 };
 
 struct LangFuncsTrans
