@@ -44,7 +44,6 @@ namespace inline
 		token c_any
 			/ any /
 	end
-
 end
 
 
@@ -118,17 +117,6 @@ end
 
 reduction TopLevel
 
-	host::section :Token
-	{
-		if ( !isImport && includeDepth == 0 ) {
-			if ( id->curItem->loc.fileName == 0 )
-				id->curItem->loc = @1;
-
-			head_t *head = tree_to_str( prg, sp, $*1, false, false );
-			id->curItem->data.write( head->data, head->length );
-		}
-	}
-
 	# Pass Through.
 	# def tok
 	#	[`define ident number] :Def1
@@ -191,36 +179,6 @@ reduction TopLevel
 
 			string name( $ident->data, $ident->length );
 			import( @ident, name, lit );
-		}
-	}
-
-	host::section :MultiLine
-	{
-		if ( !isImport && includeDepth == 0 ) {
-			InputItem *inputItem = new InputItem;
-			inputItem->type = InputItem::EndSection;
-			inputItem->loc = @5;
-			id->inputItems.append( inputItem );
-
-			if ( section != 0 ) {
-				inputItem->section = section;
-				section->lastReference = inputItem;
-			}
-
-			/* The end section may include a newline on the end, so
-			 * we use the last line, which will count the newline. */
-			inputItem = new InputItem;
-			inputItem->type = InputItem::HostData;
-			inputItem->loc.fileName = 0;
-						
-			id->inputItems.append( inputItem );
-
-			/* Record the parse data and move over the end section. */
-			id->curItem = id->curItem->next;
-			id->curItem->pd = pd;
-
-			/* Move over the host data. */
-			id->curItem = id->curItem->next;
 		}
 	}
 
