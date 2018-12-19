@@ -288,7 +288,6 @@ protected:
 				std::stringstream ss;
 				ss << "{\n" ;
 				langFuncs->genLineDirective( ss, line, fileName.c_str() );
-				ss << "\n";
 				return ss.str();
 			}
 			else
