@@ -62,13 +62,12 @@ const HostLang hostLangD = {
 	&d_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	GotoFeature
+	GotoFeature,
+	&genLineDirectiveTrans
 };
-
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangD, &rl_parse, &rlhc );
+	InputData id( &hostLangD, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

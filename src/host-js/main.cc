@@ -29,7 +29,7 @@ extern struct colm_sections rlhc;
  * JavaScript
  */
 
-const char *js_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnJs( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".js" );
 }
@@ -49,20 +49,19 @@ const HostLang hostLangJS = {
 	"JavaScript",
 	"-P",
 	hostTypesJS, 7,
-	hostTypesJS+1,
+	hostTypesJS + 1,
 	false,
 	true,
 	"js",
-	&js_defaultOutFn,
+	&defaultOutFnJs,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	VarFeature,
+	&genLineDirectiveTrans
 };
-
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangJS, &rl_parse, &rlhc );
+	InputData id( &hostLangJS, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

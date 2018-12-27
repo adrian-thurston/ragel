@@ -889,7 +889,7 @@ void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )
 	INLINE_LIST( ret, action->inlineList, opts.targState, opts.inFinish, opts.csForced );
 	ret << CLOSE_HOST_BLOCK();
 	ret << "\n";
-	langFuncs->genOutputLineDirective( ret );
+	genOutputLineDirective( ret );
 }
 
 void CodeGen::CONDITION( ostream &ret, GenAction *condition )
@@ -898,7 +898,7 @@ void CodeGen::CONDITION( ostream &ret, GenAction *condition )
 	INLINE_LIST( ret, condition->inlineList, 0, false, false );
 	ret << CLOSE_HOST_EXPR();
 	ret << "\n";
-	langFuncs->genOutputLineDirective( ret );
+	genOutputLineDirective( ret );
 }
 
 void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
@@ -1098,7 +1098,7 @@ void CodeGen::NFA_PUSH( std::string state )
 			INLINE_LIST( out, red->nfaPrePushExpr->inlineList, 0, false, false );
 			out << CLOSE_HOST_BLOCK();
 			out << "\n";
-			langFuncs->genOutputLineDirective( out );
+			genOutputLineDirective( out );
 		}
 
 		out <<

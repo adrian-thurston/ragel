@@ -217,6 +217,8 @@ struct HostType
 	unsigned int size;
 };
 
+typedef void (*GenLineDirectiveT)( std::ostream &out, int line, const char *file );
+
 struct HostLang
 {
 	const char *name;
@@ -231,53 +233,21 @@ struct HostLang
 	CodeGenData *(*makeCodeGen)( const HostLang *hostLang, const CodeGenArgs &args );
 	RagelBackend backend;
 	BackendFeature feature;
+	GenLineDirectiveT genLineDirective;
 };
 
-struct LangFuncs
-{
-	virtual void genOutputLineDirective( std::ostream &out ) = 0;
-	virtual void genLineDirective( std::ostream &out, int line, const char *file ) = 0;
-};
-
-struct LangFuncsC
-:
-	public LangFuncs
-{
-	LangFuncsC( RagelBackend backend ) : backend(backend) {}
-
-	RagelBackend backend;
-
-	void genOutputLineDirective( std::ostream &out );
-	void genLineDirective( std::ostream &out, int line, const char *file );
-};
-
-class LangFuncsAsm
-:
-	public LangFuncs
-{
-	void genOutputLineDirective( std::ostream &out );
-	void genLineDirective( std::ostream &out, int line, const char *file );
-};
-
-struct LangFuncsTrans
-:
-	public LangFuncs
-{
-	void genOutputLineDirective( std::ostream &out ) {}
-	void genLineDirective( std::ostream &out, int line, const char *file ) {}
-};
+void genLineDirectiveC( std::ostream &out, int line, const char *file );
+void genLineDirectiveAsm( std::ostream &out, int line, const char *file );
+void genLineDirectiveTrans( std::ostream &out, int line, const char *file );
 
 extern const HostLang hostLangC;
 extern const HostLang hostLangAsm;
-
-extern const HostLang *hostLangs[];
-extern const int numHostLangs;
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 );
 HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 );
 HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 );
 
-const char *c_defaultOutFn( const char *inputFileName );
+const char *defaultOutFnC( const char *inputFileName );
 extern HostType hostTypesC[];
 
 /* An abstraction of the key operators that manages key operations such as
@@ -522,6 +492,6 @@ enum RagelFrontend
 };
 
 CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
-CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args );
+CodeGenData *makeCodeGenAsm( const HostLang *hostLang, const CodeGenArgs &args );
 
 #endif

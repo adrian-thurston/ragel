@@ -49,12 +49,12 @@ const HostLang hostLangOCaml = {
 	&ocaml_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	VarFeature,
+	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangOCaml, &rl_parse, &rlhc );
+	InputData id( &hostLangOCaml, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

@@ -287,7 +287,7 @@ protected:
 			if ( lineDirectives ) {
 				std::stringstream ss;
 				ss << "{\n" ;
-				langFuncs->genLineDirective( ss, line, fileName.c_str() );
+				(*genLineDirective)( ss, line, fileName.c_str() );
 				return ss.str();
 			}
 			else

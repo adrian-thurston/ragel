@@ -53,12 +53,12 @@ const HostLang hostLangCrack = {
 	&crack_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	VarFeature,
+	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangCrack, &rl_parse, &rlhc );
+	InputData id( &hostLangCrack, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

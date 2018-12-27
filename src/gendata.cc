@@ -1539,6 +1539,13 @@ void Reducer::analyzeMachine()
 	setValueLimits();
 }
 
+void CodeGenData::genOutputLineDirective( std::ostream &out ) const
+{
+	std::streambuf *sbuf = out.rdbuf();
+	output_filter *filter = static_cast<output_filter*>(sbuf);
+	(*genLineDirective)( out, filter->line + 1, filter->fileName );
+}
+
 void CodeGenData::write_option_error( InputLoc &loc, std::string arg )
 {
 	red->id->warning(loc) << "unrecognized write option \"" << arg << "\"" << std::endl;
@@ -1587,7 +1594,7 @@ void CodeGenData::writeStatement( InputLoc &loc, int nargs,
 		return;
 	}
 
-	langFuncs->genOutputLineDirective( out );
+	genOutputLineDirective( out );
 
 	if ( args[0] == "data" ) {
 		for ( int i = 1; i < nargs; i++ ) {

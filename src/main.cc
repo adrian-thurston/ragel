@@ -26,7 +26,6 @@ extern struct colm_sections rl_parse;
 
 int main( int argc, const char **argv )
 {
-	LangFuncsC li( hostLangC.backend );
-	InputData id( &li, &hostLangC, &rl_parse, 0 );
+	InputData id( &hostLangC, &rl_parse, 0 );
 	return id.main( argc, argv );
 }

@@ -170,11 +170,10 @@ struct InputData
 :
 	public FsmGbl
 {
-	InputData( LangFuncs *langFuncs, const HostLang *hostLang,
+	InputData( const HostLang *hostLang,
 			struct colm_sections *frontendSections, struct colm_sections *rlhcSections )
 	: 
 		FsmGbl(hostLang),
-		langFuncs(langFuncs),
 		frontendSections(frontendSections),
 		rlhcSections(rlhcSections),
 		inputFileName(0),
@@ -214,12 +213,9 @@ struct InputData
 
 	void usage();
 	void version();
-	void showHostLangNames();
-	void showHostLangArgs();
 	void showFrontends();
 	void showBackends();
 
-	LangFuncs *langFuncs;
 	struct colm_sections *frontendSections;
 	struct colm_sections *rlhcSections;
 	std::string dirName;

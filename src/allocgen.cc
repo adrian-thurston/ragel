@@ -39,7 +39,7 @@
 #include "ipgoto.h"
 #include "asm.h"
 
-CodeGenData *asm_makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
+CodeGenData *makeCodeGenAsm( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	return new AsmCodeGen( args );
 }

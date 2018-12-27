@@ -341,11 +341,11 @@ public:
 
 struct CodeGenArgs
 {
-	CodeGenArgs( LangFuncs *langFuncs, FsmGbl *id, Reducer *red, HostType *alphType,
+	CodeGenArgs( FsmGbl *id, Reducer *red, HostType *alphType,
 			int machineId, std::string sourceFileName,
-			std::string fsmName, std::ostream &out, CodeStyle codeStyle )
+			std::string fsmName, std::ostream &out,
+			CodeStyle codeStyle, GenLineDirectiveT genLineDirective )
 	:
-		langFuncs(langFuncs),
 		id(id),
 		red(red),
 		alphType(alphType),
@@ -354,10 +354,10 @@ struct CodeGenArgs
 		fsmName(fsmName),
 		out(out),
 		codeStyle(codeStyle),
-		lineDirectives(true)
+		lineDirectives(true),
+		genLineDirective(genLineDirective)
 	{}
 
-	LangFuncs *langFuncs;
 	FsmGbl *id;
 	Reducer *red;
 	HostType *alphType;
@@ -367,13 +367,13 @@ struct CodeGenArgs
 	std::ostream &out;
 	CodeStyle codeStyle;
 	bool lineDirectives;
+	GenLineDirectiveT genLineDirective;
 };
 
 struct CodeGenData
 {
 	CodeGenData( const CodeGenArgs &args )
 	:
-		langFuncs(args.langFuncs),
 		red(args.red),
 		redFsm(args.red->redFsm),
 		sourceFileName(args.sourceFileName),
@@ -388,7 +388,8 @@ struct CodeGenData
 		noCS(false),
 		lineDirectives(args.lineDirectives),
 		cleared(false),
-		referencesCollected(false)
+		referencesCollected(false),
+		genLineDirective(args.genLineDirective)
 	{
 	}
 
@@ -430,7 +431,6 @@ struct CodeGenData
 
 protected:
 
-	LangFuncs *langFuncs;
 	Reducer *red;
 	RedFsmAp *redFsm;
 	std::string sourceFileName;
@@ -453,6 +453,9 @@ protected:
 
 	void collectReferences();
 	bool referencesCollected;
+
+	void genOutputLineDirective( std::ostream &out ) const;
+	GenLineDirectiveT genLineDirective;
 };
 
 /* Selects and constructs the codegen based on the output options. */

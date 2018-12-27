@@ -48,12 +48,12 @@ static const HostLang hostLangRuby = {
 	&ruby_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	VarFeature,
+	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangRuby, &rl_parse, &rlhc );
+	InputData id( &hostLangRuby, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

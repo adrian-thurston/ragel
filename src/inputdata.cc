@@ -231,7 +231,7 @@ void InputData::writeOutput( InputItem *ii )
 						if ( !noLineDirectives ) {
 							if ( ii->prev != 0 )
 								*outStream << "\n";
-							langFuncs->genLineDirective( *outStream, ii->loc.line, ii->loc.fileName );
+							(*hostLang->genLineDirective)( *outStream, ii->loc.line, ii->loc.fileName );
 						}
 					}
 						
@@ -649,30 +649,6 @@ void InputData::version()
 	abortCompile( 0 );
 }
 
-void InputData::showHostLangNames()
-{
-	ostream &out = info();
-	for ( int i = 0; i < numHostLangs; i++ ) {
-		if ( i > 0 )
-			out  << " ";
-		out << hostLangs[i]->name;
-	}
-	out << endl;
-	abortCompile( 0 );
-}
-
-void InputData::showHostLangArgs()
-{
-	ostream &out = info();
-	for ( int i = 0; i < numHostLangs; i++ ) {
-		if ( i > 0 )
-			out << " ";
-		out << hostLangs[i]->arg;
-	}
-	out << endl;
-	abortCompile( 0 );
-}
-
 void InputData::showFrontends()
 {
 	ostream &out = info();
@@ -872,11 +848,6 @@ void InputData::parseArgs( int argc, const char **argv )
 					stringTables = true;
 				else if ( strcmp( arg, "integral-tables" ) == 0 )
 					stringTables = false;
-				else if ( strcmp( arg, "host-lang-names" ) == 0 )
-					showHostLangNames();
-				else if ( strcmp( arg, "host-lang-args" ) == 0 || 
-						strcmp( arg, "supported-host-langs" ) == 0 )
-					showHostLangArgs();
 				else if ( strcmp( arg, "supported-frontends" ) == 0 )
 					showFrontends();
 				else if ( strcmp( arg, "supported-backends" ) == 0 )

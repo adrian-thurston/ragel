@@ -49,13 +49,13 @@ const HostLang hostLangJulia = {
 	&julia_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	GotoFeature
+	GotoFeature,
+	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangJulia, &rl_parse, &rlhc );
+	InputData id( &hostLangJulia, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

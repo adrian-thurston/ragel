@@ -53,13 +53,13 @@ const HostLang hostLangJava = {
 	&java_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	VarFeature,
+	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangJava, &rl_parse, &rlhc );
+	InputData id( &hostLangJava, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

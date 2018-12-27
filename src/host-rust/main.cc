@@ -49,13 +49,13 @@ const HostLang hostLangRust = {
 	&rust_defaultOutFn,
 	&makeCodeGen,
 	Translated,
-	VarFeature
+	VarFeature,
+	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangRust, &rl_parse, &rlhc );
+	InputData id( &hostLangRust, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }

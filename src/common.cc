@@ -31,7 +31,7 @@
  * C
  */
 
-const char *c_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnC( const char *inputFileName )
 {
 	const char *ext = findFileExtension( inputFileName );
 	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
@@ -60,16 +60,17 @@ const HostLang hostLangC = {
 	true,
 	false,
 	"c",
-	&c_defaultOutFn,
+	&defaultOutFnC,
 	&makeCodeGen,
 	Direct,
-	GotoFeature
+	GotoFeature,
+	&genLineDirectiveC
 };
 
 /*
  * ASM
  */
-const char *asm_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnAsm( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".s" );
 }
@@ -86,7 +87,6 @@ HostType hostTypesAsm[] =
 	{ "unsigned", "long",  "ulong",   false,  true,  false,  0, 0,                  0, ULONG_MAX,  sizeof(unsigned long) },
 };
 
-
 const HostLang hostLangAsm = {
 	"ASM",
 	"--asm",
@@ -95,17 +95,12 @@ const HostLang hostLangAsm = {
 	true,
 	false,
 	"no-lang",
-	&asm_defaultOutFn,
-	&asm_makeCodeGen,
+	&defaultOutFnC,
+	&makeCodeGenAsm,
 	Direct,
-	GotoFeature
+	GotoFeature,
+	&genLineDirectiveAsm
 };
-
-const HostLang *hostLangs[] = {
-	&hostLangC,
-};
-
-const int numHostLangs = sizeof(hostLangs)/sizeof(hostLangs[0]);
 
 HostType *findAlphType( const HostLang *hostLang, const char *s1 )
 {
@@ -420,14 +415,7 @@ void operator<<( std::ostream &out, exit_object & )
 	throw AbortCompile( 1 );
 }
 
-void LangFuncsC::genOutputLineDirective( std::ostream &out )
-{
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	genLineDirective( out, filter->line + 1, filter->fileName );
-}
-
-void LangFuncsC::genLineDirective( std::ostream &out, int line, const char *fileName )
+void genLineDirectiveC( std::ostream &out, int line, const char *fileName )
 {
 	out << "#line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
@@ -442,14 +430,7 @@ void LangFuncsC::genLineDirective( std::ostream &out, int line, const char *file
 	out << '\n';
 }
 
-void LangFuncsAsm::genOutputLineDirective( std::ostream &out )
-{
-	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	genLineDirective( out, filter->line + 1, filter->fileName );
-}
-
-void LangFuncsAsm::genLineDirective( std::ostream &out, int line, const char *fileName )
+void genLineDirectiveAsm( std::ostream &out, int line, const char *fileName )
 {
 	out << "/* #line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
@@ -462,4 +443,8 @@ void LangFuncsAsm::genLineDirective( std::ostream &out, int line, const char *fi
 	}
 	out << '"';
 	out << " */\n";
+}
+
+void genLineDirectiveTrans( std::ostream &out, int line, const char *fileName )
+{
 }

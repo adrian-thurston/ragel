@@ -33,16 +33,16 @@ const HostLang hostLangC_translated = {
 	true,
 	false,
 	"c",
-	&c_defaultOutFn,
+	&defaultOutFnC,
 	&makeCodeGen,
 	Translated,
-	GotoFeature
+	GotoFeature,
+	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	LangFuncsTrans li;
-	InputData id( &li, &hostLangC_translated, &rl_parse, &rlhc );
+	InputData id( &hostLangC_translated, &rl_parse, &rlhc );
 	return id.rlhcMain( argc, argv );
 }
 
