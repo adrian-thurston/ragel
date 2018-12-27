@@ -22,13 +22,13 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseJulia;
+extern struct colm_sections rlhcJulia;
 
 /*
  * Julia
  */
-const char *julia_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnJulia( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".jl" );
 }
@@ -38,24 +38,22 @@ HostType hostTypesJulia[] =
 	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
 };
 
-const HostLang hostLangJulia = {
-	"Julia",
-	"-Y",
-	hostTypesJulia, 1,
-	hostTypesJulia+0,
+const HostLang hostLangJulia =
+{
+	hostTypesJulia,
+	1,
+	0,
 	false,
-	true,
-	"julia",
-	&julia_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	GotoFeature,
+	&makeCodeGen,
+	&defaultOutFnJulia,
 	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJulia, &rl_parse, &rlhc );
+	InputData id( &hostLangJulia, &rlparseJulia, &rlhcJulia );
 	return id.rlhcMain( argc, argv );
 }

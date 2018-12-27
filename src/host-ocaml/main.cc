@@ -22,13 +22,13 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseOCaml;
+extern struct colm_sections rlhcOCaml;
 
 /*
  * OCaml
  */
-const char *ocaml_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnOCaml( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".ml" );
 }
@@ -38,23 +38,21 @@ HostType hostTypesOCaml[] =
 	{ "int",    0,  "int",      true,   true,  false,  S31BIT_MIN, S31BIT_MAX,  0, 0, 4 },
 };
 
-const HostLang hostLangOCaml = {
-	"OCaml",
-	"-O",
-	hostTypesOCaml, 1,
-	hostTypesOCaml+0,
+const HostLang hostLangOCaml =
+{
+	hostTypesOCaml,
+	1,
+	0,
 	false,
-	true,
-	"ocaml",
-	&ocaml_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	VarFeature,
+	&makeCodeGen,
+	&defaultOutFnOCaml,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangOCaml, &rl_parse, &rlhc );
+	InputData id( &hostLangOCaml, &rlparseOCaml, &rlhcOCaml );
 	return id.rlhcMain( argc, argv );
 }

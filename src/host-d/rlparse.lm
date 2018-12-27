@@ -1,5 +1,5 @@
 include 'ragel.lm'
-include 'reducer.lm'
+include 'rlreduce.lm'
 
 namespace inline
 	lex 

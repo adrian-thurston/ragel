@@ -22,14 +22,14 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseD;
+extern struct colm_sections rlhcD;
 
 /*
  * D
  */
 
-const char *d_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnD( const char *inputFileName )
 {
 	const char *ext = findFileExtension( inputFileName );
 	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
@@ -51,23 +51,21 @@ HostType hostTypesD[] =
 	{ "dchar",   0,  "dchar",   false,  true,  false,  0, 0,                   0, UINT_MAX,    4 },
 };
 
-const HostLang hostLangD = {
-	"D",
-	"-D",
-	hostTypesD, 9,
-	hostTypesD+2,
+const HostLang hostLangD =
+{
+	hostTypesD,
+	9,
+	2,
 	true,
-	true,
-	"d",
-	&d_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	GotoFeature,
+	&makeCodeGen,
+	&defaultOutFnD,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangD, &rl_parse, &rlhc );
+	InputData id( &hostLangD, &rlparseD, &rlhcD );
 	return id.rlhcMain( argc, argv );
 }

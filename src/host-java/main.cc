@@ -22,14 +22,14 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseJava;
+extern struct colm_sections rlhcJava;
 
 /*
  * Java
  */
 
-const char *java_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnJava( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".java" );
 }
@@ -42,24 +42,22 @@ HostType hostTypesJava[] =
 	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },
 };
 
-const HostLang hostLangJava = {
-	"Java",
-	"-J",
-	hostTypesJava, 4,
-	hostTypesJava+2,
+const HostLang hostLangJava =
+{
+	hostTypesJava,
+	4,
+	2,
 	false,
-	true,
-	"java",
-	&java_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	VarFeature,
+	&makeCodeGen,
+	&defaultOutFnJava,
 	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJava, &rl_parse, &rlhc );
+	InputData id( &hostLangJava, &rlparseJava, &rlhcJava );
 	return id.rlhcMain( argc, argv );
 }

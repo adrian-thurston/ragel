@@ -22,13 +22,13 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseCrack;
+extern struct colm_sections rlhcCrack;
 
 /*
  * Crack
  */
-const char *crack_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnCrack( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".crk" );
 }
@@ -42,23 +42,21 @@ HostType hostTypesCrack[] =
 	{ "uint",    0,  "uint",     false,  true,  false,  0, 0,                     0, UINT_MAX,     sizeof(int) },  
 };
 
-const HostLang hostLangCrack = {
-	"Crack",
-	"-K",
-	hostTypesCrack, 5,
-	hostTypesCrack+0,
+const HostLang hostLangCrack =
+{
+	hostTypesCrack,
+	5,
+	0,
 	true,
-	true,
-	"crack",
-	&crack_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	VarFeature,
+	&makeCodeGen,
+	&defaultOutFnCrack,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangCrack, &rl_parse, &rlhc );
+	InputData id( &hostLangCrack, &rlparseCrack, &rlhcCrack );
 	return id.rlhcMain( argc, argv );
 }

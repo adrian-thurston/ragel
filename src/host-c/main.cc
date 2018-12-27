@@ -22,27 +22,25 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseC;
+extern struct colm_sections rlhcC;
 
-const HostLang hostLangC_translated = {
-	"C",
-	"-C",
-	hostTypesC, 8,
-	hostTypesC+0,
+const HostLang hostLangC_translated =
+{
+	hostTypesC,
+	8,
+	0,
 	true,
-	false,
-	"c",
-	&defaultOutFnC,
-	&makeCodeGen,
 	Translated,
 	GotoFeature,
+	&makeCodeGen,
+	&defaultOutFnC,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangC_translated, &rl_parse, &rlhc );
+	InputData id( &hostLangC_translated, &rlparseC, &rlhcC );
 	return id.rlhcMain( argc, argv );
 }
 

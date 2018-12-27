@@ -22,14 +22,14 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseGo;
+extern struct colm_sections rlhcGo;
 
 /*
  * Go
  */
 
-const char *go_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnGo( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".go" );
 }
@@ -48,24 +48,22 @@ HostType hostTypesGo[] =
 	{ "rune",    0,  "int32",   true,   true,  true,   S32BIT_MIN, S32BIT_MAX,  0, 0,                    4 },
 };
 
-const HostLang hostLangGo = {
-	"Go",
-	"-Z",
-	hostTypesGo, 10,
-	hostTypesGo+0,
+const HostLang hostLangGo =
+{
+	hostTypesGo,
+	10,
+	0,
 	false,
-	true,
-	"go",
-	&go_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	GotoFeature,
+	&makeCodeGen,
+	&defaultOutFnGo,
 	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangGo, &rl_parse, &rlhc );
+	InputData id( &hostLangGo, &rlparseGo, &rlhcGo );
 	return id.rlhcMain( argc, argv );
 }

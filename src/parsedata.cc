@@ -1020,7 +1020,7 @@ bool ParseData::setVariable( const char *var, InlineList *inlineList )
 void ParseData::initKeyOps( const HostLang *hostLang )
 {
 	/* Signedness and bounds. */
-	alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
+	alphType = alphTypeSet ? userAlphType : &hostLang->hostTypes[hostLang->defaultAlphType];
 	fsmCtx->keyOps->setAlphType( hostLang, alphType );
 
 	if ( lowerNum != 0 ) {
@@ -1440,7 +1440,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, sectionName, machineId );
 	red->make( hostLang, alphType );
 
-	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle, hostLang->genLineDirective );
+	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
 
 	args.lineDirectives = !id->noLineDirectives;
 

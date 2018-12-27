@@ -22,13 +22,13 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseRust;
+extern struct colm_sections rlhcRust;
 
 /*
  * Rust
  */
-const char *rust_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnRust( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".rs" );
 }
@@ -38,24 +38,22 @@ HostType hostTypesRust[] =
 	{ "u8",    0,  "byte",      true,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
 };
 
-const HostLang hostLangRust = {
-	"Rust",
-	"-U",
-	hostTypesRust, 1,
-	hostTypesRust+0,
+const HostLang hostLangRust =
+{
+	hostTypesRust,
+	1,
+	0,
 	false,
-	true,
-	"rust",
-	&rust_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	VarFeature,
+	&makeCodeGen,
+	&defaultOutFnRust,
 	&genLineDirectiveTrans
 };
 
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangRust, &rl_parse, &rlhc );
+	InputData id( &hostLangRust, &rlparseRust, &rlhcRust );
 	return id.rlhcMain( argc, argv );
 }

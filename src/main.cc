@@ -22,10 +22,10 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
+extern struct colm_sections rlparseC;
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangC, &rl_parse, 0 );
+	InputData id( &hostLangC, &rlparseC, 0 );
 	return id.main( argc, argv );
 }

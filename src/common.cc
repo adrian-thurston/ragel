@@ -53,17 +53,14 @@ HostType hostTypesC[] =
 };
 
 const HostLang hostLangC = {
-	"C",
-	"-C",
-	hostTypesC, 8,
-	hostTypesC+0,
+	hostTypesC,
+	8,
+	0,
 	true,
-	false,
-	"c",
-	&defaultOutFnC,
-	&makeCodeGen,
 	Direct,
 	GotoFeature,
+	&makeCodeGen,
+	&defaultOutFnC,
 	&genLineDirectiveC
 };
 
@@ -88,17 +85,14 @@ HostType hostTypesAsm[] =
 };
 
 const HostLang hostLangAsm = {
-	"ASM",
-	"--asm",
-	hostTypesAsm, 8,
-	hostTypesAsm+0,
+	hostTypesAsm,
+	8,
+	0,
 	true,
-	false,
-	"no-lang",
-	&defaultOutFnC,
-	&makeCodeGenAsm,
 	Direct,
 	GotoFeature,
+	&makeCodeGenAsm,
+	&defaultOutFnC,
 	&genLineDirectiveAsm
 };
 

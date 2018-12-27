@@ -22,14 +22,14 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseCSharp;
+extern struct colm_sections rlhcCSharp;
 
 /*
  * C#
  */
 
-const char *csharp_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnCSharp( const char *inputFileName )
 {
 	const char *ext = findFileExtension( inputFileName );
 	if ( ext != 0 && strcmp( ext, ".rh" ) == 0 )
@@ -51,23 +51,21 @@ HostType hostTypesCSharp[] =
 	{ "ulong",   0,  "ulong",   false,  true,  false,  0, 0,                   0, ULONG_MAX,   8 },
 };
 
-const HostLang hostLangCSharp = {
-	"C#",
-	"-A",
-	hostTypesCSharp, 9,
-	hostTypesCSharp+4,
+const HostLang hostLangCSharp =
+{
+	hostTypesCSharp,
+	9,
+	4,
 	true,
-	true,
-	"csharp",
-	&csharp_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	GotoFeature,
+	&makeCodeGen,
+	&defaultOutFnCSharp,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangCSharp, &rl_parse, &rlhc );
+	InputData id( &hostLangCSharp, &rlparseCSharp, &rlhcCSharp );
 	return id.rlhcMain( argc, argv );
 }

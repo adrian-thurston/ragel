@@ -344,7 +344,7 @@ struct CodeGenArgs
 	CodeGenArgs( FsmGbl *id, Reducer *red, HostType *alphType,
 			int machineId, std::string sourceFileName,
 			std::string fsmName, std::ostream &out,
-			CodeStyle codeStyle, GenLineDirectiveT genLineDirective )
+			CodeStyle codeStyle )
 	:
 		id(id),
 		red(red),
@@ -354,8 +354,7 @@ struct CodeGenArgs
 		fsmName(fsmName),
 		out(out),
 		codeStyle(codeStyle),
-		lineDirectives(true),
-		genLineDirective(genLineDirective)
+		lineDirectives(true)
 	{}
 
 	FsmGbl *id;
@@ -389,7 +388,7 @@ struct CodeGenData
 		lineDirectives(args.lineDirectives),
 		cleared(false),
 		referencesCollected(false),
-		genLineDirective(args.genLineDirective)
+		genLineDirective(args.id->hostLang->genLineDirective)
 	{
 	}
 

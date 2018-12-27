@@ -218,21 +218,21 @@ struct HostType
 };
 
 typedef void (*GenLineDirectiveT)( std::ostream &out, int line, const char *file );
+typedef const char *(*DefaultOutFnT)( const char *inputFileName );
+typedef CodeGenData *(*MakeCodeGenT)( const HostLang *hostLang, const CodeGenArgs &args );
 
 struct HostLang
 {
-	const char *name;
-	const char *arg;
 	HostType *hostTypes;
 	int numHostTypes;
-	HostType *defaultAlphType;
+	int defaultAlphType;
 	bool explicitUnsigned;
-	bool rlhcRequired;
-	const char *rlhcArg;
-	const char *(*defaultOutFn)( const char *inputFileName );
-	CodeGenData *(*makeCodeGen)( const HostLang *hostLang, const CodeGenArgs &args );
+
 	RagelBackend backend;
 	BackendFeature feature;
+
+	MakeCodeGenT makeCodeGen;
+	DefaultOutFnT defaultOutFn;
 	GenLineDirectiveT genLineDirective;
 };
 

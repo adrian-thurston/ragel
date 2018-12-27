@@ -22,8 +22,8 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseRuby;
+extern struct colm_sections rlhcRuby;
 
 /* What are the appropriate types for ruby? */
 static HostType hostTypesRuby[] = 
@@ -32,28 +32,26 @@ static HostType hostTypesRuby[] =
 	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0, 4 },
 };
 
-const char *ruby_defaultOutFn( const char *inputFileName )
+const char *defaultOutFnRuby( const char *inputFileName )
 {
 	return fileNameFromStem( inputFileName, ".rb" );
 }
 
-static const HostLang hostLangRuby = {
-	"Ruby",
-	"-R",
-	hostTypesRuby, 2,
-	hostTypesRuby+0,
+static const HostLang hostLangRuby =
+{
+	hostTypesRuby,
+	2,
+	0,
 	false,
-	true,
-	"ruby",
-	&ruby_defaultOutFn,
-	&makeCodeGen,
 	Translated,
 	VarFeature,
+	&makeCodeGen,
+	&defaultOutFnRuby,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangRuby, &rl_parse, &rlhc );
+	InputData id( &hostLangRuby, &rlparseRuby, &rlhcRuby );
 	return id.rlhcMain( argc, argv );
 }

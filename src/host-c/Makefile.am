@@ -19,9 +19,9 @@ BUILT_SOURCES = rlparse.c rlreduce.cc
 EXTRA_DIST = rlparse.lm rlhc-c.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
-	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
+	$(COLM) -I.. -c -b rlparseC -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: rlparse.c
 
 rlhc.c: rlhc-c.lm ../ril.lm
-	$(COLM) -I.. -c -b rlhc -o $@ $<
+	$(COLM) -I.. -c -b rlhcC -o $@ $<

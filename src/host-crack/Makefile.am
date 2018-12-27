@@ -19,9 +19,9 @@ BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 EXTRA_DIST = rlparse.lm rlhc-crack.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
-	$(COLM) -I.. -c -b rl_parse -o $@ -m rlreduce.cc $<
+	$(COLM) -I.. -c -b rlparseCrack -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: rlparse.c
 
 rlhc.c: rlhc-crack.lm
-	$(COLM) -I.. -c -b rlhc -o $@ $<
+	$(COLM) -I.. -c -b rlhcCrack -o $@ $<

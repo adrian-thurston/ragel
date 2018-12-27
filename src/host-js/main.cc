@@ -22,8 +22,8 @@
 
 #include "inputdata.h"
 
-extern struct colm_sections rl_parse;
-extern struct colm_sections rlhc;
+extern struct colm_sections rlparseJs;
+extern struct colm_sections rlhcJs;
 
 /*
  * JavaScript
@@ -45,23 +45,21 @@ HostType hostTypesJS[] =
 	{ "number", 0, "number",  true,   true,  false,  LONG_MIN,  LONG_MAX,   0, 0,          8 },
 };
 
-const HostLang hostLangJS = {
-	"JavaScript",
-	"-P",
-	hostTypesJS, 7,
-	hostTypesJS + 1,
+const HostLang hostLangJS =
+{
+	hostTypesJS,
+	7,
+	1,
 	false,
-	true,
-	"js",
-	&defaultOutFnJs,
-	&makeCodeGen,
 	Translated,
 	VarFeature,
+	&makeCodeGen,
+	&defaultOutFnJs,
 	&genLineDirectiveTrans
 };
 
 int main( int argc, const char **argv )
 {
-	InputData id( &hostLangJS, &rl_parse, &rlhc );
+	InputData id( &hostLangJS, &rlparseJs, &rlhcJs );
 	return id.rlhcMain( argc, argv );
 }

@@ -125,29 +125,13 @@ endif
 RAGEL_LM = \
 	rlparse.lm \
 	ragel.lm \
-	reducer.lm
+	rlreduce.lm
 
 parse.c: $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM) -c -b rl_parse -o $@ -m rlreduce.cc $<
+	$(COLM) -c -b rlparseC -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: parse.c
 
-RLHC = \
-	rlhc-host.lm \
-	rlhc-c.lm \
-	rlhc-d.lm \
-	rlhc-go.lm \
-	rlhc-csharp.lm \
-	rlhc-java.lm \
-	rlhc-ruby.lm \
-	rlhc-rust.lm \
-	rlhc-ocaml.lm \
-	rlhc-crack.lm \
-	rlhc-julia.lm \
-	rlhc-js.lm
-
-rlhc.c: rlhc.lm $(RLHC) $(COLM_BINDEP)
-	$(COLM) -c -b rlhc_object -o $@ $<
 
 if WITH_RAGEL_KELBT
 
