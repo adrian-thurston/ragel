@@ -16,12 +16,12 @@ ragel_c_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc
 
-EXTRA_DIST = rlparse.lm rlhc-c.lm
+EXTRA_DIST = rlparse.lm rlhc.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
 	$(COLM) -I.. -c -b rlparseC -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: rlparse.c
 
-rlhc.c: rlhc-c.lm ../ril.lm
+rlhc.c: rlhc.lm ../ril.lm
 	$(COLM) -I.. -c -b rlhcC -o $@ $<
