@@ -650,6 +650,11 @@ struct Factor
 		CondPlus
 	}; 
 
+	enum NfaRepeatMode {
+		NfaGreedy,
+		NfaLazy
+	};
+
 	/* Construct with a literal fsm. */
 	Factor( Literal *literal ) :
 		literal(literal), type(LiteralType) { }
@@ -714,6 +719,7 @@ struct Factor
 	Action *action5;
 	Action *action6;
 	PriorDesc priorDescs[4];
+	NfaRepeatMode mode;
 
 	Type type;
 };

@@ -1707,8 +1707,11 @@ FsmRes Factor::walk( ParseData *pd )
 	case NfaRep: {
 		FsmRes exprTree = expression->walk( pd );
 
+		FsmAp::NfaRepeatMode repMode = 
+				mode == NfaGreedy ? FsmAp::NfaGreedy : FsmAp::NfaLazy;
+
 		FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
-				action4, action5, action6 );
+				action4, action5, action6, repMode );
 
 		res.fsm->verifyIntegrity();
 		return res;

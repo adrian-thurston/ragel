@@ -52,8 +52,6 @@ void FsmAp::nfaFillInStates()
 	}
 }
 
-
-
 void FsmAp::prepareNfaRound()
 {
 	for ( StateList::Iter st = stateList; st.lte(); st++ ) {
@@ -149,7 +147,7 @@ void FsmAp::transferOutToNfaTrans( NfaTrans *trans, StateAp *state )
  * trailing characters, where they may interact with other actions that use the
  * same variables. */
 FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
-		Action *stay, Action *repeat, Action *exit )
+		Action *stay, Action *repeat, Action *exit, NfaRepeatMode mode )
 {
 	/*
 	 * First Concat.
@@ -189,9 +187,15 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 
 		repl->nfaOut = new NfaTransList;
 
+		const int orderStay =   mode == NfaGreedy ? 3 : 1;
+		const int orderRepeat = mode == NfaGreedy ? 2 : 2;
+		const int orderExit =   mode == NfaGreedy ? 1 : 3;
+
+		std::cerr << mode << " " << orderStay << orderRepeat << orderExit << std::endl;
+
 		if ( stay != 0 ) {
 			/* Transition to original final state. Represents staying. */
-			trans = new NfaTrans( 3 );
+			trans = new NfaTrans( orderStay );
 
 			trans->pushTable.setAction( ORD_PUSH, push );
 			trans->restoreTable.setAction( ORD_RESTORE, pop );
@@ -203,7 +207,7 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 
 		/* Transition back to the start. Represents repeat. */
 		if ( repeat != 0 ) {
-			trans = new NfaTrans( 2 );
+			trans = new NfaTrans( orderRepeat );
 
 			trans->pushTable.setAction( ORD_PUSH, push );
 			trans->restoreTable.setAction( ORD_RESTORE, pop );
@@ -218,7 +222,7 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 
 		if ( exit != 0 ) {
 			/* Transition to thew new final. Represents exiting. */
-			trans = new NfaTrans( 1 );
+			trans = new NfaTrans( orderExit );
 
 			trans->pushTable.setAction( ORD_PUSH, push );
 			trans->restoreTable.setAction( ORD_RESTORE, pop );

@@ -2265,10 +2265,15 @@ public:
 
 	void transferOutToNfaTrans( NfaTrans *trans, StateAp *state );
 
+	enum NfaRepeatMode {
+		NfaGreedy = 1,
+		NfaLazy
+	};
+
 	/* Results in an NFA. */
 	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, std::ostream &stats );
 	static FsmRes nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
-			Action *stay, Action *repeat, Action *exit );
+			Action *stay, Action *repeat, Action *exit, NfaRepeatMode mode = NfaGreedy );
 
 	static FsmRes nfaUnion( const NfaRoundVect &roundsList, FsmAp **machines,
 			int numMachines, std::ostream &stats, bool printStatistics );
