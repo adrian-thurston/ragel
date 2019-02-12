@@ -217,7 +217,7 @@ struct HostType
 	unsigned int size;
 };
 
-typedef void (*GenLineDirectiveT)( std::ostream &out, int line, const char *file );
+typedef void (*GenLineDirectiveT)( std::ostream &out, bool nld, int line, const char *file );
 typedef const char *(*DefaultOutFnT)( const char *inputFileName );
 typedef CodeGenData *(*MakeCodeGenT)( const HostLang *hostLang, const CodeGenArgs &args );
 
@@ -236,9 +236,9 @@ struct HostLang
 	GenLineDirectiveT genLineDirective;
 };
 
-void genLineDirectiveC( std::ostream &out, int line, const char *file );
-void genLineDirectiveAsm( std::ostream &out, int line, const char *file );
-void genLineDirectiveTrans( std::ostream &out, int line, const char *file );
+void genLineDirectiveC( std::ostream &out, bool nld, int line, const char *file );
+void genLineDirectiveAsm( std::ostream &out, bool nld, int line, const char *file );
+void genLineDirectiveTrans( std::ostream &out, bool nld, int line, const char *file );
 
 extern const HostLang hostLangC;
 extern const HostLang hostLangAsm;

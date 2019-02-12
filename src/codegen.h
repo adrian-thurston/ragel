@@ -284,14 +284,10 @@ protected:
 	string OPEN_HOST_BLOCK( string fileName, int line )
 	{ 
 		if ( backend == Direct ) {
-			if ( lineDirectives ) {
-				std::stringstream ss;
-				ss << "{\n" ;
-				(*genLineDirective)( ss, line, fileName.c_str() );
-				return ss.str();
-			}
-			else
-				return "{\n";
+			std::stringstream ss;
+			ss << "{\n" ;
+			(*genLineDirective)( ss, lineDirectives, line, fileName.c_str() );
+			return ss.str();
 		}
 		else {
 			return "host( \"" + fileName + "\", " + STR(line) + " ) ${";

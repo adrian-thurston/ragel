@@ -228,11 +228,9 @@ void InputData::writeOutput( InputItem *ii )
 			switch ( hostLang->backend ) {
 				case Direct:
 					if ( ii->loc.fileName != 0 ) {
-						if ( !noLineDirectives ) {
-							if ( ii->prev != 0 )
-								*outStream << "\n";
-							(*hostLang->genLineDirective)( *outStream, ii->loc.line, ii->loc.fileName );
-						}
+						if ( ii->prev != 0 )
+							*outStream << "\n";
+						(*hostLang->genLineDirective)( *outStream, !noLineDirectives, ii->loc.line, ii->loc.fileName );
 					}
 						
 					*outStream << ii->data.str();

@@ -409,8 +409,14 @@ void operator<<( std::ostream &out, exit_object & )
 	throw AbortCompile( 1 );
 }
 
-void genLineDirectiveC( std::ostream &out, int line, const char *fileName )
+void genLineDirectiveC( std::ostream &out, bool lineDirectives, int line, const char *fileName )
 {
+	if ( !lineDirectives )
+		return;
+
+	if ( !lineDirectives )
+		out << "/* ";
+
 	out << "#line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
@@ -421,11 +427,18 @@ void genLineDirectiveC( std::ostream &out, int line, const char *fileName )
 			out << *pc;
 	}
 	out << '"';
+
+	if ( !lineDirectives )
+		out << " */";
+
 	out << '\n';
 }
 
-void genLineDirectiveAsm( std::ostream &out, int line, const char *fileName )
+void genLineDirectiveAsm( std::ostream &out, bool lineDirectives, int line, const char *fileName )
 {
+	if ( !lineDirectives )
+		return;
+
 	out << "/* #line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
@@ -439,6 +452,6 @@ void genLineDirectiveAsm( std::ostream &out, int line, const char *fileName )
 	out << " */\n";
 }
 
-void genLineDirectiveTrans( std::ostream &out, int line, const char *fileName )
+void genLineDirectiveTrans( std::ostream &out, bool lineDirectives, int line, const char *fileName )
 {
 }
