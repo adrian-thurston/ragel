@@ -191,8 +191,6 @@ FsmRes FsmAp::nfaRepeatOp( FsmAp *fsm, Action *push, Action *pop, Action *init,
 		const int orderRepeat = mode == NfaGreedy ? 2 : 2;
 		const int orderExit =   mode == NfaGreedy ? 1 : 3;
 
-		std::cerr << mode << " " << orderStay << orderRepeat << orderExit << std::endl;
-
 		if ( stay != 0 ) {
 			/* Transition to original final state. Represents staying. */
 			trans = new NfaTrans( orderStay );
