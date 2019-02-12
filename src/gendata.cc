@@ -1542,8 +1542,9 @@ void Reducer::analyzeMachine()
 void CodeGenData::genOutputLineDirective( std::ostream &out ) const
 {
 	std::streambuf *sbuf = out.rdbuf();
-	output_filter *filter = static_cast<output_filter*>(sbuf);
-	(*genLineDirective)( out, lineDirectives, filter->line + 1, filter->fileName );
+	output_filter *filter = dynamic_cast<output_filter*>(sbuf);
+	if ( filter != 0 ) 
+		(*genLineDirective)( out, lineDirectives, filter->line + 1, filter->fileName );
 }
 
 void CodeGenData::write_option_error( InputLoc &loc, std::string arg )

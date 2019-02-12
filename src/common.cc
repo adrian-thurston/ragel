@@ -412,9 +412,6 @@ void operator<<( std::ostream &out, exit_object & )
 void genLineDirectiveC( std::ostream &out, bool lineDirectives, int line, const char *fileName )
 {
 	if ( !lineDirectives )
-		return;
-
-	if ( !lineDirectives )
 		out << "/* ";
 
 	out << "#line " << line  << " \"";
@@ -436,9 +433,6 @@ void genLineDirectiveC( std::ostream &out, bool lineDirectives, int line, const 
 
 void genLineDirectiveAsm( std::ostream &out, bool lineDirectives, int line, const char *fileName )
 {
-	if ( !lineDirectives )
-		return;
-
 	out << "/* #line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
 		if ( *pc == '\\' )
