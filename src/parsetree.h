@@ -651,6 +651,7 @@ struct Factor
 	}; 
 
 	enum NfaRepeatMode {
+		NfaLegacy = 1,
 		NfaGreedy,
 		NfaLazy
 	};

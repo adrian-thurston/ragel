@@ -1707,14 +1707,27 @@ FsmRes Factor::walk( ParseData *pd )
 	case NfaRep: {
 		FsmRes exprTree = expression->walk( pd );
 
-		FsmAp::NfaRepeatMode repMode = 
-				mode == NfaGreedy ? FsmAp::NfaGreedy : FsmAp::NfaLazy;
+		if ( mode == Factor::NfaLegacy ) {
+			FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
+					action4, action5, action6 );
 
-		FsmRes res = FsmAp::nfaRepeatOp( exprTree.fsm, action1, action2, action3,
-				action4, action5, action6, repMode );
+			res.fsm->verifyIntegrity();
+			return res;
+		}
+		else if ( mode == Factor::NfaLazy ) {
+			FsmRes res = FsmAp::nfaRepeatOp2( exprTree.fsm, action1, action2, action3,
+					action4, action5, action6, FsmAp::NfaLazy );
 
-		res.fsm->verifyIntegrity();
-		return res;
+			res.fsm->verifyIntegrity();
+			return res;
+		}
+		else {
+			FsmRes res = FsmAp::nfaRepeatOp2( exprTree.fsm, action1, action2, action3,
+					action4, action5, action6, FsmAp::NfaGreedy );
+
+			res.fsm->verifyIntegrity();
+			return res;
+		}
 	}
 	case CondStar: {
 		FsmRes exprTree = expression->walk( pd );

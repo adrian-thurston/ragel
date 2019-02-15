@@ -1517,7 +1517,7 @@ reduction TopLevel
 
 	ragel::nfastar :Default
 	{
-		$$->mode = Factor::NfaGreedy;
+		$$->mode = Factor::NfaLegacy;
 	}
 
 	ragel::nfastar :Lazy
