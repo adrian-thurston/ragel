@@ -759,7 +759,7 @@ void IpGoto::writeExec()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			out << "	case " << st->id << ": {\n";
 			NFA_PUSH( st );
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t break;}\n";
 		}
 
 		out <<
