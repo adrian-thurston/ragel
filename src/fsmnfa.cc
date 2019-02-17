@@ -161,12 +161,17 @@ FsmRes FsmAp::nfaRepeatOp2( FsmAp *fsm, Action *push, Action *pop, Action *init,
 	newStart1->nfaOut = new NfaTransList;
 	newStart2->nfaOut = new NfaTransList;
 
+	const int orderInit =   0;
+	const int orderStay =   mode == NfaGreedy ? 3 : 1;
+	const int orderRepeat = mode == NfaGreedy ? 2 : 2;
+	const int orderExit =   mode == NfaGreedy ? 1 : 3;
+
 	NfaTrans *trans;
 	if ( init ) {
 		/* Transition into the repetition. Doesn't make much sense to flip this
 		 * statically false, but provided for consistency of interface. Allows
 		 * an init so we can have only local state manipulation. */
-		trans = new NfaTrans( 1 );
+		trans = new NfaTrans( orderInit );
 
 		trans->pushTable.setAction( ORD_PUSH, push );
 		trans->restoreTable.setAction( ORD_RESTORE, pop );
@@ -179,7 +184,7 @@ FsmRes FsmAp::nfaRepeatOp2( FsmAp *fsm, Action *push, Action *pop, Action *init,
 	StateAp *newFinal = fsm->addState();
 
 	if ( exit ) {
-		trans = new NfaTrans( 1 );
+		trans = new NfaTrans( orderExit );
 
 		trans->pushTable.setAction( ORD_PUSH, push );
 		trans->restoreTable.setAction( ORD_RESTORE, pop );
@@ -190,7 +195,7 @@ FsmRes FsmAp::nfaRepeatOp2( FsmAp *fsm, Action *push, Action *pop, Action *init,
 	}
 
 	if ( repeat ) {
-		trans = new NfaTrans( 1 );
+		trans = new NfaTrans( orderRepeat );
 
 		trans->pushTable.setAction( ORD_PUSH, push );
 		trans->restoreTable.setAction( ORD_RESTORE, pop );
@@ -207,10 +212,6 @@ FsmRes FsmAp::nfaRepeatOp2( FsmAp *fsm, Action *push, Action *pop, Action *init,
 		fsm->moveInwardTrans( repl, *orig );
 
 		repl->nfaOut = new NfaTransList;
-
-		const int orderStay =   mode == NfaGreedy ? 3 : 1;
-		const int orderRepeat = mode == NfaGreedy ? 2 : 2;
-		const int orderExit =   mode == NfaGreedy ? 1 : 3;
 
 		if ( stay != 0 ) {
 			/* Transition to original final state. Represents staying. */
