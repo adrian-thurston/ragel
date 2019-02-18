@@ -132,7 +132,8 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	 * restarting to affect the searching through the graph that follows. For
 	 * now take the safe route and save the list of transitions to restart
 	 * until after all searching is done. */
-	Vector<TransAp*> restartTrans;
+	Vector<TransAp*> restartData;
+	Vector<CondAp*> restartCond;
 
 	/* Set actions that do immediate token recognition, set the longest match part
 	 * id and set the token ending. */
@@ -159,7 +160,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 						 * makes the outlist non-empty. */
 						tdap->actionTable.setAction( lmAct->key, 
 								lmAct->value->actOnLast );
-						restartTrans.append( trans );
+						restartData.append( trans );
 					}
 					else {
 						/* Look for non final states that have a non-empty item
@@ -219,7 +220,7 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 							 * makes the outlist non-empty. */
 							cond->actionTable.setAction( lmAct->key, 
 									lmAct->value->actOnLast );
-							restartTrans.append( trans );
+							restartCond.append( cond );
 						}
 						else {
 							/* Look for non final states that have a non-empty item
@@ -263,7 +264,10 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 
 	/* Now that all graph searching is done it certainly safe set the
 	 * restarting. It may be safe above, however this must be verified. */
-	for ( Vector<TransAp*>::Iter pt = restartTrans; pt.lte(); pt++ )
+	for ( Vector<TransAp*>::Iter pt = restartData; pt.lte(); pt++ )
+		restart( graph, *pt );
+
+	for ( Vector<CondAp*>::Iter pt = restartCond; pt.lte(); pt++ )
 		restart( graph, *pt );
 
 	int lmErrActionOrd = pd->fsmCtx->curActionOrd++;

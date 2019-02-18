@@ -353,18 +353,16 @@ void LongestMatch::resolveNameRefs( ParseData *pd )
 
 void LongestMatch::restart( FsmAp *graph, TransAp *trans )
 {
-	if ( trans->plain() ) {
-		StateAp *fromState = trans->tdap()->fromState;
-		graph->detachTrans( fromState, trans->tdap()->toState, trans->tdap() );
-		graph->attachTrans( fromState, graph->startState, trans->tdap() );
-	}
-	else {
-		for ( CondList::Iter cti = trans->tcap()->condList; cti.lte(); cti++ ) {
-			StateAp *fromState = cti->fromState;
-			graph->detachTrans( fromState, cti->toState, cti );
-			graph->attachTrans( fromState, graph->startState, cti );
-		}
-	}
+	StateAp *fromState = trans->tdap()->fromState;
+	graph->detachTrans( fromState, trans->tdap()->toState, trans->tdap() );
+	graph->attachTrans( fromState, graph->startState, trans->tdap() );
+}
+
+void LongestMatch::restart( FsmAp *graph, CondAp *cti )
+{
+	StateAp *fromState = cti->fromState;
+	graph->detachTrans( fromState, cti->toState, cti );
+	graph->attachTrans( fromState, graph->startState, cti );
 }
 
 void LongestMatch::transferScannerLeavingActions( FsmAp *graph )

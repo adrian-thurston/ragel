@@ -329,6 +329,7 @@ struct LongestMatch
 	void makeActions( ParseData *pd );
 	void findName( ParseData *pd );
 	void restart( FsmAp *graph, TransAp *trans );
+	void restart( FsmAp *graph, CondAp *cond );
 
 	InputLoc loc;
 	LmPartList *longestMatchList;
