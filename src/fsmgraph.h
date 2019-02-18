@@ -2278,6 +2278,8 @@ public:
 
 	static FsmRes nfaRepeatOp2( FsmAp *fsm, Action *push, Action *pop, Action *init,
 			Action *stay, Action *repeat, Action *exit, NfaRepeatMode mode = NfaGreedy );
+	static FsmRes nfaWrap( FsmAp *fsm, Action *push, Action *pop, Action *init,
+			Action *stay, Action *exit, NfaRepeatMode mode = NfaGreedy );
 
 	static FsmRes nfaUnion( const NfaRoundVect &roundsList, FsmAp **machines,
 			int numMachines, std::ostream &stats, bool printStatistics );

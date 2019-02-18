@@ -646,6 +646,7 @@ struct Factor
 		ParenType,
 		LongestMatchType,
 		NfaRep,
+		NfaWrap,
 		CondStar,
 		CondPlus
 	}; 

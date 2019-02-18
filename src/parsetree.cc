@@ -1679,7 +1679,8 @@ Factor::~Factor()
 		case LongestMatchType:
 			delete longestMatch;
 			break;
-		case NfaRep: case CondStar: case CondPlus:
+		case NfaWrap: case NfaRep:
+		case CondStar: case CondPlus:
 			delete expression;
 			break;
 	}
@@ -1724,6 +1725,23 @@ FsmRes Factor::walk( ParseData *pd )
 		else {
 			FsmRes res = FsmAp::nfaRepeatOp2( exprTree.fsm, action1, action2, action3,
 					action4, action5, action6, FsmAp::NfaGreedy );
+
+			res.fsm->verifyIntegrity();
+			return res;
+		}
+	}
+	case NfaWrap: {
+		FsmRes exprTree = expression->walk( pd );
+		if ( mode == Factor::NfaLazy ) {
+			FsmRes res = FsmAp::nfaWrap( exprTree.fsm, action1, action2, action3,
+					action4, /* action5, */ action6, FsmAp::NfaLazy );
+
+			res.fsm->verifyIntegrity();
+			return res;
+		}
+		else {
+			FsmRes res = FsmAp::nfaWrap( exprTree.fsm, action1, action2, action3,
+					action4, /* action5, */ action6, FsmAp::NfaGreedy );
 
 			res.fsm->verifyIntegrity();
 			return res;
@@ -1774,6 +1792,7 @@ void Factor::makeNameTree( ParseData *pd )
 	case LongestMatchType:
 		longestMatch->makeNameTree( pd );
 		break;
+	case NfaWrap:
 	case NfaRep:
 	case CondStar:
 	case CondPlus:
@@ -1800,6 +1819,7 @@ void Factor::resolveNameRefs( ParseData *pd )
 		longestMatch->resolveNameRefs( pd );
 		break;
 	case NfaRep:
+	case NfaWrap:
 	case CondStar:
 	case CondPlus:
 		expression->resolveNameRefs( pd );

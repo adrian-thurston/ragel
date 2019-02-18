@@ -351,7 +351,9 @@ namespace ragel
 				`access `write `getkey `export `prepush
 				`postpop `nfaprepush `nfapostpop
 
-		literal `:nfa `:nfa_greedy `:nfa_lazy `:cond `:condplus `:condstar `):
+		literal `:nfa `:nfa_greedy `:nfa_lazy `:nfa_wrap 
+			`:nfa_wrap_greedy `:nfa_wrap_lazy
+			`:cond `:condplus `:condstar `):
 
 		token string /
 			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
@@ -645,6 +647,11 @@ namespace ragel
 	|	[`:nfa_lazy]   :Lazy
 	|	[`:nfa_greedy] :Greedy
 
+	def nfawrap
+		[`:nfa_wrap]   :Default
+	|	[`:nfa_wrap_lazy]   :Lazy
+	|	[`:nfa_wrap_greedy] :Greedy
+
 	def colon_cond
 		[`:cond] :Cond
 	|	[`:condstar] :CondStar
@@ -662,6 +669,9 @@ namespace ragel
 	|	[nfastar  `( expression `,
 			Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
 			Repeat: action_ref `, Exit: action_ref `):] :Nfa
+	|	[nfawrap  `( expression `,
+			Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
+			Exit: action_ref `):] :NfaWrap
 	|	[colon_cond `( expression `, 
 			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :Cond
 	|	[`( join `)] :Join

@@ -1531,6 +1531,29 @@ reduction TopLevel
 	}
 
 	#
+	# :nfa_wrap
+	#
+	ragel::nfawrap
+	{
+		Factor::NfaRepeatMode mode;
+	}
+
+	ragel::nfawrap :Default
+	{
+		$$->mode = Factor::NfaGreedy;
+	}
+
+	ragel::nfawrap :Lazy
+	{
+		$$->mode = Factor::NfaLazy;
+	}
+
+	ragel::nfawrap :Greedy
+	{
+		$$->mode = Factor::NfaGreedy;
+	}
+
+	#
 	# :cond
 	#
 	ragel::colon_cond
@@ -1653,6 +1676,15 @@ reduction TopLevel
 		$$->factor = new Factor( @1, pd->nextRepId++, $expression->expr,
 				$Push->action, $Pop->action, $Init->action, $Stay->action,
 				$Repeat->action, $Exit->action, Factor::NfaRep );
+		$$->factor->mode = $1->mode;
+	}
+
+	ragel::factor :NfaWrap
+	{
+		/* push, pop, init, stay, repeat, exit */
+		$$->factor = new Factor( @1, pd->nextRepId++, $expression->expr,
+				$Push->action, $Pop->action, $Init->action, $Stay->action,
+				0, $Exit->action, Factor::NfaWrap );
 		$$->factor->mode = $1->mode;
 	}
 
