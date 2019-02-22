@@ -254,10 +254,13 @@ extern HostType hostTypesC[];
  * comparison and increment according the signedness of the key. */
 struct KeyOps
 {
-	/* Default to signed alphabet. */
+	/* Defaults to C "char" type: Signed 8 bit. */
 	KeyOps()
 	:
-		isSigned(true)
+		isSigned(true),
+		explicitUnsigned(true),
+		minKey(CHAR_MIN),
+		maxKey(CHAR_MAX)
 	{}
 
 	bool isSigned;
