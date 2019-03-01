@@ -1006,8 +1006,9 @@ pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &lo
 				":" << loc.line << ":" << loc.col;
 
 		if ( pdaRun->parse_error_text != 0 ) {
-			cerr << ": relative error: " << 
-					pdaRun->parse_error_text->tokdata->data;
+			colm_data *tokdata = pdaRun->parse_error_text->tokdata;
+			cerr << ": relative error: ";
+			cerr.write( tokdata->data, tokdata->length );
 		}
 		else {
 			cerr << ": parse error";
