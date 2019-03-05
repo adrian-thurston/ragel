@@ -10,22 +10,17 @@ git clone . $CLONE
 
 VERSION=$(git -C $CLONE log -n 1 master | sed -n '1{ s/commit \(........\).*/\1/; p }')
 
-AWK='
-	BEGIN { public = 1; }
-
-	/^# *END PUBLIC/ { public = 0; }
-
-	public { print $0; }
-
-	/^# *BEGIN PUBLIC/ { public = 1; }
-'
-
 in_place_clean()
 {
 	for FN; do
 		local TFN=$(mktemp /tmp/inplace.XXXXXX)
 		cat $FN > $TFN
-		awk "$AWK" $TFN > $FN
+		awk -f - $TFN <<-'EOF' > $FN
+			BEGIN { public = 1; }
+			/^# *END PUBLIC/ { public = 0; }
+			public { print $0; }
+			/^# *BEGIN PUBLIC/ { public = 1; }
+		EOF
 		rm $TFN
 	done
 }
