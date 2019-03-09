@@ -1101,8 +1101,9 @@ void ParseData::initLongestMatchData()
 }
 
 /* After building the graph, do some extra processing to ensure the runtime
- * data of the longest mactch operators is consistent. */
-void ParseData::setLongestMatchData( FsmAp *graph )
+ * data of the longest mactch operators is consistent. We want tokstart to be
+ * null when no token match is active. */
+void ParseData::longestMatchInitTweaks( FsmAp *graph )
 {
 	if ( lmList.length() > 0 ) {
 		/* Make sure all entry points (targets of fgoto, fcall, fnext, fentry)
@@ -1111,8 +1112,13 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 			/* This is run after duplicates are removed, we must guard against
 			 * inserting a duplicate. */
 			ActionTable &actionTable = en->value->toStateActionTable;
-			if ( ! actionTable.hasAction( initTokStart ) )
+			if ( ! actionTable.hasAction( initTokStart ) ) {
+				/* We do this after the analysis pass, which reference counts
+				 * the actions. Keep them up to date so we don't break the
+				 * build. */
+				initTokStart->numToStateRefs += 1;
 				actionTable.setAction( initTokStartOrd, initTokStart );
+			}
 		}
 
 		/* Find the set of states that are the target of transitions with
@@ -1144,8 +1150,13 @@ void ParseData::setLongestMatchData( FsmAp *graph )
 			/* This is run after duplicates are removed, we must guard against
 			 * inserting a duplicate. */
 			ActionTable &actionTable = (*ps)->toStateActionTable;
-			if ( ! actionTable.hasAction( initTokStart ) )
+			if ( ! actionTable.hasAction( initTokStart ) ) {
+				/* We do this after the analysis pass, which reference counts
+				 * the actions. Keep them up to date so we don't break the
+				 * build. */
+				initTokStart->numToStateRefs += 1;
 				actionTable.setAction( initTokStartOrd, initTokStart );
+			}
 		}
 	}
 }
@@ -1427,7 +1438,7 @@ FsmRes ParseData::prepareMachineGen( GraphDictEl *graphDictEl, const HostLang *h
 	fsmCtx->analyzeGraph( sectionGraph );
 
 	/* Depends on the graph analysis. */
-	setLongestMatchData( sectionGraph );
+	longestMatchInitTweaks( sectionGraph );
 
 	fsmCtx->prepareReduction( sectionGraph );
 

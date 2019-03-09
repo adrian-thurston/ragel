@@ -340,7 +340,7 @@ struct ParseData
 
 	void setLmInRetLoc( InlineList *inlineList );
 	void initLongestMatchData();
-	void setLongestMatchData( FsmAp *graph );
+	void longestMatchInitTweaks( FsmAp *graph );
 	void initNameWalk();
 	void initExportsNameWalk();
 	NameInst *nextNameScope() { return curNameInst->childVect[curNameChild]; }
