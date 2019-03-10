@@ -227,6 +227,7 @@ void TabVar::writeExec()
 			"{\n"
 			"	" << UINT() << " _nfa_cont = 1;\n"
 			"	" << UINT() << " _nfa_repeat = 1;\n"
+			"	" << UINT() << " _nfa_test = 1;\n"
 			"	while ( _nfa_cont != 0 )\n";
 	}
 
@@ -267,7 +268,8 @@ void TabVar::writeExec()
 
 	if ( !noEnd ) {
 		out << 
-			"	if ( " << P() << " == " << PE() << " ) {\n";
+			"	if ( " << P() << " == " << PE() << " ) {\n"
+			"		_nfa_test = 0;\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 			out << 
@@ -306,6 +308,7 @@ void TabVar::writeExec()
 				"		}\n"
 				"		if ( _eofcont == 0 ) {\n"
 				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
+				"			_nfa_test = 1;\n"
 				"		}\n"
 				"	}\n"
 			;
@@ -397,8 +400,12 @@ void TabVar::writeExec()
 	out << "}\n";
 	out << "}\n";
 
+	out <<
+		"	if ( _nfa_test = 1 ) {\n";
+
 	NFA_POP();
 
+	out << "}\n";
 	out << "}\n";
 
 	if ( redFsm->anyNfaStates() )

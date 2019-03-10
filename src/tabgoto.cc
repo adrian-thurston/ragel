@@ -413,6 +413,8 @@ void TabGoto::writeExec()
 			"\n";
 	}
 
+	out << "goto _out2;\n";
+
 	if ( outLabelUsed )
 		out << "}\n" << LABEL( "_out" ) << " { {}\n";
 
@@ -421,6 +423,8 @@ void TabGoto::writeExec()
 	out << "}\n";
 
 	NFA_POP();
+
+	out << "}\n" << LABEL( "_out2" ) << " { {}\n";
 
 	out << "	}\n";
 }

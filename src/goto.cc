@@ -1056,10 +1056,14 @@ void Goto::writeExec()
 			"\n";
 	}
 
+	out << "goto _out2;\n";
+
 	if ( outLabelUsed )
 		out << "	_out: {}\n";
 
 	NFA_POP();
+
+	out << "_out2: {}\n";
 
 	out << "	}\n";
 }
