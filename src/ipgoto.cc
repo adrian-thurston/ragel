@@ -805,7 +805,11 @@ void IpGoto::writeExec()
 		out <<
 			"	switch ( " << vCS() << " ) {\n";
 			FINISH_CASES() <<
-			"	}\n"
+			"	}\n";
+
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL() << " ) goto _out; ";
+
+		out <<
 			"	}\n"
 			"\n";
 	}

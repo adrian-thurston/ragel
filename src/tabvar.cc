@@ -269,7 +269,8 @@ void TabVar::writeExec()
 	if ( !noEnd ) {
 		out << 
 			"	if ( " << P() << " == " << PE() << " ) {\n"
-			"		_nfa_test = 0;\n";
+			"		_nfa_test = 0;\n"
+			"		_nfa_cont = 0;\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 			out << 
@@ -309,6 +310,7 @@ void TabVar::writeExec()
 				"		if ( _eofcont == 0 ) {\n"
 				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
 				"			_nfa_test = 1;\n"
+				"			_nfa_cont = 1;\n"
 				"		}\n"
 				"	}\n"
 			;
@@ -340,6 +342,13 @@ void TabVar::writeExec()
 			}
 
 			out << "}\n";
+
+			out <<
+				"	if ( " << vCS() << " < " << FIRST_FINAL() << " ) {\n"
+				"		_nfa_test = 1;\n"
+				"		_nfa_cont = 1;\n"
+				"	}\n";
+
 			out << "}\n";
 		}
 
@@ -401,7 +410,7 @@ void TabVar::writeExec()
 	out << "}\n";
 
 	out <<
-		"	if ( _nfa_test = 1 ) {\n";
+		"	if ( _nfa_test == 1 ) {\n";
 
 	NFA_POP();
 

@@ -408,6 +408,8 @@ void TabGoto::writeExec()
 				"	}\n";
 		}
 
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL() << " ) goto _out; ";
+
 		out <<
 			"	}\n"
 			"\n";
