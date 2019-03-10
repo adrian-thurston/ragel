@@ -59,6 +59,7 @@ public:
 	void action( ActionTable *actionTable );
 	void transAction( StateAp *fromState, TransData *trans );
 	void key( Key key );
+	void condSpec( CondSpace *condSpace, long condVals );
 	void onChar( Key lowKey, Key highKey, CondSpace *condSpace, long condVals );
 	void transList( StateAp *state );
 	void write();
