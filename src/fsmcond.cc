@@ -410,7 +410,6 @@ void FsmAp::doEmbedCondition( StateAp *state,
 				cti++;
 			}
 		}
-
 	}
 }
 

@@ -288,6 +288,24 @@ void LongestMatch::makeActions( ParseData *pd )
 		lmi->actLagBehind = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
+	/* NFA actions
+	 *
+	 * Actions that execute the user action and restart on the next character.
+	 * These actions will set tokend themselves (it is the current char). They
+	 * also reset the nfa machinery used to choose between tokens. */
+	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ ) {
+		/* For each part create actions for setting the match type.  We need
+		 * to do this so that the actions will go into the actionIndex. */
+		InlineList *inlineList = new InlineList;
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
+				InlineItem::LmNfaOnNext ) );
+		char *actName = new char[50];
+		sprintf( actName, "nnext%i", lmi->longestMatchId );
+		lmi->actNfaOnNext = newLmAction( pd, lmi->getLoc(), actName, inlineList );
+	}
+
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;
@@ -373,7 +391,7 @@ void LongestMatch::transferScannerLeavingActions( FsmAp *graph )
 	}
 }
 
-FsmRes LongestMatch::walk( ParseData *pd )
+FsmRes LongestMatch::walkClassic( ParseData *pd )
 {
 	/* The longest match has it's own name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
@@ -414,6 +432,15 @@ FsmRes LongestMatch::walk( ParseData *pd )
 
 	delete[] parts;
 	return res;
+}
+
+
+FsmRes LongestMatch::walk( ParseData *pd )
+{
+	if ( nfaConstruction )
+		return walkNfa( pd );
+	else
+		return walkClassic( pd );
 }
 
 NfaUnion::~NfaUnion()

@@ -165,9 +165,7 @@ namespace consume
 
 		token open  /'{'/ -ni
 		token close ni- /'}'/
-
 		token c_any / any /
-
 	end
 
 
@@ -730,6 +728,7 @@ namespace ragel
 	def lm
 		[join] :Join
 	|	[`|* lm_stmt_list `*|] :Lm
+	|	[`:nfa `|* lm_stmt_list `*|] :LmNfa
 
 	#
 	# Actions

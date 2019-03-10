@@ -1363,6 +1363,7 @@ void FsmAp::mergeStateProperties( StateAp *destState, StateAp *srcState )
 		destState->outActionTable.setActions( srcState->outActionTable );
 		destState->errActionTable.setActions( srcState->errActionTable );
 		destState->eofActionTable.setActions( srcState->eofActionTable );
+		destState->lmNfaParts.insert( srcState->lmNfaParts );
 		destState->guardedInTable.setPriors( srcState->guardedInTable );
 	}
 }

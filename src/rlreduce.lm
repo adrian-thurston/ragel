@@ -1918,6 +1918,18 @@ reduction TopLevel
 		$$->machineDef = new MachineDef( lm );
 	}
 
+	ragel::lm :LmNfa
+	{
+		/* Create a new factor going to a longest match structure. Record in
+		 * the parse data that we have a longest match. */
+		LongestMatch *lm = new LongestMatch( @1, $lm_stmt_list->lmPartList );
+		lm->nfaConstruction = true;
+		pd->lmList.append( lm );
+		for ( LmPartList::Iter lmp = *$lm_stmt_list->lmPartList; lmp.lte(); lmp++ )
+			lmp->longestMatch = lm;
+		$$->machineDef = new MachineDef( lm );
+	}
+
 	# def lm_stmt_list
 	# 	[lm_stmt_list lm_stmt] :Rec
 	# |	[lm_stmt] :Base

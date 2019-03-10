@@ -1277,6 +1277,11 @@ struct StateAp
 	LmItemSet lmItemSet;
 
 	PriorTable guardedInTable;
+
+	/* Used by the NFA-based scanner to track the origin of final states. We
+	 * only use it in cases where just one match is possible, starting with the
+	 * final state duplicates that are drawn using NFA transitions. */
+	LmItemSet lmNfaParts;
 };
 
 /* Return and re-entry for the co-routine iterators. This should ALWAYS be

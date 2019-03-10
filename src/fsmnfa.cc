@@ -591,7 +591,9 @@ FsmRes FsmAp::nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, ostream 
 	return FsmRes( FsmRes::Fsm(), fsm );
 }
 
-FsmRes FsmAp::nfaUnion( const NfaRoundVect &roundsList, FsmAp **machines, int numMachines, std::ostream &stats, bool printStatistics )
+FsmRes FsmAp::nfaUnion( const NfaRoundVect &roundsList,
+		FsmAp **machines, int numMachines,
+		std::ostream &stats, bool printStatistics )
 {
 	long sumPlain = 0, sumMin = 0;
 	for ( int i = 0; i < numMachines; i++ ) {

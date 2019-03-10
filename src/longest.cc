@@ -312,3 +312,101 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 }
 
 
+FsmRes LongestMatch::walkNfa( ParseData *pd )
+{
+	/* The longest match has it's own name scope. */
+	NameFrame nameFrame = pd->enterNameScope( true, 1 );
+
+	int nfaOrder = 1;
+
+	/* Make each part of the longest match. */
+	FsmAp **parts = new FsmAp*[longestMatchList->length()];
+	LmPartList::Iter lmi = longestMatchList->last(); 
+	for ( int i = longestMatchList->length() - 1; lmi.gtb(); lmi--, i-- ) {
+		/* Create the machine and embed the setting of the longest match id. */
+		FsmRes res = lmi->join->walk( pd );
+		if ( !res.success() )
+			return res;
+
+		parts[i] = res.fsm;
+
+		StateSet origFin = parts[i]->finStateSet;
+		for ( StateSet::Iter fin = origFin; fin.lte(); fin++ ) {
+			StateAp *orig = *fin;
+			StateAp *newFinal = parts[i]->addState(); 
+
+			newFinal->lmNfaParts.insert( lmi );
+			
+			NfaTrans *trans = new NfaTrans( nfaOrder++ );
+			if ( orig->nfaOut == 0 )
+				orig->nfaOut = new NfaTransList;
+			orig->nfaOut->append( trans );
+			parts[i]->attachToNfa( orig, newFinal, trans );
+
+			if ( orig->outPriorTable.length() > 0 ) {
+				newFinal->outPriorTable.insert( orig->outPriorTable );
+				orig->outPriorTable.empty();
+			}
+			if ( orig->outActionTable.length() > 0 ) {
+				newFinal->outActionTable.insert( orig->outActionTable );
+				orig->outActionTable.empty();
+			}
+			if ( orig->outCondSpace != 0 ) {
+				newFinal->outCondSpace = orig->outCondSpace;
+				newFinal->outCondKeys.insert( orig->outCondKeys );
+				orig->outCondSpace = 0;
+				orig->outCondKeys.empty();
+			}
+
+			parts[i]->unsetFinState( orig );
+			parts[i]->setFinState( newFinal );
+		}
+	}
+
+	/* Union machines one and up with machine zero. The grammar dictates that
+	 * there will always be at least one part. */
+	FsmRes res( FsmRes::Fsm(), parts[0] );
+	for ( int i = 1; i < longestMatchList->length(); i++ ) {
+		res = FsmAp::unionOp( res.fsm, parts[i] );
+		if ( !res.success() )
+			return res;
+	}
+
+	res = FsmAp::isolateStartState( res.fsm );
+	res.fsm->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
+	res.fsm->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
+
+	int lmErrActionOrd = pd->fsmCtx->curActionOrd++;
+
+	KeyOps *keyOps = pd->fsmCtx->keyOps;
+
+	for ( StateList::Iter st = res.fsm->stateList; st.lte(); st++ ) {
+		if ( st->lmNfaParts.length() > 0 ) {
+			assert( st->lmNfaParts.length() == 1 );
+
+			TransAp *newTrans = res.fsm->attachNewTrans( st,
+					res.fsm->startState, keyOps->minKey, keyOps->maxKey );
+
+			res.fsm->transferOutData( st, st );
+			if ( st->outCondSpace != 0 )
+				FsmAp::embedCondition( res.fsm, st, st->outCondSpace->condSet, st->outCondKeys );
+
+			for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
+				if ( trans->plain() )
+					trans->tdap()->actionTable.setAction( lmErrActionOrd, st->lmNfaParts[0]->actNfaOnNext );
+				else {
+					for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
+						cond->actionTable.setAction( lmErrActionOrd, st->lmNfaParts[0]->actNfaOnNext );
+				}
+			}
+
+			st->eofActionTable.setAction( lmErrActionOrd, st->lmNfaParts[0]->actNfaOnNext );
+		}
+	}
+
+	/* Pop the name scope. */
+	pd->popNameScope( nameFrame );
+
+	delete[] parts;
+	return res;
+}

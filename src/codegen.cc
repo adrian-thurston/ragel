@@ -780,6 +780,9 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 		case GenInlineItem::LmHold:
 			ret << P() << " = " << P() << " - 1;";
 			break;
+		case GenInlineItem::NfaClear:
+			ret << "nfa_len = 0; ";
+			break;
 		case GenInlineItem::Exec:
 			EXEC( ret, item, targState, inFinish );
 			break;

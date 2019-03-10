@@ -301,6 +301,7 @@ struct LongestMatchPart
 	Action *actOnLast;
 	Action *actOnNext;
 	Action *actLagBehind;
+	Action *actNfaOnNext;
 	int longestMatchId;
 	bool inLmSelect;
 	LongestMatch *longestMatch;
@@ -314,11 +315,26 @@ struct LmPartList : DList<LongestMatchPart> {};
 struct LongestMatch
 {
 	/* Construct with a list of joins */
-	LongestMatch( const InputLoc &loc, LmPartList *longestMatchList ) : 
-		loc(loc), longestMatchList(longestMatchList),
-		lmSwitchHandlesError(false) { }
+	LongestMatch( const InputLoc &loc, LmPartList *longestMatchList )
+	: 
+		loc(loc),
+		longestMatchList(longestMatchList),
+		lmSwitchHandlesError(false),
+		nfaConstruction(false)
+	{ }
+
+	InputLoc loc;
+	LmPartList *longestMatchList;
+	std::string name;
+	Action *lmActSelect;
+	bool lmSwitchHandlesError;
+	bool nfaConstruction;
+
+	LongestMatch *next, *prev;
 
 	/* Tree traversal. */
+	FsmRes walkClassic( ParseData *pd );
+	FsmRes walkNfa( ParseData *pd );
 	FsmRes walk( ParseData *pd );
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
@@ -330,15 +346,6 @@ struct LongestMatch
 	void findName( ParseData *pd );
 	void restart( FsmAp *graph, TransAp *trans );
 	void restart( FsmAp *graph, CondAp *cond );
-
-	InputLoc loc;
-	LmPartList *longestMatchList;
-	std::string name;
-
-	Action *lmActSelect;
-	bool lmSwitchHandlesError;
-
-	LongestMatch *next, *prev;
 };
 
 

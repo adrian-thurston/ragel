@@ -1118,8 +1118,13 @@ int FsmAp::compareStateData( const StateAp *state1, const StateAp *state2 )
 		return cmpRes;
 
 	/* Test eof action tables. */
-	return CmpActionTable::compare( state1->eofActionTable, 
+	cmpRes = CmpActionTable::compare( state1->eofActionTable, 
 			state2->eofActionTable );
+	if ( cmpRes != 0 )
+		return cmpRes;
+	
+	return CmpTable<LongestMatchPart*>::compare(
+			state1->lmNfaParts, state2->lmNfaParts );
 }
 
 

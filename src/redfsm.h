@@ -67,7 +67,7 @@ struct GenInlineItem
 		NcallExpr, NextExpr, Ret, Nret,
 		PChar, Char, Hold, Curs, Targs, Entry, Exec, Break, Nbreak,
 		LmSwitch, LmExec, LmSetActId, LmSetTokEnd, LmGetTokEnd,
-		LmInitAct, LmInitTokStart, LmSetTokStart,
+		LmInitAct, LmInitTokStart, LmSetTokStart, NfaClear,
 		HostStmt, HostExpr, HostText,
 		GenStmt, GenExpr, LmCase, LmHold,
 		NfaWrapAction, NfaWrapConds
