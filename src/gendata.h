@@ -355,7 +355,8 @@ struct CodeGenArgs
 		fsmName(fsmName),
 		out(out),
 		codeStyle(codeStyle),
-		lineDirectives(true)
+		lineDirectives(true),
+		forceVar(false)
 	{}
 
 	FsmGbl *id;
@@ -368,6 +369,7 @@ struct CodeGenArgs
 	CodeStyle codeStyle;
 	bool lineDirectives;
 	GenLineDirectiveT genLineDirective;
+	bool forceVar;
 };
 
 struct CodeGenData

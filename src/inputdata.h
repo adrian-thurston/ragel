@@ -206,7 +206,8 @@ struct InputData
 		varBackend(false),
 		histogramFn(0),
 		histogram(0),
-		input(0)
+		input(0),
+		forceVar(false)
 	{}
 
 	~InputData();
@@ -294,6 +295,8 @@ struct InputData
 	const char *input;
 
 	Vector<const char**> streamFileNames;
+
+	bool forceVar;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();

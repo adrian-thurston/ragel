@@ -52,48 +52,48 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 
 	switch ( args.codeStyle ) {
 	case GenBinaryLoop:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new BinGotoLoop( args );
 		else
 			codeGen = new BinVarLoop( args );
 		break;
 
 	case GenBinaryExp:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new BinGotoExp( args );
 		else
 			codeGen = new BinVarExp( args );
 		break;
 
 	case GenFlatLoop:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new FlatGotoLoop( args );
 		else
 			codeGen = new FlatVarLoop( args );
 		break;
 
 	case GenFlatExp:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new FlatGotoExp( args );
 		else
 			codeGen = new FlatVarExp( args );
 		break;
 
 	case GenSwitchLoop:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new SwitchGotoLoop(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 	case GenSwitchExp:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new SwitchGotoExp(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 
 	case GenIpGoto:
-		if ( hostLang->feature == GotoFeature )
+		if ( !args.forceVar && hostLang->feature == GotoFeature )
 			codeGen = new IpGoto(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;

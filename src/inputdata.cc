@@ -791,7 +791,6 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				break;
 
-
 			/* Version and help. */
 			case 'v':
 				version();
@@ -873,6 +872,8 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				else if ( strcmp( arg, "input-histogram" ) == 0 )
 					histogramFn = strdup(eq);
+				else if ( strcmp( arg, "force-var" ) == 0 )
+					forceVar = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
