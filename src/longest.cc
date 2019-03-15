@@ -314,6 +314,11 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 
 FsmRes LongestMatch::walkNfa( ParseData *pd )
 {
+	/*
+	 * Build the individual machines, setting up the NFA transitions to final
+	 * states
+	 */
+
 	/* The longest match has it's own name scope. */
 	NameFrame nameFrame = pd->enterNameScope( true, 1 );
 
@@ -372,24 +377,66 @@ FsmRes LongestMatch::walkNfa( ParseData *pd )
 			return res;
 	}
 
+
+	/*
+	 * Once the union is complete we can optimize by advancing actions so they
+	 * happen sooner, then draw the final transitions back to the start state.
+	 */
+again:
+	bool modified = false;
+	FsmAp *fsm = res.fsm;
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+		/* IS OUT COND SPACE ALL? */
+		if ( st->lmNfaParts.length() > 0 && st->outCondSpace == 0 && st->nfaIn != 0 ) {
+			for ( NfaInList::Iter in = *st->nfaIn; in.lte(); in++ ) {
+				std::cerr << "checking " << in->fromState << std::endl;
+				StateAp *fromState = in->fromState;
+				for ( NfaTransList::Iter to = *fromState->nfaOut; to.lte(); to++ ) {
+					if ( to == in ) {
+						break;
+					}
+
+					/* Can nuke the epsilon transition. */
+					std::cerr << "nuking EP transition" << endl;
+					fsm->detachFromNfa( fromState, to->toState, to );
+					fromState->nfaOut->detach( to );
+					delete to;
+					modified = true;
+					goto done;
+				}
+			}
+		}
+	}
+
+done:
+	if ( modified )
+		goto again;
+
+	/* Create a new, isolated start state into which we can embed tokstart
+	 * functions. */
 	res = FsmAp::isolateStartState( res.fsm );
-	res.fsm->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
-	res.fsm->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
+	if ( !res.success() )
+		return res;
+
+	fsm = res.fsm;
+	fsm->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
+	fsm->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
 
 	int lmErrActionOrd = pd->fsmCtx->curActionOrd++;
 
 	KeyOps *keyOps = pd->fsmCtx->keyOps;
 
-	for ( StateList::Iter st = res.fsm->stateList; st.lte(); st++ ) {
+	/* Draw the trasition back to the start state. */
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
 		if ( st->lmNfaParts.length() > 0 ) {
 			assert( st->lmNfaParts.length() == 1 );
 
-			TransAp *newTrans = res.fsm->attachNewTrans( st,
-					res.fsm->startState, keyOps->minKey, keyOps->maxKey );
+			TransAp *newTrans = fsm->attachNewTrans( st,
+					fsm->startState, keyOps->minKey, keyOps->maxKey );
 
-			res.fsm->transferOutData( st, st );
+			fsm->transferOutData( st, st );
 			if ( st->outCondSpace != 0 )
-				FsmAp::embedCondition( res.fsm, st, st->outCondSpace->condSet, st->outCondKeys );
+				FsmAp::embedCondition( fsm, st, st->outCondSpace->condSet, st->outCondKeys );
 
 			for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
 				if ( trans->plain() )
@@ -408,5 +455,5 @@ FsmRes LongestMatch::walkNfa( ParseData *pd )
 	pd->popNameScope( nameFrame );
 
 	delete[] parts;
-	return res;
+	return FsmRes( FsmRes::Fsm(), fsm );
 }
