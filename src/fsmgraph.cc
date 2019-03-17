@@ -515,6 +515,35 @@ void FsmAp::resolveEpsilonTrans()
 	}
 }
 
+FsmRes FsmAp::applyNfaTrans( FsmAp *fsm, StateAp *fromState, StateAp *toState, NfaTrans *nfaTrans )
+{
+	fsm->setMisfitAccounting( true );
+
+	fsm->mergeStates( fromState, toState, false );
+
+	/* Epsilons can caused merges which leave behind unreachable states. */
+	FsmRes res = FsmAp::fillInStates( fsm );
+	if ( !res.success() )
+		return res;
+
+	/* Can nuke the epsilon transition that we will never
+	 * follow. */
+	fsm->detachFromNfa( fromState, toState, nfaTrans );
+	fromState->nfaOut->detach( nfaTrans );
+	delete nfaTrans;
+
+	if ( fromState->nfaOut->length() == 0 ) {
+		delete fromState->nfaOut;
+		fromState->nfaOut = 0;
+	}
+
+	/* Remove the misfits and turn off misfit accounting. */
+	fsm->removeMisfits();
+	fsm->setMisfitAccounting( false );
+
+	return FsmRes( FsmRes::Fsm(), fsm );
+}
+
 void FsmAp::globOp( FsmAp **others, int numOthers )
 {
 	for ( int m = 0; m < numOthers; m++ ) {

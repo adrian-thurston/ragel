@@ -306,6 +306,19 @@ void Reducer::makeLmNfaOnNext( GenInlineList *outList, InlineItem *item )
 	}
 }
 
+void Reducer::makeLmNfaOnLast( GenInlineList *outList, InlineItem *item )
+{
+	makeSetTokend( outList, 1 );
+	outList->append( new GenInlineItem( InputLoc(), GenInlineItem::NfaClear ) );
+
+	if ( item->longestMatchPart->action != 0 ) {
+		Action *action = item->longestMatchPart->action;
+		makeSubList( outList, action->loc, action->inlineList, 
+				GenInlineItem::HostStmt );
+	}
+}
+
+
 void Reducer::makeSetTokend( GenInlineList *outList, long offset )
 {
 	GenInlineItem *inlineItem = new GenInlineItem( InputLoc(), GenInlineItem::LmSetTokEnd );
@@ -408,6 +421,9 @@ void Reducer::makeGenInlineList( GenInlineList *outList, InlineList *inList )
 
 		case InlineItem::LmNfaOnNext:
 			makeLmNfaOnNext( outList, item );
+			break;
+		case InlineItem::LmNfaOnLast:
+			makeLmNfaOnLast( outList, item );
 			break;
 
 		case InlineItem::LmInitAct:

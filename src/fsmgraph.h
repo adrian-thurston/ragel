@@ -1888,7 +1888,13 @@ struct FsmRes
 	FsmRes( const InternalError & )
 		: fsm(0), type(TypeInternalError) {}
 
-	bool success() { return fsm != 0; }
+	bool success()
+		{ return fsm != 0; }
+
+	operator FsmAp*()
+		{ return type == TypeFsm ? fsm : 0; }
+	FsmAp *operator->()
+		{ return type == TypeFsm ? fsm : 0; }
 
 	FsmAp *fsm;
 	Type type;
@@ -2259,7 +2265,8 @@ public:
 	static FsmRes minRepeatOp( FsmAp *fsm, int times );
 	static FsmRes rangeRepeatOp( FsmAp *fsm, int lower, int upper );
 
-	static FsmRes concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true, StateSet *fromStates = 0, bool optional = false );
+	static FsmRes concatOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true,
+			StateSet *fromStates = 0, bool optional = false );
 	static FsmRes unionOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes intersectOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
 	static FsmRes subtractOp( FsmAp *fsm, FsmAp *other, bool lastInSeq = true );
@@ -2275,6 +2282,8 @@ public:
 		NfaGreedy,
 		NfaLazy
 	};
+
+	static FsmRes applyNfaTrans( FsmAp *fsm, StateAp *fromState, StateAp *toState, NfaTrans *nfaTrans );
 
 	/* Results in an NFA. */
 	static FsmRes nfaUnionOp( FsmAp *fsm, FsmAp **others, int n, int depth, std::ostream &stats );
@@ -2385,6 +2394,9 @@ public:
 	/* Mark all states reachable from state. */
 	void markReachableFromHere( StateAp *state );
 	void markReachableFromHereStopFinal( StateAp *state );
+
+	/* Any transitions to another state? */
+	bool anyRegularTransitions( StateAp *state );
 
 	/* Removes states that cannot be reached by any path in the fsm and are
 	 * thus wasted silicon. */

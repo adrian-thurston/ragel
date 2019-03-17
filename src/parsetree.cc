@@ -306,6 +306,19 @@ void LongestMatch::makeActions( ParseData *pd )
 		lmi->actNfaOnNext = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
+	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ ) {
+		/* For each part create actions for setting the match type.  We need
+		 * to do this so that the actions will go into the actionIndex. */
+		InlineList *inlineList = new InlineList;
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
+				InlineItem::LmNfaOnLast ) );
+		char *actName = new char[50];
+		sprintf( actName, "nlast%i", lmi->longestMatchId );
+		lmi->actNfaOnLast = newLmAction( pd, lmi->getLoc(), actName, inlineList );
+	}
+
 	InputLoc loc;
 	loc.line = 1;
 	loc.col = 1;

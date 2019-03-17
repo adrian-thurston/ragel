@@ -302,6 +302,7 @@ struct LongestMatchPart
 	Action *actOnNext;
 	Action *actLagBehind;
 	Action *actNfaOnNext;
+	Action *actNfaOnLast;
 	int longestMatchId;
 	bool inLmSelect;
 	LongestMatch *longestMatch;
@@ -334,8 +335,16 @@ struct LongestMatch
 
 	/* Tree traversal. */
 	FsmRes walkClassic( ParseData *pd );
-	FsmRes walkNfa( ParseData *pd );
 	FsmRes walk( ParseData *pd );
+
+	FsmRes mergeNfaStates( ParseData *pd, FsmAp *fsm );
+	bool onlyOneNfa( ParseData *pd, FsmAp *fsm, StateAp *st, NfaTrans *in );
+	bool matchCanFail( ParseData *pd, FsmAp *fsm, StateAp *st );
+	void eliminateNfaActions( ParseData *pd, FsmAp *fsm );
+	void advanceNfaActions( ParseData *pd, FsmAp *fsm );
+	FsmRes buildBaseNfa( ParseData *pd );
+	FsmRes walkNfa( ParseData *pd );
+
 	void makeNameTree( ParseData *pd );
 	void resolveNameRefs( ParseData *pd );
 	void transferScannerLeavingActions( FsmAp *graph );

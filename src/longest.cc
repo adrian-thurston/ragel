@@ -311,21 +311,15 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	graph->setFinState( graph->startState );
 }
 
-
-FsmRes LongestMatch::walkNfa( ParseData *pd )
+/* Build the individual machines, setting up the NFA transitions to final
+ * states as we go. This is the base, unoptimized configuration. Later on we
+ * look to eliminate NFA transitions. Return the union of all machines. */
+FsmRes LongestMatch::buildBaseNfa( ParseData *pd )
 {
-	/*
-	 * Build the individual machines, setting up the NFA transitions to final
-	 * states
-	 */
-
-	/* The longest match has it's own name scope. */
-	NameFrame nameFrame = pd->enterNameScope( true, 1 );
-
 	int nfaOrder = 1;
+	FsmAp **parts = new FsmAp*[longestMatchList->length()];
 
 	/* Make each part of the longest match. */
-	FsmAp **parts = new FsmAp*[longestMatchList->length()];
 	LmPartList::Iter lmi = longestMatchList->last(); 
 	for ( int i = longestMatchList->length() - 1; lmi.gtb(); lmi--, i-- ) {
 		/* Create the machine and embed the setting of the longest match id. */
@@ -370,59 +364,21 @@ FsmRes LongestMatch::walkNfa( ParseData *pd )
 
 	/* Union machines one and up with machine zero. The grammar dictates that
 	 * there will always be at least one part. */
-	FsmRes res( FsmRes::Fsm(), parts[0] );
+	FsmRes fsm( FsmRes::Fsm(), parts[0] );
 	for ( int i = 1; i < longestMatchList->length(); i++ ) {
-		res = FsmAp::unionOp( res.fsm, parts[i] );
-		if ( !res.success() )
-			return res;
+		fsm = FsmAp::unionOp( fsm, parts[i] );
+		if ( !fsm.success() )
+			return fsm;
 	}
-
-
-	/*
-	 * Once the union is complete we can optimize by advancing actions so they
-	 * happen sooner, then draw the final transitions back to the start state.
-	 */
-again:
-	bool modified = false;
-	FsmAp *fsm = res.fsm;
-	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
-		/* IS OUT COND SPACE ALL? */
-		if ( st->lmNfaParts.length() > 0 && st->outCondSpace == 0 && st->nfaIn != 0 ) {
-			for ( NfaInList::Iter in = *st->nfaIn; in.lte(); in++ ) {
-				std::cerr << "checking " << in->fromState << std::endl;
-				StateAp *fromState = in->fromState;
-				for ( NfaTransList::Iter to = *fromState->nfaOut; to.lte(); to++ ) {
-					if ( to == in ) {
-						break;
-					}
-
-					/* Can nuke the epsilon transition. */
-					std::cerr << "nuking EP transition" << endl;
-					fsm->detachFromNfa( fromState, to->toState, to );
-					fromState->nfaOut->detach( to );
-					delete to;
-					modified = true;
-					goto done;
-				}
-			}
-		}
-	}
-
-done:
-	if ( modified )
-		goto again;
 
 	/* Create a new, isolated start state into which we can embed tokstart
 	 * functions. */
-	res = FsmAp::isolateStartState( res.fsm );
-	if ( !res.success() )
-		return res;
+	fsm = FsmAp::isolateStartState( fsm );
+	if ( !fsm.success() )
+		return fsm;
 
-	fsm = res.fsm;
 	fsm->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
 	fsm->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
-
-	int lmErrActionOrd = pd->fsmCtx->curActionOrd++;
 
 	KeyOps *keyOps = pd->fsmCtx->keyOps;
 
@@ -431,7 +387,7 @@ done:
 		if ( st->lmNfaParts.length() > 0 ) {
 			assert( st->lmNfaParts.length() == 1 );
 
-			TransAp *newTrans = fsm->attachNewTrans( st,
+			/*TransAp *newTrans = */fsm->attachNewTrans( st,
 					fsm->startState, keyOps->minKey, keyOps->maxKey );
 
 			fsm->transferOutData( st, st );
@@ -440,20 +396,177 @@ done:
 
 			for ( TransList::Iter trans = st->outList; trans.lte(); trans++ ) {
 				if ( trans->plain() )
-					trans->tdap()->actionTable.setAction( lmErrActionOrd, st->lmNfaParts[0]->actNfaOnNext );
+					trans->tdap()->actionTable.setAction( pd->fsmCtx->curActionOrd++, st->lmNfaParts[0]->actNfaOnNext );
 				else {
 					for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ )
-						cond->actionTable.setAction( lmErrActionOrd, st->lmNfaParts[0]->actNfaOnNext );
+						cond->actionTable.setAction( pd->fsmCtx->curActionOrd++, st->lmNfaParts[0]->actNfaOnNext );
 				}
 			}
 
-			st->eofActionTable.setAction( lmErrActionOrd, st->lmNfaParts[0]->actNfaOnNext );
+			st->eofActionTable.setAction( pd->fsmCtx->curActionOrd++, st->lmNfaParts[0]->actNfaOnNext );
 		}
 	}
+
+	delete[] parts;
+	return fsm;
+}
+
+bool LongestMatch::matchCanFail( ParseData *pd, FsmAp *fsm, StateAp *st )
+{
+	if ( st->outCondSpace != 0 )
+		return true;
+
+	return false;
+}
+
+
+void LongestMatch::eliminateNfaActions( ParseData *pd, FsmAp *fsm )
+{
+	/*
+	 * Once the union is complete we can optimize by advancing actions so they
+	 * happen sooner, then draw the final transitions back to the start state.
+	 * First step is to remove epsilon transitions that will never be taken. 
+	 */
+	bool modified = true;
+	while ( modified ) {
+		modified = false;
+
+		for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+			/* Check if the nfa parts list is non-empty (meaning we have a final
+			 * state created for matching a pattern). */
+			if ( st->lmNfaParts.length() > 0 && st->nfaIn != 0 ) {
+				/* Check if it can fail. If it can fail, then we cannot
+				 * eliminate the prior candidates. If it can't fail then it is
+				 * acceptable to eliminate the prior NFA transitions because we
+				 * will never backtrack to follow them.*/ 
+				if ( matchCanFail( pd, fsm, st ) )
+					continue;
+
+				for ( NfaInList::Iter in = *st->nfaIn; in.lte(); in++ ) {
+					StateAp *fromState = in->fromState;
+					/* Go forward until we get to the in-transition that cannot
+					 * fail. Stop there because we are interested in what's
+					 * before. */
+					for ( NfaTransList::Iter to = *fromState->nfaOut; to.lte(); to++ ) {
+						if ( to == in )
+							break;
+
+						/* Can nuke the epsilon transition that we will never
+						 * follow. */
+						fsm->detachFromNfa( fromState, to->toState, to );
+						fromState->nfaOut->detach( to );
+						delete to;
+
+						modified = true;
+						goto restart;
+					}
+				}
+			}
+		}
+
+		restart: {}
+	}
+}
+
+bool LongestMatch::onlyOneNfa( ParseData *pd, FsmAp *fsm, StateAp *st, NfaTrans *in )
+{
+	if ( st->nfaOut != 0 && st->nfaOut->length() == 1 && st->nfaOut->head == in )
+		return true;
+	return false;
+}
+
+/* Advance NFA actions to the final character of the pattern match. This only
+ * works when the machine cannot move forward more. */
+void LongestMatch::advanceNfaActions( ParseData *pd, FsmAp *fsm )
+{
+	/*
+	 * Advance actions to the final transition of the pattern match.
+	 */
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+		/* IS OUT COND SPACE ALL? */
+		if ( st->lmNfaParts.length() > 0 && st->nfaIn != 0 ) {
+			/* Only concern ourselves with final states that cannot fail. */
+			if ( matchCanFail( pd, fsm, st ) )
+				continue;
+
+			/* If there are any out actions we cannot advance because we need
+			 * to execute on the following character. We canot move to on-last,
+			 * but in the next pass maybe we can eliminate the NFA action and
+			 * move on leaving. */
+			if ( st->outActionTable.length() > 0 )
+				continue;
+
+			for ( NfaInList::Iter in = *st->nfaIn; in.lte(); in++ ) {
+
+				StateAp *fromState = in->fromState;
+				if ( !fsm->anyRegularTransitions( fromState ) &&
+						onlyOneNfa( pd, fsm, fromState, in ) )
+				{
+					/* Can nuke. */
+					for ( TransInList::Iter t = fromState->inTrans; t.lte(); t++ ) {
+						t->actionTable.setAction( pd->fsmCtx->curActionOrd++,
+								st->lmNfaParts[0]->actNfaOnLast );
+					}
+					for ( CondInList::Iter t = fromState->inCond; t.lte(); t++ ) {
+						t->actionTable.setAction( pd->fsmCtx->curActionOrd++,
+								st->lmNfaParts[0]->actNfaOnLast );
+					}
+
+					fsm->moveInwardTrans( fsm->startState, fromState );
+				}
+			}
+		}
+	}
+}
+
+
+FsmRes LongestMatch::mergeNfaStates( ParseData *pd, FsmAp *fsm )
+{
+again:
+	/*
+	 * Advance actions to the final transition of the pattern match.
+	 */
+	for ( StateList::Iter st = fsm->stateList; st.lte(); st++ ) {
+		/* IS OUT COND SPACE ALL? */
+		if ( st->lmNfaParts.length() > 0 && st->nfaIn != 0 ) {
+			/* Only concern ourselves with final states that cannot fail. */
+			if ( matchCanFail( pd, fsm, st ) )
+				continue;
+
+			for ( NfaInList::Iter in = *st->nfaIn; in.lte(); in++ ) {
+
+				StateAp *fromState = in->fromState;
+				if ( !fsm->anyRegularTransitions( fromState ) &&
+						onlyOneNfa( pd, fsm, fromState, in ) )
+				{
+					/* Can apply the NFA transition, eliminating it. */
+					FsmAp::applyNfaTrans( fsm, fromState, st, fromState->nfaOut->head );
+					goto again;
+				}
+			}
+		}
+	}
+
+	return FsmRes( FsmRes::Fsm(), fsm );
+}
+
+FsmRes LongestMatch::walkNfa( ParseData *pd )
+{
+	/* The longest match has it's own name scope. */
+	NameFrame nameFrame = pd->enterNameScope( true, 1 );
+
+	/* Build the machines. */
+	FsmRes fsm = buildBaseNfa( pd );
+	if ( !fsm.success() )
+		return fsm;
+
+	/* Optimization passes. */
+	eliminateNfaActions( pd, fsm );
+	advanceNfaActions( pd, fsm );
+	fsm = mergeNfaStates( pd, fsm );
 
 	/* Pop the name scope. */
 	pd->popNameScope( nameFrame );
 
-	delete[] parts;
-	return FsmRes( FsmRes::Fsm(), fsm );
+	return fsm;
 }

@@ -505,6 +505,26 @@ void FsmAp::markReachableFromHere( StateAp *state )
 	}
 }
 
+/* Any transitions to another state? */
+bool FsmAp::anyRegularTransitions( StateAp *state )
+{
+	for ( TransList::Iter trans = state->outList; trans.lte(); trans++ ) {
+		if ( trans->plain() ) {
+			StateAp *toState = trans->tdap()->toState;
+			if ( toState != 0 )
+				return true;
+		}
+		else {
+			for ( CondList::Iter cond = trans->tcap()->condList; cond.lte(); cond++ ) {
+				StateAp *toState = cond->toState;
+				if ( toState != 0 )
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
 void FsmAp::markReachableFromHereStopFinal( StateAp *state )
 {
 	/* Base case: return; */
