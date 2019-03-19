@@ -180,6 +180,7 @@ void Goto::NFA_POP()
 				"		goto _resume;\n";
 		}
 
+		outLabelUsed = true;
 		out << 
 			"		goto _out;\n"
 			"	}\n";
@@ -1020,6 +1021,7 @@ void Goto::writeExec()
 				out << "}\n";
 				out << vCS() << " = " << ERROR_STATE() << ";\n";
 				out << "goto _out;\n";
+				outLabelUsed = true;
 
 				out << "}\n";
 			}
@@ -1051,7 +1053,8 @@ void Goto::writeExec()
 				"	}\n";
 		}
 
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL() << " ) goto _out; ";
+		outLabelUsed = true;
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _out; ";
 
 		out <<
 			"	}\n"

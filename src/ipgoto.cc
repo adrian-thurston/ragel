@@ -789,6 +789,7 @@ void IpGoto::writeExec()
 				out << "}\n";
 				out << vCS() << " = " << ERROR_STATE() << ";\n";
 				out << "goto _out;\n";
+				outLabelUsed = true;
 
 				out << "}\n";
 			}
@@ -807,7 +808,8 @@ void IpGoto::writeExec()
 			FINISH_CASES() <<
 			"	}\n";
 
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL() << " ) goto _out; ";
+		outLabelUsed = true;
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _out; ";
 
 		out <<
 			"	}\n"

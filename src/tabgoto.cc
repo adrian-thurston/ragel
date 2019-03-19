@@ -249,6 +249,7 @@ void TabGoto::NFA_POP()
 				"		goto _resume;\n";
 		}
 
+		outLabelUsed = true;
 		out << 
 			"		goto _out;\n"
 			"	}\n";
@@ -393,8 +394,6 @@ void TabGoto::writeExec()
 			"	}\n"
 		;
 
-		outLabelUsed = true;
-
 		EOF_ACTIONS();
 
 		if ( redFsm->anyEofTrans() ) {
@@ -408,7 +407,8 @@ void TabGoto::writeExec()
 				"	}\n";
 		}
 
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL() << " ) goto _out; ";
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _out; ";
+		outLabelUsed = true;
 
 		out <<
 			"	}\n"
