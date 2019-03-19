@@ -44,6 +44,9 @@ struct Tables
 		acts( "_acts" ),
 		nacts( "_nacts" ),
 		inds( "_inds" ),
+		nfa_cont( "_nfa_cont" ),
+		nfa_repeat( "_nfa_repeat" ),
+		nfa_test( "_nfa_test" ),
 
 		actions(          "actions",             *this ),
 		transKeys(        "trans_keys",          *this ),
@@ -85,6 +88,9 @@ struct Tables
 	Variable acts;
 	Variable nacts;
 	Variable inds;
+	Variable nfa_cont;
+	Variable nfa_repeat;
+	Variable nfa_test;
 
 	TableArray actions;
 	TableArray transKeys;

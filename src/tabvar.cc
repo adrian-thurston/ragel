@@ -116,9 +116,9 @@ void TabVar::NFA_POP()
 {
 	if ( redFsm->anyNfaStates() ) {
 		out <<
-			"	_nfa_repeat = 1;\n"
-			"	while ( _nfa_repeat ) {\n"
-			"		_nfa_repeat = 0;\n"
+			"	" << nfa_repeat << " = 1;\n"
+			"	while ( " << nfa_repeat << " ) {\n"
+			"		" << nfa_repeat << " = 0;\n"
 			"	if ( nfa_len > 0 ) {\n"
 			"		int _pop_test = 1;\n"
 			"		nfa_count += 1;\n"
@@ -163,8 +163,8 @@ void TabVar::NFA_POP()
 
 			out <<
 //				"			goto _resume;\n"
-				"			_nfa_cont = 1;\n"
-				"			_nfa_repeat = 0;\n"
+				"			" << nfa_cont << " = 1;\n"
+				"			" << nfa_repeat << " = 0;\n"
 				"		}\n";
 
 			if ( red->nfaPostPopExpr != 0 ) {
@@ -174,16 +174,16 @@ void TabVar::NFA_POP()
 				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK() << "\n"
 //				"				goto _out;\n"
-				"				_nfa_cont = 0;\n"
-				"				_nfa_repeat = 1;\n"
+				"				" << nfa_cont << " = 0;\n"
+				"				" << nfa_repeat << " = 1;\n"
 				"			}\n";
 			}
 			else {
 				out <<
 				"			else {\n"
 //				"				goto _out;\n"
-				"				_nfa_cont = 0;\n"
-				"				_nfa_repeat = 1;\n"
+				"				" << nfa_cont << " = 0;\n"
+				"				" << nfa_repeat << " = 1;\n"
 				"			}\n"
 				;
 			}
@@ -200,16 +200,16 @@ void TabVar::NFA_POP()
 
 			out <<
 //				"		goto _resume;\n"
-				"		_nfa_cont = 1;\n"
-				"		_nfa_repeat = 0;\n"
+				"		" << nfa_cont << " = 1;\n"
+				"		" << nfa_repeat << " = 0;\n"
 				;
 		}
 
 		out << 
 			"	}\n"
 			"	else {\n"
-			"		_nfa_cont = 0;\n"
-			"		_nfa_repeat = 0;\n"
+			"		" << nfa_cont << " = 0;\n"
+			"		" << nfa_repeat << " = 0;\n"
 			"	}\n"
 			"}\n"
 			;
@@ -224,11 +224,16 @@ void TabVar::writeExec()
 
 	if ( redFsm->anyNfaStates() ) {
 		out <<
-			"{\n"
-			"	" << UINT() << " _nfa_cont = 1;\n"
-			"	" << UINT() << " _nfa_repeat = 1;\n"
-			"	" << UINT() << " _nfa_test = 1;\n"
-			"	while ( _nfa_cont != 0 )\n";
+			"{\n";
+	}
+
+		DECLARE( UINT(), nfa_cont,   " = 1" );
+		DECLARE( UINT(), nfa_repeat, " = 1" );
+		DECLARE( UINT(), nfa_test,   " = 1" );
+
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	while ( " << nfa_cont << " != 0 )\n";
 	}
 
 	out <<
@@ -269,8 +274,8 @@ void TabVar::writeExec()
 	if ( !noEnd ) {
 		out << 
 			"	if ( " << P() << " == " << PE() << " ) {\n"
-			"		_nfa_test = 0;\n"
-			"		_nfa_cont = 0;\n";
+			"		" << nfa_test << " = 0;\n"
+			"		" << nfa_cont << " = 0;\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 			out << 
@@ -309,8 +314,8 @@ void TabVar::writeExec()
 				"		}\n"
 				"		if ( _eofcont == 0 ) {\n"
 				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
-				"			_nfa_test = 1;\n"
-				"			_nfa_cont = 1;\n"
+				"			" << nfa_test << " = 1;\n"
+				"			" << nfa_cont << " = 1;\n"
 				"		}\n"
 				"	}\n"
 			;
@@ -344,9 +349,9 @@ void TabVar::writeExec()
 			out << "}\n";
 
 			out <<
-				"	if ( " << vCS() << " < " << FIRST_FINAL() << " ) {\n"
-				"		_nfa_test = 1;\n"
-				"		_nfa_cont = 1;\n"
+				"	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) {\n"
+				"		" << nfa_test << " = 1;\n"
+				"		" << nfa_cont << " = 1;\n"
 				"	}\n";
 
 			out << "}\n";
@@ -410,7 +415,7 @@ void TabVar::writeExec()
 	out << "}\n";
 
 	out <<
-		"	if ( _nfa_test == 1 ) {\n";
+		"	if ( " << nfa_test << " == 1 ) {\n";
 
 	NFA_POP();
 
