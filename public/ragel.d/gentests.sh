@@ -115,20 +115,14 @@ function exec_cmd()
 	lang=$1
 
 	case $lang in
-		c) exec_cmd=./$binary ;;
-		c++) exec_cmd=./$binary ;;
-		obj-c) exec_cmd=./$binary ;;
-		d) exec_cmd=./$binary ;;
 		java) exec_cmd="java -classpath $wk $classname" ;;
 		ruby) exec_cmd="ruby $code_src" ;;
 		csharp) exec_cmd="mono $binary" ;;
-		go) exec_cmd=./$binary ;;
 		ocaml) exec_cmd="ocaml $code_src" ;;
-		asm) exec_cmd=./$binary ;;
-		rust) exec_cmd=./$binary ;;
 		crack) exec_cmd="$crack_interpreter $code_src" ;;
 		julia) exec_cmd="$julia_interpreter $code_src" ;;
-		indep) ;;
+		indep) echo "error: exec_cmd: indep not executable"; exit 1 ;;
+		*) exec_cmd=./$binary ;;
 	esac
 }
 
@@ -143,18 +137,38 @@ function lang_opts()
 			code_suffix=c;
 			interpreted=false
 			compiler=$c_compiler;
-			#host_ragel=ragel
-			host_ragel=$RAGEL_C_BIN
+			host_ragel=$RAGEL_BIN
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_flags=""
+		;;
+		cg)
+			# For testing ragel-c using goto based.
+			lang_opt=-C;
+			code_suffix=c;
+			interpreted=false
+			compiler=$c_compiler;
+			host_ragel=$RAGEL_C_BIN
+			flags="-Wall -O3 -I. -Wno-variadic-macros"
+			libs=""
+			prohibit_flags="--string-tables"
+		;;
+		cv)
+			# For testing ragel-c using var-based
+			lang_opt=-C;
+			code_suffix=c;
+			interpreted=false
+			compiler=$c_compiler;
+			host_ragel="$RAGEL_C_BIN --var-backend"
+			flags="-Wall -O3 -I. -Wno-variadic-macros"
+			libs=""
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		c++)
 			lang_opt=-C;
 			code_suffix=cpp;
 			interpreted=false
 			compiler=$cxx_compiler;
-			#host_ragel=$ragel
 			host_ragel=$RAGEL_C_BIN
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
@@ -165,7 +179,6 @@ function lang_opts()
 			code_suffix=m;
 			interpreted=false
 			compiler=$objc_compiler
-			#host_ragel=$ragel
 			host_ragel=$RAGEL_C_BIN
 			flags="`gnustep-config --objc-flags`"
 			libs="-lobjc -lgnustep-base"
@@ -189,7 +202,7 @@ function lang_opts()
 			host_ragel=$RAGEL_JAVA_BIN
 			flags=""
 			libs=""
-			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		ruby)
 			lang_opt=-R;
@@ -199,7 +212,7 @@ function lang_opts()
 			host_ragel=$RAGEL_RUBY_BIN
 			flags=""
 			libs=""
-			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		csharp)
 			lang_opt="-A";
@@ -229,7 +242,7 @@ function lang_opts()
 			host_ragel=$RAGEL_OCAML_BIN
 			flags=""
 			libs=""
-			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		asm)
 			lang_opt="--asm"
@@ -247,9 +260,10 @@ function lang_opts()
 			interpreted=false
 			compiler=$rust_compiler
 			host_ragel=$RAGEL_RUST_BIN
-			flags="-A non_upper_case_globals -A dead_code -A unused_variables -A unused_assignments -A unused_mut -A unused_parens"
+			flags="-A non_upper_case_globals -A dead_code \
+				-A unused_variables -A unused_assignments -A unused_mut -A unused_parens"
 			libs=""
-			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		crack)
 			lang_opt="-K"
@@ -257,7 +271,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$crack_interpreter
 			host_ragel=$RAGEL_CRACK_BIN
-			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		julia)
 			lang_opt="-Y"
@@ -265,7 +279,7 @@ function lang_opts()
 			interpreted=true
 			compiler=$julia_interpreter
 			host_ragel=$RAGEL_JULIA_BIN
-			prohibit_flags="-G0 -G1 -G2 --goto-backend --string-tables"
+			prohibit_flags="-G0 -G1 -G2 --string-tables"
 		;;
 		indep)
 		;;
@@ -414,9 +428,11 @@ function run_translate()
 	cases=""
 
 	if [ $lang == indep ]; then
-		for lang in c asm d csharp go java ruby ocaml rust crack julia; do
+		for lang in c cg cv asm d csharp go java ruby ocaml rust crack julia; do
 			case $lang in 
 				c) lf="-C" ;;
+				cg) lf="-C" ;;
+				cv) lf="-C" ;;
 				asm) lf="--asm" ;;
 				d) lf="-D" ;;
 				csharp) lf="-A" ;;

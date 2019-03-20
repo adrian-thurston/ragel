@@ -464,6 +464,10 @@ for CommDef: indep::comm_def in RagelTree {
 
 if ( Lang == 'c' )
 	rw_c( Output )
+elsif ( Lang == 'cg' )
+	rw_c( Output )
+elsif ( Lang == 'cv' )
+	rw_c( Output )
 elsif ( Lang == 'asm' )
 	rw_asm( Output )
 elsif ( Lang == 'd' )
