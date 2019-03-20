@@ -624,12 +624,8 @@ void InputData::usage()
 "   --colm-frontend         Compile using a colm-based recursive descent\n"
 "                           frontend\n"
 "   --reduce-frontend       Compile using a colm-based reducer (default)\n"
-"   --direct-backend        Use the direct backend for supported langs (default)\n"
-"   --colm-backend          Use the translation backed for C\n"
-"   --var-backend           Use the variable-based backend for langs that\n"
-"                           support goto-based\n"
-"   --goto-backend          Use the goto-based backend for supported langs\n"
-"                           (default)\n"
+"   --var-backend           Use the variable-based backend even if the host lang\n"
+"                           supports goto-based\n"
 "   --supported-host-langs  Show supported host languages by command line arg\n"
 "   --supported-frontends   Show supported frontends\n"
 "   --supported-backends    Show supported backends\n"
@@ -872,7 +868,7 @@ void InputData::parseArgs( int argc, const char **argv )
 				}
 				else if ( strcmp( arg, "input-histogram" ) == 0 )
 					histogramFn = strdup(eq);
-				else if ( strcmp( arg, "force-var" ) == 0 )
+				else if ( strcmp( arg, "var-backend" ) == 0 )
 					forceVar = true;
 				else {
 					error() << "--" << pc.paramArg << 
