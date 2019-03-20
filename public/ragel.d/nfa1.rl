@@ -42,10 +42,12 @@ long nfa_count = 0;
 	action print1 {
 		printf( "%ld", value );
 		printf( "%s", "\n" );
+		fnext *atoi_error;
 	}
 
 	action print2 {
 		printf( "saw 80808080\n" );
+		fnext *atoi_error;
 	}
 
 	atoi = (
@@ -123,18 +125,19 @@ int main( )
 
 
 1
+1002000000002
 12
 -12321
 2123
 222222
 -99
--> accept
--> accept
--> accept
--> accept
--> accept
--> accept
--> accept
+-> fail
+-> fail
+-> fail
+-> fail
+-> fail
+-> fail
+-> fail
 -> fail
 -> fail
 -> fail
