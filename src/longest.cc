@@ -448,17 +448,16 @@ void LongestMatch::eliminateNfaActions( ParseData *pd, FsmAp *fsm )
 					 * fail. Stop there because we are interested in what's
 					 * before. */
 					for ( NfaTransList::Iter to = *fromState->nfaOut; to.lte(); to++ ) {
-						if ( to == in )
-							break;
+						if ( to->order < in->order ) {
+							/* Can nuke the epsilon transition that we will never
+							 * follow. */
+							fsm->detachFromNfa( fromState, to->toState, to );
+							fromState->nfaOut->detach( to );
+							delete to;
 
-						/* Can nuke the epsilon transition that we will never
-						 * follow. */
-						fsm->detachFromNfa( fromState, to->toState, to );
-						fromState->nfaOut->detach( to );
-						delete to;
-
-						modified = true;
-						goto restart;
+							modified = true;
+							goto restart;
+						}
 					}
 				}
 			}
