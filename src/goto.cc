@@ -182,7 +182,7 @@ void Goto::NFA_POP()
 
 		outLabelUsed = true;
 		out << 
-			"		goto _out;\n"
+			"		goto _pop;\n"
 			"	}\n";
 	}
 }
@@ -437,7 +437,7 @@ void Goto::STATE_GOTO_ERROR()
 	outLabelUsed = true;
 	RedStateAp *state = redFsm->errState;
 	out << "case " << state->id << ":\n";
-	out << "	goto _out;\n";
+	out << "	goto _pop;\n";
 }
 
 std::ostream &Goto::STATE_GOTOS()
@@ -831,7 +831,7 @@ void Goto::NRET( ostream &ret, bool inFinish )
 void Goto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _pop; " << CLOSE_GEN_BLOCK();
 }
 
 void Goto::NBREAK( ostream &ret, int targState, bool csForced )
@@ -946,7 +946,7 @@ void Goto::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		goto _pop;\n";
 	}
 
 	out << "_resume:\n";
@@ -973,7 +973,7 @@ void Goto::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		goto _pop;\n";
 	}
 
 	if ( !noEnd ) {
@@ -1020,7 +1020,7 @@ void Goto::writeExec()
 				}
 				out << "}\n";
 				out << vCS() << " = " << ERROR_STATE() << ";\n";
-				out << "goto _out;\n";
+				out << "goto _pop;\n";
 				outLabelUsed = true;
 
 				out << "}\n";
@@ -1054,21 +1054,21 @@ void Goto::writeExec()
 		}
 
 		outLabelUsed = true;
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _out; ";
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _pop; ";
 
 		out <<
 			"	}\n"
 			"\n";
 	}
 
-	out << "goto _out2;\n";
+	out << "goto _out;\n";
 
 	if ( outLabelUsed )
-		out << "	_out: {}\n";
+		out << "	_pop: {}\n";
 
 	NFA_POP();
 
-	out << "_out2: {}\n";
+	out << "_out: {}\n";
 
 	out << "	}\n";
 }

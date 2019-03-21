@@ -252,7 +252,7 @@ void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
-	ret << "goto _out;}";
+	ret << "goto _pop;}";
 }
 
 void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
@@ -314,7 +314,7 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( redFsm->anyRegNbreak() ) {
 				out <<
 					"if ( _nbreak == 1 )\n"
-					"	goto _out;\n";
+					"	goto _pop;\n";
 				outLabelUsed = true;
 			}
 				
@@ -395,7 +395,7 @@ void IpGoto::STATE_GOTO_ERROR()
 	/* Break out here. */
 	outLabelUsed = true;
 	out << vCS() << " = " << state->id << ";\n";
-	out << "	goto _out;\n";
+	out << "	goto _pop;\n";
 }
 
 
@@ -788,7 +788,7 @@ void IpGoto::writeExec()
 				}
 				out << "}\n";
 				out << vCS() << " = " << ERROR_STATE() << ";\n";
-				out << "goto _out;\n";
+				out << "goto _pop;\n";
 				outLabelUsed = true;
 
 				out << "}\n";
@@ -809,21 +809,21 @@ void IpGoto::writeExec()
 			"	}\n";
 
 		outLabelUsed = true;
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _out; ";
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _pop; ";
 
 		out <<
 			"	}\n"
 			"\n";
 	}
 
-	out << "goto _out2;\n";
+	out << "goto _out;\n";
 
 	if ( outLabelUsed ) 
-		out << "	_out: {}\n";
+		out << "	_pop: {}\n";
 
 	NFA_POP();
 
-	out << "_out2: {}\n";
+	out << "_out: {}\n";
 
 	out <<
 		"	}\n";

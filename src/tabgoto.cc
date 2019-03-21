@@ -159,7 +159,7 @@ void TabGoto::NRET( ostream &ret, bool inFinish )
 void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _pop; " << CLOSE_GEN_BLOCK();
 }
 
 void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
@@ -251,7 +251,7 @@ void TabGoto::NFA_POP()
 
 		outLabelUsed = true;
 		out << 
-			"		goto _out;\n"
+			"		goto _pop;\n"
 			"	}\n";
 	}
 }
@@ -297,7 +297,7 @@ void TabGoto::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		goto _pop;\n";
 	}
 
 	out << LABEL( "_resume" ) << " {\n";
@@ -334,7 +334,7 @@ void TabGoto::writeExec()
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
 				"	if ( _nbreak == 1 )\n"
-				"		goto _out;\n";
+				"		goto _pop;\n";
 			outLabelUsed = true;
 		}
 
@@ -351,7 +351,7 @@ void TabGoto::writeExec()
 		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _out;\n";
+			"		goto _pop;\n";
 	}
 
 	if ( !noEnd ) {
@@ -387,7 +387,7 @@ void TabGoto::writeExec()
 		if ( red->condSpaceList.length() > 0 )
 			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
 
-		COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto _out;" );
+		COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto _pop;" );
 
 		out << 
 			"		_ok: {}\n"
@@ -407,7 +407,7 @@ void TabGoto::writeExec()
 				"	}\n";
 		}
 
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _out; ";
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _pop; ";
 		outLabelUsed = true;
 
 		out <<
@@ -415,10 +415,10 @@ void TabGoto::writeExec()
 			"\n";
 	}
 
-	out << "goto _out2;\n";
+	out << "goto _out;\n";
 
 	if ( outLabelUsed )
-		out << "}\n" << LABEL( "_out" ) << " { {}\n";
+		out << "}\n" << LABEL( "_pop" ) << " { {}\n";
 
 	out << "}\n";
 
@@ -426,7 +426,7 @@ void TabGoto::writeExec()
 
 	NFA_POP();
 
-	out << "}\n" << LABEL( "_out2" ) << " { {}\n";
+	out << "}\n" << LABEL( "_out" ) << " { {}\n";
 
 	out << "	}\n";
 }
