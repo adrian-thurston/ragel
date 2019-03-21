@@ -574,7 +574,7 @@ bool CodeGen::isAlphTypeSigned()
 void CodeGen::DECLARE( std::string type, Variable &var, std::string init )
 {
 	if ( var.isReferenced )
-		out << type << " " << var.name << init << ';';
+		out << type << " " << var.name << init << ";\n";
 }
 
 void CodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
