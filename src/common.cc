@@ -277,6 +277,9 @@ std::streamsize output_filter::countAndWrite( const char *s, std::streamsize n )
 			line += 1;
 			break;
 		case '{':
+			/* If we detec an open block then eliminate the single-indent
+			 * addition, which is to account for single statements. */
+			singleIndent = false;
 			level += 1;
 			break;
 		case '}':
@@ -286,6 +289,20 @@ std::streamsize output_filter::countAndWrite( const char *s, std::streamsize n )
 	}
 
 	return std::filebuf::xsputn( s, n );
+}
+
+bool openSingleIndent( const char *s, int n )
+{
+	if ( n >= 3 && memcmp( s, "if ", 3 ) == 0 )
+		return true;
+
+	if ( n >= 8 && memcmp( s, "else if ", 8 ) == 0 )
+		return true;
+
+	if ( n >= 5 && memcmp( s, "else ", 5 ) == 0 )
+		return true;
+
+	return false;
 }
 
 /* Counts newlines before sending data out to file. */
@@ -303,7 +320,7 @@ restart:
 		}
 
 		if ( n > 0 ) {
-			int tabs = level;
+			int tabs = level + ( singleIndent ? 1 : 0 );
 
 			if ( *s == '}' ) {
 				/* If the next char is de-dent, then reduce the tabs. This is
@@ -312,12 +329,20 @@ restart:
 				tabs -= 1;
 			}
 
+			/* Note that the count and write will eliminate this if it detects
+			 * an open block. */
+			if ( openSingleIndent( s, n ) )
+				singleIndent = true;
+			else
+				singleIndent = false;
+
 			if ( *s != '#' ) {
 				/* Found some data, print the indentation and turn off indentation
 				 * mode. */
 				for ( l = 0; l < tabs; l++ )
 					countAndWrite( "\t", 1 );
 			}
+
 
 			indent = 0;
 

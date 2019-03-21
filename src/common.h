@@ -399,7 +399,8 @@ public:
 		fileName(fileName),
 		line(1),
 		level(0),
-		indent(false)
+		indent(false),
+		singleIndent(false)
 	{}
 
 	virtual int sync();
@@ -411,6 +412,7 @@ public:
 	int line;
 	int level;
 	bool indent;
+	bool singleIndent;
 };
 
 class nullbuf
