@@ -170,13 +170,6 @@ def static_value
 def while_stmt
 	[`while `( expr `) stmt]
 
-def entry_loop
-	[`entry `{ stmt* `}]
-
-def label_stmt
-	Id: int
-	[`label ident `{ stmt* `}]
-
 def else_if_clause
 	[`else `if `( expr `) stmt]
 
@@ -261,8 +254,6 @@ def stmt
 |	[export_stmt]
 |	[assign_stmt]
 |	[expr_stmt]
-|	[entry_loop]
-|	[label_stmt]
 |	[while_stmt]
 |	[if_stmt]
 |	[match_stmt]

@@ -464,17 +464,6 @@ namespace d_gen
 
 			send Parser ";
 		}
-		case [label_stmt]
-		{
-			send Parser
-				"[Stmt.label_stmt.ident]:
-				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
-		}
-		case [entry_loop]
-		{
-			send Parser
-				[stmt_list( Stmt.entry_loop._repeat_stmt )]
-		}
 		case [AS: assign_stmt]
 		{
 			send Parser

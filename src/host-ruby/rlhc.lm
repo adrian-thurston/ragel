@@ -468,8 +468,6 @@ void stmt( Stmt: stmt )
 	}
 	case [goto_label] {}
 	case [goto_stmt] {}
-	case [entry_loop] {}
-	case [label_stmt] {}
 	case [AS: assign_stmt]
 	{
 		send Parser
@@ -505,26 +503,8 @@ void ruby_trans( Output: stream, Start: start )
 	}
 }
 
-void assign_labels( Prog: ref<any> )
-{
-	N: int = 1
-	new Map: map<ident, label_stmt>()
-	for LabelStmt: label_stmt in Prog {
-		LabelStmt.Id = N
-		Map->insert( LabelStmt.ident, LabelStmt )
-		N = N + 1
-	}
-
-	for GotoStmt: goto_stmt in Prog {
-		LabelStmt: label_stmt = Map->find( GotoStmt.ident )
-		if ( LabelStmt )
-			GotoStmt.Id = LabelStmt.Id
-	}
-}
-
 void trans( Output: stream, Start: start )
 {
-	assign_labels( Start )
 	ruby_trans( Output, Start )
 }
 

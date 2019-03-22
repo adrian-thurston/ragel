@@ -452,36 +452,8 @@ namespace js_gen
 				"[stmt_list( Stmt.default_block._repeat_stmt )]
 				"break;
 		}
-		case [goto_label]
-		{
-			send Parser "{}"
-		}
-		case [G: goto_stmt]
-		{
-			send Parser
-				"{
-				"	_goto_targ = [$G.Id];
-				"	continue _goto;
-				"}
-		}
-		case [entry_loop]
-		{
-			send Parser
-				"var _goto_targ = 0;
-				"_goto: while ( true ) {
-				"	switch ( _goto_targ ) {
-				"	case 0:
-				"	[stmt_list( Stmt.entry_loop._repeat_stmt )]
-				"	}
-				"	break;
-				"}
-		}
-		case [label_stmt]
-		{
-			send Parser
-				"case [Stmt.label_stmt.Id]:
-				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
-		}
+		case [goto_label] { }
+		case [G: goto_stmt] { }
 		case [AS: assign_stmt]
 		{
 			send Parser

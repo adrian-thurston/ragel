@@ -345,20 +345,9 @@ protected:
 			return "index " + type + " ";
 	}
 
-	string ENTRY()
-	{
-		if ( backend == Direct )
-			return "";
-		else
-			return "entry";
-	}
-
 	string LABEL( string name )
 	{
-		if ( backend == Direct )
-			return name + ": ";
-		else
-			return "label " + name;
+		return name + ": ";
 	}
 
 	string OFFSET( string arr, string off )

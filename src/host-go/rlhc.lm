@@ -388,15 +388,6 @@ namespace go_gen
 		{
 			"case [expr( CL.expr )]:
 		}
-		case [LS: label_stmt]
-		{
-			"[LS.ident]:
-			"[stmt_list( LS._repeat_stmt )]
-		}
-		case [EL: entry_loop]
-		{
-			[stmt_list( EL._repeat_stmt )]
-		}
 		case [AS: assign_stmt]
 		{
 			"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];

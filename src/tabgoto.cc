@@ -283,9 +283,6 @@ void TabGoto::writeExec()
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 	DECLARE( UINT(), nacts );
 
-	out <<
-		"	" << ENTRY() << " {\n";
-
 	if ( !noEnd ) {
 		testEofUsed = true;
 		out << 
@@ -300,7 +297,7 @@ void TabGoto::writeExec()
 			"		goto _pop;\n";
 	}
 
-	out << LABEL( "_resume" ) << " {\n";
+	out << LABEL( "_resume" ) << "\n";
 
 	FROM_STATE_ACTIONS();
 
@@ -308,8 +305,7 @@ void TabGoto::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "}\n";
-	out << LABEL( "_match_cond" ) << " {\n";
+	out << LABEL( "_match_cond" ) << "\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
@@ -343,7 +339,7 @@ void TabGoto::writeExec()
 
 	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
 			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "}\n" << LABEL( "_again" ) << " {\n";
+		out << "\n" << LABEL( "_again" ) << "\n";
 
 	TO_STATE_ACTIONS();
 
@@ -367,7 +363,7 @@ void TabGoto::writeExec()
 	}
 
 	if ( testEofUsed )
-		out << "}\n" << LABEL( "_test_eof" ) << " { {}\n";
+		out << LABEL( "_test_eof" ) << " {}\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
@@ -407,7 +403,7 @@ void TabGoto::writeExec()
 				"	}\n";
 		}
 
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _pop; ";
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n goto _pop;\n";
 		outLabelUsed = true;
 
 		out <<
@@ -418,15 +414,11 @@ void TabGoto::writeExec()
 	out << "goto _out;\n";
 
 	if ( outLabelUsed )
-		out << "}\n" << LABEL( "_pop" ) << " { {}\n";
-
-	out << "}\n";
-
-	out << "}\n";
+		out << LABEL( "_pop" ) << " {}\n";
 
 	NFA_POP();
 
-	out << "}\n" << LABEL( "_out" ) << " { {}\n";
+	out << LABEL( "_out" ) << " {}\n";
 
 	out << "	}\n";
 }

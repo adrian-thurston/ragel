@@ -505,12 +505,6 @@ namespace julia_gen
 			send Parser
 				"@case [expr( Stmt.case_label.expr )]
 		}
-		case [label_stmt]
-		{
-			send Parser
-				"@label [Stmt.label_stmt.ident]
-				"[stmt_list( Stmt.label_stmt._repeat_stmt )]
-		}
 		case [L: goto_label]
 		{
 			send Parser
@@ -520,11 +514,6 @@ namespace julia_gen
 		{
 			send Parser
 				"@goto [G.ident]
-		}
-		case [entry_loop]
-		{
-			send Parser
-				[stmt_list( Stmt.entry_loop._repeat_stmt )]
 		}
 		case [AS: assign_stmt]
 		{
