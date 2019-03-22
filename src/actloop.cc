@@ -179,10 +179,10 @@ void ActLoop::TO_STATE_ACTIONS()
 	if ( redFsm->anyToStateActions() ) {
 		out <<
 			"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	" << nacts << " = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+			"	" << nacts << " = " << CAST(UINT()) << DEREF( ARR_REF( actions ), string(acts) ) << ";\n"
 			"	" << acts << " += 1;\n"
 			"	while ( " << nacts << " > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), string(acts) ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		" << nacts << " -= 1;\n"
@@ -196,17 +196,15 @@ void ActLoop::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<
-			"	" << INDEX( ARR_TYPE( actions ), "__acts" ) << ";\n"
-			"	" << UINT() << " __nacts;\n"
-			"	__acts = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	__nacts = " << CAST(UINT()) << DEREF( ARR_REF( actions ), "__acts" ) << ";\n"
-			"	__acts += 1;\n"
-			"	while ( __nacts > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "__acts" ) << " ) {\n";
+			"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( eofActions ) + "[" + vCS() + "]" ) << ";\n"
+			"	" << nacts << " = " << CAST(UINT()) << DEREF( ARR_REF( actions ), string(acts) ) << ";\n"
+			"	" << acts << " += 1;\n"
+			"	while ( " << nacts << " > 0 ) {\n"
+			"		switch ( " << DEREF( ARR_REF( actions ), string(acts) ) << " ) {\n";
 			EOF_ACTION_SWITCH() <<
 			"		}\n"
-			"		__nacts -= 1;\n"
-			"		__acts += 1;\n"
+			"		" << nacts << " -= 1;\n"
+			"		" << acts << " += 1;\n"
 			"	}\n";
 	}
 }
@@ -216,10 +214,10 @@ void ActLoop::NFA_FROM_STATE_ACTION_EXEC()
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
-			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), string(acts) ) << ";\n"
 			"	" << acts << " += 1;\n"
 			"	while ( " << nacts << " > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), string(acts) ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		" << nacts << " -= 1;\n"

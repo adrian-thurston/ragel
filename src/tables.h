@@ -47,6 +47,8 @@ struct Tables
 		nfa_cont( "_nfa_cont" ),
 		nfa_repeat( "_nfa_repeat" ),
 		nfa_test( "_nfa_test" ),
+		_acts( "__acts" ),
+		_nacts( "__nacts" ),
 
 		_out("_out"),
 		_pop("_pop"),
@@ -99,6 +101,8 @@ struct Tables
 	Variable nfa_cont;
 	Variable nfa_repeat;
 	Variable nfa_test;
+	Variable _acts;
+	Variable _nacts;
 
 	GotoLabel _out;
 	GotoLabel _pop;
