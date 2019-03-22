@@ -128,7 +128,5 @@ void BinVar::LOCATE_COND()
 			string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + ");\n",
 			""
 	);
-			
-	outLabelUsed = true;
 }
 

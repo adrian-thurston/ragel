@@ -48,6 +48,14 @@ struct Tables
 		nfa_repeat( "_nfa_repeat" ),
 		nfa_test( "_nfa_test" ),
 
+		_out("_out"),
+		_pop("_pop"),
+		_test_eof( "_test_eof" ),
+		_resume( "_resume" ),
+		_match_cond( "_match_cond" ),
+		_again( "_again" ),
+		_match( "_match" ),
+
 		actions(          "actions",             *this ),
 		transKeys(        "trans_keys",          *this ),
 		charClass(        "char_class",          *this ),
@@ -91,6 +99,14 @@ struct Tables
 	Variable nfa_cont;
 	Variable nfa_repeat;
 	Variable nfa_test;
+
+	GotoLabel _out;
+	GotoLabel _pop;
+	GotoLabel _test_eof;
+	GotoLabel _resume;
+	GotoLabel _match_cond;
+	GotoLabel _again;
+	GotoLabel _match;
 
 	TableArray actions;
 	TableArray transKeys;

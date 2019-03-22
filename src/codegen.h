@@ -65,6 +65,17 @@ struct Variable
 	bool isReferenced;
 };
 
+struct GotoLabel
+{
+	GotoLabel( const char *name ) : name(name), isReferenced(false) {}
+
+	operator const char *() { isReferenced = true; return name; }
+	void reference() { isReferenced = true; }
+
+	const char *name;
+	bool isReferenced;
+};
+
 struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
 struct CodeGen;
@@ -348,6 +359,14 @@ protected:
 	string LABEL( string name )
 	{
 		return name + ": ";
+	}
+
+	string EMIT_LABEL( GotoLabel label )
+	{
+		if ( label.isReferenced )
+			return std::string(label.name) + ": {}\n";
+		else
+			return "";
 	}
 
 	string OFFSET( string arr, string off )

@@ -108,7 +108,6 @@ void TabVar::BREAK( ostream &ret, int targState, bool csForced )
 
 void TabVar::NBREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << "+= 1; _cont = 0; " << CLOSE_GEN_BLOCK();
 }
 
@@ -219,7 +218,6 @@ void TabVar::NFA_POP()
 void TabVar::writeExec()
 {
 	testEofUsed = false;
-	outLabelUsed = false;
 	matchCondLabelUsed = false;
 
 	if ( redFsm->anyNfaStates() ) {
@@ -262,7 +260,6 @@ void TabVar::writeExec()
 		"\n";
 
 	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		_cont = 0;\n";
@@ -400,7 +397,6 @@ void TabVar::writeExec()
 	TO_STATE_ACTIONS();
 
 	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		_cont = 0;\n";

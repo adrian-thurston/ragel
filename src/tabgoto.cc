@@ -31,7 +31,7 @@ void TabGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << "goto _again;";
+	ret << "goto " << _again << ";";
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -44,7 +44,7 @@ void TabGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 	
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 	
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -66,7 +66,7 @@ void TabGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -105,7 +105,7 @@ void TabGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << "goto _again;";
+	ret << "goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -139,7 +139,7 @@ void TabGoto::RET( ostream &ret, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << "goto _again;" << CLOSE_GEN_BLOCK();
+	ret << "goto " << _again << ";" << CLOSE_GEN_BLOCK();
 }
 
 void TabGoto::NRET( ostream &ret, bool inFinish )
@@ -158,13 +158,11 @@ void TabGoto::NRET( ostream &ret, bool inFinish )
 
 void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _pop; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto " << _pop << "; " << CLOSE_GEN_BLOCK();
 }
 
 void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1;" << CLOSE_GEN_BLOCK();
 }
 
@@ -216,10 +214,10 @@ void TabGoto::NFA_POP()
 
 			out << 
 				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto _test_eof;\n";
+				"		goto " << _test_eof << ";\n";
 
 			out <<
-				"			goto _resume;\n"
+				"			goto " << _resume << ";\n"
 				"		}\n";
 
 			if ( red->nfaPostPopExpr != 0 ) {
@@ -243,24 +241,20 @@ void TabGoto::NFA_POP()
 
 			out << 
 				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto _test_eof;\n";
+				"		goto " << _test_eof << ";\n";
 
 			out <<
-				"		goto _resume;\n";
+				"		goto " << _resume << ";\n";
 		}
 
-		outLabelUsed = true;
 		out << 
-			"		goto _pop;\n"
+			"		goto " << _pop << ";\n"
 			"	}\n";
 	}
 }
 
 void TabGoto::writeExec()
 {
-	testEofUsed = false;
-	outLabelUsed = false;
-
 	out <<
 		"	{\n";
 
@@ -284,20 +278,19 @@ void TabGoto::writeExec()
 	DECLARE( UINT(), nacts );
 
 	if ( !noEnd ) {
-		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
+			"		goto " << _test_eof << ";\n";
 	}
 
 	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _pop;\n";
+			"		goto " << _pop << ";\n";
 	}
 
-	out << LABEL( "_resume" ) << "\n";
+	
+	out << EMIT_LABEL( _resume );
 
 	FROM_STATE_ACTIONS();
 
@@ -305,7 +298,7 @@ void TabGoto::writeExec()
 
 	LOCATE_TRANS();
 
-	out << LABEL( "_match_cond" ) << "\n";
+	out << EMIT_LABEL( _match_cond );
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
@@ -319,7 +312,7 @@ void TabGoto::writeExec()
 	if ( redFsm->anyRegActions() ) {
 		out <<
 			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] == 0 )\n"
-			"		goto _again;\n"
+			"		goto " << _again << ";\n"
 			"\n";
 
 		if ( redFsm->anyRegNbreak() )
@@ -330,40 +323,35 @@ void TabGoto::writeExec()
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
 				"	if ( _nbreak == 1 )\n"
-				"		goto _pop;\n";
-			outLabelUsed = true;
+				"		goto " << _pop << ";\n";
 		}
 
 		out << "\n";
 	}
 
-	if ( redFsm->anyRegActions() || redFsm->anyActionGotos() || 
-			redFsm->anyActionCalls() || redFsm->anyActionRets() )
-		out << "\n" << LABEL( "_again" ) << "\n";
+	out << "\n" << EMIT_LABEL( _again );
 
 	TO_STATE_ACTIONS();
 
 	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _pop;\n";
+			"		goto " << _pop << ";\n";
 	}
 
 	if ( !noEnd ) {
 		out << 
 			"	" << P() << " += 1;\n"
 			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
+			"		goto " << _resume << ";\n";
 	}
 	else {
 		out << 
 			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
+			"	goto " << _resume << ";\n";
 	}
 
-	if ( testEofUsed )
-		out << LABEL( "_test_eof" ) << " {}\n";
+	out << EMIT_LABEL( _test_eof );
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 		out << 
@@ -383,7 +371,7 @@ void TabGoto::writeExec()
 		if ( red->condSpaceList.length() > 0 )
 			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
 
-		COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto _pop;" );
+		COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto " + string(_pop) + ";" );
 
 		out << 
 			"		_ok: {}\n"
@@ -399,26 +387,24 @@ void TabGoto::writeExec()
 			EOF_TRANS();
 
 			out <<
-				"		goto _match_cond;\n"
+				"		goto " << _match_cond << ";\n"
 				"	}\n";
 		}
 
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n goto _pop;\n";
-		outLabelUsed = true;
+		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n goto " << _pop << ";\n";
 
 		out <<
 			"	}\n"
 			"\n";
 	}
 
-	out << "goto _out;\n";
+	out << "goto " << _out << ";\n";
 
-	if ( outLabelUsed )
-		out << LABEL( "_pop" ) << " {}\n";
+	out << EMIT_LABEL( _pop );
 
 	NFA_POP();
 
-	out << LABEL( "_out" ) << " {}\n";
+	out << EMIT_LABEL( _out );
 
 	out << "	}\n";
 }
