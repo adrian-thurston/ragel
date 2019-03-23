@@ -390,14 +390,11 @@ void TabGoto::writeExec()
 				"		goto " << _match_cond << ";\n"
 				"	}\n";
 		}
+	}
 
-		out << 
-			"	if ( " << vCS() << " > " << FIRST_FINAL_STATE() << " )\n"
-			"		goto " << _out << ";\n";
-	}
-	else {
-		out << "goto " << _out << ";\n";
-	}
+	out << 
+		"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+		"		goto " << _out << ";\n";
 
 	out << EMIT_LABEL( _pop );
 
@@ -407,5 +404,3 @@ void TabGoto::writeExec()
 
 	out << "	}\n";
 }
-
-

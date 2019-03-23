@@ -161,7 +161,7 @@ void TabVar::NFA_POP()
 			}
 
 			out <<
-//				"			goto _resume;\n"
+				// "			goto _resume;\n"
 				"			" << nfa_cont << " = 1;\n"
 				"			" << nfa_repeat << " = 0;\n"
 				"		}\n";
@@ -172,7 +172,7 @@ void TabVar::NFA_POP()
 				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
 				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK() << "\n"
-//				"				goto _out;\n"
+				// "				goto _out;\n"
 				"				" << nfa_cont << " = 0;\n"
 				"				" << nfa_repeat << " = 1;\n"
 				"			}\n";
@@ -180,7 +180,7 @@ void TabVar::NFA_POP()
 			else {
 				out <<
 				"			else {\n"
-//				"				goto _out;\n"
+				// "				goto _out;\n"
 				"				" << nfa_cont << " = 0;\n"
 				"				" << nfa_repeat << " = 1;\n"
 				"			}\n"
@@ -198,7 +198,7 @@ void TabVar::NFA_POP()
 			}
 
 			out <<
-//				"		goto _resume;\n"
+				// "		goto _resume;\n"
 				"		" << nfa_cont << " = 1;\n"
 				"		" << nfa_repeat << " = 0;\n"
 				;
@@ -225,9 +225,9 @@ void TabVar::writeExec()
 			"{\n";
 	}
 
-		DECLARE( UINT(), nfa_cont,   " = 1" );
-		DECLARE( UINT(), nfa_repeat, " = 1" );
-		DECLARE( UINT(), nfa_test,   " = 1" );
+	DECLARE( UINT(), nfa_cont,   " = 1" );
+	DECLARE( UINT(), nfa_repeat, " = 1" );
+	DECLARE( UINT(), nfa_test,   " = 1" );
 
 	if ( redFsm->anyNfaStates() ) {
 		out <<
