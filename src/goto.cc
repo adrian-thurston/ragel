@@ -1053,15 +1053,16 @@ void Goto::writeExec()
 				"	}\n";
 		}
 
-		outLabelUsed = true;
-		out << "	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) goto _pop; ";
 
 		out <<
 			"	}\n"
 			"\n";
+
 	}
 
-	out << "goto _out;\n";
+	out <<
+		"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+		"		goto _out; ";
 
 	if ( outLabelUsed )
 		out << "	_pop: {}\n";

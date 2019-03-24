@@ -215,6 +215,12 @@ void TabVar::NFA_POP()
 	}
 }
 
+/*
+ * 0 means stop, (goto out)
+ * 1 means fall through to pop and repeat (goto pop)
+ * 2 means fall through to next and repeat (no goto)
+*/
+
 void TabVar::writeExec()
 {
 	testEofUsed = false;
@@ -345,14 +351,14 @@ void TabVar::writeExec()
 
 			out << "}\n";
 
-			out <<
-				"	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) {\n"
-				"		" << nfa_test << " = 1;\n"
-				"		" << nfa_cont << " = 1;\n"
-				"	}\n";
-
 			out << "}\n";
 		}
+
+		out <<
+			"	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) {\n"
+			"		" << nfa_test << " = 1;\n"
+			"		" << nfa_cont << " = 1;\n"
+			"	}\n";
 
 		out << 
 			"	if ( _have == 0 )\n"
