@@ -272,12 +272,6 @@ void TabGoto::writeExec()
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 	DECLARE( UINT(), nacts );
 
-//	if ( !noEnd ) {
-//		out << 
-//			"	if ( " << P() << " == " << PE() << " )\n"
-//			"		goto " << _test_eof << ";\n";
-//	}
-
 	if ( redFsm->errState != 0 ) {
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
@@ -422,7 +416,7 @@ void TabGoto::writeExec()
 	if ( !noEnd ) {
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto " << _test_eof << ";\n";
+			"		goto " << _resume << ";\n";
 	}
 	out << "	goto " << _again << ";\n";
 
