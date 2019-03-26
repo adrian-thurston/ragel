@@ -292,6 +292,21 @@ void TabGoto::writeExec()
 	
 	out << EMIT_LABEL( _resume );
 
+	/* Do we break out on no more input. */
+	if ( !noEnd ) {
+		bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions();
+		if ( eof ) {
+			out << 
+				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
+				"               goto " << _out << ";\n";
+		}
+		else {
+			out << 
+				"       if ( " << P() << " == " << PE() << " )\n"
+				"               goto " << _out << ";\n";
+		}
+	}
+
 	NFA_PUSH( vCS() );
 
 	FROM_STATE_ACTIONS();
