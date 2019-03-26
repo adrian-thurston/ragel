@@ -288,13 +288,12 @@ void TabGoto::writeExec()
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
 			"		goto " << _pop << ";\n";
 	}
-
 	
 	out << EMIT_LABEL( _resume );
 
 	/* Do we break out on no more input. */
+	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions();
 	if ( !noEnd ) {
-		bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions();
 		if ( eof ) {
 			out << 
 				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
@@ -305,6 +304,12 @@ void TabGoto::writeExec()
 				"       if ( " << P() << " == " << PE() << " )\n"
 				"               goto " << _out << ";\n";
 		}
+	}
+
+	if ( !noEnd && eof ) {
+		out << 
+			"	if ( " << P() << " == " << vEOF() << " )\n"
+			"		goto " << _test_eof << ";\n";
 	}
 
 	NFA_PUSH( vCS() );
