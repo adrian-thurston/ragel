@@ -292,9 +292,9 @@ void TabGoto::writeExec()
 	
 	out << EMIT_LABEL( _resume );
 
-	FROM_STATE_ACTIONS();
-
 	NFA_PUSH( vCS() );
+
+	FROM_STATE_ACTIONS();
 
 	LOCATE_TRANS();
 
