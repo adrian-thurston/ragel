@@ -212,10 +212,6 @@ void TabGoto::NFA_POP()
 				out << CLOSE_HOST_BLOCK();
 			}
 
-			out << 
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto " << _test_eof << ";\n";
-
 			out <<
 				"			goto " << _resume << ";\n"
 				"		}\n";
@@ -238,10 +234,6 @@ void TabGoto::NFA_POP()
 				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK();
 			}
-
-			out << 
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto " << _test_eof << ";\n";
 
 			out <<
 				"		goto " << _resume << ";\n";
