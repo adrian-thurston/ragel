@@ -55,6 +55,7 @@ struct Tables
 		_match_cond( "_match_cond" ),
 		_again( "_again" ),
 		_match( "_match" ),
+		_eof_goto( "_eof_goto" ),
 
 		actions(          "actions",             *this ),
 		transKeys(        "trans_keys",          *this ),
@@ -107,6 +108,7 @@ struct Tables
 	GotoLabel _match_cond;
 	GotoLabel _again;
 	GotoLabel _match;
+	GotoLabel _eof_goto;
 
 	TableArray actions;
 	TableArray transKeys;

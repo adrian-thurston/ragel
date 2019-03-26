@@ -29,9 +29,10 @@ void TabGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";";
 
 	if ( inFinish && !noEnd )
-		EOF_CHECK( ret );
+		ret << "goto " << _eof_goto << ";";
+	else
+		ret << "goto " << _again << ";";
 
-	ret << "goto " << _again << ";";
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -42,9 +43,10 @@ void TabGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	ret << CLOSE_HOST_EXPR() << ";";
 
 	if ( inFinish && !noEnd )
-		EOF_CHECK( ret );
-	
-	ret << " goto " << _again << ";";
+		ret << "goto " << _eof_goto << ";";
+	else
+		ret << "goto " << _again << ";";
+
 	
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -64,9 +66,9 @@ void TabGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 			callDest << ";";
 
 	if ( inFinish && !noEnd )
-		EOF_CHECK( ret );
-
-	ret << " goto " << _again << ";";
+		ret << "goto " << _eof_goto << ";";
+	else
+		ret << "goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -103,9 +105,9 @@ void TabGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 	ret << CLOSE_HOST_EXPR() << ";";
 
 	if ( inFinish && !noEnd )
-		EOF_CHECK( ret );
-
-	ret << "goto " << _again << ";";
+		ret << "goto " << _eof_goto << ";";
+	else
+		ret << "goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -137,9 +139,11 @@ void TabGoto::RET( ostream &ret, bool inFinish )
 	}
 
 	if ( inFinish && !noEnd )
-		EOF_CHECK( ret );
+		ret << "goto " << _eof_goto << ";";
+	else
+		ret << "goto " << _again << ";";
 
-	ret << "goto " << _again << ";" << CLOSE_GEN_BLOCK();
+	ret << CLOSE_GEN_BLOCK();
 }
 
 void TabGoto::NRET( ostream &ret, bool inFinish )
@@ -152,7 +156,6 @@ void TabGoto::NRET( ostream &ret, bool inFinish )
 		ret << CLOSE_HOST_BLOCK();
 	}
 
-	/* FIXME: ws in front of } will cause rlhc failure. */
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -341,6 +344,9 @@ void TabGoto::writeExec()
 		out << "\n";
 	}
 
+	out << "	goto " << _again << ";\n";
+	
+
 	out << "\n" << EMIT_LABEL( _again );
 
 	TO_STATE_ACTIONS();
@@ -407,6 +413,19 @@ void TabGoto::writeExec()
 	out << 
 		"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
 		"		goto " << _out << ";\n";
+
+	out << "	goto " << _pop << ";\n";
+
+	out << "\n" << EMIT_LABEL( _eof_goto );
+
+	if ( !noEnd ) {
+		out << 
+			"	if ( " << P() << " == " << PE() << " )\n"
+			"		goto _test_eof;\n";
+	}
+	out << "	goto " << _again << ";\n";
+
+	/* END OF EOF PROCESSING. */
 
 	out << EMIT_LABEL( _pop );
 
