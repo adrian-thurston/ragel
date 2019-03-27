@@ -297,8 +297,64 @@ void TabGoto::writeExec()
 
 	if ( !noEnd && eof ) {
 		out << 
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"		goto " << _test_eof << ";\n";
+			"	if ( " << P() << " == " << vEOF() << " ) {\n";
+
+		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+			out << 
+				"	if ( " << P() << " != " << vEOF() << " )\n"
+				"		goto " << _out << ";\n";
+
+			NFA_PUSH( vCS() );
+
+			out <<
+				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
+				"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
+							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
+				"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+				"		" << cpc << " = 0;\n"
+			;
+
+			if ( red->condSpaceList.length() > 0 )
+				COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
+
+			COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto " + string(_pop) + ";" );
+
+			out << 
+				"		_ok: {}\n"
+				"	}\n"
+			;
+
+			EOF_ACTIONS();
+
+			if ( redFsm->anyEofTrans() ) {
+				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
+
+				EOF_TRANS();
+
+				out <<
+					"		goto " << _match_cond << ";\n"
+					"	}\n";
+			}
+		}
+
+		out << 
+			"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"		goto " << _out << ";\n";
+
+		out << "	goto " << _pop << ";\n";
+
+		out << "\n" << EMIT_LABEL( _eof_goto );
+
+		if ( !noEnd ) {
+			out << 
+				"	if ( " << P() << " == " << PE() << " )\n"
+				"		goto " << _resume << ";\n";
+		}
+		out << "	goto " << _again << ";\n";
+
+		out << 
+			"	}\n";
 	}
 
 	NFA_PUSH( vCS() );
@@ -355,64 +411,6 @@ void TabGoto::writeExec()
 		"	" << P() << " += 1;\n"
 		"	goto " << _resume << ";\n";
 
-	/* EOF BLOCK. */
-	out << EMIT_LABEL( _test_eof );
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out << 
-			"	if ( " << P() << " != " << vEOF() << " )\n"
-			"		goto " << _out << ";\n";
-
-		NFA_PUSH( vCS() );
-
-		out <<
-			"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-			"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
-						/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-			"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
-			"		" << cpc << " = 0;\n"
-		;
-
-		if ( red->condSpaceList.length() > 0 )
-			COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
-
-		COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto " + string(_pop) + ";" );
-
-		out << 
-			"		_ok: {}\n"
-			"	}\n"
-		;
-
-		EOF_ACTIONS();
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
-
-			EOF_TRANS();
-
-			out <<
-				"		goto " << _match_cond << ";\n"
-				"	}\n";
-		}
-	}
-
-	out << 
-		"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-		"		goto " << _out << ";\n";
-
-	out << "	goto " << _pop << ";\n";
-
-	out << "\n" << EMIT_LABEL( _eof_goto );
-
-	if ( !noEnd ) {
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto " << _resume << ";\n";
-	}
-	out << "	goto " << _again << ";\n";
-
-	/* END OF EOF PROCESSING. */
 
 	out << EMIT_LABEL( _pop );
 
