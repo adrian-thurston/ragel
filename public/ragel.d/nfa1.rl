@@ -76,6 +76,7 @@ void exec( char *data, int len )
 {
 	char *p = data;
 	char *pe = data + len;
+	char *eof = pe;
 	%% write exec;
 }
 

@@ -74,6 +74,7 @@ int test( const char *p )
 {
 	int len = strlen( p ) + 1;
 	const char *pe = p + len;
+	const char *eof = pe;
 	int cs;
 
 	struct nfa_bp_rec *nfa_bp = (struct nfa_bp_rec*) s;
