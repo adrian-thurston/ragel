@@ -295,12 +295,13 @@ void TabGoto::writeExec()
 		}
 	}
 
+	NFA_PUSH( vCS() );
+
 	if ( !noEnd && eof ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-			NFA_PUSH( vCS() );
 
 			out <<
 				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
@@ -338,7 +339,8 @@ void TabGoto::writeExec()
 			"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
 			"		goto " << _out << ";\n";
 
-		out << "	goto " << _pop << ";\n";
+		out <<
+			"	goto " << _pop << ";\n";
 
 		out << "\n" << EMIT_LABEL( _eof_goto );
 
@@ -352,8 +354,6 @@ void TabGoto::writeExec()
 		out << 
 			"	}\n";
 	}
-
-	NFA_PUSH( vCS() );
 
 	FROM_STATE_ACTIONS();
 
