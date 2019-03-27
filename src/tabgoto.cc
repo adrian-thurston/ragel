@@ -281,7 +281,7 @@ void TabGoto::writeExec()
 	out << EMIT_LABEL( _resume );
 
 	/* Do we break out on no more input. */
-	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions();
+	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions() || redFsm->anyNfaStates();
 	if ( !noEnd ) {
 		if ( eof ) {
 			out << 
@@ -351,17 +351,9 @@ void TabGoto::writeExec()
 			"		goto " << _pop << ";\n";
 	}
 
-	if ( !noEnd ) {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto " << _resume << ";\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto " << _resume << ";\n";
-	}
+	out << 
+		"	" << P() << " += 1;\n"
+		"	goto " << _resume << ";\n";
 
 	/* EOF BLOCK. */
 	out << EMIT_LABEL( _test_eof );
