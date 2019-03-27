@@ -300,10 +300,6 @@ void TabGoto::writeExec()
 			"	if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-			out << 
-				"	if ( " << P() << " != " << vEOF() << " )\n"
-				"		goto " << _out << ";\n";
-
 			NFA_PUSH( vCS() );
 
 			out <<
