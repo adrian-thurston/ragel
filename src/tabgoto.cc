@@ -24,15 +24,21 @@
 #include "binary.h"
 #include "flat.h"
 
+void TabGoto::CONTROL_JUMP( ostream &ret, bool inFinish )
+{
+	if ( inFinish && !noEnd ) {
+		out << 
+			"	if ( " << P() << " == " << PE() << " )\n"
+			"		goto " << _resume << ";\n";
+	}
+
+	ret << "goto " << _again << ";";
+}
+
 void TabGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";";
-
-	if ( inFinish && !noEnd )
-		ret << "goto " << _eof_goto << ";";
-	else
-		ret << "goto " << _again << ";";
-
+	CONTROL_JUMP( ret, inFinish );
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -42,12 +48,7 @@ void TabGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << CLOSE_HOST_EXPR() << ";";
 
-	if ( inFinish && !noEnd )
-		ret << "goto " << _eof_goto << ";";
-	else
-		ret << "goto " << _again << ";";
-
-	
+	CONTROL_JUMP( ret, inFinish );
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -65,11 +66,7 @@ void TabGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 			vCS() << "; " << TOP() << " += 1;" << vCS() << " = " << 
 			callDest << ";";
 
-	if ( inFinish && !noEnd )
-		ret << "goto " << _eof_goto << ";";
-	else
-		ret << "goto " << _again << ";";
-
+	CONTROL_JUMP( ret, inFinish );
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -104,11 +101,7 @@ void TabGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 	INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
 	ret << CLOSE_HOST_EXPR() << ";";
 
-	if ( inFinish && !noEnd )
-		ret << "goto " << _eof_goto << ";";
-	else
-		ret << "goto " << _again << ";";
-
+	CONTROL_JUMP( ret, inFinish );
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -138,11 +131,7 @@ void TabGoto::RET( ostream &ret, bool inFinish )
 		ret << CLOSE_HOST_BLOCK();
 	}
 
-	if ( inFinish && !noEnd )
-		ret << "goto " << _eof_goto << ";";
-	else
-		ret << "goto " << _again << ";";
-
+	CONTROL_JUMP( ret, inFinish );
 	ret << CLOSE_GEN_BLOCK();
 }
 
@@ -299,7 +288,7 @@ void TabGoto::writeExec()
 
 	if ( !noEnd && eof ) {
 		out << 
-			"	if ( " << P() << " == " << vEOF() << " ) {\n";
+			"if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 
@@ -340,19 +329,8 @@ void TabGoto::writeExec()
 			"		goto " << _out << ";\n";
 
 		out <<
-			"	goto " << _pop << ";\n";
-
-		out << "\n" << EMIT_LABEL( _eof_goto );
-
-		if ( !noEnd ) {
-			out << 
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto " << _resume << ";\n";
-		}
-		out << "	goto " << _again << ";\n";
-
-		out << 
-			"	}\n";
+			"	goto " << _pop << ";\n"
+			"}\n";
 	}
 
 	FROM_STATE_ACTIONS();
@@ -389,9 +367,6 @@ void TabGoto::writeExec()
 
 		out << "\n";
 	}
-
-	out << "	goto " << _again << ";\n";
-	
 
 	out << "\n" << EMIT_LABEL( _again );
 

@@ -170,6 +170,8 @@ struct TabGoto
 		Tables( args )
 	{}
 
+	void CONTROL_JUMP( ostream &ret, bool inFinish );
+
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
