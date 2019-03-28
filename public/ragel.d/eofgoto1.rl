@@ -55,6 +55,7 @@ neg = false;
 	action extra
 	{
 		print_str "goto extra\n";
+		fhold;
 		fgoto extra;
 	}
 

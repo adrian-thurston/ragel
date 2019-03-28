@@ -57,6 +57,7 @@ int stack[32];
 	action extra
 	{
 		print_str "goto extra\n";
+		fhold;
 		fcall extra;
 	}
 
