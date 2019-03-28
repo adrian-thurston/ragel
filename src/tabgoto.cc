@@ -345,8 +345,7 @@ void TabGoto::writeExec()
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
-			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] == 0 )\n"
-			"		goto " << _again << ";\n"
+			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] != 0 ) {\n"
 			"\n";
 
 		if ( redFsm->anyRegNbreak() )
@@ -360,7 +359,7 @@ void TabGoto::writeExec()
 				"		goto " << _pop << ";\n";
 		}
 
-		out << "\n";
+		out << "}\n";
 	}
 
 	if ( !noEnd && eof ) {
@@ -373,9 +372,9 @@ void TabGoto::writeExec()
 	if ( !noEnd && eof ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n"
-			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"			goto " << _out << ";\n"
-			"		goto " << _pop << ";\n"
+			"		if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n"
+			"			goto " << _pop << ";\n"
+			"		goto " << _out << ";\n"
 			"	}\n"
 			"	else {\n";
 	}

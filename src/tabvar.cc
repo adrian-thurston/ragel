@@ -402,6 +402,8 @@ void TabVar::writeExec()
 			"	}\n";
 	}
 
+	/* _again: */
+
 	TO_STATE_ACTIONS();
 
 	if ( redFsm->errState != 0 ) {
