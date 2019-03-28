@@ -635,7 +635,7 @@ void Reducer::makeStateActions( StateAp *state )
 	/* EOF actions go out here only if the state has no eof target. If it has
 	 * an eof target then an eof transition will be used instead. */
 	RedActionTable *eofActions = 0;
-	if ( state->eofTarget == 0 && state->eofActionTable.length() > 0 )
+	if ( state->eofActionTable.length() > 0 )
 		eofActions = actionTableMap.find( state->eofActionTable );
 	
 	if ( toStateActions != 0 || fromStateActions != 0 || eofActions != 0 ) {
@@ -657,17 +657,11 @@ void Reducer::makeStateActions( StateAp *state )
 
 void Reducer::makeEofTrans( StateAp *state )
 {
-	RedActionTable *eofActions = 0;
-	if ( state->eofActionTable.length() > 0 )
-		eofActions = actionTableMap.find( state->eofActionTable );
-	
 	/* The EOF trans is used when there is an eof target, otherwise the eof
 	 * action goes into state actions. */
 	if ( state->eofTarget != 0 ) {
 		long targ = state->eofTarget->alg.stateNum;
 		long action = -1;
-		if ( eofActions != 0 )
-			action = eofActions->id;
 
 		setEofTrans( curState, targ, action );
 	}
@@ -1136,7 +1130,7 @@ void Reducer::setEofTrans( int snum, long eofTarget, long actId )
 {
 	RedStateAp *curState = allStates + snum;
 	RedStateAp *targState = allStates + eofTarget;
-	RedAction *eofAct = allActionTables + actId;
+	RedAction *eofAct = actId >= 0 ? allActionTables + actId : 0;
 
 	RedTransAp *trans = redFsm->allocateTrans( targState, eofAct );
 
