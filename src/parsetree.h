@@ -301,8 +301,9 @@ struct LongestMatchPart
 	Action *actOnLast;
 	Action *actOnNext;
 	Action *actLagBehind;
-	Action *actNfaOnNext;
 	Action *actNfaOnLast;
+	Action *actNfaOnNext;
+	Action *actNfaOnEof;
 	int longestMatchId;
 	bool inLmSelect;
 	LongestMatch *longestMatch;

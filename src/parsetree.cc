@@ -288,11 +288,26 @@ void LongestMatch::makeActions( ParseData *pd )
 		lmi->actLagBehind = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
-	/* NFA actions
+	/*
+	 * NFA actions
 	 *
 	 * Actions that execute the user action and restart on the next character.
 	 * These actions will set tokend themselves (it is the current char). They
-	 * also reset the nfa machinery used to choose between tokens. */
+	 * also reset the nfa machinery used to choose between tokens.
+	 */
+	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ ) {
+		/* For each part create actions for setting the match type.  We need
+		 * to do this so that the actions will go into the actionIndex. */
+		InlineList *inlineList = new InlineList;
+		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
+		inlineList->head->children = new InlineList;
+		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
+				InlineItem::LmNfaOnLast ) );
+		char *actName = new char[50];
+		sprintf( actName, "nlast%i", lmi->longestMatchId );
+		lmi->actNfaOnLast = newLmAction( pd, lmi->getLoc(), actName, inlineList );
+	}
+
 	for ( LmPartList::Iter lmi = *longestMatchList; lmi.lte(); lmi++ ) {
 		/* For each part create actions for setting the match type.  We need
 		 * to do this so that the actions will go into the actionIndex. */
@@ -313,10 +328,10 @@ void LongestMatch::makeActions( ParseData *pd )
 		inlineList->append( new InlineItem( InputLoc(), InlineItem::Stmt ) );
 		inlineList->head->children = new InlineList;
 		inlineList->head->children->append( new InlineItem( lmi->getLoc(), this, lmi, 
-				InlineItem::LmNfaOnLast ) );
+				InlineItem::LmNfaOnEof ) );
 		char *actName = new char[50];
-		sprintf( actName, "nlast%i", lmi->longestMatchId );
-		lmi->actNfaOnLast = newLmAction( pd, lmi->getLoc(), actName, inlineList );
+		sprintf( actName, "neof%i", lmi->longestMatchId );
+		lmi->actNfaOnEof = newLmAction( pd, lmi->getLoc(), actName, inlineList );
 	}
 
 	InputLoc loc;

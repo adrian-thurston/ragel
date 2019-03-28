@@ -212,8 +212,9 @@ protected:
 	void makeLmOnNext( GenInlineList *outList, InlineItem *item );
 	void makeLmOnLagBehind( GenInlineList *outList, InlineItem *item );
 	void makeLmSwitch( GenInlineList *outList, InlineItem *item );
-	void makeLmNfaOnNext( GenInlineList *outList, InlineItem *item );
 	void makeLmNfaOnLast( GenInlineList *outList, InlineItem *item );
+	void makeLmNfaOnNext( GenInlineList *outList, InlineItem *item );
+	void makeLmNfaOnEof( GenInlineList *outList, InlineItem *item );
 	void makeActionExec( GenInlineList *outList, InlineItem *item );
 	void makeSetTokend( GenInlineList *outList, long offset );
 	void makeSetAct( GenInlineList *outList, long lmId );

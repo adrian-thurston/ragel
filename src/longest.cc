@@ -403,7 +403,7 @@ FsmRes LongestMatch::buildBaseNfa( ParseData *pd )
 				}
 			}
 
-			st->eofActionTable.setAction( pd->fsmCtx->curActionOrd++, st->lmNfaParts[0]->actNfaOnNext );
+			st->eofActionTable.setAction( pd->fsmCtx->curActionOrd++, st->lmNfaParts[0]->actNfaOnEof );
 		}
 	}
 
