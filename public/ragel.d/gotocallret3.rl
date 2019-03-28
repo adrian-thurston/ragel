@@ -114,6 +114,7 @@ ACCEPT
 prints
 correct command
 ACCEPT
+error: failed to recover
 FAIL
 prints
 error: garbling line
