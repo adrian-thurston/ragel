@@ -223,9 +223,6 @@ void TabVar::NFA_POP()
 
 void TabVar::writeExec()
 {
-	testEofUsed = false;
-	matchCondLabelUsed = false;
-
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"{\n";
@@ -342,11 +339,16 @@ void TabVar::writeExec()
 
 				EOF_TRANS();
 
-				out <<
-					"		_have = 1;\n"
-					"	}\n";
+				string condVar =
+						red->condSpaceList.length() != 0 ? string(cond) : string(trans);
 
-				matchCondLabelUsed = true;
+				out <<
+					"		" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n"
+					"\n";
+
+				out <<
+					"		/*_have = 1;*/\n"
+					"	}\n";
 			}
 
 			out << "}\n";

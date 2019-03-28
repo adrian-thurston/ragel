@@ -318,8 +318,16 @@ void TabGoto::writeExec()
 
 				EOF_TRANS();
 
+				string condVar =
+						red->condSpaceList.length() != 0 ? string(cond) : string(trans);
+
 				out <<
-					"		goto " << _match_cond << ";\n"
+					"		" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
+
+				out <<
+					"		goto " << _again << ";\n";
+
+				out << 
 					"	}\n";
 			}
 		}
