@@ -83,7 +83,7 @@ void IpGoto::EOF_CHECK( ostream &ret, int gotoDest )
 {
 	ret << 
 		"       if ( " << P() << " == " << PE() << " )\n"
-		"               goto _test_eof" << gotoDest << ";\n";
+		"               goto " << ipLabel[gotoDest].reference() << ";\n";
 
 	testEofUsed = true;
 }
@@ -356,7 +356,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 			out <<
 				"	" << P() << "+= 1;\n"
 				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto _test_eof" << state->id << ";\n";
+				"		goto " << ipLabel[state->id].reference() << ";\n";
 		}
 		else {
 			out << 
@@ -454,9 +454,9 @@ std::ostream &IpGoto::COND_GOTO( RedCondPair *cond, int level )
 std::ostream &IpGoto::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->outNeeded ) {
+		if ( ipLabel[st->id].isReferenced ) {
 			testEofUsed = true;
-			out << "	_test_eof" << st->id << ": " << vCS() << " = " << 
+			out << "	" << ipLabel[st->id].define() << ": " << vCS() << " = " << 
 					st->id << "; goto _test_eof; \n";
 		}
 	}
@@ -568,7 +568,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 std::ostream &IpGoto::FINISH_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofAction != 0 ) {
+		if ( st->eofAction != 0 && st->eofTrans == 0 ) {
 			if ( st->eofAction->eofRefs == 0 )
 				st->eofAction->eofRefs = new IntSet;
 			st->eofAction->eofRefs->insert( st->id );
@@ -593,7 +593,17 @@ std::ostream &IpGoto::FINISH_CASES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			RedCondPair *cond = st->eofTrans->outCond( 0 );
-			out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
+			out <<
+				"	case " << st->id << ":\n";
+
+			if ( st->eofAction != 0 ) {
+				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+					ACTION( out, item->value, IlOpts( STATE_ERR_STATE, true, false ) );
+
+			}
+
+			out <<
+				"		goto st" << cond->targ->id << ";\n";
 		}
 	}
 
@@ -665,14 +675,6 @@ void IpGoto::setLabelsNeeded()
 			}
 		}
 	}
-
-	if ( !noEnd ) {
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			if ( st != redFsm->errState )
-				st->outNeeded = st->labelNeeded;
-		}
-
-	}
 }
 
 void IpGoto::writeData()
@@ -698,6 +700,12 @@ void IpGoto::NFA_FROM_STATE_ACTION_EXEC()
 
 void IpGoto::writeExec()
 {
+	if ( ipLabel == 0 ) {
+		ipLabel = new IpLabel[redFsm->stateList.length()];
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
+			ipLabel[st->id].stid = st->id;
+	}
+
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
 	setLabelsNeeded();

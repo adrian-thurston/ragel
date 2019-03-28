@@ -29,6 +29,38 @@
 /* Forwards. */
 struct CodeGenData;
 
+struct IpLabel
+{
+	IpLabel()
+	:
+		type(TestEof),
+		stid(0),
+		isReferenced(false)
+	{}
+
+	enum Type
+	{
+		TestEof
+	};
+
+	std::string reference()
+	{
+		isReferenced = true;
+		return define();
+	}
+
+	std::string define()
+	{
+		std::stringstream ss;
+		ss << "_test_eof" << stid;
+		return ss.str();
+	}
+
+	Type type;
+	int stid;
+	bool isReferenced;
+};
+
 /*
  * class FGotoCodeGen
  */
@@ -37,7 +69,10 @@ class IpGoto
 {
 public:
 	IpGoto( const CodeGenArgs &args ) 
-			: Goto( args, Ip ) {}
+	:
+		Goto( args, Ip ),
+		ipLabel(0)
+	{}
 
 	std::ostream &EXIT_STATES();
 	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
@@ -102,6 +137,8 @@ protected:
 	void NFA_PUSH( RedStateAp *state );
 
 	void tableDataPass();
+
+	IpLabel *ipLabel;
 };
 
 namespace C

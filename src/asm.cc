@@ -1752,18 +1752,6 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 		}
 	}
 
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofTrans != 0 ) {
-			long l = nextLmSwitchLabel++;
-			
-			out <<
-				"	cmpq	$" << st->id << ", %rax\n"
-				"	jne		" << LABEL( "finish_next", l ) << "\n"
-				"	jmp		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n"
-				"" << LABEL( "finish_next", l ) << ":\n";
-		}
-	}
-
 
 	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
 		if ( act->eofRefs != 0 ) {
@@ -1785,9 +1773,20 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 		}
 	}
 
-
 	out << 
 		"" << LABEL( "finish_done", done ) << ":\n";
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st->eofTrans != 0 ) {
+			long l = nextLmSwitchLabel++;
+			
+			out <<
+				"	cmpq	$" << st->id << ", %rax\n"
+				"	jne		" << LABEL( "finish_next", l ) << "\n"
+				"	jmp		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n"
+				"" << LABEL( "finish_next", l ) << ":\n";
+		}
+	}
 
 	return out;
 }
