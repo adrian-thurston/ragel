@@ -26,12 +26,6 @@
 
 void TabGoto::CONTROL_JUMP( ostream &ret, bool inFinish )
 {
-	if ( inFinish && !noEnd ) {
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto " << _resume << ";\n";
-	}
-
 	ret << "goto " << _again << ";";
 }
 
@@ -325,20 +319,13 @@ void TabGoto::writeExec()
 					"		" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
 
 				out <<
-					"		goto " << _again << ";\n";
-
-				out << 
 					"	}\n";
 			}
 		}
 
 		out << 
-			"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"		goto " << _out << ";\n";
-
-		out <<
-			"	goto " << _pop << ";\n"
-			"}\n";
+			"}\n"
+			"else {\n";
 	}
 
 	FROM_STATE_ACTIONS();
@@ -376,7 +363,22 @@ void TabGoto::writeExec()
 		out << "\n";
 	}
 
+	if ( !noEnd && eof ) {
+		out << 
+			"}\n";
+	}
+
 	out << "\n" << EMIT_LABEL( _again );
+
+	if ( !noEnd && eof ) {
+		out << 
+			"	if ( " << P() << " == " << vEOF() << " ) {\n"
+			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"			goto " << _out << ";\n"
+			"		goto " << _pop << ";\n"
+			"	}\n"
+			"	else {\n";
+	}
 
 	TO_STATE_ACTIONS();
 
@@ -390,6 +392,10 @@ void TabGoto::writeExec()
 		"	" << P() << " += 1;\n"
 		"	goto " << _resume << ";\n";
 
+	if ( !noEnd && eof ) {
+		out <<
+			"	}\n";
+	}
 
 	out << EMIT_LABEL( _pop );
 
