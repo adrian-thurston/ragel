@@ -65,7 +65,7 @@ void BinGoto::LOCATE_COND()
 	
 	COND_BIN_SEARCH(
 			ckeys, condKeys,
-			"" + string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + "); goto " + string(_match_cond) + ";\n",
+			string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + "); goto " + string(_match_cond) + ";\n",
 			"goto " + string(_again) + ";\n"
 	);
 }
@@ -126,7 +126,7 @@ void BinGoto::LOCATE_TRANS()
 
 	if ( red->condSpaceList.length() > 0 )
 		LOCATE_COND();
-	else
-		out << "goto " << _match_cond << ";\n";
+
+	out << EMIT_LABEL( _match_cond );
 }
 

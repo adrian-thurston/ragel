@@ -137,8 +137,4 @@ void FlatGoto::LOCATE_TRANS()
 			"	}\n"
 			"	" << cond << " += " << CAST( UINT() ) << "" << cpc << ";\n";
 	}
-	
-	out <<
-		"	goto " << _match_cond << ";\n"
-	;
 }

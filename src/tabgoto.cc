@@ -332,8 +332,6 @@ void TabGoto::writeExec()
 
 	LOCATE_TRANS();
 
-	out << EMIT_LABEL( _match_cond );
-
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
 
