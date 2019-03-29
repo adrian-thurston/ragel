@@ -347,7 +347,6 @@ void TabVar::writeExec()
 					"\n";
 
 				out <<
-					"		/*_have = 1;*/\n"
 					"	}\n";
 			}
 
@@ -363,22 +362,18 @@ void TabVar::writeExec()
 			"	}\n";
 
 		out << 
-			"	if ( _have == 0 )\n"
-			"		_cont = 0;\n"
-			"	}\n";
+			"	_cont = 0;\n"
+			"}\n";
 	}
 
 	out << 
-		"	if ( _cont == 1 ) {\n"
-		"	if ( _have == 0 ) {\n";
+		"	if ( _cont == 1 ) {\n";
 
 	FROM_STATE_ACTIONS();
 
 	NFA_PUSH( vCS() );
 
 	LOCATE_TRANS();
-
-	out << "}\n";
 
 	out << "if ( _cont == 1 ) {\n";
 
