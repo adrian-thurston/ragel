@@ -108,7 +108,7 @@ void TabVar::BREAK( ostream &ret, int targState, bool csForced )
 
 void TabVar::NBREAK( ostream &ret, int targState, bool csForced )
 {
-	ret << OPEN_GEN_BLOCK() << P() << "+= 1; _cont = 0; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << "+= 1; " << cont << " = 0; " << CLOSE_GEN_BLOCK();
 }
 
 void TabVar::NFA_POP()
@@ -162,7 +162,7 @@ void TabVar::NFA_POP()
 
 			out <<
 				// "			goto _resume;\n"
-				"			" << nfa_cont << " = 1;\n"
+				"			" << cont << " = 1;\n"
 				"			" << nfa_repeat << " = 0;\n"
 				"		}\n";
 
@@ -172,16 +172,16 @@ void TabVar::NFA_POP()
 				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
 				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
 				out << CLOSE_HOST_BLOCK() << "\n"
-				// "				goto _out;\n"
-				"				" << nfa_cont << " = 0;\n"
+				// "			goto _pop;\n"
+				"				" << cont << " = 0;\n"
 				"				" << nfa_repeat << " = 1;\n"
 				"			}\n";
 			}
 			else {
 				out <<
 				"			else {\n"
-				// "				goto _out;\n"
-				"				" << nfa_cont << " = 0;\n"
+				// "			goto _pop;\n"
+				"				" << cont << " = 0;\n"
 				"				" << nfa_repeat << " = 1;\n"
 				"			}\n"
 				;
@@ -199,7 +199,7 @@ void TabVar::NFA_POP()
 
 			out <<
 				// "		goto _resume;\n"
-				"		" << nfa_cont << " = 1;\n"
+				"		" << cont << " = 1;\n"
 				"		" << nfa_repeat << " = 0;\n"
 				;
 		}
@@ -207,7 +207,7 @@ void TabVar::NFA_POP()
 		out << 
 			"	}\n"
 			"	else {\n"
-			"		" << nfa_cont << " = 0;\n"
+			"		" << cont << " = 0;\n"
 			"		" << nfa_repeat << " = 0;\n"
 			"	}\n"
 			"}\n"
@@ -223,20 +223,6 @@ void TabVar::NFA_POP()
 
 void TabVar::writeExec()
 {
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"{\n";
-	}
-
-	DECLARE( UINT(), nfa_cont,   " = 1" );
-	DECLARE( UINT(), nfa_repeat, " = 1" );
-	DECLARE( UINT(), nfa_test,   " = 1" );
-
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	while ( " << nfa_cont << " != 0 )\n";
-	}
-
 	out <<
 		"	{\n";
 
@@ -245,9 +231,11 @@ void TabVar::writeExec()
 
 	out <<
 		"	" << UINT() << " " << trans << " = 0;\n"
-		"	" << UINT() << " _have = 0;\n"
-		"	" << UINT() << " _cont = 1;\n";
+		"	" << UINT() << " _have = 0;\n";
 
+	DECLARE( UINT(), nfa_repeat, " = 1" );
+	DECLARE( UINT(), nfa_test,   " = 1" );
+	DECLARE( UINT(), cont, " = 1" );
 	DECLARE( "int",  klen );
 	DECLARE( UINT(), cond, " = 0" );
 	DECLARE( "int", cpc );
@@ -259,13 +247,13 @@ void TabVar::writeExec()
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 
 	out <<
-		"	while ( _cont == 1 ) {\n"
+		"	while ( " << cont << " == 1 ) {\n"
 		"\n";
 
 	if ( redFsm->errState != 0 ) {
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		_cont = 0;\n";
+			"		" << cont << " = 0;\n";
 	}
 
 	out << 
@@ -274,8 +262,7 @@ void TabVar::writeExec()
 	if ( !noEnd ) {
 		out << 
 			"	if ( " << P() << " == " << PE() << " ) {\n"
-			"		" << nfa_test << " = 0;\n"
-			"		" << nfa_cont << " = 0;\n";
+			"		" << nfa_test << " = 0;\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
 			out << 
@@ -315,14 +302,15 @@ void TabVar::writeExec()
 				"		if ( _eofcont == 0 ) {\n"
 				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
 				"			" << nfa_test << " = 1;\n"
-				"			" << nfa_cont << " = 1;\n"
 				"		}\n"
 				"	}\n"
 			;
 
 			out << 
 				"	}\n"
-				"	else { _eofcont = 1; }\n"
+				"	else {\n"
+				"		_eofcont = 1;\n"
+				"	}\n"
 			;
 
 			out << "if ( _eofcont == 1 ) {\n";
@@ -358,16 +346,15 @@ void TabVar::writeExec()
 		out <<
 			"	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) {\n"
 			"		" << nfa_test << " = 1;\n"
-			"		" << nfa_cont << " = 1;\n"
 			"	}\n";
 
 		out << 
-			"	_cont = 0;\n"
+			"	" << cont << " = 0;\n"
 			"}\n";
 	}
 
 	out << 
-		"	if ( _cont == 1 ) {\n";
+		"	if ( " << cont <<  "== 1 ) {\n";
 
 	FROM_STATE_ACTIONS();
 
@@ -375,7 +362,7 @@ void TabVar::writeExec()
 
 	LOCATE_TRANS();
 
-	out << "if ( _cont == 1 ) {\n";
+	out << "if ( " << cont << " == 1 ) {\n";
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	_ps = " << vCS() << ";\n";
@@ -404,26 +391,23 @@ void TabVar::writeExec()
 	if ( redFsm->errState != 0 ) {
 		out << 
 			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		_cont = 0;\n";
+			"		" << cont << " = 0;\n";
 	}
 
 	out << 
-		"	if ( _cont == 1 )\n"
+		"	if ( " << cont << " == 1 )\n"
 		"		" << P() << " += 1;\n";
 
 	out << "}\n";
 	out << "}\n";
-	out << "}\n";
 
 	out <<
-		"	if ( " << nfa_test << " == 1 ) {\n";
+		"	if ( " << cont << " == 0 && " << nfa_test << " == 1 ) {\n";
 
 	NFA_POP();
 
 	out << "}\n";
 	out << "}\n";
-
-	if ( redFsm->anyNfaStates() )
-		out << "}\n";
+	out << "}\n";
 }
 

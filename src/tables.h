@@ -44,7 +44,8 @@ struct Tables
 		acts( "_acts" ),
 		nacts( "_nacts" ),
 		inds( "_inds" ),
-		nfa_cont( "_nfa_cont" ),
+
+		cont( "_cont" ),
 		nfa_repeat( "_nfa_repeat" ),
 		nfa_test( "_nfa_test" ),
 
@@ -97,7 +98,7 @@ struct Tables
 	Variable acts;
 	Variable nacts;
 	Variable inds;
-	Variable nfa_cont;
+	Variable cont;
 	Variable nfa_repeat;
 	Variable nfa_test;
 
