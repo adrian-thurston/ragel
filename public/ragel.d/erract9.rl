@@ -19,6 +19,7 @@
 def run_machine( data )
 	p = 0;
 	pe = data.length
+	eof = pe
 	cs = 0
 
 	%% write init;
