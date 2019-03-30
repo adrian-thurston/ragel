@@ -232,7 +232,6 @@ void TabVar::writeExec()
 		"	" << UINT() << " " << trans << " = 0;\n"
 		"	" << UINT() << " _have = 0;\n";
 
-//	DECLARE( UINT(), nfa_repeat, " = 1" );
 	DECLARE( UINT(), nfa_test,   " = 1" );
 	DECLARE( UINT(), cont, " = 1" );
 	DECLARE( "int",  klen );
@@ -249,27 +248,38 @@ void TabVar::writeExec()
 		"	while ( " << cont << " == 1 ) {\n"
 		"\n";
 
-	if ( redFsm->errState != 0 ) {
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		" << cont << " = 0;\n";
+	/* Do we break out on no more input. */
+	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions() || redFsm->anyNfaStates();
+	if ( !noEnd ) {
+		if ( eof ) {
+			out << 
+				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " ) {\n"
+				"			" << cont << " = 0;\n"
+				"			" << nfa_test << " = 0;\n"
+				"		}\n";
+		}
+		else {
+			out << 
+				"       if ( " << P() << " == " << PE() << " ) {\n"
+				"			" << cont << " = 0;\n"
+				"			" << nfa_test << " = 0;\n"
+				"		}\n";
+		}
 	}
+
+	out << 
+		"	if ( " << cont <<  " == 1 ) {\n";
+
+	NFA_PUSH( vCS() );
 
 	out << 
 		"_have = 0;\n";
 
-	if ( !noEnd ) {
+	if ( !noEnd && eof ) {
 		out << 
-			"	if ( " << P() << " == " << PE() << " ) {\n"
-			"		" << nfa_test << " = 0;\n";
+			"if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-			out << 
-				"	if ( " << P() << " == " << vEOF() << " )\n"
-				"	{\n";
-
-			NFA_PUSH( vCS() );
-
 			out << UINT() << " _eofcont = 0;\n";
 
 			out <<
@@ -300,6 +310,7 @@ void TabVar::writeExec()
 				"		}\n"
 				"		if ( _eofcont == 0 ) {\n"
 				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
+				"			" << cont << " = 0;\n"
 				"			" << nfa_test << " = 1;\n"
 				"		}\n"
 				"	}\n"
@@ -316,9 +327,10 @@ void TabVar::writeExec()
 
 			EOF_ACTIONS();
 
-			out << "	}\n";
+			out << "}\n";
 
-			out << "if ( _eofcont == 1 ) {\n";
+			out <<
+				"if ( _eofcont == 1 ) {\n";
 
 			if ( redFsm->anyEofTrans() ) {
 				out <<
@@ -338,26 +350,17 @@ void TabVar::writeExec()
 			}
 
 			out << "}\n";
-
-			out << "}\n";
 		}
 
-		out <<
-			"	if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " ) {\n"
-			"		" << nfa_test << " = 1;\n"
-			"	}\n";
-
 		out << 
-			"	" << cont << " = 0;\n"
-			"}\n";
+			"}\n"
+			"else {\n";
 	}
 
 	out << 
-		"	if ( " << cont <<  "== 1 ) {\n";
+		"	if ( " << cont << " == 1 ) {\n";
 
 	FROM_STATE_ACTIONS();
-
-	NFA_PUSH( vCS() );
 
 	LOCATE_TRANS();
 
@@ -383,20 +386,54 @@ void TabVar::writeExec()
 			"	}\n";
 	}
 
+	/* closing cont tests. */
+	out << "}\n";
+	out << "}\n";
+
+	if ( !noEnd && eof ) {
+		out << 
+			"}\n";
+	}
+
 	/* _again: */
+
+	out <<
+		"	if ( " << cont << " == 1 ) { \n";
+
+	if ( !noEnd && eof ) {
+		out << 
+			"	if ( " << P() << " == " << vEOF() << " ) {\n"
+			"		if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n"
+			"			" << nfa_test << " = 1;\n"
+			"		else\n"
+			"			" << nfa_test << " = 0;\n"
+			"		" << cont << " = 0;\n"
+			"	}\n"
+			"	else {\n";
+	}
 
 	TO_STATE_ACTIONS();
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		" << cont << " = 0;\n";
+			"	if ( " << vCS() << " == " << redFsm->errState->id << " ) {\n"
+			"		" << nfa_test << " = 1;\n"
+			"		" << cont << " = 0;\n"
+			"	}\n";
 	}
 
+	
 	out << 
-		"	if ( " << cont << " == 1 )\n"
-		"		" << P() << " += 1;\n";
+		"	if ( " << cont << " == 1 ) { \n"
+		"		" << P() << " += 1;\n"
+		"	}\n";
 
+	if ( !noEnd && eof ) {
+		out <<
+			"	}\n";
+	}
+
+	/* Closing cont tests. */
 	out << "}\n";
 	out << "}\n";
 
@@ -409,7 +446,11 @@ void TabVar::writeExec()
 		"_nfa_test = 1;\n";
 
 	out << "}\n";
+
+	/* Cont loop. */
 	out << "}\n";
+
+	/* Wrapping block. */
 	out << "}\n";
 }
 
