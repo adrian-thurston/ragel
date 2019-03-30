@@ -254,12 +254,6 @@ void TabGoto::writeExec()
 	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 	DECLARE( UINT(), nacts );
-
-	if ( redFsm->errState != 0 ) {
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto " << _pop << ";\n";
-	}
 	
 	out << EMIT_LABEL( _resume );
 
