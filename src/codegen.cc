@@ -1155,3 +1155,13 @@ void CodeGen::NFA_PUSH( std::string state )
 			;
 	}
 }
+
+void CodeGen::POST_POP()
+{
+	if ( red->nfaPostPopExpr != 0 ) {
+		out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
+		INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
+		out << CLOSE_HOST_BLOCK();
+	}
+}
+
