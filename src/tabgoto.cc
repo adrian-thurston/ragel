@@ -186,41 +186,24 @@ void TabGoto::NFA_POP()
 			}
 
 			out <<
-				"		}\n";
-
-			out <<
-				"		if ( _pop_test ) {\n"
-				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
+				"		}\n"
+				"\n"
+				"		if ( !_pop_test ) {\n";
 
 			POST_POP();
 
 			out <<
-				"			goto " << _resume << ";\n"
+				"			goto " << _pop << ";\n"
 				"		}\n";
-
-			if ( red->nfaPostPopExpr != 0 ) {
-					out <<
-					"			else {\n";
-
-				POST_POP();
-
-				out <<
-					"			}\n";
-			}
-
-			out << 
-				"		goto " << _pop << ";\n";
-		}
-		else {
-			out <<
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			POST_POP();
-
-			out <<
-				"		goto " << _resume << ";\n";
 		}
 
+		out <<
+			"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+		POST_POP();
+
+		out <<
+			"		goto " << _resume << ";\n";
 
 		out << 
 			"	}\n";
