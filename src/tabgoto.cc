@@ -210,6 +210,9 @@ void TabGoto::NFA_POP()
 				out << CLOSE_HOST_BLOCK() << "\n"
 				"			}\n";
 			}
+
+			out << 
+				"		goto " << _pop << ";\n";
 		}
 		else {
 			out <<
@@ -225,8 +228,8 @@ void TabGoto::NFA_POP()
 				"		goto " << _resume << ";\n";
 		}
 
+
 		out << 
-			"		goto " << _pop << ";\n"
 			"	}\n";
 	}
 }
