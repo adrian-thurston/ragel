@@ -337,6 +337,9 @@ protected:
 	string CLOSE_GEN_PLAIN()
 		{ return backend == Direct ? "" : "}@"; }
 	
+	string INT()
+		{ return "int"; }
+
 	string UINT()
 		{ return backend == Direct ? "unsigned int" : "uint"; }
 

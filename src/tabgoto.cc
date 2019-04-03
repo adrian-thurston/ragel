@@ -216,15 +216,15 @@ void TabGoto::writeExec()
 		"	{\n";
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps;\n";
+		out << "	" << INT() << " _ps;\n";
 
 	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
-		out << "	int " << cpc << ";\n";
+		out << "	" << INT() << " " << cpc << ";\n";
 
 	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
+		out << "	" << INT() << " _nbreak;\n";
 
-	DECLARE( "int", klen );
+	DECLARE( INT(), klen );
 	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys );
 	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), cekeys );
 	DECLARE( UINT(), trans, " = 0" );
@@ -263,7 +263,7 @@ void TabGoto::writeExec()
 				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
 				"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
 							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-				"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
+				"		" << klen << " = " << CAST( INT() ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
 				"		" << cpc << " = 0;\n"
 			;
 
@@ -289,7 +289,7 @@ void TabGoto::writeExec()
 						red->condSpaceList.length() != 0 ? string(cond) : string(trans);
 
 				out <<
-					"		" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
+					"		" << vCS() << " = " << CAST(INT()) << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
 
 				out <<
 					"	}\n";
@@ -312,7 +312,7 @@ void TabGoto::writeExec()
 			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
 
 	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
+		"	" << vCS() << " = " << CAST(INT()) << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
 
 	if ( redFsm->anyRegActions() ) {
 		out <<
