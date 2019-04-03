@@ -190,7 +190,7 @@ void TabGoto::NFA_POP()
 				"\n"
 				"		if ( !_pop_test ) {\n";
 
-			POST_POP();
+			NFA_POST_POP();
 
 			out <<
 				"			goto " << _pop << ";\n"
@@ -200,7 +200,7 @@ void TabGoto::NFA_POP()
 		out <<
 			"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-		POST_POP();
+		NFA_POST_POP();
 
 		out <<
 			"		goto " << _resume << ";\n";

@@ -1156,7 +1156,7 @@ void CodeGen::NFA_PUSH( std::string state )
 	}
 }
 
-void CodeGen::POST_POP()
+void CodeGen::NFA_POST_POP()
 {
 	if ( red->nfaPostPopExpr != 0 ) {
 		out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
@@ -1164,4 +1164,3 @@ void CodeGen::POST_POP()
 		out << CLOSE_HOST_BLOCK();
 	}
 }
-

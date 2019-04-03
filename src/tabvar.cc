@@ -153,11 +153,7 @@ void TabVar::NFA_POP()
 				"		if ( _pop_test ) {\n"
 				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-			if ( red->nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
-				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
-				out << CLOSE_HOST_BLOCK();
-			}
+			NFA_POST_POP();
 
 			out <<
 				// "			goto _resume;\n"
@@ -167,22 +163,23 @@ void TabVar::NFA_POP()
 
 			if ( red->nfaPostPopExpr != 0 ) {
 				out <<
-				"			else {\n"
-				"			" << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
-				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
-				out << CLOSE_HOST_BLOCK() << "\n"
-				// "			goto _pop;\n"
-				"				" << cont << " = 0;\n"
-				"				" << nfa_test << " = 1;\n"
-				"			}\n";
+					"		else {\n";
+
+				NFA_POST_POP();
+
+				out <<
+					// "		goto _pop;\n"
+					"			" << cont << " = 0;\n"
+					"			" << nfa_test << " = 1;\n"
+					"		}\n";
 			}
 			else {
 				out <<
-				"			else {\n"
-				// "			goto _pop;\n"
-				"				" << cont << " = 0;\n"
-				"				" << nfa_test << " = 1;\n"
-				"			}\n"
+					"		else {\n"
+					// "		goto _pop;\n"
+					"			" << cont << " = 0;\n"
+					"			" << nfa_test << " = 1;\n"
+					"		}\n"
 				;
 			}
 		}
@@ -190,11 +187,7 @@ void TabVar::NFA_POP()
 			out <<
 				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-			if ( red->nfaPostPopExpr != 0 ) {
-				out << OPEN_HOST_BLOCK( red->nfaPostPopExpr );
-				INLINE_LIST( out, red->nfaPostPopExpr->inlineList, 0, false, false );
-				out << CLOSE_HOST_BLOCK();
-			}
+			NFA_POST_POP();
 
 			out <<
 				// "		goto _resume;\n"

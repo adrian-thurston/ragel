@@ -441,7 +441,7 @@ protected:
 			return "export " + type + " " + name + " " + value + ";";
 	}
 
-	void POST_POP();
+	void NFA_POST_POP();
 	virtual void NFA_PUSH( std::string );
 	virtual void NFA_POP() = 0;
 	virtual void LOCATE_TRANS() {}
