@@ -51,6 +51,8 @@ void BinGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, 
 
 void BinGoto::LOCATE_COND()
 {
+	std::stringstream success, error;
+
 	out <<
 		"	" << ckeys << " = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[" + string(trans) + "]" ) << ";\n"
 		"	" << klen << " = " << CAST( "int" ) << ARR_REF( transLengths ) << "[" << trans << "];\n"
@@ -63,11 +65,14 @@ void BinGoto::LOCATE_COND()
 	if ( red->condSpaceList.length() > 0 )
 		COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
 	
-	COND_BIN_SEARCH(
-			ckeys, condKeys,
-			string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + "); goto " + string(_match_cond) + ";\n",
-			"goto " + string(_again) + ";\n"
-	);
+	success <<
+		cond << " += " << CAST( UINT() ) << "(_mid - " << ckeys << "); "
+		"goto " << _match_cond << ";\n";
+
+	error <<
+		"goto " << _again << ";\n";
+
+	COND_BIN_SEARCH( ckeys, condKeys, success.str(), error.str() );
 }
 
 void BinGoto::LOCATE_TRANS()

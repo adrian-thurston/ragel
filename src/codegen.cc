@@ -43,6 +43,20 @@ using std::ios;
 using std::cin;
 using std::endl;
 
+std::ostream &operator<<( std::ostream &out, Variable &v )
+{
+	out << v.name;
+	v.isReferenced = true;
+	return out;
+}
+
+std::ostream &operator<<( std::ostream &out, GotoLabel &l )
+{
+	out << l.name;
+	l.isReferenced = true;
+	return out;
+}
+
 TableArray::TableArray( const char *name, CodeGen &codeGen )
 :
 	state(InitialState),

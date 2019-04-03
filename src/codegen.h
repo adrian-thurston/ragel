@@ -58,7 +58,7 @@ struct Variable
 {
 	Variable( const char *name ) : name(name), isReferenced(false) {}
 
-	operator const char *() { isReferenced = true; return name; }
+	operator const std::string() { isReferenced = true; return name; }
 	void reference() { isReferenced = true; }
 
 	const char *name;
@@ -69,12 +69,15 @@ struct GotoLabel
 {
 	GotoLabel( const char *name ) : name(name), isReferenced(false) {}
 
-	operator const char *() { isReferenced = true; return name; }
+	operator std::string() { isReferenced = true; return name; }
 	void reference() { isReferenced = true; }
 
 	const char *name;
 	bool isReferenced;
 };
+
+std::ostream &operator<<( std::ostream &out, GotoLabel &l );
+std::ostream &operator<<( std::ostream &out, Variable &v );
 
 struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
