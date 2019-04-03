@@ -144,12 +144,20 @@ void TabGoto::NRET( ostream &ret, bool inFinish )
 
 void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto " << _pop << "; " << CLOSE_GEN_BLOCK();
+	ret <<
+		OPEN_GEN_BLOCK() <<
+		P() << " += 1; " <<
+		"goto " << _pop << "; " <<
+		CLOSE_GEN_BLOCK();
 }
 
 void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
 {
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1;" << CLOSE_GEN_BLOCK();
+	ret <<
+		OPEN_GEN_BLOCK() <<
+		P() << " += 1; " <<
+		nbreak << " = 1;" <<
+		CLOSE_GEN_BLOCK();
 }
 
 void TabGoto::NFA_POP()
@@ -215,15 +223,9 @@ void TabGoto::writeExec()
 	out <<
 		"	{\n";
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	" << INT() << " _ps;\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() || red->condSpaceList.length() > 0 )
-		out << "	" << INT() << " " << cpc << ";\n";
-
-	if ( redFsm->anyRegNbreak() )
-		out << "	" << INT() << " _nbreak;\n";
-
+	DECLARE( INT(), ps );
+	DECLARE( INT(), cpc );
+	DECLARE( INT(), nbreak );
 	DECLARE( INT(), klen );
 	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys );
 	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), cekeys );
@@ -306,7 +308,7 @@ void TabGoto::writeExec()
 	LOCATE_TRANS();
 
 	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << vCS() << ";\n";
+		out << "	" << ps << " = " << vCS() << ";\n";
 
 	string condVar =
 			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
@@ -320,13 +322,13 @@ void TabGoto::writeExec()
 			"\n";
 
 		if ( redFsm->anyRegNbreak() )
-			out << "	_nbreak = 0;\n";
+			out << "	" << nbreak << " = 0;\n";
 
 		REG_ACTIONS( condVar );
 
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
-				"	if ( _nbreak == 1 )\n"
+				"	if ( " << nbreak << " == 1 )\n"
 				"		goto " << _pop << ";\n";
 		}
 

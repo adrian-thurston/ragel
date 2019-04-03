@@ -48,6 +48,8 @@ struct Tables
 		cont( "_cont" ),
 		nfa_repeat( "_nfa_repeat" ),
 		nfa_test( "_nfa_test" ),
+		ps( "_ps" ),
+		nbreak( "_nbreak" ),
 
 		_out("_out"),
 		_pop("_pop"),
@@ -101,6 +103,8 @@ struct Tables
 	Variable cont;
 	Variable nfa_repeat;
 	Variable nfa_test;
+	Variable ps;
+	Variable nbreak;
 
 	GotoLabel _out;
 	GotoLabel _pop;
