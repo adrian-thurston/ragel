@@ -43,7 +43,6 @@ void BinGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, 
 		"				" << ok << "\n"
 		"			}\n"
 		"		}\n"
-		"		" << vCS() << " = " << ERROR_STATE() << ";\n"
 		"		" << error << "\n"
 		"	}\n"
 	;

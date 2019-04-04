@@ -272,7 +272,13 @@ void TabGoto::writeExec()
 			if ( red->condSpaceList.length() > 0 )
 				COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
 
-			COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", "goto " + string(_pop) + ";" );
+			std::stringstream success, error;
+
+			error <<
+				vCS() << " = " << ERROR_STATE() << ";\n"
+				"goto " << _pop << ";";
+
+			COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", error.str() );
 
 			out << 
 				"		_ok: {}\n"
