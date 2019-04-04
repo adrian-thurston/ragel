@@ -37,6 +37,9 @@ void Binary::genAnalysis()
 	/* Choose the singles. */
 	redFsm->moveSelectTransToSingle();
 
+	if ( redFsm->errState != 0 )
+		redFsm->getErrorCond();
+
 	/* If any errors have occured in the input file then don't write anything. */
 	if ( red->id->errorCount > 0 )
 		return;
@@ -454,6 +457,8 @@ void Binary::taTransOffsets()
 		}
 	}
 
+	errCondOffset = curOffset;
+
 	transOffsets.finish();
 }
 
@@ -629,6 +634,11 @@ void Binary::taCondTargs()
 		}
 	}
 
+	if ( redFsm->errCond != 0 ) {
+		RedCondPair *cond = &redFsm->errCond->p;
+		condTargs.value( cond->targ->id );
+	}
+
 	condTargs.finish();
 }
 
@@ -674,6 +684,11 @@ void Binary::taCondActions()
 				COND_ACTION( cond );
 			}
 		}
+	}
+
+	if ( redFsm->errCond != 0 ) {
+		RedCondPair *cond = &redFsm->errCond->p;
+		COND_ACTION( cond );
 	}
 
 	condActions.finish();

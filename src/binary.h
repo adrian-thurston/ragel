@@ -51,6 +51,8 @@ public:
 protected:
 	Type type;
 
+	int errCondOffset;
+
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();
 	std::ostream &INDICIES();

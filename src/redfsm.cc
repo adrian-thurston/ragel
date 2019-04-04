@@ -55,7 +55,7 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx, int machineId )
 	keyOps(fsmCtx->keyOps),
 	fsmCtx(fsmCtx),
 	machineId(machineId),
-	forcedErrorState(false),
+	forcedErrorState(true),
 	nextActionId(0),
 	nextTransId(0),
 	nextCondId(0),

@@ -39,7 +39,6 @@ struct BinGoto
 	{}
 
 	void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error );
-	void LOCATE_COND();
 	void LOCATE_TRANS();
 };
 
