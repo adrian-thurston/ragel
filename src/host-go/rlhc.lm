@@ -308,22 +308,22 @@ namespace go_gen
 				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
 		] {
 			# If the if-statement has more than just an if clause it goes out as a switch.
-			"switch {
-			"	case [expr( IfExpr )]:
+			"if [expr( IfExpr )] {
 			"		[stmt( IfStmt )]
 
 			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
 				match ElseIfClause
 					['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
 
-				"case [expr(ElseIfExpr)]:
+				"} else if [expr(ElseIfExpr)] {
 				"	[stmt(ElseIfStmt)]
 			}
 
 			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
-				"default:
+				"} else {
 				"	[stmt(ElseStmt)]
 			}
+
 			"}
 		}
 		case ["while ( TRUE )" WhileStmt: stmt] {
