@@ -147,7 +147,7 @@ void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
 	ret <<
 		OPEN_GEN_BLOCK() <<
 		P() << " += 1; " <<
-		"goto " << _pop << "; " <<
+		"goto " << _out << "; " <<
 		CLOSE_GEN_BLOCK();
 }
 
@@ -335,7 +335,7 @@ void TabGoto::writeExec()
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
 				"	if ( " << nbreak << " == 1 )\n"
-				"		goto " << _pop << ";\n";
+				"		goto " << _out << ";\n";
 		}
 
 		out << "}\n";

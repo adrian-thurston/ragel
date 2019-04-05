@@ -824,7 +824,7 @@ void Goto::NRET( ostream &ret, bool inFinish )
 void Goto::BREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _pop; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
 }
 
 void Goto::NBREAK( ostream &ret, int targState, bool csForced )

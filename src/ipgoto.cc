@@ -252,7 +252,7 @@ void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
-	ret << "goto _pop;}";
+	ret << "goto _out;}";
 }
 
 void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
@@ -314,7 +314,7 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( redFsm->anyRegNbreak() ) {
 				out <<
 					"if ( _nbreak == 1 )\n"
-					"	goto _pop;\n";
+					"	goto _out;\n";
 				outLabelUsed = true;
 			}
 				
