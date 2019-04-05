@@ -30,8 +30,10 @@ void FlatGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok,
 		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << " = " << var << " + " << klen << " - 1;\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
 		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower )\n"
+		"			if ( _upper < _lower ) {\n"
+		"				" << error << "\n"
 		"				break;\n"
+		"			}\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 		"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
@@ -40,9 +42,9 @@ void FlatGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok,
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				" << ok << "\n"
+		"				break;\n"
 		"			}\n"
 		"		}\n"
-		"		" << error << "\n"
 		"	}\n"
 	;
 }

@@ -31,8 +31,10 @@ void BinGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, 
 		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << " = " << var << " + " << klen << " - 1;\n"
 		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
 		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower )\n"
+		"			if ( _upper < _lower ) {\n"
+		"				" << error << "\n"
 		"				break;\n"
+		"			}\n"
 		"\n"
 		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
 		"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
@@ -41,9 +43,9 @@ void BinGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, 
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
 		"				" << ok << "\n"
+		"				break;\n"
 		"			}\n"
 		"		}\n"
-		"		" << error << "\n"
 		"	}\n"
 	;
 }
@@ -118,12 +120,10 @@ void BinGoto::LOCATE_TRANS()
 			COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
 		
 		success <<
-			cond << " += " << CAST( UINT() ) << "(_mid - " << ckeys << "); "
-			"goto " << _match_cond << ";\n";
+			cond << " += " << CAST( UINT() ) << "(_mid - " << ckeys << ");\n";
 
 		error <<
-			cond << " = " << errCondOffset << ";\n"
-			"goto " << _match_cond << ";\n";
+			cond << " = " << errCondOffset << ";\n";
 
 		COND_BIN_SEARCH( ckeys, condKeys, success.str(), error.str() );
 	}

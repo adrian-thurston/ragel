@@ -278,10 +278,9 @@ void TabGoto::writeExec()
 				vCS() << " = " << ERROR_STATE() << ";\n"
 				"goto " << _pop << ";";
 
-			COND_BIN_SEARCH( cekeys, eofCondKeys, "goto _ok;", error.str() );
+			COND_BIN_SEARCH( cekeys, eofCondKeys, "", error.str() );
 
 			out << 
-				"		_ok: {}\n"
 				"	}\n"
 			;
 

@@ -81,7 +81,7 @@ void BinVar::LOCATE_TRANS()
 		LOCATE_COND();
 }
 
-void BinVar::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error )
+void BinVar::VAR_COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error )
 {
 	out <<
 		"	{\n"
@@ -124,7 +124,7 @@ void BinVar::LOCATE_COND()
 	if ( red->condSpaceList.length() > 0 )
 		COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
 
-	COND_BIN_SEARCH( ckeys, condKeys,
+	VAR_COND_BIN_SEARCH( ckeys, condKeys,
 			string(cond) + " += " + CAST( UINT() ) + "(_mid - " + string(ckeys) + ");\n",
 			""
 	);
