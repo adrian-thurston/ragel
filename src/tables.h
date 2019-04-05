@@ -50,6 +50,7 @@ struct Tables
 		nfa_test( "_nfa_test" ),
 		ps( "_ps" ),
 		nbreak( "_nbreak" ),
+		have( "__have" ),
 
 		_out("_out"),
 		_pop("_pop"),
@@ -105,6 +106,7 @@ struct Tables
 	Variable nfa_test;
 	Variable ps;
 	Variable nbreak;
+	Variable have;
 
 	GotoLabel _out;
 	GotoLabel _pop;
