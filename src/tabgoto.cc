@@ -196,22 +196,21 @@ void TabGoto::NFA_POP()
 			out <<
 				"		}\n"
 				"\n"
-				"		if ( !_pop_test ) {\n";
-
-			NFA_POST_POP();
-
-			out <<
-				"			goto " << _pop << ";\n"
-				"		}\n";
+				"		if ( _pop_test )\n"
+				"			" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"		else\n"
+				"			" << vCS() << " = " << ERROR_STATE() << ";\n";
 		}
+		else {
+			out <<
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
 
-		out <<
-			"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
+		}
 
 		NFA_POST_POP();
 
 		out <<
-			"		goto " << _resume << ";\n";
+			"		continue;\n";
 
 		out << 
 			"	}\n";
@@ -244,14 +243,17 @@ void TabGoto::writeExec()
 	if ( !noEnd ) {
 		if ( eof ) {
 			out << 
-				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
-				"               goto " << _out << ";\n";
+				"       while ( " << P() << " != " << PE() << " || " << P() << " == " << vEOF() << " ) {\n";
 		}
 		else {
 			out << 
-				"       if ( " << P() << " == " << PE() << " )\n"
-				"               goto " << _out << ";\n";
+				"       while ( " << P() << " != " << PE() << " ) {\n";
 		}
+	}
+	else {
+			out << 
+				"       while ( " << TRUE() << " ) {\n";
+
 	}
 
 	NFA_PUSH( vCS() );
@@ -276,8 +278,7 @@ void TabGoto::writeExec()
 			std::stringstream success, error;
 
 			error <<
-				vCS() << " = " << ERROR_STATE() << ";\n"
-				"goto " << _pop << ";";
+				vCS() << " = " << ERROR_STATE() << ";\n";
 
 			COND_BIN_SEARCH( cekeys, eofCondKeys, "", error.str() );
 
@@ -335,7 +336,7 @@ void TabGoto::writeExec()
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
 				"	if ( " << nbreak << " == 1 )\n"
-				"		goto " << _out << ";\n";
+				"		break;\n";
 		}
 
 		out << "}\n";
@@ -351,9 +352,8 @@ void TabGoto::writeExec()
 	if ( !noEnd && eof ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n"
-			"		if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n"
-			"			goto " << _pop << ";\n"
-			"		goto " << _out << ";\n"
+			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"			break;\n"
 			"	}\n"
 			"	else {\n";
 	}
@@ -362,24 +362,31 @@ void TabGoto::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto " << _pop << ";\n";
+			"	if ( " << vCS() << " != " << redFsm->errState->id << " ) {\n";
 	}
 
 	out << 
 		"	" << P() << " += 1;\n"
-		"	goto " << _resume << ";\n";
+		"	continue;\n";
+
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	}\n";
+	}
 
 	if ( !noEnd && eof ) {
 		out <<
 			"	}\n";
 	}
 
-	out << EMIT_LABEL( _pop );
-
 	NFA_POP();
+
+	out << 
+		"	break;\n"
+		"}\n";
 
 	out << EMIT_LABEL( _out );
 
 	out << "	}\n";
 }
+
