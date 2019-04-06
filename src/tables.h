@@ -190,7 +190,9 @@ struct TabGoto
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
-	void NFA_POP();
+	void NFA_POP() {}
+
+	void NFA_POP_TEST_EXEC();
 	void writeExec();
 };
 

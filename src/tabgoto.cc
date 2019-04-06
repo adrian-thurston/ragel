@@ -160,61 +160,31 @@ void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
 		CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::NFA_POP()
+void TabGoto::NFA_POP_TEST_EXEC()
 {
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	if ( nfa_len > 0 ) {\n"
-			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			;
+	out << 
+		"		int _pop_test = 1;\n"
+		"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
 
-		if ( redFsm->bAnyNfaPops ) {
-			NFA_FROM_STATE_ACTION_EXEC();
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+			redAct.lte(); redAct++ )
+	{
+		if ( redAct->numNfaPopTestRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
-			out << 
-				"		int _pop_test = 1;\n"
-				"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+				NFA_CONDITION( out, item->value, item.last() );
 
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopTestRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						NFA_CONDITION( out, item->value, item.last() );
-
-					out << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n"
-				"\n"
-				"		if ( _pop_test )\n"
-				"			" << vCS() << " = nfa_bp[nfa_len].state;\n"
-				"		else\n"
-				"			" << vCS() << " = " << ERROR_STATE() << ";\n";
+			out << CEND() << "}\n";
 		}
-		else {
-			out <<
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-		}
-
-		NFA_POST_POP();
-
-		out <<
-			"		continue;\n";
-
-		out << 
-			"	}\n";
 	}
+
+	out <<
+		"		}\n"
+		"\n";
 }
 
 void TabGoto::writeExec()
@@ -379,10 +349,41 @@ void TabGoto::writeExec()
 			"	}\n";
 	}
 
-	NFA_POP();
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len == 0 )\n"
+			"		break;\n"
+			"\n"
+			"	nfa_count += 1;\n"
+			"	nfa_len -= 1;\n"
+			"	" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
+
+		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
+
+			NFA_POP_TEST_EXEC();
+
+			out <<
+				"	if ( _pop_test )\n"
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"	else\n"
+				"		" << vCS() << " = " << ERROR_STATE() << ";\n";
+		}
+		else {
+			out <<
+				"	" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+		}
+
+		NFA_POST_POP();
+	}
+	else {
+		out << 
+			"	break;\n";
+	}
 
 	out << 
-		"	break;\n"
 		"}\n";
 
 	out << EMIT_LABEL( _out );
