@@ -41,7 +41,7 @@ lex
 	literal `uint `const
 			`s8 `s16 `s32 `s64
 			`s128 `nil `export
-			`fallthrough `u `c `break
+			`fallthrough `u `c `break `continue
 
 	token ident
 		/( alpha | '_' ) ( alpha | digit | '_' )*/
@@ -233,6 +233,9 @@ def fallthrough
 def break_stmt
 	[`break `;]
 
+def continue_stmt
+	[`continue `;]
+
 def block
 	[`{ StmtList: stmt* `}]
 
@@ -265,6 +268,7 @@ def stmt
 |	[goto_stmt]
 |	[fallthrough]
 |	[break_stmt]
+|	[continue_stmt]
 |	[block]
 
 def start

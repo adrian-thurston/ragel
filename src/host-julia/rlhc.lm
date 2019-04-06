@@ -522,7 +522,8 @@ namespace julia_gen
 		}
 		default {
 			# catches unspecified cases
-			send Parser "[Stmt]
+			send Parser
+				"[Stmt]
 		}
 	}
 
