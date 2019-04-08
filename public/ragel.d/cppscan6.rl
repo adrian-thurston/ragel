@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @PROHIBIT_LANGUAGES: cv ruby ocaml rust crack
  * @NEEDS_EOF: yes
  *
  * const char *data = ts;
