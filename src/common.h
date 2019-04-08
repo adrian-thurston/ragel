@@ -44,6 +44,7 @@ enum RagelBackend
 enum BackendFeature
 {
 	GotoFeature,
+	BreakFeature,
 	VarFeature
 };
 

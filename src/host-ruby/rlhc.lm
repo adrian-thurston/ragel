@@ -473,6 +473,11 @@ void stmt( Stmt: stmt )
 		send Parser
 			"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
 	}
+	case [continue_stmt]
+	{
+		send Parser
+			"next;
+	}
 	default {
 		# catches unspecified cases
 		send Parser [Stmt]

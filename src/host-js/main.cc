@@ -52,7 +52,7 @@ const HostLang hostLangJS =
 	1,
 	false,
 	Translated,
-	VarFeature,
+	BreakFeature,
 	&makeCodeGen,
 	&defaultOutFnJs,
 	&genLineDirectiveTrans

@@ -32,8 +32,10 @@
  */
 #include "binvar.h"
 #include "bingoto.h"
+#include "binbreak.h"
 #include "flatvar.h"
 #include "flatgoto.h"
+#include "flatbreak.h"
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"
@@ -49,51 +51,64 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 {
 	FsmGbl *id = args.id;
 	CodeGenData *codeGen = 0;
+	BackendFeature feature = hostLang->feature;
+	if ( args.forceVar )
+		feature = VarFeature;
 
 	switch ( args.codeStyle ) {
 	case GenBinaryLoop:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
 			codeGen = new BinGotoLoop( args );
+		else if ( feature == BreakFeature )
+			codeGen = new BinBreakLoop( args );
 		else
 			codeGen = new BinVarLoop( args );
 		break;
 
 	case GenBinaryExp:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
 			codeGen = new BinGotoExp( args );
+		else if ( feature == BreakFeature )
+			codeGen = new BinBreakExp( args );
 		else
 			codeGen = new BinVarExp( args );
 		break;
 
 	case GenFlatLoop:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
 			codeGen = new FlatGotoLoop( args );
+		else if ( feature == BreakFeature )
+			codeGen = new FlatBreakLoop( args );
 		else
 			codeGen = new FlatVarLoop( args );
 		break;
 
 	case GenFlatExp:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
 			codeGen = new FlatGotoExp( args );
+		else if ( feature == BreakFeature )
+			codeGen = new FlatBreakExp( args );
 		else
 			codeGen = new FlatVarExp( args );
 		break;
 
 	case GenSwitchLoop:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
+			codeGen = new SwitchGotoLoop(args);
+		else if ( feature == BreakFeature )
 			codeGen = new SwitchGotoLoop(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 	case GenSwitchExp:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
 			codeGen = new SwitchGotoExp(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
 
 	case GenIpGoto:
-		if ( !args.forceVar && hostLang->feature == GotoFeature )
+		if ( feature == GotoFeature )
 			codeGen = new IpGoto(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;

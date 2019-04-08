@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2018 Adrian Thurston <thurston@colm.net>
+ * Copyright 2018-2018 Adrian Thurston <thurston@colm.net>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -20,38 +20,53 @@
  * SOFTWARE.
  */
 
-#include "inputdata.h"
+#ifndef RAGEL_FLATBREAK_H
+#define RAGEL_FLATBREAK_H
 
-extern struct colm_sections rlparseRuby;
-extern struct colm_sections rlhcRuby;
+#include "flat.h"
+#include "actloop.h"
+#include "actexp.h"
 
-/* What are the appropriate types for ruby? */
-static HostType hostTypesRuby[] = 
+struct FlatBreak
+:
+	public Flat, public TabBreak
 {
-	{ "char",    0,  "char",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0, 1 },
-	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0, 4 },
+	FlatBreak( const CodeGenArgs &args, Flat::Type type )
+	:
+		Tables( args ),
+		Flat( args, type ),
+		TabBreak( args )
+	{}
+
+	void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error );
+	void LOCATE_TRANS();
 };
 
-const char *defaultOutFnRuby( const char *inputFileName )
+class FlatBreakLoop
+	: public FlatBreak, public ActLoop
 {
-	return fileNameFromStem( inputFileName, ".rb" );
-}
-
-static const HostLang hostLangRuby =
-{
-	hostTypesRuby,
-	2,
-	0,
-	false,
-	Translated,
-	BreakFeature,
-	&makeCodeGen,
-	&defaultOutFnRuby,
-	&genLineDirectiveTrans
+public:
+	FlatBreakLoop( const CodeGenArgs &args )
+	:
+		Tables( args ),
+		FlatBreak( args, Flat::Loop ),
+		ActLoop( args )
+	{}
 };
 
-int main( int argc, const char **argv )
+/*
+ * FlatBreakExp
+ */
+class FlatBreakExp
+	: public FlatBreak, public ActExp
 {
-	InputData id( &hostLangRuby, &rlparseRuby, &rlhcRuby );
-	return id.rlhcMain( argc, argv );
-}
+public:
+	FlatBreakExp( const CodeGenArgs &args ) 
+	:
+		Tables( args ),
+		FlatBreak( args, Flat::Exp ),
+		ActExp( args )
+	{}
+};
+
+#endif

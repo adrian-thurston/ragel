@@ -24,19 +24,19 @@
 #include "binary.h"
 #include "flat.h"
 
-void TabGoto::CONTROL_JUMP( ostream &ret, bool inFinish )
+void TabBreak::CONTROL_JUMP( ostream &ret, bool inFinish )
 {
 	ret << "goto " << _again << ";";
 }
 
-void TabGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
+void TabBreak::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";";
 	CONTROL_JUMP( ret, inFinish );
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+void TabBreak::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
@@ -46,7 +46,7 @@ void TabGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+void TabBreak::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -64,7 +64,7 @@ void TabGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
+void TabBreak::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -79,7 +79,7 @@ void TabGoto::NCALL( ostream &ret, int callDest, int targState, bool inFinish )
 			callDest << "; " << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void TabBreak::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -99,7 +99,7 @@ void TabGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, boo
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+void TabBreak::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
 
@@ -115,7 +115,7 @@ void TabGoto::NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bo
 	ret << CLOSE_HOST_EXPR() << "; " << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::RET( ostream &ret, bool inFinish )
+void TabBreak::RET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
@@ -129,7 +129,7 @@ void TabGoto::RET( ostream &ret, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::NRET( ostream &ret, bool inFinish )
+void TabBreak::NRET( ostream &ret, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << TOP() << " -= 1;" << vCS() << " = " << STACK() << "[" << TOP() << "];";
 
@@ -142,7 +142,7 @@ void TabGoto::NRET( ostream &ret, bool inFinish )
 	ret << CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
+void TabBreak::BREAK( ostream &ret, int targState, bool csForced )
 {
 	ret <<
 		OPEN_GEN_BLOCK() <<
@@ -151,7 +151,7 @@ void TabGoto::BREAK( ostream &ret, int targState, bool csForced )
 		CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
+void TabBreak::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	ret <<
 		OPEN_GEN_BLOCK() <<
@@ -160,7 +160,7 @@ void TabGoto::NBREAK( ostream &ret, int targState, bool csForced )
 		CLOSE_GEN_BLOCK();
 }
 
-void TabGoto::NFA_POP_TEST_EXEC()
+void TabBreak::NFA_POP_TEST_EXEC()
 {
 	out << 
 		"		int _pop_test = 1;\n"
@@ -187,7 +187,7 @@ void TabGoto::NFA_POP_TEST_EXEC()
 		"\n";
 }
 
-void TabGoto::writeExec()
+void TabBreak::writeExec()
 {
 	out <<
 		"	{\n";
@@ -337,7 +337,7 @@ void TabGoto::writeExec()
 
 	out << 
 		"	" << P() << " += 1;\n"
-		"	goto " << _resume << ";\n";
+		"	continue;\n";
 
 	if ( redFsm->errState != 0 ) {
 		out << 

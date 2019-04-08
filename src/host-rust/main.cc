@@ -45,7 +45,7 @@ const HostLang hostLangRust =
 	0,
 	false,
 	Translated,
-	VarFeature,
+	BreakFeature,
 	&makeCodeGen,
 	&defaultOutFnRust,
 	&genLineDirectiveTrans

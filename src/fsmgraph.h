@@ -1018,12 +1018,9 @@ struct FsmGbl
 	:
 		printStatistics(false),
 		errorCount(0),
-		//inLibRagel(false),
 		displayPrintables(false),
-		//backend(Direct),
 		hostLang(hostLang),
 		stringTables(false),
-		//backendFeature(GotoFeature),
 		checkPriorInteraction(0),
 		wantDupsRemoved(true),
 		minimizeLevel(MinimizePartition2),
@@ -1058,14 +1055,11 @@ struct FsmGbl
 	std::stringstream libcout;
 
 	int errorCount;
-	//bool inLibRagel;
 	void abortCompile( int code );
 	bool displayPrintables;
 
-	//RagelBackend backend;
 	const HostLang *hostLang;
 	bool stringTables;
-	//BackendFeature backendFeature;
 	bool checkPriorInteraction;
 	bool wantDupsRemoved;
 

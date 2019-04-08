@@ -49,7 +49,7 @@ const HostLang hostLangJava =
 	2,
 	false,
 	Translated,
-	VarFeature,
+	BreakFeature,
 	&makeCodeGen,
 	&defaultOutFnJava,
 	&genLineDirectiveTrans

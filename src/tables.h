@@ -196,6 +196,35 @@ struct TabGoto
 	void writeExec();
 };
 
+struct TabBreak
+:
+	public virtual Tables
+{
+	TabBreak( const CodeGenArgs &args )
+	:
+		Tables( args )
+	{}
+
+	void CONTROL_JUMP( ostream &ret, bool inFinish );
+
+	void GOTO( ostream &ret, int gotoDest, bool inFinish );
+	void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish );
+	void CALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void NCALL( ostream &ret, int callDest, int targState, bool inFinish );
+	void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish );
+	void RET( ostream &ret, bool inFinish );
+	void NRET( ostream &ret, bool inFinish );
+	void BREAK( ostream &ret, int targState, bool csForced );
+	void NBREAK( ostream &ret, int targState, bool csForced );
+
+	void NFA_POP() {}
+
+	void NFA_POP_TEST_EXEC();
+	void writeExec();
+};
+
+
 struct TabVar
 :
 	public virtual Tables

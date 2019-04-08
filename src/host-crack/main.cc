@@ -49,7 +49,7 @@ const HostLang hostLangCrack =
 	0,
 	true,
 	Translated,
-	VarFeature,
+	BreakFeature,
 	&makeCodeGen,
 	&defaultOutFnCrack,
 	&genLineDirectiveTrans
