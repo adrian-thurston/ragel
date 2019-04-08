@@ -1,6 +1,6 @@
 /*
  * @LANG: indep
- * @PROHIBIT_LANGUAGES: cv ruby ocaml java rust crack
+ * @PROHIBIT_LANGUAGES: cv ruby ocaml rust crack
  */
 
 int target;

@@ -342,7 +342,7 @@ function run_test()
 
 		cat >> $sh <<-EOF
 		diff -u --strip-trailing-cr $expected_out $output > $diff
-		rm -f $intermed $code_src $binary $classfile $output 
+		# rm -f $intermed $code_src $binary $classfile $output 
 		EOF
 
 	fi
