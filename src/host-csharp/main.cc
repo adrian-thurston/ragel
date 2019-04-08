@@ -57,6 +57,7 @@ const HostLang hostLangCSharp =
 	9,
 	4,
 	true,
+	false, /* loopLabels */
 	Translated,
 	GotoFeature,
 	&makeCodeGen,

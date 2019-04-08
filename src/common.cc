@@ -57,6 +57,7 @@ const HostLang hostLangC = {
 	8,
 	0,
 	true,
+	false, /* loopLabels */
 	Direct,
 	GotoFeature,
 	&makeCodeGen,
@@ -89,6 +90,7 @@ const HostLang hostLangAsm = {
 	8,
 	0,
 	true,
+	false, /* loopLabels */
 	Direct,
 	GotoFeature,
 	&makeCodeGenAsm,

@@ -48,6 +48,7 @@ const HostLang hostLangJava =
 	4,
 	2,
 	false,
+	true, /* loopLabels */
 	Translated,
 	BreakFeature,
 	&makeCodeGen,

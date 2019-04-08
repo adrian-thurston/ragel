@@ -43,6 +43,7 @@ static const HostLang hostLangRuby =
 	2,
 	0,
 	false,
+	false, /* loopLabels. */
 	Translated,
 	BreakFeature,
 	&makeCodeGen,

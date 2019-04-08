@@ -228,6 +228,7 @@ struct HostLang
 	int numHostTypes;
 	int defaultAlphType;
 	bool explicitUnsigned;
+	bool loopLabels;
 
 	RagelBackend backend;
 	BackendFeature feature;

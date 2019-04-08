@@ -44,6 +44,7 @@ const HostLang hostLangOCaml =
 	1,
 	0,
 	false,
+	false, /* loopLabels */
 	Translated,
 	VarFeature,
 	&makeCodeGen,

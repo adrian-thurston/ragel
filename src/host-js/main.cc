@@ -51,6 +51,7 @@ const HostLang hostLangJS =
 	7,
 	1,
 	false,
+	true, /* loopLabels */
 	Translated,
 	BreakFeature,
 	&makeCodeGen,

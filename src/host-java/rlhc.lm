@@ -371,6 +371,15 @@ namespace java_gen
 				"while ( [expr(WhileExpr)] )
 				"	[stmt(WhileStmt)]
 		}
+		case [BL: break_label? 'while' '(' WhileExpr: expr ')' '{' StmtList: stmt* '}' ] {
+			if match BL [bl: break_label]
+				send Parser "[bl.ident]: "
+				
+			send Parser
+				"while ( [expr(WhileExpr)] ) {
+				"	[stmt_list(StmtList)]
+				"}
+		}
 		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
 			send Parser
 				"switch ( [expr(SwitchExpr)] ) {

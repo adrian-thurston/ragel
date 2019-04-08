@@ -57,6 +57,7 @@ const HostLang hostLangD =
 	9,
 	2,
 	true,
+	false, /* loopLabels */
 	Translated,
 	GotoFeature,
 	&makeCodeGen,

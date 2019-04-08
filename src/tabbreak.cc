@@ -24,9 +24,38 @@
 #include "binary.h"
 #include "flat.h"
 
+std::string TabBreak::BREAK( GotoLabel &label )
+{
+	string ret = "break";
+	if ( loopLabels ) {
+		ret += " ";
+		ret += label;
+	}
+	return ret;
+}
+
+std::string TabBreak::CONTINUE( GotoLabel &label )
+{
+	string ret = "continue";
+	if ( loopLabels ) {
+		ret += " ";
+		ret += label;
+	}
+	return ret;
+}
+
+std::string TabBreak::BREAK_LABEL( GotoLabel &label )
+{
+	if ( loopLabels ) {
+		if ( label.isReferenced )
+			return std::string(label.name) + "::\n";
+	}
+	return "";
+}
+
 void TabBreak::CONTROL_JUMP( ostream &ret, bool inFinish )
 {
-	ret << "goto " << _again << ";";
+	ret << "if ( " << TRUE() << " ) break " << _again << ";";
 }
 
 void TabBreak::GOTO( ostream &ret, int gotoDest, bool inFinish )
@@ -147,7 +176,7 @@ void TabBreak::BREAK( ostream &ret, int targState, bool csForced )
 	ret <<
 		OPEN_GEN_BLOCK() <<
 		P() << " += 1; " <<
-		"goto " << _out << "; " <<
+		"break " << _resume << "; " <<
 		CLOSE_GEN_BLOCK();
 }
 
@@ -206,7 +235,7 @@ void TabBreak::writeExec()
 	DECLARE( UINT(), nacts );
 	DECLARE( INT(), have );
 	
-	out << EMIT_LABEL( _resume );
+	out << BREAK_LABEL( _resume );
 
 	/* Do we break out on no more input. */
 	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions() || redFsm->anyNfaStates();
@@ -227,6 +256,11 @@ void TabBreak::writeExec()
 	}
 
 	NFA_PUSH( vCS() );
+
+	if ( loopLabels ) {
+		out << BREAK_LABEL( _again );
+		out << "while ( " << TRUE() << " ) {\n";
+	}
 
 	if ( !noEnd && eof ) {
 		out << 
@@ -306,7 +340,7 @@ void TabBreak::writeExec()
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
 				"	if ( " << nbreak << " == 1 )\n"
-				"		break;\n";
+				"		" << BREAK( _resume ) << ";\n";
 		}
 
 		out << "}\n";
@@ -317,13 +351,17 @@ void TabBreak::writeExec()
 			"}\n";
 	}
 
+	if ( loopLabels ) {
+		out << BREAK( _again ) << ";\n}\n";
+	}
+
 	out << "\n" << EMIT_LABEL( _again );
 
 	if ( !noEnd && eof ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n"
 			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"			break;\n"
+			"			" << BREAK( _resume ) << ";\n"
 			"	}\n"
 			"	else {\n";
 	}
@@ -337,7 +375,7 @@ void TabBreak::writeExec()
 
 	out << 
 		"	" << P() << " += 1;\n"
-		"	continue;\n";
+		"	" << CONTINUE( _resume ) << ";\n";
 
 	if ( redFsm->errState != 0 ) {
 		out << 
@@ -352,7 +390,7 @@ void TabBreak::writeExec()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( nfa_len == 0 )\n"
-			"		break;\n"
+			"		" << BREAK ( _resume ) << ";\n"
 			"\n"
 			"	nfa_count += 1;\n"
 			"	nfa_len -= 1;\n"
@@ -380,7 +418,7 @@ void TabBreak::writeExec()
 	}
 	else {
 		out << 
-			"	break;\n";
+			"	" << BREAK( _resume ) << ";\n";
 	}
 
 	out << 

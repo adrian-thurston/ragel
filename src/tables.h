@@ -202,7 +202,8 @@ struct TabBreak
 {
 	TabBreak( const CodeGenArgs &args )
 	:
-		Tables( args )
+		Tables( args ),
+		loopLabels( args.loopLabels )
 	{}
 
 	void CONTROL_JUMP( ostream &ret, bool inFinish );
@@ -222,8 +223,12 @@ struct TabBreak
 
 	void NFA_POP_TEST_EXEC();
 	void writeExec();
-};
 
+	bool loopLabels;
+	std::string BREAK( GotoLabel &label );
+	std::string CONTINUE( GotoLabel &label );
+	std::string BREAK_LABEL( GotoLabel &label );
+};
 
 struct TabVar
 :

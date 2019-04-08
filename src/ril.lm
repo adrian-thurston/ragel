@@ -167,8 +167,11 @@ def static_array
 def static_value
 	[`value type ident `= number `;]
 
+def break_label
+	[ident `: `:]
+
 def while_stmt
-	[`while `( expr `) stmt]
+	[break_label? `while `( expr `) stmt]
 
 def else_if_clause
 	[`else `if `( expr `) stmt]
@@ -231,10 +234,10 @@ def fallthrough
 	[`fallthrough `;]
 
 def break_stmt
-	[`break `;]
+	[`break ident? `;]
 
 def continue_stmt
-	[`continue `;]
+	[`continue ident? `;]
 
 def block
 	[`{ StmtList: stmt* `}]

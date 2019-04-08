@@ -1455,6 +1455,7 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 
 	args.lineDirectives = !id->noLineDirectives;
 	args.forceVar = id->forceVar;
+	args.loopLabels = hostLang->loopLabels;
 
 	/* Write out with it. */
 	cgd = (*hostLang->makeCodeGen)( hostLang, args );

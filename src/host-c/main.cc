@@ -31,6 +31,7 @@ const HostLang hostLangC_translated =
 	8,
 	0,
 	true,
+	false, /* loopLabels */
 	Translated,
 	GotoFeature,
 	&makeCodeGen,

@@ -44,6 +44,7 @@ const HostLang hostLangJulia =
 	1,
 	0,
 	false,
+	false, /* loopLabels */
 	Translated,
 	GotoFeature,
 	&makeCodeGen,

@@ -48,6 +48,7 @@ const HostLang hostLangCrack =
 	5,
 	0,
 	true,
+	false, /* loopLabels */
 	Translated,
 	BreakFeature,
 	&makeCodeGen,
