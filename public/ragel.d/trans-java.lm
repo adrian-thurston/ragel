@@ -155,6 +155,11 @@ int rw_java_print_stmt( Stmt: indep::print_stmt )
 			"_s = new String( data, ts, te - ts );
 			"System.out.print( _s );
 	}
+	else if match Stmt [`print_off `;]
+	{
+		send Out
+			"System.out.print( p );
+	}
 }
 
 void rw_java_buf_stmt( BufStmt: indep::buf_stmt )
