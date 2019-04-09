@@ -22,33 +22,6 @@
 
 #include "binbreak.h"
 
-void BinBreak::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error )
-{
-	out <<
-		"	{\n"
-		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << " = " << var << ";\n"
-		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << " = " << var << " + " << klen << " - 1;\n"
-		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
-		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower ) {\n"
-		"				" << error << "\n"
-		"				break;\n"
-		"			}\n"
-		"\n"
-		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 1;\n"
-		"			else if ( " << cpc << " > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
-		"				_lower = _mid + 1;\n"
-		"			else {\n"
-		"				" << ok << "\n"
-		"				break;\n"
-		"			}\n"
-		"		}\n"
-		"	}\n"
-	;
-}
-
 void BinBreak::LOCATE_TRANS()
 {
 	out <<
@@ -104,7 +77,10 @@ void BinBreak::LOCATE_TRANS()
 		"		}\n"
 		"	}\n"
 		"\n";
+}
 
+void BinBreak::LOCATE_COND()
+{
 	if ( red->condSpaceList.length() > 0 ) {
 		std::stringstream success, error;
 
@@ -126,7 +102,29 @@ void BinBreak::LOCATE_TRANS()
 		error <<
 			cond << " = " << errCondOffset << ";\n";
 
-		COND_BIN_SEARCH( ckeys, condKeys, success.str(), error.str() );
+		out <<
+			"	{\n"
+			"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << " = " << ckeys << ";\n"
+			"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << " = " << ckeys << " + " << klen << " - 1;\n"
+			"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
+			"		while ( " << TRUE() << " ) {\n"
+			"			if ( _upper < _lower ) {\n"
+			"				" << error.str() << "\n"
+			"				break;\n"
+			"			}\n"
+			"\n"
+			"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+			"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+			"				_upper = _mid - 1;\n"
+			"			else if ( " << cpc << " > " << CAST( "int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+			"				_lower = _mid + 1;\n"
+			"			else {\n"
+			"				" << success.str() << "\n"
+			"				break;\n"
+			"			}\n"
+			"		}\n"
+			"	}\n"
+		;
 	}
 
 	out << EMIT_LABEL( _match_cond );

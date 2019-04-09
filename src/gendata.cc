@@ -765,7 +765,6 @@ void Reducer::makeEofTrans( StateAp *state )
 			errCond = redFsm->getErrorCond();
 		
 		setEofTrans( state->alg.stateNum, condSpace, outConds, numConds, errCond );
-
 	}
 }
 

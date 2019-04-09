@@ -238,7 +238,7 @@ void TabBreak::writeExec()
 	out << BREAK_LABEL( _resume );
 
 	/* Do we break out on no more input. */
-	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions() || redFsm->anyNfaStates();
+	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
 	if ( !noEnd ) {
 		if ( eof ) {
 			out << 
@@ -267,44 +267,11 @@ void TabBreak::writeExec()
 			"if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-
-			out <<
-				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-				"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
-							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-				"		" << klen << " = " << CAST( INT() ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
-				"		" << cpc << " = 0;\n"
-			;
-
-			if ( red->condSpaceList.length() > 0 )
-				COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
-
-			std::stringstream success, error;
-
-			error <<
-				vCS() << " = " << ERROR_STATE() << ";\n";
-
-			COND_BIN_SEARCH( cekeys, eofCondKeys, "", error.str() );
-
-			out << 
-				"	}\n"
-			;
-
-			EOF_ACTIONS();
-
 			if ( redFsm->anyEofTrans() ) {
 				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
-
-				EOF_TRANS();
-
-				string condVar =
-						red->condSpaceList.length() != 0 ? string(cond) : string(trans);
-
-				out <<
-					"		" << vCS() << " = " << CAST(INT()) << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
-
-				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		" << trans << " = " <<
+								CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 					"	}\n";
 			}
 		}
@@ -317,6 +284,13 @@ void TabBreak::writeExec()
 	FROM_STATE_ACTIONS();
 
 	LOCATE_TRANS();
+
+	if ( !noEnd && eof ) {
+		out << 
+			"}\n";
+	}
+
+	LOCATE_COND();
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	" << ps << " = " << vCS() << ";\n";
@@ -346,10 +320,6 @@ void TabBreak::writeExec()
 		out << "}\n";
 	}
 
-	if ( !noEnd && eof ) {
-		out << 
-			"}\n";
-	}
 
 	if ( loopLabels ) {
 		out << BREAK( _again ) << ";\n}\n";
