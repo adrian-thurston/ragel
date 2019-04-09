@@ -140,12 +140,12 @@ namespace ml_gen
 		}
 		case [T: `TRUE]
 		{
-			T.data = '1'
+			T.data = 'true'
 			send Parser [T]
 		}
 		case [F: `FALSE]
 		{
-			F.data = '0'
+			F.data = 'false'
 			send Parser [F]
 		}
 		case [N: `nil]

@@ -39,6 +39,7 @@ struct FlatVar
 	{}
 
 	void LOCATE_TRANS();
+	void LOCATE_COND();
 };
 
 class FlatVarLoop

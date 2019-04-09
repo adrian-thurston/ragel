@@ -24,6 +24,21 @@
 #include "flatvar.h"
 #include "binvar.h"
 
+std::string TabVar::BREAK( GotoLabel &label )
+{
+	return "{ _cont = 0; _again = 0; }";
+}
+
+std::string TabVar::CONTINUE( GotoLabel &label )
+{
+	return "{ _cont = 0; _again = 1; }";
+}
+
+std::string TabVar::BREAK_LABEL( GotoLabel &label )
+{
+	return "";
+}
+
 void TabVar::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << gotoDest << ";" << CLOSE_GEN_BLOCK();
@@ -110,243 +125,102 @@ void TabVar::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	ret <<
 		OPEN_GEN_BLOCK() <<
-		P() << "+= 1; " << cont << " = 0; " <<
-		nfa_test << " = 0;\n" <<
+			P() << "+= 1;\n" <<
+			nbreak << " = 1;" <<
+		//	cont << " = 0;\n" <<
+		//	nfa_test << " = 0;\n" <<
 		CLOSE_GEN_BLOCK();
 }
 
-void TabVar::NFA_POP()
+void TabVar::NFA_POP_TEST_EXEC()
 {
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	while ( " << nfa_test << " ) {\n"
-			"		" << nfa_test << " = 0;\n"
-			"	if ( nfa_len > 0 ) {\n"
-			"		int _pop_test = 1;\n"
-			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			;
+	out << 
+		"		int _pop_test = 1;\n"
+		"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
 
-		if ( redFsm->bAnyNfaPops ) {
-			NFA_FROM_STATE_ACTION_EXEC();
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+			redAct.lte(); redAct++ )
+	{
+		if ( redAct->numNfaPopTestRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
 
-			out << 
-				"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+				NFA_CONDITION( out, item->value, item.last() );
 
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopTestRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						NFA_CONDITION( out, item->value, item.last() );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n";
-
-			out <<
-				"		if ( _pop_test ) {\n"
-				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			NFA_POST_POP();
-
-			out <<
-				// "			goto _resume;\n"
-				"			" << cont << " = 1;\n"
-				"			" << nfa_test << " = 0;\n"
-				"		}\n";
-
-			if ( red->nfaPostPopExpr != 0 ) {
-				out <<
-					"		else {\n";
-
-				NFA_POST_POP();
-
-				out <<
-					// "		goto _pop;\n"
-					"			" << cont << " = 0;\n"
-					"			" << nfa_test << " = 1;\n"
-					"		}\n";
-			}
-			else {
-				out <<
-					"		else {\n"
-					// "		goto _pop;\n"
-					"			" << cont << " = 0;\n"
-					"			" << nfa_test << " = 1;\n"
-					"		}\n"
-				;
-			}
+			out << CEND() << "}\n";
 		}
-		else {
-			out <<
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			NFA_POST_POP();
-
-			out <<
-				// "		goto _resume;\n"
-				"		" << cont << " = 1;\n"
-				"		" << nfa_test << " = 0;\n"
-				;
-		}
-
-		out << 
-			"	}\n"
-			"	else {\n"
-			"		" << cont << " = 0;\n"
-			"		" << nfa_test << " = 0;\n"
-			"	}\n"
-			"}\n"
-			;
 	}
+
+	out <<
+		"		}\n"
+		"\n";
 }
 
-/*
- * 0 means stop, (goto out)
- * 1 means fall through to pop and repeat (goto pop)
- * 2 means fall through to next and repeat (no goto)
-*/
 
 void TabVar::writeExec()
 {
 	out <<
-		"	{\n";
+		"{\n";
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps;\n";
-
-	out <<
-		"	" << UINT() << " " << trans << " = 0;\n"
-		"	" << UINT() << " _have = 0;\n";
-
-	DECLARE( UINT(), nfa_test,   " = 1" );
-	DECLARE( UINT(), cont, " = 1" );
-	DECLARE( "int",  klen );
-	DECLARE( UINT(), cond, " = 0" );
-	DECLARE( "int", cpc );
-	DECLARE( INDEX( ALPH_TYPE() ), keys );
-	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
-	DECLARE( UINT(), nacts );
+	DECLARE( INT(), ps );
+	DECLARE( INT(), cpc );
+	DECLARE( INT(), nbreak );
+	DECLARE( INT(), klen );
 	DECLARE( INDEX( ARR_TYPE( condKeys ) ), ckeys );
 	DECLARE( INDEX( ARR_TYPE( eofCondKeys ) ), cekeys );
+	DECLARE( UINT(), trans, " = 0" );
+	DECLARE( UINT(), cond, " = 0" );
+	DECLARE( INDEX( ALPH_TYPE() ), keys );
+	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
+	DECLARE( UINT(), nacts );
+	DECLARE( INT(), have );
 
-	out <<
-		"	while ( " << cont << " == 1 ) {\n"
-		"\n";
+	out << UINT() << " _have = 0;\n";
+	out << UINT() << " _cont = 1;\n";
+	out << UINT() << " _again = 1;\n";
+	out << UINT() << " _bsc = 1;\n";
+	
+	out << BREAK_LABEL( _resume );
 
 	/* Do we break out on no more input. */
-	bool eof = redFsm->anyEofTrans() || redFsm->anyEofActions() || redFsm->anyNfaStates();
+	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
 	if ( !noEnd ) {
 		if ( eof ) {
 			out << 
-				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " ) {\n"
-				"			" << cont << " = 0;\n"
-				"			" << nfa_test << " = 0;\n"
-				"		}\n";
+				"       while ( _again == 1 && ( " << P() << " != " << PE() << " || " << P() << " == " << vEOF() << " ) ) {\n";
 		}
 		else {
 			out << 
-				"       if ( " << P() << " == " << PE() << " ) {\n"
-				"			" << cont << " = 0;\n"
-				"			" << nfa_test << " = 0;\n"
-				"		}\n";
+				"       while ( _again == 1 && " << P() << " != " << PE() << " ) {\n";
 		}
 	}
+	else {
+			out << 
+				"       while ( _again == 1 ) {\n";
 
-	out << 
-		"	if ( " << cont <<  " == 1 ) {\n";
+	}
+
+	out << "_cont = 1;\n";
+	out << "_again = 1;\n";
 
 	NFA_PUSH( vCS() );
-
-	out << 
-		"_have = 0;\n";
 
 	if ( !noEnd && eof ) {
 		out << 
 			"if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-			out << UINT() << " _eofcont = 0;\n";
-
-			out <<
-				"	if ( " << ARR_REF( eofCondSpaces ) << "[" << vCS() << "] != -1 ) {\n"
-				"		" << cekeys << " = " << OFFSET( ARR_REF( eofCondKeys ),
-							/*CAST( UINT() ) + */ ARR_REF( eofCondKeyOffs ) + "[" + vCS() + "]" ) << ";\n"
-				"		" << klen << " = " << CAST( "int" ) << ARR_REF( eofCondKeyLens ) + "[" + vCS() + "]" << ";\n"
-				"		" << cpc << " = 0;\n"
-			;
-
-			if ( red->condSpaceList.length() > 0 )
-				COND_EXEC( ARR_REF( eofCondSpaces ) + "[" + vCS() + "]" );
-
-			out <<
-				"	{\n"
-				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_lower" ) << " = " << cekeys << ";\n"
-				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_upper" ) << " = " << cekeys << " + " << klen << " - 1;\n"
-				"		" << INDEX( ARR_TYPE( eofCondKeys ), "_mid" ) << ";\n"
-				"		while ( _eofcont == 0 && _lower <= _upper ) {\n"
-				"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-				"			if ( " << cpc << " < " << CAST( "int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
-				"				_upper = _mid - 1;\n"
-				"			else if ( " << cpc << " > " << CAST("int" ) << DEREF( ARR_REF( eofCondKeys ), "_mid" ) << " )\n"
-				"				_lower = _mid + 1;\n"
-				"			else {\n"
-				"				_eofcont = 1;\n"
-				"			}\n"
-				"		}\n"
-				"		if ( _eofcont == 0 ) {\n"
-				"			" << vCS() << " = " << ERROR_STATE() << ";\n"
-				"			" << cont << " = 0;\n"
-				"			" << nfa_test << " = 1;\n"
-				"		}\n"
-				"	}\n"
-			;
-
-			out << 
-				"	}\n"
-				"	else {\n"
-				"		_eofcont = 1;\n"
-				"	}\n"
-			;
-
-			out << "if ( _eofcont == 1 ) {\n";
-
-			EOF_ACTIONS();
-
-			out << "}\n";
-
-			out <<
-				"if ( _eofcont == 1 ) {\n";
-
 			if ( redFsm->anyEofTrans() ) {
 				out <<
-					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n";
-
-				EOF_TRANS();
-
-				string condVar =
-						red->condSpaceList.length() != 0 ? string(cond) : string(trans);
-
-				out <<
-					"		" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n"
-					"\n";
-
-				out <<
+					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
+					"		" << trans << " = " <<
+								CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 					"	}\n";
 			}
-
-			out << "}\n";
 		}
 
 		out << 
@@ -354,57 +228,54 @@ void TabVar::writeExec()
 			"else {\n";
 	}
 
-	out << 
-		"	if ( " << cont << " == 1 ) {\n";
-
 	FROM_STATE_ACTIONS();
 
 	LOCATE_TRANS();
-
-	out << "if ( " << cont << " == 1 ) {\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	_ps = " << vCS() << ";\n";
-
-	string condVar =
-			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
-
-	out <<
-		"	" << vCS() << " = " << CAST("int") << ARR_REF( condTargs ) << "[" << condVar << "];\n"
-		"\n";
-
-	if ( redFsm->anyRegActions() ) {
-		out <<
-			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] != 0 ) {\n";
-
-		REG_ACTIONS( condVar );
-
-		out <<
-			"	}\n";
-	}
-
-	/* closing cont tests. */
-	out << "}\n";
-	out << "}\n";
 
 	if ( !noEnd && eof ) {
 		out << 
 			"}\n";
 	}
 
-	/* _again: */
+	LOCATE_COND();
+
+	if ( redFsm->anyRegCurStateRef() )
+		out << "	" << ps << " = " << vCS() << ";\n";
+
+	string condVar =
+			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
 
 	out <<
-		"	if ( " << cont << " == 1 ) { \n";
+		"	" << vCS() << " = " << CAST(INT()) << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";
+
+	if ( redFsm->anyRegActions() ) {
+		out <<
+			"	if ( " << ARR_REF( condActions ) << "[" << condVar << "] != 0 ) {\n"
+			"\n";
+
+		if ( redFsm->anyRegNbreak() )
+			out << "	" << nbreak << " = 0;\n";
+
+		REG_ACTIONS( condVar );
+
+		if ( redFsm->anyRegNbreak() ) {
+			out <<
+				"	if ( " << nbreak << " == 1 )\n"
+				"		" << BREAK( _resume ) << "\n";
+		}
+
+		out << "}\n";
+	}
+
+	out << "if ( _cont == 1 ) {\n";
+
+	out << "\n" << EMIT_LABEL( _again );
 
 	if ( !noEnd && eof ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n"
-			"		if ( " << vCS() << " < " << FIRST_FINAL_STATE() << " )\n"
-			"			" << nfa_test << " = 1;\n"
-			"		else\n"
-			"			" << nfa_test << " = 0;\n"
-			"		" << cont << " = 0;\n"
+			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"			" << BREAK( _resume ) << "\n"
 			"	}\n"
 			"	else {\n";
 	}
@@ -413,41 +284,75 @@ void TabVar::writeExec()
 
 	if ( redFsm->errState != 0 ) {
 		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " ) {\n"
-			"		" << nfa_test << " = 1;\n"
-			"		" << cont << " = 0;\n"
-			"	}\n";
+			"	if ( " << vCS() << " != " << redFsm->errState->id << " ) {\n";
 	}
 
-	
 	out << 
-		"	if ( " << cont << " == 1 ) { \n"
-		"		" << P() << " += 1;\n"
-		"	}\n";
+		"	" << P() << " += 1;\n"
+		"	" << CONTINUE( _resume ) << "\n";
+
+	if ( redFsm->errState != 0 ) {
+		out << 
+			"	}\n";
+	}
 
 	if ( !noEnd && eof ) {
 		out <<
 			"	}\n";
 	}
 
-	/* Closing cont tests. */
+	out << "if ( _cont == 1 ) {\n";
+
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len == 0 )\n"
+			"		" << BREAK ( _resume ) << "\n"
+			"\n";
+
+		out << "if ( _cont == 1 ) {\n";
+
+		out <<
+			"	nfa_count += 1;\n"
+			"	nfa_len -= 1;\n"
+			"	" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
+
+		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
+
+			NFA_POP_TEST_EXEC();
+
+			out <<
+				"	if ( _pop_test )\n"
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"	else\n"
+				"		" << vCS() << " = " << ERROR_STATE() << ";\n";
+		}
+		else {
+			out <<
+				"	" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+		}
+
+		NFA_POST_POP();
+
+		/* cont */
+		out << "}\n";
+	}
+	else {
+		out << 
+			"	" << BREAK( _resume ) << "\n";
+	}
+
+	/* cont */
+	out << "}}\n";
+
+	/* P loop. */
 	out << "}\n";
-	out << "}\n";
 
-	out <<
-		"	if ( " << cont << " == 0 && " << nfa_test << " == 1 ) {\n";
+	out << EMIT_LABEL( _out );
 
-	NFA_POP();
-	
-	out <<
-		"_nfa_test = 1;\n";
-
-	out << "}\n";
-
-	/* Cont loop. */
-	out << "}\n";
-
-	/* Wrapping block. */
+	/* Variable decl. */
 	out << "}\n";
 }
 

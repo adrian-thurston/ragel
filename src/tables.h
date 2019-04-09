@@ -252,7 +252,13 @@ struct TabVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
-	void NFA_POP();
+	void NFA_POP_TEST_EXEC();
+	void NFA_POP() {}
+
+	std::string BREAK( GotoLabel &label );
+	std::string CONTINUE( GotoLabel &label );
+	std::string BREAK_LABEL( GotoLabel &label );
+
 	void writeExec();
 };
 

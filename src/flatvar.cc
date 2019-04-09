@@ -29,7 +29,7 @@ void FlatVar::LOCATE_TRANS()
 {
 	if ( redFsm->classMap == 0 ) {
 		out <<
-			"	" << trans << " = " << CAST( UINT() ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
+			"	" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n";
 	}
 	else {
 		long lowKey = redFsm->lowKey.getVal();
@@ -60,28 +60,30 @@ void FlatVar::LOCATE_TRANS()
 		}
 
 		out <<
-			"       int _ic = " << CAST( "int" ) << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
+			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= " << CAST( "int" ) << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
-						"_ic >= " << CAST( "int" ) << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
-			"			" << trans << " = " << CAST( UINT() ) << DEREF( ARR_REF( indicies ),
-								string(inds) + " + " + CAST("int") + "( _ic - " + CAST("int") + DEREF( ARR_REF( transKeys ),
-								string(keys) + "" ) + " ) " ) << "; \n"
+			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
+						"_ic >= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
+			"			" << trans << " = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
+								string(inds) + " + " + CAST("int") + "( _ic - " + CAST("int") +
+								DEREF( ARR_REF( transKeys ), string(keys) + "" ) + " ) " ) << "; \n"
 			"		else\n"
-			"			" << trans << " = " << CAST( UINT() ) << ARR_REF( indexDefaults ) <<
+			"			" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";
 
 		if ( !limitLow || !limitHigh ) {
 			out <<
 				"	}\n"
 				"	else {\n"
-				"		" << trans << " = " << CAST( UINT() ) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
+				"		" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) << "[" << vCS() << "]" << ";\n"
 				"	}\n"
 				"\n";
 		}
 	}
+}
 
-
+void FlatVar::LOCATE_COND()
+{
 	if ( red->condSpaceList.length() > 0 ) {
 		out <<
 			"	" << cond << " = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[" << trans << "];\n"
@@ -96,16 +98,18 @@ void FlatVar::LOCATE_TRANS()
 
 		for ( CondSpaceList::Iter csi = red->condSpaceList; csi.lte(); csi++ ) {
 			GenCondSpace *condSpace = csi;
-			out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
-			for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-				out << TABS(2) << "if ( ";
-				CONDITION( out, *csi );
-				Size condValOffset = (1 << csi.pos());
-				out << " ) " << cpc << " += " << condValOffset << ";\n";
-			}
+			if ( condSpace->numTransRefs > 0 ) {
+				out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
+				for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
+					out << TABS(2) << "if ( ";
+					CONDITION( out, *csi );
+					Size condValOffset = (1 << csi.pos());
+					out << " ) " << cpc << " += " << condValOffset << ";\n";
+				}
 
-			out << 
-				"	" << CEND() << "}\n";
+				out << 
+					"	" << CEND() << "}\n";
+			}
 		}
 
 		out << 
