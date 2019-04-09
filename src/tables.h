@@ -146,6 +146,8 @@ struct Tables
 	TableArray transLengths;
 	TableArray condKeys;
 
+	int errCondOffset;
+
 	virtual void TO_STATE_ACTION( RedStateAp *state ) = 0;
 	virtual void FROM_STATE_ACTION( RedStateAp *state ) = 0;
 	virtual void EOF_ACTION( RedStateAp *state ) = 0;

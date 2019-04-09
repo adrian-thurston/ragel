@@ -632,13 +632,7 @@ void Reducer::makeStateActions( StateAp *state )
 	if ( state->fromStateActionTable.length() > 0 )
 		fromStateActions = actionTableMap.find( state->fromStateActionTable );
 
-	/* EOF actions go out here only if the state has no eof target. If it has
-	 * an eof target then an eof transition will be used instead. */
-	RedActionTable *eofActions = 0;
-	if ( state->eofActionTable.length() > 0 )
-		eofActions = actionTableMap.find( state->eofActionTable );
-	
-	if ( toStateActions != 0 || fromStateActions != 0 || eofActions != 0 ) {
+	if ( toStateActions != 0 || fromStateActions != 0 ) {
 		long to = -1;
 		if ( toStateActions != 0 )
 			to = toStateActions->id;
@@ -647,37 +641,7 @@ void Reducer::makeStateActions( StateAp *state )
 		if ( fromStateActions != 0 )
 			from = fromStateActions->id;
 
-		long eof = -1;
-		if ( eofActions != 0 )
-			eof = eofActions->id;
-
-		setStateActions( curState, to, from, eof );
-	}
-}
-
-void Reducer::makeEofTrans( StateAp *state )
-{
-	/* The EOF trans is used when there is an eof target, otherwise the eof
-	 * action goes into state actions. */
-	if ( state->eofTarget != 0 ) {
-		long targ = state->eofTarget->alg.stateNum;
-		long action = -1;
-
-		setEofTrans( curState, targ, action );
-	}
-
-	if ( state->outCondSpace != 0 ) {
-		RedStateAp *rs = allStates + curState;
-		GenCondSpace *condSpace = allCondSpaces + state->outCondSpace->condSpaceId;
-		rs->outCondSpace = condSpace;
-		rs->outCondKeys = state->outCondKeys;
-
-//		std::cout << "ck: " << state->alg.stateNum << " " <<
-//				state->outCondKeys.length() << std::endl;
-//
-//		for ( CondKeySet::Iter k = state->outCondKeys; k.lte(); k++ ) {
-//			std::cout << "  k: " << *k << std::endl;
-//		}
+		setStateActions( curState, to, from, -1 );
 	}
 }
 
@@ -751,6 +715,63 @@ void Reducer::makeTrans( Key lowKey, Key highKey, TransAp *trans )
 		newTrans( allStates + curState, lowKey, highKey, trans );
 	}
 }
+
+void Reducer::makeEofTrans( StateAp *state )
+{
+	/* EOF actions go out here only if the state has no eof target. If it has
+	 * an eof target then an eof transition will be used instead. */
+	RedActionTable *eofActions = 0;
+	if ( state->eofActionTable.length() > 0 )
+		eofActions = actionTableMap.find( state->eofActionTable );
+
+	/* Add an EOF transition if we have conditions, a target, or actions, */
+	if ( state->outCondSpace != 0 || state->eofTarget != 0 || eofActions != 0 )
+		redFsm->bAnyEofActivity = true;
+
+	long targ = state->alg.stateNum;
+	long action = -1;
+
+	if ( state->eofTarget != 0 )
+		targ = state->eofTarget->alg.stateNum;
+
+	if ( eofActions != 0 )
+		action = eofActions->id;
+
+
+	if ( state->outCondSpace == 0 ) {
+		// std::cerr << "setEofTrans( " <<
+		//		state->alg.stateNum << ", " << targ << ", " << action << " );" << endl;
+
+		setEofTrans( state->alg.stateNum, targ, action );
+	}
+	else {
+		int numConds = state->outCondKeys.length();
+		RedCondEl *outConds = new RedCondEl[numConds];
+		for ( int pos = 0; pos < numConds; pos++ ) {
+			/* Make the new transitions. */
+			RedStateAp *targState = targ >= 0 ? (allStates + targ) : redFsm->getErrorState();
+			RedAction *at = action >= 0 ? (allActionTables + action) : 0;
+			RedCondAp *cond = redFsm->allocateCond( targState, at );
+
+			outConds[pos].key = state->outCondKeys[pos];
+			outConds[pos].value = cond;
+		}
+
+		GenCondSpace *condSpace = allCondSpaces + state->outCondSpace->condSpaceId;
+
+		/* If the cond list is not full then we need an error cond. */
+		RedCondAp *errCond = 0;
+		if ( numConds < ( 1 << condSpace->condSet.length() ) )
+			errCond = redFsm->getErrorCond();
+		
+		RedTransAp *trans = redFsm->allocateTrans(
+				condSpace, outConds, numConds, errCond );
+
+		RedStateAp *s = allStates + curState;
+		s->eofTrans = trans;
+	}
+}
+
 
 void Reducer::makeTransList( StateAp *state )
 {

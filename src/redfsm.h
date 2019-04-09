@@ -691,6 +691,7 @@ struct RedFsmAp
 	bool bAnyRegActions;
 	bool bAnyEofActions;
 	bool bAnyEofTrans;
+	bool bAnyEofActivity;
 	bool bAnyActionGotos;
 	bool bAnyActionCalls;
 	bool bAnyActionNcalls;
@@ -732,6 +733,7 @@ struct RedFsmAp
 	bool anyRegActions()            { return bAnyRegActions; }
 	bool anyEofActions()            { return bAnyEofActions; }
 	bool anyEofTrans()              { return bAnyEofTrans; }
+	bool anyEofActivity()			{ return bAnyEofActivity; }
 	bool anyActionGotos()           { return bAnyActionGotos; }
 	bool anyActionCalls()           { return bAnyActionCalls; }
 	bool anyActionNcalls()          { return bAnyActionNcalls; }

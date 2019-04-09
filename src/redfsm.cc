@@ -70,6 +70,7 @@ RedFsmAp::RedFsmAp( FsmCtx *fsmCtx, int machineId )
 	bAnyRegActions(false),
 	bAnyEofActions(false),
 	bAnyEofTrans(false),
+	bAnyEofActivity(false),
 	bAnyActionGotos(false),
 	bAnyActionCalls(false),
 	bAnyActionNcalls(false),
@@ -1078,7 +1079,7 @@ RedTransAp *RedFsmAp::getErrorTrans()
 		 * can point to the error state. */
 		errTrans = new RedTransAp( nextTransId++, nextCondId++, getErrorState(), 0 );
 		RedTransAp *inTransSet = transSet.insert( errTrans );
-		assert( inTransSet != 0 );
+		//assert( inTransSet != 0 );
 
 	}
 	return errTrans;
