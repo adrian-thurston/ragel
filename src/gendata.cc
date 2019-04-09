@@ -764,11 +764,8 @@ void Reducer::makeEofTrans( StateAp *state )
 		if ( numConds < ( 1 << condSpace->condSet.length() ) )
 			errCond = redFsm->getErrorCond();
 		
-		RedTransAp *trans = redFsm->allocateTrans(
-				condSpace, outConds, numConds, errCond );
+		setEofTrans( state->alg.stateNum, condSpace, outConds, numConds, errCond );
 
-		RedStateAp *s = allStates + curState;
-		s->eofTrans = trans;
 	}
 }
 
@@ -1154,12 +1151,16 @@ void Reducer::setEofTrans( int snum, long eofTarget, long actId )
 	RedAction *eofAct = actId >= 0 ? allActionTables + actId : 0;
 
 	RedTransAp *trans = redFsm->allocateTrans( targState, eofAct );
+	curState->eofTrans = trans;
+}
 
-	trans->condSpace = 0;
-	trans->p.id = redFsm->nextCondId++;
-	trans->p.targ = targState;
-	trans->p.action = eofAct;
+void Reducer::setEofTrans( int snum, GenCondSpace *condSpace,
+		RedCondEl *outConds, int numConds, RedCondAp *errCond )
+{
+	RedStateAp *curState = allStates + snum;
 
+	RedTransAp *trans = redFsm->allocateTrans( condSpace, outConds, numConds, errCond );
+	
 	curState->eofTrans = trans;
 }
 

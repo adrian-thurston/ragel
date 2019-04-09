@@ -1062,27 +1062,12 @@ void RedFsmAp::chooseDefaultNumRanges()
 
 RedCondAp *RedFsmAp::getErrorCond()
 {
-	if ( errCond == 0 ) {
-		/* Create the cond transition. This should also always succeed. */
-		errCond = new RedCondAp( getErrorState(), 0, nextCondId++ );
-		RedCondAp *inCondSet = condSet.insert( errCond );
-		assert( inCondSet != 0 );
-	}
-	return errCond;
+	return allocateCond( getErrorState(), 0 );
 }
 
 RedTransAp *RedFsmAp::getErrorTrans()
 {
-	/* If the error trans has not been made aready, make it. */
-	if ( errTrans == 0 ) {
-		/* This insert should always succeed. No transition created by the user
-		 * can point to the error state. */
-		errTrans = new RedTransAp( nextTransId++, nextCondId++, getErrorState(), 0 );
-		RedTransAp *inTransSet = transSet.insert( errTrans );
-		//assert( inTransSet != 0 );
-
-	}
-	return errTrans;
+	return allocateTrans( getErrorState(), 0 );
 }
 
 RedStateAp *RedFsmAp::getErrorState()

@@ -451,6 +451,7 @@ protected:
 	virtual void NFA_PUSH( std::string );
 	virtual void NFA_POP() = 0;
 	virtual void LOCATE_TRANS() {}
+	virtual void LOCATE_COND() {}
 	virtual void EOF_TRANS() {}
 
 	virtual void COND_EXEC( std::string expr ) {}

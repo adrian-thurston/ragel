@@ -361,8 +361,9 @@ void Flat::taTransCondSpaces()
 
 	/* Transitions must be written ordered by their id. */
 	RedTransAp **transPtrs = new RedTransAp*[redFsm->transSet.length()];
-	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ )
+	for ( TransApSet::Iter trans = redFsm->transSet; trans.lte(); trans++ ) {
 		transPtrs[trans->id] = trans;
+	}
 
 	/* Keep a count of the num of items in the array written. */
 	for ( int t = 0; t < redFsm->transSet.length(); t++ ) {

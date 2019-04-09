@@ -260,6 +260,8 @@ protected:
 	void setStateActions( int snum, long toStateAction, 
 			long fromStateAction, long eofAction );
 	void setEofTrans( int snum, long targ, long eofAction );
+	void setEofTrans( int snum, GenCondSpace *condSpace,
+			RedCondEl *outConds, int numConds, RedCondAp *errCond );
 	void setForcedErrorState()
 		{ redFsm->forcedErrorState = true; }
 

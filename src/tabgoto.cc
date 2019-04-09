@@ -236,8 +236,8 @@ void TabGoto::writeExec()
 			if ( redFsm->anyEofTrans() ) {
 				out <<
 					"	if ( " << ARR_REF( eofTrans ) << "[" << vCS() << "] > 0 ) {\n"
-					"	" << trans << " = " << 
-							CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
+					"		" << trans << " = " << 
+								CAST(UINT()) << ARR_REF( eofTrans ) << "[" << vCS() << "] - 1;\n"
 					"	}\n";
 			}
 		}
@@ -256,29 +256,7 @@ void TabGoto::writeExec()
 			"}\n";
 	}
 
-	if ( red->condSpaceList.length() > 0 ) {
-		std::stringstream success, error;
-
-		out <<
-			"	" << ckeys << " = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[" + string(trans) + "]" ) << ";\n"
-			"	" << klen << " = " << CAST( "int" ) << ARR_REF( transLengths ) << "[" << trans << "];\n"
-			"	" << cond << " = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[" << trans << "];\n"
-			"\n";
-
-		out <<
-			"	" << cpc << " = 0;\n";
-		
-		if ( red->condSpaceList.length() > 0 )
-			COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
-		
-		success <<
-			cond << " += " << CAST( UINT() ) << "(_mid - " << ckeys << ");\n";
-
-		error <<
-			cond << " = " << errCondOffset << ";\n";
-
-		COND_BIN_SEARCH( ckeys, condKeys, success.str(), error.str() );
-	}
+	LOCATE_COND();
 
 	if ( redFsm->anyRegCurStateRef() )
 		out << "	" << ps << " = " << vCS() << ";\n";

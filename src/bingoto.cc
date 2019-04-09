@@ -22,34 +22,6 @@
 
 #include "bingoto.h"
 
-
-void BinGoto::COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error )
-{
-	out <<
-		"	{\n"
-		"		" << INDEX( ARR_TYPE( keys ), "_lower" ) << " = " << var << ";\n"
-		"		" << INDEX( ARR_TYPE( keys ), "_upper" ) << " = " << var << " + " << klen << " - 1;\n"
-		"		" << INDEX( ARR_TYPE( keys ), "_mid" ) << ";\n"
-		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower ) {\n"
-		"				" << error << "\n"
-		"				break;\n"
-		"			}\n"
-		"\n"
-		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 1;\n"
-		"			else if ( " << cpc << " > " << CAST( "int" ) << DEREF( ARR_REF( keys ), "_mid" ) << " )\n"
-		"				_lower = _mid + 1;\n"
-		"			else {\n"
-		"				" << ok << "\n"
-		"				break;\n"
-		"			}\n"
-		"		}\n"
-		"	}\n"
-	;
-}
-
 void BinGoto::LOCATE_TRANS()
 {
 	out <<
@@ -105,5 +77,55 @@ void BinGoto::LOCATE_TRANS()
 		"		}\n"
 		"	}\n"
 		"\n";
+}
+
+
+void BinGoto::LOCATE_COND()
+{
+	if ( red->condSpaceList.length() > 0 ) {
+		std::stringstream success, error;
+
+		out <<
+			"	" << ckeys << " = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[" + string(trans) + "]" ) << ";\n"
+			"	" << klen << " = " << CAST( "int" ) << ARR_REF( transLengths ) << "[" << trans << "];\n"
+			"	" << cond << " = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[" << trans << "];\n"
+			"\n";
+
+		out <<
+			"	" << cpc << " = 0;\n";
+		
+		if ( red->condSpaceList.length() > 0 )
+			COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
+		
+		success <<
+			cond << " += " << CAST( UINT() ) << "(_mid - " << ckeys << ");\n";
+
+		error <<
+			cond << " = " << errCondOffset << ";\n";
+
+		out <<
+			"	{\n"
+			"		" << INDEX( ARR_TYPE( condKeys ), "_lower" ) << " = " << ckeys << ";\n"
+			"		" << INDEX( ARR_TYPE( condKeys ), "_upper" ) << " = " << ckeys << " + " << klen << " - 1;\n"
+			"		" << INDEX( ARR_TYPE( condKeys ), "_mid" ) << ";\n"
+			"		while ( " << TRUE() << " ) {\n"
+			"			if ( _upper < _lower ) {\n"
+			"				" << error.str() << "\n"
+			"				break;\n"
+			"			}\n"
+			"\n"
+			"			_mid = _lower + ((_upper-_lower) >> 1);\n"
+			"			if ( " << cpc << " < " << CAST("int") << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+			"				_upper = _mid - 1;\n"
+			"			else if ( " << cpc << " > " << CAST( "int" ) << DEREF( ARR_REF( condKeys ), "_mid" ) << " )\n"
+			"				_lower = _mid + 1;\n"
+			"			else {\n"
+			"				" << success.str() << "\n"
+			"				break;\n"
+			"			}\n"
+			"		}\n"
+			"	}\n"
+		;
+	}
 }
 
