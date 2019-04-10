@@ -204,7 +204,6 @@ void TabGoto::writeExec()
 	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 	DECLARE( UINT(), nacts );
-	DECLARE( INT(), have );
 	
 	out << EMIT_LABEL( _resume );
 

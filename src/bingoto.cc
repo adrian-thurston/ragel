@@ -29,7 +29,6 @@ void BinGoto::LOCATE_TRANS()
 		"	" << trans << " = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
 		"\n"
 		"	" << klen << " = " << CAST( "int" ) << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
-		"	" << have << " = 0;\n"
 		"	if ( " << klen << " > 0 ) {\n"
 		"		" << INDEX( ALPH_TYPE(), "_lower" ) << " = " << keys << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_upper" ) << " = " << keys << " + " << klen << " - 1;\n"
@@ -47,15 +46,14 @@ void BinGoto::LOCATE_TRANS()
 		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
 		"				_lower = _mid + 1;\n"
 		"			else {\n"
-		"				" << have << " = 1;\n"
 		"				" << trans << " += " << CAST( UINT() ) << "(_mid - " << keys << ");\n"
-		"				break;\n"
+		"				goto " << _match << ";\n"
 		"			}\n"
 		"		}\n"
 		"	}\n"
 		"\n"
 		"	" << klen << " = " << CAST("int") << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
-		"	if ( " << have << " == 0 && " << klen << " > 0 ) {\n"
+		"	if ( " << klen << " > 0 ) {\n"
 		"		" << INDEX( ALPH_TYPE(), "_lower" ) << " = " << keys << ";\n"
 		"		" << INDEX( ALPH_TYPE(), "_upper" ) << " = " << keys << " + (" << klen << "<<1) - 2;\n"
 		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
@@ -77,6 +75,8 @@ void BinGoto::LOCATE_TRANS()
 		"		}\n"
 		"	}\n"
 		"\n";
+
+	out << EMIT_LABEL( _match );
 }
 
 
