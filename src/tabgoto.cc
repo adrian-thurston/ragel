@@ -213,17 +213,14 @@ void TabGoto::writeExec()
 	if ( !noEnd ) {
 		if ( eof ) {
 			out << 
-				"       while ( " << P() << " != " << PE() << " || " << P() << " == " << vEOF() << " ) {\n";
+				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
+				"			goto " << _out << ";\n";
 		}
 		else {
 			out << 
-				"       while ( " << P() << " != " << PE() << " ) {\n";
+				"       if ( " << P() << " == " << PE() << " )\n"
+				"			goto " << _out << ";\n";
 		}
-	}
-	else {
-			out << 
-				"       while ( " << TRUE() << " ) {\n";
-
 	}
 
 	NFA_PUSH( vCS() );
@@ -280,7 +277,7 @@ void TabGoto::writeExec()
 		if ( redFsm->anyRegNbreak() ) {
 			out <<
 				"	if ( " << nbreak << " == 1 )\n"
-				"		break;\n";
+				"		goto " << _out << ";\n";
 		}
 
 		out << "}\n";
@@ -292,7 +289,7 @@ void TabGoto::writeExec()
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n"
 			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"			break;\n"
+			"			goto " << _out << ";\n"
 			"	}\n"
 			"	else {\n";
 	}
@@ -321,7 +318,7 @@ void TabGoto::writeExec()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( nfa_len == 0 )\n"
-			"		break;\n"
+			"		goto " << _out << ";\n"
 			"\n"
 			"	nfa_count += 1;\n"
 			"	nfa_len -= 1;\n"
@@ -346,14 +343,9 @@ void TabGoto::writeExec()
 		}
 
 		NFA_POST_POP();
-	}
-	else {
-		out << 
-			"	break;\n";
-	}
 
-	out << 
-		"}\n";
+		out << "goto " << _resume << ";\n";
+	}
 
 	out << EMIT_LABEL( _out );
 

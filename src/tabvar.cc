@@ -127,8 +127,6 @@ void TabVar::NBREAK( ostream &ret, int targState, bool csForced )
 		OPEN_GEN_BLOCK() <<
 			P() << "+= 1;\n" <<
 			nbreak << " = 1;" <<
-		//	cont << " = 0;\n" <<
-		//	nfa_test << " = 0;\n" <<
 		CLOSE_GEN_BLOCK();
 }
 
