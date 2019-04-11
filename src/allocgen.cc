@@ -30,12 +30,15 @@
 /*
  * Code generators.
  */
-#include "binvar.h"
 #include "bingoto.h"
 #include "binbreak.h"
-#include "flatvar.h"
+#include "binvar.h"
 #include "flatgoto.h"
 #include "flatbreak.h"
+#include "flatvar.h"
+#include "switchgoto.h"
+#include "switchbreak.h"
+#include "switchvar.h"
 #include "gotoloop.h"
 #include "gotoexp.h"
 #include "ipgoto.h"
@@ -91,6 +94,24 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 		else
 			codeGen = new FlatVarExp( args );
 		break;
+	case GenSwitchLoop:
+		if ( feature == GotoFeature )
+			codeGen = new SwitchGotoLoop( args );
+		else if ( feature == BreakFeature )
+			codeGen = new SwitchBreakLoop( args );
+		else
+			codeGen = new SwitchVarLoop( args );
+		break;
+
+	case GenSwitchExp:
+		if ( feature == GotoFeature )
+			codeGen = new SwitchGotoExp( args );
+		else if ( feature == BreakFeature )
+			codeGen = new SwitchBreakExp( args );
+		else
+			codeGen = new SwitchVarExp( args );
+		break;
+
 
 	case GenGotoLoop:
 		if ( feature == GotoFeature )

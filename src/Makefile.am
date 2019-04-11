@@ -41,6 +41,7 @@ dist_libfsm_la_SOURCES = \
 	tables.h \
 	binary.h bingoto.h binbreak.h binvar.h \
 	flat.h flatgoto.h flatbreak.h flatvar.h \
+	switch.h switchgoto.h switchbreak.h switchvar.h \
 	goto.h gotoloop.h gotoexp.h \
 	ipgoto.h asm.h \
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
@@ -50,6 +51,7 @@ dist_libfsm_la_SOURCES = \
 	tables.cc tabgoto.cc tabbreak.cc tabvar.cc \
 	binary.cc bingoto.cc binbreak.cc actloop.cc \
 	flat.cc flatgoto.cc flatbreak.cc flatvar.cc \
+	switch.cc switchgoto.cc switchbreak.cc switchvar.cc \
 	goto.cc gotoloop.cc gotoexp.cc ipgoto.cc \
 	dot.cc asm.cc
 

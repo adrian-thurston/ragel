@@ -44,6 +44,8 @@ enum CodeStyle
 	GenFlatExp,
 	GenGotoLoop,
 	GenGotoExp,
+	GenSwitchLoop,
+	GenSwitchExp,
 	GenIpGoto
 };
 

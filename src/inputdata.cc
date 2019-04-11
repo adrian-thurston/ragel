@@ -680,7 +680,7 @@ void escapeLineDirectivePath( std::ostream &out, char *path )
 
 void InputData::parseArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "o:dnmleabjkS:M:I:vHh?-:sT:F:G:LpV", argc, argv );
+	ParamCheck pc( "o:dnmleabjkS:M:I:vHh?-:sT:F:W:G:LpV", argc, argv );
 
 	/* Decide if we were invoked using a path variable, or with an explicit path. */
 	const char *lastSlash = strrchr( argv[0], '/' );
@@ -912,6 +912,17 @@ void InputData::parseArgs( int argc, const char **argv )
 					codeStyle = GenIpGoto;
 					maxTransitions = 32;
 				} else {
+					error() << "-G" << pc.paramArg[0] << 
+							" is an invalid argument" << endl;
+					abortCompile( 1 );
+				}
+				break;
+			case 'W': 
+				if ( pc.paramArg[0] == '0' )
+					codeStyle = GenSwitchLoop;
+				else if ( pc.paramArg[0] == '1' )
+					codeStyle = GenSwitchExp;
+				else {
 					error() << "-G" << pc.paramArg[0] << 
 							" is an invalid argument" << endl;
 					abortCompile( 1 );
