@@ -28,7 +28,7 @@
 #include "parsedata.h"
 #include "inputdata.h"
 
-std::ostream &SwitchGotoLoop::ACTION_SWITCH()
+std::ostream &GotoLoop::ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -44,7 +44,7 @@ std::ostream &SwitchGotoLoop::ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoLoop::EOF_ACTION_SWITCH()
+std::ostream &GotoLoop::EOF_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -60,7 +60,7 @@ std::ostream &SwitchGotoLoop::EOF_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoLoop::FROM_STATE_ACTION_SWITCH()
+std::ostream &GotoLoop::FROM_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -76,7 +76,7 @@ std::ostream &SwitchGotoLoop::FROM_STATE_ACTION_SWITCH()
 	return out;
 }
 
-std::ostream &SwitchGotoLoop::TO_STATE_ACTION_SWITCH()
+std::ostream &GotoLoop::TO_STATE_ACTION_SWITCH()
 {
 	/* Walk the list of functions, printing the cases. */
 	for ( GenActionList::Iter act = red->actionList; act.lte(); act++ ) {
@@ -92,7 +92,7 @@ std::ostream &SwitchGotoLoop::TO_STATE_ACTION_SWITCH()
 	return out;
 }
 
-void SwitchGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
+void GotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->push != 0 )
@@ -100,7 +100,7 @@ void SwitchGotoLoop::NFA_PUSH_ACTION( RedNfaTarg *targ )
 	nfaPushActions.value( act );
 }
 
-void SwitchGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
+void GotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 {
 	int act = 0;
 	if ( targ->popTest != 0 )
@@ -108,7 +108,7 @@ void SwitchGotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 	nfaPopTrans.value( act );
 }
 
-std::ostream &SwitchGotoLoop::EXEC_FUNCS()
+std::ostream &GotoLoop::EXEC_FUNCS()
 {
 	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
@@ -150,7 +150,7 @@ std::ostream &SwitchGotoLoop::EXEC_FUNCS()
 	return out;
 }
 
-void SwitchGotoLoop::NFA_FROM_STATE_ACTION_EXEC()
+void GotoLoop::NFA_FROM_STATE_ACTION_EXEC()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -168,7 +168,7 @@ void SwitchGotoLoop::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-void SwitchGotoLoop::FROM_STATE_ACTIONS()
+void GotoLoop::FROM_STATE_ACTIONS()
 {
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
@@ -186,7 +186,7 @@ void SwitchGotoLoop::FROM_STATE_ACTIONS()
 	}
 }
 
-void SwitchGotoLoop::TO_STATE_ACTIONS()
+void GotoLoop::TO_STATE_ACTIONS()
 {
 	if ( redFsm->anyToStateActions() ) {
 		out <<
@@ -204,11 +204,11 @@ void SwitchGotoLoop::TO_STATE_ACTIONS()
 	}
 }
 
-void SwitchGotoLoop::REG_ACTIONS()
+void GotoLoop::REG_ACTIONS()
 {
 }
 
-void SwitchGotoLoop::EOF_ACTIONS()
+void GotoLoop::EOF_ACTIONS()
 {
 	if ( redFsm->anyEofActions() ) {
 		out <<

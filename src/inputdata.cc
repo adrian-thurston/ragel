@@ -903,9 +903,9 @@ void InputData::parseArgs( int argc, const char **argv )
 				break;
 			case 'G': 
 				if ( pc.paramArg[0] == '0' )
-					codeStyle = GenSwitchLoop;
+					codeStyle = GenGotoLoop;
 				else if ( pc.paramArg[0] == '1' )
-					codeStyle = GenSwitchExp;
+					codeStyle = GenGotoExp;
 				else if ( pc.paramArg[0] == '2' )
 					codeStyle = GenIpGoto;
 				else if ( pc.paramArg[0] == 'T' && pc.paramArg[1] == '2' ) {

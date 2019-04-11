@@ -92,17 +92,15 @@ CodeGenData *makeCodeGen( const HostLang *hostLang, const CodeGenArgs &args )
 			codeGen = new FlatVarExp( args );
 		break;
 
-	case GenSwitchLoop:
+	case GenGotoLoop:
 		if ( feature == GotoFeature )
-			codeGen = new SwitchGotoLoop(args);
-		else if ( feature == BreakFeature )
-			codeGen = new SwitchGotoLoop(args);
+			codeGen = new GotoLoop(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;
-	case GenSwitchExp:
+	case GenGotoExp:
 		if ( feature == GotoFeature )
-			codeGen = new SwitchGotoExp(args);
+			codeGen = new GotoExp(args);
 		else
 			id->error() << "unsupported lang/style combination" << endp;
 		break;

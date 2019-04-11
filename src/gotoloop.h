@@ -33,11 +33,11 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
-class SwitchGotoLoop
+class GotoLoop
 	: public Goto
 {
 public:
-	SwitchGotoLoop( const CodeGenArgs &args ) 
+	GotoLoop( const CodeGenArgs &args ) 
 		: Goto(args, Loop) {}
 
 	virtual std::ostream &ACTION_SWITCH();
@@ -58,13 +58,13 @@ public:
 
 namespace C
 {
-	class SwitchGotoLoop
+	class GotoLoop
 	:
-		public ::SwitchGotoLoop
+		public ::GotoLoop
 	{
 	public:
-		SwitchGotoLoop( const CodeGenArgs &args )
-			: ::SwitchGotoLoop( args )
+		GotoLoop( const CodeGenArgs &args )
+			: ::GotoLoop( args )
 		{}
 	};
 }
