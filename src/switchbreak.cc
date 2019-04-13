@@ -22,8 +22,214 @@
 
 #include "switchbreak.h"
 
+std::ostream &SwitchBreak::TRANS_GOTO( RedTransAp *trans, int level )
+{
+	out << "_trans = 1;\n";
+	return out;
+}
+
+void SwitchBreak::RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high )
+{
+	/* Get the mid position, staying on the lower end of the range. */
+	int mid = (low + high) >> 1;
+	RedTransEl *data = state->outRange.data;
+
+	/* Determine if we need to look higher or lower. */
+	bool anyLower = mid > low;
+	bool anyHigher = mid < high;
+
+	/* Determine if the keys at mid are the limits of the alphabet. */
+	bool limitLow = keyOps->eq( data[mid].lowKey, lower );
+	bool limitHigh = keyOps->eq( data[mid].highKey, upper );
+
+	if ( anyLower && anyHigher ) {
+		/* Can go lower and higher than mid. */
+		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
+				KEY(data[mid].lowKey) << " ) {\n";
+		RANGE_B_SEARCH( state, level+1, lower, keyOps->sub( data[mid].lowKey, 1 ), low, mid-1 );
+		out << TABS(level) << "} else if ( " << GET_KEY() << " > " << 
+				KEY(data[mid].highKey) << " ) {\n";
+		RANGE_B_SEARCH( state, level+1, keyOps->add( data[mid].highKey, 1 ), upper, mid+1, high );
+		out << TABS(level) << "} else {\n";
+		TRANS_GOTO(data[mid].value, level+1) << "\n";
+		out << TABS(level) << "}\n";
+	}
+	else if ( anyLower && !anyHigher ) {
+		/* Can go lower than mid but not higher. */
+		out << TABS(level) << "if ( " << GET_KEY() << " < " << 
+				KEY(data[mid].lowKey) << " ) {\n";
+		RANGE_B_SEARCH( state, level+1, lower, keyOps->sub( data[mid].lowKey, 1 ), low, mid-1 );
+
+		/* if the higher is the highest in the alphabet then there is no
+		 * sense testing it. */
+		if ( limitHigh ) {
+			out << TABS(level) << "} else {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else {
+			out << TABS(level) << "} else if ( " << GET_KEY() << " <= " << 
+					KEY(data[mid].highKey) << " ) {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+
+			out << "else {\n";
+			DEFAULT( state );
+			out << "}\n";
+		}
+	}
+	else if ( !anyLower && anyHigher ) {
+		/* Can go higher than mid but not lower. */
+		out << TABS(level) << "if ( " << GET_KEY() << " > " << 
+				KEY(data[mid].highKey) << " ) {\n";
+		RANGE_B_SEARCH( state, level+1, keyOps->add( data[mid].highKey, 1 ), upper, mid+1, high );
+
+		/* If the lower end is the lowest in the alphabet then there is no
+		 * sense testing it. */
+		if ( limitLow ) {
+			out << TABS(level) << "} else {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+		else {
+			out << TABS(level) << "} else if ( " << GET_KEY() << " >= " << 
+					KEY(data[mid].lowKey) << " ) {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+
+			out << "else {\n";
+			DEFAULT( state );
+			out << "}\n";
+		}
+	}
+	else {
+		/* Cannot go higher or lower than mid. It's mid or bust. What
+		 * tests to do depends on limits of alphabet. */
+		if ( !limitLow && !limitHigh ) {
+			out << TABS(level) << "if ( " << KEY(data[mid].lowKey) << " <= " << 
+					GET_KEY() << " && " << GET_KEY() << " <= " << 
+					KEY(data[mid].highKey) << " ) {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+
+			out << "else {\n";
+			DEFAULT( state );
+			out << "}\n";
+		}
+		else if ( limitLow && !limitHigh ) {
+			out << TABS(level) << "if ( " << GET_KEY() << " <= " << 
+					KEY(data[mid].highKey) << " ) {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+
+			out << "else {\n";
+			DEFAULT( state );
+			out << "}\n";
+		}
+		else if ( !limitLow && limitHigh ) {
+			out << TABS(level) << "if ( " << KEY(data[mid].lowKey) << " <= " << 
+					GET_KEY() << " ) {\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+
+			out << "else {\n";
+			DEFAULT( state );
+			out << "}\n";
+		}
+		else {
+			/* Both high and low are at the limit. No tests to do. */
+			out << TABS(level) << "{\n";
+			TRANS_GOTO(data[mid].value, level+1) << "\n";
+			out << TABS(level) << "}\n";
+		}
+	}
+}
+
+void SwitchBreak::SINGLE_SWITCH( RedStateAp *st )
+{
+	/* Load up the singles. */
+	int numSingles = st->outSingle.length();
+	RedTransEl *data = st->outSingle.data;
+
+	if ( numSingles == 1 ) {
+		/* If there is a single single key then write it out as an if. */
+		out << "\tif ( " << GET_KEY() << " == " << 
+				KEY(data[0].lowKey) << " ) {\n\t\t"; 
+
+		/* Virtual function for writing the target of the transition. */
+		TRANS_GOTO(data[0].value, 0) << "\n";
+		out << "\t}\n";
+
+		out << "else {\n";
+		NOT_SINGLE( st );
+		out << "}\n";
+	}
+	else if ( numSingles > 1 ) {
+		/* Write out single keys in a switch if there is more than one. */
+		out << "\tswitch( " << GET_KEY() << " ) {\n";
+
+		/* Write out the single indicies. */
+		for ( int j = 0; j < numSingles; j++ ) {
+			out << "\t\t case " << KEY(data[j].lowKey) << " {\n";
+			TRANS_GOTO(data[j].value, 0) << "\n";
+			out << "\t}\n";
+		}
+
+		out << "default {\n";
+		NOT_SINGLE( st );
+		out << "}\n";
+		
+		/* Close off the transition switch. */
+		out << "\t}\n";
+	}
+}
+
+void SwitchBreak::DEFAULT( RedStateAp *st )
+{
+	TRANS_GOTO( st->defTrans, 1 ) << "\n";
+}
+
+void SwitchBreak::NOT_SINGLE( RedStateAp *st )
+{
+	if ( st->outRange.length() > 0 ) {
+		RANGE_B_SEARCH( st, 1, keyOps->minKey, keyOps->maxKey,
+				0, st->outRange.length() - 1 );
+	}
+	else {
+		DEFAULT( st );
+	}
+}
+
 void SwitchBreak::LOCATE_TRANS()
 {
+	out <<
+		"	switch ( " << vCS() << " ) {\n";
+
+	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		if ( st == redFsm->errState ) {
+			out << "case " << st->id << " {\n";
+			out << "}\n";
+		}
+		else {
+			/* Label the state. */
+			out << "case " << st->id << " {\n";
+
+			/* Try singles. */
+			if ( st->outSingle.length() > 0 ) {
+				SINGLE_SWITCH( st );
+			}
+			else {
+				NOT_SINGLE( st );
+			}
+
+			out << "}\n";
+		}
+	}
+
+	out <<
+		"	}\n"
+		"\n";
+
 	out <<
 		"	" << keys << " = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
 		"	" << trans << " = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
