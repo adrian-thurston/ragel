@@ -40,7 +40,7 @@ struct SwitchVar
 
 	void VAR_COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error );
 
-	void LOCATE_TRANS();
+	//void LOCATE_TRANS();
 	void LOCATE_COND();
 };
 

@@ -38,12 +38,6 @@ struct SwitchBreak
 		TabBreak( args )
 	{}
 
-	std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
-	void RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high );
-	void SINGLE_SWITCH( RedStateAp *st );
-	void DEFAULT( RedStateAp *st );
-	void NOT_SINGLE( RedStateAp *st );
-	void LOCATE_TRANS();
 	void LOCATE_COND();
 };
 

@@ -22,64 +22,6 @@
 
 #include "switchgoto.h"
 
-void SwitchGoto::LOCATE_TRANS()
-{
-	out <<
-		"	" << keys << " = " << OFFSET( ARR_REF( transKeys ), ARR_REF( keyOffsets ) + "[" + vCS() + "]" ) << ";\n"
-		"	" << trans << " = " << CAST(UINT()) << ARR_REF( indexOffsets ) << "[" << vCS() << "];\n"
-		"\n"
-		"	" << klen << " = " << CAST( "int" ) << ARR_REF( singleLens ) << "[" << vCS() << "];\n"
-		"	if ( " << klen << " > 0 ) {\n"
-		"		" << INDEX( ALPH_TYPE(), "_lower" ) << " = " << keys << ";\n"
-		"		" << INDEX( ALPH_TYPE(), "_upper" ) << " = " << keys << " + " << klen << " - 1;\n"
-		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
-		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower ) {\n"
-		"				" << keys << " += " << klen << ";\n"
-		"				" << trans << " += " << CAST( UINT() ) << "" << klen << ";\n"
-		"				break;\n"
-		"			}\n"
-		"\n"
-		"			_mid = _lower + ((_upper-_lower) >> 1);\n"
-		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 1;\n"
-		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
-		"				_lower = _mid + 1;\n"
-		"			else {\n"
-		"				" << trans << " += " << CAST( UINT() ) << "(_mid - " << keys << ");\n"
-		"				goto " << _match << ";\n"
-		"			}\n"
-		"		}\n"
-		"	}\n"
-		"\n"
-		"	" << klen << " = " << CAST("int") << ARR_REF( rangeLens ) << "[" << vCS() << "];\n"
-		"	if ( " << klen << " > 0 ) {\n"
-		"		" << INDEX( ALPH_TYPE(), "_lower" ) << " = " << keys << ";\n"
-		"		" << INDEX( ALPH_TYPE(), "_upper" ) << " = " << keys << " + (" << klen << "<<1) - 2;\n"
-		"		" << INDEX( ALPH_TYPE(), "_mid" ) << ";\n"
-		"		while ( " << TRUE() << " ) {\n"
-		"			if ( _upper < _lower ) {\n"
-		"				" << trans << " += " << CAST( UINT() ) << "" << klen << ";\n"
-		"				break;\n"
-		"			}\n"
-		"\n"
-		"			_mid = _lower + (((_upper-_lower) >> 1) & ~1);\n"
-		"			if ( " << GET_KEY() << " < " << DEREF( ARR_REF( transKeys ), "_mid" ) << " )\n"
-		"				_upper = _mid - 2;\n"
-		"			else if ( " << GET_KEY() << " > " << DEREF( ARR_REF( transKeys ), "_mid + 1" ) << " )\n"
-		"				_lower = _mid + 2;\n"
-		"			else {\n"
-		"				" << trans << " += " << CAST( UINT() ) << "((_mid - " << keys << ")>>1);\n"
-		"				break;\n"
-		"			}\n"
-		"		}\n"
-		"	}\n"
-		"\n";
-
-	out << EMIT_LABEL( _match );
-}
-
-
 void SwitchGoto::LOCATE_COND()
 {
 	if ( red->condSpaceList.length() > 0 ) {

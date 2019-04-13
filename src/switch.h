@@ -48,8 +48,16 @@ public:
 		type(type)
 	{}
 
+	std::ostream &TRANS_GOTO( int off, RedTransAp *trans, int level );
+	void RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high );
+	void SINGLE_SWITCH( RedStateAp *st );
+	void DEFAULT( RedStateAp *st );
+	void NOT_SINGLE( RedStateAp *st );
+	void LOCATE_TRANS();
+
 protected:
 	Type type;
+	int transBase;
 
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();

@@ -38,7 +38,6 @@ struct SwitchGoto
 		TabGoto( args )
 	{}
 
-	void LOCATE_TRANS();
 	void LOCATE_COND();
 };
 
