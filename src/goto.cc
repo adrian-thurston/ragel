@@ -95,93 +95,6 @@ void Goto::taActions()
 	actions.finish();
 }
 
-void Goto::NFA_POP()
-{
-	if ( redFsm->anyNfaStates() ) {
-		out <<
-			"	if ( nfa_len > 0 ) {\n";
-
-		if ( redFsm->bAnyNfaCondRefs )
-			out << "	int " << cpc << ";\n";
-
-		out <<
-			"		nfa_count += 1;\n"
-			"		nfa_len -= 1;\n"
-			"		" << P() << " = nfa_bp[nfa_len].p;\n"
-			;
-
-		if ( redFsm->bAnyNfaPops ) {
-			out << 
-				"		int _pop_test = 1;\n"
-				"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
-
-			/* Loop the actions. */
-			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
-					redAct.lte(); redAct++ )
-			{
-				if ( redAct->numNfaPopTestRefs > 0 ) {
-					/* Write the entry label. */
-					out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
-
-					/* Write each action in the list of action items. */
-					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
-						NFA_CONDITION( out, item->value, item.last() );
-
-					out << "\n\t" << CEND() << "}\n";
-				}
-			}
-
-			out <<
-				"		}\n";
-
-			out <<
-				"		if ( _pop_test ) {\n"
-				"			" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			NFA_POST_POP();
-
-			out << 
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto _test_eof;\n";
-
-
-			out <<
-				"			goto _resume;\n"
-				"		}\n";
-
-			if ( red->nfaPostPopExpr != 0 ) {
-				out <<
-					"		else {\n";
-
-				NFA_POST_POP();
-
-				out <<
-					"		}\n";
-			}
-		}
-		else {
-			out <<
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n";
-
-			NFA_POST_POP();
-
-			out << 
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto _test_eof;\n";
-
-			out <<
-				"		goto _resume;\n";
-		}
-
-		outLabelUsed = true;
-		out << 
-			"		goto _pop;\n"
-			"	}\n";
-	}
-}
-
-
-
 void Goto::GOTO_HEADER( RedStateAp *state )
 {
 	/* Label the state. */
@@ -430,7 +343,7 @@ void Goto::STATE_GOTO_ERROR()
 	outLabelUsed = true;
 	RedStateAp *state = redFsm->errState;
 	out << "case " << state->id << ":\n";
-	out << "	goto _pop;\n";
+	out << "	goto _again;\n";
 }
 
 std::ostream &Goto::STATE_GOTOS()
@@ -909,6 +822,7 @@ void Goto::writeExec()
 
 	out << "	{\n";
 
+	DECLARE( INT(), cpc );
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 				|| redFsm->anyFromStateActions() )
@@ -928,25 +842,53 @@ void Goto::writeExec()
 		out << "	int _nbreak;\n";
 	}
 
-	if ( !noEnd ) {
-		testEofUsed = true;
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
-	}
-
-	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
-		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _pop;\n";
-	}
-
 	out << "_resume:\n";
+
+	/* Do we break out on no more input. */
+	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
+	if ( !noEnd ) {
+		if ( eof ) {
+			out << 
+				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
+				"			goto _out;\n";
+		}
+		else {
+			out << 
+				"       if ( " << P() << " == " << PE() << " )\n"
+				"			goto _out;\n";
+		}
+	}
+
+	NFA_PUSH( vCS() ); 
+
+	if ( !noEnd && eof ) {
+		out << 
+			"if ( " << P() << " == " << vEOF() << " ) {\n";
+
+		out <<
+			"	switch ( " << vCS() << " ) {\n";
+
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+
+			out << "	case " << st->id << ": {\n";
+			if ( st->eofTrans != 0 ) {
+				TRANS_GOTO( st->eofTrans, 0 );
+			}
+
+			out <<
+				"	break;\n}\n";
+		}
+
+		out << 
+			"	}\n";
+
+		out << 
+			"	goto _again;\n"
+			"}\n";
+	}
 
 	FROM_STATE_ACTIONS();
 
-	NFA_PUSH( vCS() ); 
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTOS() <<
@@ -960,107 +902,67 @@ void Goto::writeExec()
 
 	out << "_again:\n";
 
+	if ( !noEnd && eof ) {
+		out << 
+			"	if ( " << P() << " == " << vEOF() << " ) {\n"
+			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"			goto _out;\n"
+			"	}\n"
+			"	else {\n";
+	}
+
 	TO_STATE_ACTIONS();
 
 	if ( redFsm->errState != 0 ) {
-		outLabelUsed = true;
 		out << 
-			"	if ( " << vCS() << " == " << redFsm->errState->id << " )\n"
-			"		goto _pop;\n";
+			"	if ( " << vCS() << " != " << redFsm->errState->id << " ) {\n";
 	}
 
-	if ( !noEnd ) {
+	out << 
+		"	" << P() << " += 1;\n"
+		"	goto _resume;\n";
+
+	if ( redFsm->errState != 0 ) {
 		out << 
-			"	" << P() << " += 1;\n"
-			"	if ( " << P() << " != " << PE() << " )\n"
-			"		goto _resume;\n";
-	}
-	else {
-		out << 
-			"	" << P() << " += 1;\n"
-			"	goto _resume;\n";
+			"	}\n";
 	}
 
-	if ( testEofUsed )
-		out << "	_test_eof: {}\n";
-
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
-		out << 
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
-
-		NFA_PUSH( vCS() );
-
-		out <<
-			"	switch ( " << vCS() << " ) {\n";
-
-		bool okeydokey = false;
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			if ( st->outCondSpace != 0 ) {
-				out << "	case " << st->id << ": {\n";
-				out << "int ck = 0;\n";
-				for ( GenCondSet::Iter csi = st->outCondSpace->condSet; csi.lte(); csi++ ) {
-					out << "if ( ";
-					CONDITION( out, *csi );
-					Size condValOffset = (1 << csi.pos());
-					out << " ) ck += " << condValOffset << ";\n";
-				}
-
-				out << "	switch ( ck ) {\n";
-				for ( CondKeySet::Iter k = st->outCondKeys; k.lte(); k++ ) {
-					out << "case " << *k << ": goto _okeydokey;\n";
-					okeydokey = true;
-				}
-				out << "}\n";
-				out << vCS() << " = " << ERROR_STATE() << ";\n";
-				out << "goto _pop;\n";
-				outLabelUsed = true;
-
-				out << "}\n";
-			}
-
-		}
-
+	if ( !noEnd && eof ) {
 		out <<
 			"	}\n";
-
-		if ( okeydokey ) {
-			out <<
-				"_okeydokey: {}\n";
-		}
-
-		EOF_ACTIONS();
-
-		if ( redFsm->anyEofTrans() ) {
-			out <<
-				"	switch ( " << vCS() << " ) {\n";
-
-			for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-				if ( st->eofTrans != 0 ) {
-					RedCondPair *cond = st->eofTrans->outCond( 0 );
-					out << "	case " << st->id << ": goto ctr" << cond->id << ";\n";
-				}
-			}
-
-			out <<
-				"	}\n";
-		}
-
-
-		out <<
-			"	}\n"
-			"\n";
-
 	}
 
-	out <<
-		"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-		"		goto _out; ";
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len == 0 )\n"
+			"		goto _out;\n"
+			"\n"
+			"	nfa_count += 1;\n"
+			"	nfa_len -= 1;\n"
+			"	" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
 
-	if ( outLabelUsed )
-		out << "	_pop: {}\n";
+		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
 
-	NFA_POP();
+			NFA_POP_TEST_EXEC();
+
+			out <<
+				"	if ( _pop_test )\n"
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"	else\n"
+				"		" << vCS() << " = " << ERROR_STATE() << ";\n";
+		}
+		else {
+			out <<
+				"	" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+		}
+
+		NFA_POST_POP();
+
+		out << "goto _resume;\n";
+	}
 
 	out << "_out: {}\n";
 

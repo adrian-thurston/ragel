@@ -969,6 +969,33 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 	}
 }
 
+void CodeGen::NFA_POP_TEST_EXEC()
+{
+	out << 
+		"		int _pop_test = 1;\n"
+		"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
+
+	/* Loop the actions. */
+	for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
+			redAct.lte(); redAct++ )
+	{
+		if ( redAct->numNfaPopTestRefs > 0 ) {
+			/* Write the entry label. */
+			out << "\t " << CASE( STR( redAct->actListId+1 ) ) << " {\n";
+
+			/* Write each action in the list of action items. */
+			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
+				NFA_CONDITION( out, item->value, item.last() );
+
+			out << CEND() << "}\n";
+		}
+	}
+
+	out <<
+		"		}\n"
+		"\n";
+}
+
 
 string CodeGen::ERROR_STATE()
 {

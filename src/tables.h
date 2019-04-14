@@ -194,7 +194,6 @@ struct TabGoto
 
 	void NFA_POP() {}
 
-	void NFA_POP_TEST_EXEC();
 	void writeExec();
 };
 
@@ -223,7 +222,6 @@ struct TabBreak
 
 	void NFA_POP() {}
 
-	void NFA_POP_TEST_EXEC();
 	void writeExec();
 
 	bool loopLabels;
@@ -252,7 +250,6 @@ struct TabVar
 	void BREAK( ostream &ret, int targState, bool csForced );
 	void NBREAK( ostream &ret, int targState, bool csForced );
 
-	void NFA_POP_TEST_EXEC();
 	void NFA_POP() {}
 
 	std::string BREAK( GotoLabel &label );

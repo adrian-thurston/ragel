@@ -182,6 +182,7 @@ protected:
 
 	void ACTION( ostream &ret, GenAction *action, IlOpts opts );
 	void NFA_CONDITION( ostream &ret, GenAction *condition, bool last );
+	void NFA_POP_TEST_EXEC();
 	void CONDITION( ostream &ret, GenAction *condition );
 	string ALPH_TYPE();
 
