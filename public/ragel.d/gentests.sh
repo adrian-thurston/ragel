@@ -44,9 +44,9 @@ trap sig_exit SIGTERM
 wk=working
 test -d $wk || mkdir $wk
 
-while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
+while getopts "gcnmleT:F:W:G:P:CDJRAZOUKY-:" opt; do
 	case $opt in
-		B|T|F|G|P)
+		T|F|W|G|P)
 			genflags="$genflags -$opt$OPTARG"
 			gen_opts="$gen_opts -$opt$OPTARG"
 		;;
@@ -83,8 +83,13 @@ while getopts "gcnmleB:T:F:G:P:CDJRAZOUKY-:" opt; do
 	esac
 done
 
-[ -z "$langflags" ]   && langflags="-C --asm -R -Y -O -U -J -Z -D -A -K"
-[ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -G0 -G1 -G2 -n -m -e --string-tables"
+#
+# Temporarily reduced.
+#
+#[ -z "$langflags" ]   && langflags="-C --asm -R -Y -O -U -J -Z -D -A -K"
+[ -z "$langflags" ]   && langflags="-C -R -Y -O -U -J -Z -D -A -K"
+
+[ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -W0 -W1 -G0 -G1 -G2 -n -m -e --string-tables"
 
 shift $((OPTIND - 1));
 
