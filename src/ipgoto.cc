@@ -341,6 +341,18 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	if ( state->labelNeeded ) 
 		out << "st" << state->id << ":\n";
 
+	/* need to do this if the transition is an eof transition, or if the action
+	 * contains fexec. Otherwise, no need. */
+	if ( redFsm->anyEofActivity() ) {
+		out << "	if ( " << P() << " == " << vEOF() << " ) {\n"
+			"			if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"				goto _out;\n"
+			"			else\n"
+			"				goto _pop;\n"
+			"		}\n";
+		outLabelUsed = true;
+	}
+
 	if ( state->toStateAction != 0 ) {
 		/* Write every action in the list. */
 		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
@@ -416,6 +428,8 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 		}
 	}
 	else {
+		out << "{\n";
+
 		out << TABS(level) << "int ck = 0;\n";
 		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
 			out << TABS(level) << "if ( ";
@@ -430,6 +444,8 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 		if ( trans->errCond() != 0 ) {
 			COND_GOTO( trans->errCond(), level+1 ) << "\n";
 		}
+
+		out << "}\n";
 	}
 
 	return out;
@@ -564,46 +580,14 @@ std::ostream &IpGoto::STATE_GOTOS()
 	return out;
 }
 
-
 std::ostream &IpGoto::FINISH_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofAction != 0 && st->eofTrans == 0 ) {
-			if ( st->eofAction->eofRefs == 0 )
-				st->eofAction->eofRefs = new IntSet;
-			st->eofAction->eofRefs->insert( st->id );
-		}
-	}
-
-	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
-		if ( act->eofRefs != 0 ) {
-			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
-				out << "	case " << *pst << ": \n";
-				if ( ! pst.last() )
-					out << "		" << FALLTHROUGH() << "\n";
-			}
-
-			/* Write each action in the eof action list. */
-			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
-				ACTION( out, item->value, IlOpts( STATE_ERR_STATE, true, false ) );
-			out << "\n\tbreak;\n";
-		}
-	}
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
-			RedCondPair *cond = st->eofTrans->outCond( 0 );
 			out <<
 				"	case " << st->id << ":\n";
 
-			if ( st->eofAction != 0 ) {
-				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
-					ACTION( out, item->value, IlOpts( STATE_ERR_STATE, true, false ) );
-
-			}
-
-			out <<
-				"		goto st" << cond->targ->id << ";\n";
+			TRANS_GOTO( st->eofTrans, 1 );
 		}
 	}
 
@@ -714,6 +698,7 @@ void IpGoto::writeExec()
 
 	out << "	{\n";
 
+	DECLARE( INT(), cpc );
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
 
@@ -756,7 +741,7 @@ void IpGoto::writeExec()
 	if ( testEofUsed ) 
 		out << "	_test_eof: {}\n";
 
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofActivity() ) {
 		out <<
 			"	if ( " << P() << " == " << vEOF() << " )\n"
 			"	{\n";
@@ -829,7 +814,37 @@ void IpGoto::writeExec()
 	if ( outLabelUsed ) 
 		out << "	_pop: {}\n";
 
-	NFA_POP();
+	if ( redFsm->anyNfaStates() ) {
+		out <<
+			"	if ( nfa_len == 0 )\n"
+			"		goto _out;\n"
+			"\n"
+			"	nfa_count += 1;\n"
+			"	nfa_len -= 1;\n"
+			"	" << P() << " = nfa_bp[nfa_len].p;\n"
+			;
+
+		if ( redFsm->bAnyNfaPops ) {
+			NFA_FROM_STATE_ACTION_EXEC();
+
+			NFA_POP_TEST_EXEC();
+
+			out <<
+				"	if ( _pop_test )\n"
+				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"	else\n"
+				"		" << vCS() << " = " << ERROR_STATE() << ";\n";
+		}
+		else {
+			out <<
+				"	" << vCS() << " = nfa_bp[nfa_len].state;\n";
+
+		}
+
+		NFA_POST_POP();
+
+		out << "goto _resume;\n";
+	}
 
 	out << "_out: {}\n";
 
