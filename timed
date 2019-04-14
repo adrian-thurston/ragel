@@ -17,7 +17,7 @@ fi
 for D in $DIRS; do
 	cd $D
 	echo ------- $D
-	./gentests $ARGS | xargs -n1 -P4 bash
+	./gentests $ARGS | xargs -n1 -P2 bash
 	WORKING="$WORKING $D/working"
 	cd $OLDPWD
 done
