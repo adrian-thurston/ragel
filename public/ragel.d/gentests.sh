@@ -174,7 +174,7 @@ function lang_opts()
 			code_suffix=cpp;
 			interpreted=false
 			compiler=$cxx_compiler;
-			host_ragel=$RAGEL_C_BIN
+			host_ragel=$RAGEL_BIN
 			flags="-Wall -O3 -I. -Wno-variadic-macros"
 			libs=""
 			prohibit_flags=""
@@ -184,7 +184,7 @@ function lang_opts()
 			code_suffix=m;
 			interpreted=false
 			compiler=$objc_compiler
-			host_ragel=$RAGEL_C_BIN
+			host_ragel=$RAGEL_BIN
 			flags="`gnustep-config --objc-flags`"
 			libs="-lobjc -lgnustep-base"
 			prohibit_flags=""
