@@ -30,6 +30,19 @@
 
 using std::ostringstream;
 
+IpLabel *Goto::allocateLabels( IpLabel *labels, IpLabel::Type type, int n )
+{
+	if ( labels == 0 ) {
+		labels = new IpLabel[n];
+		for ( int id = 0; id < n; id++ ) {
+			labels[id].type = type;
+			labels[id].stid = id;
+		}
+	}
+
+	return labels;
+}
+
 void Goto::setTableState( TableArray::State state )
 {
 	for ( ArrayVector::Iter i = arrayVector; i.lte(); i++ ) {
@@ -38,11 +51,10 @@ void Goto::setTableState( TableArray::State state )
 	}
 }
 
-
 /* Emit the goto to take for a given transition. */
 std::ostream &Goto::COND_GOTO( RedCondPair *cond, int level )
 {
-	out << TABS(level) << "goto ctr" << cond->id << ";";
+	out << TABS(level) << "goto " << ctrLabel[cond->id].reference() << ";";
 	return out;
 }
 
@@ -55,7 +67,7 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans, int level )
 		RedCondPair *cond = trans->outCond( 0 );
 
 		/* Go to the transition which will go to the state. */
-		out << TABS(level) << "goto ctr" << cond->id << ";";
+		out << TABS(level) << "goto " << ctrLabel[cond->id].reference() << ";";
 	}
 	else {
 		out << TABS(level) << "int ck = 0;\n";
@@ -378,7 +390,8 @@ std::ostream &Goto::STATE_GOTOS()
 std::ostream &Goto::TRANSITION( RedCondPair *pair )
 {
 	/* Write the label for the transition so it can be jumped to. */
-	out << "	ctr" << pair->id << ": ";
+	if ( ctrLabel[pair->id].isReferenced )
+		out << "_ctr" << pair->id << ": ";
 
 	/* Destination state. */
 	if ( pair->action != 0 && pair->action->anyCurStateRef() )
@@ -820,7 +833,10 @@ void Goto::writeExec()
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << "	{\n";
+	int maxCtrId = redFsm->nextCondId > redFsm->nextTransId ? redFsm->nextCondId : redFsm->nextTransId;
+	ctrLabel = allocateLabels( ctrLabel, IpLabel::Ctr, maxCtrId );
+
+	out << "{\n";
 
 	DECLARE( INT(), cpc );
 	if ( type == Loop ) {
@@ -966,5 +982,5 @@ void Goto::writeExec()
 
 	out << "_out: {}\n";
 
-	out << "	}\n";
+	out << "}\n";
 }

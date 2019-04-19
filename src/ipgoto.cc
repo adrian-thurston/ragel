@@ -83,7 +83,7 @@ void IpGoto::EOF_CHECK( ostream &ret, int gotoDest )
 {
 	ret << 
 		"       if ( " << P() << " == " << PE() << " )\n"
-		"               goto " << ipLabel[gotoDest].reference() << ";\n";
+		"               goto " << eofLabel[gotoDest].reference() << ";\n";
 
 	testEofUsed = true;
 }
@@ -95,7 +95,7 @@ void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret, gotoDest );
 
-	ret << "goto st" << gotoDest << ";";
+	ret << "goto " << stLabel[gotoDest].reference() << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -132,7 +132,7 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret, callDest );
 
-	ret << "goto st" << callDest << ";";
+	ret << "goto " << stLabel[callDest].reference() << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -294,7 +294,8 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			anyWritten = true;
 
 			/* Write the label for the transition so it can be jumped to. */
-			out << "ctr" << trans->id << ":\n";
+			if ( ctrLabel[trans->id].isReferenced )
+				out << "_ctr" << trans->id << ":\n";
 
 			/* If the action contains a next, then we must preload the current
 			 * state since the action may or may not set it. */
@@ -324,7 +325,7 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( trans->action->anyNextStmt() )
 				out << "\n\tgoto _again;\n";
 			else
-				out << "\n\tgoto st" << trans->targ->id << ";\n";
+				out << "\n\tgoto " << stLabel[trans->targ->id].reference() << ";\n";
 		}
 	}
 
@@ -338,8 +339,8 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 {
 	IN_TRANS_ACTIONS( state );
 
-	if ( state->labelNeeded ) 
-		out << "st" << state->id << ":\n";
+	if ( stLabel[state->id].isReferenced ) 
+		out << "_st" << state->id << ":\n";
 
 	/* need to do this if the transition is an eof transition, or if the action
 	 * contains fexec. Otherwise, no need. */
@@ -368,7 +369,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 			out <<
 				"	" << P() << "+= 1;\n"
 				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto " << ipLabel[state->id].reference() << ";\n";
+				"		goto " << eofLabel[state->id].reference() << ";\n";
 		}
 		else {
 			out << 
@@ -401,8 +402,8 @@ void IpGoto::STATE_GOTO_ERROR()
 	IN_TRANS_ACTIONS( state );
 
 	out << "st_case_" << state->id << ":\n";
-	if ( state->labelNeeded ) 
-		out << "st" << state->id << ":\n";
+	if ( stLabel[state->id].isReferenced ) 
+		out << "_st" << state->id << ":\n";
 
 	/* Break out here. */
 	outLabelUsed = true;
@@ -420,11 +421,11 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 		RedCondPair *cond = trans->outCond( 0 );
 		if ( cond->action != 0 ) {
 			/* Go to the transition which will go to the state. */
-			out << TABS(level) << "goto ctr" << cond->id << ";";
+			out << TABS(level) << "goto " << ctrLabel[trans->p.id].reference() << ";";
 		}
 		else {
 			/* Go directly to the target state. */
-			out << TABS(level) << "goto st" << cond->targ->id << ";";
+			out << TABS(level) << "goto " << stLabel[cond->targ->id].reference() << ";";
 		}
 	}
 	else {
@@ -457,11 +458,11 @@ std::ostream &IpGoto::COND_GOTO( RedCondPair *cond, int level )
 	/* Existing. */
 	if ( cond->action != 0 ) {
 		/* Go to the transition which will go to the state. */
-		out << TABS(level) << "goto ctr" << cond->id << ";";
+		out << TABS(level) << "goto " << ctrLabel[cond->id].reference() << ";";
 	}
 	else {
 		/* Go directly to the target state. */
-		out << TABS(level) << "goto st" << cond->targ->id << ";";
+		out << TABS(level) << "goto " << stLabel[cond->targ->id].reference() << ";";
 	}
 
 	return out;
@@ -470,9 +471,9 @@ std::ostream &IpGoto::COND_GOTO( RedCondPair *cond, int level )
 std::ostream &IpGoto::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( ipLabel[st->id].isReferenced ) {
+		if ( eofLabel[st->id].isReferenced ) {
 			testEofUsed = true;
-			out << "	" << ipLabel[st->id].define() << ": " << vCS() << " = " << 
+			out << "	" << eofLabel[st->id].define() << ": " << vCS() << " = " << 
 					st->id << "; goto _test_eof; \n";
 		}
 	}
@@ -483,7 +484,7 @@ std::ostream &IpGoto::AGAIN_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << 
-			"		case " << st->id << ": goto st" << st->id << ";\n";
+			"		case " << st->id << ": goto " << stLabel[st->id].reference() << ";\n";
 	}
 	return out;
 }
@@ -681,14 +682,13 @@ void IpGoto::NFA_FROM_STATE_ACTION_EXEC()
 	}
 }
 
-
 void IpGoto::writeExec()
 {
-	if ( ipLabel == 0 ) {
-		ipLabel = new IpLabel[redFsm->stateList.length()];
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ )
-			ipLabel[st->id].stid = st->id;
-	}
+	int maxCtrId = redFsm->nextCondId > redFsm->nextTransId ? redFsm->nextCondId : redFsm->nextTransId;
+
+	stLabel = allocateLabels( stLabel, IpLabel::St, redFsm->nextStateId );
+	eofLabel = allocateLabels( eofLabel, IpLabel::TestEof, redFsm->nextStateId );
+	ctrLabel = allocateLabels( ctrLabel, IpLabel::Ctr, maxCtrId );
 
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */

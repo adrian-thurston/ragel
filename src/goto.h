@@ -33,6 +33,54 @@ struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;
 
+struct IpLabel
+{
+	IpLabel()
+	:
+		type(None),
+		stid(0),
+		isReferenced(false)
+	{}
+
+	enum Type
+	{
+		None = 1,
+		TestEof,
+		Ctr,
+		St
+	};
+
+	std::string reference()
+	{
+		isReferenced = true;
+		return define();
+	}
+
+	std::string define()
+	{
+		std::stringstream ss;
+		switch ( type ) {
+			case None: break;
+			case TestEof:
+				ss << "_test_eof" << stid;
+				break;
+			case Ctr:
+				ss << "_ctr" << stid;
+				break;
+			case St:
+				ss << "_st" << stid;
+				break;
+		}
+
+		return ss.str();
+	}
+
+	Type type;
+	int stid;
+	bool isReferenced;
+};
+
+
 /*
  * Goto driven fsm.
  */
@@ -55,7 +103,8 @@ public:
 		actions(           "actions",             *this ),
 		toStateActions(    "to_state_actions",    *this ),
 		fromStateActions(  "from_state_actions",  *this ),
-		eofActions(        "eof_actions",         *this )
+		eofActions(        "eof_actions",         *this ),
+		ctrLabel(0)
 	{}
 
 	void tableDataPass();
@@ -77,6 +126,8 @@ public:
 	TableArray toStateActions;
 	TableArray fromStateActions;
 	TableArray eofActions;
+
+	IpLabel *ctrLabel;
 
 	void taActions();
 	void taToStateActions();
@@ -139,6 +190,8 @@ public:
 	virtual void TO_STATE_ACTIONS() = 0;
 	virtual void REG_ACTIONS() = 0;
 	virtual void EOF_ACTIONS() = 0;
+
+	IpLabel *allocateLabels( IpLabel *labels, IpLabel::Type type, int n );
 };
 
 #endif
