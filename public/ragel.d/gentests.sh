@@ -83,12 +83,7 @@ while getopts "gcnmleT:F:W:G:P:CDJRAZOUKY-:" opt; do
 	esac
 done
 
-#
-# Temporarily reduced.
-#
-#[ -z "$langflags" ]   && langflags="-C --asm -R -Y -O -U -J -Z -D -A -K"
-[ -z "$langflags" ]   && langflags="-C -R -Y -O -U -J -Z -D -A -K"
-
+[ -z "$langflags" ]   && langflags="-C --asm -R -Y -O -U -J -Z -D -A -K"
 [ -z "$genflags" ]    && genflags="-T0 -T1 -F0 -F1 -W0 -W1 -G0 -G1 -G2 -n -m -e --string-tables"
 
 shift $((OPTIND - 1));
