@@ -437,6 +437,8 @@ struct CodeGenData
 		red->redFsm = 0;
 	}
 
+	void collectReferences();
+
 protected:
 
 	Reducer *red;
@@ -459,7 +461,6 @@ protected:
 	bool lineDirectives;
 	bool cleared;
 
-	void collectReferences();
 	bool referencesCollected;
 
 	void genOutputLineDirective( std::ostream &out ) const;
