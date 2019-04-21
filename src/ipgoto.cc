@@ -674,12 +674,12 @@ void IpGoto::writeData()
 
 void IpGoto::NFA_FROM_STATE_ACTION_EXEC()
 {
-	if ( redFsm->anyFromStateActions() ) {
-		/* Unimplemented feature. Don't have the from state actions array in
-		 * this mode. Need to add it, or to alter the NFA pop codegen to be
-		 * consistent with the mode. */ 
-		assert( false );
-	}
+//	if ( redFsm->anyFromStateActions() ) {
+//		/* Unimplemented feature. Don't have the from state actions array in
+//		 * this mode. Need to add it, or to alter the NFA pop codegen to be
+//		 * consistent with the mode. */ 
+//		assert( false );
+//	}
 }
 
 void IpGoto::writeExec()
