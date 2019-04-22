@@ -252,7 +252,7 @@ function lang_opts()
 			host_ragel=$RAGEL_ASM_BIN
 			flags=""
 			libs=""
-			prohibit_flags="-T0 -T1 -F0 -F1 -G0 -G1 --string-tables"
+			prohibit_flags="-T0 -T1 -F0 -F1 -W0 -W1 -G0 -G1 --string-tables"
 		;;
 		rust)
 			lang_opt="-U"
