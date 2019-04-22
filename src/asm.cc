@@ -468,7 +468,7 @@ void AsmCodeGen::NBREAK( ostream &ret, int targState, bool csForced )
 
 	ret <<
 		"	movb	$1, " << NBREAK() << "\n"
-		"	jmp		" << LABEL( "out" ) << "\n";
+		"	jmp		" << LABEL( "pop" ) << "\n";
 }
 
 /* Write out an inline tree structure. Walks the list and possibly calls out
@@ -667,14 +667,14 @@ void AsmCodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 		}
 
 		out <<
-			"	jmp	" << LABEL( "out" ) << "\n"
+			"	jmp	" << LABEL( "pop" ) << "\n"
 			"102:\n";
 	}
 	else {
 		CONDITION( ret, condition );
 		out <<
 			"	test	%eax, %eax\n"
-			"	jz		" << LABEL( "out" ) << "\n";
+			"	jz		" << LABEL( "pop" ) << "\n";
 	}
 }
 
@@ -1558,7 +1558,7 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( redFsm->anyRegNbreak() ) {
 				out <<
 					"	cmpb	$0, " << NBREAK() << "\n"
-					"	jne		" << LABEL( "out" ) << "\n";
+					"	jne		" << LABEL( "pop" ) << "\n";
 				outLabelUsed = true;
 			}
 				
@@ -1581,6 +1581,32 @@ void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
 
 	if ( state->labelNeeded ) 
 		out << LABEL( "st", state->id ) << ":\n";
+
+	/* need to do this if the transition is an eof transition, or if the action
+	 * contains fexec. Otherwise, no need. */
+	if ( redFsm->anyEofActivity() ) {
+		out <<
+			"	cmpq	" << P() << ", " << vEOF() << "\n"
+			"	jne		" << LABEL( "skip", state->id ) << "\n";
+
+		if ( state->isFinal ) {
+			out <<
+//				"	cmpq	" << vCS() << ", " << FIRST_FINAL_STATE() << "\n"
+				"	jmp		" << LABEL( "out" ) << "\n";
+		}
+
+		out << 
+			"	jmp		" << LABEL( "pop" ) << "\n" <<
+			LABEL( "skip", state->id ) << ":\n";
+
+//		out << "	if ( " << P() << " == " << vEOF() << " ) {\n"
+//			"			if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+//			"				goto _out;\n"
+//			"			else\n"
+//			"				goto _pop;\n"
+//			"		}\n";
+//		outLabelUsed = true;
+	}
 
 	if ( state->toStateAction != 0 ) {
 		/* Remember that we wrote an action. Write every action in the list. */
@@ -1640,7 +1666,7 @@ void AsmCodeGen::STATE_GOTO_ERROR()
 
 	out << 
 		"	movq	$" << state->id << ", " << vCS() << "\n"
-		"	jmp		" << LABEL( "out" ) << "\n";
+		"	jmp		" << LABEL( "pop" ) << "\n";
 }
 
 std::string AsmCodeGen::TRANS_GOTO_TARG( RedCondPair *pair )
@@ -1745,46 +1771,10 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 	long done = nextLmSwitchLabel++;
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->eofAction != 0 ) {
-			if ( st->eofAction->eofRefs == 0 )
-				st->eofAction->eofRefs = new IntSet;
-			st->eofAction->eofRefs->insert( st->id );
-		}
-	}
-
-
-	for ( GenActionTableMap::Iter act = redFsm->actionMap; act.lte(); act++ ) {
-		if ( act->eofRefs != 0 ) {
-			for ( IntSet::Iter pst = *act->eofRefs; pst.lte(); pst++ ) {
-				long l = nextLmSwitchLabel++;
-				out <<
-					"	# eof ref case\n"
-					"	cmpq	$" << *pst << ", %rax\n"
-					"	jne		" << LABEL( "finish_next", l ) << "\n";
-
-				/* Write each action in the eof action list. */
-				for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
-					ACTION( out, item->value, STATE_ERR_STATE, true, false );
-
-				out <<
-					"	jmp		" << LABEL( "finish_done", done ) << "\n"
-					"" << LABEL( "finish_next", l ) << ":\n";
-			}
-		}
-	}
-
-	out << 
-		"" << LABEL( "finish_done", done ) << ":\n";
-
-	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
-			long l = nextLmSwitchLabel++;
-			
 			out <<
 				"	cmpq	$" << st->id << ", %rax\n"
-				"	jne		" << LABEL( "finish_next", l ) << "\n"
-				"	jmp		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n"
-				"" << LABEL( "finish_next", l ) << ":\n";
+				"	je		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n";
 		}
 	}
 
@@ -1910,7 +1900,7 @@ void AsmCodeGen::writeExec()
 	/* If there are eof actions then we need to run code after exporting the
 	 * final state to vCS. Since the interface register is calee-save, we need
 	 * it to live on the stack. */
-	stackCS = redFsm->anyEofActions();
+	stackCS = redFsm->anyEofActivity();
 
 	/*
 	 * This code needs 88 bytes of stack (offset 0 from %rbp).
@@ -1998,7 +1988,7 @@ void AsmCodeGen::writeExec()
 	if ( testEofUsed )
 		out << LABEL( "test_eof" ) << ":\n";
 
-	if ( redFsm->anyEofTrans() || redFsm->anyEofActions() ) {
+	if ( redFsm->anyEofActivity() ) {
 		out <<
 			"	cmpq	" << P() << ", " << vEOF() << "\n"
 			"	jne		" << LABEL( "eof_trans" ) << "\n"
@@ -2007,9 +1997,12 @@ void AsmCodeGen::writeExec()
 			"" << LABEL( "eof_trans" ) << ":\n";
 	}
 
+	out <<
+		"	cmpq	$" << FIRST_FINAL_STATE() << ", " << vCS() << "\n"
+		"	jge		" << LABEL( "out" ) << "\n";
 
-	if ( outLabelUsed )
-		out << LABEL( "out" ) << ":\n";
+//	if ( outLabelUsed )
+	out << LABEL( "pop" ) << ":\n";
 
 	if ( redFsm->anyNfaStates() ) {
 		out <<
@@ -2073,6 +2066,13 @@ void AsmCodeGen::writeExec()
 
 	out <<
 		"# WRITE EXEC END\n";
+
+	out << LABEL( "out" ) << ":\n";
+
+	if ( stackCS ) {
+		out <<
+			"	movq	" << vCS() << ", %r11\n";
+	}
 
 #ifdef LOG_TRANS
 	out <<
