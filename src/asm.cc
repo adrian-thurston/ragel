@@ -667,14 +667,14 @@ void AsmCodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 		}
 
 		out <<
-			"	jmp	" << LABEL( "pop" ) << "\n"
+			"	jmp	" << LABEL( "pop_fail" ) << "\n"
 			"102:\n";
 	}
 	else {
 		CONDITION( ret, condition );
 		out <<
 			"	test	%eax, %eax\n"
-			"	jz		" << LABEL( "pop" ) << "\n";
+			"	jz		" << LABEL( "pop_fail" ) << "\n";
 	}
 }
 
@@ -2001,14 +2001,14 @@ void AsmCodeGen::writeExec()
 		"	cmpq	$" << FIRST_FINAL_STATE() << ", " << vCS() << "\n"
 		"	jge		" << LABEL( "out" ) << "\n";
 
-//	if ( outLabelUsed )
+	// if ( outLabelUsed )
 	out << LABEL( "pop" ) << ":\n";
 
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	movq    " << NFA_TOP() << ", %rcx\n"
 			"	cmpq	$0, %rcx\n"
-			"	je		" << LABEL( "no_alt" ) << "\n"
+			"	je		" << LABEL( "nfa_stack_empty" ) << "\n"
 			"	movq    " << NFA_TOP() << ", %rcx\n"
 			"	subq	$1, %rcx\n"
 			"	movq	%rcx, " << NFA_TOP() << "\n"
@@ -2017,7 +2017,6 @@ void AsmCodeGen::writeExec()
 			"	movq    0(%rax,%rcx,), %r11\n"
 			"	movq	8(%rax,%rcx,), " << P() << "\n"
 			"	movq	%r11, " << vCS() << "\n"
-
 			;
 
 		if ( redFsm->bAnyNfaPops ) {
@@ -2055,8 +2054,11 @@ void AsmCodeGen::writeExec()
 		}
 
 		out <<
-			"	jmp		" << LABEL( "resume" ) << "\n"
-			<< LABEL( "no_alt" ) << ":\n";
+			"	jmp		" << LABEL( "resume" ) << "\n" <<
+			LABEL( "pop_fail" ) << ":\n"
+			"	movq	$" << ERROR_STATE() << ", " << vCS() << "\n"
+			"	jmp		" << LABEL( "resume" ) << "\n" <<
+			LABEL( "nfa_stack_empty" ) << ":\n";
 	}
 
 	if ( stackCS ) {
