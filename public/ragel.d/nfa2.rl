@@ -61,8 +61,9 @@
 		(('-' @ see_neg | '+') ?
 		(digit @ add_digit) +) > begin %finish;
 
-	main1 = atoi '\n' @print1;
-	main2 = [0-9]* '00000000' [0-9]* '\n' @print2;
+	# Using the expectation of the second newline to trigger backtracking.
+	main1 = atoi '\n' @print1 '\n';
+	main2 = [0-9]* '00000000' [0-9]* '\n' @print2 'X';
 
 	main |= (5, 0) main1 | main2;
 
@@ -185,25 +186,25 @@ finish:
 
 	.section	.rodata
 .LC3:
-	.string	"1\n"
+	.string	"1\n\n"
 .LC4:
-	.string	"12\n"
+	.string	"12\n\n"
 .LC45:
-	.string "1002000000002\n",
+	.string "1002000000002\nX",
 .LC5:
-	.string	"222222\n"
+	.string	"222222\n\n"
 .LC6:
-	.string	"+2123\n"
+	.string	"+2123\n\n"
 .LC7:
-	.string	"-99\n"
+	.string	"-99\n\n"
 .LC8:
-	.string	"-12321\n"
+	.string	"-12321\n\n"
 .LC9:
-	.string	"213 3213\n"
+	.string	"213 3213\n\n"
 .LC10:
-	.string	"--123\n"
+	.string	"--123\n\n"
 .LC11:
-	.string	" -3000\n"
+	.string	" -3000\n\n"
 	.data
 	.align 32
 	.type	inp, @object
