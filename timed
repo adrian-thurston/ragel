@@ -3,6 +3,13 @@
 # Default to all .d direcories.
 DIRS=$(find -type d -name '*.d')
 
+CORES=$(awk '/cpu cores/ { print $4; exit }'  /proc/cpuinfo)
+
+if ! echo $CORES | grep -q '^[1-9][0-9]\?$'; then
+	echo "warning: could not determine number of cores, using 2"
+	CORES=2
+fi
+
 HERE=$(basename $(pwd))
 if [ "${HERE%.d}" != "$HERE" ]; then
 	# In a test directory. Set DIR to . and pass any arguments to the local
@@ -17,7 +24,7 @@ fi
 for D in $DIRS; do
 	cd $D
 	echo ------- $D
-	./gentests $ARGS | xargs -n1 -P2 bash
+	./gentests $ARGS | xargs -n1 -P$CORES bash
 	WORKING="$WORKING $D/working"
 	cd $OLDPWD
 done
