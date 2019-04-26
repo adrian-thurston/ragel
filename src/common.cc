@@ -264,13 +264,6 @@ bool ParamCheck::check()
 	return true;
 }
 
-/* Counts newlines before sending sync. */
-int output_filter::sync( )
-{
-	line += 1;
-	return std::filebuf::sync();
-}
-
 std::streamsize output_filter::countAndWrite( const char *s, std::streamsize n )
 {
 	for ( int i = 0; i < n; i++ ) {
@@ -305,6 +298,13 @@ bool openSingleIndent( const char *s, int n )
 		return true;
 
 	return false;
+}
+
+/* Counts newlines before sending sync. */
+int output_filter::sync( )
+{
+	line += 1;
+	return std::filebuf::sync();
 }
 
 /* Counts newlines before sending data out to file. */

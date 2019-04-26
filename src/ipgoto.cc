@@ -345,12 +345,13 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	/* need to do this if the transition is an eof transition, or if the action
 	 * contains fexec. Otherwise, no need. */
 	if ( redFsm->anyEofActivity() ) {
-		out << "	if ( " << P() << " == " << vEOF() << " ) {\n"
-			"			if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"				goto _out;\n"
-			"			else\n"
-			"				goto _pop;\n"
-			"		}\n";
+		out <<
+			"if ( " << P() << " == " << vEOF() << " ) {\n"
+			"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+			"		goto _out;\n"
+			"	else\n"
+			"		goto _pop;\n"
+			"}\n";
 		outLabelUsed = true;
 	}
 
@@ -367,13 +368,13 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 	if ( state->labelNeeded ) {
 		if ( !noEnd ) {
 			out <<
-				"	" << P() << "+= 1;\n"
-				"	if ( " << P() << " == " << PE() << " )\n"
-				"		goto " << eofLabel[state->id].reference() << ";\n";
+				P() << "+= 1;\n"
+				"if ( " << P() << " == " << PE() << " )\n"
+				"	goto " << eofLabel[state->id].reference() << ";\n";
 		}
 		else {
 			out << 
-				"	" << P() << " += 1;\n";
+				P() << " += 1;\n";
 		}
 	}
 
@@ -391,7 +392,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 
 	/* Record the prev state if necessary. */
 	if ( state->anyRegCurStateRef() )
-		out << "	_ps = " << state->id << ";\n";
+		out << "_ps = " << state->id << ";\n";
 }
 
 void IpGoto::STATE_GOTO_ERROR()
@@ -408,7 +409,7 @@ void IpGoto::STATE_GOTO_ERROR()
 	/* Break out here. */
 	outLabelUsed = true;
 	out << vCS() << " = " << state->id << ";\n";
-	out << "	goto _pop;\n";
+	out << "goto _pop;\n";
 }
 
 
@@ -473,7 +474,7 @@ std::ostream &IpGoto::EXIT_STATES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( eofLabel[st->id].isReferenced ) {
 			testEofUsed = true;
-			out << "	" << eofLabel[st->id].define() << ": " << vCS() << " = " << 
+			out << eofLabel[st->id].define() << ": " << vCS() << " = " << 
 					st->id << "; goto _test_eof; \n";
 		}
 	}
@@ -484,7 +485,7 @@ std::ostream &IpGoto::AGAIN_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		out << 
-			"		case " << st->id << ": goto " << stLabel[st->id].reference() << ";\n";
+			"case " << st->id << ": goto " << stLabel[st->id].reference() << ";\n";
 	}
 	return out;
 }
@@ -492,8 +493,8 @@ std::ostream &IpGoto::AGAIN_CASES()
 std::ostream &IpGoto::STATE_GOTO_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		out << TABS(1) << "case " << st->id << ":\n";
-		out << TABS(2) << "goto st_case_" << st->id << ";\n";
+		out << "case " << st->id << ":\n";
+		out << "goto st_case_" << st->id << ";\n";
 	}
 	return out;
 }
@@ -508,8 +509,8 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 
 		if ( state->nfaTargs != 0 ) {
 			out <<
-				"	if ( " << ARR_REF( nfaOffsets ) << "[" << _state << "] ) {\n"
-				"		int new_recs = " << state->nfaTargs->length() << ";\n";
+				"if ( " << ARR_REF( nfaOffsets ) << "[" << _state << "] ) {\n"
+				"	int new_recs = " << state->nfaTargs->length() << ";\n";
 
 			if ( red->nfaPrePushExpr != 0 ) {
 				out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
@@ -520,18 +521,16 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 			int alt = 0;
 			for ( RedNfaTargs::Iter nt = *state->nfaTargs; nt.lte(); nt++ ) {
 				out <<
-					"			nfa_bp[nfa_len].state = " << nt->state->id << ";\n"
-					"			nfa_bp[nfa_len].p = " << P() << ";\n";
+					"	nfa_bp[nfa_len].state = " << nt->state->id << ";\n"
+					"	nfa_bp[nfa_len].p = " << P() << ";\n";
 
 				if ( nt->popTest != 0 ) {
 					out <<
-						"			nfa_bp[nfa_len].popTrans = " << (nt->popTest->actListId+1) << ";\n"
-						"\n"
-						;
+						"	nfa_bp[nfa_len].popTrans = " << (nt->popTest->actListId+1) << ";\n";
 				}
 				else if ( redFsm->bAnyNfaPops ) {
 					out <<
-						"			nfa_bp[nfa_len].popTrans = 0;\n";
+						"	nfa_bp[nfa_len].popTrans = 0;\n";
 				}
 
 				if ( nt->push != 0 )  {
@@ -540,13 +539,13 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 				}
 
 				out <<
-					"			nfa_len += 1;\n";
+					"	nfa_len += 1;\n";
 
 				alt += 1;
 			}
+
 			out <<
-				"	}\n"
-				;
+				"}\n";
 		}
 	}
 }
@@ -586,7 +585,7 @@ std::ostream &IpGoto::FINISH_CASES()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
 			out <<
-				"	case " << st->id << ":\n";
+				"case " << st->id << ":\n";
 
 			TRANS_GOTO( st->eofTrans, 1 );
 		}
@@ -599,13 +598,14 @@ void IpGoto::setLabelsNeeded( GenInlineList *inlineList )
 {
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
-		case GenInlineItem::Goto: case GenInlineItem::Call:
-		case GenInlineItem::Ncall: {
-			/* Mark the target as needing a label. */
-			item->targState->labelNeeded = true;
-			break;
-		}
-		default: break;
+			case GenInlineItem::Goto:
+			case GenInlineItem::Call:
+			case GenInlineItem::Ncall: {
+				/* Mark the target as needing a label. */
+				item->targState->labelNeeded = true;
+				break;
+			}
+			default: break;
 		}
 
 		if ( item->children != 0 )
@@ -696,7 +696,7 @@ void IpGoto::writeExec()
 	testEofUsed = false;
 	outLabelUsed = false;
 
-	out << "	{\n";
+	out << "{\n";
 
 	DECLARE( INT(), cpc );
 	if ( redFsm->anyRegNbreak() )
@@ -728,8 +728,7 @@ void IpGoto::writeExec()
 		out << "_resume:\n";
 
 	out <<
-		"	switch ( " << vCS() << " )\n"
-		"	{\n";
+		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTO_CASES() <<
 		"	}\n"
 		"	goto st_out;\n";
@@ -743,28 +742,27 @@ void IpGoto::writeExec()
 
 	if ( redFsm->anyEofActivity() ) {
 		out <<
-			"	if ( " << P() << " == " << vEOF() << " )\n"
-			"	{\n";
+			"	if ( " << P() << " == " << vEOF() << " ) {\n";
 
 		out <<
-			"	switch ( " << vCS() << " ) {\n";
+			"		switch ( " << vCS() << " ) {\n";
 
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			out << "	case " << st->id << ": {\n";
+			out << "case " << st->id << ": {\n";
 			NFA_PUSH( st );
-			out << "\n\t break;}\n";
+			out << "\n\t break;\n}\n";
 		}
 
 		out <<
-			"	}\n";
+			"		}\n";
 
 		out <<
-			"	switch ( " << vCS() << " ) {\n";
+			"		switch ( " << vCS() << " ) {\n";
 
 		bool okeydokey = false;
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			if ( st->outCondSpace != 0 ) {
-				out << "	case " << st->id << ": {\n";
+				out << "case " << st->id << ": {\n";
 
 				out << "int ck = 0;\n";
 				for ( GenCondSet::Iter csi = st->outCondSpace->condSet; csi.lte(); csi++ ) {
@@ -774,12 +772,13 @@ void IpGoto::writeExec()
 					out << " ) ck += " << condValOffset << ";\n";
 				}
 
-				out << "	switch ( ck ) {\n";
+				out << "switch ( ck ) {\n";
 				for ( CondKeySet::Iter k = st->outCondKeys; k.lte(); k++ ) {
 					out << "case " << *k << ": goto _okeydokey;\n";
 					okeydokey = true;
 				}
 				out << "}\n";
+
 				out << vCS() << " = " << ERROR_STATE() << ";\n";
 				out << "goto _pop;\n";
 				outLabelUsed = true;
@@ -808,21 +807,22 @@ void IpGoto::writeExec()
 	}
 
 	out <<
-		"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-		"		goto _out; ";
+		"if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+		"	goto _out; ";
 
 	if ( outLabelUsed ) 
 		out << "	_pop: {}\n";
 
 	if ( redFsm->anyNfaStates() ) {
 		out <<
-			"	if ( nfa_len == 0 )\n"
-			"		goto _out;\n"
-			"\n"
-			"	nfa_count += 1;\n"
-			"	nfa_len -= 1;\n"
-			"	" << P() << " = nfa_bp[nfa_len].p;\n"
-			;
+			"if ( nfa_len == 0 )\n"
+			"	goto _out;\n"
+			"\n";
+
+		out <<
+			"nfa_count += 1;\n"
+			"nfa_len -= 1;\n" <<
+			P() << " = nfa_bp[nfa_len].p;\n";
 
 		if ( redFsm->bAnyNfaPops ) {
 			NFA_FROM_STATE_ACTION_EXEC();
@@ -830,14 +830,14 @@ void IpGoto::writeExec()
 			NFA_POP_TEST_EXEC();
 
 			out <<
-				"	if ( _pop_test )\n"
-				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
-				"	else\n"
-				"		" << vCS() << " = " << ERROR_STATE() << ";\n";
+				"if ( _pop_test )\n"
+				"	" << vCS() << " = nfa_bp[nfa_len].state;\n"
+				"else\n"
+				"	" << vCS() << " = " << ERROR_STATE() << ";\n";
 		}
 		else {
 			out <<
-				"	" << vCS() << " = nfa_bp[nfa_len].state;\n";
+				vCS() << " = nfa_bp[nfa_len].state;\n";
 
 		}
 
@@ -849,5 +849,5 @@ void IpGoto::writeExec()
 	out << "_out: {}\n";
 
 	out <<
-		"	}\n";
+		"}\n";
 }
