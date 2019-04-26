@@ -762,7 +762,10 @@ void CodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 	for ( GenInlineList::Iter item = *inlineList; item.lte(); item++ ) {
 		switch ( item->type ) {
 		case GenInlineItem::Text:
-			translatedHostData( ret, item->data );
+			if ( backend == Direct )
+				ret << item->data;
+			else
+				translatedHostData( ret, item->data );
 			break;
 		case GenInlineItem::Goto:
 			GOTO( ret, item->targState->id, inFinish );
