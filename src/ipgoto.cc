@@ -430,14 +430,12 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans )
 		}
 	}
 	else {
-		out << "{\n";
-
-		out << "int ck = 0;\n";
+		out << ck << " = 0;\n";
 		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
 			out << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = (1 << csi.pos());
-			out << " ) ck += " << condValOffset << ";\n";
+			out << " )\n" << ck << " += " << condValOffset << ";\n";
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
@@ -446,8 +444,6 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans )
 		if ( trans->errCond() != 0 ) {
 			COND_GOTO( trans->errCond() ) << "\n";
 		}
-
-		out << "}\n";
 	}
 
 	return out;
@@ -699,6 +695,8 @@ void IpGoto::writeExec()
 	out << "{\n";
 
 	DECLARE( INT(), cpc );
+	DECLARE( INT(), ck );
+
 	if ( redFsm->anyRegNbreak() )
 		out << "	int _nbreak;\n";
 
@@ -764,15 +762,15 @@ void IpGoto::writeExec()
 			if ( st->outCondSpace != 0 ) {
 				out << "case " << st->id << ": {\n";
 
-				out << "int ck = 0;\n";
+				out << ck << " = 0;\n";
 				for ( GenCondSet::Iter csi = st->outCondSpace->condSet; csi.lte(); csi++ ) {
 					out << "if ( ";
 					CONDITION( out, *csi );
 					Size condValOffset = (1 << csi.pos());
-					out << " ) ck += " << condValOffset << ";\n";
+					out << " )\n" << ck << " += " << condValOffset << ";\n";
 				}
 
-				out << "switch ( ck ) {\n";
+				out << "switch ( " << ck << " ) {\n";
 				for ( CondKeySet::Iter k = st->outCondKeys; k.lte(); k++ ) {
 					out << "case " << *k << ": goto _okeydokey;\n";
 					okeydokey = true;

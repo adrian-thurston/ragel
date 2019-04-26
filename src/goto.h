@@ -100,6 +100,7 @@ public:
 		type(type),
 		acts( "_acts" ),
 		nacts( "_nacts" ),
+		ck( "_ck" ),
 		actions(           "actions",             *this ),
 		toStateActions(    "to_state_actions",    *this ),
 		fromStateActions(  "from_state_actions",  *this ),
@@ -121,6 +122,7 @@ public:
 
 	Variable acts;
 	Variable nacts;
+	Variable ck;
 
 	TableArray actions;
 	TableArray toStateActions;

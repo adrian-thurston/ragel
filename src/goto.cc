@@ -70,12 +70,12 @@ std::ostream &Goto::TRANS_GOTO( RedTransAp *trans )
 		out << "goto " << ctrLabel[cond->id].reference() << ";";
 	}
 	else {
-		out << "int ck = 0;\n";
+		out << ck << " = 0;\n";
 		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
 			out << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = (1 << csi.pos());
-			out << " ) ck += " << condValOffset << ";\n";
+			out << " )\n" << ck << " += " << condValOffset << ";\n";
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
@@ -271,10 +271,10 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 
 	if ( anyLower && anyHigher ) {
 		/* Can go lower and higher than mid. */
-		out << "if ( " << "ck" << " < " << 
+		out << "if ( " << ck << " < " << 
 				CKEY(midKey) << " ) {\n";
 		COND_B_SEARCH( trans, lower, midKey-1, low, mid-1 );
-		out << "} else if ( " << "ck" << " > " << 
+		out << "} else if ( " << ck << " > " << 
 				CKEY(midKey) << " ) {\n";
 		COND_B_SEARCH( trans, midKey+1, upper, mid+1, high );
 		out << "} else {\n";
@@ -283,7 +283,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 	}
 	else if ( anyLower && !anyHigher ) {
 		/* Can go lower than mid but not higher. */
-		out << "if ( " << "ck" << " < " << 
+		out << "if ( " << ck << " < " << 
 				CKEY(midKey) << " ) {\n";
 		COND_B_SEARCH( trans, lower, midKey-1, low, mid-1);
 
@@ -295,7 +295,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 			out << "}\n";
 		}
 		else {
-			out << "} else if ( " << "ck" << " <= " << 
+			out << "} else if ( " << ck << " <= " << 
 					CKEY(midKey) << " ) {\n";
 			COND_GOTO(midTrans) << "\n";
 			out << "}\n";
@@ -303,7 +303,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 	}
 	else if ( !anyLower && anyHigher ) {
 		/* Can go higher than mid but not lower. */
-		out << "if ( " << "ck" << " > " << 
+		out << "if ( " << ck << " > " << 
 				CKEY(midKey) << " ) {\n";
 		COND_B_SEARCH( trans, midKey+1, upper, mid+1, high );
 
@@ -315,7 +315,7 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 			out << "}\n";
 		}
 		else {
-			out << "} else if ( " << "ck" << " >= " << 
+			out << "} else if ( " << ck << " >= " << 
 					CKEY(midKey) << " ) {\n";
 			COND_GOTO(midTrans) << "\n";
 			out << "}\n";
@@ -325,20 +325,19 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 		/* Cannot go higher or lower than mid. It's mid or bust. What
 		 * tests to do depends on limits of alphabet. */
 		if ( !limitLow && !limitHigh ) {
-			out << "if ( ck" << " == " << 
+			out << "if ( " << ck << " == " << 
 					CKEY(midKey) << " ) {\n";
 			COND_GOTO(midTrans) << "\n";
 			out << "}\n";
 		}
 		else if ( limitLow && !limitHigh ) {
-			out << "if ( " << "ck" << " <= " << 
+			out << "if ( " << ck << " <= " << 
 					CKEY(midKey) << " ) {\n";
 			COND_GOTO(midTrans) << "\n";
 			out << "}\n";
 		}
 		else if ( !limitLow && limitHigh ) {
-			out << "if ( " << CKEY(midKey) << " <= " << 
-					"ck" << " )\n {";
+			out << "if ( " << CKEY(midKey) << " <= " << ck << " )\n {";
 			COND_GOTO(midTrans) << "\n";
 			out << "}\n";
 		}
@@ -839,6 +838,8 @@ void Goto::writeExec()
 	out << "{\n";
 
 	DECLARE( INT(), cpc );
+	DECLARE( INT(), ck );
+
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
 				|| redFsm->anyFromStateActions() )
