@@ -544,16 +544,6 @@ string CodeGen::GET_KEY()
 	return ret.str();
 }
 
-/* Write out level number of tabs. Makes the nested binary search nice
- * looking. */
-string CodeGen::TABS( int level )
-{
-	string result;
-	while ( level-- > 0 )
-		result += "\t";
-	return result;
-}
-
 /* Write out a key from the fsm code gen. Depends on wether or not the key is
  * signed. */
 string CodeGen::KEY( Key key )

@@ -274,16 +274,6 @@ string AsmCodeGen::GET_KEY()
 	return ret.str();
 }
 
-/* Write out level number of tabs. Makes the nested binary search nice
- * looking. */
-string AsmCodeGen::TABS( int level )
-{
-	string result;
-	while ( level-- > 0 )
-		result += "\t";
-	return result;
-}
-
 string AsmCodeGen::COND_KEY( CondKey key )
 {
 	ostringstream ret;
@@ -939,7 +929,7 @@ void AsmCodeGen::emitSingleJumpTable( RedStateAp *state, string def )
 }
 
 
-void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int high )
+void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int low, int high )
 {
 	static int nl = 1;
 
@@ -971,7 +961,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			"	jge	" << LABEL( "nl", l1 ) << "\n";
 			
 		
-		emitRangeBSearch( state, level+1, low, mid-1 );
+		emitRangeBSearch( state, low, mid-1 );
 
 		out <<
 			LABEL( "nl", l1 ) << ":\n";
@@ -984,7 +974,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 		out <<
 			"	jle	" << targ << "\n";
 
-		emitRangeBSearch( state, level+1, mid+1, high );
+		emitRangeBSearch( state, mid+1, high );
 	}
 	else if ( anyLower && !anyHigher ) {
 
@@ -1000,7 +990,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			"	cmpb	" << KEY( data[mid].lowKey ) << ", %r10b\n"
 			"	jge	" << targ << "\n";
 
-		emitRangeBSearch( state, level+1, low, mid-1 );
+		emitRangeBSearch( state, low, mid-1 );
 
 		/* If the higher is the highest in the alphabet then there is no sense
 		 * testing it. */
@@ -1033,7 +1023,7 @@ void AsmCodeGen::emitRangeBSearch( RedStateAp *state, int level, int low, int hi
 			"	cmpb	" << KEY( data[mid].highKey ) << ", %r10b\n"
 			"	jle	" << targ << "\n";
 
-		emitRangeBSearch( state, level+1, mid+1, high );
+		emitRangeBSearch( state, mid+1, high );
 
 		/* If the lower end is the lowest in the alphabet then there is no
 		 * sense testing it. */

@@ -166,15 +166,15 @@ public:
 
 	void setTableState( TableArray::State );
 
-	virtual std::ostream &COND_GOTO( RedCondPair *trans, int level );
+	virtual std::ostream &COND_GOTO( RedCondPair *trans );
 
 	string CKEY( CondKey key );
-	void COND_B_SEARCH( RedTransAp *trans, int level, CondKey lower, CondKey upper, int low, int high);
+	void COND_B_SEARCH( RedTransAp *trans, CondKey lower, CondKey upper, int low, int high);
 
-	virtual std::ostream &TRANS_GOTO( RedTransAp *trans, int level );
+	virtual std::ostream &TRANS_GOTO( RedTransAp *trans );
 
 	void SINGLE_SWITCH( RedStateAp *state );
-	void RANGE_B_SEARCH( RedStateAp *state, int level, Key lower, Key upper, int low, int high );
+	void RANGE_B_SEARCH( RedStateAp *state, Key lower, Key upper, int low, int high );
 
 	/* Called from STATE_GOTOS just before writing the gotos */
 	virtual void GOTO_HEADER( RedStateAp *state );

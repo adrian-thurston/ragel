@@ -176,7 +176,6 @@ protected:
 	string FSM_NAME();
 	string START_STATE_ID();
 	void taActions();
-	string TABS( int level );
 	string KEY( Key key );
 	string LDIR_PATH( char *path );
 

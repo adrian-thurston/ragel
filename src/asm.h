@@ -77,7 +77,6 @@ public:
 protected:
 	string FSM_NAME();
 	string START_STATE_ID();
-	string TABS( int level );
 	string KEY( Key key );
 	string COND_KEY( CondKey key );
 	string LDIR_PATH( char *path );
@@ -197,7 +196,7 @@ public:
 	unsigned int FROM_STATE_ACTION( RedStateAp *state );
 	unsigned int EOF_ACTION( RedStateAp *state );
 
-	void COND_TRANSLATE( GenStateCond *stateCond, int level );
+	void COND_TRANSLATE( GenStateCond *stateCond );
 	void STATE_CONDS( RedStateAp *state, bool genDefault ); 
 
 	std::ostream &EXIT_STATES();
@@ -236,7 +235,7 @@ public:
 
 	void emitSingleIfElseIf( RedStateAp *state );
 	void emitSingleJumpTable( RedStateAp *state, std::string def );
-	void emitRangeBSearch( RedStateAp *state, int level, int low, int high );
+	void emitRangeBSearch( RedStateAp *state, int low, int high );
 	void emitCharClassIfElseIf( RedStateAp *state );
 	void emitCharClassJumpTable( RedStateAp *state, std::string def );
 

@@ -414,7 +414,7 @@ void IpGoto::STATE_GOTO_ERROR()
 
 
 /* Emit the goto to take for a given transition. */
-std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
+std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans )
 {
 	if ( trans->condSpace == 0 || trans->condSpace->condSet.length() == 0 ) {
 		/* Existing. */
@@ -422,29 +422,29 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 		RedCondPair *cond = trans->outCond( 0 );
 		if ( cond->action != 0 ) {
 			/* Go to the transition which will go to the state. */
-			out << TABS(level) << "goto " << ctrLabel[trans->p.id].reference() << ";";
+			out << "goto " << ctrLabel[trans->p.id].reference() << ";";
 		}
 		else {
 			/* Go directly to the target state. */
-			out << TABS(level) << "goto " << stLabel[cond->targ->id].reference() << ";";
+			out << "goto " << stLabel[cond->targ->id].reference() << ";";
 		}
 	}
 	else {
 		out << "{\n";
 
-		out << TABS(level) << "int ck = 0;\n";
+		out << "int ck = 0;\n";
 		for ( GenCondSet::Iter csi = trans->condSpace->condSet; csi.lte(); csi++ ) {
-			out << TABS(level) << "if ( ";
+			out << "if ( ";
 			CONDITION( out, *csi );
 			Size condValOffset = (1 << csi.pos());
 			out << " ) ck += " << condValOffset << ";\n";
 		}
 		CondKey lower = 0;
 		CondKey upper = trans->condFullSize() - 1;
-		COND_B_SEARCH( trans, 1, lower, upper, 0, trans->numConds() - 1 );
+		COND_B_SEARCH( trans, lower, upper, 0, trans->numConds() - 1 );
 
 		if ( trans->errCond() != 0 ) {
-			COND_GOTO( trans->errCond(), level+1 ) << "\n";
+			COND_GOTO( trans->errCond() ) << "\n";
 		}
 
 		out << "}\n";
@@ -454,16 +454,16 @@ std::ostream &IpGoto::TRANS_GOTO( RedTransAp *trans, int level )
 }
 
 /* Emit the goto to take for a given transition. */
-std::ostream &IpGoto::COND_GOTO( RedCondPair *cond, int level )
+std::ostream &IpGoto::COND_GOTO( RedCondPair *cond )
 {
 	/* Existing. */
 	if ( cond->action != 0 ) {
 		/* Go to the transition which will go to the state. */
-		out << TABS(level) << "goto " << ctrLabel[cond->id].reference() << ";";
+		out << "goto " << ctrLabel[cond->id].reference() << ";";
 	}
 	else {
 		/* Go directly to the target state. */
-		out << TABS(level) << "goto " << stLabel[cond->targ->id].reference() << ";";
+		out << "goto " << stLabel[cond->targ->id].reference() << ";";
 	}
 
 	return out;
@@ -567,13 +567,13 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 			/* Default case is to binary search for the ranges, if that fails then */
 			if ( st->outRange.length() > 0 ) {
-				RANGE_B_SEARCH( st, 1, keyOps->minKey, keyOps->maxKey,
+				RANGE_B_SEARCH( st, keyOps->minKey, keyOps->maxKey,
 						0, st->outRange.length() - 1 );
 			}
 
 			/* Write the default transition. */
 			out << "{\n";
-			TRANS_GOTO( st->defTrans, 1 ) << "\n";
+			TRANS_GOTO( st->defTrans ) << "\n";
 			out << "}\n";
 		}
 	}
@@ -587,7 +587,7 @@ std::ostream &IpGoto::FINISH_CASES()
 			out <<
 				"case " << st->id << ":\n";
 
-			TRANS_GOTO( st->eofTrans, 1 );
+			TRANS_GOTO( st->eofTrans );
 		}
 	}
 

@@ -100,7 +100,7 @@ void FlatGoto::LOCATE_COND()
 			if ( condSpace->numTransRefs > 0 ) {
 				out << "	" << CASE( STR(condSpace->condSpaceId) ) << " {\n";
 				for ( GenCondSet::Iter csi = condSpace->condSet; csi.lte(); csi++ ) {
-					out << TABS(2) << "if ( ";
+					out << "if ( ";
 					CONDITION( out, *csi );
 					Size condValOffset = (1 << csi.pos());
 					out << " ) " << cpc << " += " << condValOffset << ";\n";
