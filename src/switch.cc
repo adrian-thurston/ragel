@@ -177,12 +177,12 @@ void Switch::SINGLE_SWITCH( RedStateAp *st )
 		for ( int j = 0; j < numSingles; j++ ) {
 			out << CASE( KEY(data[j].lowKey) ) << " {\n";
 			TRANS_GOTO(transBase + j, data[j].value, 0) << "\n";
-			out << CEND() << "}\n";
+			out << CEND() << "\n}\n";
 		}
 
 		out << CodeGen::DEFAULT() << " {\n";
 		NOT_SINGLE( st );
-		out << CEND() << "}\n";
+		out << CEND() << "\n}\n";
 		
 		/* Close off the transition switch. */
 		out << "\t}\n";
@@ -217,7 +217,7 @@ void Switch::LOCATE_TRANS()
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st == redFsm->errState ) {
 			out << CASE( STR( st->id ) ) << " {\n";
-			out << CEND() << "}\n";
+			out << CEND() << "\n}\n";
 		}
 		else {
 			/* Label the state. */
@@ -231,7 +231,7 @@ void Switch::LOCATE_TRANS()
 				NOT_SINGLE( st );
 			}
 
-			out << CEND() << "}\n";
+			out << CEND() << "\n}\n";
 		}
 
 		transBase += st->outSingle.length() +

@@ -315,7 +315,7 @@ protected:
 	}
 
 	string CLOSE_HOST_BLOCK()
-		{ return backend == Direct ? "}" : "}$"; }
+		{ return backend == Direct ? "}\n" : "}$"; }
 
 	string OPEN_HOST_PLAIN()
 		{ return backend == Direct ? "" : "host( \"-\", 1 ) @{"; }

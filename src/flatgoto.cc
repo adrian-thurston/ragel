@@ -107,7 +107,7 @@ void FlatGoto::LOCATE_COND()
 				}
 
 				out << 
-					"	" << CEND() << "}\n";
+					"	" << CEND() << "\n}\n";
 			}
 		}
 

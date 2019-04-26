@@ -72,7 +72,7 @@ void Tables::COND_EXEC( std::string expr )
 		}
 
 		out << 
-			"	" << CEND() << "}\n";
+			"	" << CEND() << "\n}\n";
 	}
 
 	out << 

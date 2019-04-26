@@ -81,7 +81,7 @@ std::ostream &ActLoop::FROM_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -97,7 +97,7 @@ std::ostream &ActLoop::ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -113,7 +113,7 @@ std::ostream &ActLoop::TO_STATE_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, false, false ) );
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -130,7 +130,7 @@ std::ostream &ActLoop::EOF_ACTION_SWITCH()
 			/* Write the case label, the action and the case break. */
 			out << "\t " << CASE( STR( act->actionId ) ) << " {\n";
 			ACTION( out, act, IlOpts( 0, true, false ) );
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 

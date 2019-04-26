@@ -89,7 +89,7 @@ std::ostream &ActExp::FROM_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -112,7 +112,7 @@ std::ostream &ActExp::ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -135,7 +135,7 @@ std::ostream &ActExp::TO_STATE_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -156,7 +156,7 @@ std::ostream &ActExp::EOF_ACTION_SWITCH()
 				out << "\n\t";
 			}
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 

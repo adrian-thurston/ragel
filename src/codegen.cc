@@ -617,7 +617,7 @@ void CodeGen::LM_SWITCH( ostream &ret, GenInlineItem *item,
 		/* Write the block and close it off. */
 		INLINE_LIST( ret, lma->children, targState, inFinish, csForced );
 
-		ret << CEND() << "}\n";
+		ret << CEND() << "\n}\n";
 	}
 
 	ret << 
@@ -957,15 +957,22 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 			ret << "_pop_test = 0;\n";
 		}
 
-		if ( !last )
-			ret << "if ( !_pop_test ) break;\n";
+		if ( !last ) {
+			ret <<
+				"if ( !_pop_test )\n"
+				"	break;\n";
+		}
 	}
 	else {
 		ret << "_pop_test = ";
 		CONDITION( ret, condition );
 		ret << ";\n";
-		if ( !last )
-			ret << "if ( !_pop_test ) break;\n";
+
+		if ( !last ) {
+			ret <<
+				"if ( !_pop_test )\n"
+				"	break;\n";
+		}
 	}
 }
 
@@ -987,7 +994,7 @@ void CodeGen::NFA_POP_TEST_EXEC()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				NFA_CONDITION( out, item->value, item.last() );
 
-			out << CEND() << "}\n";
+			out << CEND() << "\n}\n";
 		}
 	}
 
@@ -1179,7 +1186,7 @@ void CodeGen::NFA_PUSH( std::string state )
 					for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 						ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-					out << "\n\t" << CEND() << "}\n";
+					out << "\n\t" << CEND() << "\n}\n";
 				}
 			}
 

@@ -71,7 +71,7 @@ std::ostream &GotoExp::TO_STATE_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -92,7 +92,7 @@ std::ostream &GotoExp::FROM_STATE_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, false, false ) );
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
@@ -111,7 +111,7 @@ std::ostream &GotoExp::EOF_ACTION_SWITCH()
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
 				ACTION( out, item->value, IlOpts( 0, true, false ) );
 
-			out << "\n\t" << CEND() << "}\n";
+			out << "\n\t" << CEND() << "\n}\n";
 		}
 	}
 
