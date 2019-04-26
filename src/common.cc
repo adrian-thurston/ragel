@@ -301,7 +301,7 @@ bool openSingleIndent( const char *s, int n )
 	if ( n >= 8 && memcmp( s, "else if ", 8 ) == 0 )
 		return true;
 
-	if ( n >= 5 && memcmp( s, "else ", 5 ) == 0 )
+	if ( n >= 5 && memcmp( s, "else\n", 4 ) == 0 )
 		return true;
 
 	return false;
