@@ -24,7 +24,7 @@
 
 void Tables::CURS( ostream &ret, bool inFinish )
 {
-	ret << OPEN_GEN_EXPR() << "_ps" << CLOSE_GEN_EXPR();
+	ret << OPEN_GEN_EXPR() << ps << CLOSE_GEN_EXPR();
 }
 
 void Tables::TARGS( ostream &ret, bool inFinish, int targState )

@@ -124,7 +124,7 @@ std::ostream &GotoLoop::EXEC_FUNCS()
 		"execFuncs:\n";
 
 	if ( redFsm->anyRegNbreak() )
-		out << "	_nbreak = 0;\n";
+		out << nbreak << " = 0;\n";
 
 	out <<
 		"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
@@ -140,7 +140,7 @@ std::ostream &GotoLoop::EXEC_FUNCS()
 
 	if ( redFsm->anyRegNbreak() ) {
 		out <<
-			"	if ( _nbreak == 1 )\n"
+			"	if ( " << nbreak << " == 1 )\n"
 			"		goto _out;\n";
 		outLabelUsed = true;
 	}

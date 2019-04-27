@@ -394,7 +394,7 @@ std::ostream &Goto::TRANSITION( RedCondPair *pair )
 
 	/* Destination state. */
 	if ( pair->action != 0 && pair->action->anyCurStateRef() )
-		out << "_ps = " << vCS() << ";";
+		out << ps << " = " << vCS() << ";";
 	out << vCS() << " = " << pair->targ->id << "; ";
 
 	if ( pair->action != 0 ) {
@@ -621,7 +621,7 @@ void Goto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void Goto::CURS( ostream &ret, bool inFinish )
 {
-	ret << "(_ps)";
+	ret << "(" << ps << ")";
 }
 
 void Goto::TARGS( ostream &ret, bool inFinish, int targState )
@@ -755,7 +755,7 @@ void Goto::BREAK( ostream &ret, int targState, bool csForced )
 void Goto::NBREAK( ostream &ret, int targState, bool csForced )
 {
 	outLabelUsed = true;
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << " _nbreak = 1; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << nbreak << " = 1; " << CLOSE_GEN_BLOCK();
 }
 
 void Goto::tableDataPass()
@@ -839,6 +839,11 @@ void Goto::writeExec()
 
 	DECLARE( INT(), cpc );
 	DECLARE( INT(), ck );
+	DECLARE( INT(), pop_test );
+	DECLARE( INT(), nbreak );
+	DECLARE( INT(), ps, " = 0" );
+	DECLARE( INT(), new_recs );
+	DECLARE( INT(), alt );
 
 	if ( type == Loop ) {
 		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
@@ -850,14 +855,7 @@ void Goto::writeExec()
 		}
 	}
 
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps = 0;\n";
-
 	out << "\n";
-
-	if ( redFsm->anyRegNbreak() ) {
-		out << "	int _nbreak;\n";
-	}
 
 	out << "_resume:\n";
 
@@ -965,7 +963,7 @@ void Goto::writeExec()
 			NFA_POP_TEST_EXEC();
 
 			out <<
-				"	if ( _pop_test )\n"
+				"	if ( " << pop_test << " )\n"
 				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
 				"	else\n"
 				"		" << vCS() << " = " << ERROR_STATE() << ";\n";

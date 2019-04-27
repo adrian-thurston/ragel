@@ -37,7 +37,7 @@ std::ostream &GotoExp::EXEC_FUNCS()
 			out << "f" << redAct->actListId << ":\n";
 
 			if ( redFsm->anyRegNbreak() )
-				out << "_nbreak = 0;\n";
+				out << nbreak << " = 0;\n";
 
 			/* Write each action in the list of action items. */
 			for ( GenActionTable::Iter item = redAct->key; item.lte(); item++ )
@@ -45,7 +45,7 @@ std::ostream &GotoExp::EXEC_FUNCS()
 
 			if ( redFsm->anyRegNbreak() ) {
 				out << 
-					"	if ( _nbreak == 1 )\n"
+					"	if ( " << nbreak << " == 1 )\n"
 					"		goto _out;\n";
 				outLabelUsed = true;
 			}

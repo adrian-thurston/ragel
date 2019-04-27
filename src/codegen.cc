@@ -356,6 +356,9 @@ CodeGen::CodeGen( const CodeGenArgs &args )
 :
 	CodeGenData( args ),
 	cpc( "_cpc" ),
+	pop_test( "_pop_test" ),
+	new_recs( "new_recs" ),
+	alt( "_alt" ),
 	tableData( 0 ),
 	backend( args.id->hostLang->backend ),
 	stringTables( args.id->stringTables ),
@@ -938,7 +941,7 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 
 		const CondKeySet &keys = condition->inlineList->head->condKeySet;
 		if ( keys.length() > 0 ) {
-			ret << "_pop_test = ";
+			ret << pop_test << " = ";
 			for ( CondKeySet::Iter cki = keys; cki.lte(); cki++ ) {
 				ret << "" << cpc << " == " << *cki;
 				if ( !cki.last() )
@@ -947,23 +950,23 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 			ret << ";\n";
 		}
 		else {
-			ret << "_pop_test = 0;\n";
+			ret << pop_test << " = 0;\n";
 		}
 
 		if ( !last ) {
 			ret <<
-				"if ( !_pop_test )\n"
+				"if ( !" << pop_test << " )\n"
 				"	break;\n";
 		}
 	}
 	else {
-		ret << "_pop_test = ";
+		ret << pop_test << " = ";
 		CONDITION( ret, condition );
 		ret << ";\n";
 
 		if ( !last ) {
 			ret <<
-				"if ( !_pop_test )\n"
+				"if ( !" << pop_test << " )\n"
 				"	break;\n";
 		}
 	}
@@ -972,7 +975,7 @@ void CodeGen::NFA_CONDITION( ostream &ret, GenAction *condition, bool last )
 void CodeGen::NFA_POP_TEST_EXEC()
 {
 	out << 
-		"		int _pop_test = 1;\n"
+		"		" << pop_test << " = 1;\n"
 		"		switch ( nfa_bp[nfa_len].popTrans ) {\n";
 
 	/* Loop the actions. */
@@ -1133,8 +1136,8 @@ void CodeGen::NFA_PUSH( std::string state )
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( " << ARR_REF( nfaOffsets ) << "[" << state << "] ) {\n"
-			"		int alt = 0; \n"
-			"		int new_recs = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+			"		" << alt << " = 0; \n"
+			"		" << new_recs << " = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << state << "]];\n";
 
 		if ( red->nfaPrePushExpr != 0 ) {
@@ -1146,18 +1149,18 @@ void CodeGen::NFA_PUSH( std::string state )
 		}
 
 		out <<
-			"		while ( alt < new_recs ) { \n";
+			"		while ( " << alt << " < " << new_recs << " ) { \n";
 
 
 		out <<
 			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
-							ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt];\n"
+							ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + " << alt << "];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
 		if ( redFsm->bAnyNfaPops ) {
 			out <<
 				"			nfa_bp[nfa_len].popTrans = " << ARR_REF( nfaPopTrans ) << "[" << CAST("long") <<
-								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt];\n"
+								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + " << alt << "];\n"
 				"\n"
 				;
 		}
@@ -1165,7 +1168,7 @@ void CodeGen::NFA_PUSH( std::string state )
 		if ( redFsm->bAnyNfaPushes ) {
 			out <<
 				"			switch ( " << ARR_REF( nfaPushActions ) << "[" << CAST("int") <<
-								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + alt] ) {\n";
+								ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + " << alt << "] ) {\n";
 
 			/* Loop the actions. */
 			for ( GenActionTableMap::Iter redAct = redFsm->actionMap;
@@ -1190,7 +1193,7 @@ void CodeGen::NFA_PUSH( std::string state )
 
 		out <<
 			"			nfa_len += 1;\n"
-			"			alt += 1;\n"
+			"			" << alt << " += 1;\n"
 			"		}\n"
 			"	}\n"
 			;

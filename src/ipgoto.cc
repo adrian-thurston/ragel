@@ -238,7 +238,7 @@ void IpGoto::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 
 void IpGoto::CURS( ostream &ret, bool inFinish )
 {
-	ret << "(_ps)";
+	ret << "(" << ps << ")";
 }
 
 void IpGoto::TARGS( ostream &ret, bool inFinish, int targState )
@@ -261,7 +261,7 @@ void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
 	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
-	ret << "_nbreak = 1;}";
+	ret << nbreak << " = 1;}";
 }
 
 void IpGoto::NFA_PUSH_ACTION( RedNfaTarg *targ )
@@ -303,7 +303,7 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 				out << "	" << vCS() << " = " << trans->targ->id << ";\n";
 
 			if ( redFsm->anyRegNbreak() )
-				out << "_nbreak = 0;\n";
+				out << nbreak << " = 0;\n";
 
 			/* Write each action in the list. */
 			for ( GenActionTable::Iter item = trans->action->key; item.lte(); item++ ) {
@@ -314,7 +314,7 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 
 			if ( redFsm->anyRegNbreak() ) {
 				out <<
-					"if ( _nbreak == 1 )\n"
+					"if ( " << nbreak << " == 1 )\n"
 					"	goto _out;\n";
 				outLabelUsed = true;
 			}
@@ -392,7 +392,7 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 
 	/* Record the prev state if necessary. */
 	if ( state->anyRegCurStateRef() )
-		out << "_ps = " << state->id << ";\n";
+		out << ps << " = " << state->id << ";\n";
 }
 
 void IpGoto::STATE_GOTO_ERROR()
@@ -506,7 +506,7 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 		if ( state->nfaTargs != 0 ) {
 			out <<
 				"if ( " << ARR_REF( nfaOffsets ) << "[" << _state << "] ) {\n"
-				"	int new_recs = " << state->nfaTargs->length() << ";\n";
+				"	" << new_recs << " = " << state->nfaTargs->length() << ";\n";
 
 			if ( red->nfaPrePushExpr != 0 ) {
 				out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
@@ -696,12 +696,11 @@ void IpGoto::writeExec()
 
 	DECLARE( INT(), cpc );
 	DECLARE( INT(), ck );
-
-	if ( redFsm->anyRegNbreak() )
-		out << "	int _nbreak;\n";
-
-	if ( redFsm->anyRegCurStateRef() )
-		out << "	int _ps = 0;\n";
+	DECLARE( INT(), pop_test );
+	DECLARE( INT(), nbreak );
+	DECLARE( INT(), ps );
+	DECLARE( INT(), new_recs );
+	DECLARE( INT(), alt );
 
 	if ( !noEnd ) {
 		testEofUsed = true;
@@ -828,7 +827,7 @@ void IpGoto::writeExec()
 			NFA_POP_TEST_EXEC();
 
 			out <<
-				"if ( _pop_test )\n"
+				"if ( " << pop_test << " )\n"
 				"	" << vCS() << " = nfa_bp[nfa_len].state;\n"
 				"else\n"
 				"	" << vCS() << " = " << ERROR_STATE() << ";\n";

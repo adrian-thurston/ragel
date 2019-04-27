@@ -172,6 +172,9 @@ protected:
 	ArrayVector arrayVector;
 
 	Variable cpc;
+	Variable pop_test;
+	Variable new_recs;
+	Variable alt;
 
 	string FSM_NAME();
 	string START_STATE_ID();

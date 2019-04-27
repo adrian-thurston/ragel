@@ -56,16 +56,16 @@ void FlatVar::LOCATE_TRANS()
 			if ( !limitLow )
 				out << GET_KEY() << " >= " << lowKey;
 
-			out << " )\n	{\n";
+			out << " ) {\n";
 		}
 
 		out <<
-			"       int _ic = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
+			"       " << ic << " = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( _ic <= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
-						"_ic >= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
+			"		if ( " << ic << " <= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
+						"" << ic << " >= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
 			"			" << trans << " = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
-								string(inds) + " + " + CAST("int") + "( _ic - " + CAST("int") +
+								string(inds) + " + " + CAST("int") + "( " + string(ic) + " - " + CAST("int") +
 								DEREF( ARR_REF( transKeys ), string(keys) + "" ) + " ) " ) << "; \n"
 			"		else\n"
 			"			" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<

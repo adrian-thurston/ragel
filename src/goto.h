@@ -101,6 +101,8 @@ public:
 		acts( "_acts" ),
 		nacts( "_nacts" ),
 		ck( "_ck" ),
+		nbreak( "_nbreak" ),
+		ps( "_ps" ),
 		actions(           "actions",             *this ),
 		toStateActions(    "to_state_actions",    *this ),
 		fromStateActions(  "from_state_actions",  *this ),
@@ -123,6 +125,8 @@ public:
 	Variable acts;
 	Variable nacts;
 	Variable ck;
+	Variable nbreak;
+	Variable ps;
 
 	TableArray actions;
 	TableArray toStateActions;

@@ -51,6 +51,7 @@ struct Tables
 		ps( "_ps" ),
 		nbreak( "_nbreak" ),
 		have( "__have" ),
+		ic( "_ic" ),
 
 		_out("_out"),
 		_pop("_pop"),
@@ -107,6 +108,7 @@ struct Tables
 	Variable ps;
 	Variable nbreak;
 	Variable have;
+	Variable ic;
 
 	GotoLabel _out;
 	GotoLabel _pop;

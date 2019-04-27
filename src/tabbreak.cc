@@ -207,6 +207,10 @@ void TabBreak::writeExec()
 	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
 	DECLARE( UINT(), nacts );
 	DECLARE( INT(), have );
+	DECLARE( INT(), pop_test );
+	DECLARE( INT(), new_recs );
+	DECLARE( INT(), alt );
+	DECLARE( INT(), ic );
 	
 	out << BREAK_LABEL( _resume );
 
@@ -346,7 +350,7 @@ void TabBreak::writeExec()
 			NFA_POP_TEST_EXEC();
 
 			out <<
-				"	if ( _pop_test )\n"
+				"	if ( " << pop_test << " )\n"
 				"		" << vCS() << " = nfa_bp[nfa_len].state;\n"
 				"	else\n"
 				"		" << vCS() << " = " << ERROR_STATE() << ";\n";
