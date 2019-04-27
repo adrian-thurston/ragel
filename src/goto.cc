@@ -122,26 +122,26 @@ void Goto::SINGLE_SWITCH( RedStateAp *state )
 
 	if ( numSingles == 1 ) {
 		/* If there is a single single key then write it out as an if. */
-		out << "\tif ( " << GET_KEY() << " == " << 
-				KEY(data[0].lowKey) << " ) {\n\t\t"; 
+		out << "if ( " << GET_KEY() << " == " << 
+				KEY(data[0].lowKey) << " ) {\n"; 
 
 		/* Virtual function for writing the target of the transition. */
 		TRANS_GOTO(data[0].value) << "\n";
-		out << "\t}\n";
+		out << "}\n";
 	}
 	else if ( numSingles > 1 ) {
 		/* Write out single keys in a switch if there is more than one. */
-		out << "\tswitch( " << GET_KEY() << " ) {\n";
+		out << "switch( " << GET_KEY() << " ) {\n";
 
 		/* Write out the single indicies. */
 		for ( int j = 0; j < numSingles; j++ ) {
-			out << "\t\t case " << KEY(data[j].lowKey) << ": {\n";
+			out << "case " << KEY(data[j].lowKey) << ": {\n";
 			TRANS_GOTO(data[j].value) << "\n";
-			out << "\t}\n";
+			out << "}\n";
 		}
 		
 		/* Close off the transition switch. */
-		out << "\t}\n";
+		out << "}\n";
 	}
 }
 
@@ -844,16 +844,8 @@ void Goto::writeExec()
 	DECLARE( INT(), ps, " = 0" );
 	DECLARE( INT(), new_recs );
 	DECLARE( INT(), alt );
-
-	if ( type == Loop ) {
-		if ( redFsm->anyToStateActions() || redFsm->anyRegActions() 
-				|| redFsm->anyFromStateActions() )
-		{
-			out << 
-				"	" << INDEX( ARR_TYPE( actions ), "" + string(acts) + "" ) << ";\n"
-				"	" << UINT() << " " << nacts << ";\n";
-		}
-	}
+	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
+	DECLARE( UINT(), nacts );
 
 	out << "\n";
 

@@ -275,9 +275,6 @@ protected:
 
 	string STR( int v );
 
-	bool againLabelUsed;
-	bool matchCondLabelUsed;
-
 	void VALUE( string type, string name, string value );
 
 	string ACCESS_OPER()

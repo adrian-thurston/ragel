@@ -318,9 +318,9 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
 			if ( trans->action->anyNextStmt() )
-				out << "\n\tgoto " << _again << ";\n";
+				out << "goto " << _again << ";\n";
 			else
-				out << "\n\tgoto " << stLabel[trans->targ->id].reference() << ";\n";
+				out << "goto " << stLabel[trans->targ->id].reference() << ";\n";
 		}
 	}
 
@@ -737,7 +737,7 @@ void IpGoto::writeExec()
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			out << "case " << st->id << ": {\n";
 			NFA_PUSH( st );
-			out << "\n\t break;\n}\n";
+			out << "break;\n}\n";
 		}
 
 		out <<
