@@ -886,15 +886,6 @@ string CodeGen::LDIR_PATH( char *path )
 	return ret.str();
 }
 
-void CodeGen::EOF_CHECK( ostream &ret )
-{
-	ret << 
-		"	if ( " << P() << " == " << PE() << " )\n"
-		"		goto _test_eof;\n";
-
-	testEofUsed = true;
-}
-
 void CodeGen::ACTION( ostream &ret, GenAction *action, IlOpts opts )
 {
 	ret << '\t';

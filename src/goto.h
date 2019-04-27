@@ -103,6 +103,11 @@ public:
 		ck( "_ck" ),
 		nbreak( "_nbreak" ),
 		ps( "_ps" ),
+		_out("_out"),
+		_pop("_pop"),
+		_again("_again"),
+		_resume("_resume"),
+		_test_eof("_test_eof"),
 		actions(           "actions",             *this ),
 		toStateActions(    "to_state_actions",    *this ),
 		fromStateActions(  "from_state_actions",  *this ),
@@ -128,6 +133,12 @@ public:
 	Variable nbreak;
 	Variable ps;
 
+	GotoLabel _out;
+	GotoLabel _pop;
+	GotoLabel _again;
+	GotoLabel _resume;
+	GotoLabel _test_eof;
+
 	TableArray actions;
 	TableArray toStateActions;
 	TableArray fromStateActions;
@@ -143,6 +154,8 @@ public:
 	void taNfaOffsets();
 	void taNfaPushActions();
 	void taNfaPopTrans();
+
+	void EOF_CHECK( ostream &ret );
 
 	void GOTO( ostream &ret, int gotoDest, bool inFinish );
 	void CALL( ostream &ret, int callDest, int targState, bool inFinish );

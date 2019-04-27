@@ -84,8 +84,6 @@ void IpGoto::EOF_CHECK( ostream &ret, int gotoDest )
 	ret << 
 		"       if ( " << P() << " == " << PE() << " )\n"
 		"               goto " << eofLabel[gotoDest].reference() << ";\n";
-
-	testEofUsed = true;
 }
 
 void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
@@ -109,9 +107,9 @@ void IpGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	/* Since we are setting CS above and can select on it, call the all-state
 	 * test_eof. */
 	if ( inFinish && !noEnd )
-		CodeGen::EOF_CHECK( ret );
+		Goto::EOF_CHECK( ret );
 	
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 	
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -170,9 +168,9 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 	/* Since we are setting CS above and can select on it, call the all-state
 	 * test_eof. */
 	if ( inFinish && !noEnd )
-		CodeGen::EOF_CHECK( ret );
+		Goto::EOF_CHECK( ret );
 
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 	
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -205,9 +203,9 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 	}
 
 	if ( inFinish && !noEnd )
-		CodeGen::EOF_CHECK( ret );
+		Goto::EOF_CHECK( ret );
 
-	ret << "goto _again;" << CLOSE_GEN_BLOCK();
+	ret << "goto " << _again << ";" << CLOSE_GEN_BLOCK();
 }
 
 void IpGoto::NRET( ostream &ret, bool inFinish )
@@ -248,16 +246,14 @@ void IpGoto::TARGS( ostream &ret, bool inFinish, int targState )
 
 void IpGoto::BREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
 	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
-	ret << "goto _out;}";
+	ret << "goto " << _out << ";}";
 }
 
 void IpGoto::NBREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
 	ret << "{" << P() << "+= 1; ";
 	if ( !csForced ) 
 		ret << vCS() << " = " << targState << "; ";
@@ -315,15 +311,14 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 			if ( redFsm->anyRegNbreak() ) {
 				out <<
 					"if ( " << nbreak << " == 1 )\n"
-					"	goto _out;\n";
-				outLabelUsed = true;
+					"	goto " << _out << ";\n";
 			}
 				
  
 			/* If the action contains a next then we need to reload, otherwise
 			 * jump directly to the target state. */
 			if ( trans->action->anyNextStmt() )
-				out << "\n\tgoto _again;\n";
+				out << "\n\tgoto " << _again << ";\n";
 			else
 				out << "\n\tgoto " << stLabel[trans->targ->id].reference() << ";\n";
 		}
@@ -348,11 +343,10 @@ void IpGoto::GOTO_HEADER( RedStateAp *state )
 		out <<
 			"if ( " << P() << " == " << vEOF() << " ) {\n"
 			"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"		goto _out;\n"
+			"		goto " << _out << ";\n"
 			"	else\n"
-			"		goto _pop;\n"
+			"		goto " << _pop << ";\n"
 			"}\n";
-		outLabelUsed = true;
 	}
 
 	if ( state->toStateAction != 0 ) {
@@ -407,9 +401,8 @@ void IpGoto::STATE_GOTO_ERROR()
 		out << "_st" << state->id << ":\n";
 
 	/* Break out here. */
-	outLabelUsed = true;
 	out << vCS() << " = " << state->id << ";\n";
-	out << "goto _pop;\n";
+	out << "goto " << _pop << ";\n";
 }
 
 
@@ -469,9 +462,8 @@ std::ostream &IpGoto::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( eofLabel[st->id].isReferenced ) {
-			testEofUsed = true;
 			out << eofLabel[st->id].define() << ": " << vCS() << " = " << 
-					st->id << "; goto _test_eof; \n";
+					st->id << "; goto " << _test_eof << "; \n";
 		}
 	}
 	return out;
@@ -689,8 +681,6 @@ void IpGoto::writeExec()
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
 	setLabelsNeeded();
-	testEofUsed = false;
-	outLabelUsed = false;
 
 	out << "{\n";
 
@@ -703,17 +693,19 @@ void IpGoto::writeExec()
 	DECLARE( INT(), alt );
 
 	if ( !noEnd ) {
-		testEofUsed = true;
 		out << 
 			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto _test_eof;\n";
+			"		goto " << _test_eof << ";\n";
 	}
 
-	if ( useAgainLabel() ) {
+	if ( _again.isReferenced ) {
 		out << 
-			"	goto _resume;\n"
-			"\n"
-			"_again:\n"
+			"	goto " << _resume << ";\n"
+			"\n";
+
+		out << EMIT_LABEL( _again );
+
+		out <<
 			"	switch ( " << vCS() << " ) {\n";
 			AGAIN_CASES() <<
 			"	}\n"
@@ -721,8 +713,7 @@ void IpGoto::writeExec()
 
 	}
 
-	if ( useAgainLabel() || redFsm->anyNfaStates() ) 
-		out << "_resume:\n";
+	out << EMIT_LABEL( _resume );
 
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
@@ -734,8 +725,7 @@ void IpGoto::writeExec()
 		EXIT_STATES() <<
 		"\n";
 
-	if ( testEofUsed ) 
-		out << "	_test_eof: {}\n";
+	out << EMIT_LABEL( _test_eof );
 
 	if ( redFsm->anyEofActivity() ) {
 		out <<
@@ -777,8 +767,7 @@ void IpGoto::writeExec()
 				out << "}\n";
 
 				out << vCS() << " = " << ERROR_STATE() << ";\n";
-				out << "goto _pop;\n";
-				outLabelUsed = true;
+				out << "goto " << _pop << ";\n";
 
 				out << "}\n";
 			}
@@ -805,15 +794,14 @@ void IpGoto::writeExec()
 
 	out <<
 		"if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-		"	goto _out; ";
+		"	goto " << _out << "; ";
 
-	if ( outLabelUsed ) 
-		out << "	_pop: {}\n";
+	out << EMIT_LABEL( _pop );
 
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"if ( nfa_len == 0 )\n"
-			"	goto _out;\n"
+			"	goto " << _out << ";\n"
 			"\n";
 
 		out <<
@@ -840,10 +828,10 @@ void IpGoto::writeExec()
 
 		NFA_POST_POP();
 
-		out << "goto _resume;\n";
+		out << "goto " << _resume << ";\n";
 	}
 
-	out << "_out: {}\n";
+	out << EMIT_LABEL( _out );
 
 	out <<
 		"}\n";

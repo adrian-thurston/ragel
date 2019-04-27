@@ -233,8 +233,6 @@ protected:
 	void INLINE_BLOCK( ostream &ret, GenInlineExpr *inlineExpr );
 	void INLINE_PLAIN( ostream &ret, GenInlineExpr *inlineExpr );
 
-	void EOF_CHECK( ostream &ret );
-
 	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
 			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
@@ -277,8 +275,6 @@ protected:
 
 	string STR( int v );
 
-	bool outLabelUsed;
-	bool testEofUsed;
 	bool againLabelUsed;
 	bool matchCondLabelUsed;
 
@@ -456,6 +452,7 @@ protected:
 	virtual void LOCATE_TRANS() {}
 	virtual void LOCATE_COND() {}
 	virtual void EOF_TRANS() {}
+
 
 	virtual void COND_EXEC( std::string expr ) {}
 	virtual void COND_BIN_SEARCH( Variable &var, TableArray &keys, std::string ok, std::string error ) {}

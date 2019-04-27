@@ -351,10 +351,9 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 void Goto::STATE_GOTO_ERROR()
 {
 	/* Label the state and bail immediately. */
-	outLabelUsed = true;
 	RedStateAp *state = redFsm->errState;
 	out << "case " << state->id << ":\n";
-	out << "	goto _again;\n";
+	out << "	goto " << _again << ";\n";
 }
 
 std::ostream &Goto::STATE_GOTOS()
@@ -403,7 +402,7 @@ std::ostream &Goto::TRANSITION( RedCondPair *pair )
 	}
 	else {
 		/* No code to execute, just loop around. */
-		out << "goto _again;\n";
+		out << "goto " << _again << ";\n";
 	}
 	return out;
 }
@@ -592,6 +591,12 @@ void Goto::taNfaPopTrans()
 	nfaPopTrans.finish();
 }
 
+void Goto::EOF_CHECK( ostream &ret )
+{
+	ret << 
+		"	if ( " << P() << " == " << PE() << " )\n"
+		"		goto " << _test_eof << ";\n";
+}
 
 void Goto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
@@ -600,7 +605,7 @@ void Goto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << "goto _again;";
+	ret << "goto " << _again << ";";
 	
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -614,7 +619,7 @@ void Goto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 	
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -658,7 +663,7 @@ void Goto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -696,7 +701,7 @@ void Goto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool i
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << " goto _again;";
+	ret << " goto " << _again << ";";
 
 	ret << CLOSE_GEN_BLOCK();
 }
@@ -730,7 +735,7 @@ void Goto::RET( ostream &ret, bool inFinish )
 	if ( inFinish && !noEnd )
 		EOF_CHECK( ret );
 
-	ret << "goto _again;" << CLOSE_GEN_BLOCK();
+	ret << "goto " << _again << ";" << CLOSE_GEN_BLOCK();
 }
 
 void Goto::NRET( ostream &ret, bool inFinish )
@@ -748,13 +753,11 @@ void Goto::NRET( ostream &ret, bool inFinish )
 
 void Goto::BREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
-	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto _out; " << CLOSE_GEN_BLOCK();
+	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << "goto " << _out << "; " << CLOSE_GEN_BLOCK();
 }
 
 void Goto::NBREAK( ostream &ret, int targState, bool csForced )
 {
-	outLabelUsed = true;
 	ret << OPEN_GEN_BLOCK() << P() << " += 1; " << nbreak << " = 1; " << CLOSE_GEN_BLOCK();
 }
 
@@ -829,9 +832,6 @@ void Goto::writeData()
 
 void Goto::writeExec()
 {
-	testEofUsed = false;
-	outLabelUsed = false;
-
 	int maxCtrId = redFsm->nextCondId > redFsm->nextTransId ? redFsm->nextCondId : redFsm->nextTransId;
 	ctrLabel = allocateLabels( ctrLabel, IpLabel::Ctr, maxCtrId );
 
@@ -857,7 +857,7 @@ void Goto::writeExec()
 
 	out << "\n";
 
-	out << "_resume:\n";
+	out << EMIT_LABEL( _resume );
 
 	/* Do we break out on no more input. */
 	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
@@ -865,12 +865,12 @@ void Goto::writeExec()
 		if ( eof ) {
 			out << 
 				"       if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
-				"			goto _out;\n";
+				"			goto " << _out << ";\n";
 		}
 		else {
 			out << 
 				"       if ( " << P() << " == " << PE() << " )\n"
-				"			goto _out;\n";
+				"			goto " << _out << ";\n";
 		}
 	}
 
@@ -898,7 +898,7 @@ void Goto::writeExec()
 			"	}\n";
 
 		out << 
-			"	goto _again;\n"
+			"	goto " << _again << ";\n"
 			"}\n";
 	}
 
@@ -915,13 +915,13 @@ void Goto::writeExec()
 	if ( redFsm->anyRegActions() )
 		EXEC_FUNCS() << "\n";
 
-	out << "_again:\n";
+	out << EMIT_LABEL( _again );
 
 	if ( !noEnd && eof ) {
 		out << 
 			"	if ( " << P() << " == " << vEOF() << " ) {\n"
 			"		if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"			goto _out;\n"
+			"			goto " << _out << ";\n"
 			"	}\n"
 			"	else {\n";
 	}
@@ -935,7 +935,7 @@ void Goto::writeExec()
 
 	out << 
 		"	" << P() << " += 1;\n"
-		"	goto _resume;\n";
+		"	goto " << _resume << ";\n";
 
 	if ( redFsm->errState != 0 ) {
 		out << 
@@ -950,7 +950,7 @@ void Goto::writeExec()
 	if ( redFsm->anyNfaStates() ) {
 		out <<
 			"	if ( nfa_len == 0 )\n"
-			"		goto _out;\n"
+			"		goto " << _out << ";\n"
 			"\n"
 			"	nfa_count += 1;\n"
 			"	nfa_len -= 1;\n"
@@ -976,10 +976,10 @@ void Goto::writeExec()
 
 		NFA_POST_POP();
 
-		out << "goto _resume;\n";
+		out << "goto " << _resume << ";\n";
 	}
 
-	out << "_out: {}\n";
+	out << EMIT_LABEL( _out );
 
 	out << "}\n";
 }

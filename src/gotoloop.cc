@@ -141,8 +141,7 @@ std::ostream &GotoLoop::EXEC_FUNCS()
 	if ( redFsm->anyRegNbreak() ) {
 		out <<
 			"	if ( " << nbreak << " == 1 )\n"
-			"		goto _out;\n";
-		outLabelUsed = true;
+			"		goto " << _out << ";\n";
 	}
 
 	out <<
