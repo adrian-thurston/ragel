@@ -376,10 +376,7 @@ std::ostream &Goto::STATE_GOTOS()
 			}
 
 			/* Write the default transition. */
-
-			out << "{\n";
 			TRANS_GOTO( st->defTrans ) << "\n";
-			out << "}\n";
 		}
 	}
 	return out;
