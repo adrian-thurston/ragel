@@ -51,7 +51,7 @@ include(GNUInstallDirs)
 # libcolm
 
 add_library(libcolm
-	map.c pdarun.c list.c input.c debug.c
+	map.c pdarun.c list.c input.c stream.c debug.c
 	codevect.c pool.c string.c tree.c iter.c
 	bytecode.c program.c struct.c commit.c
 	print.c)
