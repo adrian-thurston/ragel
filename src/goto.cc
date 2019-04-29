@@ -368,9 +368,24 @@ void Goto::FROM_STATE_ACTION_EMIT( RedStateAp *state )
 
 std::ostream &Goto::STATE_CASES()
 {
+	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Writing code above state gotos. */
 		GOTO_HEADER( st );
+
+		if ( !noEnd && eof ) {
+			out << 
+				"if ( " << P() << " == " << vEOF() << " ) {\n";
+
+			if ( st->eofTrans != 0 )
+				TRANS_GOTO( st->eofTrans );
+
+			out << 
+				"	goto " << _again << ";\n"
+				"}\n"
+				"else {\n";
+		}
 
 		FROM_STATE_ACTION_EMIT( st );
 
@@ -389,6 +404,11 @@ std::ostream &Goto::STATE_CASES()
 
 			/* Write the default transition. */
 			TRANS_GOTO( st->defTrans ) << "\n";
+		}
+
+		if ( !noEnd && eof ) {
+			out << 
+				"}\n";
 		}
 	}
 	return out;
@@ -876,32 +896,6 @@ void Goto::writeExec()
 	}
 
 	NFA_PUSH( vCS() ); 
-
-	if ( !noEnd && eof ) {
-		out << 
-			"if ( " << P() << " == " << vEOF() << " ) {\n";
-
-		out <<
-			"	switch ( " << vCS() << " ) {\n";
-
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-
-			out << "	case " << st->id << ": {\n";
-			if ( st->eofTrans != 0 ) {
-				TRANS_GOTO( st->eofTrans );
-			}
-
-			out <<
-				"	break;\n}\n";
-		}
-
-		out << 
-			"	}\n";
-
-		out << 
-			"	goto " << _again << ";\n"
-			"}\n";
-	}
 
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
