@@ -25,9 +25,23 @@ in_place_clean()
 	done
 }
 
-in_place_clean $CLONE/autogen.sh $CLONE/configure.in $CLONE/Makefile.in
+in_place_clean $CLONE/autogen.sh $CLONE/configure.ac
+
+cat <<'EOF' >> $CLONE/configure.ac
+AC_SUBST(SED_SUBST)
+AC_OUTPUT([
+	Makefile
+	public/Makefile
+	public/aapl.d/Makefile
+	public/colm.d/Makefile
+	public/ragel.d/Makefile
+])
+EOF
 
 tar -C $TMP/testing --xform "s,^,testing-$VERSION/," -czf testing-$VERSION.tar.gz \
-	autogen.sh configure.in Makefile.in runtests timed public
+	autogen.sh configure.ac Makefile.am runtests timed \
+	public/aapl.d \
+	public/colm.d \
+	public/ragel.d
 
 rm -Rf $TMP

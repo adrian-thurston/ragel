@@ -3,15 +3,14 @@
 
 set -xe
 
-cd public
-./autogen.sh
-cd ..
+aclocal
+autoheader
+automake --foreign --add-missing 
+autoconf
 
 # END PUBLIC
 
-cd cases
-./autogen.sh
-cd ..
+# GENF cases must have autogen.sh called.
 
 cd genf/app1.d
 $HOME/pkgs/pkgbuild/bin/autogen.sh
@@ -24,10 +23,3 @@ cd ../..
 cd genf/process1.d
 $HOME/pkgs/pkgbuild/bin/autogen.sh
 cd ../..
-
-# BEGIN PUBLIC
-
-rm -f configure
-cp configure.in configure
-chmod +x-w configure
-
