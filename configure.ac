@@ -185,16 +185,16 @@ AC_ARG_WITH(genf,
 	[AC_ERROR(["require --with-genf"])]
 )
 
-cd genf/app1.d
-./configure --prefix=$root/genf/inst/app1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
+cd cases/app1.d
+./configure --prefix=$root/cases/inst/app1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
-cd genf/kern1.d
-./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
+cd cases/kern1.d
+./configure --prefix=$root/cases/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
-cd genf/process1.d
-./configure --prefix=$root/genf/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
+cd cases/process1.d
+./configure --prefix=$root/cases/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
 cd ../..
 
 dnl
@@ -205,10 +205,12 @@ AC_SUBST(SED_SUBST)
 
 AC_OUTPUT([
 		Makefile
-		public/Makefile
-		public/ragel.d/Makefile
-		public/aapl.d/Makefile
-		public/colm.d/Makefile
+		cases/Makefile
+		cases/ragel.d/Makefile
+		cases/aapl.d/Makefile
+		cases/colm.d/Makefile
+		cases/yellowbrick.d/Makefile
+		cases/yellowbrick.d/src/Makefile
 ])
 
 echo "configuration of testing package complete"

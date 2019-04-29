@@ -1,1 +1,1 @@
-SUBDIRS = public
+SUBDIRS = cases

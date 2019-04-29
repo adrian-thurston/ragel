@@ -1,4 +1,8 @@
-SUBDIRS = . pcre-colm.d pcre-ragel.d rlhc.d rlparse.d trans.d yellowbrick.d
+SUBDIRS = aapl.d colm.d ragel.d
+
+# END PUBLIC
+
+SUBDIRS += . pcre-colm.d pcre-ragel.d rlhc.d rlparse.d trans.d yellowbrick.d
 
 noinst_SCRIPTS = colm.mk colm.sh ragel.mk ragel.sh
 
