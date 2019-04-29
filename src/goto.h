@@ -122,7 +122,9 @@ public:
 
 	std::ostream &TRANSITION( RedCondPair *pair );
 
-	std::ostream &STATE_GOTOS();
+	void FROM_STATE_ACTION_EMIT( RedStateAp *state );
+
+	std::ostream &STATE_CASES();
 	std::ostream &TRANSITIONS();
 
 	Type type;

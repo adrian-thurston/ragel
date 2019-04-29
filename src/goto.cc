@@ -350,21 +350,33 @@ void Goto::COND_B_SEARCH( RedTransAp *trans, CondKey lower,
 
 void Goto::STATE_GOTO_ERROR()
 {
-	/* Label the state and bail immediately. */
-	RedStateAp *state = redFsm->errState;
-	out << "case " << state->id << ":\n";
+	/* Bail out immediately. */
 	out << "	goto " << _again << ";\n";
 }
 
-std::ostream &Goto::STATE_GOTOS()
+void Goto::FROM_STATE_ACTION_EMIT( RedStateAp *state )
+{
+	if ( state->fromStateAction != 0 ) {
+		/* Write every action in the list. */
+		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
+			ACTION( out, item->value, IlOpts( state->id, false,
+						state->fromStateAction->anyNextStmt() ) );
+			out << "\n";
+		}
+	}
+}
+
+std::ostream &Goto::STATE_CASES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+		/* Writing code above state gotos. */
+		GOTO_HEADER( st );
+
+		FROM_STATE_ACTION_EMIT( st );
+
 		if ( st == redFsm->errState )
 			STATE_GOTO_ERROR();
 		else {
-			/* Writing code above state gotos. */
-			GOTO_HEADER( st );
-
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )
 				SINGLE_SWITCH( st );
@@ -891,11 +903,9 @@ void Goto::writeExec()
 			"}\n";
 	}
 
-	FROM_STATE_ACTIONS();
-
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
-		STATE_GOTOS() <<
+		STATE_CASES() <<
 		"	}\n"
 		"\n";
 		TRANSITIONS() <<
