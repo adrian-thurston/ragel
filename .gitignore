@@ -16,5 +16,6 @@
 /config.guess
 /config.sub
 /ltmain.sh
+/confdefs.h
 
 /testing-*.tar.gz

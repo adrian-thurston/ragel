@@ -175,6 +175,11 @@ SED_SUBST=["\
 # END PUBLIC
 
 dnl
+dnl Stop before AC_OUTPUT. The slicer will add the correct AC_OUTPUT.
+dnl
+
+
+dnl
 dnl Configure the genf tests.
 dnl
 root=$(pwd)
@@ -211,6 +216,7 @@ AC_OUTPUT([
 		cases/colm.d/Makefile
 		cases/yellowbrick.d/Makefile
 		cases/yellowbrick.d/src/Makefile
+		cases/pcre-ragel.d/Makefile
 ])
 
 echo "configuration of testing package complete"
