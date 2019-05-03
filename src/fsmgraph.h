@@ -704,6 +704,7 @@ struct NfaTrans
 
 	NfaTrans( const ActionTable &pushTable,
 			const ActionTable &restoreTable,
+			const ActionTable &popFrom,
 			CondSpace *popCondSpace,
 			const CondKeySet popCondKeys,
 			const ActionTable &popAction,
@@ -714,6 +715,7 @@ struct NfaTrans
 		order(order),
 		pushTable(pushTable),
 		restoreTable(restoreTable),
+		popFrom(popFrom),
 		popCondSpace(popCondSpace),
 		popCondKeys(popCondKeys),
 		popAction(popAction),
@@ -747,6 +749,7 @@ struct NfaTrans
 	 * 2. Actions transferred
 	 * 3. Pop actions created during epsilon draw. 
 	 */
+	ActionTable popFrom;
 	CondSpace *popCondSpace;
 	CondKeySet popCondKeys;
 

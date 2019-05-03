@@ -354,14 +354,8 @@ void FsmAp::transferOutData( StateAp *destState, StateAp *srcState )
 	}
 
 	if ( destState->nfaOut != 0 ) {
-		for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ ) {
-			na->popAction.setActions( srcState->outActionTable );
-
-			na->popCondSpace = srcState->outCondSpace;
-			na->popCondKeys = srcState->outCondKeys;
-
-			na->priorTable.setPriors( srcState->outPriorTable );
-		}
+		for ( NfaTransList::Iter na = *destState->nfaOut; na.lte(); na++ )
+			transferOutToNfaTrans( na, srcState );
 	}
 }
 
@@ -1416,7 +1410,7 @@ void FsmAp::mergeNfaTransitions( StateAp *destState, StateAp *srcState )
 		for ( NfaTransList::Iter nt = *srcState->nfaOut; nt.lte(); nt++ ) {
 			NfaTrans *trans = new NfaTrans(
 					nt->pushTable, nt->restoreTable,
-					nt->popCondSpace, nt->popCondKeys,
+					nt->popFrom, nt->popCondSpace, nt->popCondKeys,
 					nt->popAction, nt->popTest, nt->order );
 
 			destState->nfaOut->append( trans );

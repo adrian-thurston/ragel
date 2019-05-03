@@ -130,16 +130,18 @@ void FsmAp::nfaMergeStates( StateAp *destState,
  * to happen before any user actions. 
  */
 const int ORD_PUSH = 0;
-const int ORD_RESTORE = -2;
+const int ORD_RESTORE = -3;
 const int ORD_COND = -1;
+const int ORD_COND2 = -2;
 const int ORD_TEST = 1073741824;
 
 void FsmAp::transferOutToNfaTrans( NfaTrans *trans, StateAp *state )
 {
-	trans->popAction.setActions( state->outActionTable );
+	trans->popFrom = state->fromStateActionTable;
 	trans->popCondSpace = state->outCondSpace;
 	trans->popCondKeys = state->outCondKeys;
 	trans->priorTable.setPriors( state->outPriorTable );
+	trans->popAction.setActions( state->outActionTable );
 }
 
 FsmRes FsmAp::nfaWrap( FsmAp *fsm, Action *push, Action *pop, Action *init,

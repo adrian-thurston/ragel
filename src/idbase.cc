@@ -262,6 +262,17 @@ void FsmCtx::createNfaActions( FsmAp *fsm )
 					n->popTest.setAction( ati->key, ati->value );
 				}
 
+				/* Move pop actions into pop test. Wrap to override the
+				 * condition-like testing. */
+				for ( ActionTable::Iter ati = n->popFrom; ati.lte(); ati++ ) {
+
+					InlineList *il1 = new InlineList;
+					il1->append( new InlineItem( InputLoc(),
+								ati->value, InlineItem::NfaWrapAction ) );
+					Action *wrap = newNfaWrapAction( "action_wrap", il1, ati->value );
+					n->popTest.setAction( ORD_COND2, wrap );
+				}
+
 				/* Move condition evaluation into pop test. Wrap with condition
 				 * execution. */
 				if ( n->popCondSpace != 0 ) {

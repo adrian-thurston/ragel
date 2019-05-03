@@ -196,6 +196,7 @@ typedef DList<LengthDef> LengthDefList;
 extern const int ORD_PUSH;
 extern const int ORD_RESTORE;
 extern const int ORD_COND;
+extern const int ORD_COND2;
 extern const int ORD_TEST;
 
 /* Class to collect information about the machine during the 
