@@ -239,6 +239,8 @@ void TabBreak::writeExec()
 		out << "while ( " << TRUE() << " ) {\n";
 	}
 
+	FROM_STATE_ACTIONS();
+
 	if ( !noEnd && eof ) {
 		out << 
 			"if ( " << P() << " == " << vEOF() << " ) {\n";
@@ -257,8 +259,6 @@ void TabBreak::writeExec()
 			"}\n"
 			"else {\n";
 	}
-
-	FROM_STATE_ACTIONS();
 
 	LOCATE_TRANS();
 

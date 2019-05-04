@@ -201,6 +201,8 @@ void TabGoto::writeExec()
 
 	NFA_PUSH( vCS() );
 
+	FROM_STATE_ACTIONS();
+
 	if ( !noEnd && eof ) {
 		out << 
 			"if ( " << P() << " == " << vEOF() << " ) {\n";
@@ -219,8 +221,6 @@ void TabGoto::writeExec()
 			"}\n"
 			"else {\n";
 	}
-
-	FROM_STATE_ACTIONS();
 
 	LOCATE_TRANS();
 

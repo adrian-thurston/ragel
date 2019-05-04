@@ -374,6 +374,8 @@ std::ostream &Goto::STATE_CASES()
 		/* Writing code above state gotos. */
 		GOTO_HEADER( st );
 
+		FROM_STATE_ACTION_EMIT( st );
+
 		if ( !noEnd && eof ) {
 			out << 
 				"if ( " << P() << " == " << vEOF() << " ) {\n";
@@ -386,8 +388,6 @@ std::ostream &Goto::STATE_CASES()
 				"}\n"
 				"else {\n";
 		}
-
-		FROM_STATE_ACTION_EMIT( st );
 
 		if ( st == redFsm->errState )
 			STATE_GOTO_ERROR();

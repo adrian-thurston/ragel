@@ -183,6 +183,8 @@ void TabVar::writeExec()
 
 	NFA_PUSH( vCS() );
 
+	FROM_STATE_ACTIONS();
+
 	if ( !noEnd && eof ) {
 		out << 
 			"if ( " << P() << " == " << vEOF() << " ) {\n";
@@ -201,8 +203,6 @@ void TabVar::writeExec()
 			"}\n"
 			"else {\n";
 	}
-
-	FROM_STATE_ACTIONS();
 
 	LOCATE_TRANS();
 
