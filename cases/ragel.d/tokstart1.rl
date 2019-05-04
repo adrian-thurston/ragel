@@ -44,10 +44,14 @@ struct Scanner
 	} 
 	action from_act {
 		cout << "from: fc = ";
-		if ( fc == '\'' )
-			cout << (int)fc;
-		else
-			cout << fc;
+		if ( p == eof )
+			cout << "EOF";
+		else {
+			if ( fc == '\'' )
+				cout << (int)fc;
+			else
+				cout << fc;
+		}
 		cout << " ts = " << ( ts == 0 ? -1 : ts-buf ) << endl;
 	}
 
@@ -233,5 +237,7 @@ from: fc =
  ts = 30
 to:   fc = 
  ts = 30
+from: fc = EOF ts = 30
 to:   fc = 
  ts = -1
+from: fc = EOF ts = 31
