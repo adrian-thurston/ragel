@@ -1,7 +1,6 @@
 /* 
  * @LANG: indep
  * @NEEDS_EOF: yes
- * @PROHIBIT_LANGUAGES: asm
  */
 
 int q;
