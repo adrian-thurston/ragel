@@ -1755,7 +1755,22 @@ std::ostream &AsmCodeGen::FINISH_CASES()
 		if ( st->eofTrans != 0 ) {
 			out <<
 				"	cmpq	$" << st->id << ", %rax\n"
-				"	je		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n";
+				"	jne		" << LABEL( "fc", st->id ) << "\n";
+
+			if ( st->fromStateAction != 0 ) {
+				/* Remember that we wrote an action. Write every action in the list. */
+				for ( GenActionTable::Iter item = st->fromStateAction->key;
+						item.lte(); item++ )
+				{
+					ACTION( out, item->value, st->id, false,
+							st->fromStateAction->anyNextStmt() );
+					out << "\n";
+				}
+			}
+				
+			out <<
+				"	jmp		" << TRANS_GOTO_TARG( st->eofTrans ) << "\n" <<
+				LABEL( "fc", st->id ) << ":\n";
 		}
 	}
 
