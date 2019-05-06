@@ -45,7 +45,6 @@ using std::cin;
 using std::endl;
 
 extern int numSplitPartitions;
-extern bool noLineDirectives;
 bool printStatistics = false;
 
 /* Enables transition logging in the form that score-based state sorting can
@@ -55,10 +54,6 @@ bool printStatistics = false;
 
 void asmLineDirective( ostream &out, const char *fileName, int line )
 {
-#if 0
-	if ( noLineDirectives )
-		out << "/* ";
-
 	/* Write the preprocessor line info for to the input file. */
 	out << "#line " << line  << " \"";
 	for ( const char *pc = fileName; *pc != 0; pc++ ) {
@@ -69,11 +64,7 @@ void asmLineDirective( ostream &out, const char *fileName, int line )
 	}
 	out << '"';
 
-	if ( noLineDirectives )
-		out << " */";
-
 	out << '\n';
-#endif
 }
 
 /* Init code gen with in parameters. */
