@@ -168,6 +168,24 @@ void rw_asm_abs_expr( Expr: indep::abs_expr )
 				"	setge	%al
 				"	movsbq	%al, %rax
 		}
+		case [`>] {
+			send Out
+				"	cmp		%rcx, %rax
+				"	setg	%al
+				"	movsbq	%al, %rax
+		}
+		case [`<=] {
+			send Out
+				"	cmp		%rax, %rcx
+				"	setge	%al
+				"	movsbq	%al, %rax
+		}
+		case [`<] {
+			send Out
+				"	cmp		%rax, %rcx
+				"	setg	%al
+				"	movsbq	%al, %rax
+		}
 
 		send Out
 				"	pushq	%rax
