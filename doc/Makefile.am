@@ -21,6 +21,10 @@ IN_FILES = \
 	0_05_fizzbuzz.adoc 1_04_functions.adoc 2_03_def.adoc \
 	3_05_reduction.adoc 8_05_contributing.adoc
 
+CODE = \
+	code/assign.lm     code/fizzbuzz.lm     code/nested_scope.lm  code/reference.lm \
+	code/figure_44.lm  code/hello_world.lm  code/poker.lm         code/scope.lm
+
 
 OUT_FILES = \
 	0_00_welcome.html 0_06_scope.html 1_05_variables.html \
@@ -37,7 +41,7 @@ OUT_FILES = \
 
 CLEANFILES = $(OUT_FILES)
 
-EXTRA_DIST = $(IN_FILES)
+EXTRA_DIST = $(IN_FILES) $(CODE)
 
 if BUILD_MANUAL
 
