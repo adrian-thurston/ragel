@@ -4,7 +4,7 @@ dnl
   
 AC_INIT(test-suite, 1.0.1)
 
-EXPECTED_COLM_VER=0.13.0.6
+EXPECTED_COLM_VER=0.13.0.7
 
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_HEADER(config.h)
