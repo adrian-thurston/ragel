@@ -114,7 +114,7 @@ void TableArray::finishAnalyze()
 		/* Calculate the type if it is not already set. */
 		if ( type.empty() ) {
 			if ( min >= S8BIT_MIN && max <= S8BIT_MAX ) {
-				type = "char";
+				type = "signed char";
 				width = sizeof(char);
 			}
 			else if ( min >= S16BIT_MIN && max <= S16BIT_MAX ) {

@@ -268,7 +268,7 @@ namespace c_gen
 	{
 		switch Type
 		case S8
-			['char ']
+			['signed char ']
 		case S16
 			['short ']
 		case S32
