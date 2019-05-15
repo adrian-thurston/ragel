@@ -553,6 +553,10 @@ void AsmCodeGen::INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			ret <<
 				"	subq	$1, " << P() << "\n";
 			break;
+		case GenInlineItem::NfaClear:
+			ret <<
+				"	movq	$0, " << NFA_TOP() << "\n";
+			break;
 
 		case GenInlineItem::HostStmt:
 			HOST_STMT( ret, item, targState, inFinish, csForced );
@@ -1749,7 +1753,7 @@ std::ostream &AsmCodeGen::ENTRY_CASES()
 std::ostream &AsmCodeGen::FINISH_CASES()
 {
 	/* The current state is in %rax. */
-	long done = nextLmSwitchLabel++;
+	/*long done = */ nextLmSwitchLabel++;
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->eofTrans != 0 ) {
