@@ -298,6 +298,10 @@ void crack( Output: stream )
 		"	int p = 0;
 		"	int pe = s.size;
 		"	int cs;
+		"	int nfa_len, nfa_count;
+		"	array\[int\] nfa_bp_state = {20};
+		"	array\[int\] nfa_bp_p = {20};
+		"	int ts, te;
 		"	String buffer;
 
 	if NeedsEof {

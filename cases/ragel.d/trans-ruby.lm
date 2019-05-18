@@ -282,6 +282,12 @@ void rw_ruby( Output: stream )
 		"	cs = 0;
 		"	_m = ""
 		"	_a = ""
+		"	nfa_len = 0
+		"	nfa_count = 0
+		"	nfa_bp_state = Array.new()
+		"	nfa_bp_p = Array.new()
+		"	ts = 0
+		"	te = 0
 		"	buffer = Array.new
 		"	blen = 0
 

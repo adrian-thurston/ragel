@@ -274,6 +274,10 @@ void rw_java( Output: stream )
 		"
 		"%% write data;
 		"int cs;
+		"int nfa_len, nfa_count;
+		"int nfa_bp_state\[\] = new int\[20\];
+		"int nfa_bp_p\[\] = new int\[20\];
+		"int ts, te;
 		"
 		"void init()
 		"{

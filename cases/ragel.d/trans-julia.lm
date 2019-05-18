@@ -290,6 +290,12 @@ void julia( Output: stream )
 		"	eof = length(data)
 		"	cs = 0
 		"	buffer = \"\"
+		"	nfa_len = 0
+		"	nfa_count = 0
+		"	nfa_bp_state = Array{Int, 1}(20)
+		"	nfa_bp_p = Array{Int, 1}(20)
+		"	ts = 0
+		"	te = 0
 
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {

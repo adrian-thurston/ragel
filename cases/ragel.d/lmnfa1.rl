@@ -1,50 +1,26 @@
 /*
- * @LANG: c
+ * @LANG: indep
+ * @NEEDS_EOF: yes
  */
 
-#include <stdio.h>
-#include <string.h>
-
 %%{
-	machine nfalm;
+	machine lmnfa1;
 
 	main := :nfa |*
-		"hello" %when {0} => { printf("hello --fail\n"); };
-		"hello"           => { printf("hello\n"); };
-		[a-z]+ %when {0}  => { printf("other --fail\n"); };
-		[a-z]+            => { printf("other\n"); };
-		' '               => { printf("<space>\n"); };
+		"hello" %when {false} => { print_str "hello --fail\n"; };
+		"hello"               => { print_str "hello\n"; };
+		[a-z]+ %when {false}  => { print_str "other --fail\n"; };
+		[a-z]+                => { print_str "other\n"; };
+		' '                   => { print_str "<space>\n"; };
 	*|;
 }%%
 
-%% write data;
-
-void exec( const char *data, int length )
-{
-	const char *p = data;
-	const char *pe = data + length;
-	const char *eof = pe;
-
-	const char *ts, *te;
-	int cs;
-
-	int nfa_len, nfa_count;
-	struct nfa_s { int state; const char *p; } nfa_bp[20];
-
-	%% write init;
-	%% write exec;
-}
-
-int main()
-{
-	const char *in = "hello hellos hello";
-	exec( in, strlen(in) );
-	return 0;
-}
-
+##### INPUT #####
+"hello hellos hello"
 ##### OUTPUT #####
 hello
 <space>
 other
 <space>
 hello
+ACCEPT

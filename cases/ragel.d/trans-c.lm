@@ -272,6 +272,9 @@ void rw_c( Output: stream )
 		"int cs;
 		"int blen;
 		"char buffer\[1024\];
+		"int nfa_len, nfa_count;
+		"struct nfa_s { int state; char *p; } nfa_bp\[20\];
+		"char *ts, *te;
 		"
 		"void init()
 		"{
