@@ -1126,9 +1126,9 @@ void CodeGen::NFA_PUSH( std::string state )
 {
 	if ( redFsm->anyNfaStates() ) {
 		out <<
-			"	if ( " << ARR_REF( nfaOffsets ) << "[" << state << "] ) {\n"
+			"	if ( " << ARR_REF( nfaOffsets ) << "[" << state << "] != 0 ) {\n"
 			"		" << alt << " = 0; \n"
-			"		" << new_recs << " = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+			"		" << new_recs << " = " << CAST("int") << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 						ARR_REF( nfaOffsets ) << "[" << state << "]];\n";
 
 		if ( red->nfaPrePushExpr != 0 ) {
@@ -1144,7 +1144,7 @@ void CodeGen::NFA_PUSH( std::string state )
 
 
 		out <<
-			"			nfa_bp[nfa_len].state = " << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
+			"			nfa_bp[nfa_len].state = " << CAST("int") << ARR_REF( nfaTargs ) << "[" << CAST("int") <<
 							ARR_REF( nfaOffsets ) << "[" << state << "] + 1 + " << alt << "];\n"
 			"			nfa_bp[nfa_len].p = " << P() << ";\n";
 
