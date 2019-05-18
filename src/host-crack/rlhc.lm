@@ -154,6 +154,10 @@ namespace crack_gen
 			send Parser 
 				"[type( T )] ( [expr_factor( F )] )"
 		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' E ']']
+		}
 		default {
 			# Catches cases not specified
 			send Parser [ExprFactor]
@@ -178,6 +182,10 @@ namespace crack_gen
 			# The accessor operator is contained wihtin the lhs.
 			embedded_host( E1 )
 			lvalue( E2 )
+		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' E ']']
 		}
 		default {
 			# Catches cases not specified

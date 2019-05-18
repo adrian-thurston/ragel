@@ -119,6 +119,10 @@ namespace ml_gen
 					"[ ExprFactor.ident ].\[[ expr( TL ) ]\]"
 			}
 		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '.(' expr(E) ')']
+		}
 		case ['offset' '(' ident ',' expr ')']
 		{
 			send Parser
@@ -178,6 +182,10 @@ namespace ml_gen
 			send Parser
 				[expr_factor( ExprFactor._expr_factor )]
 		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' E ']']
+		}
 		default {
 			# Catches cases not specified
 			send Parser [ExprFactor]
@@ -202,6 +210,10 @@ namespace ml_gen
 			# The accessor operator is contained wihtin the lhs.
 			embedded_host( E1 )
 			lvalue( E2 )
+		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '.(' E ')']
 		}
 		default {
 			# Catches cases not specified
@@ -521,7 +533,16 @@ namespace ml_gen
 			{
 				switch AS.LValue
 				case "stack\[[expr]\]" {
-					send Parser "Array.set stack top.contents [expr(AS.expr)];"
+					send Parser
+						"Array.set stack top.contents [expr(AS.expr)];
+				}
+				case "nfa_bp\[[expr]\].state" {
+					send Parser
+						"Array.set nfa_bp_state nfa_len.contents [expr(AS.expr)];
+				}
+				case "nfa_bp\[[expr]\].p" {
+					send Parser
+						"Array.set nfa_bp_p nfa_len.contents [expr(AS.expr)];
 				}
 				default {
 					send Parser

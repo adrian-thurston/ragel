@@ -125,11 +125,6 @@ namespace julia_gen
 			send Parser
 				"[I]\[1+([expr( E )])\]"
 		}
-		case [I: ident `[ E: expr `] `. F: ident]
-		{
-			send Parser
-				"[I]\[1+([expr( E )])\].[F]"
-		}
 		case [`offset `( ident `, expr `)]
 		{
 			send Parser
@@ -167,6 +162,10 @@ namespace julia_gen
 			send Parser 
 				"convert([type( T )], [expr_factor( F )] )"
 		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[1+(' expr(E) ')]']
+		}
 		default {
 			# Catches cases not specified
 			send Parser [ExprFactor]
@@ -186,16 +185,15 @@ namespace julia_gen
 			send Parser
 				"[I]\[1+([expr( E )])\]"
 		}
-		case [I: ident `[ E: expr `] `. F: ident]
-		{
-			send Parser
-				"[I]\[1+([ expr( E )])\].[F]"
-		}
 		case [E1: embedded_host `-> E2: lvalue]
 		{
 			# The accessor operator is contained wihtin the lhs.
 			embedded_host( E1 )
 			lvalue( E2 )
+		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[1+(' expr(E) ')]']
 		}
 		default {
 			# Catches cases not specified

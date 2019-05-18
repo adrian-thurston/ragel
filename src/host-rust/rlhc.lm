@@ -146,6 +146,10 @@ namespace rust_gen
 			send Parser
 				"( [expr_factor( E )] ) as [type(T)]"
 		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' expr(E) ' as usize]']
+		}
 		default {
 			# Catches cases not specified
 			send Parser [ExprFactor]
@@ -170,6 +174,10 @@ namespace rust_gen
 			# The accessor operator is contained wihtin the lhs.
 			embedded_host( E1 )
 			lvalue( E2 )
+		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' expr(E) ' as usize]']
 		}
 		default {
 			# Catches cases not specified

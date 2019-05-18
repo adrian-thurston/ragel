@@ -160,6 +160,10 @@ void expr_factor( ExprFactor: expr_factor )
 		#send Parser [Close]
 		expr_factor( ExprFactor._expr_factor )
 	}
+	case [I: ident `[ E: expr `] `. F: ident] {
+		send Parser
+			[^I '_' ^F '[' E ']']
+	}
 	default {
 		# Catches cases not specified
 		send Parser [ExprFactor]
@@ -183,6 +187,10 @@ void lvalue( ExprFactor: lvalue )
 	{
 		embedded_host( E1 )
 		lvalue( E2 )
+	}
+	case [I: ident `[ E: expr `] `. F: ident] {
+		send Parser
+			[^I '_' ^F '[' E ']']
 	}
 	default {
 		# Catches cases not specified

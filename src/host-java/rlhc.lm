@@ -162,6 +162,10 @@ namespace java_gen
 			send Parser [Close]
 			expr_factor( ExprFactor._expr_factor )
 		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' E ']']
+		}
 		default {
 			# Catches cases not specified
 			send Parser [ExprFactor]
@@ -186,6 +190,10 @@ namespace java_gen
 		{
 			embedded_host( E1 )
 			lvalue( E2 )
+		}
+		case [I: ident `[ E: expr `] `. F: ident] {
+			send Parser
+				[^I '_' ^F '[' E ']']
 		}
 		default {
 			# Catches cases not specified
