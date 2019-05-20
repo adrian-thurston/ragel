@@ -47,7 +47,9 @@ struct IpLabel
 		None = 1,
 		TestEof,
 		Ctr,
-		St
+		St,
+		Out,
+		Pop
 	};
 
 	std::string reference()
@@ -69,6 +71,12 @@ struct IpLabel
 				break;
 			case St:
 				ss << "_st" << stid;
+				break;
+			case Out:
+				ss << "_out" << stid;
+				break;
+			case Pop:
+				ss << "_pop" << stid;
 				break;
 		}
 

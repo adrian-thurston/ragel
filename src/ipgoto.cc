@@ -366,9 +366,13 @@ std::ostream &IpGoto::COND_GOTO( RedCondPair *cond )
 std::ostream &IpGoto::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( eofLabel[st->id].isReferenced ) {
-			out << eofLabel[st->id].define() << ": " << vCS() << " = " << 
-					st->id << "; goto " << _test_eof << "; \n";
+		if ( outLabel[st->id].isReferenced ) {
+			out << outLabel[st->id].define() << ": " << vCS() << " = " << 
+					st->id << "; goto " << _out << "; \n";
+		}
+		if ( popLabel[st->id].isReferenced ) {
+			out << popLabel[st->id].define() << ": " << vCS() << " = " << 
+					st->id << "; goto " << _pop << "; \n";
 		}
 	}
 	return out;
@@ -459,11 +463,10 @@ std::ostream &IpGoto::STATE_GOTOS()
 		if ( eof ) {
 			out <<
 				"if ( " << P() << " == " << vEOF() << " ) {\n"
-				"	" << vCS() << " = " << st->id << ";\n"
 				"	if ( " << st->id << " >= " << FIRST_FINAL_STATE() << " )\n"
-				"		goto " << _out << ";\n"
+				"		goto " << outLabel[st->id].reference() << ";\n"
 				"	else\n"
-				"		goto " << _pop << ";\n"
+				"		goto " << popLabel[st->id].reference() << ";\n"
 				"}\n";
 		}
 
@@ -480,8 +483,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 			out << "st_case_" << st->id << ":\n";
 
 			/* Break out here. */
-			out << vCS() << " = " << st->id << ";\n";
-			out << "goto " << _pop << ";\n";
+			out << "goto " << popLabel[st->id].reference() << ";\n";
 		}
 		else {
 
@@ -494,22 +496,18 @@ std::ostream &IpGoto::STATE_GOTOS()
 			/* Give the st a switch case. */
 			out << "st_case_" << st->id << ":\n";
 
-				if ( !noEnd ) {
+			if ( !noEnd ) {
 				if ( eof ) {
 					out <<
-						"if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " ) {\n"
-						"	" << vCS() << " = " << st->id << ";\n"
-						"	goto " << _out << ";\n"
-						"}\n";
+						"if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " )\n"
+						"	goto " << outLabel[st->id].reference() << ";\n";
 				}
 				else {
 					out << 
-						"if ( " << P() << " == " << PE() << " ) {\n"
-						"	" << vCS() << " = " << st->id << ";\n"
-						"	goto " << _out << ";\n"
-						"}\n";
+						"if ( " << P() << " == " << PE() << " )\n"
+						"	goto " << outLabel[st->id].reference() << ";\n";
 				}
-				}
+			}
 
 			
 			NFA_PUSH( st );
@@ -532,10 +530,9 @@ std::ostream &IpGoto::STATE_GOTOS()
 				else {
 
 					out <<
-						"	" << vCS() << " = " << st->id << ";\n"
 						"if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-						"	goto " << _out << ";\n"
-						"goto " << _pop << ";\n";
+						"	goto " << outLabel[st->id].reference() << ";\n"
+						"goto " << popLabel[st->id].reference() << ";\n";
 				}
 
 				out <<
@@ -676,8 +673,9 @@ void IpGoto::writeExec()
 	int maxCtrId = redFsm->nextCondId > redFsm->nextTransId ? redFsm->nextCondId : redFsm->nextTransId;
 
 	stLabel = allocateLabels( stLabel, IpLabel::St, redFsm->nextStateId );
-	eofLabel = allocateLabels( eofLabel, IpLabel::TestEof, redFsm->nextStateId );
 	ctrLabel = allocateLabels( ctrLabel, IpLabel::Ctr, maxCtrId );
+	outLabel = allocateLabels( outLabel, IpLabel::Out, redFsm->nextStateId );
+	popLabel = allocateLabels( popLabel, IpLabel::Pop, redFsm->nextStateId );
 
 	/* Must set labels immediately before writing because we may depend on the
 	 * noend write option. */
@@ -712,39 +710,17 @@ void IpGoto::writeExec()
 
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
-		STATE_GOTO_CASES() <<
+
+	STATE_GOTO_CASES() <<
 		"	}\n"
 		"	goto st_out;\n";
-		STATE_GOTOS() <<
+
+	STATE_GOTOS() <<
 		"	st_out:\n";
-		EXIT_STATES() <<
-		"\n";
+	
+	EXIT_STATES();
 
 	out << EMIT_LABEL( _test_eof );
-
-	if ( redFsm->anyEofActivity() ) {
-
-		out <<
-			"		switch ( " << vCS() << " ) {\n";
-
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			if ( st->eofTrans != 0 ) {
-				out << "case " << st->id << ": {\n";
-
-				TRANS_GOTO( st->eofTrans );
-
-				out << "}\n";
-			}
-		}
-
-		out <<
-			"	}\n"
-			"\n";
-	}
-
-	out <<
-		"if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-		"	goto " << _out << "; ";
 
 	out << EMIT_LABEL( _pop );
 

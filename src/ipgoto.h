@@ -40,8 +40,9 @@ public:
 	:
 		Goto( args, Ip ),
 		stLabel(0),
-		eofLabel(0),
-		ctrLabel(0)
+		ctrLabel(0),
+		outLabel(0),
+		popLabel(0)
 	{}
 
 	std::ostream &EXIT_STATES();
@@ -107,8 +108,9 @@ protected:
 	void tableDataPass();
 
 	IpLabel *stLabel;
-	IpLabel *eofLabel;
 	IpLabel *ctrLabel;
+	IpLabel *outLabel;
+	IpLabel *popLabel;
 };
 
 namespace C
