@@ -79,19 +79,9 @@ bool IpGoto::useAgainLabel()
 			redFsm->anyRegNextStmt();
 }
 
-void IpGoto::EOF_CHECK( ostream &ret, int gotoDest )
-{
-	ret << 
-		"       if ( " << P() << " == " << PE() << " )\n"
-		"               goto " << eofLabel[gotoDest].reference() << ";\n";
-}
-
 void IpGoto::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
 	ret << OPEN_GEN_BLOCK();
-
-	if ( inFinish && !noEnd )
-		EOF_CHECK( ret, gotoDest );
 
 	ret << "goto " << stLabel[gotoDest].reference() << ";";
 
@@ -103,11 +93,6 @@ void IpGoto::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	ret << OPEN_GEN_BLOCK() << vCS() << " = " << OPEN_HOST_EXPR();
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << CLOSE_HOST_EXPR() << ";";
-
-	/* Since we are setting CS above and can select on it, call the all-state
-	 * test_eof. */
-	if ( inFinish && !noEnd )
-		Goto::EOF_CHECK( ret );
 	
 	ret << " goto " << _again << ";";
 	
@@ -126,9 +111,6 @@ void IpGoto::CALL( ostream &ret, int callDest, int targState, bool inFinish )
 
 	ret << STACK() << "[" << TOP() << "] = " << targState << 
 			"; " << TOP() << "+= 1; ";
-
-	if ( inFinish && !noEnd )
-		EOF_CHECK( ret, callDest );
 
 	ret << "goto " << stLabel[callDest].reference() << ";";
 
@@ -165,11 +147,6 @@ void IpGoto::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << CLOSE_HOST_EXPR() << ";";
 
-	/* Since we are setting CS above and can select on it, call the all-state
-	 * test_eof. */
-	if ( inFinish && !noEnd )
-		Goto::EOF_CHECK( ret );
-
 	ret << " goto " << _again << ";";
 	
 	ret << CLOSE_GEN_BLOCK();
@@ -201,9 +178,6 @@ void IpGoto::RET( ostream &ret, bool inFinish )
 		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 		ret << CLOSE_HOST_BLOCK();
 	}
-
-	if ( inFinish && !noEnd )
-		Goto::EOF_CHECK( ret );
 
 	ret << "goto " << _again << ";" << CLOSE_GEN_BLOCK();
 }
