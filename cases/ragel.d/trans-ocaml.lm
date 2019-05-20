@@ -330,8 +330,6 @@ void rw_ocaml( Output: stream )
 		"  let nfa_count = ref 0 in
 		"  let nfa_bp_state = Array.make 20 0 in
 		"  let nfa_bp_p = Array.make 20 0 in
-		"  let ts = ref 0 in
-		"  let te = ref 0 in
 
 	if NeedsEof {
 		send Output

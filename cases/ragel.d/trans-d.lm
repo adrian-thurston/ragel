@@ -271,7 +271,6 @@ void rw_d( Output: stream )
 		"int nfa_len, nfa_count;
 		"struct nfa_s { int state; const(char)* p; };
 		"nfa_s\[20\] nfa_bp;
-		"const(char) *ts, te;
 		"
 		"void init()
 		"{

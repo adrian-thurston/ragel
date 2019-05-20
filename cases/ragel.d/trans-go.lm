@@ -270,8 +270,6 @@ void rw_go( Output: stream )
 		"var nfa_len int;
 		"var nfa_count int;
 		"var nfa_bp \[20\] struct { state int; p int; };
-		"var ts int;
-		"var te int;
 		"
 		"%% write data;
 		"

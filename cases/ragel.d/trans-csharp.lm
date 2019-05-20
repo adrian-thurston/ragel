@@ -285,7 +285,6 @@ void rw_csharp( Output: stream )
 		"int nfa_len, nfa_count;
 		"struct nfa_s { public int state; public int p; };
 		"nfa_s \[\] nfa_bp = new nfa_s\[20\];
-		"int ts, te;
 		"
 		"void init()
 		"{

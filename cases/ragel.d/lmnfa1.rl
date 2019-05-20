@@ -3,6 +3,8 @@
  * @NEEDS_EOF: yes
  */
 
+ptr ts;
+ptr te;
 %%{
 	machine lmnfa1;
 

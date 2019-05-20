@@ -309,8 +309,6 @@ void rust( Output: stream )
 		"	let mut nfa_count:i32 = 0;
 		"	let mut nfa_bp_state: \[i32; 20\] = \[0; 20\];
 		"	let mut nfa_bp_p: \[i32; 20\] = \[0; 20\];
-		"	let mut ts: i32 = 0;
-		"	let mut te: i32 = 0;
 
 	for Stmt: indep::stmt in Init {
 		if match Stmt [ExprStmt: expr_stmt] {
