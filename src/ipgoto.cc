@@ -328,81 +328,12 @@ bool IpGoto::IN_TRANS_ACTIONS( RedStateAp *state )
 	return anyWritten;
 }
 
-/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for each
- * state. */
 void IpGoto::GOTO_HEADER( RedStateAp *state )
 {
-	IN_TRANS_ACTIONS( state );
-
-	if ( stLabel[state->id].isReferenced ) 
-		out << "_st" << state->id << ":\n";
-
-	/* need to do this if the transition is an eof transition, or if the action
-	 * contains fexec. Otherwise, no need. */
-	if ( redFsm->anyEofActivity() ) {
-		out <<
-			"if ( " << P() << " == " << vEOF() << " ) {\n"
-			"	if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-			"		goto " << _out << ";\n"
-			"	else\n"
-			"		goto " << _pop << ";\n"
-			"}\n";
-	}
-
-	if ( state->toStateAction != 0 ) {
-		/* Write every action in the list. */
-		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
-			ACTION( out, item->value, IlOpts( state->id, false, 
-					state->toStateAction->anyNextStmt() ) );
-			out << "\n";
-		}
-	}
-
-	/* Advance and test buffer pos. */
-	if ( state->labelNeeded ) {
-		if ( !noEnd ) {
-			out <<
-				P() << "+= 1;\n"
-				"if ( " << P() << " == " << PE() << " )\n"
-				"	goto " << eofLabel[state->id].reference() << ";\n";
-		}
-		else {
-			out << 
-				P() << " += 1;\n";
-		}
-	}
-
-	/* Give the state a switch case. */
-	out << "st_case_" << state->id << ":\n";
-
-	if ( state->fromStateAction != 0 ) {
-		/* Write every action in the list. */
-		for ( GenActionTable::Iter item = state->fromStateAction->key; item.lte(); item++ ) {
-			ACTION( out, item->value, IlOpts( state->id, false,
-					state->fromStateAction->anyNextStmt() ) );
-			out << "\n";
-		}
-	}
-
-	/* Record the prev state if necessary. */
-	if ( state->anyRegCurStateRef() )
-		out << ps << " = " << state->id << ";\n";
 }
 
 void IpGoto::STATE_GOTO_ERROR()
 {
-	/* In the error state we need to emit some stuff that usually goes into
-	 * the header. */
-	RedStateAp *state = redFsm->errState;
-	IN_TRANS_ACTIONS( state );
-
-	out << "st_case_" << state->id << ":\n";
-	if ( stLabel[state->id].isReferenced ) 
-		out << "_st" << state->id << ":\n";
-
-	/* Break out here. */
-	out << vCS() << " = " << state->id << ";\n";
-	out << "goto " << _pop << ";\n";
 }
 
 
@@ -542,11 +473,71 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 std::ostream &IpGoto::STATE_GOTOS()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st == redFsm->errState )
-			STATE_GOTO_ERROR();
+		IN_TRANS_ACTIONS( st );
+
+		if ( stLabel[st->id].isReferenced ) 
+			out << "_st" << st->id << ":\n";
+
+		/* Need to do this if the transition is an eof transition, or if
+		 * the action contains fexec. Otherwise, no need. */
+		if ( redFsm->anyEofActivity() ) {
+			out <<
+				"if ( " << P() << " == " << vEOF() << " ) {\n"
+				"	" << vCS() << " = " << st->id << ";\n"
+				"	if ( " << st->id << " >= " << FIRST_FINAL_STATE() << " )\n"
+				"		goto " << _out << ";\n"
+				"	else\n"
+				"		goto " << _pop << ";\n"
+				"}\n";
+		}
+
+		if ( st->toStateAction != 0 ) {
+			/* Write every action in the list. */
+			for ( GenActionTable::Iter item = st->toStateAction->key; item.lte(); item++ ) {
+				ACTION( out, item->value, IlOpts( st->id, false, 
+						st->toStateAction->anyNextStmt() ) );
+				out << "\n";
+			}
+		}
+
+		if ( st == redFsm->errState ) {
+			out << "st_case_" << st->id << ":\n";
+
+			/* Break out here. */
+			out << vCS() << " = " << st->id << ";\n";
+			out << "goto " << _pop << ";\n";
+		}
 		else {
-			/* Writing code above state gotos. */
-			GOTO_HEADER( st );
+
+			/* Advance and test buffer pos. */
+			if ( st->labelNeeded ) {
+				if ( !noEnd ) {
+					out <<
+						P() << "+= 1;\n"
+						"if ( " << P() << " == " << PE() << " )\n"
+						"	goto " << eofLabel[st->id].reference() << ";\n";
+				}
+				else {
+					out << 
+						P() << " += 1;\n";
+				}
+			}
+
+			/* Give the st a switch case. */
+			out << "st_case_" << st->id << ":\n";
+
+			if ( st->fromStateAction != 0 ) {
+				/* Write every action in the list. */
+				for ( GenActionTable::Iter item = st->fromStateAction->key; item.lte(); item++ ) {
+					ACTION( out, item->value, IlOpts( st->id, false,
+							st->fromStateAction->anyNextStmt() ) );
+					out << "\n";
+				}
+			}
+
+			/* Record the prev st if necessary. */
+			if ( st->anyRegCurStateRef() )
+				out << ps << " = " << st->id << ";\n";
 
 			NFA_PUSH( st );
 
@@ -561,9 +552,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 			}
 
 			/* Write the default transition. */
-			out << "{\n";
 			TRANS_GOTO( st->defTrans ) << "\n";
-			out << "}\n";
 		}
 	}
 	return out;
@@ -755,7 +744,6 @@ void IpGoto::writeExec()
 		out <<
 			"		switch ( " << vCS() << " ) {\n";
 
-		bool okeydokey = false;
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 			if ( st->eofTrans != 0 ) {
 				out << "case " << st->id << ": {\n";
