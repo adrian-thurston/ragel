@@ -472,6 +472,8 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 
 std::ostream &IpGoto::STATE_GOTOS()
 {
+	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		IN_TRANS_ACTIONS( st );
 
@@ -480,7 +482,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 		/* Need to do this if the transition is an eof transition, or if
 		 * the action contains fexec. Otherwise, no need. */
-		if ( redFsm->anyEofActivity() ) {
+		if ( eof ) {
 			out <<
 				"if ( " << P() << " == " << vEOF() << " ) {\n"
 				"	" << vCS() << " = " << st->id << ";\n"
@@ -511,20 +513,30 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 			/* Advance and test buffer pos. */
 			if ( st->labelNeeded ) {
-				if ( !noEnd ) {
-					out <<
-						P() << "+= 1;\n"
-						"if ( " << P() << " == " << PE() << " )\n"
-						"	goto " << eofLabel[st->id].reference() << ";\n";
-				}
-				else {
-					out << 
-						P() << " += 1;\n";
-				}
+				out <<
+					P() << "+= 1;\n";
 			}
 
 			/* Give the st a switch case. */
 			out << "st_case_" << st->id << ":\n";
+
+				if ( !noEnd ) {
+				if ( eof ) {
+					out <<
+						"if ( " << P() << " == " << PE() << " && " << P() << " != " << vEOF() << " ) {\n"
+						"	" << vCS() << " = " << st->id << ";\n"
+						"	goto " << _out << ";\n"
+						"}\n";
+				}
+				else {
+					out << 
+						"if ( " << P() << " == " << PE() << " ) {\n"
+						"	" << vCS() << " = " << st->id << ";\n"
+						"	goto " << _out << ";\n"
+						"}\n";
+				}
+				}
+
 			
 			NFA_PUSH( st );
 
@@ -535,6 +547,26 @@ std::ostream &IpGoto::STATE_GOTOS()
 							st->fromStateAction->anyNextStmt() ) );
 					out << "\n";
 				}
+			}
+
+			if ( !noEnd && eof ) {
+				out <<
+					"if ( " << P() << " == " << vEOF() << " ) {\n";
+
+				if ( st->eofTrans != 0 )
+					TRANS_GOTO( st->eofTrans );
+				else {
+
+					out <<
+						"	" << vCS() << " = " << st->id << ";\n"
+						"if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
+						"	goto " << _out << ";\n"
+						"goto " << _pop << ";\n";
+				}
+
+				out <<
+					"}\n"
+					"else {\n";
 			}
 
 			/* Record the prev st if necessary. */
@@ -553,6 +585,11 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 			/* Write the default transition. */
 			TRANS_GOTO( st->defTrans ) << "\n";
+
+			if ( !noEnd && eof ) {
+				out <<
+					"}\n";
+			}
 		}
 	}
 	return out;
@@ -682,12 +719,6 @@ void IpGoto::writeExec()
 	DECLARE( INT(), new_recs );
 	DECLARE( INT(), alt );
 
-	if ( !noEnd ) {
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto " << _test_eof << ";\n";
-	}
-
 	if ( _again.isReferenced ) {
 		out << 
 			"	goto " << _resume << ";\n"
@@ -705,12 +736,6 @@ void IpGoto::writeExec()
 
 	out << EMIT_LABEL( _resume );
 
-	if ( !noEnd ) {
-		out << 
-			"	if ( " << P() << " == " << PE() << " )\n"
-			"		goto " << _test_eof << ";\n";
-	}
-
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTO_CASES() <<
@@ -724,22 +749,6 @@ void IpGoto::writeExec()
 	out << EMIT_LABEL( _test_eof );
 
 	if ( redFsm->anyEofActivity() ) {
-		out <<
-			"	if ( " << P() << " == " << vEOF() << " ) {\n";
-
-		out <<
-			"		switch ( " << vCS() << " ) {\n";
-
-		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			out << "case " << st->id << ": {\n";
-			NFA_PUSH( st );
-			FROM_STATE_ACTION_EMIT( st );
-
-			out << "break;\n}\n";
-		}
-
-		out <<
-			"		}\n";
 
 		out <<
 			"		switch ( " << vCS() << " ) {\n";
@@ -753,15 +762,6 @@ void IpGoto::writeExec()
 				out << "}\n";
 			}
 		}
-
-		out <<
-			"	}\n";
-
-		out <<
-			"	switch ( " << vCS() << " ) {\n";
-			FINISH_CASES() <<
-			"	}\n";
-
 
 		out <<
 			"	}\n"
