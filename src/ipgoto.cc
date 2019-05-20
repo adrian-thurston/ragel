@@ -525,6 +525,8 @@ std::ostream &IpGoto::STATE_GOTOS()
 
 			/* Give the st a switch case. */
 			out << "st_case_" << st->id << ":\n";
+			
+			NFA_PUSH( st );
 
 			if ( st->fromStateAction != 0 ) {
 				/* Write every action in the list. */
@@ -538,8 +540,6 @@ std::ostream &IpGoto::STATE_GOTOS()
 			/* Record the prev st if necessary. */
 			if ( st->anyRegCurStateRef() )
 				out << ps << " = " << st->id << ";\n";
-
-			NFA_PUSH( st );
 
 			/* Try singles. */
 			if ( st->outSingle.length() > 0 )
