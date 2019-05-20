@@ -716,6 +716,12 @@ void IpGoto::writeExec()
 
 	out << EMIT_LABEL( _resume );
 
+	if ( !noEnd ) {
+		out << 
+			"	if ( " << P() << " == " << PE() << " )\n"
+			"		goto " << _test_eof << ";\n";
+	}
+
 	out <<
 		"	switch ( " << vCS() << " ) {\n";
 		STATE_GOTO_CASES() <<
@@ -751,26 +757,10 @@ void IpGoto::writeExec()
 
 		bool okeydokey = false;
 		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-			if ( st->outCondSpace != 0 ) {
+			if ( st->eofTrans != 0 ) {
 				out << "case " << st->id << ": {\n";
 
-				out << ck << " = 0;\n";
-				for ( GenCondSet::Iter csi = st->outCondSpace->condSet; csi.lte(); csi++ ) {
-					out << "if ( ";
-					CONDITION( out, *csi );
-					Size condValOffset = (1 << csi.pos());
-					out << " )\n" << ck << " += " << condValOffset << ";\n";
-				}
-
-				out << "switch ( " << ck << " ) {\n";
-				for ( CondKeySet::Iter k = st->outCondKeys; k.lte(); k++ ) {
-					out << "case " << *k << ": goto _okeydokey;\n";
-					okeydokey = true;
-				}
-				out << "}\n";
-
-				out << vCS() << " = " << ERROR_STATE() << ";\n";
-				out << "goto " << _pop << ";\n";
+				TRANS_GOTO( st->eofTrans );
 
 				out << "}\n";
 			}
@@ -778,11 +768,6 @@ void IpGoto::writeExec()
 
 		out <<
 			"	}\n";
-
-		if ( okeydokey ) {
-			out <<
-				"_okeydokey: {}\n";
-		}
 
 		out <<
 			"	switch ( " << vCS() << " ) {\n";
