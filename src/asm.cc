@@ -1161,14 +1161,122 @@ void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 
 std::ostream &AsmCodeGen::STATE_GOTOS()
 {
+	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
+
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st == redFsm->errState )
-			STATE_GOTO_ERROR();
+		/* Writing code above state gotos. */
+		IN_TRANS_ACTIONS( st );
+
+		if ( st->labelNeeded ) 
+			out << LABEL( "st", st->id ) << ":\n";
+
+
+		/* need to do this if the transition is an eof transition, or if the action
+		 * contains fexec. Otherwise, no need. */
+		if ( eof ) {
+			/* FIXME: need to elim this. */
+			out << "	movq	$" << st->id << ", " << vCS() << "\n";
+
+			out <<
+				"	cmpq	" << P() << ", " << vEOF() << "\n";
+
+			if ( st->isFinal )
+				out << "	je		" << LABEL( "out" ) << "\n";
+			else
+				out << "	je		" << LABEL( "pop" ) << "\n";
+		}
+
+		if ( st->toStateAction != 0 ) {
+			/* Remember that we wrote an action. Write every action in the list. */
+			for ( GenActionTable::Iter item = st->toStateAction->key; item.lte(); item++ ) {
+				ACTION( out, item->value, st->id, false, 
+						st->toStateAction->anyNextStmt() );
+				out << "\n";
+			}
+		}
+
+		if ( st == redFsm->errState ) {
+			out << LABEL( "en", st->id ) << ":\n";
+
+			/* Break out here. */
+			outLabelUsed = true;
+
+			out << 
+				"	movq	$" << st->id << ", " << vCS() << "\n"
+				"	jmp		" << LABEL( "pop" ) << "\n";
+		}
 		else {
-			/* Writing code above state gotos. */
-			GOTO_HEADER( st );
+			/* Advance and test buffer pos. */
+			if ( st->labelNeeded ) {
+				out <<
+					"	addq	$1, " << P() << "\n";
+
+			}
+
+			/* This is the entry label for starting a run. */
+			out << LABEL( "en", st->id ) << ":\n";
+
+			if ( !noEnd ) {
+				/* FIXME: need to elim this. */
+				out << "	movq	$" << st->id << ", " << vCS() << "\n";
+
+				if ( eof ) {
+					out <<
+						"	cmpq	" << P() << ", " << PE() << "\n"
+						"	jne	" << LABEL( "nope", st->id ) << "\n" <<
+						"	cmpq	" << P() << ", " << vEOF() << "\n"
+						"	jne	" << LABEL( "out" ) << "\n" <<
+						LABEL( "nope", st->id ) << ":\n";
+				}
+				else {
+					out <<
+						"	cmpq	" << P() << ", " << PE() << "\n"
+						"	je	" << LABEL( "out" ) << "\n";
+				}
+			}
 
 			NFA_PUSH( st );
+
+			if ( st->fromStateAction != 0 ) {
+				/* Remember that we wrote an action. Write every action in the list. */
+				for ( GenActionTable::Iter item = st->fromStateAction->key;
+						item.lte(); item++ )
+				{
+					ACTION( out, item->value, st->id, false,
+							st->fromStateAction->anyNextStmt() );
+					out << "\n";
+				}
+			}
+
+			if ( !noEnd && eof ) {
+				/* FIXME: need to elim this. */
+				out << "	movq	$" << st->id << ", " << vCS() << "\n";
+
+				out <<
+					"	cmpq	" << P() << ", " << vEOF() << "\n"
+					"	jne	" << LABEL( "neofd", st->id ) << "\n";
+
+				if ( st->eofTrans != 0 )
+					TRANS_GOTO( st->eofTrans );
+				else {
+					if ( st->isFinal || !redFsm->anyNfaStates() )
+						out << "jmp " << LABEL( "out" ) << "\n";
+					else
+						out << "jmp " << LABEL( "pop" ) << "\n";
+				}
+
+				out <<
+					"	jmp	" << LABEL( "deofd", st->id ) << "\n";
+
+				out << LABEL( "neofd", st->id ) << ":\n";
+			}
+
+			/* Record the prev state if necessary. */
+			if ( st->anyRegCurStateRef() ) {
+				out <<
+					"	movq	$" << st->id << ", -72(%rbp)\n";
+			}
+
 
 #ifdef LOG_TRANS
 			out <<
@@ -1213,6 +1321,10 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			/* Write the default transition. */
 			out << LABEL( "nf", st->id ) << ":\n";
 			TRANS_GOTO( st->defTrans );
+
+			if ( !noEnd && eof ) {
+				out << LABEL( "deofd", st->id) << ":\n";
+			}
 		}
 	}
 	return out;
@@ -1560,81 +1672,6 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 	return anyWritten;
 }
 
-void AsmCodeGen::GOTO_HEADER( RedStateAp *state )
-{
-	IN_TRANS_ACTIONS( state );
-
-	if ( state->labelNeeded ) 
-		out << LABEL( "st", state->id ) << ":\n";
-
-	/* need to do this if the transition is an eof transition, or if the action
-	 * contains fexec. Otherwise, no need. */
-	if ( redFsm->anyEofActivity() ) {
-		out <<
-			"	cmpq	" << P() << ", " << vEOF() << "\n"
-			"	jne		" << LABEL( "skip", state->id ) << "\n";
-
-		if ( state->isFinal ) {
-			out <<
-//				"	cmpq	" << vCS() << ", " << FIRST_FINAL_STATE() << "\n"
-				"	jmp		" << LABEL( "out" ) << "\n";
-		}
-
-		out << 
-			"	jmp		" << LABEL( "pop" ) << "\n" <<
-			LABEL( "skip", state->id ) << ":\n";
-
-//		out << "	if ( " << P() << " == " << vEOF() << " ) {\n"
-//			"			if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-//			"				goto _out;\n"
-//			"			else\n"
-//			"				goto _pop;\n"
-//			"		}\n";
-//		outLabelUsed = true;
-	}
-
-	if ( state->toStateAction != 0 ) {
-		/* Remember that we wrote an action. Write every action in the list. */
-		for ( GenActionTable::Iter item = state->toStateAction->key; item.lte(); item++ ) {
-			ACTION( out, item->value, state->id, false, 
-					state->toStateAction->anyNextStmt() );
-			out << "\n";
-		}
-	}
-
-	/* Advance and test buffer pos. */
-	if ( state->labelNeeded ) {
-		out <<
-			"	addq	$1, " << P() << "\n";
-
-		if ( !noEnd ) {
-			out <<
-				"	cmpq	" << P() << ", " << PE() << "\n"
-				"	je	" << LABEL( "test_eof", state->id ) << "\n";
-		}
-	}
-
-	/* This is the entry label for starting a run. */
-	out << LABEL( "en", state->id ) << ":\n";
-
-	if ( state->fromStateAction != 0 ) {
-		/* Remember that we wrote an action. Write every action in the list. */
-		for ( GenActionTable::Iter item = state->fromStateAction->key;
-				item.lte(); item++ )
-		{
-			ACTION( out, item->value, state->id, false,
-					state->fromStateAction->anyNextStmt() );
-			out << "\n";
-		}
-	}
-
-	/* Record the prev state if necessary. */
-	if ( state->anyRegCurStateRef() ) {
-		out <<
-			"	movq	$" << state->id << ", -72(%rbp)\n";
-	}
-}
-
 void AsmCodeGen::STATE_GOTO_ERROR()
 {
 	/* In the error state we need to emit some stuff that usually goes into
@@ -1953,11 +1990,11 @@ void AsmCodeGen::writeExec()
 			"	movq	%r11, " << vCS() << "\n";
 	}
 
-	if ( !noEnd ) {
-		out <<
-			"	cmpq	" << P() << ", " << PE() << "\n"
-			"	je	" << LABEL( "test_eof" ) << "\n";
-	}
+//	if ( !noEnd ) {
+//		out <<
+//			"	cmpq	" << P() << ", " << PE() << "\n"
+//			"	je	" << LABEL( "test_eof" ) << "\n";
+//	}
 
 	if ( useAgainLabel() ) {
 		out << 
@@ -1969,7 +2006,6 @@ void AsmCodeGen::writeExec()
 
 	if ( useAgainLabel() || redFsm->anyNfaStates() )
 		out << LABEL( "resume" ) << ":\n";
-
 
 	/* Jump into the machine based on the current state. */
 	out <<
