@@ -529,10 +529,10 @@ std::ostream &IpGoto::STATE_GOTOS()
 					TRANS_GOTO( st->eofTrans );
 				else {
 
-					out <<
-						"if ( " << vCS() << " >= " << FIRST_FINAL_STATE() << " )\n"
-						"	goto " << outLabel[st->id].reference() << ";\n"
-						"goto " << popLabel[st->id].reference() << ";\n";
+					if ( st->isFinal )
+						out << "goto " << outLabel[st->id].reference() << ";\n";
+					else
+						out << "goto " << popLabel[st->id].reference() << ";\n";
 				}
 
 				out <<
