@@ -1174,16 +1174,13 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 		/* need to do this if the transition is an eof transition, or if the action
 		 * contains fexec. Otherwise, no need. */
 		if ( eof ) {
-			/* FIXME: need to elim this. */
-			out << "	movq	$" << st->id << ", " << vCS() << "\n";
-
 			out <<
 				"	cmpq	" << P() << ", " << vEOF() << "\n";
 
 			if ( st->isFinal )
-				out << "	je		" << LABEL( "out" ) << "\n";
+				out << "	je		" << LABEL( "out", st->id ) << "\n";
 			else
-				out << "	je		" << LABEL( "pop" ) << "\n";
+				out << "	je		" << LABEL( "pop", st->id ) << "\n";
 		}
 
 		if ( st->toStateAction != 0 ) {
@@ -1217,21 +1214,18 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			out << LABEL( "en", st->id ) << ":\n";
 
 			if ( !noEnd ) {
-				/* FIXME: need to elim this. */
-				out << "	movq	$" << st->id << ", " << vCS() << "\n";
-
 				if ( eof ) {
 					out <<
 						"	cmpq	" << P() << ", " << PE() << "\n"
 						"	jne	" << LABEL( "nope", st->id ) << "\n" <<
 						"	cmpq	" << P() << ", " << vEOF() << "\n"
-						"	jne	" << LABEL( "out" ) << "\n" <<
+						"	jne	" << LABEL( "out", st->id ) << "\n" <<
 						LABEL( "nope", st->id ) << ":\n";
 				}
 				else {
 					out <<
 						"	cmpq	" << P() << ", " << PE() << "\n"
-						"	je	" << LABEL( "out" ) << "\n";
+						"	je	" << LABEL( "out", st->id ) << "\n";
 				}
 			}
 
@@ -1249,9 +1243,6 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			}
 
 			if ( !noEnd && eof ) {
-				/* FIXME: need to elim this. */
-				out << "	movq	$" << st->id << ", " << vCS() << "\n";
-
 				out <<
 					"	cmpq	" << P() << ", " << vEOF() << "\n"
 					"	jne	" << LABEL( "neofd", st->id ) << "\n";
@@ -1260,9 +1251,9 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 					TRANS_GOTO( st->eofTrans );
 				else {
 					if ( st->isFinal || !redFsm->anyNfaStates() )
-						out << "jmp " << LABEL( "out" ) << "\n";
+						out << "jmp " << LABEL( "out", st->id ) << "\n";
 					else
-						out << "jmp " << LABEL( "pop" ) << "\n";
+						out << "jmp " << LABEL( "pop", st->id ) << "\n";
 				}
 
 				out <<
@@ -1363,12 +1354,6 @@ bool AsmCodeGen::useAgainLabel()
 
 void AsmCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	if ( inFinish && !noEnd ) {
-		out <<
-			"	cmpq	" << P() << ", " << PE() << "\n"
-			"	je	" << LABEL( "test_eof", gotoDest ) << "\n";
-	}
-
 	ret <<
 		"	jmp		" << LABEL( "st", gotoDest ) << "\n";
 }
@@ -1385,13 +1370,6 @@ void AsmCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish 
 		"	addq	$1, %rcx\n"
 		"	movq	%rcx, " << TOP() << "\n"
 	;
-
-	if ( inFinish && !noEnd ) {
-		out <<
-			"	cmpq	" << P() << ", " << PE() << "\n"
-			"	je	" << LABEL( "test_eof", callDest ) << "\n";
-	}
-
 
 	ret <<
 		"	jmp		" << LABEL( "st", callDest ) << "\n";
@@ -1417,13 +1395,6 @@ void AsmCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, 
 		"	movq	%rdx, " << vCS() << "\n"
 	;
 
-	if ( inFinish && !noEnd ) {
-		out <<
-			"	cmpq	" << P() << ", " << PE() << "\n"
-			"	je	" << LABEL( "test_eof" ) << "\n";
-	}
-
-
 	ret <<
 		"	jmp		" << LABEL( "again" ) << "\n";
 }
@@ -1441,12 +1412,6 @@ void AsmCodeGen::RET( ostream &ret, bool inFinish )
 	if ( red->postPopExpr != 0 )
 		INLINE_LIST( ret, red->postPopExpr->inlineList, 0, false, false );
 
-	if ( inFinish && !noEnd ) {
-		out <<
-			"	cmpq	" << P() << ", " << PE() << "\n"
-			"	je	" << LABEL( "test_eof" ) << "\n";
-	}
-
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
 }
@@ -1456,12 +1421,6 @@ void AsmCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 	ret << "	movq	";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
 	ret << ", " << vCS() << "\n";
-
-	if ( inFinish && !noEnd ) {
-		out <<
-			"	cmpq	" << P() << ", " << PE() << "\n"
-			"	je	" << LABEL( "test_eof" ) << "\n";
-	}
 
 	ret <<
 		"	jmp		" << LABEL("again") << "\n";
@@ -1726,14 +1685,15 @@ std::ostream &AsmCodeGen::TRANS_GOTO( RedTransAp *trans )
 std::ostream &AsmCodeGen::EXIT_STATES()
 {
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
-		if ( st->outNeeded ) {
-			testEofUsed = true;
+		out << 
+			LABEL( "out", st->id ) << ":\n"
+			"	movq	$" << st->id << ", " << vCS() << "\n"
+			"	jmp		" << LABEL( "out" ) << "\n";
 
-			out << 
-				LABEL( "test_eof", st->id ) << ":\n"
-				"	movq	$" << st->id << ", " << vCS() << "\n"
-				"	jmp		" << LABEL( "test_eof" ) << "\n";
-		}
+		out << 
+			LABEL( "pop", st->id ) << ":\n"
+			"	movq	$" << st->id << ", " << vCS() << "\n"
+			"	jmp		" << LABEL( "pop" ) << "\n";
 	}
 	return out;
 }
@@ -1990,12 +1950,6 @@ void AsmCodeGen::writeExec()
 			"	movq	%r11, " << vCS() << "\n";
 	}
 
-//	if ( !noEnd ) {
-//		out <<
-//			"	cmpq	" << P() << ", " << PE() << "\n"
-//			"	je	" << LABEL( "test_eof" ) << "\n";
-//	}
-
 	if ( useAgainLabel() ) {
 		out << 
 			"	jmp		" << LABEL( "resume" ) << "\n"
@@ -2019,25 +1973,9 @@ void AsmCodeGen::writeExec()
 	ENTRY_CASES();
 
 	STATE_GOTOS();
-	EXIT_STATES() << "\n";
 
-	if ( testEofUsed )
-		out << LABEL( "test_eof" ) << ":\n";
+	EXIT_STATES();
 
-	if ( redFsm->anyEofActivity() ) {
-		out <<
-			"	cmpq	" << P() << ", " << vEOF() << "\n"
-			"	jne		" << LABEL( "eof_trans" ) << "\n"
-			"	movq	" << vCS() << ", %rax\n";
-			FINISH_CASES() <<
-			"" << LABEL( "eof_trans" ) << ":\n";
-	}
-
-	out <<
-		"	cmpq	$" << FIRST_FINAL_STATE() << ", " << vCS() << "\n"
-		"	jge		" << LABEL( "out" ) << "\n";
-
-	// if ( outLabelUsed )
 	out << LABEL( "pop" ) << ":\n";
 
 	if ( redFsm->anyNfaStates() ) {
