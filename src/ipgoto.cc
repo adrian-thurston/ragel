@@ -462,12 +462,12 @@ std::ostream &IpGoto::STATE_GOTOS()
 		 * the action contains fexec. Otherwise, no need. */
 		if ( eof ) {
 			out <<
-				"if ( " << P() << " == " << vEOF() << " ) {\n"
-				"	if ( " << st->id << " >= " << FIRST_FINAL_STATE() << " )\n"
-				"		goto " << outLabel[st->id].reference() << ";\n"
-				"	else\n"
-				"		goto " << popLabel[st->id].reference() << ";\n"
-				"}\n";
+				"if ( " << P() << " == " << vEOF() << " )\n";
+
+			if ( st->isFinal )
+				out << "goto " << outLabel[st->id].reference() << ";\n";
+			else
+				out << "goto " << popLabel[st->id].reference() << ";\n";
 		}
 
 		if ( st->toStateAction != 0 ) {
@@ -708,19 +708,15 @@ void IpGoto::writeExec()
 
 	out << EMIT_LABEL( _resume );
 
-	out <<
-		"	switch ( " << vCS() << " ) {\n";
+	out << "switch ( " << vCS() << " ) {\n";
 
-	STATE_GOTO_CASES() <<
-		"	}\n"
-		"	goto st_out;\n";
+	STATE_GOTO_CASES();
 
-	STATE_GOTOS() <<
-		"	st_out:\n";
+	out << "}\n";
+
+	STATE_GOTOS();
 	
 	EXIT_STATES();
-
-	out << EMIT_LABEL( _test_eof );
 
 	out << EMIT_LABEL( _pop );
 
