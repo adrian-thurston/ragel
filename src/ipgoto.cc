@@ -406,9 +406,12 @@ void IpGoto::NFA_PUSH( RedStateAp *state )
 
 		if ( state->nfaTargs != 0 ) {
 			out <<
-				"if ( " << ARR_REF( nfaOffsets ) << "[" << _state << "] != 0 ) {\n"
-				"	" << new_recs << " = " << state->nfaTargs->length() << ";\n";
+				"if ( " << ARR_REF( nfaOffsets ) << "[" << _state << "] != 0 ) {\n";
 
+			if ( red->nfaPrePushExpr != 0 ) {
+				out << 
+					new_recs << " = " << state->nfaTargs->length() << ";\n";
+			}
 
 			if ( red->nfaPrePushExpr != 0 ) {
 				out << OPEN_HOST_BLOCK( red->nfaPrePushExpr );
