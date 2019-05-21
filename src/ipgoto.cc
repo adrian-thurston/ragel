@@ -464,7 +464,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 			out <<
 				"if ( " << P() << " == " << vEOF() << " )\n";
 
-			if ( st->isFinal )
+			if ( st->isFinal || !redFsm->anyNfaStates() )
 				out << "goto " << outLabel[st->id].reference() << ";\n";
 			else
 				out << "goto " << popLabel[st->id].reference() << ";\n";
@@ -483,7 +483,10 @@ std::ostream &IpGoto::STATE_GOTOS()
 			out << "st_case_" << st->id << ":\n";
 
 			/* Break out here. */
-			out << "goto " << popLabel[st->id].reference() << ";\n";
+			if ( !redFsm->anyNfaStates() )
+				out << "goto " << outLabel[st->id].reference() << ";\n";
+			else
+				out << "goto " << popLabel[st->id].reference() << ";\n";
 		}
 		else {
 
@@ -528,8 +531,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 				if ( st->eofTrans != 0 )
 					TRANS_GOTO( st->eofTrans );
 				else {
-
-					if ( st->isFinal )
+					if ( st->isFinal || !redFsm->anyNfaStates() )
 						out << "goto " << outLabel[st->id].reference() << ";\n";
 					else
 						out << "goto " << popLabel[st->id].reference() << ";\n";
