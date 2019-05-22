@@ -76,6 +76,7 @@ struct input_funcs \
 	struct colm_tree *(*undo_append_tree)( struct colm_program *prg, struct _input_impl *si ); \
 	void (*append_stream)( struct colm_program *prg, struct _input_impl *si, struct colm_stream *stream ); \
 	struct colm_tree *(*undo_append_stream)( struct colm_program *prg, struct _input_impl *si ); \
+	void (*auto_trim)( struct colm_program *prg, struct _input_impl *si, int auto_trim ); \
 	void (*set_eof_mark)( struct colm_program *prg, struct _input_impl *si, char eof_mark ); \
 	void (*transfer_loc)( struct colm_program *prg, struct colm_location *loc, struct _input_impl *si ); \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct _input_impl *si ); \
@@ -93,6 +94,7 @@ struct stream_funcs \
 	struct colm_str_collect *(*get_collect)( struct colm_program *prg, struct _stream_impl *si ); \
 	void (*flush_stream)( struct colm_program *prg, struct _stream_impl *si ); \
 	void (*close_stream)( struct colm_program *prg, struct _stream_impl *si ); \
+	void (*auto_trim)( struct colm_program *prg, struct _stream_impl *si, int auto_trim ); \
 	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
 			struct _stream_impl *impl, struct colm_tree *tree, int trim ); \
 	struct stream_impl *(*split_consumed)( struct colm_program *prg, struct _stream_impl *si ); \
@@ -149,6 +151,7 @@ struct input_impl_seq
 	struct seq_buf *stash;
 
 	int consumed;
+	int auto_trim;
 };
 
 struct run_buf
@@ -196,6 +199,8 @@ struct stream_impl_data
 	int *line_len;
 	int lines_alloc;
 	int lines_cur;
+
+	int auto_trim;
 };
 
 void stream_impl_push_line( struct stream_impl_data *ss, int ll );

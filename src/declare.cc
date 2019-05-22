@@ -50,6 +50,7 @@ void Compiler::initUniqueTypes( )
 	uniqeTypeMap.insert( uniqueTypeIgnore );
 	uniqeTypeMap.insert( uniqueTypeAny );
 
+	uniqeTypeMap.insert( uniqueTypeInput );
 	uniqeTypeMap.insert( uniqueTypeStream );
 }
 
@@ -888,6 +889,9 @@ void Compiler::declareInputFields( )
 	initFunction( uniqueTypeVoid, inputObj, ObjectMethod::Call, "close",
 			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
 
+	initFunction( uniqueTypeVoid, inputObj, ObjectMethod::Call, "auto_trim",
+			IN_IINPUT_AUTO_TRIM_WC, IN_IINPUT_AUTO_TRIM_WC, uniqueTypeBool, false );
+
 	declareInputField( inputObj, 0 );
 }
 
@@ -909,6 +913,9 @@ void Compiler::declareStreamFields( )
 
 	initFunction( uniqueTypeVoid, streamObj, ObjectMethod::Call, "close",
 			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
+
+	initFunction( uniqueTypeVoid, streamObj, ObjectMethod::Call, "auto_trim",
+			IN_INPUT_AUTO_TRIM_WC, IN_INPUT_AUTO_TRIM_WC, uniqueTypeBool, false );
 
 	declareStreamField( streamObj, 0 );
 }
@@ -1485,7 +1492,7 @@ void Compiler::initParserFunctions( GenericType *gen )
 	initFunction( gen->elUt, gen->objDef, ObjectMethod::ParseFinish, "eof",
 			IN_PARSE_FRAG_W, IN_PARSE_FRAG_W, true );
 
-	initFunction( uniqueTypeStream, gen->objDef, ObjectMethod::Call, "gets",
+	initFunction( uniqueTypeInput, gen->objDef, ObjectMethod::Call, "gets",
 			IN_GET_PARSER_STREAM, IN_GET_PARSER_STREAM, true );
 }
 

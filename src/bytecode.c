@@ -212,7 +212,7 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, input_t *dest, tr
 		/* Collect the tree data. */
 		str_collect_t collect;
 		init_str_collect( &collect );
-		colm_print_tree_collect( prg, sp, &collect, input, false );
+		colm_print_tree_collect( prg, sp, &collect, input, ((struct input_impl_seq*)impl)->auto_trim );
 
 		/* Load it into the input. */
 		impl->funcs->append_data( prg, impl, collect.data, collect.length );
@@ -2508,6 +2508,30 @@ again:
 			si->funcs->close_stream( prg, si );
 
 			vm_push_stream( stream );
+			break;
+		}
+		case IN_INPUT_AUTO_TRIM_WC: {
+			debug( prg, REALM_BYTECODE, "IN_INPUT_AUTO_TRIM_WC\n" );
+
+			stream_t *stream = vm_pop_stream();
+			value_t auto_trim = vm_pop_value();
+			struct stream_impl *si = stream->impl;
+
+			si->funcs->auto_trim( prg, si, (long) auto_trim );
+
+			vm_push_stream( stream );
+			break;
+		}
+		case IN_IINPUT_AUTO_TRIM_WC: {
+			debug( prg, REALM_BYTECODE, "IN_INPUT_AUTO_TRIM_WC\n" );
+
+			input_t *input = vm_pop_input();
+			value_t auto_trim = vm_pop_value();
+			struct input_impl *ii = input->impl;
+
+			ii->funcs->auto_trim( prg, ii, (long) auto_trim );
+
+			vm_push_input( input );
 			break;
 		}
 

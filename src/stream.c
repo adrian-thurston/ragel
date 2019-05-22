@@ -390,13 +390,18 @@ static void data_close_stream( struct colm_program *prg, struct stream_impl_data
 	}
 }
 
+static void data_auto_trim( struct colm_program *prg, struct stream_impl_data *si, int auto_trim )
+{
+	si->auto_trim = auto_trim ? 1 : 0;
+}
+
 static void data_print_tree( struct colm_program *prg, tree_t **sp,
 		struct stream_impl_data *si, tree_t *tree, int trim )
 {
 	if ( si->file != 0 )
-		colm_print_tree_file( prg, sp, (struct stream_impl*)si, tree, false );
+		colm_print_tree_file( prg, sp, (struct stream_impl*)si, tree, si->auto_trim );
 	else if ( si->collect != 0 )
-		colm_print_tree_collect( prg, sp, si->collect, tree, false );
+		colm_print_tree_collect( prg, sp, si->collect, tree, si->auto_trim );
 }
 
 static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss, int *pskip, char **pdp, int *copied )
@@ -593,7 +598,9 @@ struct stream_funcs_data file_funcs =
 	&data_get_collect,
 	&data_flush_stream,
 	&data_close_stream,
+	&data_auto_trim,
 	&data_print_tree,
+
 	&data_split_consumed,
 	&data_append_data,
 	&data_undo_append_data,
@@ -613,6 +620,7 @@ struct stream_funcs_data accum_funcs =
 	&data_get_collect,
 	&data_flush_stream,
 	&data_close_stream,
+	&data_auto_trim,
 	&data_print_tree,
 
 	&data_split_consumed,
