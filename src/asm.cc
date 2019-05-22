@@ -1159,7 +1159,7 @@ void AsmCodeGen::NFA_PUSH( RedStateAp *st )
 	}
 }
 
-std::ostream &AsmCodeGen::STATE_GOTOS()
+void AsmCodeGen::STATE_GOTOS()
 {
 	bool eof = redFsm->anyEofActivity() || redFsm->anyNfaStates();
 
@@ -1318,7 +1318,6 @@ std::ostream &AsmCodeGen::STATE_GOTOS()
 			}
 		}
 	}
-	return out;
 }
 
 unsigned int AsmCodeGen::TO_STATE_ACTION( RedStateAp *state )
@@ -1629,25 +1628,6 @@ bool AsmCodeGen::IN_TRANS_ACTIONS( RedStateAp *state )
 	}
 
 	return anyWritten;
-}
-
-void AsmCodeGen::STATE_GOTO_ERROR()
-{
-	/* In the error state we need to emit some stuff that usually goes into
-	 * the header. */
-	RedStateAp *state = redFsm->errState;
-	IN_TRANS_ACTIONS( state );
-
-	out << LABEL( "en", state->id ) << ":\n";
-	if ( state->labelNeeded ) 
-		out << LABEL( "st", state->id ) << ":\n";
-
-	/* Break out here. */
-	outLabelUsed = true;
-
-	out << 
-		"	movq	$" << state->id << ", " << vCS() << "\n"
-		"	jmp		" << LABEL( "pop" ) << "\n";
 }
 
 std::string AsmCodeGen::TRANS_GOTO_TARG( RedCondPair *pair )

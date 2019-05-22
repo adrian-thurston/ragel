@@ -225,13 +225,8 @@ public:
 	bool useAgainLabel();
 
 	void NFA_PUSH( RedStateAp *state );
-
-	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
-	 * each state. */
 	bool IN_TRANS_ACTIONS( RedStateAp *state );
-	void GOTO_HEADER( RedStateAp *state );
-	void STATE_GOTO_ERROR();
-	std::ostream &STATE_GOTOS();
+	void STATE_GOTOS();
 
 	void emitSingleIfElseIf( RedStateAp *state );
 	void emitSingleJumpTable( RedStateAp *state, std::string def );
