@@ -270,12 +270,12 @@ input_funcs_ct pat_funcs =
 	0, 0, 0, 0, 0, 0, /* prepend funcs. */
 	0, 0, 0, 0, 0, 0, /* append funcs */
 
-	0,
-
 	&ct_set_eof_mark,
 
 	&ct_transfer_loc_seq,
 	&ct_destructor,
+
+	0, 0
 };
 
 
@@ -489,12 +489,12 @@ input_funcs_ct repl_funcs =
 	0, 0, 0, 0, 0, 0, /* prepend. */
 	0, 0, 0, 0, 0, 0, /* append. */
 
-	0,
-
 	&ct_set_eof_mark,
 
 	&ct_transfer_loc_seq,
 	&ct_destructor,
+
+	0, 0
 };
 
 void pushBinding( pda_run *pdaRun, parse_tree_t *parseTree )

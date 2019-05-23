@@ -196,17 +196,10 @@ static void input_stream_seq_prepend( struct input_impl_seq *is, struct seq_buf 
 	}
 }
 
-static void input_auto_trim( struct colm_program *prg, struct input_impl_seq *ii, int auto_trim )
-{
-	ii->auto_trim = auto_trim ? 1 : 0;
-}
-
-
 void input_set_eof_mark( struct colm_program *prg, struct input_impl_seq *si, char eof_mark )
 {
 	si->eof_mark = eof_mark;
 }
-
 
 static void input_destructor( program_t *prg, tree_t **sp, struct input_impl_seq *si )
 {
@@ -242,6 +235,16 @@ static void input_destructor( program_t *prg, tree_t **sp, struct input_impl_seq
 	//	free( stream->impl->name );
 
 	free( si );
+}
+
+static int input_get_option( struct colm_program *prg, struct input_impl_seq *ii, int option )
+{
+	return ii->auto_trim;
+}
+
+static void input_set_option( struct colm_program *prg, struct input_impl_seq *ii, int option, int value )
+{
+	ii->auto_trim = value ? 1 : 0;
 }
 
 
@@ -693,14 +696,15 @@ struct input_funcs_seq input_funcs =
 	&input_append_stream,
 	&input_undo_append_stream,
 
-	/* Trimming */
-	&input_auto_trim,
-
 	/* EOF */
 	&input_set_eof_mark,
 
 	&input_transfer_loc,
 	&input_destructor,
+
+	/* Trimming */
+	&input_get_option,
+	&input_set_option,
 };
 
 struct input_impl *colm_impl_new_generic( char *name )
