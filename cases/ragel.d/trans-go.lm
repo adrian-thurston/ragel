@@ -1,3 +1,11 @@
+parser<out_code::lines> new_parser()
+{
+	new P: parser<out_code::lines>()
+	Input: _input = P->gets()
+	Input->auto_trim( true )
+	return P
+}
+
 int rw_go_factor( Factor: indep::factor )
 {
 	if match Factor [`first_token_char]
@@ -121,24 +129,23 @@ int rw_go_if_stmt( IfStmt: indep::if_stmt )
 {
 	send Out
 		"if ( [rw_go_expr( IfStmt.expr )] ) {
-		"	[rw_go_stmt_list( IfStmt._repeat_stmt )]
-		"}"
+		"	[rw_go_stmt_list( IfStmt._repeat_stmt )]"
 
 	if ( IfStmt.opt_else._repeat_stmt ) {
 		send Out
-			" else {
-			"	[rw_go_stmt_list( IfStmt.opt_else._repeat_stmt )]
-			"}"
+			"} else {
+			"	[rw_go_stmt_list( IfStmt.opt_else._repeat_stmt )]"
 	}
 
-	send Out "
+	send Out 
+		"}
 }
 
 int rw_go_print_stmt( Stmt: indep::print_stmt )
 {
 	if match Stmt [`print_int expr `;] {
 		send Out
-			"fmt.Print( [rw_go_expr(Stmt.expr)] );"
+			"fmt.Print( [rw_go_expr(Stmt.expr)] );
 	}
 	else if match Stmt [`print_buf `;]
 	{
@@ -148,17 +155,17 @@ int rw_go_print_stmt( Stmt: indep::print_stmt )
 	else if match Stmt [`print_str expr `;]
 	{
 		send Out
-			"fmt.Print( [rw_go_expr( Stmt.expr )] );"
+			"fmt.Print( [rw_go_expr( Stmt.expr )] );
 	}
 	else if match Stmt [`print_token `;]
 	{
 		send Out
-			"fmt.Print( data\[ts:te\] );" 
+			"fmt.Print( data\[ts:te\] );
 	}
 	else if match Stmt [`print_off `;]
 	{
 		send Out
-			"fmt.Print( p );" 
+			"fmt.Print( p );
 	}
 }
 
@@ -208,14 +215,17 @@ void rw_go_stmt_list( StmtList: indep::stmt* )
 
 int rw_go_action_block( ActionBlock: indep::action_block )
 {
-	Out = new parser<out_code::lines>()
+	Out = new_parser()
 	if match ActionBlock [`{ stmt* `}] {
-		send Out
-			"{[rw_go_stmt_list( ActionBlock._repeat_stmt )]}
+		send Out [
+			"{
+				rw_go_stmt_list( ActionBlock._repeat_stmt )
+			"}
+		]
 	}
 	else if match ActionBlock [`{ expr `}] {
 		send Out
-			"{[rw_go_expr( ActionBlock.expr )]}
+			"{ [rw_go_expr( ActionBlock.expr )] }
 	}
 	send Out [] eos
 }
@@ -242,7 +252,7 @@ void rw_go( Output: stream )
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {
 		if match Stmt [Decl: var_decl] {
-			Out = new parser<out_code::lines>()
+			Out = new_parser()
 			rw_go_var_decl( Decl )
 			send Out [] eos
 			send Output [Out->tree]
@@ -277,7 +287,7 @@ void rw_go( Output: stream )
 
 	for Stmt: indep::stmt in Init {
 		if match Stmt [ExprStmt: expr_stmt] {
-			Out = new parser<out_code::lines>()
+			Out = new_parser()
 			rw_go_expr_stmt( ExprStmt )
 			send Out [] eos
 			send Output [Out->tree]
