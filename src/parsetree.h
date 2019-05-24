@@ -1734,6 +1734,12 @@ struct PatternItemList
 
 struct ConsItem
 {
+	enum Trim {
+		TrimYes,
+		TrimNo,
+		TrimDefault
+	};
+
 	enum Type { 
 		InputText, 
 		ExprType,
@@ -1747,7 +1753,7 @@ struct ConsItem
 		langEl(0),
 		prodEl(0),
 		bindId(-1),
-		trim(false)
+		trim(TrimDefault)
 	{
 	}
 
@@ -1760,7 +1766,7 @@ struct ConsItem
 		return r;
 	}
 
-	static ConsItem *cons( const InputLoc &loc, Type type, LangExpr *expr, bool trim )
+	static ConsItem *cons( const InputLoc &loc, Type type, LangExpr *expr, Trim trim )
 	{
 		ConsItem *r = new ConsItem;
 		r->loc = loc;
@@ -1787,7 +1793,8 @@ struct ConsItem
 	LangEl *langEl;
 	ProdEl *prodEl;
 	long bindId;
-	bool trim;
+	Trim trim;
+
 	ConsItem *prev, *next;
 };
 

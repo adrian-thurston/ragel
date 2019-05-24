@@ -424,6 +424,10 @@ typedef unsigned char uchar;
 #define FN_PREFIX                0x3b
 #define FN_SUFFIX                0x3c
 
+#define TRIM_DEFAULT 0x01
+#define TRIM_YES     0x02
+#define TRIM_NO      0x03
+
 /* Types of Generics. */
 enum GEN {
 	GEN_PARSER   = 0x14,

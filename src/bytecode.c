@@ -200,7 +200,7 @@ static head_t *tree_to_str_postfix( program_t *prg, tree_t **sp, tree_t *tree, i
 }
 
 
-static word_t stream_append_text( program_t *prg, tree_t **sp, input_t *dest, tree_t *input )
+static word_t stream_append_text( program_t *prg, tree_t **sp, input_t *dest, tree_t *input, int trim )
 {
 	long length = 0;
 	struct input_impl *impl = input_to_impl( dest );
@@ -209,12 +209,10 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, input_t *dest, tr
 		assert(false);
 	}
 	else {
-		int auto_trim = impl->funcs->get_option( prg, impl, 0 );
-
 		/* Collect the tree data. */
 		str_collect_t collect;
 		init_str_collect( &collect );
-		colm_print_tree_collect( prg, sp, &collect, input, auto_trim );
+		colm_print_tree_collect( prg, sp, &collect, input, trim );
 
 		/* Load it into the input. */
 		impl->funcs->append_data( prg, impl, collect.data, collect.length );
@@ -2323,13 +2321,24 @@ again:
 		}
 
 		case IN_PRINT_TREE: {
-			debug( prg, REALM_BYTECODE, "IN_PRINT_TREE\n" );
+			uchar trim;
+			read_byte( trim );
+
+			debug( prg, REALM_BYTECODE, "IN_PRINT_TREE %d\n", (int)trim );
 
 			tree_t *to_send = vm_pop_tree();
 			stream_t *stream = vm_pop_stream();
 
 			struct stream_impl *si = stream_to_impl( stream );
-			int auto_trim = si->funcs->get_option( prg, si, 0 );
+
+			int auto_trim;
+			if ( trim == TRIM_YES )
+				auto_trim = true;
+			else if ( trim == TRIM_NO )
+				auto_trim = false;
+			else 
+				auto_trim = si->funcs->get_option( prg, si, 0 );
+
 			si->funcs->print_tree( prg, sp, si, to_send, auto_trim );
 			vm_push_stream( stream );
 			colm_tree_downref( prg, sp, to_send );
@@ -2337,12 +2346,25 @@ again:
 		}
 
 		case IN_SEND_TEXT_W: {
-			debug( prg, REALM_BYTECODE, "IN_SEND_TEXT_W\n" );
+			uchar trim;
+			read_byte( trim );
+
+			debug( prg, REALM_BYTECODE, "IN_SEND_TEXT_W %d\n", (int)trim );
 
 			tree_t *to_send = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
 
-			word_t len = stream_append_text( prg, sp, parser->input, to_send );
+			struct input_impl *si = input_to_impl( parser->input );
+
+			int auto_trim;
+			if ( trim == TRIM_YES )
+				auto_trim = true;
+			else if ( trim == TRIM_NO )
+				auto_trim = false;
+			else 
+				auto_trim = si->funcs->get_option( prg, si, 0 );
+
+			word_t len = stream_append_text( prg, sp, parser->input, to_send, auto_trim );
 
 			vm_push_parser( parser );
 
@@ -2380,10 +2402,26 @@ again:
 		}
 
 		case IN_SEND_TREE_W: {
-			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_W\n" );
+			uchar trim;
+			read_byte( trim );
+
+			debug( prg, REALM_BYTECODE, "IN_SEND_TREE_W %d\n", (int)trim );
 
 			tree_t *to_send = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
+
+			struct input_impl *si = input_to_impl( parser->input );
+
+			int auto_trim;
+			if ( trim == TRIM_YES )
+				auto_trim = true;
+			else if ( trim == TRIM_NO )
+				auto_trim = false;
+			else 
+				auto_trim = si->funcs->get_option( prg, si, 0 );
+
+			if ( auto_trim )
+				to_send = tree_trim( prg, sp, to_send );
 
 			word_t len = stream_append_tree( prg, sp, parser->input, to_send );
 

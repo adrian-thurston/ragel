@@ -1401,7 +1401,7 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 			}
 
 			if ( !isStr( ut ) ) {
-				if ( item->trim ) 
+				if ( item->trim == ConsItem::TrimYes ) 
 					code.append( IN_TREE_TRIM );
 			}
 
@@ -1493,6 +1493,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 			if ( ut->typeId != TYPE_TREE )
 				error() << "variables used in replacements must be trees" << endp;
 
+			if ( item->trim == ConsItem::TrimYes ) 
+				code.append( IN_TREE_TRIM );
+
 			item->langEl = ut->langEl;
 		}
 	}
@@ -1542,6 +1545,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 	else {
 		for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 			bool isStream = false;
+			uchar trim = TRIM_DEFAULT;
+
 			switch ( item->type ) {
 			case ConsItem::LiteralType: {
 				String result;
@@ -1584,15 +1589,24 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				if ( ut == pd->uniqueTypeStream )
 					isStream = true;
 
+				if ( item->trim == ConsItem::TrimYes )
+					trim = TRIM_YES;
+				else if ( item->trim == ConsItem::TrimNo )
+					trim = TRIM_NO;
+
 				break;
 			}}
 
 			if ( isStream )
 				code.append( IN_SEND_STREAM_W );
-			else if ( tree )
+			else if ( tree ) {
 				code.append( IN_SEND_TREE_W );
-			else
+				code.append( trim );
+			}
+			else {
 				code.append( IN_SEND_TEXT_W );
+				code.append( trim );
+			}
 
 			/* Parse instruction, dependent on whether or not we are producing
 			 * revert or commit code. */
@@ -1641,6 +1655,8 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 
 	/* Assign bind ids to the variables in the replacement. */
 	for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
+		uchar trim = TRIM_DEFAULT;
+
 		switch ( item->type ) {
 		case ConsItem::LiteralType: {
 			String result;
@@ -1679,10 +1695,16 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
+			if ( item->trim == ConsItem::TrimYes )
+				trim = TRIM_YES;
+			else if ( item->trim == ConsItem::TrimNo )
+				trim = TRIM_NO;
+
 			break;
 		}}
 
 		code.append( IN_PRINT_TREE );
+		code.append( trim );
 	}
 }
 
@@ -1710,6 +1732,8 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 		/* Assign bind ids to the variables in the replacement. */
 		for ( ConsItemList::Iter item = *parserText->list; item.lte(); item++ ) {
 			bool isStream = false;
+			uchar trim = TRIM_DEFAULT;
+
 			switch ( item->type ) {
 			case ConsItem::LiteralType: {
 				String result;
@@ -1748,6 +1772,11 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 				if ( ut == pd->uniqueTypeStream )
 					isStream = true;
 
+				if ( item->trim == ConsItem::TrimYes )
+					trim = TRIM_YES;
+				else if ( item->trim == ConsItem::TrimNo )
+					trim = TRIM_NO;
+
 				if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 					code.append( IN_INT_TO_STR );
 
@@ -1756,10 +1785,14 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 
 			if ( isStream )
 				code.append( IN_SEND_STREAM_W );
-			else if ( !strings )
+			else if ( !strings ) {
 				code.append( IN_SEND_TREE_W );
-			else
+				code.append( trim );
+			}
+			else {
 				code.append( IN_SEND_TEXT_W );
+				code.append( trim );
+			}
 
 			parseFrag( pd, code, 0 );
 		}
@@ -2238,6 +2271,11 @@ UniqueType *LangExpr::evaluate( Compiler *pd, CodeVect &code ) const
 				case '^': {
 					UniqueType *rt = right->evaluate( pd, code );
 					code.append( IN_TREE_TRIM );
+					return rt;
+				}
+				case '@': {
+					UniqueType *rt = right->evaluate( pd, code );
+					//code.append( IN_TREE_TRIM );
 					return rt;
 				}
 				default: 
