@@ -1,6 +1,10 @@
-parser<out_code::lines> new_parser()
+include 'out-go.lm'
+
+global Out2: parser<out_go::out_go>
+
+parser<out_go::out_go> new_parser()
 {
-	new P: parser<out_code::lines>()
+	new P: parser<out_go::out_go>()
 	Input: _input = P->gets()
 	Input->auto_trim( true )
 	return P
@@ -10,44 +14,44 @@ int rw_go_factor( Factor: indep::factor )
 {
 	if match Factor [`first_token_char]
 	{
-		send Out "data\[ts\]"
+		send Out2 "data\[ts\]"
 	}
 	else if match Factor [tk_ident `[ expr `]]
 	{
-		send Out
+		send Out2
 			"[$Factor.tk_ident]\[ [rw_go_expr(Factor.expr)] \]
 	}
 	else if match Factor [tk_ident `( expr `)]
 	{
-		send Out
+		send Out2
 			"[$Factor.tk_ident]( [rw_go_expr(Factor.expr)] )
 	}
 	elsif match Factor [`< type `> `( expr `)]
 	{
-		send Out
+		send Out2
 			"( [rw_go_type(Factor.type)] ) ( [rw_go_expr(Factor.expr)] )
 	}
 	elsif match Factor [`( expr `)]
 	{
-		send Out
+		send Out2
 			"( [rw_go_expr(Factor.expr)] )
 	}
 	elsif match Factor ['true']
 	{
-		send Out 'true'
+		send Out2 'true'
 	}
 	elsif match Factor ['false']
 	{
-		send Out 'false'
+		send Out2 'false'
 	}
 	elsif match Factor [`buffer]
 	{
-		send Out
+		send Out2
 			"string ( buffer\[:blen\] )"
 	}
 	else
 	{
-		send Out [$Factor]
+		send Out2 [$Factor]
 	}
 }
 
@@ -55,30 +59,30 @@ void rw_go_type( Type: indep::type )
 {
 	if match Type [`int]
 	{
-		send Out "int"
+		send Out2 "int"
 	}
 	elsif match Type [`bool]
 	{
-		send Out "bool"
+		send Out2 "bool"
 	}
 	elsif match Type [`char]
 	{
-		send Out "byte"
+		send Out2 "byte"
 	}
 	elsif match Type [`ptr]
 	{
-		send Out "int"
+		send Out2 "int"
 	}
 	elsif match Type [`byte]
 	{
-		send Out "unsigned char"
+		send Out2 "unsigned char"
 	}
 }
 
 void rw_go_abs_expr( Expr: indep::abs_expr )
 {
 	if ( Expr.Op ) {
-		send Out
+		send Out2
 			"[rw_go_abs_expr(Expr.E1)] [$Expr.Op] [rw_go_abs_expr( Expr.E2 )]"
 	}
 	else {
@@ -95,83 +99,83 @@ void rw_go_expr( Expr: indep::expr )
 void rw_go_opt_array( OptArr: indep::opt_arr )
 {
 	if OptArr.expr {
-		send Out "\[[rw_go_expr( OptArr.expr )]\]"
+		send Out2 "\[[rw_go_expr( OptArr.expr )]\]"
 	}
 }
 
 int rw_go_var_decl( VarDecl: indep::var_decl )
 {
-	send Out
+	send Out2
 		"var [$VarDecl.tk_ident] [rw_go_opt_array(VarDecl.opt_arr)] [rw_go_type( VarDecl.type )] ;
 }
 
 void rw_go_opt_sub( OptSub: indep::opt_sub )
 {
 	if ( OptSub.expr )
-		send Out "\[[rw_go_expr(OptSub.expr)]\]"
+		send Out2 "\[[rw_go_expr(OptSub.expr)]\]"
 }
 
 int rw_go_expr_stmt( ExprStmt: indep::expr_stmt )
 {
 	if match ExprStmt [tk_ident opt_sub `= expr `;]
 	{
-		send Out
+		send Out2
 			"[$ExprStmt.tk_ident rw_go_opt_sub(ExprStmt.opt_sub)] = [rw_go_expr(ExprStmt.expr)];
 	}
 	else if match ExprStmt [expr `;]
 	{
-		send Out
+		send Out2
 			"[rw_go_expr(ExprStmt.expr)];
 	}
 }
 
 int rw_go_if_stmt( IfStmt: indep::if_stmt )
 {
-	send Out
+	send Out2
 		"if ( [rw_go_expr( IfStmt.expr )] ) {
 		"	[rw_go_stmt_list( IfStmt._repeat_stmt )]"
 
 	if ( IfStmt.opt_else._repeat_stmt ) {
-		send Out
+		send Out2
 			"} else {
 			"	[rw_go_stmt_list( IfStmt.opt_else._repeat_stmt )]"
 	}
 
-	send Out 
+	send Out2 
 		"}
 }
 
 int rw_go_print_stmt( Stmt: indep::print_stmt )
 {
 	if match Stmt [`print_int expr `;] {
-		send Out
+		send Out2
 			"fmt.Print( [rw_go_expr(Stmt.expr)] );
 	}
 	else if match Stmt [`print_buf `;]
 	{
-		send Out
+		send Out2
 			"fmt.Print( string(buffer\[0:blen\]) );
 	}
 	else if match Stmt [`print_str expr `;]
 	{
-		send Out
+		send Out2
 			"fmt.Print( [rw_go_expr( Stmt.expr )] );
 	}
 	else if match Stmt [`print_token `;]
 	{
-		send Out
+		send Out2
 			"fmt.Print( data\[ts:te\] );
 	}
 	else if match Stmt [`print_off `;]
 	{
-		send Out
+		send Out2
 			"fmt.Print( p );
 	}
 }
 
 int rw_go_ragel_stmt( Stmt: indep::ragel_stmt )
 {
-	send Out
+	send Out2
 		"[Stmt]
 }
 
@@ -179,11 +183,11 @@ void rw_go_buf_stmt( BufStmt: indep::buf_stmt )
 {
 	switch BufStmt
 	case [`buf_clear `( `) `;] {
-		send Out
+		send Out2
 			"	blen = 0;
 	}
 	case [`buf_append `( `) `;] {
-		send Out
+		send Out2
 			"	buffer\[blen\] = fc;
 			"	blen += 1;
 			"	buffer\[blen\] = 0;
@@ -215,19 +219,20 @@ void rw_go_stmt_list( StmtList: indep::stmt* )
 
 int rw_go_action_block( ActionBlock: indep::action_block )
 {
-	Out = new_parser()
+	Out2 = new_parser()
+
 	if match ActionBlock [`{ stmt* `}] {
-		send Out [
+		send Out2 [
 			"{
 				rw_go_stmt_list( ActionBlock._repeat_stmt )
 			"}
 		]
 	}
 	else if match ActionBlock [`{ expr `}] {
-		send Out
+		send Out2
 			"{ [rw_go_expr( ActionBlock.expr )] }
 	}
-	send Out [] eos
+	send Out2 [] eos
 }
 
 void rw_go( Output: stream )
@@ -252,10 +257,10 @@ void rw_go( Output: stream )
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {
 		if match Stmt [Decl: var_decl] {
-			Out = new_parser()
+			Out2 = new_parser()
 			rw_go_var_decl( Decl )
-			send Out [] eos
-			send Output [Out->tree]
+			send Out2 [] eos
+			send Output [$Out2->tree]
 		}
 	}
 
@@ -268,7 +273,7 @@ void rw_go( Output: stream )
 		rw_go_action_block( IndepActionBlock )
 
 		# Reparse back to ragel action block.
-		Action = parse ragel::action_block[$Out->tree]
+		Action = parse ragel::action_block[Out2->tree]
 	}
 
 	prints( Output, '\n', Section, '\n' )
@@ -287,10 +292,10 @@ void rw_go( Output: stream )
 
 	for Stmt: indep::stmt in Init {
 		if match Stmt [ExprStmt: expr_stmt] {
-			Out = new_parser()
+			Out2 = new_parser()
 			rw_go_expr_stmt( ExprStmt )
-			send Out [] eos
-			send Output [Out->tree]
+			send Out2 [] eos
+			send Output [$Out2->tree]
 		}
 	}
 
