@@ -62,6 +62,8 @@ void init_str_collect( str_collect_t *collect )
 	collect->data = (char*) malloc( BUFFER_INITIAL_SIZE );
 	collect->allocated = BUFFER_INITIAL_SIZE;
 	collect->length = 0;
+	collect->indent.indent = 0;
+	collect->indent.level = COLM_INDENT_OFF;
 }
 
 void str_collect_destroy( str_collect_t *collect )
@@ -99,11 +101,15 @@ void append_collect( struct colm_print_args *args, const char *data, int length 
 
 void append_file( struct colm_print_args *args, const char *data, int length )
 {
-	int level;
 	struct stream_impl_data *impl = (struct stream_impl_data*) args->arg;
+	fwrite( data, 1, length, impl->file );
+}
 
+static void out_indent( struct colm_print_args *args, const char *data, int length )
+{
+	int level;
 restart:
-	if ( impl->indent ) {
+	if ( args->indent->indent ) {
 		/* Consume mode. */
 		while ( length > 0 && ( *data == ' ' || *data == '\t' ) ) {
 			data += 1;
@@ -113,33 +119,33 @@ restart:
 		if ( length > 0 ) {
 			/* Found some data, print the indentation and turn off indentation
 			 * mode. */
-			for ( level = 0; level < impl->level; level++ )
-				fputc( '\t', impl->file );
+			for ( level = 0; level < args->indent->level; level++ )
+				args->out( args, "\t", 1 );
 
-			impl->indent = 0;
+			args->indent->indent = 0;
 
 			goto restart;
 		}
 	}
 	else {
 		char *nl;
-		if ( impl->level != COLM_INDENT_OFF &&
+		if ( args->indent->level != COLM_INDENT_OFF &&
 				(nl = memchr( data, '\n', length )) )
 		{
 			/* Print up to and including the newline. */
 			int wl = nl - data + 1;
-			fwrite( data, 1, wl, impl->file );
+			args->out( args, data, wl );
 
 			/* Go into consume state. If we see more non-indentation chars we
 			 * will generate the appropriate indentation level. */
 			data += wl;
 			length -= wl;
-			impl->indent = 1;
+			args->indent->indent = 1;
 			goto restart;
 		}
 		else {
 			/* Indentation off, or no indent trigger (newline). */
-			fwrite( data, 1, length, impl->file );
+			args->out( args, data, length );
 		}
 	}
 }
@@ -415,7 +421,7 @@ void colm_print_tree_args( program_t *prg, tree_t **sp,
 		struct colm_print_args *print_args, tree_t *tree )
 {
 	if ( tree == 0 )
-		print_args->out( print_args, "NIL", 3 );
+		out_indent( print_args, "NIL", 3 );
 	else {
 		/* This term tree allows us to print trailing ignores. */
 		tree_t term_tree;
@@ -440,19 +446,19 @@ void colm_print_null( program_t *prg, tree_t **sp,
 }
 
 void colm_print_term_tree( program_t *prg, tree_t **sp,
-		struct colm_print_args *print_args, kid_t *kid )
+		struct colm_print_args *args, kid_t *kid )
 {
 	debug( prg, REALM_PRINT, "printing term %p\n", kid->tree );
 
 	if ( kid->tree->id == LEL_ID_PTR ) {
 		char buf[INT_SZ];
-		print_args->out( print_args, "#<", 2 );
+		out_indent( args, "#<", 2 );
 		sprintf( buf, "%lx", ((pointer_t*)kid->tree)->value );
-		print_args->out( print_args, buf, strlen(buf) );
-		print_args->out( print_args, ">", 1 );
+		out_indent( args, buf, strlen(buf) );
+		out_indent( args, ">", 1 );
 	}
 	else if ( kid->tree->id == LEL_ID_STR ) {
-		print_str( print_args, ((str_t*)kid->tree)->value );
+		print_str( args, ((str_t*)kid->tree)->value );
 	}
 //	else if ( kid->tree->id == LEL_ID_STREAM ) {
 //		char buf[INT_SZ];
@@ -463,33 +469,32 @@ void colm_print_term_tree( program_t *prg, tree_t **sp,
 	else if ( kid->tree->tokdata != 0 && 
 			string_length( kid->tree->tokdata ) > 0 )
 	{
-		print_args->out( print_args, string_data( kid->tree->tokdata ), 
+		out_indent( args, string_data( kid->tree->tokdata ), 
 				string_length( kid->tree->tokdata ) );
 	}
 
 	struct lang_el_info *lel_info = prg->rtd->lel_info;
-	struct stream_impl_data *impl = (struct stream_impl_data*) print_args->arg;
-
 	if ( strcmp( lel_info[kid->tree->id].name, "_IN_" ) == 0 ) {
-		if ( impl->level == COLM_INDENT_OFF ) {
-			impl->level = 1;
-			impl->indent = 1;
+		if ( args->indent->level == COLM_INDENT_OFF ) {
+			args->indent->level = 1;
+			args->indent->indent = 1;
 		}
 		else {
-			impl->level += 1;
+			args->indent->level += 1;
 		}
 	}
 
 	if ( strcmp( lel_info[kid->tree->id].name, "_EX_" ) == 0 )
-		impl->level -= 1;
+		args->indent->level -= 1;
 }
 
 void colm_print_tree_collect( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			collect, true, false, trim, &append_collect, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null
+			collect, true, false, trim, &collect->indent,
+			&append_collect, &colm_print_null,
+			&colm_print_term_tree, &colm_print_null
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
@@ -499,19 +504,21 @@ void colm_print_tree_collect_a( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			collect, true, true, trim, &append_collect, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null
+			collect, true, true, trim, &collect->indent,
+			&append_collect, &colm_print_null,
+			&colm_print_term_tree, &colm_print_null
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
-void colm_print_tree_file( program_t *prg, tree_t **sp, struct stream_impl *impl,
-		tree_t *tree, int trim )
+void colm_print_tree_file( program_t *prg, tree_t **sp,
+		struct stream_impl_data *impl, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			impl, true, false, trim, &append_file, 
-			&colm_print_null, &colm_print_term_tree, &colm_print_null
+			impl, true, false, trim, &impl->indent,
+			&append_file, &colm_print_null,
+			&colm_print_term_tree, &colm_print_null
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
@@ -590,12 +597,12 @@ static void xml_close( program_t *prg, tree_t **sp,
 }
 
 void colm_print_xml_stdout( program_t *prg, tree_t **sp,
-		struct stream_impl *impl, tree_t *tree,
+		struct stream_impl_data *impl, tree_t *tree,
 		int comm_attr, int trim )
 {
 	struct colm_print_args print_args = {
-			impl, comm_attr, comm_attr, trim, &append_file, 
-			&xml_open, &xml_term, &xml_close };
+			impl, comm_attr, comm_attr, trim, &impl->indent,
+			&append_file, &xml_open, &xml_term, &xml_close };
 	colm_print_tree_args( prg, sp, &print_args, tree );
 }
 
@@ -724,8 +731,8 @@ void colm_postfix_tree_collect( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-		collect, false, false, false, &append_collect, 
-		&postfix_open, &postfix_term, &postfix_close
+		collect, false, false, false, &collect->indent,
+		&append_collect, &postfix_open, &postfix_term, &postfix_close
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
@@ -751,8 +758,8 @@ void colm_print_tree_collect_xml( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			collect, false, false, trim, &append_collect, 
-			&xml_open, &xml_term, &xml_close
+			collect, false, false, trim, &collect->indent,
+			&append_collect, &xml_open, &xml_term, &xml_close
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );
@@ -762,8 +769,8 @@ void colm_print_tree_collect_xml_ac( program_t *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim )
 {
 	struct colm_print_args print_args = {
-			collect, true, true, trim, &append_collect, 
-			&xml_open, &xml_term, &xml_close
+			collect, true, true, trim, &collect->indent,
+			&append_collect, &xml_open, &xml_term, &xml_close
 	};
 
 	colm_print_tree_args( prg, sp, &print_args, tree );

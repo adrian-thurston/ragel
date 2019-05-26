@@ -300,6 +300,7 @@ typedef struct colm_str_collect
 	char *data;
 	int allocated;
 	int length;
+	struct indent_impl indent;
 } str_collect_t;
 
 void init_str_collect( str_collect_t *collect );
@@ -315,9 +316,9 @@ void colm_print_tree_collect_a( struct colm_program *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim );
 
 void colm_print_tree_file( struct colm_program *prg, tree_t **sp,
-		struct stream_impl *impl, tree_t *tree, int trim );
+		struct stream_impl_data *impl, tree_t *tree, int trim );
 void colm_print_xml_stdout( struct colm_program *prg, tree_t **sp,
-		struct stream_impl *impl, tree_t *tree, int comm_attr, int trim );
+		struct stream_impl_data *impl, tree_t *tree, int comm_attr, int trim );
 
 void colm_postfix_tree_collect( struct colm_program *prg, tree_t **sp,
 		str_collect_t *collect, tree_t *tree, int trim );

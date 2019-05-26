@@ -35,6 +35,13 @@ struct colm_sections;
 struct colm_tree;
 struct colm_location;
 
+struct indent_impl
+{
+	/* Indentation. */
+	int level;
+	int indent;
+};
+
 extern struct colm_sections colm_object;
 
 typedef unsigned long colm_value_t;
@@ -59,6 +66,7 @@ struct colm_print_args
 	int comm;
 	int attr;
 	int trim;
+	struct indent_impl *indent;
 
 	void (*out)( struct colm_print_args *args, const char *data, int length );
 	void (*open_tree)( struct colm_program *prg, struct colm_tree **sp, 

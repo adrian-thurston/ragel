@@ -24,6 +24,7 @@
 #define _COLM_INPUT_H
 
 #include <stdio.h>
+#include "colm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -194,9 +195,7 @@ struct stream_impl_data
 
 	int consumed;
 
-	/* Indentation. */
-	int level;
-	int indent;
+	struct indent_impl indent;
 
 	int *line_len;
 	int lines_alloc;

@@ -1278,12 +1278,10 @@ struct LoadColm
 			if ( expr->op == '^' ) {
 				trim = ConsItem::TrimYes;
 				expr = expr->right;
-				std::cerr << "trim" << std::endl;
 			}
 			else if ( expr->op == '@' ) {
 				trim = ConsItem::TrimNo;
 				expr = expr->right;
-				std::cerr << "notrim" << std::endl;
 			}
 		}
 		return expr;

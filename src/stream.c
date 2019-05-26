@@ -404,7 +404,7 @@ static void data_print_tree( struct colm_program *prg, tree_t **sp,
 		struct stream_impl_data *si, tree_t *tree, int trim )
 {
 	if ( si->file != 0 )
-		colm_print_tree_file( prg, sp, (struct stream_impl*)si, tree, trim );
+		colm_print_tree_file( prg, sp, si, tree, trim );
 	else if ( si->collect != 0 )
 		colm_print_tree_collect( prg, sp, si->collect, tree, trim );
 }
@@ -649,7 +649,8 @@ static void si_data_init( struct stream_impl_data *is, char *name )
 	is->byte = 0;
 
 	/* Indentation turned off. */
-	is->level = COLM_INDENT_OFF;
+	is->indent.level = COLM_INDENT_OFF;
+	is->indent.indent = 0;
 }
 
 struct stream_impl *colm_impl_new_accum( char *name )
