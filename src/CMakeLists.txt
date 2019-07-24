@@ -159,6 +159,8 @@ if(${PROJECT_NAME}_MAKE_INSTALL)
 	install(EXPORT ${_PACKAGE_NAME}-targets
 		NAMESPACE ${_PACKAGE_NAME}::
 		DESTINATION "${CMAKE_INSTALL_CMAKEDIR}")
+	export(EXPORT ${_PACKAGE_NAME}-targets
+		NAMESPACE ${_PACKAGE_NAME}::)
 	include(CMakePackageConfigHelpers)
 	write_basic_package_version_file(
 		"${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"

@@ -29,6 +29,7 @@
 /cmake_install.cmake
 /*-config.cmake
 /*-config-version.cmake
+/*-targets.cmake
 /*.exe
 
 # Common testing files.
