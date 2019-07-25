@@ -1,10 +1,26 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(ragel
-    VERSION 7.0.0.10
-    LANGUAGES C CXX)
-set(PROJECT_PUBDATE "May 2017")
-set(PROJECT_EXPECTED_COLM 0.13.0.5)
+# Read project configuration from configure.ac file
+file(STRINGS configure.ac _PROJECT_CONFIGS
+	REGEX "(AC_INIT\\()|(PUBDATE=)|(EXPECTED_COLM=)")
+foreach(_PROJECT_CONFIG ${_PROJECT_CONFIGS})
+	if(_PROJECT_CONFIG MATCHES "AC_INIT\\(([^,]+)")
+		string(STRIP ${CMAKE_MATCH_1} PROJECT_NAME)
+	endif()
+	if(_PROJECT_CONFIG MATCHES "AC_INIT\\([^,]+,([^\\)]+)")
+		string(STRIP ${CMAKE_MATCH_1} PROJECT_VERSION)
+	endif()
+	if(_PROJECT_CONFIG MATCHES "PUBDATE=\"([^\"]+)")
+		string(STRIP ${CMAKE_MATCH_1} PROJECT_PUBDATE)
+	endif()
+	if(_PROJECT_CONFIG MATCHES "EXPECTED_COLM=(.+)")
+		string(STRIP ${CMAKE_MATCH_1} PROJECT_EXPECTED_COLM)
+	endif()
+endforeach()
+
+project(${PROJECT_NAME}
+	VERSION ${PROJECT_VERSION}
+	LANGUAGES C CXX)
 
 find_package(colm ${PROJECT_EXPECTED_COLM} REQUIRED)
 
