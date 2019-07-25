@@ -29,16 +29,24 @@ include(GNUInstallDirs)
 # libfsm
 
 add_library(libfsm
-	buffer.h codegen.h binary.h bingoto.h bingotoloop.h bingotoexp.h binvar.h
-	binvarloop.h binvarexp.h flat.h flatgotoloop.h flatgotoexp.h flatvar.h
-	flatvarloop.h flatvarexp.h goto.h gotoloop.h gotoexp.h
+	buffer.h codegen.h
+	actloop.h actexp.h
+	tables.h
+	binary.h bingoto.h binbreak.h binvar.h
+	flat.h flatgoto.h flatbreak.h flatvar.h
+	switch.h switchgoto.h switchbreak.h switchvar.h
+	goto.h gotoloop.h gotoexp.h
 	ipgoto.h asm.h
 	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc
 	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc
-	allocgen.cc codegen.cc binary.cc bingotoloop.cc bingotoexp.cc binvar.cc
-	binvarloop.cc binvarexp.cc flat.cc flatgotoloop.cc flatgotoexp.cc
-	flatvar.cc flatvarloop.cc flatvarexp.cc goto.cc gotoloop.cc
-	gotoexp.cc ipgoto.cc dot.cc asm.cc)
+	allocgen.cc codegen.cc
+	actexp.cc binvar.cc
+	tables.cc tabgoto.cc tabbreak.cc tabvar.cc
+	binary.cc bingoto.cc binbreak.cc actloop.cc
+	flat.cc flatgoto.cc flatbreak.cc flatvar.cc
+	switch.cc switchgoto.cc switchbreak.cc switchvar.cc
+	goto.cc gotoloop.cc gotoexp.cc ipgoto.cc
+	dot.cc asm.cc)
 
 target_include_directories(libfsm
 	PUBLIC
@@ -51,24 +59,10 @@ set_target_properties(libfsm PROPERTIES
 
 # libragel
 
-add_custom_command(OUTPUT
-	"${CMAKE_CURRENT_BINARY_DIR}/ldparse.c"
-	"${CMAKE_CURRENT_BINARY_DIR}/ldreduce.cc"
-	DEPENDS langdesc.lm #$(COLM_BINDEP)
-	COMMAND colm::colm
-	ARGS -c -b ld_parse
-	-o "${CMAKE_CURRENT_BINARY_DIR}/ldparse.c"
-	-m "${CMAKE_CURRENT_BINARY_DIR}/ldreduce.cc"
-	langdesc.lm
-	WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}")
-
 add_library(libragel
 	# dist
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h
-	parsetree.cc parsedata.cc inputdata.cc load.cc reducer.cc
-	# nodist
-	"${CMAKE_CURRENT_BINARY_DIR}/ldparse.c"
-	"${CMAKE_CURRENT_BINARY_DIR}/ldreduce.cc")
+	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc)
 
 target_link_libraries(libragel colm::libcolm)
 
@@ -90,15 +84,14 @@ set_property(TARGET libragel APPEND PROPERTY
 set(RAGEL_LM
 	rlparse.lm
 	ragel.lm
-	host.lm
-	reducer.lm)
+	rlreduce.lm)
 
 add_custom_command(OUTPUT
 	"${CMAKE_CURRENT_BINARY_DIR}/parse.c"
 	"${CMAKE_CURRENT_BINARY_DIR}/rlreduce.cc"
 	DEPENDS ${RAGEL_LM} #$(COLM_BINDEP)
 	COMMAND colm::colm
-	ARGS -c -b rl_parse
+	ARGS -c -b rlparseC
 	-o "${CMAKE_CURRENT_BINARY_DIR}/parse.c"
 	-m "${CMAKE_CURRENT_BINARY_DIR}/rlreduce.cc"
 	rlparse.lm
