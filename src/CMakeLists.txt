@@ -104,6 +104,11 @@ add_executable(ragel
 
 target_link_libraries(ragel libragel libfsm)
 
+foreach(_SUBDIR host-ruby host-asm host-julia host-ocaml host-c host-d
+		host-csharp host-go host-java host-rust host-crack host-js)
+	add_subdirectory(${_SUBDIR})
+endforeach()
+
 if(${PROJECT_NAME}_MAKE_INSTALL)
 	if(NOT DEFINED CMAKE_INSTALL_CMAKEDIR)
 		set(CMAKE_INSTALL_CMAKEDIR

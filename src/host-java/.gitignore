@@ -3,6 +3,10 @@
 /.deps
 /.libs
 /ragel-java
+/ragel-java.exe
 /rlhc.c
 /rlparse.c
 /rlreduce.cc
+
+/CMakeFiles
+/cmake_install.cmake

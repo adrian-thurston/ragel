@@ -3,6 +3,10 @@
 /.deps
 /.libs
 /ragel-ruby
+/ragel-ruby.exe
 /rlparse.c
 /rlreduce.cc
 /rlhc.c
+
+/CMakeFiles
+/cmake_install.cmake

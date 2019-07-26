@@ -3,6 +3,10 @@
 /.deps
 /.libs
 /ragel-crack
+/ragel-crack.exe
 /rlhc.c
 /rlparse.c
 /rlreduce.cc
+
+/CMakeFiles
+/cmake_install.cmake

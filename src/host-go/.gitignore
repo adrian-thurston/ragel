@@ -3,6 +3,10 @@
 /.deps
 /.libs
 /ragel-go
+/ragel-go.exe
 /rlhc.c
 /rlparse.c
 /rlreduce.cc
+
+/CMakeFiles
+/cmake_install.cmake

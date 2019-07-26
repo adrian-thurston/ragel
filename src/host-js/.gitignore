@@ -3,6 +3,10 @@
 /.deps
 /.libs
 /ragel-js
+/ragel-js.exe
 /rlhc.c
 /rlparse.c
 /rlreduce.cc
+
+/CMakeFiles
+/cmake_install.cmake
