@@ -3,6 +3,10 @@ include(CheckTypeSize)
 check_type_size("int" SIZEOF_INT)
 check_type_size("long" SIZEOF_LONG)
 
+# Check system headers
+include(CheckIncludeFile)
+check_include_file(sys/wait.h HAVE_SYS_WAIT_H)
+
 # Prepare settings
 string(TOLOWER ${PROJECT_NAME} _PACKAGE_NAME)
 if("${CMAKE_BUILD_TYPE}" MATCHES "[Dd][Ee][Bb]")

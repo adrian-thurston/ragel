@@ -43,7 +43,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#if defined(HAVE_SYS_WAIT_H)
 #include <sys/wait.h>
+#endif
 
 #ifdef _WIN32
 #include <windows.h>
@@ -1096,10 +1098,12 @@ int InputData::rlhcRun( int argc, const char **argv )
 
 void InputData::wait( const char *what, pid_t pid )
 {
+#if defined(HAVE_SYS_WAIT_H)
 	int status = 0;
 	waitpid( pid, &status, 0 );
 	if ( WIFSIGNALED(status) )
 		error() << what << " stopped by signal: " << WTERMSIG(status) << std::endl;
+#endif
 }
 
 int InputData::rlhcMain( int argc, const char **argv )
@@ -1111,17 +1115,23 @@ int InputData::rlhcMain( int argc, const char **argv )
 	makeDefaultFileName();
 	makeTranslateOutputFileName();
 
+#if defined(HAVE_SYS_WAIT_H)
 	pid = fork();
+#endif
 	if ( pid == 0 ) {
 		/* Child. */
 		if ( !process() )
 			abortCompile( 1 );
+#if defined(HAVE_SYS_WAIT_H)
 		exit( 0 );
+#endif
 	}
 
 	wait( "frontend", pid );
 
+#if defined(HAVE_SYS_WAIT_H)
 	pid = fork();
+#endif
 	if ( pid == 0 ) {
 		/* rlhc <input> <output> */
 		const char *_argv[] = { "rlhc",

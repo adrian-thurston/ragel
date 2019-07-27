@@ -28,6 +28,7 @@ EXPECTED_COLM=0.13.0.7
 AM_INIT_AUTOMAKE([foreign])
 AC_SUBST(PUBDATE)
 AC_CONFIG_HEADER(src/config.h)
+AC_CHECK_HEADERS([sys/wait.h])
 
 : ${CFLAGS="-Wall -g"}
 : ${CXXFLAGS="-Wall -g"}
