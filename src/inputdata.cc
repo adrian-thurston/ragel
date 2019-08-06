@@ -872,6 +872,8 @@ void InputData::parseArgs( int argc, const char **argv )
 					histogramFn = strdup(eq);
 				else if ( strcmp( arg, "var-backend" ) == 0 )
 					forceVar = true;
+				else if ( strcmp( arg, "no-fork" ) == 0 )
+					noFork = true;
 				else {
 					error() << "--" << pc.paramArg << 
 							" is an invalid argument" << endl;
@@ -1084,7 +1086,14 @@ int InputData::main( int argc, const char **argv )
 	return code;
 }
 
-int InputData::rlhcRun( int argc, const char **argv )
+int InputData::runFrontend( int argc, const char **argv )
+{
+	if ( !process() )
+		return -1;
+	return 0;
+}
+
+int InputData::runRlhc( int argc, const char **argv )
 {
 	struct colm_program *prg;
 	int exit_status;
@@ -1096,50 +1105,56 @@ int InputData::rlhcRun( int argc, const char **argv )
 	return exit_status;
 }
 
-void InputData::wait( const char *what, pid_t pid )
+int InputData::wait( const char *what, pid_t pid )
 {
-#if defined(HAVE_SYS_WAIT_H)
 	int status = 0;
 	waitpid( pid, &status, 0 );
-	if ( WIFSIGNALED(status) )
+	if ( WIFSIGNALED(status) ) {
 		error() << what << " stopped by signal: " << WTERMSIG(status) << std::endl;
-#endif
+		return -1;
+	}
+	
+	return WEXITSTATUS( status );
+}
+
+/* Run a job (frontend or backend). If we want forks then we return the result
+ * via the process's exit code. otherwise it comes back on the stack. */
+int InputData::runJob( const char *what, IdProcess idProcess, int argc, const char **argv )
+{
+	pid_t pid = 0;
+	bool background = HAVE_SYS_WAIT_H && !noFork;
+
+	if ( !background ) {
+		return (this->*idProcess)( argc, argv );
+	}
+	else {
+		pid = fork();
+
+		if ( pid == 0 ) {
+			int es = (this->*idProcess)( argc, argv );
+			exit( es );
+		}
+
+		return wait( what, pid );
+	}
 }
 
 int InputData::rlhcMain( int argc, const char **argv )
 {
-	pid_t pid = 0;
-
 	parseArgs( argc, argv );
 	checkArgs();
 	makeDefaultFileName();
 	makeTranslateOutputFileName();
 
-#if defined(HAVE_SYS_WAIT_H)
-	pid = fork();
-#endif
-	if ( pid == 0 ) {
-		/* Child. */
-		if ( !process() )
-			abortCompile( 1 );
-#if defined(HAVE_SYS_WAIT_H)
-		exit( 0 );
-#endif
-	}
+	int es = runJob( "frontend", &InputData::runFrontend, 0, 0 );
 
-	wait( "frontend", pid );
+	if ( es != 0 )
+		return es;
 
-#if defined(HAVE_SYS_WAIT_H)
-	pid = fork();
-#endif
-	if ( pid == 0 ) {
-		/* rlhc <input> <output> */
-		const char *_argv[] = { "rlhc",
+	/* rlhc <input> <output> */
+	const char *_argv[] = { "rlhc",
 			genOutputFileName.c_str(),
 			origOutputFileName.c_str(), 0 };
-		rlhcRun( 3, _argv );
-	}
 
-	wait( "rlhc", pid );
-	return 0;
+	return runJob( "rlhc", &InputData::runRlhc, 3, _argv );
 }

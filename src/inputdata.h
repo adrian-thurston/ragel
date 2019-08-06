@@ -207,7 +207,8 @@ struct InputData
 		histogramFn(0),
 		histogram(0),
 		input(0),
-		forceVar(false)
+		forceVar(false),
+		noFork(false)
 	{}
 
 	~InputData();
@@ -297,6 +298,7 @@ struct InputData
 	Vector<const char**> streamFileNames;
 
 	bool forceVar;
+	bool noFork;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
@@ -344,9 +346,15 @@ struct InputData
 	std::ifstream *tryOpenInclude( const char **pathChecks, long &found );
 	int main( int argc, const char **argv );
 
-	void wait( const char *what, pid_t pid );
+	int runFrontend( int argc, const char **argv );
+	int runRlhc( int argc, const char **argv );
 
-	int rlhcRun( int argc, const char **argv );
+	typedef int (InputData::*IdProcess)( int argc, const char **argv );
+
+	int wait( const char *what, pid_t pid );
+	int runJob( const char *what, IdProcess idProcess,
+			int argc, const char **argv );
+
 	int rlhcMain( int argc, const char **argv );
 };
 
