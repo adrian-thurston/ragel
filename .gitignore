@@ -20,5 +20,8 @@
 /CMakeCache.txt
 /CMakeFiles
 /cmake_install.cmake
+/*-config.cmake
+/*-config-version.cmake
+/*-targets.cmake
 /install_manifest.txt
 /*.user

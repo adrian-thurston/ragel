@@ -25,7 +25,8 @@ set(common_COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}")
 configure_file(version.h.cmake.in version.h @ONLY)
 configure_file(config.h.cmake.in config.h @ONLY)
 configure_file(defs.h.cmake.in defs.h @ONLY)
-configure_file(colm-config.cmake.in ${_PACKAGE_NAME}-config.cmake @ONLY)
+configure_file(colm-config.cmake.in
+	"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake" @ONLY)
 
 # Runtime headers
 set(RUNTIME_HDR
@@ -160,14 +161,15 @@ if(${PROJECT_NAME}_MAKE_INSTALL)
 		NAMESPACE ${_PACKAGE_NAME}::
 		DESTINATION "${CMAKE_INSTALL_CMAKEDIR}")
 	export(EXPORT ${_PACKAGE_NAME}-targets
-		NAMESPACE ${_PACKAGE_NAME}::)
+		NAMESPACE ${_PACKAGE_NAME}::
+		FILE "${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-targets.cmake")
 	include(CMakePackageConfigHelpers)
 	write_basic_package_version_file(
-		"${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"
-		VERSION ${${PROJECT_NAME}_VERSION}
+		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"
+		VERSION ${PROJECT_VERSION}
 		COMPATIBILITY AnyNewerVersion)
 	install(FILES
-		"${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake"
-		"${CMAKE_CURRENT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"
+		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake"
+		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"
 		DESTINATION "${CMAKE_INSTALL_CMAKEDIR}")
 endif()
