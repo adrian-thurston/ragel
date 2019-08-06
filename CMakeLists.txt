@@ -25,6 +25,13 @@ project(${PROJECT_NAME}
 find_package(colm ${PROJECT_EXPECTED_COLM} REQUIRED)
 
 set(${PROJECT_NAME}_MAKE_INSTALL ON CACHE BOOL
-    "Set to OFF to disable install rules (default is ON)")
+	"Set to OFF to disable install rules (default is ON)")
+
+set(${PROJECT_NAME}_BUILD_EXAMPLES OFF CACHE BOOL
+	"Set to ON to build examples (default is OFF)")
 
 add_subdirectory(src)
+
+if(${PROJECT_NAME}_BUILD_EXAMPLES)
+	add_subdirectory(examples)
+endif()
