@@ -1105,38 +1105,30 @@ int InputData::runRlhc( int argc, const char **argv )
 	return exit_status;
 }
 
-int InputData::wait( const char *what, pid_t pid )
-{
-	int status = 0;
-	waitpid( pid, &status, 0 );
-	if ( WIFSIGNALED(status) ) {
-		error() << what << " stopped by signal: " << WTERMSIG(status) << std::endl;
-		return -1;
-	}
-	
-	return WEXITSTATUS( status );
-}
-
 /* Run a job (frontend or backend). If we want forks then we return the result
  * via the process's exit code. otherwise it comes back on the stack. */
 int InputData::runJob( const char *what, IdProcess idProcess, int argc, const char **argv )
 {
-	pid_t pid = 0;
-	bool background = HAVE_SYS_WAIT_H && !noFork;
-
-	if ( !background ) {
-		return (this->*idProcess)( argc, argv );
-	}
-	else {
-		pid = fork();
+#if defined(HAVE_SYS_WAIT_H)
+	if ( !noFork ) {
+		pid_t pid = fork();
 
 		if ( pid == 0 ) {
 			int es = (this->*idProcess)( argc, argv );
 			exit( es );
 		}
 
-		return wait( what, pid );
+		int status = 0;
+		waitpid( pid, &status, 0 );
+		if ( WIFSIGNALED(status) ) {
+			error() << what << " stopped by signal: " << WTERMSIG(status) << std::endl;
+			return -1;
+		}
+
+		return WEXITSTATUS( status );
 	}
+#endif
+	return (this->*idProcess)( argc, argv );
 }
 
 int InputData::rlhcMain( int argc, const char **argv )

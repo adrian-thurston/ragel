@@ -351,7 +351,6 @@ struct InputData
 
 	typedef int (InputData::*IdProcess)( int argc, const char **argv );
 
-	int wait( const char *what, pid_t pid );
 	int runJob( const char *what, IdProcess idProcess,
 			int argc, const char **argv );
 
