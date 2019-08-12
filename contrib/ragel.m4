@@ -23,7 +23,7 @@ AC_DEFUN([CHECK_RAGEL], [
   AS_IF([test x"$RAGEL" = x"no"],
         [RAGEL=false],
 	AS_IF([test x"$2" != "x"],
-	      [ragel_version=`$RAGEL --version | sed -n -e '1s:.*version \(@<:@0-9@:>@\.@<:@0-9@:>@\) .*:\1:p'`
+	      [ragel_version=`$RAGEL --version | sed -n -e '1s:.*version \(@<:@0-9@:>@\.@<:@0-9@:>@\)\(\.@<:@0-9@:>@\)* .*:\1:p'`
 	       ragel_version_compare=`echo $ragel_version | tr -d .`
 	       ragel_wanted_version=`echo $2 | tr -d .`
 	       AS_IF([test $ragel_version_compare -lt $ragel_wanted_version],
