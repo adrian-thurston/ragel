@@ -167,7 +167,7 @@ reduction TopLevel
 		}
 		else {
 			/* Add the action to the list of actions. */
-			Action *newAction = new Action( @1, data, 
+			Action *newAction = new Action( &$action_block->loc, data, 
 					$action_block->inlineList, pd->fsmCtx->nextCondId++ );
 
 			/* Insert to list and dict. */
@@ -189,7 +189,7 @@ reduction TopLevel
 		}
 		else {
 			/* Add the action to the list of actions. */
-			Action *newAction = new Action( @1, data, 
+			Action *newAction = new Action( &$action_block->loc, data, 
 					$action_block->inlineList, pd->fsmCtx->nextCondId++ );
 
 			/* Insert to list and dict. */
