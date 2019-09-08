@@ -1,0 +1,183 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define TK_Dlit 256
+#define TK_Slit 257
+#define TK_Float 258
+#define TK_Id 259
+#define TK_NameSep 260
+#define TK_Arrow 261
+#define TK_PlusPlus 262
+#define TK_MinusMinus 263
+#define TK_ArrowStar 264
+#define TK_DotStar 265
+#define TK_ShiftLeft 266
+#define TK_ShiftRight 267
+#define TK_IntegerDecimal 268
+#define TK_IntegerOctal 269
+#define TK_IntegerHex 270
+#define TK_EqualsEquals 271
+#define TK_NotEquals 272
+#define TK_AndAnd 273
+#define TK_OrOr 274
+#define TK_MultAssign 275
+#define TK_DivAssign 276
+#define TK_PercentAssign 277
+#define TK_PlusAssign 278
+#define TK_MinusAssign 279
+#define TK_AmpAssign 280
+#define TK_CaretAssign 281
+#define TK_BarAssign 282
+#define TK_DotDotDot 283
+#define TK_Whitespace 284
+#define TK_Comment 285
+
+int line = 1, col = 1;
+
+void token( int tok, char *data, int len )
+{
+	printf( "<%i> ", tok );
+	for ( int i = 0; i < len; i++ )
+		fputc( data[i], stdout );
+	fputc( '\n', stdout );
+
+	/* Count newlines and columns. This code is here mainly for having some
+	 * code in the token routine when commenting out the above output during
+	 * performance testing. */
+	for ( int i = 0; i < len; i ++ ) {
+		if ( data[i] == '\n' ) {
+			line += 1;
+			col = 1;
+		}
+		else {
+			col += 1;
+		}
+	}
+}
+
+#define BUFSIZE 8192
+char buf[BUFSIZE];
+
+void fill( int n )
+{
+	printf("fill(%i)\n", n);
+	exit(1);
+}
+
+int main()
+{
+	char *start, *p = buf, *lim = buf, *marker;
+	int len, have, want, shift;
+	int done = 0;
+	
+#define YYCTYPE         char
+
+#define YYCURSOR        p
+#define YYLIMIT         lim
+#define YYMARKER        marker
+
+#define YYFILL(n)      { \
+		if ( ! done ) { \
+			have = lim-start; \
+			if ( start > buf ) { \
+				shift = start-buf; \
+				memmove( buf, start, have ); \
+				start -= shift; \
+				p -= shift; \
+				lim -= shift; \
+				marker -= shift; \
+			} \
+			want = BUFSIZE - have - 1; \
+			len = fread( lim, 1, want, stdin ); \
+			lim += len; \
+			if ( len < want ) { \
+				*lim++ = 0; \
+				done = 1; \
+			} \
+		} \
+	}
+
+again:
+	start = p;
+
+/*!re2c
+
+ANY				= [\000-\377];
+FRACTCONST		= ( [0-9]* "." [0-9]+ ) | [0-9]+ ".";
+EXPONENT		= [eE] [+\-]? [0-9]+;
+FLOATSUFFIX		= [flFL];
+
+	"L"? "\'" ( ANY \ [\'\\\n] | "\\" ANY )* "\'" {
+		token( TK_Slit, start, p-start );
+		goto again;
+	}
+
+	"L"? "\"" ( ANY \ [\"\\\n] | "\\" ANY )* "\"" {
+		token( TK_Dlit, start, p-start );
+		goto again;
+	}
+
+	[a-zA-Z_][a-zA-Z0-9_]* {
+		token( TK_Id, start, p-start );
+		goto again;
+	}
+
+	( FRACTCONST EXPONENT? FLOATSUFFIX? ) | ( [0-9]+ EXPONENT FLOATSUFFIX? ) {
+		token( TK_Float, start, p-start );
+		goto again;
+	}
+
+
+	( "0" | [1-9][0-9]* ) [ulUL]* {
+		token( TK_IntegerDecimal, start, p-start );
+		goto again;
+	}
+
+	"0" [0-9]+ [ulUL]* {
+		token( TK_IntegerOctal, start, p-start );
+		goto again;
+	}
+
+	"0x" [0-9a-fA-F]+[ulUL]* {
+		token( TK_IntegerHex, start, p-start );
+		goto again;
+	}
+
+	"::"	{ token( TK_NameSep, start, p-start ); goto again; }
+	"=="	{ token( TK_EqualsEquals, start, p-start ); goto again; }
+	"!="	{ token( TK_NotEquals, start, p-start ); goto again; }
+	"&&"	{ token( TK_AndAnd, start, p-start ); goto again; }
+	"||"	{ token( TK_OrOr, start, p-start ); goto again; }
+	"*="	{ token( TK_MultAssign, start, p-start ); goto again; }
+	"/="	{ token( TK_DivAssign, start, p-start ); goto again; }
+	"%="	{ token( TK_PercentAssign, start, p-start ); goto again; }
+	"+="	{ token( TK_PlusAssign, start, p-start ); goto again; }
+	"-="	{ token( TK_MinusAssign, start, p-start ); goto again; }
+	"&="	{ token( TK_AmpAssign, start, p-start ); goto again; }
+	"^="	{ token( TK_CaretAssign, start, p-start ); goto again; }
+	"|="	{ token( TK_BarAssign, start, p-start ); goto again; }
+	"++"	{ token( TK_PlusPlus, start, p-start ); goto again; }
+	"--"	{ token( TK_MinusMinus, start, p-start ); goto again; }
+	"->"	{ token( TK_Arrow, start, p-start ); goto again; }
+	"->*"	{ token( TK_ArrowStar, start, p-start ); goto again; }
+	".*"	{ token( TK_DotStar, start, p-start ); goto again; }
+	"..."	{ token( TK_DotDotDot, start, p-start ); goto again; }
+
+	"/*" { goto comment; }
+	"//" (ANY\"\n")* "\n"	{ goto again; }
+	[\001-\040\177]+		{ goto again; }
+
+	[\041-\057\072-\100\133-\140\173-\176]	{
+		token( *start, start, p-start );
+		goto again;
+	}
+	"\000"					{ return 0; }
+*/
+
+comment:
+/*!re2c
+	"*/"					{ goto again; }
+	ANY						{ goto comment; }
+*/
+}

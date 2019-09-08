@@ -1,0 +1,404 @@
+include 'ril.lm'
+
+include 'out-go.lm'
+
+namespace go_gen
+
+	global _: parser<out_go::out_go>
+
+	void tok_list( TL: host::tok* )
+	{
+		for Tok: host::tok in repeat(TL) {
+			switch Tok
+			case Stmt {
+				"{
+					stmt_list( StmtList )
+				"}
+			}
+			case Expr {
+				"([expr( Expr )])"
+			}
+			case Escape {
+				Str: str = $Tok
+				"[Str.suffix( 1 )]"
+			}
+			default {
+				[Tok]
+			}
+		}
+	}
+
+	void embedded_host( EmbeddedHost: embedded_host )
+	{
+		switch EmbeddedHost
+		case Expr
+		{
+			['(' tok_list( TL ) ')']
+		}
+		case Stmt
+		{
+			['{' tok_list( TL ) '}\n']
+		}
+		case Bare
+		{
+			[tok_list( TL )]
+		}
+	}
+
+	void expr_factor( ExprFactor: expr_factor )
+	{
+		switch ExprFactor
+		case EmbeddedHost
+		{
+			[embedded_host(embedded_host)]
+		}
+		case Paren
+		{
+			['( ' expr(expr) ' )']
+		}
+		case ArraySub
+		{
+			[ident '[ ' expr( expr ) ' ]']
+		}
+		case Offset
+		{
+			"int([expr(expr )])
+		}
+		case Deref
+		{
+			[ident '[ ' expr( expr ) ' ]' ]
+		}
+		case True
+		{
+			"true"
+		}
+		case False
+		{
+			"false"
+		}
+		case Nil
+		{
+			"0"
+		}
+		case Access
+		{
+			embedded_host(embedded_host)
+			expr_factor(_expr_factor)
+		}
+		case Cast
+		{
+			[type(type) '( ' expr_factor(_expr_factor) ' )' ]
+		}
+		default {
+			# Catches cases not specified
+			[ExprFactor]
+		}
+	}
+
+	void lvalue( ExprFactor: lvalue )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			[embedded_host(EH)]
+		}
+		case [ident `[ TL: expr `]]
+		{
+			[ident '[' expr( TL ) ']']
+		}
+		case [E1: embedded_host `-> E2: lvalue]
+		{
+			embedded_host( E1 )
+			lvalue( E2 )
+		}
+		default {
+			# Catches cases not specified
+			[ExprFactor]
+		}
+	}
+
+	void expr_factor_op( ExprFactorOp: expr_factor_op )
+	{
+		switch ExprFactorOp
+		case [B: `! expr_factor_op]
+		{
+			['! ' expr_factor_op( _expr_factor_op )]
+		}
+		case [T: `~ expr_factor_op]
+		{
+			['^ ' expr_factor_op( _expr_factor_op )]
+		}
+		case [expr_factor]
+		{
+			[expr_factor( ExprFactorOp.expr_factor )]
+		}
+	}
+
+	void expr_bitwise( ExprBitwise: expr_bitwise )
+	{
+		switch ExprBitwise
+		case [expr_bitwise A: `& expr_factor_op]
+		{
+			[expr_bitwise( _expr_bitwise ) ' & ' expr_factor_op( expr_factor_op )]
+		}
+		case [expr_factor_op]
+		{
+			[expr_factor_op( ExprBitwise.expr_factor_op )]
+		}
+	}
+
+	void expr_mult( ExprMult: expr_mult )
+	{
+		switch ExprMult
+		case [expr_mult T: `* expr_bitwise]
+		{
+			[expr_mult( _expr_mult ) ' * ' expr_bitwise( expr_bitwise )]
+		}
+		case [expr_bitwise]
+		{
+			[expr_bitwise( expr_bitwise )]
+		}
+	}
+
+	void expr_add( ExprAdd: expr_add )
+	{
+		switch ExprAdd
+		case [expr_add Op: add_op expr_mult]
+		{
+			[expr_add( _expr_add ) ' ' Op ' ' expr_mult( expr_mult )]
+		}
+		case [expr_mult]
+		{
+			[expr_mult( ExprAdd.expr_mult )]
+		}
+	}
+
+	void expr_shift( ExprShift: expr_shift )
+	{
+		switch ExprShift
+		case [expr_shift Op: shift_op expr_add]
+		{
+			[expr_shift( _expr_shift ) ' ' Op ' ' expr_add( expr_add )]
+		}
+		case [expr_add]
+		{
+			[expr_add( expr_add )]
+		}
+	}
+
+	void expr_test( ExprTest: expr_test )
+	{
+		switch ExprTest
+		case [expr_test Op: test_op expr_shift]
+		{
+			[expr_test( _expr_test ) ' ' Op ' ' expr_shift( expr_shift )]
+		}
+		case [expr_shift]
+		{
+			[expr_shift( ExprTest.expr_shift )]
+		}
+	}
+
+	void expr( Expr: expr )
+	{
+		expr_test( Expr.expr_test )
+	}
+
+	void type( Type: type )
+	{
+		switch Type
+		case S8
+			['int8']
+		case S16
+			['int16']
+		case S32
+			['int32']
+		case S64
+			['int64']
+		case S128
+			['long long']
+		default
+			[Type]
+	}
+
+	void number( Number: number )
+	{
+		switch Number
+		case Unsigned
+			[uint]
+		default
+			[Number]
+	}
+
+	void num_list( NumList: num_list )
+	{
+		number( NumList.number )
+		for CommaNum: comma_num in NumList {
+			[', ' number( CommaNum.number )]
+		}
+	}
+
+	# Go must have {} around if and for statements. We strip any blocks from
+	# these statments and force our own.
+	void strip_block_stmt( Stmt: stmt )
+	{
+		if match Stmt [`{ StmtList: stmt* `}]
+			stmt_list(StmtList)
+		else
+			stmt( Stmt )
+	}
+
+	void stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [EH: embedded_host]
+		{
+			[embedded_host(EH)]
+		}
+		case [A: static_array] {
+			"var [A.ident] = \[\] "
+				"[type(A.type)] { [num_list(A.num_list)] }
+		}
+		case [V: static_value] {
+			"var [V.ident] [type(V.type)] = [V.number]
+			"var _ = [V.ident]
+		}
+		case [
+				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
+		] {
+			# if-statements with only the if clause can go out as an if.
+			"if [expr(IfExpr)] {
+				strip_block_stmt(IfStmt)
+			"}
+		}
+		case [
+				'if' O: `( IfExpr: expr C: `) IfStmt: stmt
+				ElseIfClauseList: else_if_clause* ElseClauseOpt: else_clause?
+		] {
+			# If the if-statement has more than just an if clause it goes out as a switch.
+			"if [expr( IfExpr )] {
+				strip_block_stmt( IfStmt )
+
+			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+				match ElseIfClause
+					['else if (' ElseIfExpr: expr ')' ElseIfStmt: stmt]
+
+				"} else if [expr(ElseIfExpr)] {
+					strip_block_stmt(ElseIfStmt)
+			}
+
+			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+				"} else {
+					strip_block_stmt(ElseStmt)
+			}
+
+			"}
+		}
+		case ["while ( TRUE )" WhileStmt: stmt] {
+			"for {
+				strip_block_stmt(WhileStmt)
+			"}
+		}
+		case ['while' '(' WhileExpr: expr ')' WhileStmt: stmt] {
+			"for [expr(WhileExpr)] {
+				strip_block_stmt(WhileStmt)
+			"}
+		}
+		case ['switch' '(' SwitchExpr: expr ')' '{' StmtList: stmt* '}'] {
+			"switch [expr(SwitchExpr)] {
+				stmt_list(StmtList)
+			"}
+		}
+		case [ExprExpr: expr `;] {
+			[expr(ExprExpr) ';']
+		}
+		case [B: block] {
+			"{
+				stmt_list(B.StmtList)
+			"}
+		}
+		case [D: declaration]
+		{
+			"var [D.ident] [type(D.type)]"
+
+			if match D.opt_init ['=' Expr: expr] {
+				"  = [expr(Expr)]"
+			}
+			['\n']
+		}
+		case [ES: export_stmt]
+		{
+			"#define [ES.ident] [number(ES.number)]
+		}
+		case [fallthrough]
+		{
+			"fallthrough
+		}
+		case [Index: index_stmt]
+		{
+			"var [Index.ident] int"
+
+			if match Index.opt_init ['=' Expr: expr] {
+				" = [expr(Expr)]"
+			}
+
+			['\n']
+		}
+		case [CB: case_block]
+		{
+			"case [expr( CB.expr )]:
+			stmt_list( CB._repeat_stmt )
+		}
+		case [DB: default_block]
+		{
+			"default:
+			stmt_list( DB._repeat_stmt )
+		}
+		case [CL: case_label]
+		{
+			"case [expr( CL.expr )]:
+		}
+		case [AS: assign_stmt]
+		{
+			"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+		}
+		default {
+			# catches unspecified cases
+			"[Stmt]
+		}
+	}
+
+	void stmt_list( StmtList: stmt* )
+	{
+		for Stmt: stmt in repeat( StmtList )
+			stmt( Stmt )
+	}
+
+	void trans( Output: stream, Start: start )
+	{
+		_ = new parser<out_go::out_go>()
+		Input: _input = _->gets()
+		Input->auto_trim(true)
+
+		stmt_list( Start._repeat_stmt )
+
+		GO: out_go::out_go = _->finish()
+
+		if GO {
+			send Output
+				[GO]
+		}
+		else {
+			send stderr
+				"failed to parse output: [_->error]
+		}
+
+	}
+end
+
+void trans( Output: stream, Start: start )
+{
+	go_gen::trans( Output, Start )
+}
+
+include 'rlhc-main.lm'

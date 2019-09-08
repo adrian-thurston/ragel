@@ -1,0 +1,12 @@
+/Makefile
+/Makefile.in
+/.deps
+/.libs
+/ragel-d
+/ragel-d.exe
+/rlhc.c
+/rlparse.c
+/rlreduce.cc
+
+/CMakeFiles
+/cmake_install.cmake

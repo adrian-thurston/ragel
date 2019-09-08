@@ -1,0 +1,11 @@
+/Makefile.in
+/Makefile
+/.deps
+/.libs
+/ragel-asm
+/ragel-asm.exe
+/rlparse.c
+/rlreduce.cc
+
+/CMakeFiles
+/cmake_install.cmake

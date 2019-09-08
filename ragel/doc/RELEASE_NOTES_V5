@@ -1,0 +1,112 @@
+
+                      RELEASE NOTES Ragel 5.X
+
+This file describes the changes in Ragel version 5.X that are not backwards
+compatible. For a list of all the changes see the ChangeLog file.
+
+
+Interface to Host Programming Language
+======================================
+
+In version 5.0 there is a new interface to the host programming language.
+There are two major changes: the way Ragel specifications are embedded in the
+host program text, and the way that the host program interfaces with the
+generated code.
+
+Multiline Ragel specifications begin with '%%{' and end with '}%%'. Single line
+specifications start with '%%' and end at the first newline. Machine names are
+given with the machine statement at the very beginning of a machine spec. This
+change was made in order to make the task of separating Ragel code from the
+host code as straightforward as possible. This will ease the addition of more
+supported host languages.
+
+Ragel no longer parses structure and class names in order to infer machine
+names.  Parsing structures and clases requires knowledge of the host language
+hardcoded into Ragel. Since Ragel is moving towards language independence, this
+feature has been removed.
+
+If a machine spec does not have a name then the previous spec name is used. If
+there is no previous specification then this is an error. 
+
+The second major frontend change in 5.0 is doing away with the init(),
+execute() and finish() routines. Instead of generating these functions Ragel
+now only generates their contents. This scheme is more flexible, allowing the
+user to use a single function to drive the machine or separate out the
+different tasks if desired. It also frees the user from having to build the
+machine around a structure or a class.
+
+An example machine is:
+
+--------------------------
+
+%%{
+    machine fsm;
+    main := 'hello world';
+}%%
+
+%% write data;
+
+int parse( char *p )
+{
+    int cs;
+    char *pe = p + strlen(p);
+    %%{
+        write init;
+        write exec;
+    }%%
+    return cs;
+};
+
+--------------------------
+
+The generated code expects certain variables to be available. In some cases
+only if the corresponding features are used.
+
+  el* p:         A pointer to the data to parse.
+  el* pe:        A pointer to one past the last item.
+  int cs:        The current state.
+  el* tokstart:  The beginning of current match of longest match machines.
+  el* tokend:    The end of the current match.
+  int act:       The longest match pattern that has been matched.
+  int stack[n]:  The stack for machine call statements
+  int top:       The top of the stack for machine call statements
+
+It is possible to specify to Ragel how the generated code should access all the
+variables except p and pe by using the access statement.
+
+  access some_pointer->;
+  access variable_name_prefix;
+
+The writing statments are:
+
+  write data;
+  write init;
+  write exec;
+  write eof;
+
+There are some options available:
+
+  write data noerror nofinal noprefix;
+  write exec noend
+
+  noerror:   Do not write the id of the error state.
+  nofinal:   Do not write the id of the first_final state.
+  noprefix:  Do not prefix the variable with the name of the machine
+  noend:     Do not test if the current character has reached pe. This is
+             useful if one wishes to break out of the machine using fbreak
+             when hitting some marker, such as the null character.
+
+The fexec Action Statement Changed
+==================================
+
+The fexec action statement has been changed to take only the new position to
+move to. This statement is more useful for moving backwards and reparsing input
+than for specifying a whole new buffer entirely and has been shifted to this
+new use. Also, using only a single argument simplifies the parsing of Ragel
+input files and will ease the addition of other host languages.
+
+Context Embedding Has Been Dropped
+==================================
+
+The context embedding operators were not carried over from version 4.X. Though
+interesting, they have not found any real practical use.

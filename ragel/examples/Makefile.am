@@ -1,0 +1,72 @@
+
+RAGEL = ../src/ragel
+FLEX = flex
+RE2C = re2c
+
+noinst_PROGRAMS = \
+	atoi concurrent cppscan format gotocallret mailbox params \
+	statechart 
+
+EXTRA_DIST = \
+	gotocallret.rl pullscan.rl concurrent.rl rlscan.rl statechart.rl \
+	params.rl clang.rl cppscan.rl format.rl awkemu.rl mailbox.rl atoi.rl
+
+gotocallret_SOURCES = gotocallret.cpp
+pullscan_SOURCES = pullscan.c
+concurrent_SOURCES = concurrent.cpp
+rlscan_SOURCES = rlscan.cpp
+statechart_SOURCES = statechart.cpp 
+params_SOURCES = params.c
+clang_SOURCES = clang.c 
+cppscan_SOURCES = cppscan.cpp 
+format_SOURCES = format.c
+awkemu_SOURCES = awkemu.c
+mailbox_SOURCES = mailbox.cpp
+atoi_SOURCES = atoi.cpp
+
+gotocallret.cpp: gotocallret.rl
+	$(RAGEL) -G2 -o gotocallret.cpp gotocallret.rl 
+
+pullscan.c: pullscan.rl $(RAGEL) 
+	$(RAGEL) -G2 -o $@ pullscan.rl
+
+concurrent.cpp: concurrent.rl $(RAGEL)
+	$(RAGEL) -G2 -o concurrent.cpp concurrent.rl
+
+rlscan.cpp: rlscan.rl 
+	$(RAGEL) -G2 -o rlscan.cpp rlscan.rl
+
+statechart.cpp: statechart.rl 
+	$(RAGEL) -G2 -o statechart.cpp statechart.rl
+
+params.c: params.rl
+	$(RAGEL) -G2 -o params.c params.rl
+
+clang.c: clang.rl 
+	$(RAGEL) -G2 -o clang.c clang.rl
+
+cppscan.cpp: cppscan.rl 
+	$(RAGEL) -G2 -o $@ cppscan.rl
+
+format.c: format.rl
+	$(RAGEL) -G2 -o format.c format.rl
+
+awkemu.c: awkemu.rl
+	$(RAGEL) -G2 -o awkemu.c awkemu.rl
+
+mailbox.cpp: mailbox.rl
+	$(RAGEL) -G2 -o mailbox.cpp mailbox.rl
+
+atoi.cpp: atoi.rl
+	$(RAGEL) -G2 -o atoi.cpp atoi.rl
+
+###
+
+lex-cppscan.cpp: cppscan.lex
+	$(FLEX) -f -o $@ $<
+
+re2c-cppscan.cpp: cppscan.rec
+	$(RE2C) -s $< > $@
+
+example.cpp: example.rec
+	$(RE2C) -s $< > $@

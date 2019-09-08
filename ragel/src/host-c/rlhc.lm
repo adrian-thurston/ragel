@@ -1,0 +1,459 @@
+include 'ril.lm'
+
+namespace c_out
+
+	token _IN_ /''/
+	token _EX_ /''/
+
+	lex
+		token comment /
+			'//' any* :> '\n' |
+			'/*' any* :>> '*/'
+		/
+
+		token id
+			/[a-zA-Z_][a-zA-Z_0-9]*/
+
+		token number /
+			[0-9]+
+		/
+
+		token symbol /
+			'!' | '#' | '$' | '%' | '&' | '(' | ')' | '*' |
+			'+' | ',' | '-' | '.' | '/' | ':' | ';' | '<' |
+			'=' | '>' | '?' | '@' | '[' | ']' | '^' | '|' |
+			'~' /
+
+		literal `{ `}
+
+		token string /
+				'"' ( [^"\\] | '\\' any ) * '"' |
+				"'" ( [^'\\] | '\\' any ) * "'"
+			/
+
+		ignore
+			/[ \t\v\r\n]+/
+	end
+
+	def item
+		[comment]
+	|	[id]
+	|	[number]
+	|	[symbol]
+	|	[string]
+	|	[`{ _IN_ item* _EX_ `} ]
+
+	def c_out
+		[_IN_ _EX_ item*]
+end
+
+namespace c_gen
+	global _: parser<c_out::c_out>
+
+	void tok_list( TL: host::tok* )
+	{
+		for Tok: host::tok in repeat(TL) {
+			switch Tok
+			case Stmt {
+				"{
+				"	[stmt_list( StmtList )]
+				"}
+			}
+			case Expr {
+				"([expr( Expr )])"
+			}
+			case Escape {
+				Str: str = $escape
+				"[Str.suffix( 1 )]"
+			}
+			default {
+				[Tok]
+			}
+		}
+	}
+
+	void embedded_host( EmbeddedHost: embedded_host )
+	{
+		switch EmbeddedHost
+		case Expr
+		{
+			"([tok_list( TL )])"
+		}
+		case Stmt
+		{
+			"{
+			"	[tok_list( TL )]
+			"}
+		}
+		case Bare
+		{
+			[tok_list( TL )]
+		}
+	}
+
+	void expr_factor( ExprFactor: expr_factor )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			[embedded_host( EH )]
+		}
+		case Paren
+		{
+			"([expr( expr )])"
+		}
+		case ArraySub
+		{
+			"[ident]\[[expr( expr )]\]"
+		}
+		case ArraySubField
+		{
+			"[ident]\[[expr( expr )]\].[Field]"
+		}
+		case Offset
+		{
+			"[ident] + [expr( expr )]"
+		}
+		case Deref
+		{
+			"(*( [expr(expr)] ))
+		}
+		case [`TRUE]
+		{
+			"1"
+		}
+		case [`FALSE]
+		{
+			"1"
+		}
+		case [N: `nil]
+		{
+			"0"
+		}
+		case [Number: number]
+		{
+			number( Number )
+		}
+		case [E1: embedded_host `-> E2: expr_factor]
+		{
+			# The accessor operator is contained wihtin the lhs.
+			embedded_host( E1 )
+			expr_factor( E2 )
+		}
+		case [`cast `( T: type `) F: expr_factor]
+		{
+			"( [type( T )] ) [expr_factor( F )]"
+		}
+		default {
+			# Catches cases not specified
+			[ExprFactor]
+		}
+	}
+
+	void lvalue( ExprFactor: lvalue )
+	{
+		switch ExprFactor
+		case [EH: embedded_host]
+		{
+			[embedded_host( EH )]
+		}
+		case [ident O: `[ TL: expr C: `]]
+		{
+			[ident O expr( TL ) C]
+		}
+		case [I: ident `[ E: expr `] `. F: ident]
+		{
+			"[I]\[[ expr( E )]\].[F]
+		}
+		case [E1: embedded_host `-> E2: lvalue]
+		{
+			# The accessor operator is contained wihtin the lhs.
+			embedded_host( E1 )
+			lvalue( E2 )
+		}
+		default {
+			# Catches cases not specified
+			[ExprFactor]
+		}
+	}
+
+	void expr_factor_op( ExprFactorOp: expr_factor_op )
+	{
+		switch ExprFactorOp
+		case [B: `! expr_factor_op]
+		{
+			['!' expr_factor_op( _expr_factor_op )]
+		}
+		case [T: `~ expr_factor_op]
+		{
+			['~' expr_factor_op( _expr_factor_op )]
+		}
+		case [expr_factor]
+		{
+			[expr_factor( expr_factor )]
+		}
+	}
+
+	void expr_bitwise( ExprBitwise: expr_bitwise )
+	{
+		switch ExprBitwise
+		case [expr_bitwise A: `& expr_factor_op]
+		{
+			[expr_bitwise( _expr_bitwise ) A expr_factor_op( expr_factor_op )]
+		}
+		case [expr_factor_op]
+		{
+			[expr_factor_op( expr_factor_op )]
+		}
+	}
+
+	void expr_mult( ExprMult: expr_mult )
+	{
+		switch ExprMult
+		case [expr_mult T: `* expr_bitwise]
+		{
+			[expr_mult( _expr_mult ) T expr_bitwise( expr_bitwise )]
+		}
+		case [expr_bitwise]
+		{
+			[expr_bitwise( expr_bitwise )]
+		}
+	}
+
+	void expr_add( ExprAdd: expr_add )
+	{
+		switch ExprAdd
+		case [expr_add Op: add_op expr_mult]
+		{
+			[expr_add( _expr_add ) Op expr_mult( expr_mult )]
+		}
+		case [expr_mult]
+		{
+			[expr_mult( expr_mult )]
+		}
+	}
+
+	void expr_shift( ExprShift: expr_shift )
+	{
+		switch ExprShift
+		case [expr_shift Op: shift_op expr_add]
+		{
+			[expr_shift( _expr_shift ) Op expr_add( expr_add )]
+		}
+		case [expr_add]
+		{
+			[expr_add( expr_add )]
+		}
+	}
+
+	void expr_test( ExprTest: expr_test )
+	{
+		switch ExprTest
+		case [expr_test Op: test_op expr_shift]
+		{
+			[expr_test( _expr_test ) Op expr_shift( expr_shift )]
+		}
+		case [expr_shift]
+		{
+			[expr_shift( expr_shift )]
+		}
+	}
+
+	void expr( Expr: expr )
+	{
+		expr_test( Expr.expr_test )
+	}
+
+	void type( Type: type )
+	{
+		switch Type
+		case S8
+			['signed char ']
+		case S16
+			['short ']
+		case S32
+			['int ']
+		case S64
+			['long ']
+		case S128
+			['long long ']
+		case "uint"
+			['unsigned int ']
+		default
+			[Type]
+	}
+
+	void number( Number: number )
+	{
+		switch Number
+		case Unsigned
+			"[uint]u"
+		default
+			[Number]
+	}
+
+	void num_list( NumList: num_list )
+	{
+		for Number: number in NumList
+			"[number( Number )], "
+	}
+
+	void stmt( Stmt: stmt )
+	{
+		switch Stmt
+		case [EH: embedded_host]
+		{
+			[embedded_host( EH )]
+		}
+		case [A: static_array] {
+			"static const [type(A.type)] "
+				"[A.ident] \[\] = { [num_list(A.num_list)] };
+		}
+		case [V: static_value] {
+			"static const [V.type] [V.ident] = [V.number];
+		}
+		case [
+				`if `( IfExpr: expr `)
+					IfStmt: stmt
+				ElseIfClauseList: else_if_clause*
+				ElseClauseOpt: else_clause?
+		] {
+			"if ( [expr(IfExpr)] )
+			"	[stmt(IfStmt)]
+
+			for ElseIfClause: else_if_clause in repeat( ElseIfClauseList ) {
+				match ElseIfClause
+					[`else `if `( ElseIfExpr: expr `) ElseIfStmt: stmt]
+
+				"else if ( [expr(ElseIfExpr)] )
+				"	[stmt(ElseIfStmt)]
+			}
+
+			if ( match ElseClauseOpt ['else' ElseStmt: stmt] ) {
+				"else
+				"	[stmt(ElseStmt)]
+			}
+		}
+		case [`while `( WhileExpr: expr `) WhileStmt: stmt] {
+			"while ( [expr(WhileExpr)] )
+			"	[stmt(WhileStmt)]
+		}
+		case [M: match_stmt] {
+			"switch ( [expr(M.E)] ) {
+
+			for PB: pat_block in repeat( M.P ) {
+				"case [expr( PB.expr )]:
+				"[stmt_list( PB._repeat_stmt )]
+				"break;
+			}
+
+			if match M.D [D: default_block] {
+				"default:
+				"[stmt_list( D._repeat_stmt )]
+				"break;
+			}
+
+			"}
+		}
+		case [`switch `( SwitchExpr: expr `) `{ StmtList: stmt* `}] {
+			"switch ( [expr(SwitchExpr)] ) {
+			"	[stmt_list(StmtList)]
+			"}
+		}
+		case [ES: expr_stmt] {
+			"[expr(ES.expr)];
+		}
+		case [B: block] {
+			"{
+			"	[stmt_list(B.StmtList)]
+			"}
+		}
+		case [
+			OptConst: opt_const Type: type 
+			Ident: ident OptInit: opt_init Semi: `;
+		]
+		{
+			"[OptConst] [type(Type)] [Ident]"
+
+			if match OptInit [`= Init: expr] {
+				" = [expr(Init)]
+			}
+
+			";
+		}
+		case [Export: export_stmt]
+		{
+			"#define [Export.ident] [number(Export.number)] 
+		}
+		case [fallthrough]
+		{
+			# Nothing needed here.
+			# C falls through by default.
+		}
+		case [Index: index_stmt]
+		{
+			"const [type(Index.type)] *[Index.ident]
+
+			if match Index.opt_init [E: `= expr] {
+				[E expr(Index.opt_init.expr)]
+			}
+
+			";
+		}
+		case [CB: case_block]
+		{
+			"case [expr( CB.expr )]:
+			"[stmt_list( CB._repeat_stmt )]
+			"break;
+		}
+		case [DB: default_block]
+		{
+			"default:
+			"[stmt_list( DB._repeat_stmt )]
+			"break;
+		}
+		case [CL: case_label]
+		{
+			"case [expr( CL.expr )]:
+		}
+		case [AS: assign_stmt]
+		{
+			"[lvalue(AS.LValue) AS.assign_op expr(AS.expr)];
+		}
+		default {
+			# catches unspecified cases
+			[Stmt]
+		}
+	}
+
+	void stmt_list( StmtList: stmt* )
+	{
+		for Stmt: stmt in repeat( StmtList )
+			stmt( Stmt )
+	}
+
+	void trans( Output: stream, Start: start )
+	{
+		_ = new parser<c_out::c_out>()
+
+		stmt_list( Start._repeat_stmt )
+
+		CO: c_out::c_out = _->finish()
+
+		if CO {
+			send Output
+				[CO]
+		}
+		else {
+			send stderr
+				"failed to parse output: [_->error]
+		}
+	}
+end
+
+void trans( Output: stream, Start: start )
+{
+	c_gen::trans( Output, Start )
+}
+
+include 'rlhc-main.lm'

@@ -1,0 +1,55 @@
+/tags
+/Makefile
+/Makefile.in
+/rlscan.cc
+/rlparse.cc
+/rlparse.h
+/version.h
+/config.h
+/config.h.in
+/config.h.in~
+/ragel
+/ragel.exe
+/.deps
+/stamp-h1
+/rlhc
+/rlhc.c
+
+/*.lo
+
+# Parsing
+/parse.c
+/rlreduce.cc
+/ldparse.c
+/ldreduce.cc
+
+# Common testing file.
+/tmp.rl
+/tmp.c
+/tmp.cc
+/tmp.d
+/tmp.go
+/tmp.ps
+/tmp.ml
+/tmp.cmi
+/tmp.cmx
+/tmp.rs
+/tmp.crk
+/tmp.jl
+/tmp
+/input
+
+# The ragel frontend doesn't support OCaml lexical rules yet, so a util is
+# needed.
+/util.ml
+/util.cmi
+/util.cmx
+
+/libragel.a
+/libragel.la
+/libfsm.a
+/libfsm.la
+/.libs
+
+/CMakeFiles
+/cmake_install.cmake

@@ -1,0 +1,95 @@
+
+                      RELEASE NOTES Ragel 6.X
+
+This file describes the changes in Ragel version 6.X that are not backwards
+compatible. For a list of all the changes see the ChangeLog file.
+
+Leaving Actions in Scanners (new in 6.1)
+========================================
+
+Scanners now ensure that any leaving actions at the end of a pattern are
+executed. They are always executed before the pattern action.
+
+The EOF Event
+=============
+
+There is a new execution variable called "eof". This should be set to pe on the
+execution of the last buffer block. When p == eof the state machine's EOF
+actions are executed. The variable is required only when EOF actions have been
+embedded.
+
+The advantage of this over "write eof" is that EOF actions are now executed in
+the same context as regular actions. They are free to manipulate p, and jump to
+a new portion of the machine to reprocess input. This was not possible with
+"write eof".
+
+The "write eof" directive was consequently removed.
+
+Scanners now use EOF actions to to flush out the last token, if needed. This
+eliminates the need to manually flush the last token.
+
+Semantics of > % and Error Actions
+==================================
+
+Ragel has gone back to the 3.X semantics for >, % and error actions. 
+
+Those that have been using Ragel since the 3.X days will remember that the
+entering operator > embedded a leaving action/priority into the start state
+when it was final. The leaving operator % would embed EOF actions when the
+final states stayed final all the way to the end of compilation. Also, error
+actions would embed EOF actions when at the end of compilation the states the
+error actions were embedded into were not final.
+
+The problem before was that EOF actions and regular actions were executed in
+different contexts ("write exec" and "write eof"), and a single action block
+could easily end up in two different functions. This could lead to compile
+errors and other subtle errors. Now that all actions are executed in the same
+context ("write exec") these problems go away. The original semantics has been
+restored.
+
+Backend Automatically Executed
+==============================
+
+The "ragel" program now automatically executes the appropriate backend. If you
+need the intermediate XML format you can use the -x option. 
+
+The fbreak Statement
+====================
+
+The fbreak statement now advances p. It is now possible to break out of the
+machine and restart it without having to fix p first. Originally, fbreak did
+not advance p because it was intended to be used to terminate processing.
+Advancing p was more work than necessary in that case. But fbreak turns out to
+be useful for stopping to return a token as well. In this case the failure to
+advance p is an inconvenience.
+
+Guarded Concatenation Operators are Stronger
+============================================
+
+The :> :>> and <: guarded concatenation operators have been strengthened. In
+the previous version of Ragel is was possible for the priority assignments to
+be bypassed via the the zero length string. Running the following examples
+through 5.25 you will see that the a and b actions are executed on a single
+transition, showing the guard fails. This happens because the operators did not
+consider that the middle machine might have a start state that is final. In 6.0
+these cases have been fixed.
+
+    (' '@a)* <: 'x'* . ' '@b;
+    (' '@a)* :> 'x'? . ' '@b;
+    (' '@a)* :>> 'xyz'? . ' '@b;
+	
+The tokstart and tokend Variables Renamed
+=========================================
+
+The "tokstart" and "tokend" variables were changed to "ts" and "te". These
+variables get referenced a lot in scanner actions. They should be shorter.
+
+To update your code simply search and replace:
+    tokstart => ts
+    tokend => te
+
+Options
+=======
+
+The -l option in rlgen-cd was changed to -L because -l is used in the frontend,
+which now must pass options through.
