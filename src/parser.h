@@ -184,7 +184,7 @@ struct BaseParser
 
 	virtual void go( long activeRealm ) = 0;
 
-	BstSet<String, CmpStr> genericElDefined;
+	BstSet<String, ColmCmpStr> genericElDefined;
 
 	NamespaceQual *emptyNspaceQual()
 	{

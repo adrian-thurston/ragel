@@ -852,7 +852,7 @@ template<class T> struct CmpStrTmpl
 	}
 };
 
-typedef CmpStrTmpl<char> CmpStr;
+typedef CmpStrTmpl<char> ColmCmpStr;
 
 #ifdef AAPL_NAMESPACE
 }

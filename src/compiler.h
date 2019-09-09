@@ -118,7 +118,7 @@ struct LelDefListEl { Production *prev, *next; };
 typedef Vector< LangEl* > LangElVect;
 typedef Vector< ProdEl* > FactorVect;
 
-typedef AvlMap<String, long, CmpStr> StringMap;
+typedef AvlMap<String, long, ColmCmpStr> StringMap;
 typedef AvlMapEl<String, long> StringMapEl;
 
 enum PredType { 
@@ -488,7 +488,7 @@ struct TokenRegion;
 
 /* tree_t of instantiated names. */
 typedef BstMapEl<String, NameInst*> NameMapEl;
-typedef BstMap<String, NameInst*, CmpStr> NameMap;
+typedef BstMap<String, NameInst*, ColmCmpStr> NameMap;
 typedef Vector<NameInst*> NameVect;
 typedef BstSet<NameInst*> NameSet;
 
@@ -1104,7 +1104,7 @@ void errorStateLabels( const NameSet &locations );
 
 struct ColmParser;
 
-typedef AvlMap<String, ColmParser *, CmpStr> ParserDict;
+typedef AvlMap<String, ColmParser *, ColmCmpStr> ParserDict;
 typedef AvlMapEl<String, ColmParser *> ParserDictEl;
 
 LangEl *declareLangEl( Compiler *pd, Namespace *nspace,

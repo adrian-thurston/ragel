@@ -285,7 +285,7 @@ void prepareLitString( String &result, bool &caseInsensitive,
 
 std::ostream &operator<<(std::ostream &out, const Token &token );
 
-typedef AvlMap< String, TokenInstance*, CmpStr > LiteralDict;
+typedef AvlMap< String, TokenInstance*, ColmCmpStr > LiteralDict;
 typedef AvlMapEl< String, TokenInstance* > LiteralDictEl;
 
 /* Store the value and type of a priority augmentation. */
@@ -316,7 +316,7 @@ struct LexDefinition
 };
 
 typedef Vector<String> StringVect;
-typedef CmpTable<String, CmpStr> CmpStrVect;
+typedef CmpTable<String, ColmCmpStr> CmpStrVect;
 
 struct NamespaceQual
 {
@@ -623,7 +623,7 @@ struct TypeMapEl
 };
 
 /* Symbol Map. */
-typedef AvlTree< TypeMapEl, String, CmpStr > TypeMap;
+typedef AvlTree< TypeMapEl, String, ColmCmpStr > TypeMap;
 
 typedef Vector<TokenRegion*> RegionVect;
 
@@ -793,7 +793,7 @@ struct GraphDictEl
 	InputLoc loc;
 };
 
-typedef AvlTree<GraphDictEl, String, CmpStr> GraphDict;
+typedef AvlTree<GraphDictEl, String, ColmCmpStr> GraphDict;
 typedef DList<GraphDictEl> GraphList;
 
 struct TypeAlias
@@ -817,10 +817,10 @@ struct TypeAlias
 
 typedef DList<TypeAlias> TypeAliasList;
 
-typedef AvlMap<String, ObjectField*, CmpStr> FieldMap;
+typedef AvlMap<String, ObjectField*, ColmCmpStr> FieldMap;
 typedef AvlMapEl<String, ObjectField*> FieldMapEl;
 
-typedef AvlMap<String, ObjectMethod*, CmpStr> MethodMap;
+typedef AvlMap<String, ObjectMethod*, ColmCmpStr> MethodMap;
 typedef AvlMapEl<String, ObjectMethod*> MethodMapEl;
 
 /* tree_t of name scopes for an object def. All of the object fields inside this
