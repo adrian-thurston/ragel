@@ -1,3 +1,3 @@
 RAGEL_BIN = ../../ragel/ragel
 RAGEL_CPPFLAGS = -I../../ragel/include
-RAGEL_LDFLAGS = -L../../ragel/.libs
+RAGEL_LDFLAGS = -L../../ragel/.libs -Wl,-rpath,../../ragel/.libs -Wl,-rpath,../../../ragel/.libs

@@ -1,4 +1,4 @@
-SUBJECT_BIN="@COLM_BIN@";
-SUBJECT_CPPFLAGS="@COLM_CPPFLAGS@";
-SUBJECT_LDFLAGS="@COLM_LDFLAGS@";
-SUBJECT_LD_LIBRARY_PATH="@LD_LIBRARY_PATH@";
+SUBJECT_BIN="../../colm/colm";
+SUBJECT_CPPFLAGS="-I../../colm/include";
+SUBJECT_LDFLAGS="-L../../colm/.libs -Wl,-rpath,../../colm/.libs -Wl,-rpath,../../../colm/.libs";
+SUBJECT_LD_LIBRARY_PATH="";
