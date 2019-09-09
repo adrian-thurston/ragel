@@ -1302,6 +1302,8 @@ template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::empty()
 
 #ifdef WALKABLE
 		BASELIST::abandon();
+#else
+		head = tail = 0;
 #endif
 	}
 }
@@ -1318,6 +1320,8 @@ template <AVLMEL_TEMPDEF> void AvlTree<AVLMEL_TEMPUSE>::abandon()
 
 #ifdef WALKABLE
 	BASELIST::abandon();
+#else
+	head = tail = 0;
 #endif
 }
 
