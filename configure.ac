@@ -35,7 +35,7 @@ AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(unsigned long)
 AC_CHECK_SIZEOF(unsigned long long)
-AC_CONFIG_HEADER([src/config.h src/defs.h])
+AC_CONFIG_HEADER([colm/config.h colm/defs.h])
 AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 
 dnl Choose a default for the build_manual var. If the dist file is present in
@@ -90,8 +90,8 @@ AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
 dnl write output files
 AC_OUTPUT([
 	Makefile
-	src/Makefile
 	aapl/Makefile
+	colm/Makefile
 	doc/Makefile
 ])
 
