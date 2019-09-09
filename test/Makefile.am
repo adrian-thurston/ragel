@@ -2,8 +2,6 @@ SUBDIRS = . aapl.d colm.d ragel.d rlhc.d rlparse.d trans.d
 
 noinst_SCRIPTS = colm.mk colm.sh ragel.mk ragel.sh
 
-SED_SUBST = 's/@NO_ACTION@//'
-
 colm.mk: colm.mk.in Makefile
 	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
 

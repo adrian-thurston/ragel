@@ -14,22 +14,22 @@ TRANS=./trans
 
 # Make available to to test directories below us that are not part of this
 # repository and cannot source one dir up.
-export RAGEL_BIN="@RAGEL_BIN@"
-export RAGEL_CPPFLAGS="@RAGEL_CPPFLAGS@"
-export RAGEL_LDFLAGS="@RAGEL_LDFLAGS@"
-export LD_LIBRARY_PATH="@LD_LIBRARY_PATH@"
+export RAGEL_BIN="../../ragel/ragel"
+export RAGEL_CPPFLAGS="-I../../ragel/include"
+export RAGEL_LDFLAGS="-L../../ragel/.libs"
+export LD_LIBRARY_PATH=""
 
-export RAGEL_C_BIN="@RAGEL_C_BIN@"
-export RAGEL_D_BIN="@RAGEL_D_BIN@"
-export RAGEL_JAVA_BIN="@RAGEL_JAVA_BIN@"
-export RAGEL_RUBY_BIN="@RAGEL_RUBY_BIN@"
-export RAGEL_CSHARP_BIN="@RAGEL_CSHARP_BIN@"
-export RAGEL_GO_BIN="@RAGEL_GO_BIN@"
-export RAGEL_OCAML_BIN="@RAGEL_OCAML_BIN@"
-export RAGEL_ASM_BIN="@RAGEL_ASM_BIN@"
-export RAGEL_RUST_BIN="@RAGEL_RUST_BIN@"
-export RAGEL_CRACK_BIN="@RAGEL_CRACK_BIN@"
-export RAGEL_JULIA_BIN="@RAGEL_JULIA_BIN@"
+export RAGEL_C_BIN="../../ragel/host-c/ragel-c"
+export RAGEL_D_BIN="../../ragel/host-d/ragel-d"
+export RAGEL_JAVA_BIN="../../ragel/host-java/ragel-java"
+export RAGEL_RUBY_BIN="../../ragel/host-ruby/ragel-ruby"
+export RAGEL_CSHARP_BIN="../../ragel/host-csharp/ragel-csharp"
+export RAGEL_GO_BIN="../../ragel/host-go/ragel-go"
+export RAGEL_OCAML_BIN="../../ragel/host-ocaml/ragel-ocaml"
+export RAGEL_ASM_BIN="../../ragel/host-asm/ragel-asm"
+export RAGEL_RUST_BIN="../../ragel/host-rust/ragel-rust"
+export RAGEL_CRACK_BIN="../../ragel/host-crack/ragel-crack"
+export RAGEL_JULIA_BIN="../../ragel/host-julia/ragel-julia"
 
 function sig_exit()
 {

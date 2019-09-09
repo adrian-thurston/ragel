@@ -111,6 +111,14 @@ dnl AM_CONDITIONAL([BUILD_MANUAL],     [test "x$build_manual" = "xyes"])
 AC_CANONICAL_HOST()
 AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
 
+AC_ARG_WITH(crack,
+	[AC_HELP_STRING([--with-crack], [location of crack install])],
+	[CRACK_BIN="$withval/bin/crack"],
+	[AC_ERROR(["require --with-crack"])]
+)
+
+AC_SUBST(CRACK_BIN)
+
 COLM='$(top_srcdir)/colm/colm'
 COLM_LD='$(top_srcdir)/colm/libcolm.la'
 COLM_LIBDEP=$COLM_LD
@@ -120,6 +128,14 @@ AC_SUBST(COLM)
 AC_SUBST(COLM_LD)
 AC_SUBST(COLM_LIBDEP)
 AC_SUBST(COLM_BINDEP)
+
+SED_SUBST=["\
+	-e 's|@CRACK_BIN@|${CRACK_BIN}|g' \
+	-e 's|@CXX@|${CXX}|g' \
+	-e 's|@CC@|${CC}|g' \
+"]
+
+AC_SUBST(SED_SUBST)
 
 dnl write output files
 AC_OUTPUT([

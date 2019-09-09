@@ -42,9 +42,9 @@
 WORKING=working
 ERRORS=0
 
-COLM="@COLM_BIN@"
-CPPFLAGS="@COLM_CPPFLAGS@"
-LDFLAGS="@COLM_LDFLAGS@"
+COLM="../../colm/colm"
+CPPFLAGS="-I../../colm/include"
+LDFLAGS="-L../../colm/.libs -Wl,-rpath,../../colm/.libs"
 
 # Make available to to test directories below us that are not part of this
 # repository and cannot source one dir up.

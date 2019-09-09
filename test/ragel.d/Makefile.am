@@ -20,7 +20,6 @@
 
 COLM = ../../colm/colm
 RAGEL_LM = ../../ragel
-SED_SUBST = 's/@NO_EFFECT@//'
 
 COLM_CPPFLAGS = -I../../colm/include
 COLM_LDFLAGS = -L../../colm
