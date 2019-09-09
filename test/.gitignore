@@ -18,4 +18,7 @@
 /ltmain.sh
 /confdefs.h
 
-/testing-*.tar.gz
+/colm.mk
+/ragel.mk
+/colm.sh
+/ragel.sh

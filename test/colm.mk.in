@@ -1,0 +1,4 @@
+SUBJECT_BIN = ../../colm/colm
+SUBJECT_CPPFLAGS = -I../../colm/include
+SUBJECT_LDFLAGS = -L../../colm/.libs
+SUBJECT_LD_LIBRARY_PATH = 
