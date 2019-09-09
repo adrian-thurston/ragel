@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 #ifndef _AAPL_BSTSET_H
 #define _AAPL_BSTSET_H
 

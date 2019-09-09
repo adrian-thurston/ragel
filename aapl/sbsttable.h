@@ -20,7 +20,6 @@
  * SOFTWARE.
  */
 
-
 #ifndef _AAPL_SBSTTABLE_H
 #define _AAPL_SBSTTABLE_H
 
