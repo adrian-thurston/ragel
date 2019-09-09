@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 
-SUBDIRS = colm doc
+SUBDIRS = colm ragel doc
 DIST_SUBDIRS = $(SUBDIRS) aapl
 
 dist_doc_DATA = colm.vim

@@ -17,6 +17,8 @@
 /build
 /m4
 
+*.o
+
 /CMakeCache.txt
 /CMakeFiles
 /cmake_install.cmake
@@ -25,3 +27,4 @@
 /*-targets.cmake
 /install_manifest.txt
 /*.user
+

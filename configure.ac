@@ -84,14 +84,61 @@ AC_CHECK_PROG([ASCIIDOC], [asciidoc], [asciidoc])
 AC_CHECK_PROG([PYGMENTIZE], [pygmentize], [pygmentize])
 AM_CONDITIONAL([BUILD_MANUAL], [test "x$ASCIIDOC" != x && test "x$PYGMENTIZE" != x])
 
+
+dnl
+dnl Build the program? ( no means just build libfsm )
+dnl
+AC_ARG_ENABLE(program,
+	[AC_HELP_STRING([--enable-program], [build the program? no means libfsm only] )],
+	[
+		if test "x$enableval" = "xyes"; then
+			build_program=yes;
+		else
+			build_program=no;
+		fi
+	],
+	[
+		build_program=yes;
+	]
+)
+
+AM_CONDITIONAL([BUILD_PROGRAM],    [test "x$build_program" = "xyes"])
+AM_CONDITIONAL([WITH_RAGEL_KELBT], [test "x$RAGEL_KELBT" = "xyes"])
+
+dnl This is from ragel, but already have one above from colm. Need to merge.
+dnl AM_CONDITIONAL([BUILD_MANUAL],     [test "x$build_manual" = "xyes"])
+
 AC_CANONICAL_HOST()
 AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
+
+COLM='$(top_srcdir)/colm/colm'
+COLM_LD='$(top_srcdir)/colm/libcolm.la'
+COLM_LIBDEP=$COLM_LD
+COLM_BINDEP=$COLM
+
+AC_SUBST(COLM)
+AC_SUBST(COLM_LD)
+AC_SUBST(COLM_LIBDEP)
+AC_SUBST(COLM_BINDEP)
 
 dnl write output files
 AC_OUTPUT([
 	Makefile
 	aapl/Makefile
 	colm/Makefile
+	ragel/Makefile
+	ragel/host-ruby/Makefile
+	ragel/host-asm/Makefile
+	ragel/host-julia/Makefile
+	ragel/host-ocaml/Makefile
+	ragel/host-c/Makefile
+	ragel/host-d/Makefile
+	ragel/host-csharp/Makefile
+	ragel/host-go/Makefile
+	ragel/host-java/Makefile
+	ragel/host-rust/Makefile
+	ragel/host-crack/Makefile
+	ragel/host-js/Makefile
 	doc/Makefile
 ])
 

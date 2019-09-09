@@ -7,7 +7,7 @@ bin_PROGRAMS = ragel-go
 
 data_DATA = out-go.lm
 
-ragel_go_CPPFLAGS = -I$(top_srcdir)/aapl
+ragel_go_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/ragel -I$(top_srcdir)/colm/include
 
 dist_ragel_go_SOURCES = main.cc rlhc.c
 

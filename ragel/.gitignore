@@ -16,6 +16,7 @@
 /rlhc.c
 
 /*.lo
+/include
 
 # Parsing
 /parse.c

@@ -17,11 +17,10 @@
 /stamp-h1
 /stamp-h2
 
-/include
-
 /bootstrap0
 /bootstrap1
 /gen
+/include
 
 /libprog.a
 

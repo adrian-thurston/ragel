@@ -16,17 +16,13 @@ RAGEL       = @RAGEL@
 # except the reducers, which are specific to the frontends.
 lib_LTLIBRARIES = libfsm.la libragel.la
 
-if BUILD_PROGRAM
-
 bin_PROGRAMS = ragel
-
-endif
 
 pkginclude_HEADERS = \
 	action.h fsmgraph.h ragel.h common.h \
 	gendata.h redfsm.h dot.h
 
-nodist_pkginclude_HEADERS = config.h
+# nodist_pkginclude_HEADERS = config.h
 
 data_DATA = ragel.lm
 
@@ -63,7 +59,7 @@ libfsm_la_LDFLAGS = -no-undefined
 #
 # libragel: ragel program minus host-specific code
 #
-libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -DBINDIR='"@bindir@"'
+libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/colm/include -DBINDIR='"@bindir@"'
 
 dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
@@ -80,7 +76,7 @@ endif
 #
 # ragel program.
 #
-ragel_CPPFLAGS = -I$(top_srcdir)/aapl
+ragel_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/colm/include
 
 dist_ragel_SOURCES = \
 	main.cc

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 libtoolize --quiet --copy --force
 aclocal
 autoheader

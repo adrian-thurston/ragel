@@ -5,7 +5,7 @@ COLM_BINDEP = @COLM_BINDEP@
 
 bin_PROGRAMS = ragel-ruby
 
-ragel_ruby_CPPFLAGS = -I$(top_srcdir)/aapl
+ragel_ruby_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/ragel -I$(top_srcdir)/colm/include
 
 dist_ragel_ruby_SOURCES = main.cc rlhc.c
 
