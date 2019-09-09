@@ -18,8 +18,12 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-COLM = @COLM_BIN@
-RAGEL_LM = @RAGEL_LM@
+COLM = ../../colm/colm
+RAGEL_LM = ../../ragel
+SED_SUBST = 's/@NO_EFFECT@//'
+
+COLM_CPPFLAGS = -I../../colm/include
+COLM_LDFLAGS = -L../../colm
 
 TESTS = gentests
 
@@ -54,19 +58,19 @@ TRANS_DEPS = \
 	trans-ocaml.lm trans-ruby.lm \
 	trans-rust.lm
 
-trans_CPPFLAGS = @COLM_CPPFLAGS@
+trans_CPPFLAGS = $(COLM_CPPFLAGS)
 trans_SOURCES = trans.c main.c
 trans_LDADD = -lcolm
-trans_LDFLAGS = @COLM_LDFLAGS@
+trans_LDFLAGS = $(COLM_LDFLAGS)
 
 trans.c: trans.lm $(TRANS_DEPS)
-	$(COLM) -c -b trans_object -I$(RAGEL_LM) -o $@ $<
+	$(COLM) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
 
 gentests: gentests.sh Makefile
-	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
+	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
 
 subject.mk: subject.mk.in Makefile
-	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
+	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
 
 subject.sh: subject.sh.in Makefile
-	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
+	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)

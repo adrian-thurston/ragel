@@ -2,7 +2,7 @@
 #   Copyright 2001, 2002 Adrian Thurston <thurston@cs.queensu.ca>
 #
 
-CPPFLAGS = @AAPL_CPPFLAGS@
+CPPFLAGS = -I ../../aapl
 
 noinst_PROGRAMS = \
 	stress_avltree stress_avliter stress_avlmel \
@@ -59,7 +59,7 @@ test_string_SOURCES = test_string.cpp util.cpp
 test_rope_SOURCES = test_rope.cpp util.cpp
 
 gentests: gentests.sh Makefile
-	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
+	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
 
 #*************************************
 

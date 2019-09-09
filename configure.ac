@@ -139,6 +139,10 @@ AC_OUTPUT([
 	ragel/host-rust/Makefile
 	ragel/host-crack/Makefile
 	ragel/host-js/Makefile
+	test/Makefile
+	test/aapl.d/Makefile
+	test/colm.d/Makefile
+	test/ragel.d/Makefile
 	doc/Makefile
 ])
 
