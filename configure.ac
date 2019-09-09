@@ -172,52 +172,12 @@ SED_SUBST=["\
 	-e 's|@CC@|${CC}|g' \
 "]
 
-# END PUBLIC
-
-dnl
-dnl Stop before AC_OUTPUT. The slicer will add the correct AC_OUTPUT.
-dnl
-
-
-dnl
-dnl Configure the genf tests.
-dnl
-root=$(pwd)
-
-AC_ARG_WITH(genf,
-	[AC_HELP_STRING([--with-genf], [location of genf install])],
-	[WITH_GENF="$withval"],
-	[AC_ERROR(["require --with-genf"])]
-)
-
-cd cases/app1.d
-./configure --prefix=$root/cases/inst/app1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
-cd ../..
-
-cd cases/kern1.d
-./configure --prefix=$root/cases/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
-cd ../..
-
-cd cases/process1.d
-./configure --prefix=$root/cases/inst/kern1 --with-aapl=$WITH_AAPL --with-genf=$WITH_GENF
-cd ../..
-
-dnl
-dnl Finish up.
-dnl
-
 AC_SUBST(SED_SUBST)
-
 AC_OUTPUT([
-		Makefile
-		cases/Makefile
-		cases/ragel.d/Makefile
-		cases/aapl.d/Makefile
-		cases/colm.d/Makefile
-		cases/yellowbrick.d/Makefile
-		cases/yellowbrick.d/src/Makefile
-		cases/pcre-ragel.d/Makefile
+	Makefile
+	cases/Makefile
+	cases/aapl.d/Makefile
+	cases/colm.d/Makefile
+	cases/ragel.d/Makefile
 ])
-
-echo "configuration of testing package complete"
-
+EOF
