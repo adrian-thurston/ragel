@@ -1,0 +1,170 @@
+host( "working/include2.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	
+	
+	
+	
+}@
+array s8 _include_test_1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _include_test_1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _include_test_1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _include_test_1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int include_test_1_start = 1;
+value int include_test_1_first_final = 8;
+value int include_test_1_error = 0;
+
+value int include_test_1_en_main = 1;
+
+host( "working/include2.rl", 35 ) @{
+	
+	void test( char *p )
+	{
+		int cs;
+	}@
+	{
+		cs = cast(int)include_test_1_start;
+	}
+	host( "working/include2.rl", 40 ) @{
+	}@
+	{
+		int _nbreak;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) == 97 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 98 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 97 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 98 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 97 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 98 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 0 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto f0;
+		ctr2: cs = 3; goto f1;
+		ctr3: cs = 4; goto f2;
+		ctr4: cs = 5; goto f3;
+		ctr5: cs = 6; goto f4;
+		ctr6: cs = 7; goto f5;
+		ctr7: cs = 8; goto f6;
+		
+		f0:
+		_nbreak = 0;
+		host( "./include1.rl", 11 ) ${printf(" a1");}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		f2:
+		_nbreak = 0;
+		host( "./include1.rl", 25 ) ${printf(" a2");}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		f4:
+		_nbreak = 0;
+		host( "working/include2.rl", 13 ) ${printf(" a3");}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		f6:
+		_nbreak = 0;
+		host( "working/include2.rl", 31 ) ${${p += 1;  _nbreak = 1; }$}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		f1:
+		_nbreak = 0;
+		host( "./include1.rl", 12 ) ${printf(" b1");}$	host( "./include1.rl", 14 ) ${printf(" nr1");}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		f3:
+		_nbreak = 0;
+		host( "./include1.rl", 26 ) ${printf(" b2");}$	host( "./include1.rl", 23 ) ${printf(" nr2");}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		f5:
+		_nbreak = 0;
+		host( "working/include2.rl", 14 ) ${printf(" b3");}$	host( "working/include2.rl", 11 ) ${printf(" nr3");}$	if ( _nbreak == 1 )
+		goto _out;
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		goto _resume;
+		_out: {}
+	}
+	host( "working/include2.rl", 41 ) @{
+		printf("\n");
+	}
+	
+	int main()
+	{
+		test( "ababab" );
+		return 0;
+	}
+	
+}@

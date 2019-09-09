@@ -1,0 +1,78 @@
+include 'rlhc-host.lm'
+include 'rlhc-c.lm'
+include 'rlhc-d.lm'
+include 'rlhc-csharp.lm'
+include 'rlhc-go.lm'
+include 'rlhc-java.lm'
+include 'rlhc-ruby.lm'
+include 'rlhc-ocaml.lm'
+include 'rlhc-rust.lm'
+include 'rlhc-crack.lm'
+include 'rlhc-julia.lm'
+include 'rlhc-js.lm'
+
+str argvPop()
+{
+	A: list_el<str> = argv->pop_el()
+	return A->value
+}
+
+OutputFile: str = argvPop()
+InputFile: str = argvPop()
+Lang: str = argvPop()
+
+Input: stream = open( InputFile, "r" )
+
+parse Start: start[ Input ]
+
+if ( !Start ) {
+	print( error, '\n' )
+	exit(1)
+}
+
+void assign_labels( Prog: ref<any> )
+{
+	N: int = 1
+	new Map: map<ident, label_stmt>()
+	for LabelStmt: label_stmt in Prog {
+		LabelStmt.Id = N
+		Map->insert( LabelStmt.ident, LabelStmt )
+		N = N + 1
+	}
+
+	for GotoStmt: goto_stmt in Prog {
+		LabelStmt: label_stmt = Map->find( GotoStmt.ident )
+		if ( LabelStmt )
+			GotoStmt.Id = LabelStmt.Id
+	}
+}
+
+assign_labels( Start )
+
+Output: stream = open( OutputFile, "w" )
+
+if ( Lang == 'c' )
+	c_gen::trans( Output, Start )
+elsif ( Lang == 'd' )
+	d_gen::trans( Output, Start )
+elsif ( Lang == 'csharp' )
+	csharp_gen::trans( Output, Start )
+elsif ( Lang == 'go' )
+	go_gen::trans( Output, Start )
+elsif ( Lang == 'java' )
+	java_gen::trans( Output, Start )
+elsif ( Lang == 'ruby' )
+	ruby_gen::trans( Output, Start )
+elsif ( Lang == 'ocaml' )
+	ml_gen::trans( Output, Start )
+elsif ( Lang == 'rust' )
+	rust_gen::trans( Output, Start )
+elsif ( Lang == 'crack' )
+	crack_gen::trans( Output, Start )
+elsif ( Lang == 'julia' )
+	julia_gen::trans( Output, Start )
+elsif ( Lang == 'js' )
+	js_gen::trans( Output, Start )
+else {
+	print( 'rlhc: unrecognized language: ', Lang, '\n' )
+}

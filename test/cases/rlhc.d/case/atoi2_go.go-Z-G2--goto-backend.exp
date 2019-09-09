@@ -1,0 +1,201 @@
+package main
+import "fmt"
+
+var neg  int ;
+var value  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var state_chart_start  int  = 3
+var state_chart_first_final  int  = 3
+var state_chart_error  int  = 0
+var state_chart_en_main  int  = 3
+var _state_chart_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _state_chart_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0  }
+var _state_chart_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _state_chart_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+func prepare() {
+	value = 0;
+	neg = 0;
+	
+	{
+		cs = int(state_chart_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		switch cs  {
+			case 3:
+			goto st_case_3;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			
+		}
+		goto st_out;
+		ctr2:
+		{if ( neg != 0 ) {
+				value = -1 * value;
+				
+			}
+		}
+		{fmt.Print( value );fmt.Print( "\n" );}
+		
+		
+		goto st3;
+		st3:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof3;
+			
+		}
+		st_case_3:
+		switch ( data[p ])  {
+			case 43:
+			{
+				goto ctr3;
+			}
+			case 45:
+			{
+				goto ctr4;
+			}
+			
+		}
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto ctr5;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr3:
+		{neg = 0;
+			value = 0;
+		}
+		
+		
+		goto st1;
+		ctr4:
+		{neg = 0;
+			value = 0;
+		}
+		{neg = 1;
+		}
+		
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof1;
+			
+		}
+		st_case_1:
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto ctr0;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		ctr0:
+		{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+			;
+		}
+		
+		
+		goto st2;
+		ctr5:
+		{neg = 0;
+			value = 0;
+		}
+		{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+			;
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof2;
+			
+		}
+		st_case_2:
+		if ( data[p ]) == 10  {
+			{
+				goto ctr2;
+			}
+			
+		}
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto ctr0;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= state_chart_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"1\n",
+	"12\n",
+	"222222\n",
+	"+2123\n",
+	"213 3213\n",
+	"-12321\n",
+	"--123\n",
+	"-99\n",
+	" -3000\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

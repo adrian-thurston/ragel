@@ -1,0 +1,287 @@
+import crack.io cout;
+import crack.lang Buffer;
+
+int
+ts;
+int
+te;
+int act;
+int token;
+
+
+
+
+
+const array[int16 ] _scanner_actions = [ 0, 1, 0, 1, 1, 1, 5, 1, 6, 1, 7, 2, 2, 3, 2, 2, 4, 0 ,  ];
+const array[byte ] _scanner_trans_keys = [ 0, 2, 0, 1, 0, 2, 0,  ];
+const array[int16 ] _scanner_char_class = [ 0, 1, 2, 0 ,  ];
+const array[int16 ] _scanner_index_offsets = [ 0, 3, 5, 0 ,  ];
+const array[int16 ] _scanner_indicies = [ 1, 1, 2, 4, 5, 1, 1, 2, 0 ,  ];
+const array[int16 ] _scanner_index_defaults = [ 0, 3, 0, 0 ,  ];
+const array[int16 ] _scanner_trans_cond_spaces = [ -1, -1, -1, -1, -1, -1, 0 ,  ];
+const array[int16 ] _scanner_cond_targs = [ 1, 0, 1, 1, 2, 2, 0 ,  ];
+const array[int16 ] _scanner_cond_actions = [ 9, 0, 5, 7, 11, 14, 0 ,  ];
+const array[int16 ] _scanner_to_state_actions = [ 0, 1, 0, 0 ,  ];
+const array[int16 ] _scanner_from_state_actions = [ 0, 3, 0, 0 ,  ];
+const array[int16 ] _scanner_eof_trans = [ 1, 0, 1, 0 ,  ];
+const array[int16 ] _scanner_nfa_targs = [ 0, 0 ,  ];
+const array[int16 ] _scanner_nfa_offsets = [ 0, 0, 0, 0 ,  ];
+const array[int16 ] _scanner_nfa_push_actions = [ 0, 0 ,  ];
+const array[int16 ] _scanner_nfa_pop_trans = [ 0, 0 ,  ];
+const int  scanner_start  = 1;
+const int  scanner_first_final  = 1;
+const int  scanner_error  = -1;
+const int  scanner_en_main  = 1;
+void m( String s )
+{
+	byteptr data = s.buffer;
+	int p = 0;
+	int pe = s.size;
+	int cs;
+	String buffer;
+	int eof = pe;
+	
+	if ( 1 ) {
+		cs = int ( scanner_start );
+		ts = 0;
+		te = 0;
+		act = 0;
+		
+	}
+	if ( 1 ) {
+		uint32 _trans = 0;
+		uint32 _have = 0;
+		uint32 _cont = 1;
+		int _acts = 0;
+		uint32 _nacts;
+		int _keys = 0;
+		int _inds = 0;
+		while ( _cont == 1  )
+		{
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _scanner_eof_trans[cs]> 0  )
+					{
+						_trans = uint32  ( _scanner_eof_trans[cs] )- 1;
+						_have = 1;
+						
+					}
+					
+					if ( _have == 0  )
+					{
+					
+					}
+					
+					
+				}
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_acts = _scanner_from_state_actions[cs];
+					_nacts = uint32  ( _scanner_actions[_acts ] );
+					_acts += 1;
+					while ( _nacts > 0  )
+					{
+						if ( _scanner_actions[_acts ] == 1  ) {
+							if ( 1 ) {
+								if ( 1 ) {
+									ts = p;
+									
+								}
+								
+							}
+							
+						}
+						;
+						_nacts -= 1;
+						_acts += 1;
+						
+					}
+					
+					_keys = (cs<<1);
+					_inds = _scanner_index_offsets[cs];
+					if ( (data[p ])<= 99 && (data[p ])>= 97  )
+					{
+						int _ic = int ( _scanner_char_class[int ( (data[p ]) )- 97] );
+						if ( _ic <= int ( _scanner_trans_keys[_keys+1 ] )&& _ic >= int ( _scanner_trans_keys[_keys ] ) )
+						_trans = uint32  ( _scanner_indicies[_inds + int ( (_ic - int ( _scanner_trans_keys[_keys ] )) )] );
+						
+						else
+						_trans = uint32  ( _scanner_index_defaults[cs] );
+						
+						
+					}
+					
+					else
+					{
+						_trans = uint32  ( _scanner_index_defaults[cs] );
+						
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = int ( _scanner_cond_targs[_trans] );
+					if ( _scanner_cond_actions[_trans]!= 0  )
+					{
+						_acts = _scanner_cond_actions[_trans];
+						_nacts = uint32  ( _scanner_actions[_acts ] );
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							if ( _scanner_actions[_acts ] == 2  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										te = p+1;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _scanner_actions[_acts ] == 3  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										act = 1;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _scanner_actions[_acts ] == 4  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										act = 3;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _scanner_actions[_acts ] == 5  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										te = p+1;
+										if ( 1 ) {
+											cout.format( "pat2\n" );
+											
+										}
+										
+									}
+									
+								}
+								
+							}
+							else if ( _scanner_actions[_acts ] == 6  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										te = p+1;
+										if ( 1 ) {
+											cout.format( "any\n" );
+											
+										}
+										
+									}
+									
+								}
+								
+							}
+							else if ( _scanner_actions[_acts ] == 7  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										if ( act  == 1  ) {
+											p = ((te))-1;
+											if ( 1 ) {
+												cout.format( "pat1\n" );
+												
+											}
+											
+										}
+										else if ( act  == 3  ) {
+											p = ((te))-1;
+											if ( 1 ) {
+												cout.format( "any\n" );
+												
+											}
+											
+										}
+										;
+										
+									}
+									
+									
+								}
+								
+							}
+							;
+							_nacts -= 1;
+							_acts += 1;
+							
+						}
+						
+						
+					}
+					
+					_acts = _scanner_to_state_actions[cs];
+					_nacts = uint32  ( _scanner_actions[_acts ] );
+					_acts += 1;
+					while ( _nacts > 0  )
+					{
+						if ( _scanner_actions[_acts ] == 0  ) {
+							if ( 1 ) {
+								if ( 1 ) {
+									ts = 0;
+									
+								}
+								
+							}
+							
+						}
+						;
+						_nacts -= 1;
+						_acts += 1;
+						
+					}
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		
+	}
+	if ( cs >= scanner_first_final ) {
+		cout `ACCEPT\n`;
+	}
+	else {
+		cout `FAIL\n`;
+	}
+}
+
+void main()
+{
+	m( "a" );
+}
+
+main();

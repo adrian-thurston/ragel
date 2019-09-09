@@ -1,0 +1,176 @@
+host( "working/scan3_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char * ts ;
+	char * te ;
+	int act ;
+	int token ;
+	
+	
+	
+	
+	
+}@
+array s8 _scanner_to_state_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array s8 _scanner_from_state_actions( 0, 2 ) = { 0, 2, 0, 0 };
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int scanner_start = 1;
+value int scanner_first_final = 1;
+value int scanner_error = 0;
+
+value int scanner_en_main = 1;
+
+host( "working/scan3_c.rl", 32 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/scan3_c.rl", 39 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		char *eof = pe;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( _scanner_from_state_actions[cs] ) {
+			case 2{
+				host( "NONE", 1 ) ${${ts = p;}$}$
+			}
+		}
+		
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 97: {
+					goto ctr0;
+				}
+				case 98: {
+					goto ctr2;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			{
+				goto ctr5;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr4: cs = 1; goto f4;
+		ctr0: cs = 2; goto f2;
+		ctr2: cs = 2; goto f3;
+		ctr5: cs = 2; goto f5;
+		
+		f4:
+		host( "NONE", 1 ) ${${switch( act ) {
+					case 1 {
+						p = ((te))-1;
+						host( "working/scan3_c.rl", 20 ) ${printf( "%s", "pat1\n" );
+						}$ }
+					case 2 {
+						p = ((te))-1;
+						host( "working/scan3_c.rl", 22 ) ${printf( "%s", "pat2\n" );
+						}$ }
+					case 3 {
+						p = ((te))-1;
+						host( "working/scan3_c.rl", 24 ) ${printf( "%s", "pat3\n" );
+						}$ }
+				}}$
+		}$
+		goto _again;
+		f2:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/scan3_c.rl", 20 ) ${${act = 1;}$}$
+		goto _again;
+		f3:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/scan3_c.rl", 22 ) ${${act = 2;}$}$
+		goto _again;
+		f5:
+		host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/scan3_c.rl", 24 ) ${${act = 3;}$}$
+		goto _again;
+		
+		_again:
+		switch ( _scanner_to_state_actions[cs] ) {
+			case 1{
+				host( "NONE", 1 ) ${${ts = nil;}$}$
+			}
+		}
+		
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( cs ) {
+				case 2: goto ctr4;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/scan3_c.rl", 47 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= scanner_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"ab89",
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

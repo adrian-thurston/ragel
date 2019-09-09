@@ -1,0 +1,216 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int ts;
+		int te;
+		int act;
+		int token;
+		
+		
+		
+		
+		static readonly sbyte  []_scanner_to_state_actions = { 0, 3, 0, 0,  };
+		static readonly sbyte  []_scanner_from_state_actions = { 0, 4, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_offsets = { 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_pop_trans = { 0, 0,  };
+		static readonly int  scanner_start  = 1;
+		static readonly int  scanner_first_final  = 1;
+		static readonly int  scanner_error  = -1;
+		static readonly int  scanner_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)scanner_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				_resume:
+				switch ( _scanner_from_state_actions[cs]  ) {
+					case 4:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				switch ( cs  ) {
+					case 1:
+					switch ( ( data[p ])  ) {
+						case '\u0061':
+						{
+							goto ctr5;
+						}
+						case '\u0062':
+						{
+							goto ctr6;
+						}
+						
+					}
+					{
+						goto ctr4;
+					}
+					case 2:
+					if ( ( data[p ]) == '\u0063' )
+					{
+						goto ctr3;
+					}
+					
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u0062' )
+					{
+						goto ctr2;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 0:
+					if ( ( data[p ]) == '\u0063' )
+					{
+						goto ctr3;
+					}
+					
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u0062' )
+					{
+						goto ctr2;
+					}
+					
+					{
+						goto ctr7;
+					}
+					
+				}
+				ctr2: cs = 0;
+				goto _again;
+				ctr7: cs = 1;
+				goto f0;
+				ctr3: cs = 1;
+				goto f1;
+				ctr4: cs = 1;
+				goto f4;
+				ctr5: cs = 2;
+				goto f5;
+				ctr6: cs = 2;
+				goto f6;
+				
+				f1:
+				{{te = p+1;
+						{Console.Write( "pat2\n" );}
+					}}
+				
+				goto _again;
+				f4:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f0:
+				{{switch ( act  ) {
+							case 1:
+							p = ((te))-1;
+							{Console.Write( "pat1\n" );}
+							
+							break;
+							default:
+							p = ((te))-1;
+							
+							break;
+							
+						}
+					}
+				}
+				
+				goto _again;
+				f5:
+				{{te = p+1;
+					}}
+				{{act = 1;
+					}}
+				
+				goto _again;
+				f6:
+				{{te = p+1;
+					}}
+				{{act = 3;
+					}}
+				
+				goto _again;
+				
+				_again:
+				switch ( _scanner_to_state_actions[cs]  ) {
+					case 3:
+					{{ts = 0;
+						}}
+					
+					break;
+					
+				}
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( cs  ) {
+						case 2:
+						goto ctr7;
+						case 0:
+						goto ctr7;
+						
+					}
+				}
+				
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"ba a",
+		};
+		
+		
+		static readonly int inplen = 1;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

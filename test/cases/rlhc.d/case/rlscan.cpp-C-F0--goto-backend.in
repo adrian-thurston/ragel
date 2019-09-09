@@ -1,0 +1,492 @@
+host( "working/rlscan.rl", 1 ) @{/*
+	* Lexes Ragel input files.
+	*
+	* @@LANG: c++
+	* @@PROHIBIT_FEATFLAGS: --var-backend
+	*
+	* Test works with split code gen.
+	*/
+	
+	#include <iostream>
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+	
+	#ifdef PERF_TEST
+	
+	/* Calibrated to 1s on yoho. */
+	#define perf_iters ( 240984ll * S )
+	
+	int _perf_dummy = 0;
+	#define perf_cout(...) ( _perf_dummy += 1 )
+	#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+	
+	#else
+	
+	#define perf_cout(...) __VA_ARGS__
+	#define perf_loop
+	
+	#endif
+	
+	using namespace std;
+	
+	void escapeXML( const char *data )
+	{
+		while ( *data != 0 ) {
+			switch ( *data ) {
+				case '<': perf_cout( cout << "&lt;" ); break;
+				case '>': perf_cout( cout << "&gt;" ); break;
+				case '&': perf_cout( cout << "&amp;" ); break;
+				default: perf_cout( cout << *data ); break;
+			}
+			data += 1;
+		}
+	}
+	
+	void escapeXML( char c )
+	{
+		switch ( c ) {
+			case '<': perf_cout( cout << "&lt;" ); break;
+			case '>': perf_cout( cout << "&gt;" ); break;
+			case '&': perf_cout( cout << "&amp;" ); break;
+			default: perf_cout( cout << c ); break;
+		}
+	}
+	
+	void escapeXML( const char *data, int len )
+	{
+		for ( const char *end = data + len; data != end; data++  ) {
+			switch ( *data ) {
+				case '<': perf_cout( cout << "&lt;" ); break;
+				case '>': perf_cout( cout << "&gt;" ); break;
+				case '&': perf_cout( cout << "&amp;" ); break;
+				default: perf_cout( cout << *data ); break;
+			}
+		}
+	}
+	
+	inline void write( const char *data )
+	{
+		perf_cout( cout << data );
+	}
+	
+	inline void write( char c )
+	{
+		perf_cout( cout << c );
+	}
+	
+	inline void write( const char *data, int len )
+	{
+		perf_cout( cout.write( data, len ) );
+	}
+	
+	
+	
+	
+}@
+array s8 _RagelScan_actions( 0, 39 ) = { 0, 1, 0, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 1, 28, 1, 29, 1, 30, 1, 31, 1, 32, 1, 33, 1, 34, 1, 35, 1, 36, 1, 37, 1, 38, 1, 39, 2, 0, 1, 0 };
+
+array char _RagelScan_trans_keys( 0, 19 ) = { 1, 0, 4, 15, 1, 0, 7, 15, 1, 0, 2, 2, 0, 8, 0, 9, 4, 15, 1, 0, 7, 15, 1, 0, 2, 2, 4, 15, 1, 0, 2, 2, 7, 15, 1, 0, 9, 15, 1, 0, 10, 12, 15, 16, 1, 0, 6, 6, 0, 9, 4, 15, 6, 6, 18, 18, 7, 15, 8, 9, 1, 0, 0, 19, 4, 15, 7, 15, 8, 9, 0, 19, 4, 15, 2, 2, 7, 15, 9, 15, 10, 17, 10, 11, 10, 12, 10, 17, 15, 16, 6, 6, 0 };
+
+array s8 _RagelScan_char_class( 0, 19 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5, 3, 6, 3, 7, 3, 3, 8, 3, 3, 3, 3, 9, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 3, 3, 3, 3, 3, 3, 3, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 15, 16, 3, 13, 3, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 17, 13, 13, 18, 3, 19, 3, 0 };
+
+array s16 _RagelScan_index_offsets( 0, 248 ) = { 0, 0, 12, 12, 21, 21, 22, 31, 41, 53, 53, 62, 62, 63, 75, 75, 76, 85, 85, 92, 92, 95, 97, 97, 98, 108, 120, 121, 122, 131, 133, 133, 153, 165, 174, 176, 196, 208, 209, 218, 225, 233, 235, 238, 246, 248, 0 };
+
+array s8 _RagelScan_indicies( 0, 77 ) = { 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 5, 4, 4, 4, 4, 4, 4, 4, 6, 8, 10, 9, 9, 9, 9, 9, 9, 9, 11, 10, 9, 9, 9, 9, 9, 9, 9, 11, 12, 15, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 16, 18, 17, 17, 17, 17, 17, 17, 17, 19, 21, 24, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 25, 27, 29, 28, 28, 28, 28, 28, 28, 28, 30, 32, 31, 31, 31, 31, 31, 33, 35, 35, 35, 37, 38, 39, 41, 40, 40, 40, 42, 40, 43, 44, 40, 45, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 47, 49, 5, 4, 4, 4, 4, 4, 4, 4, 6, 50, 7, 10, 51, 51, 51, 52, 51, 51, 53, 51, 54, 51, 51, 51, 51, 51, 51, 51, 51, 55, 56, 15, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 16, 18, 17, 17, 17, 17, 17, 17, 17, 19, 58, 20, 10, 59, 60, 61, 62, 63, 61, 64, 61, 65, 66, 67, 68, 68, 69, 61, 61, 68, 70, 71, 24, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 25, 27, 29, 28, 28, 28, 28, 28, 28, 28, 30, 32, 31, 31, 31, 31, 31, 33, 67, 67, 73, 73, 73, 73, 73, 74, 67, 67, 35, 35, 35, 68, 68, 68, 68, 76, 76, 76, 68, 37, 38, 77, 0 };
+
+array s8 _RagelScan_index_defaults( 0, 76 ) = { 0, 1, 1, 4, 4, 7, 9, 9, 14, 14, 17, 17, 20, 23, 23, 26, 28, 28, 31, 31, 34, 36, 36, 22, 40, 1, 46, 48, 4, 46, 10, 51, 14, 17, 57, 59, 23, 26, 28, 31, 73, 73, 75, 76, 36, 72, 0 };
+
+array s8 _RagelScan_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _RagelScan_cond_targs( 0, 45 ) = { 24, 1, 24, 2, 3, 24, 4, 5, 24, 6, 0, 7, 30, 31, 8, 31, 9, 10, 31, 11, 12, 31, 35, 13, 35, 14, 15, 35, 16, 35, 17, 18, 35, 19, 35, 42, 21, 22, 35, 35, 24, 24, 25, 26, 28, 29, 24, 27, 24, 24, 24, 31, 32, 33, 34, 31, 31, 31, 31, 35, 35, 35, 36, 37, 38, 39, 40, 41, 43, 44, 35, 45, 35, 35, 20, 35, 35, 23, 0 };
+
+array s8 _RagelScan_cond_actions( 0, 79 ) = { 77, 0, 61, 0, 0, 59, 0, 0, 65, 1, 0, 1, 79, 25, 0, 11, 0, 0, 9, 0, 0, 15, 57, 0, 35, 0, 0, 31, 0, 33, 0, 0, 39, 0, 55, 0, 0, 0, 37, 27, 69, 71, 7, 0, 7, 7, 75, 0, 73, 67, 63, 21, 7, 7, 7, 17, 19, 23, 13, 45, 29, 43, 7, 7, 7, 7, 7, 0, 0, 7, 41, 7, 53, 49, 0, 51, 47, 0, 0 };
+
+array s8 _RagelScan_to_state_actions( 0, 3 ) = { 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _RagelScan_from_state_actions( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _RagelScan_eof_trans( 0, 77 ) = { 0, 1, 1, 1, 1, 1, 0, 0, 14, 14, 14, 14, 14, 23, 23, 23, 23, 23, 23, 23, 35, 23, 23, 23, 0, 47, 47, 49, 47, 47, 0, 0, 58, 58, 58, 0, 73, 73, 73, 73, 74, 74, 76, 77, 73, 73, 0 };
+
+array s8 _RagelScan_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _RagelScan_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _RagelScan_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _RagelScan_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int RagelScan_start = 24;
+value int RagelScan_error = 0;
+
+value int RagelScan_en_c_comment = 6;
+value int RagelScan_en_ilscan = 31;
+value int RagelScan_en_rlscan = 35;
+value int RagelScan_en_main = 24;
+
+host( "working/rlscan.rl", 261 ) @{
+	
+	void test( const char *data )
+	{
+		std::ios::sync_with_stdio(false);
+		
+		int cs, act;
+		perf_loop
+		{
+			int len = strlen( data );
+			const char *ts, *te;
+			int stack[1], top;
+			memset( stack, 0, sizeof(stack) );
+			
+			bool single_line = false;
+			int inline_depth = 0;
+			
+		}@
+		{
+			cs = cast(int)RagelScan_start;
+			top = 0;
+			ts = nil;
+			te = nil;
+		}
+		host( "working/rlscan.rl", 278 ) @{
+			
+			/* Read in a block. */
+			const char *p = data;
+			const char *pe = data + len;
+			const char *eof = pe;
+			
+		}@
+		{
+			int _trans = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_acts = offset( _RagelScan_actions, _RagelScan_from_state_actions[cs] );
+					_nacts = cast(uint)deref( _RagelScan_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _RagelScan_actions, _acts ) ) {
+							case 3 {
+								host( "NONE", 1 ) ${${ts = p;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					_keys = offset( _RagelScan_trans_keys, (cs<<1) );
+					_inds = offset( _RagelScan_indicies, _RagelScan_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 126 && ( deref( data, p )) >= 0 )
+					{
+						int _ic = cast(int)_RagelScan_char_class[cast(int)( deref( data, p )) - 0];
+						if ( _ic <= cast(int)deref( _RagelScan_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _RagelScan_trans_keys, _keys ) )
+						_trans = cast(int)deref( _RagelScan_indicies, _inds + cast(int)( _ic - cast(int)deref( _RagelScan_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_RagelScan_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_RagelScan_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_RagelScan_cond_targs[_trans];
+					
+					if ( _RagelScan_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_acts = offset( _RagelScan_actions, _RagelScan_cond_actions[_trans] );
+					_nacts = cast(uint)deref( _RagelScan_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _RagelScan_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/rlscan.rl", 97 ) ${ escapeXML( ={( deref( data, p ))}= ); }$
+							}
+							case 1 {
+								host( "working/rlscan.rl", 98 ) ${ ${top -= 1;cs = stack[top];goto _again;}$ }$
+							}
+							case 4 {
+								host( "NONE", 1 ) ${${te = p+1;}$}$
+							}
+							case 5 {
+								host( "working/rlscan.rl", 100 ) ${${te = p+1;host( "working/rlscan.rl", 100 ) ${
+											escapeXML( ts, te-ts );
+										}$}$}$
+							}
+							case 6 {
+								host( "working/rlscan.rl", 100 ) ${${te = p+1;host( "working/rlscan.rl", 100 ) ${
+											escapeXML( ts, te-ts );
+										}$}$}$
+							}
+							case 7 {
+								host( "working/rlscan.rl", 112 ) ${${te = p+1;host( "working/rlscan.rl", 112 ) ${
+											write( "/*" );
+											${stack[top] = cs; top += 1;cs = 6; goto _again;}$}$}$}$
+							}
+							case 8 {
+								host( "working/rlscan.rl", 100 ) ${${te = p+1;host( "working/rlscan.rl", 100 ) ${
+											escapeXML( ts, te-ts );
+										}$}$}$
+							}
+							case 9 {
+								host( "working/rlscan.rl", 118 ) ${${te = p+1;host( "working/rlscan.rl", 118 ) ${
+											write( '{' );
+												inline_depth += 1; 
+											}$}$}$
+								}
+								case 10 {
+									host( "working/rlscan.rl", 123 ) ${${te = p+1;host( "working/rlscan.rl", 123 ) ${
+												write( '}' );
+											/* If dropping down to the last } then return 
+										* to ragel code. */
+										if ( --inline_depth == 0 ) {
+											write( "</inline>\n" );
+											${cs = 35; goto _again;}$}
+									}$}$}$
+						}
+						case 11 {
+							host( "working/rlscan.rl", 133 ) ${${te = p+1;host( "working/rlscan.rl", 133 ) ${ escapeXML( *ts ); }$}$}$
+						}
+						case 12 {
+							host( "working/rlscan.rl", 133 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 133 ) ${ escapeXML( *ts ); }$}$}$
+						}
+						case 13 {
+							host( "working/rlscan.rl", 133 ) ${${p = ((te))-1;
+									host( "working/rlscan.rl", 133 ) ${ escapeXML( *ts ); }$}$}$
+						}
+						case 14 {
+							host( "working/rlscan.rl", 141 ) ${${te = p+1;host( "working/rlscan.rl", 141 ) ${
+										if ( !single_line ) {
+											write( "</section>\n" );
+											${cs = 24; goto _again;}$}
+									}$}$}$
+						}
+						case 15 {
+							host( "working/rlscan.rl", 148 ) ${${te = p+1;host( "working/rlscan.rl", 148 ) ${
+										if ( single_line ) {
+											write( "</section>\n" );
+											${cs = 24; goto _again;}$}
+									}$}$}$
+						}
+						case 16 {
+							host( "working/rlscan.rl", 177 ) ${${te = p+1;}$}$
+						}
+						case 17 {
+							host( "working/rlscan.rl", 180 ) ${${te = p+1;host( "working/rlscan.rl", 180 ) ${
+										write( "<single_lit>" );
+										escapeXML( ts, te-ts );
+										write( "</single_lit>\n" );
+									}$}$}$
+						}
+						case 18 {
+							host( "working/rlscan.rl", 187 ) ${${te = p+1;host( "working/rlscan.rl", 187 ) ${
+										write( "<double_lit>" );
+										escapeXML( ts, te-ts );
+										write( "</double_lit>\n" );
+									}$}$}$
+						}
+						case 19 {
+							host( "working/rlscan.rl", 194 ) ${${te = p+1;host( "working/rlscan.rl", 194 ) ${
+										write( "<or_lit>" );
+										escapeXML( ts, te-ts );
+										write( "</or_lit>\n" );
+									}$}$}$
+						}
+						case 20 {
+							host( "working/rlscan.rl", 201 ) ${${te = p+1;host( "working/rlscan.rl", 201 ) ${
+										write( "<re_lit>" );
+										escapeXML( ts, te-ts );
+										write( "</re_lit>\n" );
+									}$}$}$
+						}
+						case 21 {
+							host( "working/rlscan.rl", 208 ) ${${te = p+1;host( "working/rlscan.rl", 208 ) ${
+										inline_depth = 1;
+										write( "<inline>{" );
+											${cs = 31; goto _again;}$}$}$}$
+							}
+							case 22 {
+								host( "working/rlscan.rl", 214 ) ${${te = p+1;host( "working/rlscan.rl", 214 ) ${
+											write( "<symbol>" );
+											escapeXML( ={( deref( data, p ))}= );
+											write( "</symbol>\n" );
+										}$}$}$
+							}
+							case 23 {
+								host( "working/rlscan.rl", 220 ) ${${te = p+1;}$}$
+							}
+							case 24 {
+								host( "working/rlscan.rl", 156 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 156 ) ${
+											write( "<word>" );
+											write( ts, te-ts );
+											write( "</word>\n" );
+										}$}$}$
+							}
+							case 25 {
+								host( "working/rlscan.rl", 163 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 163 ) ${
+											write( "<int>" );
+											write( ts, te-ts );
+											write( "</int>\n" );
+										}$}$}$
+							}
+							case 26 {
+								host( "working/rlscan.rl", 170 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 170 ) ${
+											write( "<hex>" );
+											write( ts, te-ts );
+											write( "</hex>\n" );
+										}$}$}$
+							}
+							case 27 {
+								host( "working/rlscan.rl", 214 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 214 ) ${
+											write( "<symbol>" );
+											escapeXML( ={( deref( data, p ))}= );
+											write( "</symbol>\n" );
+										}$}$}$
+							}
+							case 28 {
+								host( "working/rlscan.rl", 163 ) ${${p = ((te))-1;
+										host( "working/rlscan.rl", 163 ) ${
+											write( "<int>" );
+											write( ts, te-ts );
+											write( "</int>\n" );
+										}$}$}$
+							}
+							case 29 {
+								host( "working/rlscan.rl", 214 ) ${${p = ((te))-1;
+										host( "working/rlscan.rl", 214 ) ${
+											write( "<symbol>" );
+											escapeXML( ={( deref( data, p ))}= );
+											write( "</symbol>\n" );
+										}$}$}$
+							}
+							case 30 {
+								host( "working/rlscan.rl", 100 ) ${${te = p+1;host( "working/rlscan.rl", 100 ) ${
+											escapeXML( ts, te-ts );
+										}$}$}$
+							}
+							case 31 {
+								host( "working/rlscan.rl", 100 ) ${${te = p+1;host( "working/rlscan.rl", 100 ) ${
+											escapeXML( ts, te-ts );
+										}$}$}$
+							}
+							case 32 {
+								host( "working/rlscan.rl", 232 ) ${${te = p+1;host( "working/rlscan.rl", 232 ) ${
+											escapeXML( ts, te-ts );
+											${stack[top] = cs; top += 1;cs = 6; goto _again;}$}$}$}$
+							}
+							case 33 {
+								host( "working/rlscan.rl", 100 ) ${${te = p+1;host( "working/rlscan.rl", 100 ) ${
+											escapeXML( ts, te-ts );
+										}$}$}$
+							}
+							case 34 {
+								host( "working/rlscan.rl", 239 ) ${${te = p+1;host( "working/rlscan.rl", 239 ) ${ 
+											write( "<section>\n" );
+											single_line = false;
+											${cs = 35; goto _again;}$}$}$}$
+							}
+							case 35 {
+								host( "working/rlscan.rl", 251 ) ${${te = p+1;host( "working/rlscan.rl", 251 ) ${ 
+											escapeXML( *ts );
+										}$}$}$
+							}
+							case 36 {
+								host( "working/rlscan.rl", 256 ) ${${te = p+1;}$}$
+							}
+							case 37 {
+								host( "working/rlscan.rl", 245 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 245 ) ${
+											write( "<section>\n" ); 
+											single_line = true; 
+											${cs = 35; goto _again;}$}$}$}$
+							}
+							case 38 {
+								host( "working/rlscan.rl", 251 ) ${${te = p;p = p - 1;host( "working/rlscan.rl", 251 ) ${ 
+											escapeXML( *ts );
+										}$}$}$
+							}
+							case 39 {
+								host( "working/rlscan.rl", 251 ) ${${p = ((te))-1;
+										host( "working/rlscan.rl", 251 ) ${ 
+											escapeXML( *ts );
+										}$}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+				}
+				label _again {
+					_acts = offset( _RagelScan_actions, _RagelScan_to_state_actions[cs] );
+					_nacts = cast(uint)deref( _RagelScan_actions, _acts ); _acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _RagelScan_actions, _acts ) ) {
+							case 2 {
+								host( "NONE", 1 ) ${${ts = nil;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+					if ( p == eof )
+					{
+						if ( _RagelScan_eof_trans[cs] > 0 ) {
+							_trans = cast(int)_RagelScan_eof_trans[cs] - 1;
+							goto _match_cond;
+						}
+					}
+					
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/rlscan.rl", 285 ) @{
+		}
+		
+		if ( cs == RagelScan_error ) {
+			/* Machine failed before finding a token. */
+			perf_cout( cerr << "PARSE ERROR" << endl );
+			exit(1);
+		}
+	}
+	
+	#define BUFSIZE 2048
+	
+	int main()
+	{
+		std::ios::sync_with_stdio(false);
+		
+		test(
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		"hi %%{ /'}%%'/ { /*{*/ {} } + '\\'' }%%there\n"
+		);
+		
+		return 0;
+	}
+}@

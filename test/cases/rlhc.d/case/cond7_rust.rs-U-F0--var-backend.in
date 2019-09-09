@@ -1,0 +1,175 @@
+host( "working/cond7_rust.rl", 1 ) @{//
+	// @@LANG: rust
+	// @@GENERATED: true
+	//
+	
+	static mut i : i32 = 0;
+	static mut c : i32 = 0;
+	
+	
+	
+	
+	
+}@
+array s8 _foo_actions( 0, 1 ) = { 0, 1, 0, 1, 1, 0 };
+
+array u8 _foo_trans_keys( 0, 2 ) = { 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 };
+
+array s8 _foo_char_class( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 };
+
+array s8 _foo_index_offsets( 0, 5 ) = { 0, 0, 1, 2, 5, 0 };
+
+array s8 _foo_indicies( 0, 4 ) = { 0, 2, 3, 1, 4, 0 };
+
+array s8 _foo_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 0 };
+
+array s8 _foo_trans_cond_spaces( -1, 0 ) = { -1, -1, 0, 0, 0, 0 };
+
+array s8 _foo_trans_offsets( 0, 6 ) = { 0, 1, 2, 4, 6, 0 };
+
+array s8 _foo_cond_targs( 0, 4 ) = { 2, 0, 3, 2, 4, 0, 0, 3, 0 };
+
+array s8 _foo_cond_actions( 0, 3 ) = { 3, 0, 3, 1, 0, 0, 0, 1, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 4;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/cond7_rust.rl", 38 ) @{
+	
+	unsafe fn m( s: String )
+	{
+		let data: &[u8] = s.as_bytes();
+		let mut p:i32 = 0;
+		let mut pe:i32 = s.len() as i32;
+		let mut eof:i32 = s.len() as i32;
+		let mut cs: i32 = 0;
+		let mut buffer = String::new();
+		
+	}@
+	{
+		cs = cast(int)foo_start;
+	}
+	host( "working/cond7_rust.rl", 49 ) @{
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		uint _cond = 0;
+		index s8 _acts;
+		uint _nacts;
+		index u8 _keys;
+		index s8 _inds;
+		int _cpc;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _foo_trans_keys, (cs<<1) );
+					_inds = offset( _foo_indicies, _foo_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_foo_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _foo_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _foo_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _foo_indicies, _inds + cast(int)( _ic - cast(int)deref( _foo_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_foo_index_defaults[cs];
+					}
+					else {
+						_trans = cast(uint)_foo_index_defaults[cs];
+					}
+					
+					_cond = cast(uint)_foo_trans_offsets[_trans];
+					
+					_cpc = 0;
+					switch ( _foo_trans_cond_spaces[_trans] ) {
+						
+						case 0 {
+							if ( host( "working/cond7_rust.rl", 12 ) ={i > 0}= ) _cpc += 1;
+						}
+					}
+					_cond += cast(uint)_cpc;
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_foo_cond_targs[_cond];
+					
+					if ( _foo_cond_actions[_cond] != 0 ) {
+						_acts = offset( _foo_actions, _foo_cond_actions[_cond] );
+						_nacts = cast(uint)deref( _foo_actions, _acts );
+						_acts += 1;
+						while ( _nacts > 0 )
+						{
+							switch ( deref( _foo_actions, _acts ) )
+							{
+								case 0 {
+									host( "working/cond7_rust.rl", 13 ) ${i = i - 1;
+										c = ( ( ={( deref( data, p ))}= ) as i32 ) 
+										;
+										print!( "{}", "item: " );
+										print!( "{}", c );
+										print!( "{}", "\n" );
+									}$
+								}
+								case 1 {
+									host( "working/cond7_rust.rl", 21 ) ${i = ( ( ={( deref( data, p ))}= - 48 ) as i32 ) 
+										;
+										print!( "{}", "count: " );
+										print!( "{}", i );
+										print!( "{}", "\n" );
+									}$
+								}
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+					}
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/cond7_rust.rl", 50 ) @{
+		
+		if ( cs >= foo_first_final ) {
+			println!( "ACCEPT" );
+		}
+		else {
+			println!( "FAIL" );
+		}
+	}
+	
+	fn main()
+	{
+		unsafe { m( "00\n".to_string() ); }
+		unsafe { m( "019\n".to_string() ); }
+		unsafe { m( "190\n".to_string() ); }
+		unsafe { m( "1719\n".to_string() ); }
+		unsafe { m( "1040000\n".to_string() ); }
+		unsafe { m( "104000a\n".to_string() ); }
+		unsafe { m( "104000\n".to_string() ); }
+	}
+	
+}@

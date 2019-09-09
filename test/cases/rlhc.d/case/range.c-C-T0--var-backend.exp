@@ -1,0 +1,240 @@
+#include <stdio.h>
+#include <string.h>
+
+struct range
+{
+	int cs;
+};
+
+
+
+static const char  _range_key_offsets [] = { 0, 0, 2, 3, 0 ,  };
+static const char  _range_trans_keys [] = { 97, 122, 10, 0 ,  };
+static const char  _range_single_lengths [] = { 0, 0, 1, 0, 0 ,  };
+static const char  _range_range_lengths [] = { 0, 1, 0, 0, 0 ,  };
+static const char  _range_index_offsets [] = { 0, 0, 2, 4, 0 ,  };
+static const char  _range_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0 ,  };
+static const char  _range_trans_offsets [] = { 0, 1, 2, 3, 4, 0 ,  };
+static const char  _range_trans_lengths [] = { 1, 1, 1, 1, 1, 0 ,  };
+static const char  _range_cond_keys [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _range_cond_targs [] = { 2, 0, 3, 0, 0, 0 ,  };
+static const char  _range_cond_actions [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _range_nfa_targs [] = { 0, 0 ,  };
+static const char  _range_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _range_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _range_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  range_start  = 1;
+static const int  range_first_final  = 3;
+static const int  range_error  = 0;
+static const int  range_en_main  = 1;
+void range_init( struct range *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) range_start;
+	}
+}
+
+void range_execute( struct range *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+		int _klen;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		while ( _cont == 1  )
+		{
+		
+			if ( (fsm->cs) == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _range_trans_keys + _range_key_offsets[(fsm->cs)];
+					_trans = ( unsigned int  ) _range_index_offsets[(fsm->cs)];
+					_have = 0;
+					_klen = ( int ) _range_single_lengths[(fsm->cs)];
+					if ( _klen > 0  )
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( ((*( p  ))
+							)< (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( ((*( p  ))
+							)> (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += ( unsigned int  ) (_mid - _keys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += ( unsigned int  ) _klen;
+						}
+						
+					}
+					
+					
+					if ( _have == 0  )
+					{
+						_klen = ( int ) _range_range_lengths[(fsm->cs)];
+						if ( _klen > 0  )
+						{
+							const char  *_lower;
+							const char  *_mid;
+							const char  *_upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( ((*( p  ))
+								)< (*( _mid  ))
+								)
+								_upper = _mid - 2;
+								
+								else if ( ((*( p  ))
+								)> (*( _mid + 1  ))
+								)
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+									_have = 1;
+								}
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += ( unsigned int  ) _klen;
+							
+						}
+						
+					}
+					
+					
+					_ckeys = _range_cond_keys + _range_trans_offsets[_trans];
+					_klen = ( int ) _range_trans_lengths[_trans];
+					_cond = ( unsigned int  ) _range_trans_offsets[_trans];
+					_have = 0;
+					_cpc = 0;
+					{
+						const char  *_lower;
+						const char  *_mid;
+						const char  *_upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < ( int ) (*( _mid  ))
+							)
+							_upper = _mid - 1;
+							
+							else if ( _cpc > ( int ) (*( _mid  ))
+							)
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += ( unsigned int  ) (_mid - _ckeys);
+								_have = 1;
+							}
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							(fsm->cs) = 0;
+							_cont = 0;
+						}
+						
+					}
+				}
+				
+				if ( _cont == 1  )
+				{
+					(fsm->cs) = ( int ) _range_cond_targs[_cond];
+					if ( (fsm->cs) == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+				
+			}
+			
+		}
+		
+	}
+}
+
+int range_finish( struct range *fsm )
+{
+	if ( fsm->cs == range_error )
+	return -1;
+	if ( fsm->cs >= range_first_final )
+	return 1;
+	return 0;
+}
+
+struct range fsm;
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	range_init( &fsm );
+	range_execute( &fsm, buf, len );
+	if ( range_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+int main()
+{
+	test( "a\n" );
+	test( "z\n" );
+	test( "g\n" );
+	test( "no\n" );
+	test( "1\n" );
+	
+	return 0;
+}
+

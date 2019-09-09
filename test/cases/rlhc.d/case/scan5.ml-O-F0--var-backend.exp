@@ -1,0 +1,478 @@
+(*
+* @LANG: ocaml
+*)
+
+let id x = x
+let fail fmt = Printf.ksprintf failwith fmt
+let pr fmt = Printf.ksprintf print_endline fmt
+
+let failed fmt = Printf.ksprintf (fun s -> prerr_endline s; exit 1) fmt
+let test' show f x y = if f x <> y then failed "FAILED: test %S" (show x)
+let case = ref 0
+let test f x y = incr case; if f x <> y then failed "FAILED: case %d" !case
+let error f x = match try Some (f x) with _ -> None with Some _ -> failed "FAILED: fail %S" x | None -> ()
+
+let _scanner_actions : int array = [|
+0; 1; 2; 1; 3; 1; 6; 1; 7; 1; 8; 1; 9; 1; 10; 1; 11; 1; 12; 1; 13; 2; 0; 1; 2; 3; 4; 2; 3; 5; 0 ; 
+|]
+let _scanner_trans_keys : int array = [|
+1; 0; 2; 9; 4; 4; 10; 10; 10; 10; 10; 10; 2; 9; 0; 9; 7; 7; 9; 9; 2; 9; 0 ; 
+|]
+let _scanner_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 1; 3; 4; 5; 3; 3; 3; 3; 3; 3; 3; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 6; 7; 8; 9; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 10; 0 ; 
+|]
+let _scanner_index_offsets : int array = [|
+0; 0; 8; 9; 10; 11; 12; 20; 30; 31; 32; 0 ; 
+|]
+let _scanner_indicies : int array = [|
+1; 2; 2; 2; 0; 0; 0; 2; 3; 6; 7; 8; 1; 2; 9; 10; 4; 4; 4; 2; 11; 4; 4; 2; 2; 2; 12; 13; 14; 15; 13; 18; 1; 2; 2; 2; 0; 0; 0; 2; 0 ; 
+|]
+let _scanner_index_defaults : int array = [|
+0; 0; 4; 5; 5; 5; 4; 4; 16; 17; 0; 0 ; 
+|]
+let _scanner_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _scanner_cond_targs : int array = [|
+7; 7; 1; 9; 0; 7; 4; 5; 7; 10; 10; 7; 7; 8; 2; 6; 7; 7; 3; 0 ; 
+|]
+let _scanner_cond_actions : int array = [|
+19; 9; 0; 3; 0; 17; 0; 0; 7; 24; 27; 11; 5; 0; 0; 0; 13; 15; 0; 0 ; 
+|]
+let _scanner_to_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 21; 0; 0; 0; 0 ; 
+|]
+let _scanner_from_state_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 0; 0 ; 
+|]
+let _scanner_eof_trans : int array = [|
+0; 1; 0; 6; 6; 6; 0; 0; 17; 18; 1; 0 ; 
+|]
+let _scanner_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _scanner_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _scanner_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _scanner_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let scanner_start  : int  = 7
+let scanner_first_final  : int  = 7
+let scanner_error  : int  = 0
+let scanner_en_main  : int  = 7
+let () =
+let ts = ref 0 and te = ref 0 and act = ref 0 in
+let data = "abbc1d1d2\n" in
+let cs = ref 0 in
+let p = ref 0 and pe = ref (String.length data) in
+let eof = ref !pe in
+begin
+	cs  := scanner_start;
+	ts  := 0;
+	te  := 0;
+	act  := 0;
+	
+end;
+let on_last = ref 0 and on_next = ref 0 and on_lag = ref 0 and
+sw1 = ref 0 and sw2 = ref 0 in
+let cnt = ref 1 in
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _acts : int ref = ref 0 in
+	let _nacts : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _scanner_eof_trans.(cs.contents)> 0  then
+						begin
+							begin
+								_trans  := _scanner_eof_trans.(cs.contents)- 1;
+								_have  := 1;
+								
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+							
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_acts  := _scanner_from_state_actions.(cs.contents);
+						_nacts  := _scanner_actions.( _acts.contents );
+						_acts  := _acts.contents + 1;
+						while _nacts.contents> 0  do
+						begin
+							if _scanner_actions.( _acts.contents ) = 2  then
+							begin
+								begin
+									begin
+										ts  := p.contents;
+										
+									end;
+									
+								end;
+								
+							end
+							;
+							_nacts  := _nacts.contents - 1;
+							_acts  := _acts.contents + 1;
+							
+						end;
+						
+						done;
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _scanner_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 120 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _scanner_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _scanner_trans_keys.( _keys.contents+1  )&& _ic.contents>= _scanner_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _scanner_indicies.( _inds.contents+ ( _ic.contents- _scanner_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _scanner_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _scanner_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _scanner_cond_targs.(_trans.contents);
+						if _scanner_cond_actions.(_trans.contents)!= 0  then
+						begin
+							begin
+								_acts  := _scanner_cond_actions.(_trans.contents);
+								_nacts  := _scanner_actions.( _acts.contents );
+								_acts  := _acts.contents + 1;
+								while _nacts.contents> 0  do
+								begin
+									if _scanner_actions.( _acts.contents ) = 3  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 4  then
+									begin
+										begin
+											begin
+												act  := 4;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 5  then
+									begin
+										begin
+											begin
+												act  := 5;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 6  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string "on last     ";
+													if !p+1 = !te then
+													(on_last := !cnt; incr cnt; print_string "yes");
+													print_string "\n";
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 7  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												begin
+													print_string "on lag      ";
+													if !p+1 = !te then
+													( on_lag := !cnt; incr cnt; print_string "yes"); 
+													print_string "\n";
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 8  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 9  then
+									begin
+										begin
+											begin
+												te  := p.contents+1;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 10  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string "on next     ";
+													if !p+1 = !te then
+													( on_next := !cnt; incr cnt; print_string "yes");
+													print_string "\n";
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 11  then
+									begin
+										begin
+											begin
+												te  := p.contents;
+												p  := p.contents- 1;
+												begin
+													print_string "on lag      ";
+													if !p+1 = !te then
+													( on_lag := !cnt; incr cnt; print_string "yes"); 
+													print_string "\n";
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 12  then
+									begin
+										begin
+											begin
+												p  := ( ( te.contents ) )-1;
+												begin
+													print_string "on lag      ";
+													if !p+1 = !te then
+													( on_lag := !cnt; incr cnt; print_string "yes"); 
+													print_string "\n";
+													
+												end;
+												
+											end;
+											
+										end;
+										
+									end
+									else if _scanner_actions.( _acts.contents ) = 13  then
+									begin
+										begin
+											begin
+												if act.contents = 0  then
+												begin
+													begin
+														begin
+															cs  := 0;
+															
+														end;
+														
+													end;
+													
+												end
+												else if act.contents = 4  then
+												begin
+													p  := ( ( te.contents ) )-1;
+													begin
+														print_string "lm switch1  ";
+														if !p+1 = !te then
+														(sw1 := !cnt; incr cnt; print_string "yes");
+														print_string "\n";
+														
+													end;
+													
+												end
+												else if act.contents = 5  then
+												begin
+													p  := ( ( te.contents ) )-1;
+													begin
+														print_string "lm switch2  ";
+														if !p+1 = !te then
+														(sw2 := !cnt; incr cnt; print_string "yes");
+														print_string "\n";
+														
+													end;
+													
+												end
+												;
+												
+											end;
+											
+											
+										end;
+										
+									end
+									;
+									_nacts  := _nacts.contents - 1;
+									_acts  := _acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;_acts  := _scanner_to_state_actions.(cs.contents);
+						_nacts  := _scanner_actions.( _acts.contents );
+						_acts  := _acts.contents + 1;
+						while _nacts.contents> 0  do
+						begin
+							if _scanner_actions.( _acts.contents ) = 0  then
+							begin
+								begin
+									begin
+										ts  := 0;
+										
+									end;
+									
+								end;
+								
+							end
+							else if _scanner_actions.( _acts.contents ) = 1  then
+							begin
+								begin
+									begin
+										act  := 0;
+										
+									end;
+									
+								end;
+								
+							end
+							;
+							_nacts  := _nacts.contents - 1;
+							_acts  := _acts.contents + 1;
+							
+						end;
+						
+						done;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+let t = test' (fun x -> string_of_int !x) (!) in
+t on_last 1;
+t on_next 2;
+t on_lag 3;
+t sw1 4;
+t sw2 5;
+t cnt 6;
+()
+

@@ -1,0 +1,197 @@
+host( "working/rangei_rust.rl", 1 ) @{//
+	// @@LANG: rust
+	// @@GENERATED: true
+	//
+	
+	
+	
+	
+	
+	
+	
+}@
+array s8 _rangei_key_offsets( 0, 24 ) = { 0, 0, 4, 8, 12, 16, 22, 24, 0 };
+
+array u8 _rangei_trans_keys( 0, 125 ) = { 65, 90, 97, 122, 65, 90, 97, 122, 60, 93, 97, 122, 65, 90, 94, 125, 65, 69, 86, 101, 118, 122, 60, 125, 0 };
+
+array s8 _rangei_single_lengths( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _rangei_range_lengths( 0, 3 ) = { 0, 2, 2, 2, 2, 3, 1, 0, 0 };
+
+array s8 _rangei_index_offsets( 0, 18 ) = { 0, 0, 3, 6, 9, 12, 16, 18, 0 };
+
+array s8 _rangei_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _rangei_trans_offsets( 0, 18 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0 };
+
+array s8 _rangei_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _rangei_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _rangei_cond_targs( 0, 7 ) = { 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0, 6, 6, 6, 0, 7, 0, 0, 0 };
+
+array s8 _rangei_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _rangei_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _rangei_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _rangei_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _rangei_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int rangei_start = 1;
+value int rangei_first_final = 7;
+value int rangei_error = 0;
+
+value int rangei_en_main = 1;
+
+host( "working/rangei_rust.rl", 24 ) @{
+	
+	unsafe fn m( s: String )
+	{
+		let data: &[u8] = s.as_bytes();
+		let mut p:i32 = 0;
+		let mut pe:i32 = s.len() as i32;
+		let mut eof:i32 = s.len() as i32;
+		let mut cs: i32 = 0;
+		let mut buffer = String::new();
+		
+	}@
+	{
+		cs = cast(int)rangei_start;
+	}
+	host( "working/rangei_rust.rl", 35 ) @{
+	}@
+	{
+		int _klen;
+		index u8 _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans;
+		uint _cond = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _rangei_trans_keys, _rangei_key_offsets[cs] );
+					_trans = cast(uint)_rangei_index_offsets[cs];
+					_have = 0;
+					
+					_klen = cast(int)_rangei_single_lengths[cs];
+					if ( _klen > 0 ) {
+						index u8 _lower;
+						index u8 _mid;
+						index u8 _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0 ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _rangei_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _rangei_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					if ( _have == 0 ) {
+						_klen = cast(int)_rangei_range_lengths[cs];
+						if ( _klen > 0 ) {
+							index u8 _lower;
+							index u8 _mid;
+							index u8 _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _rangei_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _rangei_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 )
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					_ckeys = offset( _rangei_cond_keys, _rangei_trans_offsets[_trans] );
+					_klen = cast(int)_rangei_trans_lengths[_trans];
+					_cond = cast(uint)_rangei_trans_offsets[_trans];
+					_have = 0;
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _rangei_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _rangei_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							cs = 0;
+							_cont = 0;
+						}
+					}
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_rangei_cond_targs[_cond];
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/rangei_rust.rl", 36 ) @{
+		
+		if ( cs >= rangei_first_final ) {
+			println!( "ACCEPT" );
+		}
+		else {
+			println!( "FAIL" );
+		}
+	}
+	
+	fn main()
+	{
+		unsafe { m( "AaBbAa".to_string() ); }
+		unsafe { m( "Aa`bAa".to_string() ); }
+		unsafe { m( "AaB@@Aa".to_string() ); }
+		unsafe { m( "AaBbMa".to_string() ); }
+		unsafe { m( "AaBbma".to_string() ); }
+	}
+	
+}@

@@ -1,0 +1,245 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int ts;
+		int te;
+		int act;
+		int token;
+		
+		
+		
+		
+		static readonly sbyte  []_scanner_actions = { 0, 1, 0, 1, 1, 1, 6, 2, 2, 3, 2, 2, 4, 2, 2, 5, 0,  };
+		static readonly sbyte  []_scanner_to_state_actions = { 0, 1, 0, 0,  };
+		static readonly sbyte  []_scanner_from_state_actions = { 0, 3, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_offsets = { 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_pop_trans = { 0, 0,  };
+		static readonly int  scanner_start  = 1;
+		static readonly int  scanner_first_final  = 1;
+		static readonly int  scanner_error  = 0;
+		static readonly int  scanner_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)scanner_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _acts;
+				uint _nacts;
+				
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				_acts = _scanner_from_state_actions[cs] ;
+				_nacts = (uint )_scanner_actions[_acts ];
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( _scanner_actions[_acts ] ) {
+						case 1:
+						{{ts = p;
+							}}
+						
+						break;
+						
+					}
+					_acts += 1;
+					_nacts -= 1;
+				}
+				
+				
+				switch ( cs  ) {
+					case 1:
+					switch ( ( data[p ])  ) {
+						case '\u0061':
+						{
+							goto ctr0;
+						}
+						case '\u0062':
+						{
+							goto ctr2;
+						}
+						
+					}
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					{
+						goto ctr5;
+					}
+					
+				}
+				ctr1: cs = 0;
+				goto _again;
+				ctr4: cs = 1;
+				goto f4;
+				ctr0: cs = 2;
+				goto f2;
+				ctr2: cs = 2;
+				goto f3;
+				ctr5: cs = 2;
+				goto f5;
+				
+				f4: _acts = 5;
+				goto execFuncs;
+				f2: _acts = 7;
+				goto execFuncs;
+				f3: _acts = 10;
+				goto execFuncs;
+				f5: _acts = 13;
+				goto execFuncs;
+				
+				execFuncs:
+				_nacts = (uint )_scanner_actions[_acts ];
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( _scanner_actions[_acts ] ) {
+						case 2:
+						{{te = p+1;
+							}}
+						
+						break;
+						case 3:
+						{{act = 1;
+							}}
+						
+						break;
+						case 4:
+						{{act = 2;
+							}}
+						
+						break;
+						case 5:
+						{{act = 3;
+							}}
+						
+						break;
+						case 6:
+						{{switch ( act  ) {
+									case 1:
+									p = ((te))-1;
+									{Console.Write( "pat1\n" );}
+									
+									break;
+									case 2:
+									p = ((te))-1;
+									{Console.Write( "pat2\n" );}
+									
+									break;
+									case 3:
+									p = ((te))-1;
+									{Console.Write( "pat3\n" );}
+									
+									break;
+									
+								}
+							}
+						}
+						
+						break;
+						
+					}
+					_acts += 1;
+					_nacts -= 1;
+				}
+				
+				
+				goto _again;
+				
+				_again:
+				_acts = _scanner_to_state_actions[cs] ;
+				_nacts = (uint )_scanner_actions[_acts ];
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( _scanner_actions[_acts ] ) {
+						case 0:
+						{{ts = 0;
+							}}
+						
+						break;
+						
+					}
+					_acts += 1;
+					_nacts -= 1;
+				}
+				
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( cs  ) {
+						case 2:
+						goto ctr4;
+						
+					}
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"ab89",
+		};
+		
+		
+		static readonly int inplen = 1;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

@@ -1,0 +1,434 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const char  _scanner_actions [] = { 0, 1, 2, 1, 3, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 2, 0, 1, 2, 3, 4, 2, 3, 5, 0 ,  };
+static const char  _scanner_trans_keys [] = { 1, 0, 2, 9, 4, 4, 10, 10, 10, 10, 10, 10, 2, 9, 0, 9, 7, 7, 9, 9, 2, 9, 0 ,  };
+static const char  _scanner_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 3, 4, 5, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 0 ,  };
+static const char  _scanner_index_offsets [] = { 0, 0, 8, 9, 10, 11, 12, 20, 30, 31, 32, 0 ,  };
+static const char  _scanner_indicies [] = { 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0 ,  };
+static const char  _scanner_index_defaults [] = { 0, 0, 4, 5, 5, 5, 4, 4, 16, 17, 0, 0 ,  };
+static const char  _scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _scanner_cond_targs [] = { 7, 7, 1, 9, 0, 7, 4, 5, 7, 10, 10, 7, 7, 8, 2, 6, 7, 7, 3, 0 ,  };
+static const char  _scanner_cond_actions [] = { 19, 9, 0, 3, 0, 17, 0, 0, 7, 24, 27, 11, 5, 0, 0, 0, 13, 15, 0, 0 ,  };
+static const char  _scanner_to_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0 ,  };
+static const char  _scanner_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0 ,  };
+static const char  _scanner_eof_trans [] = { 0, 1, 0, 6, 6, 6, 0, 0, 17, 18, 1, 0 ,  };
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  scanner_start  = 7;
+static const int  scanner_first_final  = 7;
+static const int  scanner_error  = 0;
+static const int  scanner_en_main  = 7;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		int _trans = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_acts = _scanner_actions + _scanner_from_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 2 :
+				{
+					{
+						ts = p;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		_keys = _scanner_trans_keys + (cs<<1);
+		_inds = _scanner_indicies + _scanner_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 120 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _scanner_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _scanner_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _scanner_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _scanner_cond_targs[_trans];
+		if ( _scanner_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		_acts = _scanner_actions + _scanner_cond_actions[_trans];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 3 :
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 4 :
+				{
+					{
+						act = 4;
+						
+					}
+					
+				}
+				
+				break;
+				case 5 :
+				{
+					{
+						act = 5;
+						
+					}
+					
+				}
+				
+				break;
+				case 6 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "on last     " );
+							if ( p + 1 == te )
+							{
+								printf( "%s", "yes" );
+								
+							} 
+							printf( "%s", "\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 7 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "on lag      " );
+							if ( p + 1 == te )
+							{
+								printf( "%s", "yes" );
+								
+							} 
+							printf( "%s", "\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 8 :
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 9 :
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 10 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "on next     " );
+							if ( p + 1 == te )
+							{
+								printf( "%s", "yes" );
+								
+							} 
+							printf( "%s", "\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 11 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "on lag      " );
+							if ( p + 1 == te )
+							{
+								printf( "%s", "yes" );
+								
+							} 
+							printf( "%s", "\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 12 :
+				{
+					{
+						p = ((te))-1;
+						{
+							printf( "%s", "on lag      " );
+							if ( p + 1 == te )
+							{
+								printf( "%s", "yes" );
+								
+							} 
+							printf( "%s", "\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 13 :
+				{
+					{
+						switch ( act  ) {
+							case 0 :
+							{
+								{
+									cs = 0;
+									goto _again;
+								}
+								
+							}
+							
+							break;
+							case 4 :
+							p = ((te))-1;
+							{
+								printf( "%s", "lm switch1  " );
+								if ( p + 1 == te )
+								{
+									printf( "%s", "yes" );
+									
+								} 
+								printf( "%s", "\n" );
+								
+							}
+							
+							break;
+							case 5 :
+							p = ((te))-1;
+							{
+								printf( "%s", "lm switch2  " );
+								if ( p + 1 == te )
+								{
+									printf( "%s", "yes" );
+									
+								} 
+								printf( "%s", "\n" );
+								
+							}
+							
+							break;
+							
+						}
+						
+					}
+					
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		_acts = _scanner_actions + _scanner_to_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					{
+						ts = 0;
+						
+					}
+					
+				}
+				
+				break;
+				case 1 :
+				{
+					{
+						act = 0;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			if ( _scanner_eof_trans[cs]> 0  )
+			{
+				_trans = ( int ) _scanner_eof_trans[cs]- 1;
+				goto _match_cond;
+			}
+			
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"abbc1d1d2\n",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

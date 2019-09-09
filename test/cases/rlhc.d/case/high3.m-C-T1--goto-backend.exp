@@ -1,0 +1,270 @@
+#include <stdio.h>
+#include <objc/Object.h>
+#include <Foundation/Foundation.h>
+
+@interface Fsm : NSObject
+{
+	@public
+	int cs;
+};
+
+// Initialize the machine. Invokes any init statement blocks. Returns 0
+// if the machine begins in a non-accepting state and 1 if the machine
+// begins in an accepting state.
+- (int) initFsm;
+
+// Execute the machine on a block of data. Returns -1 if after processing
+// the data, the machine is in the error state and can never accept, 0 if
+// the machine is in a non-accepting state and 1 if the machine is in an
+// accepting state.
+- (void) executeWithData:(const unsigned char *)data len:(int)len;
+
+// Indicate that there is no more data. Returns -1 if the machine finishes
+// in the error state and does not accept, 0 if the machine finishes
+// in any other non-accepting state and 1 if the machine finishes in an
+// accepting state.
+- (int) finish;
+
+@end
+
+@implementation Fsm
+
+
+
+static const char  _Fsm_key_offsets [] = { 0, 0, 1, 2, 0 ,  };
+static const unsigned char  _Fsm_trans_keys [] = { 232u, 10u, 0u,  };
+static const char  _Fsm_single_lengths [] = { 0, 1, 1, 0, 0 ,  };
+static const char  _Fsm_range_lengths [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _Fsm_index_offsets [] = { 0, 0, 2, 4, 0 ,  };
+static const char  _Fsm_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0 ,  };
+static const char  _Fsm_trans_offsets [] = { 0, 1, 2, 3, 4, 0 ,  };
+static const char  _Fsm_trans_lengths [] = { 1, 1, 1, 1, 1, 0 ,  };
+static const char  _Fsm_cond_keys [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Fsm_cond_targs [] = { 2, 0, 3, 0, 0, 0 ,  };
+static const char  _Fsm_cond_actions [] = { 1, 0, 0, 0, 0, 0 ,  };
+static const char  _Fsm_nfa_targs [] = { 0, 0 ,  };
+static const char  _Fsm_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _Fsm_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Fsm_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Fsm_start  = 1;
+static const int  Fsm_first_final  = 3;
+static const int  Fsm_error  = 0;
+static const int  Fsm_en_main  = 1;
+- (int) initFsm;
+{
+
+	{
+		cs = ( int ) Fsm_start;
+	}
+	return 1;
+}
+
+- (void) executeWithData:(const unsigned char *)_data len:(int)_len;
+{
+	const unsigned char *p = _data;
+	const unsigned char *pe = _data + _len;
+	
+	{
+		int _klen;
+		const unsigned char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _Fsm_trans_keys + _Fsm_key_offsets[cs];
+		_trans = ( unsigned int  ) _Fsm_index_offsets[cs];
+		_klen = ( int ) _Fsm_single_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const unsigned char  *_lower;
+			const unsigned char  *_mid;
+			const unsigned char  *_upper;
+			_lower = _keys;
+			_upper = _keys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_trans += ( unsigned int  ) (_mid - _keys);
+					goto _match;
+				}
+				
+			}
+			
+			_keys += _klen;
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		_klen = ( int ) _Fsm_range_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const unsigned char  *_lower;
+			const unsigned char  *_mid;
+			const unsigned char  *_upper;
+			_lower = _keys;
+			_upper = _keys + (_klen<<1)- 2;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 2;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid + 1  ))
+				)
+				_lower = _mid + 2;
+				
+				else
+				{
+					_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+					goto _match;
+				}
+				
+			}
+			
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		
+		_match :
+		_ckeys = _Fsm_cond_keys + _Fsm_trans_offsets[_trans];
+		_klen = ( int ) _Fsm_trans_lengths[_trans];
+		_cond = ( unsigned int  ) _Fsm_trans_offsets[_trans];
+		_cpc = 0;
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( _cpc < ( int ) (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( _cpc > ( int ) (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_cond += ( unsigned int  ) (_mid - _ckeys);
+					goto _match_cond;
+				}
+				
+			}
+			
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = ( int ) _Fsm_cond_targs[_cond];
+		if ( _Fsm_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		switch ( _Fsm_cond_actions[_cond] ) {
+			case 1 :
+			{
+				printf("yes\n");
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+- (int) finish;
+{
+	if ( cs == Fsm_error )
+	return -1;
+	else if ( cs >= Fsm_first_final )
+	return 1;
+	return 0;
+}
+
+
+@end
+
+
+#define BUFSIZE 2048
+
+Fsm *fsm;
+unsigned char buf[BUFSIZE];
+
+void test( unsigned char *buf, int len )
+{
+	fsm = [[Fsm alloc] init];
+	[fsm initFsm];
+	[fsm executeWithData:buf len:len];
+	if ( [fsm finish] > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+unsigned char data1[] = { 0xe8, 10 };
+unsigned char data2[] = { 0xf8, 10 };
+
+int main()
+{
+	test( data1, 2 );
+	test( data2, 2 );
+	return 0;
+}
+

@@ -1,0 +1,291 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+
+static const char  _recdescent_trans_keys [] = { 1, 0, 5, 5, 0, 5, 0, 5, 0, 5, 0 ,  };
+static const char  _recdescent_char_class [] = { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1, 5, 0 ,  };
+static const char  _recdescent_index_offsets [] = { 0, 0, 1, 7, 13, 0 ,  };
+static const char  _recdescent_indicies [] = { 0, 0, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9, 10, 6, 1, 11, 12, 9, 10, 0 ,  };
+static const char  _recdescent_index_defaults [] = { 0, 1, 1, 1, 1, 0 ,  };
+static const char  _recdescent_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _recdescent_cond_targs [] = { 2, 0, 3, 4, 1, 2, 2, 3, 4, 1, 2, 3, 4, 0 ,  };
+static const char  _recdescent_cond_actions [] = { 0, 0, 1, 1, 2, 3, 4, 0, 5, 6, 7, 5, 0, 0 ,  };
+static const char  _recdescent_eof_actions [] = { 0, 0, 0, 4, 4, 0 ,  };
+static const char  _recdescent_nfa_targs [] = { 0, 0 ,  };
+static const char  _recdescent_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _recdescent_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _recdescent_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  recdescent_start  = 2;
+static const int  recdescent_first_final  = 2;
+static const int  recdescent_error  = 0;
+static const int  recdescent_en_main  = 2;
+void test( char *buf )
+{
+	int cs;
+	int *stack;
+	int top, stack_size;
+	char *p, *pe, *eof, *item = 0;
+	
+	int len = strlen( buf );
+	
+	
+	{
+		cs = ( int ) recdescent_start;
+		top = 0;
+	}
+	stack_size = 1;
+	stack = (int*)malloc( sizeof(int) * stack_size );
+	
+	p = buf;
+	pe = buf + len;
+	eof = pe;
+	
+	
+	{
+		int _trans = 0;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _recdescent_trans_keys + (cs<<1);
+		_inds = _recdescent_indicies + _recdescent_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 125 && ((*( p  ))
+		)>= 9  )
+		{
+			int _ic = ( int ) _recdescent_char_class[( int ) ((*( p  ))
+			)- 9];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _recdescent_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _recdescent_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _recdescent_cond_targs[_trans];
+		if ( _recdescent_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		switch ( _recdescent_cond_actions[_trans] ) {
+			case 1 :
+			{
+				item = p; 
+			}
+			
+			break;
+			case 4 :
+			{
+				printf( "item: " );
+				fwrite( item, 1, p-item, stdout );
+				printf( "\n" );
+				
+			}
+			
+			break;
+			case 2 :
+			{
+				printf( "calling main\n" );
+				{
+					{
+						if ( top == stack_size ) {
+							printf( "growing stack\n" );
+							stack_size = top * 2;
+							stack = (int*)realloc( stack, sizeof(int)*stack_size );
+						}
+						
+					}
+					stack[top] = cs;
+					top += 1;
+					cs = 2;
+					goto _again;
+				}
+				
+			}
+			
+			break;
+			case 3 :
+			{
+				if ( top == 0 ) {
+					printf( "STRAY CLOSE\n" );
+					{
+						p += 1;
+						goto _out; 
+					}
+					
+				}
+				
+				printf( "returning from main\n" );
+				{
+					p = p - 1;
+					
+				}
+				
+				{
+					top -= 1;
+					cs = stack[top];
+					{
+						if ( stack_size > (top * 4) ) {
+							stack_size = top * 2;
+							stack = (int*)realloc( stack, sizeof(int)*stack_size );
+							printf( "shrinking stack\n" );
+						}
+						
+					}
+					goto _again;
+				}
+				
+				
+			}
+			
+			break;
+			case 5 :
+			{
+				printf( "item: " );
+				fwrite( item, 1, p-item, stdout );
+				printf( "\n" );
+				
+			}
+			{
+				item = p; 
+			}
+			
+			break;
+			case 6 :
+			{
+				printf( "item: " );
+				fwrite( item, 1, p-item, stdout );
+				printf( "\n" );
+				
+			}
+			{
+				printf( "calling main\n" );
+				{
+					{
+						if ( top == stack_size ) {
+							printf( "growing stack\n" );
+							stack_size = top * 2;
+							stack = (int*)realloc( stack, sizeof(int)*stack_size );
+						}
+						
+					}
+					stack[top] = cs;
+					top += 1;
+					cs = 2;
+					goto _again;
+				}
+				
+			}
+			
+			break;
+			case 7 :
+			{
+				printf( "item: " );
+				fwrite( item, 1, p-item, stdout );
+				printf( "\n" );
+				
+			}
+			{
+				if ( top == 0 ) {
+					printf( "STRAY CLOSE\n" );
+					{
+						p += 1;
+						goto _out; 
+					}
+					
+				}
+				
+				printf( "returning from main\n" );
+				{
+					p = p - 1;
+					
+				}
+				
+				{
+					top -= 1;
+					cs = stack[top];
+					{
+						if ( stack_size > (top * 4) ) {
+							stack_size = top * 2;
+							stack = (int*)realloc( stack, sizeof(int)*stack_size );
+							printf( "shrinking stack\n" );
+						}
+						
+					}
+					goto _again;
+				}
+				
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			switch ( _recdescent_eof_actions[cs] ) {
+				case 4 :
+				{
+					printf( "item: " );
+					fwrite( item, 1, p-item, stdout );
+					printf( "\n" );
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+	if ( cs == recdescent_error ) {
+		/* Machine failed before finding a token. */
+		printf( "PARSE ERROR\n" );
+	}
+}
+
+int main()
+{
+	test( "88 foo { 99 {{{{}}}}{ } }");
+	test( "76 } sadf");
+	return 0;
+}
+

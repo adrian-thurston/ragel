@@ -1,0 +1,106 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+	
+	
+	
+	
+	
+	
+		static readonly sbyte  []_any1_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_any1_nfa_offsets = { 0, 0, 0, 0,  };
+		static readonly sbyte  []_any1_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_any1_nfa_pop_trans = { 0, 0,  };
+		static readonly int  any1_start  = 1;
+		static readonly int  any1_first_final  = 2;
+		static readonly int  any1_error  = 0;
+		static readonly int  any1_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)any1_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( cs  ) {
+					case 1:
+					{
+						goto ctr0;
+					}
+					case 2:
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					
+				}
+				ctr1: cs = 0;
+				goto _again;
+				ctr0: cs = 2;
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= any1_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"",
+			"x",
+			"xx",
+		};
+		
+		
+		static readonly int inplen = 3;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

@@ -1,0 +1,267 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _state_act_key_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 0  }
+var _state_act_trans_keys [] byte  = [] byte  { 105, 10, 104, 104, 104, 0 }
+var _state_act_single_lengths [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 0  }
+var _state_act_range_lengths [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0  }
+var _state_act_index_offsets [] int8  = [] int8  { 0, 0, 2, 4, 6, 8, 0  }
+var _state_act_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _state_act_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0  }
+var _state_act_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _state_act_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _state_act_cond_targs [] int8  = [] int8  { 2, 0, 5, 0, 1, 0, 1, 0, 1, 0, 0  }
+var _state_act_cond_actions [] int8  = [] int8  { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _state_act_to_state_actions [] int8  = [] int8  { 0, 0, 1, 4, 6, 4, 0  }
+var _state_act_from_state_actions [] int8  = [] int8  { 0, 0, 2, 5, 7, 5, 0  }
+var _state_act_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _state_act_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0  }
+var _state_act_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _state_act_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var state_act_start  int  = 4
+var state_act_first_final  int  = 4
+var state_act_error  int  = 0
+var state_act_en_main  int  = 4
+var state_act_en_main_line_again  int  = 3
+func prepare() {
+
+	{
+		cs = int(state_act_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _klen int 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		var  _trans  uint   = 0
+		var  _cond  uint   = 0
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		switch _state_act_from_state_actions[cs]  {
+			case 5 :
+			{fmt.Print( "b2\n" );}
+			
+			break;
+			case 2 :
+			{fmt.Print( "c2\n" );}
+			
+			break;
+			case 7 :
+			{fmt.Print( "a2\n" );}
+			{fmt.Print( "b2\n" );}
+			
+			break;
+			
+		}
+		_keys = int(_state_act_key_offsets[cs] );
+		_trans = uint(_state_act_index_offsets[cs]);
+		_klen = int(_state_act_single_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + _klen - 1;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + ((_upper-_lower) >> 1);
+						switch {
+							case ( data[p ]) < _state_act_trans_keys[_mid ]:
+							_upper = _mid - 1;
+							
+							case ( data[p ]) > _state_act_trans_keys[_mid ]:
+							_lower = _mid + 1;
+							
+							default:
+							{
+								_trans += uint((_mid - _keys));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_keys += _klen;
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		_klen = int(_state_act_range_lengths[cs]);
+		if _klen > 0  {
+			{
+				var  _lower int
+				var  _mid int
+				var  _upper int
+				_lower = _keys;
+				_upper = _keys + (_klen<<1) - 2;
+				for {
+					{
+						if _upper < _lower  {
+							break;
+							
+							
+						}
+						_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+						switch {
+							case ( data[p ]) < _state_act_trans_keys[_mid ]:
+							_upper = _mid - 2;
+							
+							case ( data[p ]) > _state_act_trans_keys[_mid + 1 ]:
+							_lower = _mid + 2;
+							
+							default:
+							{
+								_trans += uint(((_mid - _keys)>>1));
+								goto _match;
+							}
+							
+						}
+					}
+					
+				}
+				_trans += uint(_klen);
+			}
+			
+			
+		}
+		
+		_match :
+		_ckeys = int(_state_act_trans_offsets[_trans] );
+		_klen = int(_state_act_trans_lengths[_trans]);
+		_cond = uint(_state_act_trans_offsets[_trans]);
+		_cpc = 0;
+		{
+			var  _lower int
+			var  _mid int
+			var  _upper int
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			for {
+				{
+					if _upper < _lower  {
+						break;
+						
+						
+					}
+					_mid = _lower + ((_upper-_lower) >> 1);
+					switch {
+						case _cpc < int(_state_act_cond_keys[_mid ]):
+						_upper = _mid - 1;
+						
+						case _cpc > int(_state_act_cond_keys[_mid ]):
+						_lower = _mid + 1;
+						
+						default:
+						{
+							_cond += uint((_mid - _ckeys));
+							goto _match_cond;
+						}
+						
+					}
+				}
+				
+			}
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = int(_state_act_cond_targs[_cond]);
+		if _state_act_cond_actions[_cond] == 0  {
+			goto _again;
+			
+			
+		}
+		switch _state_act_cond_actions[_cond]  {
+			case 3 :
+			{{cs = 3;
+				}}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch _state_act_to_state_actions[cs]  {
+			case 4 :
+			{fmt.Print( "b1\n" );}
+			
+			break;
+			case 1 :
+			{fmt.Print( "c1\n" );}
+			
+			break;
+			case 6 :
+			{fmt.Print( "a1\n" );}
+			{fmt.Print( "b1\n" );}
+			
+			break;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= state_act_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"hi\nhi\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

@@ -1,0 +1,139 @@
+host( "working/caseindep_crack.rl", 1 ) @{//
+	// @@LANG: crack
+	// @@GENERATED: true
+	//
+	
+	import crack.io cout;
+	import crack.lang Buffer;
+	
+	
+	
+	
+	
+	
+	
+}@
+array byte _indep_trans_keys( 0, 11 ) = { c(1), c(0), c(2), c(3), c(9), c(9), c(8), c(8), c(10), c(10), c(10), c(10), c(11), c(11), c(0), c(0), c(5), c(9), c(4), c(8), c(6), c(10), c(6), c(10), c(7), c(11), c(1), c(0), c(0) };
+
+array s8 _indep_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 5, 1, 1, 1, 6, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 9, 1, 1, 1, 10, 1, 1, 11, 0 };
+
+array s8 _indep_index_offsets( 0, 33 ) = { 0, 0, 2, 3, 4, 5, 6, 7, 8, 13, 18, 23, 28, 33, 0 };
+
+array s8 _indep_indicies( 0, 12 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 1, 1, 1, 9, 10, 1, 1, 1, 10, 11, 1, 1, 1, 11, 12, 1, 1, 1, 12, 7, 1, 1, 1, 7, 0 };
+
+array s8 _indep_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _indep_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _indep_cond_targs( 0, 13 ) = { 2, 0, 8, 3, 4, 5, 6, 7, 13, 9, 10, 11, 12, 0 };
+
+array s8 _indep_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _indep_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _indep_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _indep_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _indep_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int indep_start = 1;
+value int indep_first_final = 13;
+value int indep_error = 0;
+
+value int indep_en_main = 1;
+
+host( "working/caseindep_crack.rl", 27 ) @{
+	
+	void m( String s )
+	{
+		byteptr data = s.buffer;
+		int p = 0;
+		int pe = s.size;
+		int cs;
+		String buffer;
+		
+	}@
+	{
+		cs = cast(int)indep_start;
+	}
+	host( "working/caseindep_crack.rl", 37 ) @{
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index byte _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _indep_trans_keys, (cs<<1) );
+					_inds = offset( _indep_indicies, _indep_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_indep_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _indep_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _indep_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _indep_indicies, _inds + cast(int)( _ic - cast(int)deref( _indep_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_indep_index_defaults[cs];
+					}
+					else {
+						_trans = cast(uint)_indep_index_defaults[cs];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_indep_cond_targs[_trans];
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/caseindep_crack.rl", 38 ) @{
+		
+		if ( cs >= indep_first_final ) {
+			cout `ACCEPT\n`;
+		}
+		else {
+			cout `FAIL\n`;
+		}
+	}
+	
+	void main()
+	{
+		m( "1hello\n" );
+		m( "1HELLO\n" );
+		m( "1HeLLo\n" );
+		m( "2hello\n" );
+		m( "2HELLO\n" );
+		m( "2HeLLo\n" );
+		m( "3hello\n" );
+		m( "3HELLO\n" );
+		m( "3HeLLo\n" );
+		m( "4hello\n" );
+		m( "4HELLO\n" );
+		m( "4HeLLo\n" );
+		m( "5hello\n" );
+		m( "5HELLO\n" );
+		m( "5HeLLo\n" );
+		m( "6hello\n" );
+		m( "6HELLO\n" );
+		m( "6HeLLo\n" );
+	}
+	
+	main();
+}@

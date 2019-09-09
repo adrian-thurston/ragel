@@ -1,0 +1,102 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+
+static const int  any1_start  = 1;
+static const int  any1_first_final  = 2;
+static const int  any1_error  = 0;
+static const int  any1_en_main  = 1;
+static const char  _any1_nfa_targs [] = { 0, 0 ,  };
+static const char  _any1_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _any1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _any1_nfa_pop_trans [] = { 0, 0 ,  };
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) any1_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 0:
+			goto st_case_0;
+			
+		}
+		goto st_out;
+		st_case_1:
+		{
+			goto st2;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st_out:
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= any1_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"",
+	"x",
+	"xx",
+};
+
+int inplen = 3;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

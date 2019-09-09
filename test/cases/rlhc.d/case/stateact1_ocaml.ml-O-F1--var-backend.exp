@@ -1,0 +1,243 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+
+
+
+
+
+
+
+
+let _state_act_trans_keys : int array = [|
+1; 0; 3; 3; 0; 0; 2; 2; 2; 2; 2; 2; 0 ; 
+|]
+let _state_act_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 3; 0 ; 
+|]
+let _state_act_index_offsets : int array = [|
+0; 0; 1; 2; 3; 4; 0 ; 
+|]
+let _state_act_indicies : int array = [|
+0; 2; 3; 3; 3; 0 ; 
+|]
+let _state_act_index_defaults : int array = [|
+0; 1; 1; 1; 1; 1; 0 ; 
+|]
+let _state_act_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; 0 ; 
+|]
+let _state_act_cond_targs : int array = [|
+2; 0; 5; 1; 0 ; 
+|]
+let _state_act_cond_actions : int array = [|
+0; 0; 3; 0; 0 ; 
+|]
+let _state_act_to_state_actions : int array = [|
+0; 0; 1; 4; 6; 4; 0 ; 
+|]
+let _state_act_from_state_actions : int array = [|
+0; 0; 2; 5; 7; 5; 0 ; 
+|]
+let _state_act_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _state_act_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _state_act_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _state_act_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let state_act_start  : int  = 4
+let state_act_first_final  : int  = 4
+let state_act_error  : int  = 0
+let state_act_en_main  : int  = 4
+let state_act_en_main_line_again  : int  = 3
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := state_act_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						if _state_act_from_state_actions.(cs.contents) = 5  then
+						begin
+							begin
+								print_string( "b2\n" );
+								
+							end;
+							
+						end
+						else if _state_act_from_state_actions.(cs.contents) = 2  then
+						begin
+							begin
+								print_string( "c2\n" );
+								
+							end;
+							
+						end
+						else if _state_act_from_state_actions.(cs.contents) = 7  then
+						begin
+							begin
+								print_string( "a2\n" );
+								
+							end;
+							begin
+								print_string( "b2\n" );
+								
+							end;
+							
+						end
+						;
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _state_act_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 105 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _state_act_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _state_act_trans_keys.( _keys.contents+1  )&& _ic.contents>= _state_act_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _state_act_indicies.( _inds.contents+ ( _ic.contents- _state_act_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _state_act_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _state_act_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _state_act_cond_targs.(_trans.contents);
+						if _state_act_cond_actions.(_trans.contents) = 3  then
+						begin
+							begin
+								begin
+									cs  := 3;
+									
+								end;
+								
+							end;
+							
+						end
+						;
+						if _state_act_to_state_actions.(cs.contents) = 4  then
+						begin
+							begin
+								print_string( "b1\n" );
+								
+							end;
+							
+						end
+						else if _state_act_to_state_actions.(cs.contents) = 1  then
+						begin
+							begin
+								print_string( "c1\n" );
+								
+							end;
+							
+						end
+						else if _state_act_to_state_actions.(cs.contents) = 6  then
+						begin
+							begin
+								print_string( "a1\n" );
+								
+							end;
+							begin
+								print_string( "b1\n" );
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= state_act_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "hi\nhi\n";
+()
+;;
+

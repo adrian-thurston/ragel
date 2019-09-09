@@ -1,0 +1,188 @@
+host( "working/atoi1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var neg  int ;
+	var value  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _atoi_actions( 0, 4 ) = { 0, 1, 0, 1, 2, 2, 0, 1, 2, 0, 2, 2, 3, 4, 0 };
+
+array s8 _atoi_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 4;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/atoi1_go.rl", 46 ) @{
+	
+	func prepare() {
+		value = 0;
+		neg = 0;
+	}@
+	{
+		cs = cast(int)atoi_start;
+	}
+	host( "working/atoi1_go.rl", 51 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 43: {
+					goto ctr0;
+				}
+				case 45: {
+					goto ctr2;
+				}
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr5;
+			}
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto f0;
+		ctr2: cs = 2; goto f1;
+		ctr3: cs = 3; goto f2;
+		ctr4: cs = 3; goto f3;
+		ctr5: cs = 4; goto f4;
+		
+		f0: _acts = offset( _atoi_actions, 1 ); goto execFuncs;
+		f3: _acts = offset( _atoi_actions, 3 ); goto execFuncs;
+		f1: _acts = offset( _atoi_actions, 5 ); goto execFuncs;
+		f2: _acts = offset( _atoi_actions, 8 ); goto execFuncs;
+		f4: _acts = offset( _atoi_actions, 11 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _atoi_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _atoi_actions, _acts ) ) {
+				case 0{
+					host( "working/atoi1_go.rl", 15 ) ${neg = 0;
+						value = 0;
+					}$
+				}
+				case 1{
+					host( "working/atoi1_go.rl", 19 ) ${neg = 1;
+					}$
+				}
+				case 2{
+					host( "working/atoi1_go.rl", 22 ) ${value = value * 10 + ( int ) ( ={( deref( data, p ))}= - 48 )
+						;
+					}$
+				}
+				case 3{
+					host( "working/atoi1_go.rl", 26 ) ${if ( neg != 0 ) {
+							value = -1 * value;
+							
+						}
+					}$
+				}
+				case 4{
+					host( "working/atoi1_go.rl", 31 ) ${fmt.Print( value );fmt.Print( "\n" );}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/atoi1_go.rl", 57 ) @{
+	}
+	func finish() {
+		if cs >= atoi_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"1\n",
+		"12\n",
+		"222222\n",
+		"+2123\n",
+		"213 3213\n",
+		"-12321\n",
+		"--123\n",
+		"-99\n",
+		" -3000\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

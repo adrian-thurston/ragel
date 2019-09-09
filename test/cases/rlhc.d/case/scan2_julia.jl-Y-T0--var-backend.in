@@ -1,0 +1,282 @@
+host( "working/scan2_julia.rl", 1 ) @{//
+	// @@LANG: julia
+	// @@GENERATED: true
+	//
+	
+	
+	
+	
+	
+	
+}@
+array s8 _scanner_actions( 0, 7 ) = { 0, 1, 0, 1, 1, 1, 5, 1, 6, 1, 7, 2, 2, 3, 2, 2, 4, 0 };
+
+array s8 _scanner_key_offsets( 0, 5 ) = { 0, 3, 5, 0 };
+
+array u8 _scanner_trans_keys( 0, 99 ) = { 99, 97, 98, 97, 98, 99, 97, 98, 0 };
+
+array s8 _scanner_single_lengths( 0, 2 ) = { 1, 2, 1, 0 };
+
+array s8 _scanner_range_lengths( 0, 1 ) = { 1, 0, 1, 0 };
+
+array s8 _scanner_index_offsets( 0, 6 ) = { 0, 3, 6, 0 };
+
+array s8 _scanner_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _scanner_trans_offsets( 0, 10 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0 };
+
+array s8 _scanner_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _scanner_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_cond_targs( 0, 2 ) = { 1, 0, 1, 2, 2, 1, 1, 0, 1, 1, 1, 0 };
+
+array s8 _scanner_cond_actions( 0, 14 ) = { 5, 0, 9, 11, 14, 7, 5, 0, 9, 9, 9, 0 };
+
+array s8 _scanner_to_state_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array s8 _scanner_from_state_actions( 0, 3 ) = { 0, 3, 0, 0 };
+
+array s8 _scanner_eof_trans_indexed( 0, 2 ) = { 2, 0, 2, 0 };
+
+array s8 _scanner_eof_trans_direct( 0, 11 ) = { 10, 0, 11, 0 };
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int scanner_start = 1;
+value int scanner_first_final = 1;
+value int scanner_error = -1;
+
+value int scanner_en_main = 1;
+
+host( "working/scan2_julia.rl", 27 ) @{
+	
+	function m( data::AbstractString )
+	p = 0
+	pe = length(data)
+	eof = length(data)
+	cs = 0
+	buffer = ""
+	ts = 0;
+	te = 0;
+	act = 0;
+	token = 0;
+	
+}@
+{
+	cs = cast(int)scanner_start;
+	ts = nil;
+	te = nil;
+	act = 0;
+}
+host( "working/scan2_julia.rl", 40 ) @{
+}@
+{
+	int _klen;
+	uint _trans = 0;
+	uint _cond = 0;
+	uint _have = 0;
+	uint _cont = 1;
+	index s8 _acts;
+	uint _nacts;
+	index u8 _keys;
+	index s8 _ckeys;
+	int _cpc;
+	while ( _cont == 1 ) {
+		
+		_have = 0;
+		if ( p == pe ) {
+			if ( p == eof )
+			{
+				if ( _scanner_eof_trans_direct[cs] > 0 ) {
+					_trans = cast(uint)_scanner_eof_trans_direct[cs] - 1;
+					_cond = cast(uint)_scanner_trans_offsets[_trans];
+					_have = 1;
+				}
+				if ( _have == 0 ) {
+				}
+			}
+			
+			if ( _have == 0 )
+			_cont = 0;
+		}
+		if ( _cont == 1 ) {
+			if ( _have == 0 ) {
+				_acts = offset( _scanner_actions, _scanner_from_state_actions[cs] );
+				_nacts = cast(uint)deref( _scanner_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _scanner_actions, _acts ) ) {
+						case 1 {
+							host( "NONE", 1 ) ${${ts = p;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				_keys = offset( _scanner_trans_keys, _scanner_key_offsets[cs] );
+				_trans = cast(uint)_scanner_index_offsets[cs];
+				_have = 0;
+				
+				_klen = cast(int)_scanner_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index u8 _lower;
+					index u8 _mid;
+					index u8 _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( _upper >= _lower && _have == 0 ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _scanner_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _scanner_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						_keys += _klen;
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				if ( _have == 0 ) {
+					_klen = cast(int)_scanner_range_lengths[cs];
+					if ( _klen > 0 ) {
+						index u8 _lower;
+						index u8 _mid;
+						index u8 _upper;
+						_lower = _keys;
+						_upper = _keys + (_klen<<1) - 2;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+							if ( ( deref( data, p )) < deref( _scanner_trans_keys, _mid ) )
+							_upper = _mid - 2;
+							else if ( ( deref( data, p )) > deref( _scanner_trans_keys, _mid + 1 ) )
+							_lower = _mid + 2;
+							else {
+								_trans += cast(uint)((_mid - _keys)>>1);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 )
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				_ckeys = offset( _scanner_cond_keys, _scanner_trans_offsets[_trans] );
+				_klen = cast(int)_scanner_trans_lengths[_trans];
+				_cond = cast(uint)_scanner_trans_offsets[_trans];
+				_have = 0;
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( _have == 0 && _lower <= _upper ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _scanner_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _scanner_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						cs = -1;
+						_cont = 0;
+					}
+				}
+			}
+			if ( _cont == 1 ) {
+				cs = cast(int)_scanner_cond_targs[_cond];
+				
+				if ( _scanner_cond_actions[_cond] != 0 ) {
+					_acts = offset( _scanner_actions, _scanner_cond_actions[_cond] );
+					_nacts = cast(uint)deref( _scanner_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 )
+					{
+						switch ( deref( _scanner_actions, _acts ) )
+						{
+							case 2 {
+								host( "NONE", 1 ) ${${te = p+1;}$}$
+							}
+							case 3 {
+								host( "working/scan2_julia.rl", 13 ) ${${act = 1;}$}$
+							}
+							case 4 {
+								host( "working/scan2_julia.rl", 19 ) ${${act = 3;}$}$
+							}
+							case 5 {
+								host( "working/scan2_julia.rl", 16 ) ${${te = p+1;host( "working/scan2_julia.rl", 16 ) ${print( "pat2\n" );
+										}$}$}$
+							}
+							case 6 {
+								host( "working/scan2_julia.rl", 19 ) ${${te = p+1;host( "working/scan2_julia.rl", 19 ) ${print( "any\n" );
+										}$}$}$
+							}
+							case 7 {
+								host( "NONE", 1 ) ${${switch( act ) {
+											case 1 {
+												p = ((te))-1;
+												host( "working/scan2_julia.rl", 13 ) ${print( "pat1\n" );
+												}$ }
+											case 3 {
+												p = ((te))-1;
+												host( "working/scan2_julia.rl", 19 ) ${print( "any\n" );
+												}$ }
+										}}$
+								}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+				}
+				
+				_acts = offset( _scanner_actions, _scanner_to_state_actions[cs] );
+				_nacts = cast(uint)deref( _scanner_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _scanner_actions, _acts ) ) {
+						case 0 {
+							host( "NONE", 1 ) ${${ts = nil;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				if ( _cont == 1 )
+				p += 1;
+				
+			}
+		}
+	}
+}
+host( "working/scan2_julia.rl", 41 ) @{
+	
+	if ( cs >= scanner_first_final )
+	println( "ACCEPT" );
+	else
+	println( "FAIL" );
+	end
+	end
+	
+	m( "a" );
+}@

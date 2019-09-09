@@ -1,0 +1,123 @@
+host( "working/empty1_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class empty1_java
+	{
+		
+		
+		
+		
+		
+		
+		
+	}@
+	array char _empty1_trans_keys( 0, 1 ) = { u(1), u(0), u(1), u(0), u(0) };
+	
+	array s8 _empty1_char_class( 0, 0 ) = { 0 };
+	
+	array s8 _empty1_index_offsets( 0, 0 ) = { 0, 0, 0 };
+	
+	array s8 _empty1_indicies( 0, 0 ) = { 0 };
+	
+	array s8 _empty1_index_defaults( 0, 0 ) = { 0, 0, 0 };
+	
+	array s8 _empty1_trans_cond_spaces( -1, 0 ) = { -1, 0 };
+	
+	array s8 _empty1_cond_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _empty1_cond_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _empty1_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _empty1_nfa_offsets( 0, 0 ) = { 0, 0, 0 };
+	
+	array s8 _empty1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _empty1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int empty1_start = 1;
+	value int empty1_first_final = 2;
+	value int empty1_error = 0;
+	
+	value int empty1_en_main = 1;
+	
+	host( "working/empty1_java.rl", 20 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)empty1_start;
+		}
+		host( "working/empty1_java.rl", 25 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			String _s;
+		}@
+		{
+			int _trans = 0;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_trans = cast(int)_empty1_index_defaults[cs];
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_empty1_cond_targs[_trans];
+					
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/empty1_java.rl", 36 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= empty1_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"",
+			"x",
+		};
+		
+		static final int inplen = 2;
+		
+		public static void main (String[] args)
+		{
+			empty1_java machine = new empty1_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

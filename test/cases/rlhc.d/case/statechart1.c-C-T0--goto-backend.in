@@ -1,0 +1,252 @@
+host( "working/statechart1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Test in and out state actions.
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct state_chart
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _state_chart_actions( 0, 3 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 };
+
+array s8 _state_chart_key_offsets( 0, 26 ) = { 0, 0, 1, 3, 5, 9, 14, 18, 19, 21, 22, 23, 25, 26, 0 };
+
+array char _state_chart_trans_keys( 0, 120 ) = { 120, 48, 54, 49, 50, 10, 32, 48, 97, 10, 32, 48, 97, 98, 10, 32, 48, 98, 120, 48, 54, 50, 120, 48, 54, 49, 10, 48, 97, 98, 0 };
+
+array s8 _state_chart_single_lengths( 0, 5 ) = { 0, 1, 2, 2, 4, 5, 4, 1, 2, 1, 1, 2, 1, 4, 0 };
+
+array s8 _state_chart_range_lengths( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_index_offsets( 0, 38 ) = { 0, 0, 2, 5, 8, 13, 19, 24, 26, 29, 31, 33, 36, 38, 0 };
+
+array s8 _state_chart_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _state_chart_trans_offsets( 0, 42 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 0 };
+
+array s8 _state_chart_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _state_chart_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_cond_targs( 0, 13 ) = { 2, 0, 2, 3, 0, 4, 6, 0, 13, 5, 10, 4, 0, 13, 5, 1, 4, 6, 0, 13, 5, 7, 6, 0, 8, 0, 8, 9, 0, 6, 0, 11, 0, 11, 12, 0, 4, 0, 13, 1, 4, 6, 0, 0 };
+
+array s8 _state_chart_cond_actions( 0, 7 ) = { 0, 0, 0, 0, 0, 5, 7, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 1, 3, 0, 0 };
+
+array s8 _state_chart_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int state_chart_start = 13;
+value int state_chart_first_final = 13;
+value int state_chart_error = 0;
+
+value int state_chart_en_main = 13;
+
+host( "working/statechart1.rl", 54 ) @{
+	
+	void state_chart_init( struct state_chart *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)state_chart_start;
+	}
+	host( "working/statechart1.rl", 58 ) @{
+	}
+	
+	void state_chart_execute( struct state_chart *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		int _klen;
+		uint _trans = 0;
+		uint _cond = 0;
+		index s8 _acts;
+		uint _nacts;
+		index char _keys;
+		index s8 _ckeys;
+		int _cpc;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _state_chart_trans_keys, _state_chart_key_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_trans = cast(uint)_state_chart_index_offsets[host( "-", 1 ) ={ fsm->cs}=];
+				
+				_klen = cast(int)_state_chart_single_lengths[host( "-", 1 ) ={ fsm->cs}=];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _state_chart_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _state_chart_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							goto _match;
+						}
+					}
+					_keys += _klen;
+					_trans += cast(uint)_klen;
+				}
+				
+				_klen = cast(int)_state_chart_range_lengths[host( "-", 1 ) ={ fsm->cs}=];
+				if ( _klen > 0 ) {
+					index char _lower;
+					index char _mid;
+					index char _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( deref( data, p )) < deref( _state_chart_trans_keys, _mid ) )
+						_upper = _mid - 2;
+						else if ( ( deref( data, p )) > deref( _state_chart_trans_keys, _mid + 1 ) )
+						_lower = _mid + 2;
+						else {
+							_trans += cast(uint)((_mid - _keys)>>1);
+							goto _match;
+						}
+					}
+					_trans += cast(uint)_klen;
+				}
+				
+			}
+			label _match {
+				_ckeys = offset( _state_chart_cond_keys, _state_chart_trans_offsets[_trans] );
+				_klen = cast(int)_state_chart_trans_lengths[_trans];
+				_cond = cast(uint)_state_chart_trans_offsets[_trans];
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( TRUE ) {
+						if ( _upper < _lower )
+						break;
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _state_chart_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _state_chart_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							goto _match_cond;
+						}
+					}
+					host( "-", 1 ) ={ fsm->cs}= = 0;
+					goto _again;
+				}
+			}
+			label _match_cond {
+				host( "-", 1 ) ={ fsm->cs}= = cast(int)_state_chart_cond_targs[_cond];
+				
+				if ( _state_chart_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				_acts = offset( _state_chart_actions, _state_chart_cond_actions[_cond] );
+				_nacts = cast(uint)deref( _state_chart_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( deref( _state_chart_actions, _acts ) )
+					{
+						case 0 {
+							host( "working/statechart1.rl", 21 ) ${ printf("a"); }$
+						}
+						case 1 {
+							host( "working/statechart1.rl", 22 ) ${ printf("b"); }$
+						}
+						case 2 {
+							host( "working/statechart1.rl", 23 ) ${ printf("a"); }$
+						}
+						case 3 {
+							host( "working/statechart1.rl", 24 ) ${ printf("b"); }$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/statechart1.rl", 66 ) @{
+	}
+	
+	int state_chart_finish( struct state_chart *fsm )
+	{
+		if ( fsm->cs == state_chart_error )
+		return -1;
+		if ( fsm->cs >= state_chart_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct state_chart sc;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		state_chart_init( &sc );
+		state_chart_execute( &sc, buf, len );
+		state_chart_finish( &sc );
+		printf("\n");
+	}
+	
+	int main()
+	{
+		test(
+		"aa0x0061aa b\n"
+		"bbb0x62b 0x61 0x000062\n"
+		);
+		
+		return 0;
+	}
+	
+}@

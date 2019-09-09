@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <string.h>
+
+struct range
+{
+	int cs;
+};
+
+
+
+static const char  _range_nfa_targs [] = { 0, 0 ,  };
+static const char  _range_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _range_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _range_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  range_start  = 1;
+static const int  range_first_final  = 3;
+static const int  range_error  = 0;
+static const int  range_en_main  = 1;
+void range_init( struct range *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) range_start;
+	}
+}
+
+void range_execute( struct range *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+	
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( (fsm->cs) ) {
+			case 1:
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: (fsm->cs) = 0;
+		goto _again;
+		ctr0: (fsm->cs) = 2;
+		goto _again;
+		ctr2: (fsm->cs) = 3;
+		goto _again;
+		
+		_again:
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+int range_finish( struct range *fsm )
+{
+	if ( fsm->cs == range_error )
+	return -1;
+	if ( fsm->cs >= range_first_final )
+	return 1;
+	return 0;
+}
+
+struct range fsm;
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	range_init( &fsm );
+	range_execute( &fsm, buf, len );
+	if ( range_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+int main()
+{
+	test( "a\n" );
+	test( "z\n" );
+	test( "g\n" );
+	test( "no\n" );
+	test( "1\n" );
+	
+	return 0;
+}
+

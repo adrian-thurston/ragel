@@ -1,0 +1,197 @@
+static mut i : i32 = 0;
+static mut c : i32 = 0;
+
+
+
+
+
+static _foo_actions: [i8 ; 7] = [ 0, 1, 0, 1, 1, 0 , 0 ];
+static _foo_trans_keys: [u8 ; 12] = [ 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 , 0 ];
+static _foo_char_class: [i8 ; 50] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 , 0 ];
+static _foo_index_offsets: [i8 ; 7] = [ 0, 0, 1, 2, 5, 0 , 0 ];
+static _foo_indicies: [i8 ; 7] = [ 0, 2, 3, 1, 4, 0 , 0 ];
+static _foo_index_defaults: [i8 ; 7] = [ 0, 1, 1, 1, 1, 0 , 0 ];
+static _foo_trans_cond_spaces: [i8 ; 7] = [ -1, -1, 0, 0, 0, 0 , 0 ];
+static _foo_trans_offsets: [i8 ; 7] = [ 0, 1, 2, 4, 6, 0 , 0 ];
+static _foo_cond_targs: [i8 ; 10] = [ 2, 0, 3, 2, 4, 0, 0, 3, 0 , 0 ];
+static _foo_cond_actions: [i8 ; 10] = [ 3, 0, 3, 1, 0, 0, 0, 1, 0 , 0 ];
+static _foo_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _foo_nfa_offsets: [i8 ; 7] = [ 0, 0, 0, 0, 0, 0 , 0 ];
+static _foo_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _foo_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static foo_start : i32 = 1;
+static foo_first_final : i32 = 4;
+static foo_error : i32 = 0;
+static foo_en_main : i32 = 1;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( foo_start ) as i32;
+	}
+	
+	{
+		let mut _trans  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		let mut _cond  = 0;
+		let mut _acts :i32 = 0;
+		let mut _nacts = 0;
+		let mut _keys :i32 = 0;
+		let mut _inds :i32 = 0;
+		let mut _cpc = 0;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  ) {
+				_cont = 0;
+				
+			}
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							_keys = ( (cs<<1)  ) as i32;
+							_inds = ( _foo_index_offsets[(cs) as usize] ) as i32;
+							if ( ( data[(p ) as usize]
+							) <= 57 && ( data[(p ) as usize]
+							) >= 10  ) {
+								{
+									let mut _ic  = ( _foo_char_class[(( ( data[(p ) as usize]
+									)  ) as i32- 10) as usize] ) as i32;
+									if ( _ic <= ( _foo_trans_keys[(_keys+1 ) as usize]
+									) as i32&& _ic >= ( _foo_trans_keys[(_keys ) as usize]
+									) as i32 ) {
+										_trans = ( _foo_indicies[(_inds + ( ( _ic - ( _foo_trans_keys[(_keys ) as usize]
+										) as i32)   ) as i32) as usize]
+										) as u32;
+										
+									}
+									else {
+										_trans = ( _foo_index_defaults[(cs) as usize] ) as u32;
+										
+									}
+								}
+								
+							}
+							else {
+								{
+									_trans = ( _foo_index_defaults[(cs) as usize] ) as u32;
+								}
+								
+								
+							}
+							_cond = ( _foo_trans_offsets[(_trans) as usize] ) as u32;
+							_cpc = 0;
+							match ( _foo_trans_cond_spaces[(_trans) as usize] ) {
+								0  => {
+									if ( (i > 0) ) {
+										_cpc += 1;
+										
+									}
+									
+								}
+								
+								_ => {}
+							}
+							_cond += ( _cpc ) as u32;
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _foo_cond_targs[(_cond) as usize] ) as i32;
+							if ( _foo_cond_actions[(_cond) as usize]!= 0  ) {
+								{
+									_acts = ( _foo_cond_actions[(_cond) as usize] ) as i32;
+									_nacts = ( _foo_actions[(_acts ) as usize]
+									) as u32;
+									_acts += 1;
+									while ( _nacts > 0  )
+									{
+										match ( _foo_actions[(_acts ) as usize]
+										) {
+											0  => {
+												{i = i - 1;
+													c = ( ( (( data[(p ) as usize]
+													)) ) as i32 ) 
+													;
+													print!( "{}", "item: " );
+													print!( "{}", c );
+													print!( "{}", "\n" );
+												}
+												
+											}
+											1  => {
+												{i = ( ( (( data[(p ) as usize]
+													)) - 48 ) as i32 ) 
+													;
+													print!( "{}", "count: " );
+													print!( "{}", i );
+													print!( "{}", "\n" );
+												}
+												
+											}
+											
+											_ => {}
+										}
+										_nacts -= 1;
+										_acts += 1;
+									}
+									
+								}
+								
+								
+							}
+							if ( cs == 0  ) {
+								_cont = 0;
+								
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= foo_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "00\n".to_string() ); }
+	unsafe { m( "019\n".to_string() ); }
+	unsafe { m( "190\n".to_string() ); }
+	unsafe { m( "1719\n".to_string() ); }
+	unsafe { m( "1040000\n".to_string() ); }
+	unsafe { m( "104000a\n".to_string() ); }
+	unsafe { m( "104000\n".to_string() ); }
+}
+

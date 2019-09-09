@@ -1,0 +1,436 @@
+#
+# @LANG: ruby
+#
+
+
+
+class << self
+	attr_accessor :test_ex_c1 
+end
+self.test_ex_c1  = 99;
+
+class << self
+	attr_accessor :test_ex_c2 
+end
+self.test_ex_c2  = 122;
+
+class << self
+	attr_accessor :test_ex_c3 
+end
+self.test_ex_c3  = 116;
+
+class << self
+	attr_accessor :_test_actions 
+	private :_test_actions, :_test_actions=
+end
+self._test_actions = [
+0, 1, 0, 1, 1, 1, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_test_key_offsets 
+	private :_test_key_offsets, :_test_key_offsets=
+end
+self._test_key_offsets = [
+0, 0, 3, 5, 10, 10, 0 , 
+]
+
+class << self
+	attr_accessor :_test_trans_keys 
+	private :_test_trans_keys, :_test_trans_keys=
+end
+self._test_trans_keys = [
+10, 48, 57, 10, 46, 10, 65, 90, 97, 122, 99, 116, 122, 0 , 
+]
+
+class << self
+	attr_accessor :_test_single_lengths 
+	private :_test_single_lengths, :_test_single_lengths=
+end
+self._test_single_lengths = [
+0, 1, 2, 1, 0, 3, 0 , 
+]
+
+class << self
+	attr_accessor :_test_range_lengths 
+	private :_test_range_lengths, :_test_range_lengths=
+end
+self._test_range_lengths = [
+0, 1, 0, 2, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_index_offsets 
+	private :_test_index_offsets, :_test_index_offsets=
+end
+self._test_index_offsets = [
+0, 0, 3, 6, 10, 11, 0 , 
+]
+
+class << self
+	attr_accessor :_test_trans_cond_spaces 
+	private :_test_trans_cond_spaces, :_test_trans_cond_spaces=
+end
+self._test_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_test_trans_offsets 
+	private :_test_trans_offsets, :_test_trans_offsets=
+end
+self._test_trans_offsets = [
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 0 , 
+]
+
+class << self
+	attr_accessor :_test_trans_lengths 
+	private :_test_trans_lengths, :_test_trans_lengths=
+end
+self._test_trans_lengths = [
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_test_cond_keys 
+	private :_test_cond_keys, :_test_cond_keys=
+end
+self._test_cond_keys = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_cond_targs 
+	private :_test_cond_targs, :_test_cond_targs=
+end
+self._test_cond_targs = [
+5, 1, 0, 5, 2, 0, 5, 3, 3, 0, 4, 1, 2, 3, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_cond_actions 
+	private :_test_cond_actions, :_test_cond_actions=
+end
+self._test_cond_actions = [
+1, 0, 0, 5, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_targs 
+	private :_test_nfa_targs, :_test_nfa_targs=
+end
+self._test_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_offsets 
+	private :_test_nfa_offsets, :_test_nfa_offsets=
+end
+self._test_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_push_actions 
+	private :_test_nfa_push_actions, :_test_nfa_push_actions=
+end
+self._test_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_test_nfa_pop_trans 
+	private :_test_nfa_pop_trans, :_test_nfa_pop_trans=
+end
+self._test_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :test_start 
+end
+self.test_start  = 4;
+
+class << self
+	attr_accessor :test_first_final 
+end
+self.test_first_final  = 4;
+
+class << self
+	attr_accessor :test_error 
+end
+self.test_error  = 0;
+
+class << self
+	attr_accessor :test_en_commands 
+end
+self.test_en_commands  = 5;
+
+class << self
+	attr_accessor :test_en_other 
+end
+self.test_en_other  = 4;
+
+def run_machine( data )
+	p = 0;
+	pe = data.length
+	cs = test_en_commands
+	val = 0;
+	neg = false;
+	
+	begin
+	
+	end
+	begin
+		_klen= 0
+		;
+		_trans = 0;
+		_cond = 0;
+		_have = 0;
+		_cont = 1;
+		_acts = 0;
+		_nacts= 0
+		;
+		_keys = 0;
+		_ckeys = 0;
+		_cpc= 0
+		;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_keys = _test_key_offsets[cs] ;
+								_trans = _test_index_offsets[cs];
+								_have = 0;
+								_klen = _test_single_lengths[cs];
+								if ( _klen > 0  )
+									begin
+										_lower = 0;
+										_mid = 0;
+										_upper = 0;
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										while ( _upper >= _lower && _have == 0  )
+											begin
+												_mid = _lower + ((_upper-_lower) >> 1);
+												if ( ( data[p ].ord) < _test_trans_keys[_mid ] )
+													_upper = _mid - 1;
+													
+													elsif ( ( data[p ].ord) > _test_trans_keys[_mid ] )
+													_lower = _mid + 1;
+													
+													else
+													begin
+														_trans += (_mid - _keys);
+														_have = 1;
+														
+													end
+													
+												end
+												
+											end
+											
+										end
+										if ( _have == 0  )
+											begin
+												_keys += _klen;
+												_trans += _klen;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+										_klen = _test_range_lengths[cs];
+										if ( _klen > 0  )
+											begin
+												_lower = 0;
+												_mid = 0;
+												_upper = 0;
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												while ( _have == 0 && _lower <= _upper  )
+													begin
+														_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+														if ( ( data[p ].ord) < _test_trans_keys[_mid ] )
+															_upper = _mid - 2;
+															
+															elsif ( ( data[p ].ord) > _test_trans_keys[_mid + 1 ] )
+															_lower = _mid + 2;
+															
+															else
+															begin
+																_trans += ((_mid - _keys)>>1);
+																_have = 1;
+																
+															end
+															
+														end
+														
+													end
+													
+												end
+												if ( _have == 0  )
+													_trans += _klen;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								_ckeys = _test_trans_offsets[_trans] ;
+								_klen = _test_trans_lengths[_trans];
+								_cond = _test_trans_offsets[_trans];
+								_have = 0;
+								_cpc = 0;
+								begin
+									_lower = 0;
+									_mid = 0;
+									_upper = 0;
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									while ( _have == 0 && _lower <= _upper  )
+										begin
+											_mid = _lower + ((_upper-_lower) >> 1);
+											if ( _cpc < _test_cond_keys[_mid ] )
+												_upper = _mid - 1;
+												
+												elsif ( _cpc > _test_cond_keys[_mid ] )
+												_lower = _mid + 1;
+												
+												else
+												begin
+													_cond += (_mid - _ckeys);
+													_have = 1;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									if ( _have == 0  )
+										begin
+											cs = 0;
+											_cont = 0;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _cont == 1  )
+							begin
+								cs = _test_cond_targs[_cond];
+								if ( _test_cond_actions[_cond] != 0  )
+									begin
+										_acts = _test_cond_actions[_cond] ;
+										_nacts = _test_actions[_acts ];
+										_acts += 1;
+										while ( _nacts > 0  )
+											begin
+												case  _test_actions[_acts ] 
+												when -2 then
+												begin
+												end
+												when 0  then
+												begin
+													begin
+														puts "c1"; 
+													end
+													
+												end
+												when 1  then
+												begin
+													begin
+														puts "c2"; 
+													end
+													
+												end
+												when 2  then
+												begin
+													begin
+														puts "c3"; 
+													end
+													
+													
+												end
+											end
+											_nacts -= 1;
+											_acts += 1;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							if ( cs == 0  )
+								_cont = 0;
+								
+							end
+							if ( _cont == 1  )
+								p += 1;
+								
+							end
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+if  cs >= test_first_final
+	puts "ACCEPT"
+	else
+	puts "FAIL"
+end
+end
+	
+	inp = [
+	test_ex_c1, ?1, ?2, ?\n, 
+	test_ex_c2, ?a, ?b, ?\n, 
+	test_ex_c3, ?., ?., ?\n
+	]
+	
+	run_machine( inp );
+	

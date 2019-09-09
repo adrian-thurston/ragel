@@ -1,0 +1,388 @@
+host( "working/clang4_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class clang4_java
+	{
+		int pos ;
+		int line ;
+		
+		
+		
+		
+		
+	}@
+	array s8 _clang_actions( 0, 8 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 2, 0, 2, 2, 1, 0, 2, 3, 1, 2, 3, 2, 2, 4, 1, 2, 4, 2, 2, 5, 1, 2, 5, 2, 2, 6, 1, 2, 6, 2, 2, 7, 1, 2, 7, 2, 2, 8, 1, 2, 8, 2, 3, 3, 1, 0, 3, 4, 1, 0, 3, 5, 1, 0, 3, 6, 1, 0, 3, 7, 1, 0, 3, 8, 1, 0, 0 };
+	
+	array s16 _clang_key_offsets( 0, 196 ) = { 0, 0, 5, 10, 13, 17, 22, 25, 27, 33, 36, 56, 76, 96, 117, 138, 157, 176, 196, 0 };
+	
+	array char _clang_trans_keys( 0, 255 ) = { u(10), u(34), u(92), u(0), u(255), u(10), u(39), u(92), u(0), u(255), u(10), u(0), u(255), u(10), u(33), u(0), u(255), u(10), u(33), u(47), u(0), u(255), u(10), u(0), u(255), u(48), u(57), u(48), u(57), u(65), u(70), u(97), u(102), u(10), u(0), u(255), u(10), u(34), u(39), u(47), u(48), u(95), u(33), u(46), u(49), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(47), u(48), u(95), u(33), u(46), u(49), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(47), u(48), u(95), u(33), u(46), u(49), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(33), u(34), u(39), u(47), u(48), u(95), u(35), u(46), u(49), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(46), u(47), u(95), u(120), u(33), u(45), u(48), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(47), u(95), u(33), u(46), u(48), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(47), u(95), u(33), u(46), u(48), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(46), u(47), u(95), u(33), u(45), u(48), u(57), u(58), u(64), u(65), u(90), u(91), u(96), u(97), u(122), u(123), u(126), u(10), u(34), u(39), u(47), u(95), u(33), u(46), u(48), u(57), u(58), u(64), u(65), u(70), u(71), u(90), u(91), u(96), u(97), u(102), u(103), u(122), u(123), u(126), u(0) };
+	
+	array s8 _clang_single_lengths( 0, 7 ) = { 0, 3, 3, 1, 2, 3, 1, 0, 0, 1, 6, 6, 6, 7, 7, 5, 5, 6, 5, 0 };
+	
+	array s8 _clang_range_lengths( 0, 9 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 3, 1, 7, 7, 7, 7, 7, 7, 7, 7, 9, 0 };
+	
+	array s16 _clang_index_offsets( 0, 146 ) = { 0, 0, 5, 10, 13, 17, 22, 25, 27, 31, 34, 48, 62, 76, 91, 106, 119, 132, 146, 0 };
+	
+	array s8 _clang_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s16 _clang_trans_offsets( 0, 160 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 0 };
+	
+	array s8 _clang_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+	
+	array s8 _clang_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _clang_cond_targs( 0, 18 ) = { 1, 12, 9, 1, 0, 2, 12, 3, 2, 0, 2, 2, 0, 4, 5, 4, 0, 4, 5, 10, 4, 0, 10, 6, 0, 15, 0, 18, 18, 18, 0, 1, 1, 0, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 4, 1, 2, 6, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 7, 13, 16, 8, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 15, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 16, 11, 16, 11, 16, 11, 10, 10, 1, 2, 7, 13, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 18, 11, 18, 16, 11, 18, 16, 11, 10, 0 };
+	
+	array s8 _clang_cond_actions( 0, 81 ) = { 19, 0, 0, 1, 0, 19, 0, 0, 1, 0, 19, 1, 0, 5, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 1, 0, 22, 22, 22, 0, 19, 1, 0, 5, 3, 3, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 0, 58, 55, 55, 81, 81, 81, 81, 81, 81, 81, 81, 81, 81, 17, 34, 31, 31, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 9, 58, 0, 55, 55, 0, 81, 81, 81, 81, 81, 81, 81, 81, 81, 17, 46, 43, 43, 1, 73, 73, 0, 73, 1, 73, 73, 73, 73, 73, 13, 40, 37, 37, 69, 69, 69, 1, 69, 69, 69, 69, 69, 11, 28, 25, 25, 61, 1, 61, 1, 61, 1, 61, 1, 61, 7, 46, 43, 43, 1, 73, 73, 73, 1, 73, 73, 73, 73, 73, 13, 52, 49, 49, 77, 77, 77, 1, 77, 1, 77, 77, 1, 77, 77, 15, 0 };
+	
+	array s8 _clang_eof_actions( 0, 17 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 9, 17, 13, 11, 7, 13, 15, 0 };
+	
+	array s8 _clang_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _clang_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _clang_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _clang_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int clang_start = 10;
+	value int clang_first_final = 10;
+	value int clang_error = 0;
+	
+	value int clang_en_main = 10;
+	
+	host( "working/clang4_java.rl", 158 ) @{
+		int cs;
+		
+		void init()
+		{
+			pos = 0;
+			line = 1;
+		}@
+		{
+			cs = cast(int)clang_start;
+		}
+		host( "working/clang4_java.rl", 165 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			int eof = len;
+			String _s;
+		}@
+		{
+			int _klen;
+			uint _trans = 0;
+			uint _cond = 0;
+			uint _have = 0;
+			uint _cont = 1;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _ckeys;
+			int _cpc;
+			while ( _cont == 1 ) {
+				
+				if ( cs == 0 )
+				_cont = 0;
+				_have = 0;
+				if ( p == pe ) {
+					if ( p == eof )
+					{
+						if ( _have == 0 ) {
+							index s8 __acts;
+							uint __nacts;
+							__acts = offset( _clang_actions, _clang_eof_actions[cs] );
+							__nacts = cast(uint)deref( _clang_actions, __acts );
+							__acts += 1;
+							while ( __nacts > 0 ) {
+								switch ( deref( _clang_actions, __acts ) ) {
+									case 3 {
+										host( "working/clang4_java.rl", 28 ) ${System.out.print( "ident(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 4 {
+										host( "working/clang4_java.rl", 36 ) ${System.out.print( "literal(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 5 {
+										host( "working/clang4_java.rl", 44 ) ${System.out.print( "float(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 6 {
+										host( "working/clang4_java.rl", 52 ) ${System.out.print( "int(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 7 {
+										host( "working/clang4_java.rl", 60 ) ${System.out.print( "hex(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 8 {
+										host( "working/clang4_java.rl", 68 ) ${System.out.print( "symbol(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+								}
+								__nacts -= 1;
+								__acts += 1;
+							}
+						}
+					}
+					
+					if ( _have == 0 )
+					_cont = 0;
+				}
+				if ( _cont == 1 ) {
+					if ( _have == 0 ) {
+						_keys = offset( _clang_trans_keys, _clang_key_offsets[cs] );
+						_trans = cast(uint)_clang_index_offsets[cs];
+						_have = 0;
+						
+						_klen = cast(int)_clang_single_lengths[cs];
+						if ( _klen > 0 ) {
+							index char _lower;
+							index char _mid;
+							index char _upper;
+							_lower = _keys;
+							_upper = _keys + _klen - 1;
+							while ( _upper >= _lower && _have == 0 ) {
+								_mid = _lower + ((_upper-_lower) >> 1);
+								if ( ( deref( data, p )) < deref( _clang_trans_keys, _mid ) )
+								_upper = _mid - 1;
+								else if ( ( deref( data, p )) > deref( _clang_trans_keys, _mid ) )
+								_lower = _mid + 1;
+								else {
+									_trans += cast(uint)(_mid - _keys);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 ) {
+								_keys += _klen;
+								_trans += cast(uint)_klen;
+							}
+						}
+						
+						if ( _have == 0 ) {
+							_klen = cast(int)_clang_range_lengths[cs];
+							if ( _klen > 0 ) {
+								index char _lower;
+								index char _mid;
+								index char _upper;
+								_lower = _keys;
+								_upper = _keys + (_klen<<1) - 2;
+								while ( _have == 0 && _lower <= _upper ) {
+									_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+									if ( ( deref( data, p )) < deref( _clang_trans_keys, _mid ) )
+									_upper = _mid - 2;
+									else if ( ( deref( data, p )) > deref( _clang_trans_keys, _mid + 1 ) )
+									_lower = _mid + 2;
+									else {
+										_trans += cast(uint)((_mid - _keys)>>1);
+										_have = 1;
+									}
+								}
+								if ( _have == 0 )
+								_trans += cast(uint)_klen;
+							}
+						}
+						
+						_ckeys = offset( _clang_cond_keys, _clang_trans_offsets[_trans] );
+						_klen = cast(int)_clang_trans_lengths[_trans];
+						_cond = cast(uint)_clang_trans_offsets[_trans];
+						_have = 0;
+						
+						_cpc = 0;
+						{
+							index s8 _lower;
+							index s8 _mid;
+							index s8 _upper;
+							_lower = _ckeys;
+							_upper = _ckeys + _klen - 1;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + ((_upper-_lower) >> 1);
+								if ( _cpc < cast(int)deref( _clang_cond_keys, _mid ) )
+								_upper = _mid - 1;
+								else if ( _cpc > cast(int)deref( _clang_cond_keys, _mid ) )
+								_lower = _mid + 1;
+								else {
+									_cond += cast(uint)(_mid - _ckeys);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 ) {
+								cs = 0;
+								_cont = 0;
+							}
+						}
+					}
+					if ( _cont == 1 ) {
+						cs = cast(int)_clang_cond_targs[_cond];
+						
+						if ( _clang_cond_actions[_cond] != 0 ) {
+							_acts = offset( _clang_actions, _clang_cond_actions[_cond] );
+							_nacts = cast(uint)deref( _clang_actions, _acts );
+							_acts += 1;
+							while ( _nacts > 0 )
+							{
+								switch ( deref( _clang_actions, _acts ) )
+								{
+									case 0 {
+										host( "working/clang4_java.rl", 16 ) ${	buffer[blen] = ={( deref( data, p ))}=;
+											blen += 1;
+										}$
+									}
+									case 1 {
+										host( "working/clang4_java.rl", 21 ) ${	blen = 0;
+										}$
+									}
+									case 2 {
+										host( "working/clang4_java.rl", 24 ) ${line = line + 1;
+										}$
+									}
+									case 3 {
+										host( "working/clang4_java.rl", 28 ) ${System.out.print( "ident(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 4 {
+										host( "working/clang4_java.rl", 36 ) ${System.out.print( "literal(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 5 {
+										host( "working/clang4_java.rl", 44 ) ${System.out.print( "float(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 6 {
+										host( "working/clang4_java.rl", 52 ) ${System.out.print( "int(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 7 {
+										host( "working/clang4_java.rl", 60 ) ${System.out.print( "hex(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+									case 8 {
+										host( "working/clang4_java.rl", 68 ) ${System.out.print( "symbol(" );
+											System.out.print( line );
+											System.out.print( "," );
+											System.out.print( blen );
+											System.out.print( "): " );
+											System.out.print( new String( buffer, 0, blen ) );
+											System.out.print( "\n" );
+										}$
+									}
+								}
+								_nacts -= 1;
+								_acts += 1;
+							}
+						}
+						
+						if ( cs == 0 )
+						_cont = 0;
+						if ( _cont == 1 )
+						p += 1;
+						
+					}
+				}
+			}
+		}
+		host( "working/clang4_java.rl", 177 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= clang_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n",
+			"wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n",
+		};
+		
+		static final int inplen = 2;
+		
+		public static void main (String[] args)
+		{
+			clang4_java machine = new clang4_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

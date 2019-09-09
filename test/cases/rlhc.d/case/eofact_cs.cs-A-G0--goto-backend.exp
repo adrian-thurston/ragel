@@ -1,0 +1,266 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+	
+	
+	
+	
+	
+	
+		static readonly sbyte  []_eofact_actions = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 2, 0, 2, 0,  };
+		static readonly sbyte  []_eofact_eof_actions = { 0, 9, 1, 1, 1, 1, 5, 5, 5, 5, 3, 0, 7, 0,  };
+		static readonly sbyte  []_eofact_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_eofact_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_eofact_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_eofact_nfa_pop_trans = { 0, 0,  };
+		static readonly int  eofact_start  = 1;
+		static readonly int  eofact_first_final  = 10;
+		static readonly int  eofact_error  = 0;
+		static readonly int  eofact_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)eofact_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+			
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( cs  ) {
+					case 1:
+					switch ( ( data[p ])  ) {
+						case '\u0068':
+						{
+							goto ctr0;
+						}
+						case '\u0074':
+						{
+							goto ctr2;
+						}
+						
+					}
+					{
+						goto ctr1;
+					}
+					case 0:
+					goto _out;
+					case 2:
+					if ( ( data[p ]) == '\u0065' )
+					{
+						goto ctr3;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 3:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr4;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 4:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr5;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 5:
+					if ( ( data[p ]) == '\u006f' )
+					{
+						goto ctr6;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 10:
+					if ( ( data[p ]) == '\u000a' )
+					{
+						goto ctr11;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 11:
+					{
+						goto ctr1;
+					}
+					case 6:
+					if ( ( data[p ]) == '\u0068' )
+					{
+						goto ctr7;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 7:
+					if ( ( data[p ]) == '\u0065' )
+					{
+						goto ctr8;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 8:
+					if ( ( data[p ]) == '\u0072' )
+					{
+						goto ctr9;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 9:
+					if ( ( data[p ]) == '\u0065' )
+					{
+						goto ctr10;
+					}
+					
+					{
+						goto ctr1;
+					}
+					case 12:
+					{
+						goto ctr1;
+					}
+					
+				}
+				ctr1: cs = 0;
+				goto _again;
+				ctr0: cs = 2;
+				goto _again;
+				ctr3: cs = 3;
+				goto _again;
+				ctr4: cs = 4;
+				goto _again;
+				ctr5: cs = 5;
+				goto _again;
+				ctr2: cs = 6;
+				goto _again;
+				ctr7: cs = 7;
+				goto _again;
+				ctr8: cs = 8;
+				goto _again;
+				ctr9: cs = 9;
+				goto _again;
+				ctr6: cs = 10;
+				goto _again;
+				ctr11: cs = 11;
+				goto _again;
+				ctr10: cs = 12;
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					int __acts;
+					uint __nacts;
+					__acts = _eofact_eof_actions[cs] ;
+					__nacts = (uint )_eofact_actions[__acts ];
+					__acts += 1;
+					while ( __nacts > 0 )
+					{
+						switch ( _eofact_actions[__acts ] ) {
+							case 0:
+							{Console.Write( "a1\n" );}
+							
+							break;
+							case 1:
+							{Console.Write( "a2\n" );}
+							
+							break;
+							case 2:
+							{Console.Write( "a3\n" );}
+							
+							break;
+							case 3:
+							{Console.Write( "a4\n" );}
+							
+							break;
+							
+						}
+						__acts += 1;
+						__nacts -= 1;
+					}
+					
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= eofact_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"",
+			"h",
+			"hell",
+			"hello",
+			"hello\n",
+			"t",
+			"ther",
+			"there",
+			"friend",
+		};
+		
+		
+		static readonly int inplen = 9;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

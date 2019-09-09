@@ -1,0 +1,212 @@
+package main
+import "fmt"
+
+var ts  int ;
+var te  int ;
+var act  int ;
+var token  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var scanner_start  int  = 1
+var scanner_first_final  int  = 1
+var scanner_error  int  = -1
+var scanner_en_main  int  = 1
+var _scanner_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0  }
+var _scanner_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+func prepare() {
+
+	{
+		cs = int(scanner_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		switch cs  {
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 0:
+			goto st_case_0;
+			
+		}
+		goto st_out;
+		ctr7:
+		{{switch act  {
+					case 1 :
+					p = ((te))-1;
+					{fmt.Print( "pat1\n" );}
+					
+					break;
+					default:
+					p = ((te))-1;
+					
+					break;
+					
+				}
+			}
+		}
+		
+		
+		goto st1;
+		ctr3:
+		{{te = p+1;
+				{fmt.Print( "pat2\n" );}
+			}}
+		
+		
+		goto st1;
+		ctr4:
+		{{te = p+1;
+			}}
+		
+		
+		goto st1;
+		st1:
+		{{ts = 0;
+			}}
+		
+		p+= 1;
+		if p == pe  {
+			goto _test_eof1;
+			
+		}
+		st_case_1:
+		{{ts = p;
+			}}
+		switch ( data[p ])  {
+			case 97:
+			{
+				goto ctr5;
+			}
+			case 98:
+			{
+				goto ctr6;
+			}
+			
+		}
+		{
+			goto ctr4;
+		}
+		ctr5:
+		{{te = p+1;
+			}}
+		{{act = 1;
+			}}
+		
+		
+		goto st2;
+		ctr6:
+		{{te = p+1;
+			}}
+		{{act = 3;
+			}}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof2;
+			
+		}
+		st_case_2:
+		if ( data[p ]) == 99  {
+			{
+				goto ctr3;
+			}
+			
+		}
+		if 97 <= ( data[p ]) && ( data[p ]) <= 98  {
+			{
+				goto st0;
+			}
+			
+		}
+		{
+			goto ctr7;
+		}
+		st0:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof0;
+			
+		}
+		st_case_0:
+		if ( data[p ]) == 99  {
+			{
+				goto ctr3;
+			}
+			
+		}
+		if 97 <= ( data[p ]) && ( data[p ]) <= 98  {
+			{
+				goto st0;
+			}
+			
+		}
+		{
+			goto ctr7;
+		}
+		st_out:
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof0: cs = 0;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 2:
+					goto ctr7;
+					case 0:
+					goto ctr7;
+					
+				}
+			}
+			
+			
+		}
+	}
+}
+func finish() {
+	if cs >= scanner_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"ba a",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

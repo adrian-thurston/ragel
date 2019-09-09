@@ -1,0 +1,245 @@
+host( "working/caseindep_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	
+	
+	
+	
+}@
+array s8 _indep_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _indep_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _indep_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _indep_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int indep_start = 1;
+value int indep_first_final = 13;
+value int indep_error = 0;
+
+value int indep_en_main = 1;
+
+host( "working/caseindep_c.rl", 27 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)indep_start;
+	}
+	host( "working/caseindep_c.rl", 34 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) > 51 ) {
+				if ( ( deref( data, p )) <= 54 ) {
+					goto ctr2;
+				}
+			} else if ( ( deref( data, p )) >= 49 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr1;
+			}
+			case 13:
+			{
+				goto ctr1;
+			}
+			case 8:
+			switch( ( deref( data, p )) ) {
+				case 72: {
+					goto ctr9;
+				}
+				case 104: {
+					goto ctr9;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			switch( ( deref( data, p )) ) {
+				case 69: {
+					goto ctr10;
+				}
+				case 101: {
+					goto ctr10;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr11;
+				}
+				case 108: {
+					goto ctr11;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			switch( ( deref( data, p )) ) {
+				case 76: {
+					goto ctr12;
+				}
+				case 108: {
+					goto ctr12;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			switch( ( deref( data, p )) ) {
+				case 79: {
+					goto ctr7;
+				}
+				case 111: {
+					goto ctr7;
+				}
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr3: cs = 3; goto _again;
+		ctr4: cs = 4; goto _again;
+		ctr5: cs = 5; goto _again;
+		ctr6: cs = 6; goto _again;
+		ctr7: cs = 7; goto _again;
+		ctr2: cs = 8; goto _again;
+		ctr9: cs = 9; goto _again;
+		ctr10: cs = 10; goto _again;
+		ctr11: cs = 11; goto _again;
+		ctr12: cs = 12; goto _again;
+		ctr8: cs = 13; goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/caseindep_c.rl", 41 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= indep_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"1hello\n",
+		"1HELLO\n",
+		"1HeLLo\n",
+		"2hello\n",
+		"2HELLO\n",
+		"2HeLLo\n",
+		"3hello\n",
+		"3HELLO\n",
+		"3HeLLo\n",
+		"4hello\n",
+		"4HELLO\n",
+		"4HeLLo\n",
+		"5hello\n",
+		"5HELLO\n",
+		"5HeLLo\n",
+		"6hello\n",
+		"6HELLO\n",
+		"6HeLLo\n",
+	};
+	
+	int inplen = 18;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

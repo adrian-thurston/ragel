@@ -1,0 +1,373 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+
+class << self
+	attr_accessor :_rangei_key_offsets 
+	private :_rangei_key_offsets, :_rangei_key_offsets=
+end
+self._rangei_key_offsets = [
+0, 0, 4, 8, 12, 16, 22, 24, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_trans_keys 
+	private :_rangei_trans_keys, :_rangei_trans_keys=
+end
+self._rangei_trans_keys = [
+65, 90, 97, 122, 65, 90, 97, 122, 60, 93, 97, 122, 65, 90, 94, 125, 65, 69, 86, 101, 118, 122, 60, 125, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_single_lengths 
+	private :_rangei_single_lengths, :_rangei_single_lengths=
+end
+self._rangei_single_lengths = [
+0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_range_lengths 
+	private :_rangei_range_lengths, :_rangei_range_lengths=
+end
+self._rangei_range_lengths = [
+0, 2, 2, 2, 2, 3, 1, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_index_offsets 
+	private :_rangei_index_offsets, :_rangei_index_offsets=
+end
+self._rangei_index_offsets = [
+0, 0, 3, 6, 9, 12, 16, 18, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_trans_cond_spaces 
+	private :_rangei_trans_cond_spaces, :_rangei_trans_cond_spaces=
+end
+self._rangei_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_trans_offsets 
+	private :_rangei_trans_offsets, :_rangei_trans_offsets=
+end
+self._rangei_trans_offsets = [
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_trans_lengths 
+	private :_rangei_trans_lengths, :_rangei_trans_lengths=
+end
+self._rangei_trans_lengths = [
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_cond_keys 
+	private :_rangei_cond_keys, :_rangei_cond_keys=
+end
+self._rangei_cond_keys = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_cond_targs 
+	private :_rangei_cond_targs, :_rangei_cond_targs=
+end
+self._rangei_cond_targs = [
+2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0, 6, 6, 6, 0, 7, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_cond_actions 
+	private :_rangei_cond_actions, :_rangei_cond_actions=
+end
+self._rangei_cond_actions = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_nfa_targs 
+	private :_rangei_nfa_targs, :_rangei_nfa_targs=
+end
+self._rangei_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_nfa_offsets 
+	private :_rangei_nfa_offsets, :_rangei_nfa_offsets=
+end
+self._rangei_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_nfa_push_actions 
+	private :_rangei_nfa_push_actions, :_rangei_nfa_push_actions=
+end
+self._rangei_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_rangei_nfa_pop_trans 
+	private :_rangei_nfa_pop_trans, :_rangei_nfa_pop_trans=
+end
+self._rangei_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :rangei_start 
+end
+self.rangei_start  = 1;
+
+class << self
+	attr_accessor :rangei_first_final 
+end
+self.rangei_first_final  = 7;
+
+class << self
+	attr_accessor :rangei_error 
+end
+self.rangei_error  = 0;
+
+class << self
+	attr_accessor :rangei_en_main 
+end
+self.rangei_en_main  = 1;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	begin
+		cs = rangei_start;
+		
+	end
+	begin
+		_klen= 0
+		;
+		_trans = 0;
+		_cond = 0;
+		_have = 0;
+		_cont = 1;
+		_keys = 0;
+		_ckeys = 0;
+		_cpc= 0
+		;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_keys = _rangei_key_offsets[cs] ;
+								_trans = _rangei_index_offsets[cs];
+								_have = 0;
+								_klen = _rangei_single_lengths[cs];
+								if ( _klen > 0  )
+									begin
+										_lower = 0;
+										_mid = 0;
+										_upper = 0;
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										while ( _upper >= _lower && _have == 0  )
+											begin
+												_mid = _lower + ((_upper-_lower) >> 1);
+												if ( ( data[p ].ord) < _rangei_trans_keys[_mid ] )
+													_upper = _mid - 1;
+													
+													elsif ( ( data[p ].ord) > _rangei_trans_keys[_mid ] )
+													_lower = _mid + 1;
+													
+													else
+													begin
+														_trans += (_mid - _keys);
+														_have = 1;
+														
+													end
+													
+												end
+												
+											end
+											
+										end
+										if ( _have == 0  )
+											begin
+												_keys += _klen;
+												_trans += _klen;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+										_klen = _rangei_range_lengths[cs];
+										if ( _klen > 0  )
+											begin
+												_lower = 0;
+												_mid = 0;
+												_upper = 0;
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												while ( _have == 0 && _lower <= _upper  )
+													begin
+														_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+														if ( ( data[p ].ord) < _rangei_trans_keys[_mid ] )
+															_upper = _mid - 2;
+															
+															elsif ( ( data[p ].ord) > _rangei_trans_keys[_mid + 1 ] )
+															_lower = _mid + 2;
+															
+															else
+															begin
+																_trans += ((_mid - _keys)>>1);
+																_have = 1;
+																
+															end
+															
+														end
+														
+													end
+													
+												end
+												if ( _have == 0  )
+													_trans += _klen;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								_ckeys = _rangei_trans_offsets[_trans] ;
+								_klen = _rangei_trans_lengths[_trans];
+								_cond = _rangei_trans_offsets[_trans];
+								_have = 0;
+								_cpc = 0;
+								begin
+									_lower = 0;
+									_mid = 0;
+									_upper = 0;
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									while ( _have == 0 && _lower <= _upper  )
+										begin
+											_mid = _lower + ((_upper-_lower) >> 1);
+											if ( _cpc < _rangei_cond_keys[_mid ] )
+												_upper = _mid - 1;
+												
+												elsif ( _cpc > _rangei_cond_keys[_mid ] )
+												_lower = _mid + 1;
+												
+												else
+												begin
+													_cond += (_mid - _ckeys);
+													_have = 1;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									if ( _have == 0  )
+										begin
+											cs = 0;
+											_cont = 0;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _cont == 1  )
+							begin
+								cs = _rangei_cond_targs[_cond];
+								if ( cs == 0  )
+									_cont = 0;
+									
+								end
+								if ( _cont == 1  )
+									p += 1;
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	if cs >= rangei_first_final
+		puts "ACCEPT"
+		else
+		puts "FAIL"
+	end
+end
+
+inp = [
+"AaBbAa",
+"Aa`bAa",
+"AaB@Aa",
+"AaBbMa",
+"AaBbma",
+]
+
+inplen = 5
+
+inp.each { |str| run_machine(str) }
+

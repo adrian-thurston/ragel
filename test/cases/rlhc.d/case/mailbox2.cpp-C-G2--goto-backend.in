@@ -1,0 +1,3306 @@
+host( "working/mailbox2.rl", 1 ) @{/*
+	* @@LANG: c++
+	* @@CFLAGS: -I../aapl
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	
+	using std::cin;
+	using std::cout;
+	using std::cerr;
+	using std::endl;
+	
+	
+	
+}@
+value int mailbox_start = 129;
+value int mailbox_first_final = 129;
+value int mailbox_error = 0;
+
+value int mailbox_en_main = 129;
+
+array s8 _mailbox_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _mailbox_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _mailbox_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _mailbox_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/mailbox2.rl", 121 ) @{
+	
+	#define BUFSIZE 8192
+	
+	void test( const char *buf )
+	{
+		int cs, len = strlen( buf );
+		const char *ws = 0;
+		
+	}@
+	{
+		cs = cast(int)mailbox_start;
+	}
+	host( "working/mailbox2.rl", 130 ) @{
+		const char *p = buf;
+		const char *pe = p + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( cs )
+		{
+			case 129:
+			goto st_case_129;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 11:
+			goto st_case_11;
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 17:
+			goto st_case_17;
+			case 18:
+			goto st_case_18;
+			case 19:
+			goto st_case_19;
+			case 20:
+			goto st_case_20;
+			case 21:
+			goto st_case_21;
+			case 22:
+			goto st_case_22;
+			case 23:
+			goto st_case_23;
+			case 24:
+			goto st_case_24;
+			case 25:
+			goto st_case_25;
+			case 26:
+			goto st_case_26;
+			case 27:
+			goto st_case_27;
+			case 28:
+			goto st_case_28;
+			case 29:
+			goto st_case_29;
+			case 30:
+			goto st_case_30;
+			case 31:
+			goto st_case_31;
+			case 32:
+			goto st_case_32;
+			case 33:
+			goto st_case_33;
+			case 34:
+			goto st_case_34;
+			case 130:
+			goto st_case_130;
+			case 35:
+			goto st_case_35;
+			case 36:
+			goto st_case_36;
+			case 37:
+			goto st_case_37;
+			case 38:
+			goto st_case_38;
+			case 39:
+			goto st_case_39;
+			case 40:
+			goto st_case_40;
+			case 41:
+			goto st_case_41;
+			case 42:
+			goto st_case_42;
+			case 43:
+			goto st_case_43;
+			case 44:
+			goto st_case_44;
+			case 45:
+			goto st_case_45;
+			case 46:
+			goto st_case_46;
+			case 47:
+			goto st_case_47;
+			case 48:
+			goto st_case_48;
+			case 49:
+			goto st_case_49;
+			case 50:
+			goto st_case_50;
+			case 51:
+			goto st_case_51;
+			case 52:
+			goto st_case_52;
+			case 53:
+			goto st_case_53;
+			case 54:
+			goto st_case_54;
+			case 55:
+			goto st_case_55;
+			case 56:
+			goto st_case_56;
+			case 57:
+			goto st_case_57;
+			case 58:
+			goto st_case_58;
+			case 59:
+			goto st_case_59;
+			case 60:
+			goto st_case_60;
+			case 61:
+			goto st_case_61;
+			case 62:
+			goto st_case_62;
+			case 63:
+			goto st_case_63;
+			case 64:
+			goto st_case_64;
+			case 65:
+			goto st_case_65;
+			case 66:
+			goto st_case_66;
+			case 67:
+			goto st_case_67;
+			case 68:
+			goto st_case_68;
+			case 69:
+			goto st_case_69;
+			case 70:
+			goto st_case_70;
+			case 71:
+			goto st_case_71;
+			case 72:
+			goto st_case_72;
+			case 73:
+			goto st_case_73;
+			case 74:
+			goto st_case_74;
+			case 75:
+			goto st_case_75;
+			case 76:
+			goto st_case_76;
+			case 77:
+			goto st_case_77;
+			case 78:
+			goto st_case_78;
+			case 79:
+			goto st_case_79;
+			case 80:
+			goto st_case_80;
+			case 81:
+			goto st_case_81;
+			case 82:
+			goto st_case_82;
+			case 83:
+			goto st_case_83;
+			case 84:
+			goto st_case_84;
+			case 85:
+			goto st_case_85;
+			case 86:
+			goto st_case_86;
+			case 87:
+			goto st_case_87;
+			case 88:
+			goto st_case_88;
+			case 89:
+			goto st_case_89;
+			case 90:
+			goto st_case_90;
+			case 91:
+			goto st_case_91;
+			case 92:
+			goto st_case_92;
+			case 93:
+			goto st_case_93;
+			case 94:
+			goto st_case_94;
+			case 95:
+			goto st_case_95;
+			case 96:
+			goto st_case_96;
+			case 97:
+			goto st_case_97;
+			case 98:
+			goto st_case_98;
+			case 99:
+			goto st_case_99;
+			case 100:
+			goto st_case_100;
+			case 101:
+			goto st_case_101;
+			case 102:
+			goto st_case_102;
+			case 103:
+			goto st_case_103;
+			case 104:
+			goto st_case_104;
+			case 105:
+			goto st_case_105;
+			case 106:
+			goto st_case_106;
+			case 107:
+			goto st_case_107;
+			case 108:
+			goto st_case_108;
+			case 109:
+			goto st_case_109;
+			case 110:
+			goto st_case_110;
+			case 111:
+			goto st_case_111;
+			case 112:
+			goto st_case_112;
+			case 113:
+			goto st_case_113;
+			case 114:
+			goto st_case_114;
+			case 115:
+			goto st_case_115;
+			case 116:
+			goto st_case_116;
+			case 117:
+			goto st_case_117;
+			case 118:
+			goto st_case_118;
+			case 119:
+			goto st_case_119;
+			case 120:
+			goto st_case_120;
+			case 121:
+			goto st_case_121;
+			case 122:
+			goto st_case_122;
+			case 123:
+			goto st_case_123;
+			case 124:
+			goto st_case_124;
+			case 125:
+			goto st_case_125;
+			case 126:
+			goto st_case_126;
+			case 127:
+			goto st_case_127;
+			case 128:
+			goto st_case_128;
+		}
+		goto st_out;
+		st_case_129:
+		if ( ( deref( data, p )) == 70 ) {
+			goto st1;
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 114 ) {
+			goto st2;
+		}
+		{
+			goto st0;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) == 111 ) {
+			goto st3;
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		if ( ( deref( data, p )) == 109 ) {
+			goto st4;
+		}
+		{
+			goto st0;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		if ( ( deref( data, p )) == 32 ) {
+			goto st5;
+		}
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		{
+			goto st5;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st7;
+		}
+		{
+			goto st5;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st8;
+		}
+		{
+			goto st5;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof8;
+		st_case_8:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st9;
+		}
+		{
+			goto st5;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof9;
+		st_case_9:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st10;
+			}
+		}
+		{
+			goto st5;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof10;
+		st_case_10:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st11;
+		}
+		{
+			goto st5;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof11;
+		st_case_11:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st12;
+		}
+		{
+			goto st5;
+		}
+		st12:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof12;
+		st_case_12:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st13;
+		}
+		{
+			goto st5;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof13;
+		st_case_13:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st14;
+			}
+		}
+		{
+			goto st5;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof14;
+		st_case_14:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st15;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st11;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st128;
+		}
+		{
+			goto st5;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof15;
+		st_case_15:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st7;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st16;
+		}
+		{
+			goto st5;
+		}
+		st16:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof16;
+		st_case_16:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st17;
+			}
+		}
+		{
+			goto st5;
+		}
+		st17:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof17;
+		st_case_17:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st7;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st18;
+		}
+		{
+			goto st5;
+		}
+		st18:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof18;
+		st_case_18:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st19;
+		}
+		{
+			goto st5;
+		}
+		st19:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof19;
+		st_case_19:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+			case 58: {
+				goto st20;
+			}
+		}
+		{
+			goto st5;
+		}
+		st20:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof20;
+		st_case_20:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st21;
+		}
+		{
+			goto st5;
+		}
+		st21:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof21;
+		st_case_21:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st22;
+		}
+		{
+			goto st5;
+		}
+		st22:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof22;
+		st_case_22:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st23;
+			}
+			case 58: {
+				goto st125;
+			}
+		}
+		{
+			goto st5;
+		}
+		st23:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof23;
+		st_case_23:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+			case 43: {
+				goto st24;
+			}
+			case 45: {
+				goto st24;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st123;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st115;
+		}
+		{
+			goto st5;
+		}
+		st24:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof24;
+		st_case_24:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st25;
+		}
+		{
+			goto st5;
+		}
+		st25:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof25;
+		st_case_25:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st26;
+		}
+		{
+			goto st5;
+		}
+		st26:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof26;
+		st_case_26:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st27;
+		}
+		{
+			goto st5;
+		}
+		st27:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof27;
+		st_case_27:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st28;
+		}
+		{
+			goto st5;
+		}
+		st28:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof28;
+		st_case_28:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st29;
+			}
+		}
+		{
+			goto st5;
+		}
+		st29:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof29;
+		st_case_29:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st7;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st30;
+		}
+		{
+			goto st5;
+		}
+		st30:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof30;
+		st_case_30:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st31;
+		}
+		{
+			goto st5;
+		}
+		st31:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof31;
+		st_case_31:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st32;
+		}
+		{
+			goto st5;
+		}
+		st32:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof32;
+		st_case_32:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st33;
+		}
+		{
+			goto st5;
+		}
+		st33:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof33;
+		st_case_33:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr37;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		{
+			goto st5;
+		}
+		ctr37:
+		host( "working/mailbox2.rl", 30 ) ${ }$
+		
+		goto st34;
+		st34:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof34;
+		st_case_34:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr38;
+			}
+			case 70: {
+				goto ctr40;
+			}
+			case 83: {
+				goto ctr41;
+			}
+			case 84: {
+				goto ctr42;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 59 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+				goto ctr39;
+			}
+		} else if ( ( deref( data, p )) >= 33 ) {
+			goto ctr39;
+		}
+		{
+			goto st0;
+		}
+		ctr38:
+		host( "working/mailbox2.rl", 24 ) ${ cout << "------\n"; }$
+		host( "working/mailbox2.rl", 31 ) ${ }$
+		
+		goto st130;
+		ctr94:
+		host( "working/mailbox2.rl", 31 ) ${ }$
+		
+		goto st130;
+		ctr127:
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		host( "working/mailbox2.rl", 31 ) ${ }$
+		
+		goto st130;
+		st130:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof130;
+		st_case_130:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 70: {
+				goto st36;
+			}
+		}
+		{
+			goto st35;
+		}
+		st35:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof35;
+		st_case_35:
+		if ( ( deref( data, p )) == 10 ) {
+			goto st130;
+		}
+		{
+			goto st35;
+		}
+		st36:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof36;
+		st_case_36:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 114: {
+				goto st37;
+			}
+		}
+		{
+			goto st35;
+		}
+		st37:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof37;
+		st_case_37:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 111: {
+				goto st38;
+			}
+		}
+		{
+			goto st35;
+		}
+		st38:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof38;
+		st_case_38:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 109: {
+				goto st39;
+			}
+		}
+		{
+			goto st35;
+		}
+		st39:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof39;
+		st_case_39:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st40;
+			}
+		}
+		{
+			goto st35;
+		}
+		st40:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof40;
+		st_case_40:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		{
+			goto st40;
+		}
+		st41:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof41;
+		st_case_41:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st42;
+		}
+		{
+			goto st40;
+		}
+		st42:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof42;
+		st_case_42:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st43;
+		}
+		{
+			goto st40;
+		}
+		st43:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof43;
+		st_case_43:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st44;
+		}
+		{
+			goto st40;
+		}
+		st44:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof44;
+		st_case_44:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st45;
+			}
+		}
+		{
+			goto st40;
+		}
+		st45:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof45;
+		st_case_45:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st46;
+		}
+		{
+			goto st40;
+		}
+		st46:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof46;
+		st_case_46:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st47;
+		}
+		{
+			goto st40;
+		}
+		st47:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof47;
+		st_case_47:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+			goto st48;
+		}
+		{
+			goto st40;
+		}
+		st48:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof48;
+		st_case_48:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st49;
+			}
+		}
+		{
+			goto st40;
+		}
+		st49:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof49;
+		st_case_49:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st50;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st46;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st82;
+		}
+		{
+			goto st40;
+		}
+		st50:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof50;
+		st_case_50:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st42;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st51;
+		}
+		{
+			goto st40;
+		}
+		st51:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof51;
+		st_case_51:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st52;
+			}
+		}
+		{
+			goto st40;
+		}
+		st52:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof52;
+		st_case_52:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st42;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st53;
+		}
+		{
+			goto st40;
+		}
+		st53:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof53;
+		st_case_53:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st54;
+		}
+		{
+			goto st40;
+		}
+		st54:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof54;
+		st_case_54:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+			case 58: {
+				goto st55;
+			}
+		}
+		{
+			goto st40;
+		}
+		st55:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof55;
+		st_case_55:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st56;
+		}
+		{
+			goto st40;
+		}
+		st56:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof56;
+		st_case_56:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st57;
+		}
+		{
+			goto st40;
+		}
+		st57:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof57;
+		st_case_57:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st58;
+			}
+			case 58: {
+				goto st79;
+			}
+		}
+		{
+			goto st40;
+		}
+		st58:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof58;
+		st_case_58:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+			case 43: {
+				goto st59;
+			}
+			case 45: {
+				goto st59;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st77;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st69;
+		}
+		{
+			goto st40;
+		}
+		st59:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof59;
+		st_case_59:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st60;
+		}
+		{
+			goto st40;
+		}
+		st60:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof60;
+		st_case_60:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st61;
+		}
+		{
+			goto st40;
+		}
+		st61:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof61;
+		st_case_61:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st62;
+		}
+		{
+			goto st40;
+		}
+		st62:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof62;
+		st_case_62:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st63;
+		}
+		{
+			goto st40;
+		}
+		st63:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof63;
+		st_case_63:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st64;
+			}
+		}
+		{
+			goto st40;
+		}
+		st64:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof64;
+		st_case_64:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+				goto st42;
+			}
+		} else if ( ( deref( data, p )) >= 48 ) {
+			goto st65;
+		}
+		{
+			goto st40;
+		}
+		st65:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof65;
+		st_case_65:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st66;
+		}
+		{
+			goto st40;
+		}
+		st66:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof66;
+		st_case_66:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st67;
+		}
+		{
+			goto st40;
+		}
+		st67:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof67;
+		st_case_67:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st68;
+		}
+		{
+			goto st40;
+		}
+		st68:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof68;
+		st_case_68:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr37;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		{
+			goto st40;
+		}
+		st69:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof69;
+		st_case_69:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st70;
+		}
+		{
+			goto st40;
+		}
+		st70:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof70;
+		st_case_70:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st71;
+		}
+		{
+			goto st40;
+		}
+		st71:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof71;
+		st_case_71:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st72;
+		}
+		{
+			goto st40;
+		}
+		st72:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof72;
+		st_case_72:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr37;
+			}
+			case 32: {
+				goto st73;
+			}
+		}
+		{
+			goto st40;
+		}
+		st73:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof73;
+		st_case_73:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+			case 43: {
+				goto st74;
+			}
+			case 45: {
+				goto st74;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st75;
+		}
+		{
+			goto st40;
+		}
+		st74:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof74;
+		st_case_74:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st65;
+		}
+		{
+			goto st40;
+		}
+		st75:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof75;
+		st_case_75:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st43;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st76;
+		}
+		{
+			goto st40;
+		}
+		st76:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof76;
+		st_case_76:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st68;
+		}
+		{
+			goto st40;
+		}
+		st77:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof77;
+		st_case_77:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st43;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st78;
+		}
+		{
+			goto st40;
+		}
+		st78:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof78;
+		st_case_78:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st63;
+		}
+		{
+			goto st40;
+		}
+		st79:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof79;
+		st_case_79:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st80;
+		}
+		{
+			goto st40;
+		}
+		st80:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof80;
+		st_case_80:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st81;
+		}
+		{
+			goto st40;
+		}
+		st81:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof81;
+		st_case_81:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st58;
+			}
+		}
+		{
+			goto st40;
+		}
+		st82:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof82;
+		st_case_82:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st130;
+			}
+			case 32: {
+				goto st41;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st51;
+		}
+		{
+			goto st40;
+		}
+		ctr39:
+		host( "working/mailbox2.rl", 24 ) ${ cout << "------\n"; }$
+		
+		goto st83;
+		ctr128:
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st83;
+		st83:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof83;
+		st_case_83:
+		if ( ( deref( data, p )) == 58 ) {
+			goto st84;
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st84:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof84;
+		st_case_84:
+		if ( ( deref( data, p )) == 10 ) {
+			goto st85;
+		}
+		{
+			goto st84;
+		}
+		st85:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof85;
+		st_case_85:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto st84;
+			}
+			case 10: {
+				goto ctr94;
+			}
+			case 32: {
+				goto st84;
+			}
+			case 70: {
+				goto st86;
+			}
+			case 83: {
+				goto st94;
+			}
+			case 84: {
+				goto st105;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 59 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+				goto st83;
+			}
+		} else if ( ( deref( data, p )) >= 33 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		ctr40:
+		host( "working/mailbox2.rl", 24 ) ${ cout << "------\n"; }$
+		
+		goto st86;
+		ctr129:
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st86;
+		st86:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof86;
+		st_case_86:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 114: {
+				goto st87;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st87:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof87;
+		st_case_87:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 111: {
+				goto st88;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st88:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof88;
+		st_case_88:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 109: {
+				goto st89;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st89:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof89;
+		st_case_89:
+		if ( ( deref( data, p )) == 58 ) {
+			goto ctr101;
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		ctr101:
+		host( "working/mailbox2.rl", 25 ) ${ cout << "FROM\n"; }$
+		
+		goto st90;
+		ctr108:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st90;
+		ctr116:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st90;
+		ctr125:
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st90;
+		ctr146:
+		host( "working/mailbox2.rl", 26 ) ${ cout << "TO\n"; }$
+		
+		goto st90;
+		ctr159:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st90;
+		ctr167:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st90;
+		st90:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof90;
+		st_case_90:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto ctr103;
+			}
+			case 10: {
+				goto ctr104;
+			}
+			case 32: {
+				goto ctr103;
+			}
+			case 34: {
+				goto ctr105;
+			}
+			case 39: {
+				goto ctr106;
+			}
+			case 40: {
+				goto ctr107;
+			}
+			case 41: {
+				goto st0;
+			}
+			case 44: {
+				goto ctr108;
+			}
+			case 60: {
+				goto ctr109;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st0;
+			}
+		}
+		{
+			goto ctr102;
+		}
+		ctr102:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st91;
+		ctr149:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st91;
+		ctr119:
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st91;
+		ctr153:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st91;
+		st91:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof91;
+		st_case_91:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto ctr111;
+			}
+			case 10: {
+				goto ctr112;
+			}
+			case 32: {
+				goto ctr111;
+			}
+			case 34: {
+				goto ctr113;
+			}
+			case 39: {
+				goto ctr114;
+			}
+			case 40: {
+				goto ctr115;
+			}
+			case 41: {
+				goto st0;
+			}
+			case 44: {
+				goto ctr116;
+			}
+			case 60: {
+				goto ctr117;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st113;
+			}
+		}
+		{
+			goto st91;
+		}
+		ctr103:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		
+		goto st92;
+		ctr111:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		
+		goto st92;
+		ctr154:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		
+		goto st92;
+		ctr162:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		
+		goto st92;
+		st92:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof92;
+		st_case_92:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto st92;
+			}
+			case 10: {
+				goto st93;
+			}
+			case 32: {
+				goto st92;
+			}
+			case 34: {
+				goto ctr122;
+			}
+			case 39: {
+				goto ctr123;
+			}
+			case 40: {
+				goto st110;
+			}
+			case 41: {
+				goto st0;
+			}
+			case 44: {
+				goto ctr125;
+			}
+			case 60: {
+				goto ctr126;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st0;
+			}
+		}
+		{
+			goto ctr119;
+		}
+		ctr104:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		
+		goto st93;
+		ctr112:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		
+		goto st93;
+		ctr155:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		
+		goto st93;
+		ctr163:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		
+		goto st93;
+		st93:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof93;
+		st_case_93:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto st92;
+			}
+			case 10: {
+				goto ctr127;
+			}
+			case 32: {
+				goto st92;
+			}
+			case 70: {
+				goto ctr129;
+			}
+			case 83: {
+				goto ctr130;
+			}
+			case 84: {
+				goto ctr131;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 59 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+				goto ctr128;
+			}
+		} else if ( ( deref( data, p )) >= 33 ) {
+			goto ctr128;
+		}
+		{
+			goto st0;
+		}
+		ctr41:
+		host( "working/mailbox2.rl", 24 ) ${ cout << "------\n"; }$
+		
+		goto st94;
+		ctr130:
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st94;
+		st94:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof94;
+		st_case_94:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 117: {
+				goto st95;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st95:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof95;
+		st_case_95:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 98: {
+				goto st96;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st96:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof96;
+		st_case_96:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 106: {
+				goto st97;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st97:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof97;
+		st_case_97:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 101: {
+				goto st98;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st98:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof98;
+		st_case_98:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 99: {
+				goto st99;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st99:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof99;
+		st_case_99:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 116: {
+				goto st100;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st100:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof100;
+		st_case_100:
+		if ( ( deref( data, p )) == 58 ) {
+			goto ctr138;
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		ctr138:
+		host( "working/mailbox2.rl", 27 ) ${ cout << "SUBJECT\n"; }$
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		
+		goto st101;
+		st101:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof101;
+		st_case_101:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st103;
+			}
+			case 32: {
+				goto st101;
+			}
+		}
+		{
+			goto ctr139;
+		}
+		ctr139:
+		host( "working/mailbox2.rl", 17 ) ${ cout << *p; }$
+		
+		goto st102;
+		ctr143:
+		host( "working/mailbox2.rl", 18 ) ${ cout << ' '; }$
+		host( "working/mailbox2.rl", 17 ) ${ cout << *p; }$
+		
+		goto st102;
+		st102:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof102;
+		st_case_102:
+		if ( ( deref( data, p )) == 10 ) {
+			goto st103;
+		}
+		{
+			goto ctr139;
+		}
+		ctr144:
+		host( "working/mailbox2.rl", 18 ) ${ cout << ' '; }$
+		
+		goto st103;
+		st103:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof103;
+		st_case_103:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto st104;
+			}
+			case 10: {
+				goto ctr127;
+			}
+			case 32: {
+				goto st104;
+			}
+			case 70: {
+				goto ctr129;
+			}
+			case 83: {
+				goto ctr130;
+			}
+			case 84: {
+				goto ctr131;
+			}
+		}
+		if ( ( deref( data, p )) > 57 ) {
+			if ( 59 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+				goto ctr128;
+			}
+		} else if ( ( deref( data, p )) >= 33 ) {
+			goto ctr128;
+		}
+		{
+			goto st0;
+		}
+		st104:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof104;
+		st_case_104:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto st104;
+			}
+			case 10: {
+				goto ctr144;
+			}
+			case 32: {
+				goto st104;
+			}
+		}
+		{
+			goto ctr143;
+		}
+		ctr42:
+		host( "working/mailbox2.rl", 24 ) ${ cout << "------\n"; }$
+		
+		goto st105;
+		ctr131:
+		host( "working/mailbox2.rl", 23 ) ${ cout << '\n'; }$
+		
+		goto st105;
+		st105:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof105;
+		st_case_105:
+		switch( ( deref( data, p )) ) {
+			case 58: {
+				goto st84;
+			}
+			case 111: {
+				goto st106;
+			}
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		st106:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof106;
+		st_case_106:
+		if ( ( deref( data, p )) == 58 ) {
+			goto ctr146;
+		}
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto st83;
+		}
+		{
+			goto st0;
+		}
+		ctr105:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st107;
+		ctr113:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st107;
+		ctr122:
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st107;
+		ctr156:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st107;
+		ctr164:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st107;
+		st107:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof107;
+		st_case_107:
+		if ( ( deref( data, p )) == 34 ) {
+			goto st108;
+		}
+		{
+			goto st107;
+		}
+		st108:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof108;
+		st_case_108:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto ctr111;
+			}
+			case 10: {
+				goto ctr112;
+			}
+			case 32: {
+				goto ctr111;
+			}
+			case 34: {
+				goto ctr113;
+			}
+			case 39: {
+				goto ctr114;
+			}
+			case 40: {
+				goto ctr115;
+			}
+			case 41: {
+				goto st0;
+			}
+			case 44: {
+				goto ctr116;
+			}
+			case 60: {
+				goto ctr117;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st0;
+			}
+		}
+		{
+			goto ctr149;
+		}
+		ctr106:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st109;
+		ctr114:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st109;
+		ctr123:
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st109;
+		ctr157:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st109;
+		ctr165:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st109;
+		st109:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof109;
+		st_case_109:
+		if ( ( deref( data, p )) == 39 ) {
+			goto st108;
+		}
+		{
+			goto st109;
+		}
+		ctr107:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		
+		goto st110;
+		ctr115:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		
+		goto st110;
+		ctr158:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		
+		goto st110;
+		ctr166:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		
+		goto st110;
+		st110:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof110;
+		st_case_110:
+		if ( ( deref( data, p )) == 41 ) {
+			goto st92;
+		}
+		{
+			goto st110;
+		}
+		ctr109:
+		host( "working/mailbox2.rl", 22 ) ${ cout << '\t'; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st111;
+		ctr117:
+		host( "working/mailbox2.rl", 19 ) ${ cout.write(ws, p-ws); cout << ' '; }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st111;
+		ctr126:
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st111;
+		ctr160:
+		host( "working/mailbox2.rl", 20 ) ${ cout << "| "; cout.write(ws+1, p-ws-2); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st111;
+		ctr168:
+		host( "working/mailbox2.rl", 21 ) ${ cout << "| "; cout.write(ws, p-ws); }$
+		host( "working/mailbox2.rl", 29 ) ${ ws = p; }$
+		
+		goto st111;
+		st111:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof111;
+		st_case_111:
+		if ( ( deref( data, p )) == 62 ) {
+			goto st112;
+		}
+		{
+			goto st111;
+		}
+		st112:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof112;
+		st_case_112:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto ctr154;
+			}
+			case 10: {
+				goto ctr155;
+			}
+			case 32: {
+				goto ctr154;
+			}
+			case 34: {
+				goto ctr156;
+			}
+			case 39: {
+				goto ctr157;
+			}
+			case 40: {
+				goto ctr158;
+			}
+			case 41: {
+				goto st0;
+			}
+			case 44: {
+				goto ctr159;
+			}
+			case 60: {
+				goto ctr160;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st0;
+			}
+		}
+		{
+			goto ctr153;
+		}
+		st113:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof113;
+		st_case_113:
+		switch( ( deref( data, p )) ) {
+			case 32: {
+				goto st0;
+			}
+			case 34: {
+				goto st0;
+			}
+			case 44: {
+				goto st0;
+			}
+			case 60: {
+				goto st0;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st0;
+			}
+		}
+		if ( ( deref( data, p )) > 10 ) {
+			if ( 39 <= ( deref( data, p )) && ( deref( data, p )) <= 41 ) {
+				goto st0;
+			}
+		} else if ( ( deref( data, p )) >= 9 ) {
+			goto st0;
+		}
+		{
+			goto st114;
+		}
+		st114:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof114;
+		st_case_114:
+		switch( ( deref( data, p )) ) {
+			case 9: {
+				goto ctr162;
+			}
+			case 10: {
+				goto ctr163;
+			}
+			case 32: {
+				goto ctr162;
+			}
+			case 34: {
+				goto ctr164;
+			}
+			case 39: {
+				goto ctr165;
+			}
+			case 40: {
+				goto ctr166;
+			}
+			case 41: {
+				goto st0;
+			}
+			case 44: {
+				goto ctr167;
+			}
+			case 60: {
+				goto ctr168;
+			}
+			case 62: {
+				goto st0;
+			}
+			case 64: {
+				goto st0;
+			}
+		}
+		{
+			goto st114;
+		}
+		st115:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof115;
+		st_case_115:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st116;
+		}
+		{
+			goto st5;
+		}
+		st116:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof116;
+		st_case_116:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st117;
+		}
+		{
+			goto st5;
+		}
+		st117:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof117;
+		st_case_117:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st118;
+		}
+		{
+			goto st5;
+		}
+		st118:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof118;
+		st_case_118:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr37;
+			}
+			case 32: {
+				goto st119;
+			}
+		}
+		{
+			goto st5;
+		}
+		st119:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof119;
+		st_case_119:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+			case 43: {
+				goto st120;
+			}
+			case 45: {
+				goto st120;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st121;
+		}
+		{
+			goto st5;
+		}
+		st120:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof120;
+		st_case_120:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st30;
+		}
+		{
+			goto st5;
+		}
+		st121:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof121;
+		st_case_121:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st8;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st122;
+		}
+		{
+			goto st5;
+		}
+		st122:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof122;
+		st_case_122:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st33;
+		}
+		{
+			goto st5;
+		}
+		st123:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof123;
+		st_case_123:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st8;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st124;
+		}
+		{
+			goto st5;
+		}
+		st124:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof124;
+		st_case_124:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 90 ) {
+			goto st28;
+		}
+		{
+			goto st5;
+		}
+		st125:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof125;
+		st_case_125:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st126;
+		}
+		{
+			goto st5;
+		}
+		st126:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof126;
+		st_case_126:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st127;
+		}
+		{
+			goto st5;
+		}
+		st127:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof127;
+		st_case_127:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st23;
+			}
+		}
+		{
+			goto st5;
+		}
+		st128:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof128;
+		st_case_128:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto st0;
+			}
+			case 32: {
+				goto st6;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st16;
+		}
+		{
+			goto st5;
+		}
+		st_out:
+		_test_eof1: cs = 1; goto _test_eof; 
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof5: cs = 5; goto _test_eof; 
+		_test_eof6: cs = 6; goto _test_eof; 
+		_test_eof7: cs = 7; goto _test_eof; 
+		_test_eof8: cs = 8; goto _test_eof; 
+		_test_eof9: cs = 9; goto _test_eof; 
+		_test_eof10: cs = 10; goto _test_eof; 
+		_test_eof11: cs = 11; goto _test_eof; 
+		_test_eof12: cs = 12; goto _test_eof; 
+		_test_eof13: cs = 13; goto _test_eof; 
+		_test_eof14: cs = 14; goto _test_eof; 
+		_test_eof15: cs = 15; goto _test_eof; 
+		_test_eof16: cs = 16; goto _test_eof; 
+		_test_eof17: cs = 17; goto _test_eof; 
+		_test_eof18: cs = 18; goto _test_eof; 
+		_test_eof19: cs = 19; goto _test_eof; 
+		_test_eof20: cs = 20; goto _test_eof; 
+		_test_eof21: cs = 21; goto _test_eof; 
+		_test_eof22: cs = 22; goto _test_eof; 
+		_test_eof23: cs = 23; goto _test_eof; 
+		_test_eof24: cs = 24; goto _test_eof; 
+		_test_eof25: cs = 25; goto _test_eof; 
+		_test_eof26: cs = 26; goto _test_eof; 
+		_test_eof27: cs = 27; goto _test_eof; 
+		_test_eof28: cs = 28; goto _test_eof; 
+		_test_eof29: cs = 29; goto _test_eof; 
+		_test_eof30: cs = 30; goto _test_eof; 
+		_test_eof31: cs = 31; goto _test_eof; 
+		_test_eof32: cs = 32; goto _test_eof; 
+		_test_eof33: cs = 33; goto _test_eof; 
+		_test_eof34: cs = 34; goto _test_eof; 
+		_test_eof130: cs = 130; goto _test_eof; 
+		_test_eof35: cs = 35; goto _test_eof; 
+		_test_eof36: cs = 36; goto _test_eof; 
+		_test_eof37: cs = 37; goto _test_eof; 
+		_test_eof38: cs = 38; goto _test_eof; 
+		_test_eof39: cs = 39; goto _test_eof; 
+		_test_eof40: cs = 40; goto _test_eof; 
+		_test_eof41: cs = 41; goto _test_eof; 
+		_test_eof42: cs = 42; goto _test_eof; 
+		_test_eof43: cs = 43; goto _test_eof; 
+		_test_eof44: cs = 44; goto _test_eof; 
+		_test_eof45: cs = 45; goto _test_eof; 
+		_test_eof46: cs = 46; goto _test_eof; 
+		_test_eof47: cs = 47; goto _test_eof; 
+		_test_eof48: cs = 48; goto _test_eof; 
+		_test_eof49: cs = 49; goto _test_eof; 
+		_test_eof50: cs = 50; goto _test_eof; 
+		_test_eof51: cs = 51; goto _test_eof; 
+		_test_eof52: cs = 52; goto _test_eof; 
+		_test_eof53: cs = 53; goto _test_eof; 
+		_test_eof54: cs = 54; goto _test_eof; 
+		_test_eof55: cs = 55; goto _test_eof; 
+		_test_eof56: cs = 56; goto _test_eof; 
+		_test_eof57: cs = 57; goto _test_eof; 
+		_test_eof58: cs = 58; goto _test_eof; 
+		_test_eof59: cs = 59; goto _test_eof; 
+		_test_eof60: cs = 60; goto _test_eof; 
+		_test_eof61: cs = 61; goto _test_eof; 
+		_test_eof62: cs = 62; goto _test_eof; 
+		_test_eof63: cs = 63; goto _test_eof; 
+		_test_eof64: cs = 64; goto _test_eof; 
+		_test_eof65: cs = 65; goto _test_eof; 
+		_test_eof66: cs = 66; goto _test_eof; 
+		_test_eof67: cs = 67; goto _test_eof; 
+		_test_eof68: cs = 68; goto _test_eof; 
+		_test_eof69: cs = 69; goto _test_eof; 
+		_test_eof70: cs = 70; goto _test_eof; 
+		_test_eof71: cs = 71; goto _test_eof; 
+		_test_eof72: cs = 72; goto _test_eof; 
+		_test_eof73: cs = 73; goto _test_eof; 
+		_test_eof74: cs = 74; goto _test_eof; 
+		_test_eof75: cs = 75; goto _test_eof; 
+		_test_eof76: cs = 76; goto _test_eof; 
+		_test_eof77: cs = 77; goto _test_eof; 
+		_test_eof78: cs = 78; goto _test_eof; 
+		_test_eof79: cs = 79; goto _test_eof; 
+		_test_eof80: cs = 80; goto _test_eof; 
+		_test_eof81: cs = 81; goto _test_eof; 
+		_test_eof82: cs = 82; goto _test_eof; 
+		_test_eof83: cs = 83; goto _test_eof; 
+		_test_eof84: cs = 84; goto _test_eof; 
+		_test_eof85: cs = 85; goto _test_eof; 
+		_test_eof86: cs = 86; goto _test_eof; 
+		_test_eof87: cs = 87; goto _test_eof; 
+		_test_eof88: cs = 88; goto _test_eof; 
+		_test_eof89: cs = 89; goto _test_eof; 
+		_test_eof90: cs = 90; goto _test_eof; 
+		_test_eof91: cs = 91; goto _test_eof; 
+		_test_eof92: cs = 92; goto _test_eof; 
+		_test_eof93: cs = 93; goto _test_eof; 
+		_test_eof94: cs = 94; goto _test_eof; 
+		_test_eof95: cs = 95; goto _test_eof; 
+		_test_eof96: cs = 96; goto _test_eof; 
+		_test_eof97: cs = 97; goto _test_eof; 
+		_test_eof98: cs = 98; goto _test_eof; 
+		_test_eof99: cs = 99; goto _test_eof; 
+		_test_eof100: cs = 100; goto _test_eof; 
+		_test_eof101: cs = 101; goto _test_eof; 
+		_test_eof102: cs = 102; goto _test_eof; 
+		_test_eof103: cs = 103; goto _test_eof; 
+		_test_eof104: cs = 104; goto _test_eof; 
+		_test_eof105: cs = 105; goto _test_eof; 
+		_test_eof106: cs = 106; goto _test_eof; 
+		_test_eof107: cs = 107; goto _test_eof; 
+		_test_eof108: cs = 108; goto _test_eof; 
+		_test_eof109: cs = 109; goto _test_eof; 
+		_test_eof110: cs = 110; goto _test_eof; 
+		_test_eof111: cs = 111; goto _test_eof; 
+		_test_eof112: cs = 112; goto _test_eof; 
+		_test_eof113: cs = 113; goto _test_eof; 
+		_test_eof114: cs = 114; goto _test_eof; 
+		_test_eof115: cs = 115; goto _test_eof; 
+		_test_eof116: cs = 116; goto _test_eof; 
+		_test_eof117: cs = 117; goto _test_eof; 
+		_test_eof118: cs = 118; goto _test_eof; 
+		_test_eof119: cs = 119; goto _test_eof; 
+		_test_eof120: cs = 120; goto _test_eof; 
+		_test_eof121: cs = 121; goto _test_eof; 
+		_test_eof122: cs = 122; goto _test_eof; 
+		_test_eof123: cs = 123; goto _test_eof; 
+		_test_eof124: cs = 124; goto _test_eof; 
+		_test_eof125: cs = 125; goto _test_eof; 
+		_test_eof126: cs = 126; goto _test_eof; 
+		_test_eof127: cs = 127; goto _test_eof; 
+		_test_eof128: cs = 128; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/mailbox2.rl", 133 ) @{
+		
+		if ( cs == mailbox_error )
+		cerr << "ERROR" << endl;
+		
+		if ( cs < mailbox_first_final )
+		cerr << "DID NOT FINISH IN A FINAL STATE" << endl;
+	}
+	
+	int main()
+	{
+		test(
+		"From user@@host.com Wed Nov 28 13:30:05 2001\n"
+		"From: \"Adrian D. Thurston\" <thurston@@complang.org>\n"
+		"Subject:   the squirrel has landed\n"
+		"\n"
+		"Message goes here. \n"
+		"From (trick from line).\n"
+		"From: not really a header\n"
+		"\n"
+		"From user2@@host2.com Wed Nov 28 13:30:05 2001\n"
+		"To: Edgar Allen Poe <ep@@net.com> (da man)\n"
+		"Subject:   (no subject) \n"
+		"\n"
+		"Message goes here. \n"
+		"\n"
+		);
+		return 0;
+	}
+	
+}@

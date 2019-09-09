@@ -1,0 +1,200 @@
+host( "working/builtin.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	
+	void alph(const char *type)
+	{
+		printf("%s\n", type);
+	}
+	
+	struct builtin
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array unsigned int _builtin_trans_keys( 0, 9 ) = { u(0), u(9), u(0) };
+
+array s8 _builtin_char_class( 0, 9 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 3, 3, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 3, 3, 3, 3, 0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0 };
+
+array s8 _builtin_index_offsets( 0, 0 ) = { 0, 0 };
+
+array s8 _builtin_indicies( 0, 9 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+
+array s8 _builtin_index_defaults( 0, 10 ) = { 10, 0 };
+
+array s8 _builtin_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _builtin_cond_targs( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _builtin_cond_actions( 0, 11 ) = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0 };
+
+array s8 _builtin_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _builtin_nfa_offsets( 0, 0 ) = { 0, 0 };
+
+array s8 _builtin_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _builtin_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int builtin_start = 0;
+value int builtin_first_final = 0;
+value int builtin_error = -1;
+
+value int builtin_en_main = 0;
+
+host( "working/builtin.rl", 41 ) @{
+	
+	void builtin_init( struct builtin *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)builtin_start;
+	}
+	host( "working/builtin.rl", 45 ) @{
+	}
+	
+	void builtin_execute( struct builtin *fsm, const unsigned int *data, int len )
+	{
+		const unsigned int *p = data;
+		const unsigned int *pe = data+len;
+	}@
+	{
+		int _trans = 0;
+		index unsigned int _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			label _resume {
+				_keys = offset( _builtin_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
+				_inds = offset( _builtin_indicies, _builtin_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				
+				if ( ( deref( data, p )) <= 255 )
+				{
+					int _ic = cast(int)_builtin_char_class[cast(int)( deref( data, p )) - 0];
+					if ( _ic <= cast(int)deref( _builtin_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _builtin_trans_keys, _keys ) )
+					_trans = cast(int)deref( _builtin_indicies, _inds + cast(int)( _ic - cast(int)deref( _builtin_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_builtin_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+				}
+				else {
+					_trans = cast(int)_builtin_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				host( "-", 1 ) ={ fsm->cs}= = cast(int)_builtin_cond_targs[_trans];
+				
+				if ( _builtin_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _builtin_cond_actions[_trans] ) {
+					case 11 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$
+					}
+					case 10 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$
+					}
+					case 1 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 31 ) ${alph("cntrl");}$
+					}
+					case 2 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 31 ) ${alph("cntrl");}$	host( "working/builtin.rl", 35 ) ${alph("space");}$
+					}
+					case 3 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$	host( "working/builtin.rl", 35 ) ${alph("space");}$
+					}
+					case 4 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 32 ) ${alph("graph");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$	host( "working/builtin.rl", 34 ) ${alph("punct");}$
+					}
+					case 9 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 26 ) ${alph("alpha");}$	host( "working/builtin.rl", 28 ) ${alph("alnum");}$	host( "working/builtin.rl", 29 ) ${alph("lower");}$	host( "working/builtin.rl", 32 ) ${alph("graph");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$
+					}
+					case 7 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 26 ) ${alph("alpha");}$	host( "working/builtin.rl", 28 ) ${alph("alnum");}$	host( "working/builtin.rl", 30 ) ${alph("upper");}$	host( "working/builtin.rl", 32 ) ${alph("graph");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$
+					}
+					case 5 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 27 ) ${alph("digit");}$	host( "working/builtin.rl", 28 ) ${alph("alnum");}$	host( "working/builtin.rl", 32 ) ${alph("graph");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$	host( "working/builtin.rl", 36 ) ${alph("xdigit");}$
+					}
+					case 8 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 26 ) ${alph("alpha");}$	host( "working/builtin.rl", 28 ) ${alph("alnum");}$	host( "working/builtin.rl", 29 ) ${alph("lower");}$	host( "working/builtin.rl", 32 ) ${alph("graph");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$	host( "working/builtin.rl", 36 ) ${alph("xdigit");}$
+					}
+					case 6 {
+						host( "working/builtin.rl", 23 ) ${alph("any");}$	host( "working/builtin.rl", 24 ) ${alph("ascii");}$	host( "working/builtin.rl", 25 ) ${alph("extend");}$	host( "working/builtin.rl", 26 ) ${alph("alpha");}$	host( "working/builtin.rl", 28 ) ${alph("alnum");}$	host( "working/builtin.rl", 30 ) ${alph("upper");}$	host( "working/builtin.rl", 32 ) ${alph("graph");}$	host( "working/builtin.rl", 33 ) ${alph("print");}$	host( "working/builtin.rl", 36 ) ${alph("xdigit");}$
+					}
+				}
+				
+				
+			}
+			label _again {
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+		}
+	}
+	host( "working/builtin.rl", 52 ) @{
+	}
+	
+	int builtin_finish( struct builtin *fsm )
+	{
+		if ( fsm->cs == builtin_error )
+		return -1;
+		else if ( fsm->cs >= builtin_first_final )
+		return 1;
+		return 0;
+	}
+	
+	#include <stdio.h>
+	#define BUFSIZE 2048
+	
+	struct builtin fsm;
+	char buf[BUFSIZE];
+	unsigned int i;
+	
+	int test( const unsigned int *data, int len )
+	{
+		builtin_init( &fsm );
+		builtin_execute( &fsm, data, len );
+		if ( builtin_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+		return 0;
+	}
+	
+	#define DLEN 258
+	unsigned int data[DLEN] = {
+		-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+		20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+		39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+		58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76,
+		77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95,
+		96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+		112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126,
+		127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141,
+		142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156,
+		157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171,
+		172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186,
+		187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201,
+		202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216,
+		217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231,
+		232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246,
+		247, 248, 249, 250, 251, 252, 253, 254, 255, 256
+	};
+	
+	int main()
+	{
+		test( data, DLEN );
+		return 0;
+	}
+	
+}@

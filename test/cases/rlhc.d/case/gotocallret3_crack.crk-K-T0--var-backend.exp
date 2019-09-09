@@ -1,0 +1,413 @@
+import crack.io cout;
+import crack.lang Buffer;
+
+byte comm;
+int top;
+array[int] stack = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+
+
+
+
+
+const array[int16 ] _gotocallret_actions = [ 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 5, 1, 7, 1, 8, 2, 0, 1, 2, 4, 6, 0 ,  ];
+const array[int16 ] _gotocallret_key_offsets = [ 0, 0, 1, 2, 3, 4, 8, 10, 14, 14, 18, 0 ,  ];
+const array[byte ] _gotocallret_trans_keys = [ 32, 10, 10, 10, 65, 90, 97, 122, 48, 57, 48, 57, 97, 122, 65, 90, 97, 122, 48, 57, 0,  ];
+const array[int16 ] _gotocallret_single_lengths = [ 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _gotocallret_range_lengths = [ 0, 0, 0, 0, 0, 2, 1, 2, 0, 2, 1, 0 ,  ];
+const array[int16 ] _gotocallret_index_offsets = [ 0, 0, 2, 4, 6, 8, 11, 13, 16, 17, 20, 0 ,  ];
+const array[int16 ] _gotocallret_trans_cond_spaces = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  ];
+const array[int16 ] _gotocallret_trans_offsets = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 0 ,  ];
+const array[int16 ] _gotocallret_trans_lengths = [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  ];
+const array[int16 ] _gotocallret_cond_keys = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _gotocallret_cond_targs = [ 2, 0, 7, 0, 8, 4, 8, 4, 9, 9, 0, 10, 0, 1, 1, 0, 0, 9, 9, 0, 10, 0, 0 ,  ];
+const array[int16 ] _gotocallret_cond_actions = [ 18, 13, 11, 13, 15, 1, 3, 0, 0, 0, 7, 0, 7, 9, 9, 13, 0, 0, 0, 7, 0, 7, 0 ,  ];
+const array[int16 ] _gotocallret_eof_actions = [ 0, 13, 13, 5, 5, 7, 7, 0, 5, 0, 0, 0 ,  ];
+const array[int16 ] _gotocallret_nfa_targs = [ 0, 0 ,  ];
+const array[int16 ] _gotocallret_nfa_offsets = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _gotocallret_nfa_push_actions = [ 0, 0 ,  ];
+const array[int16 ] _gotocallret_nfa_pop_trans = [ 0, 0 ,  ];
+const int  gotocallret_start  = 7;
+const int  gotocallret_first_final  = 7;
+const int  gotocallret_error  = 0;
+const int  gotocallret_en_garble_line  = 3;
+const int  gotocallret_en_alp_comm  = 5;
+const int  gotocallret_en_dig_comm  = 6;
+const int  gotocallret_en_main  = 7;
+void m( String s )
+{
+	byteptr data = s.buffer;
+	int p = 0;
+	int pe = s.size;
+	int cs;
+	String buffer;
+	int eof = pe;
+	
+	if ( 1 ) {
+		cs = int ( gotocallret_start );
+		top = 0;
+		
+	}
+	if ( 1 ) {
+		int _klen;
+		uint32 _trans = 0;
+		uint32 _cond = 0;
+		uint32 _have = 0;
+		uint32 _cont = 1;
+		int _acts = 0;
+		uint32 _nacts;
+		int _keys = 0;
+		int _ckeys = 0;
+		int _cpc;
+		while ( _cont == 1  )
+		{
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _have == 0  )
+					{
+						int __acts = 0;
+						uint32 __nacts;
+						__acts = _gotocallret_eof_actions[cs];
+						__nacts = uint32  ( _gotocallret_actions[__acts ] );
+						__acts += 1;
+						while ( __nacts > 0  )
+						{
+							if ( _gotocallret_actions[__acts ] == 2  ) {
+								if ( 1 ) {
+									cout.format( "error: failed to recover\n" );
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[__acts ] == 3  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										p = p - 1;
+										
+									}
+									if ( 1 ) {
+										top-= 1;
+										cs = stack[top];
+										
+									}
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[__acts ] == 8  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										p = p - 1;
+										
+									}
+									if ( 1 ) {
+										cs = 3;
+										
+									}
+									
+								}
+								
+							}
+							;
+							__nacts -= 1;
+							__acts += 1;
+							
+						}
+						
+						
+					}
+					
+					
+				}
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _gotocallret_key_offsets[cs];
+					_trans = uint32  ( _gotocallret_index_offsets[cs] );
+					_have = 0;
+					_klen = int ( _gotocallret_single_lengths[cs] );
+					if ( _klen > 0  )
+					{
+						int _lower = 0;
+						int _mid = 0;
+						int _upper = 0;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( (data[p ])< _gotocallret_trans_keys[_mid ] )
+							_upper = _mid - 1;
+							
+							else if ( (data[p ])> _gotocallret_trans_keys[_mid ] )
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += uint32  ( (_mid - _keys) );
+								_have = 1;
+								
+							}
+							
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += uint32  ( _klen );
+							
+						}
+						
+						
+					}
+					
+					if ( _have == 0  )
+					{
+						_klen = int ( _gotocallret_range_lengths[cs] );
+						if ( _klen > 0  )
+						{
+							int _lower = 0;
+							int _mid = 0;
+							int _upper = 0;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( (data[p ])< _gotocallret_trans_keys[_mid ] )
+								_upper = _mid - 2;
+								
+								else if ( (data[p ])> _gotocallret_trans_keys[_mid + 1 ] )
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += uint32  ( ((_mid - _keys)>>1) );
+									_have = 1;
+									
+								}
+								
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += uint32  ( _klen );
+							
+							
+						}
+						
+						
+					}
+					
+					_ckeys = _gotocallret_trans_offsets[_trans];
+					_klen = int ( _gotocallret_trans_lengths[_trans] );
+					_cond = uint32  ( _gotocallret_trans_offsets[_trans] );
+					_have = 0;
+					_cpc = 0;
+					if ( 1 ) {
+						int _lower = 0;
+						int _mid = 0;
+						int _upper = 0;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < int ( _gotocallret_cond_keys[_mid ] ) )
+							_upper = _mid - 1;
+							
+							else if ( _cpc > int ( _gotocallret_cond_keys[_mid ] ) )
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += uint32  ( (_mid - _ckeys) );
+								_have = 1;
+								
+							}
+							
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+							
+						}
+						
+						
+					}
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = int ( _gotocallret_cond_targs[_cond] );
+					if ( _gotocallret_cond_actions[_cond]!= 0  )
+					{
+						_acts = _gotocallret_cond_actions[_cond];
+						_nacts = uint32  ( _gotocallret_actions[_acts ] );
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							if ( _gotocallret_actions[_acts ] == 0  ) {
+								if ( 1 ) {
+									cout.format( "error: garbling line\n" );
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 1  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										cs = 7;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 3  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										p = p - 1;
+										
+									}
+									if ( 1 ) {
+										top-= 1;
+										cs = stack[top];
+										
+									}
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 4  ) {
+								if ( 1 ) {
+									if ( comm >= 97 )
+									{
+										if ( 1 ) {
+											stack[top] = cs;
+											top += 1;
+											cs = 5;
+											
+										}
+									} 
+									else {
+										if ( 1 ) {
+											stack[top] = cs;
+											top += 1;
+											cs = 6;
+											
+										}
+									}
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 5  ) {
+								if ( 1 ) {
+									comm = ((data[p ]));
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 6  ) {
+								if ( 1 ) {
+									cout.format( "prints\n" );
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 7  ) {
+								if ( 1 ) {
+									cout.format( "correct command\n" );
+									
+								}
+								
+							}
+							else if ( _gotocallret_actions[_acts ] == 8  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										p = p - 1;
+										
+									}
+									if ( 1 ) {
+										cs = 3;
+										
+									}
+									
+								}
+								
+							}
+							;
+							_nacts -= 1;
+							_acts += 1;
+							
+						}
+						
+						
+					}
+					
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		
+	}
+	if ( cs >= gotocallret_first_final ) {
+		cout `ACCEPT\n`;
+	}
+	else {
+		cout `FAIL\n`;
+	}
+}
+
+void main()
+{
+	m( "lkajsdf\n" );
+	m( "2134\n" );
+	m( "(\n" );
+	m( "\n" );
+	m( "*234234()0909 092 -234aslkf09`1 11\n" );
+	m( "1\n" );
+	m( "909\n" );
+	m( "1 a\n" );
+	m( "11 1\n" );
+	m( "a 1\n" );
+	m( "aa a\n" );
+	m( "1 1\n" );
+	m( "1 123456\n" );
+	m( "a a\n" );
+	m( "a abcdef\n" );
+	m( "h" );
+	m( "a aa1" );
+}
+
+main();

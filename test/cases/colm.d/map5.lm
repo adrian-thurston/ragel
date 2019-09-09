@@ -1,0 +1,7 @@
+
+new StrMap: map<str, str>()
+StrMap->insert( "hello ", "there" ) 
+StrMap->insert( "friend", "how"   ) 
+StrMap->insert( "are   ", "you"   ) 
+
+##### EXP #####

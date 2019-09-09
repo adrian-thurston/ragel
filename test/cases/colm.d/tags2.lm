@@ -1,0 +1,4182 @@
+#
+# Definitions
+#
+
+rl xml_digit / (0x30..0x39) /
+
+rl base_char / 0x41..0x5A | 0x61..0x7A /
+
+rl char / 0x9 | 0xA | 0xD | 0x20..0x7f /
+
+rl letter / base_char /
+
+rl name_char / letter | digit | '.' | '-' | '_' | ':' | 0xb7 /
+
+rl name / (letter | '_' | ':') name_char* /
+
+#
+# Reference definitions. These appear in the 
+# top level and also in strings.
+#
+
+rl entity_ref_pat / '&' name ';' /
+
+rl char_ref_pat / '&#' [0-9]+ ';' | '&0x' [0-9a-fA-F]+ ';' /
+
+#
+# Single quotes.
+#
+lex
+	token sq_close /'\''/
+
+	# References in single quotes
+	token sq_entity_ref /entity_ref_pat/
+	token sq_char_ref /char_ref_pat/
+
+	token sq_data / [^<&']+ /
+
+	def sq_item 
+		[ sq_data ]
+	|	[ sq_entity_ref ]
+	|	[ sq_char_ref ]
+
+	# The opening quote belongs to the tag region. 
+	def sq_string 
+		[ `' sq_item* sq_close ]
+end
+
+#
+# Double quotes.
+#
+lex
+	token dq_close /'"'/
+
+	# References in double quotes
+	token dq_entity_ref /entity_ref_pat/
+	token dq_char_ref /char_ref_pat/
+
+	token dq_data / [^<&"]+ /
+
+	def dq_item 
+		[ dq_data ]
+	|	[ dq_entity_ref ]
+	|	[ dq_char_ref ]
+
+	# The opening quote belongs to the tag region. 
+	def dq_string 
+		[ `" dq_item* dq_close ]
+end
+
+#
+# Tag elements. 
+#
+lex
+	literal `' `" `= `/
+
+	# Within this region whitespace is not significant.
+	ignore xml_space / (0x20 | 0x9 | 0xD | 0xA)+ /
+
+	#
+	# Attributes
+	#
+	token attr_name / name /
+end
+
+literal `>
+
+#
+# Top Level
+#
+lex
+	#
+	# Comments
+	#
+
+	# Cannot contain '--'
+	rl char_no_dash / char - '-' /
+	token comment / '<!--' ( char_no_dash | '-' char_no_dash )* '-->' /
+
+
+	# Opening a tag.
+	literal `<
+
+	#
+	# Character Data
+	#
+
+	token cdata / '<![CDATA[' char* :> ']]>'/
+	token char_data / [^<&]+ /
+	token entity_ref /entity_ref_pat/
+	token char_ref /char_ref_pat/
+end
+
+
+def attribute_value 
+	[ sq_string ]
+|	[ dq_string ]
+
+def attribute 
+	[ attr_name `= attribute_value ]
+
+def empty_tag 
+	[ `< attr_name attribute* `/ `> ]
+
+def close_tag 
+	[ `< `/ attr_name `> ]
+
+def open_tag 
+	[ `< attr_name attribute* `> ]
+
+def tag 
+	[open_tag content close_tag]
+
+def content_item 
+	[tag]
+|	[empty_tag]
+|	[char_data]
+|	[entity_ref]
+|	[char_ref]
+|	[cdata]
+|	[comment]
+
+def content 
+	[content_item*]
+
+def document 
+	[content]
+
+def start 
+	[document]
+
+parse S: start[stdin]
+
+for Switch:tag in S {
+	if match Switch
+			["<lm_switch>" SwitchContent:content "</lm_switch>"]
+	{
+		print( 'SWITCH\n' )
+		for Text:tag in SwitchContent {
+			if match Text
+					["<text>" TextContent:content "</text>"]
+			{
+				print( ' ', TextContent, '\n' )
+			}
+		}
+	}
+}
+##### IN #####
+<ragel version="5.24" filename="../colm/lmscan.rl" lang="C">
+<ragel_def name="rlscan">
+  <alphtype>char</alphtype>
+  <machine>
+    <action_list length="166">
+      <action id="0" name="inc_nl" line="217" col="16"><text> 
+		lastnl = p; 
+		column = 0;
+		line++;
+	</text></action>
+      <action id="1" name="initts" line="1" col="1"><init_tokstart></init_tokstart></action>
+      <action id="2" name="tokstart" line="1" col="1"><set_tokstart></set_tokstart></action>
+      <action id="3" name="tokend" line="1" col="1"><set_tokend>1</set_tokend></action>
+      <action id="4" name="last1" line="238" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\0' ); </text></sub_action></action>
+      <action id="5" name="last2" line="239" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\a' ); </text></sub_action></action>
+      <action id="6" name="last3" line="240" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\b' ); </text></sub_action></action>
+      <action id="7" name="last4" line="241" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\t' ); </text></sub_action></action>
+      <action id="8" name="last5" line="242" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\n' ); </text></sub_action></action>
+      <action id="9" name="last6" line="243" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\v' ); </text></sub_action></action>
+      <action id="10" name="last7" line="244" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\f' ); </text></sub_action></action>
+      <action id="11" name="last8" line="245" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, '\r' ); </text></sub_action></action>
+      <action id="12" name="last9" line="246" col="13"><set_tokend>1</set_tokend><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="13" name="last10" line="247" col="15"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, tokstart+1, tokend ); </text></sub_action></action>
+      <action id="14" name="last11" line="250" col="10"><set_tokend>1</set_tokend><sub_action><text> token( RE_Dash, 0, 0 ); </text></sub_action></action>
+      <action id="15" name="last12" line="253" col="10"><set_tokend>1</set_tokend><sub_action><text> token( RE_SqClose ); </text><ret></ret><text> </text></sub_action></action>
+      <action id="16" name="last13" line="255" col="10"><set_tokend>1</set_tokend><sub_action><text>
+			scan_error() &lt;&lt; "unterminated OR literal" &lt;&lt; endl;
+		</text></sub_action></action>
+      <action id="17" name="last14" line="260" col="12"><set_tokend>1</set_tokend><sub_action><text> token( RE_Char, tokstart, tokend ); </text></sub_action></action>
+      <action id="18" name="store15" line="265" col="13"><set_act>15</set_act></action>
+      <action id="19" name="store16" line="266" col="12"><set_act>16</set_act></action>
+      <action id="20" name="store17" line="267" col="12"><set_act>17</set_act></action>
+      <action id="21" name="store18" line="268" col="13"><set_act>18</set_act></action>
+      <action id="22" name="store19" line="269" col="11"><set_act>19</set_act></action>
+      <action id="23" name="store20" line="270" col="13"><set_act>20</set_act></action>
+      <action id="24" name="store21" line="273" col="12"><set_act>21</set_act></action>
+      <action id="25" name="last24" line="281" col="7"><set_tokend>1</set_tokend><sub_action><text> token( TK_Literal, tokstart, tokend ); </text></sub_action></action>
+      <action id="26" name="last26" line="284" col="11"><set_tokend>1</set_tokend><sub_action><text> token( RE_SqOpenNeg ); </text><call>166</call><text> </text></sub_action></action>
+      <action id="27" name="last27" line="286" col="10"><set_tokend>1</set_tokend><sub_action><text> token( '/'); </text><ret></ret><text> </text></sub_action></action>
+      <action id="28" name="last28" line="289" col="20"><set_tokend>1</set_tokend><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="29" name="last29" line="291" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_ColonEquals ); </text></sub_action></action>
+      <action id="30" name="last30" line="294" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StartToState ); </text></sub_action></action>
+      <action id="31" name="last31" line="295" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AllToState ); </text></sub_action></action>
+      <action id="32" name="last32" line="296" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_FinalToState ); </text></sub_action></action>
+      <action id="33" name="last33" line="297" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotStartToState ); </text></sub_action></action>
+      <action id="34" name="last34" line="298" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotFinalToState ); </text></sub_action></action>
+      <action id="35" name="last35" line="299" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_MiddleToState ); </text></sub_action></action>
+      <action id="36" name="last36" line="302" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StartFromState ); </text></sub_action></action>
+      <action id="37" name="last37" line="303" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AllFromState ); </text></sub_action></action>
+      <action id="38" name="last38" line="304" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_FinalFromState ); </text></sub_action></action>
+      <action id="39" name="last39" line="305" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotStartFromState ); </text></sub_action></action>
+      <action id="40" name="last40" line="306" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotFinalFromState ); </text></sub_action></action>
+      <action id="41" name="last41" line="307" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_MiddleFromState ); </text></sub_action></action>
+      <action id="42" name="last42" line="310" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StartEOF ); </text></sub_action></action>
+      <action id="43" name="last43" line="311" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AllEOF ); </text></sub_action></action>
+      <action id="44" name="last44" line="312" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_FinalEOF ); </text></sub_action></action>
+      <action id="45" name="last45" line="313" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotStartEOF ); </text></sub_action></action>
+      <action id="46" name="last46" line="314" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotFinalEOF ); </text></sub_action></action>
+      <action id="47" name="last47" line="315" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_MiddleEOF ); </text></sub_action></action>
+      <action id="48" name="last48" line="318" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StartGblError ); </text></sub_action></action>
+      <action id="49" name="last49" line="319" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AllGblError ); </text></sub_action></action>
+      <action id="50" name="last50" line="320" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_FinalGblError ); </text></sub_action></action>
+      <action id="51" name="last51" line="321" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotStartGblError ); </text></sub_action></action>
+      <action id="52" name="last52" line="322" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotFinalGblError ); </text></sub_action></action>
+      <action id="53" name="last53" line="323" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_MiddleGblError ); </text></sub_action></action>
+      <action id="54" name="last54" line="326" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StartLocalError ); </text></sub_action></action>
+      <action id="55" name="last55" line="327" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AllLocalError ); </text></sub_action></action>
+      <action id="56" name="last56" line="328" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_FinalLocalError ); </text></sub_action></action>
+      <action id="57" name="last57" line="329" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotStartLocalError ); </text></sub_action></action>
+      <action id="58" name="last58" line="330" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotFinalLocalError ); </text></sub_action></action>
+      <action id="59" name="last59" line="331" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_MiddleLocalError ); </text></sub_action></action>
+      <action id="60" name="last61" line="337" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StartCond ); </text></sub_action></action>
+      <action id="61" name="last62" line="338" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AllCond ); </text></sub_action></action>
+      <action id="62" name="last63" line="339" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_LeavingCond ); </text></sub_action></action>
+      <action id="63" name="last64" line="341" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_DotDot ); </text></sub_action></action>
+      <action id="64" name="last65" line="342" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_StarStar ); </text></sub_action></action>
+      <action id="65" name="last66" line="343" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_DashDash ); </text></sub_action></action>
+      <action id="66" name="last67" line="344" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_Arrow ); </text></sub_action></action>
+      <action id="67" name="last69" line="347" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_ColonGtGt ); </text></sub_action></action>
+      <action id="68" name="last70" line="348" col="12"><set_tokend>1</set_tokend><sub_action><text> token( TK_LtColon ); </text></sub_action></action>
+      <action id="69" name="last72" line="354" col="9"><set_tokend>1</set_tokend><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="70" name="last73" line="357" col="6"><set_tokend>1</set_tokend></action>
+      <action id="71" name="last74" line="359" col="10"><set_tokend>1</set_tokend><sub_action><text> token( *tokstart ); </text></sub_action></action>
+      <action id="72" name="next21" line="273" col="12"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_Word, tokstart, tokend ); </text></sub_action></action>
+      <action id="73" name="next22" line="276" col="13"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_UInt, tokstart, tokend ); </text></sub_action></action>
+      <action id="74" name="next23" line="277" col="17"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_Hex, tokstart, tokend ); </text></sub_action></action>
+      <action id="75" name="next24" line="281" col="7"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_Literal, tokstart, tokend ); </text></sub_action></action>
+      <action id="76" name="next25" line="283" col="10"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( RE_SqOpen ); </text><call>166</call><text> </text></sub_action></action>
+      <action id="77" name="next60" line="334" col="11"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_Middle ); </text></sub_action></action>
+      <action id="78" name="next68" line="346" col="12"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_ColonGt ); </text></sub_action></action>
+      <action id="79" name="next71" line="351" col="15"><set_tokend>0</set_tokend><hold></hold><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="80" name="next74" line="359" col="10"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( *tokstart ); </text></sub_action></action>
+      <action id="81" name="lag22" line="276" col="13"><exec><get_tokend></get_tokend></exec><sub_action><text> token( TK_UInt, tokstart, tokend ); </text></sub_action></action>
+      <action id="82" name="switch" line="1" col="1"><lm_switch>
+        <sub_action id="15"><exec><get_tokend></get_tokend></exec><text> token( KW_When ); </text></sub_action>
+        <sub_action id="16"><exec><get_tokend></get_tokend></exec><text> token( KW_Eof ); </text></sub_action>
+        <sub_action id="17"><exec><get_tokend></get_tokend></exec><text> token( KW_Err ); </text></sub_action>
+        <sub_action id="18"><exec><get_tokend></get_tokend></exec><text> token( KW_Lerr ); </text></sub_action>
+        <sub_action id="19"><exec><get_tokend></get_tokend></exec><text> token( KW_To ); </text></sub_action>
+        <sub_action id="20"><exec><get_tokend></get_tokend></exec><text> token( KW_From ); </text></sub_action>
+        <sub_action id="21"><exec><get_tokend></get_tokend></exec><text> token( TK_Word, tokstart, tokend ); </text></sub_action>
+    </lm_switch></action>
+      <action id="83" name="last75" line="363" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\a' ); </text></sub_action></action>
+      <action id="84" name="last76" line="364" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\b' ); </text></sub_action></action>
+      <action id="85" name="last77" line="365" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\t' ); </text></sub_action></action>
+      <action id="86" name="last78" line="366" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\n' ); </text></sub_action></action>
+      <action id="87" name="last79" line="367" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\v' ); </text></sub_action></action>
+      <action id="88" name="last80" line="368" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\f' ); </text></sub_action></action>
+      <action id="89" name="last81" line="369" col="12"><set_tokend>1</set_tokend><sub_action><text> litBuf.append( '\r' ); </text></sub_action></action>
+      <action id="90" name="last82" line="371" col="12"><set_tokend>1</set_tokend><sub_action><text>
+			litBuf.append( tokstart[1] );
+		</text></sub_action></action>
+      <action id="91" name="last83" line="374" col="10"><set_tokend>1</set_tokend><sub_action><text>
+			if ( litBuf.length &gt; 0 ) {
+				token( TK_LitPat, litBuf.data, litBuf.data+litBuf.length );
+				litBuf.clear();
+			}
+			token( '"' );
+			</text><ret></ret><text>
+		</text></sub_action></action>
+      <action id="92" name="last84" line="382" col="9"><set_tokend>1</set_tokend><sub_action><text>
+			if ( litBuf.length &gt; 0 ) {
+				litBuf.append( '\n' );
+				token( TK_LitPat, litBuf.data, litBuf.data+litBuf.length );
+				litBuf.clear();
+			}
+			token( '"' );
+			</text><ret></ret><text>
+		</text></sub_action></action>
+      <action id="93" name="last85" line="391" col="10"><set_tokend>1</set_tokend><sub_action><text> 
+			if ( litBuf.length &gt; 0 ) {
+				token( TK_LitPat, litBuf.data, litBuf.data+litBuf.length );
+				litBuf.clear();
+			}
+			token( '[' );
+			</text><call>10</call><text>
+		</text></sub_action></action>
+      <action id="94" name="last86" line="399" col="10"><set_tokend>1</set_tokend><sub_action><text> 
+			litBuf.append( *tokstart );
+		</text></sub_action></action>
+      <action id="95" name="store87" line="406" col="12"><set_act>87</set_act></action>
+      <action id="96" name="store88" line="407" col="15"><set_act>88</set_act></action>
+      <action id="97" name="store89" line="408" col="17"><set_act>89</set_act></action>
+      <action id="98" name="store90" line="409" col="15"><set_act>90</set_act></action>
+      <action id="99" name="store91" line="410" col="13"><set_act>91</set_act></action>
+      <action id="100" name="store92" line="411" col="14"><set_act>92</set_act></action>
+      <action id="101" name="store93" line="412" col="18"><set_act>93</set_act></action>
+      <action id="102" name="store94" line="413" col="14"><set_act>94</set_act></action>
+      <action id="103" name="store95" line="414" col="16"><set_act>95</set_act></action>
+      <action id="104" name="store96" line="415" col="16"><set_act>96</set_act></action>
+      <action id="105" name="store97" line="416" col="13"><set_act>97</set_act></action>
+      <action id="106" name="store98" line="417" col="15"><set_act>98</set_act></action>
+      <action id="107" name="store99" line="418" col="16"><set_act>99</set_act></action>
+      <action id="108" name="store101" line="420" col="14"><set_act>101</set_act></action>
+      <action id="109" name="store102" line="421" col="12"><set_act>102</set_act></action>
+      <action id="110" name="store103" line="422" col="12"><set_act>103</set_act></action>
+      <action id="111" name="store104" line="424" col="11"><set_act>104</set_act></action>
+      <action id="112" name="store105" line="425" col="12"><set_act>105</set_act></action>
+      <action id="113" name="store106" line="426" col="15"><set_act>106</set_act></action>
+      <action id="114" name="store107" line="427" col="12"><set_act>107</set_act></action>
+      <action id="115" name="store108" line="428" col="16"><set_act>108</set_act></action>
+      <action id="116" name="store109" line="429" col="18"><set_act>109</set_act></action>
+      <action id="117" name="store110" line="430" col="12"><set_act>110</set_act></action>
+      <action id="118" name="store112" line="432" col="16"><set_act>112</set_act></action>
+      <action id="119" name="store113" line="433" col="17"><set_act>113</set_act></action>
+      <action id="120" name="store114" line="434" col="11"><set_act>114</set_act></action>
+      <action id="121" name="store115" line="435" col="13"><set_act>115</set_act></action>
+      <action id="122" name="store116" line="436" col="15"><set_act>116</set_act></action>
+      <action id="123" name="store117" line="437" col="14"><set_act>117</set_act></action>
+      <action id="124" name="store118" line="438" col="13"><set_act>118</set_act></action>
+      <action id="125" name="store119" line="439" col="18"><set_act>119</set_act></action>
+      <action id="126" name="store120" line="440" col="13"><set_act>120</set_act></action>
+      <action id="127" name="store121" line="441" col="14"><set_act>121</set_act></action>
+      <action id="128" name="store122" line="442" col="12"><set_act>122</set_act></action>
+      <action id="129" name="store123" line="443" col="13"><set_act>123</set_act></action>
+      <action id="130" name="store124" line="444" col="13"><set_act>124</set_act></action>
+      <action id="131" name="store125" line="445" col="13"><set_act>125</set_act></action>
+      <action id="132" name="store126" line="446" col="18"><set_act>126</set_act></action>
+      <action id="133" name="store127" line="447" col="13"><set_act>127</set_act></action>
+      <action id="134" name="store128" line="448" col="11"><set_act>128</set_act></action>
+      <action id="135" name="store129" line="449" col="18"><set_act>129</set_act></action>
+      <action id="136" name="store130" line="450" col="16"><set_act>130</set_act></action>
+      <action id="137" name="store131" line="453" col="12"><set_act>131</set_act></action>
+      <action id="138" name="last133" line="457" col="10"><set_tokend>1</set_tokend><sub_action><text> 
+			token( '/' ); 
+			</text><call>168</call><text>
+		</text></sub_action></action>
+      <action id="139" name="last134" line="462" col="20"><set_tokend>1</set_tokend><sub_action><text> 
+			token( '"' );
+			token( TK_LitPat, tokstart+1, tokend );
+			token( '"' );
+		</text></sub_action></action>
+      <action id="140" name="last135" line="468" col="16"><set_tokend>1</set_tokend><sub_action><text>
+			token( TK_Literal, tokstart, tokend );
+		</text></sub_action></action>
+      <action id="141" name="last136" line="472" col="10"><set_tokend>1</set_tokend><sub_action><text> 
+			token( '"' );
+			litBuf.clear(); 
+			</text><call>203</call><text>
+		</text></sub_action></action>
+      <action id="142" name="last137" line="477" col="10"><set_tokend>1</set_tokend><sub_action><text> 
+			token( '[' ); 
+			</text><call>10</call><text>
+		</text></sub_action></action>
+      <action id="143" name="last138" line="482" col="10"><set_tokend>1</set_tokend><sub_action><text>
+			token( ']' );
+			if ( top &gt; 0 )
+				</text><ret></ret><text>
+		</text></sub_action></action>
+      <action id="144" name="last139" line="489" col="20"><set_tokend>1</set_tokend><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="145" name="last140" line="491" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_ColonEquals ); </text></sub_action></action>
+      <action id="146" name="last141" line="492" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_DoubleArrow ); </text></sub_action></action>
+      <action id="147" name="last142" line="493" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_DoubleEquals ); </text></sub_action></action>
+      <action id="148" name="last143" line="494" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_NotEquals ); </text></sub_action></action>
+      <action id="149" name="last144" line="495" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_DoubleColon ); </text></sub_action></action>
+      <action id="150" name="last145" line="496" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_LessEquals ); </text></sub_action></action>
+      <action id="151" name="last146" line="497" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_GreaterEquals ); </text></sub_action></action>
+      <action id="152" name="last147" line="498" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_LeftArrow ); </text></sub_action></action>
+      <action id="153" name="last148" line="499" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_AmpAmp ); </text></sub_action></action>
+      <action id="154" name="last149" line="500" col="11"><set_tokend>1</set_tokend><sub_action><text> token( TK_BarBar ); </text></sub_action></action>
+      <action id="155" name="last150" line="502" col="43"><set_tokend>1</set_tokend><sub_action><text> token( *tokstart ); </text></sub_action></action>
+      <action id="156" name="last152" line="509" col="9"><set_tokend>1</set_tokend><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="157" name="last153" line="512" col="6"><set_tokend>1</set_tokend></action>
+      <action id="158" name="last154" line="514" col="10"><set_tokend>1</set_tokend><sub_action><text> token( *tokstart ); </text></sub_action></action>
+      <action id="159" name="next100" line="419" col="12"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( KW_Pri ); </text></sub_action></action>
+      <action id="160" name="next111" line="431" col="14"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( KW_Print ); </text></sub_action></action>
+      <action id="161" name="next131" line="453" col="12"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_Word, tokstart, tokend ); </text></sub_action></action>
+      <action id="162" name="next132" line="455" col="13"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( TK_Number, tokstart, tokend ); </text></sub_action></action>
+      <action id="163" name="next151" line="506" col="15"><set_tokend>0</set_tokend><hold></hold><sub_action><text> updateCol(); </text></sub_action></action>
+      <action id="164" name="next154" line="514" col="10"><set_tokend>0</set_tokend><hold></hold><sub_action><text> token( *tokstart ); </text></sub_action></action>
+      <action id="165" name="switch" line="1" col="1"><lm_switch>
+        <sub_action id="87"><exec><get_tokend></get_tokend></exec><text> token( KW_Lex ); </text></sub_action>
+        <sub_action id="88"><exec><get_tokend></get_tokend></exec><text> token( KW_Action ); </text></sub_action>
+        <sub_action id="89"><exec><get_tokend></get_tokend></exec><text> token( KW_AlphType ); </text></sub_action>
+        <sub_action id="90"><exec><get_tokend></get_tokend></exec><text> token( KW_Commit ); </text></sub_action>
+        <sub_action id="91"><exec><get_tokend></get_tokend></exec><text> token( KW_Undo ); </text></sub_action>
+        <sub_action id="92"><exec><get_tokend></get_tokend></exec><text> token( KW_Final ); </text></sub_action>
+        <sub_action id="93"><exec><get_tokend></get_tokend></exec><text> token( KW_Translate ); </text></sub_action>
+        <sub_action id="94"><exec><get_tokend></get_tokend></exec><text> token( KW_Token ); </text></sub_action>
+        <sub_action id="95"><exec><get_tokend></get_tokend></exec><text> token( KW_Literal ); </text></sub_action>
+        <sub_action id="96"><exec><get_tokend></get_tokend></exec><text> token( KW_NonTerm ); </text></sub_action>
+        <sub_action id="97"><exec><get_tokend></get_tokend></exec><text> token( KW_Uses ); </text></sub_action>
+        <sub_action id="98"><exec><get_tokend></get_tokend></exec><text> token( KW_Parser ); </text></sub_action>
+        <sub_action id="99"><exec><get_tokend></get_tokend></exec><text> token( KW_Include ); </text></sub_action>
+        <sub_action id="101"><exec><get_tokend></get_tokend></exec><text> token( KW_Write ); </text></sub_action>
+        <sub_action id="102"><exec><get_tokend></get_tokend></exec><text> token( KW_Nfa ); </text></sub_action>
+        <sub_action id="103"><exec><get_tokend></get_tokend></exec><text> token( KW_Pda ); </text></sub_action>
+        <sub_action id="104"><exec><get_tokend></get_tokend></exec><text> token( KW_Rl ); </text></sub_action>
+        <sub_action id="105"><exec><get_tokend></get_tokend></exec><text> token( KW_Cfl ); </text></sub_action>
+        <sub_action id="106"><exec><get_tokend></get_tokend></exec><text> token( KW_Ignore ); </text></sub_action>
+        <sub_action id="107"><exec><get_tokend></get_tokend></exec><text> token( KW_End ); </text></sub_action>
+        <sub_action id="108"><exec><get_tokend></get_tokend></exec><text> token( KW_Pattern ); </text></sub_action>
+        <sub_action id="109"><exec><get_tokend></get_tokend></exec><text> token( KW_Construct ); </text></sub_action>
+        <sub_action id="110"><exec><get_tokend></get_tokend></exec><text> token( KW_Red ); </text></sub_action>
+        <sub_action id="112"><exec><get_tokend></get_tokend></exec><text> token( KW_TypeId ); </text></sub_action>
+        <sub_action id="113"><exec><get_tokend></get_tokend></exec><text> token( KW_TypeDef ); </text></sub_action>
+        <sub_action id="114"><exec><get_tokend></get_tokend></exec><text> token( KW_If ); </text></sub_action>
+        <sub_action id="115"><exec><get_tokend></get_tokend></exec><text> token( KW_Init ); </text></sub_action>
+        <sub_action id="116"><exec><get_tokend></get_tokend></exec><text> token( KW_Reject ); </text></sub_action>
+        <sub_action id="117"><exec><get_tokend></get_tokend></exec><text> token( KW_While ); </text></sub_action>
+        <sub_action id="118"><exec><get_tokend></get_tokend></exec><text> token( KW_Else ); </text></sub_action>
+        <sub_action id="119"><exec><get_tokend></get_tokend></exec><text> token( KW_SubParser ); </text></sub_action>
+        <sub_action id="120"><exec><get_tokend></get_tokend></exec><text> token( KW_Next ); </text></sub_action>
+        <sub_action id="121"><exec><get_tokend></get_tokend></exec><text> token( KW_Match ); </text></sub_action>
+        <sub_action id="122"><exec><get_tokend></get_tokend></exec><text> token( KW_For ); </text></sub_action>
+        <sub_action id="123"><exec><get_tokend></get_tokend></exec><text> token( KW_Iter ); </text></sub_action>
+        <sub_action id="124"><exec><get_tokend></get_tokend></exec><text> token( KW_Find ); </text></sub_action>
+        <sub_action id="125"><exec><get_tokend></get_tokend></exec><text> token( KW_Root ); </text></sub_action>
+        <sub_action id="126"><exec><get_tokend></get_tokend></exec><text> token( KW_PrintXML ); </text></sub_action>
+        <sub_action id="127"><exec><get_tokend></get_tokend></exec><text> token( KW_Then ); </text></sub_action>
+        <sub_action id="128"><exec><get_tokend></get_tokend></exec><text> token( KW_Do ); </text></sub_action>
+        <sub_action id="129"><exec><get_tokend></get_tokend></exec><text> token( KW_Namespace ); </text></sub_action>
+        <sub_action id="130"><exec><get_tokend></get_tokend></exec><text> token( KW_Scanner ); </text></sub_action>
+        <sub_action id="131"><exec><get_tokend></get_tokend></exec><text> token( TK_Word, tokstart, tokend ); </text></sub_action>
+    </lm_switch></action>
+    </action_list>
+    <action_table_list length="166">
+      <action_table id="0" length="2">0 144</action_table>
+      <action_table id="1" length="1">0</action_table>
+      <action_table id="2" length="1">140</action_table>
+      <action_table id="3" length="2">0 139</action_table>
+      <action_table id="4" length="2">0 28</action_table>
+      <action_table id="5" length="1">81</action_table>
+      <action_table id="6" length="1">1</action_table>
+      <action_table id="7" length="1">2</action_table>
+      <action_table id="8" length="1">158</action_table>
+      <action_table id="9" length="1">157</action_table>
+      <action_table id="10" length="2">0 156</action_table>
+      <action_table id="11" length="1">141</action_table>
+      <action_table id="12" length="1">3</action_table>
+      <action_table id="13" length="1">155</action_table>
+      <action_table id="14" length="1">138</action_table>
+      <action_table id="15" length="2">3 137</action_table>
+      <action_table id="16" length="1">142</action_table>
+      <action_table id="17" length="1">143</action_table>
+      <action_table id="18" length="1">163</action_table>
+      <action_table id="19" length="1">164</action_table>
+      <action_table id="20" length="1">148</action_table>
+      <action_table id="21" length="1">153</action_table>
+      <action_table id="22" length="1">162</action_table>
+      <action_table id="23" length="1">149</action_table>
+      <action_table id="24" length="1">145</action_table>
+      <action_table id="25" length="1">152</action_table>
+      <action_table id="26" length="1">150</action_table>
+      <action_table id="27" length="1">147</action_table>
+      <action_table id="28" length="1">146</action_table>
+      <action_table id="29" length="1">151</action_table>
+      <action_table id="30" length="1">165</action_table>
+      <action_table id="31" length="1">161</action_table>
+      <action_table id="32" length="2">3 96</action_table>
+      <action_table id="33" length="2">3 97</action_table>
+      <action_table id="34" length="2">3 112</action_table>
+      <action_table id="35" length="2">3 98</action_table>
+      <action_table id="36" length="2">3 116</action_table>
+      <action_table id="37" length="2">3 134</action_table>
+      <action_table id="38" length="2">3 124</action_table>
+      <action_table id="39" length="2">3 114</action_table>
+      <action_table id="40" length="2">3 130</action_table>
+      <action_table id="41" length="2">3 100</action_table>
+      <action_table id="42" length="2">3 128</action_table>
+      <action_table id="43" length="2">3 120</action_table>
+      <action_table id="44" length="2">3 113</action_table>
+      <action_table id="45" length="2">3 107</action_table>
+      <action_table id="46" length="2">3 121</action_table>
+      <action_table id="47" length="2">3 129</action_table>
+      <action_table id="48" length="2">3 95</action_table>
+      <action_table id="49" length="2">3 103</action_table>
+      <action_table id="50" length="2">3 127</action_table>
+      <action_table id="51" length="2">3 135</action_table>
+      <action_table id="52" length="2">3 126</action_table>
+      <action_table id="53" length="2">3 109</action_table>
+      <action_table id="54" length="2">3 104</action_table>
+      <action_table id="55" length="2">3 106</action_table>
+      <action_table id="56" length="2">3 115</action_table>
+      <action_table id="57" length="2">3 110</action_table>
+      <action_table id="58" length="1">159</action_table>
+      <action_table id="59" length="1">160</action_table>
+      <action_table id="60" length="2">3 132</action_table>
+      <action_table id="61" length="2">3 111</action_table>
+      <action_table id="62" length="2">3 117</action_table>
+      <action_table id="63" length="2">3 122</action_table>
+      <action_table id="64" length="2">3 131</action_table>
+      <action_table id="65" length="2">3 136</action_table>
+      <action_table id="66" length="2">3 125</action_table>
+      <action_table id="67" length="2">3 133</action_table>
+      <action_table id="68" length="2">3 102</action_table>
+      <action_table id="69" length="2">3 101</action_table>
+      <action_table id="70" length="2">3 119</action_table>
+      <action_table id="71" length="2">3 118</action_table>
+      <action_table id="72" length="2">3 99</action_table>
+      <action_table id="73" length="2">3 105</action_table>
+      <action_table id="74" length="2">3 123</action_table>
+      <action_table id="75" length="2">3 108</action_table>
+      <action_table id="76" length="1">154</action_table>
+      <action_table id="77" length="1">17</action_table>
+      <action_table id="78" length="1">16</action_table>
+      <action_table id="79" length="1">14</action_table>
+      <action_table id="80" length="1">15</action_table>
+      <action_table id="81" length="1">13</action_table>
+      <action_table id="82" length="1">12</action_table>
+      <action_table id="83" length="1">4</action_table>
+      <action_table id="84" length="1">5</action_table>
+      <action_table id="85" length="1">6</action_table>
+      <action_table id="86" length="1">10</action_table>
+      <action_table id="87" length="1">8</action_table>
+      <action_table id="88" length="1">11</action_table>
+      <action_table id="89" length="1">7</action_table>
+      <action_table id="90" length="1">9</action_table>
+      <action_table id="91" length="1">71</action_table>
+      <action_table id="92" length="1">70</action_table>
+      <action_table id="93" length="2">0 69</action_table>
+      <action_table id="94" length="1">27</action_table>
+      <action_table id="95" length="2">3 24</action_table>
+      <action_table id="96" length="1">79</action_table>
+      <action_table id="97" length="1">75</action_table>
+      <action_table id="98" length="1">25</action_table>
+      <action_table id="99" length="1">80</action_table>
+      <action_table id="100" length="1">49</action_table>
+      <action_table id="101" length="1">37</action_table>
+      <action_table id="102" length="1">43</action_table>
+      <action_table id="103" length="1">61</action_table>
+      <action_table id="104" length="1">55</action_table>
+      <action_table id="105" length="1">31</action_table>
+      <action_table id="106" length="1">50</action_table>
+      <action_table id="107" length="1">38</action_table>
+      <action_table id="108" length="1">44</action_table>
+      <action_table id="109" length="1">62</action_table>
+      <action_table id="110" length="1">56</action_table>
+      <action_table id="111" length="1">32</action_table>
+      <action_table id="112" length="1">64</action_table>
+      <action_table id="113" length="1">65</action_table>
+      <action_table id="114" length="1">66</action_table>
+      <action_table id="115" length="1">63</action_table>
+      <action_table id="116" length="1">73</action_table>
+      <action_table id="117" length="1">74</action_table>
+      <action_table id="118" length="1">29</action_table>
+      <action_table id="119" length="1">78</action_table>
+      <action_table id="120" length="1">67</action_table>
+      <action_table id="121" length="1">51</action_table>
+      <action_table id="122" length="1">39</action_table>
+      <action_table id="123" length="1">45</action_table>
+      <action_table id="124" length="1">68</action_table>
+      <action_table id="125" length="1">57</action_table>
+      <action_table id="126" length="1">33</action_table>
+      <action_table id="127" length="1">77</action_table>
+      <action_table id="128" length="1">53</action_table>
+      <action_table id="129" length="1">41</action_table>
+      <action_table id="130" length="1">47</action_table>
+      <action_table id="131" length="1">59</action_table>
+      <action_table id="132" length="1">35</action_table>
+      <action_table id="133" length="1">48</action_table>
+      <action_table id="134" length="1">36</action_table>
+      <action_table id="135" length="1">42</action_table>
+      <action_table id="136" length="1">60</action_table>
+      <action_table id="137" length="1">54</action_table>
+      <action_table id="138" length="1">30</action_table>
+      <action_table id="139" length="1">52</action_table>
+      <action_table id="140" length="1">40</action_table>
+      <action_table id="141" length="1">46</action_table>
+      <action_table id="142" length="1">58</action_table>
+      <action_table id="143" length="1">34</action_table>
+      <action_table id="144" length="1">82</action_table>
+      <action_table id="145" length="1">76</action_table>
+      <action_table id="146" length="1">26</action_table>
+      <action_table id="147" length="1">72</action_table>
+      <action_table id="148" length="2">3 19</action_table>
+      <action_table id="149" length="2">3 20</action_table>
+      <action_table id="150" length="2">3 23</action_table>
+      <action_table id="151" length="2">3 21</action_table>
+      <action_table id="152" length="2">3 22</action_table>
+      <action_table id="153" length="2">3 18</action_table>
+      <action_table id="154" length="1">94</action_table>
+      <action_table id="155" length="2">0 92</action_table>
+      <action_table id="156" length="1">91</action_table>
+      <action_table id="157" length="1">93</action_table>
+      <action_table id="158" length="1">90</action_table>
+      <action_table id="159" length="1">83</action_table>
+      <action_table id="160" length="1">84</action_table>
+      <action_table id="161" length="1">88</action_table>
+      <action_table id="162" length="1">86</action_table>
+      <action_table id="163" length="1">89</action_table>
+      <action_table id="164" length="1">85</action_table>
+      <action_table id="165" length="1">87</action_table>
+    </action_table_list>
+    <start_state>10</start_state>
+    <entry_points>
+      <entry name="or_literal">166</entry>
+      <entry name="regular_type">168</entry>
+      <entry name="literal_pattern">203</entry>
+      <entry name="main">10</entry>
+    </entry_points>
+    <state_list length="205">
+      <state id="0">
+      <trans_list length="3">
+        <t>-128 9 0 x</t>
+        <t>10 10 10 0</t>
+        <t>11 127 0 x</t>
+      </trans_list>
+      </state>
+
+      <state id="1">
+      <trans_list length="7">
+        <t>-128 9 1 x</t>
+        <t>10 10 1 1</t>
+        <t>11 38 1 x</t>
+        <t>39 39 10 2</t>
+        <t>40 91 1 x</t>
+        <t>92 92 2 x</t>
+        <t>93 127 1 x</t>
+      </trans_list>
+      </state>
+
+      <state id="2">
+      <trans_list length="3">
+        <t>-128 9 1 x</t>
+        <t>10 10 1 1</t>
+        <t>11 127 1 x</t>
+      </trans_list>
+      </state>
+
+      <state id="3">
+      <trans_list length="3">
+        <t>-128 9 3 x</t>
+        <t>10 10 10 3</t>
+        <t>11 127 3 x</t>
+      </trans_list>
+      </state>
+
+      <state id="4">
+      <trans_list length="7">
+        <t>-128 9 4 x</t>
+        <t>10 10 4 1</t>
+        <t>11 33 4 x</t>
+        <t>34 34 171 x</t>
+        <t>35 91 4 x</t>
+        <t>92 92 5 x</t>
+        <t>93 127 4 x</t>
+      </trans_list>
+      </state>
+
+      <state id="5">
+      <trans_list length="3">
+        <t>-128 9 4 x</t>
+        <t>10 10 4 1</t>
+        <t>11 127 4 x</t>
+      </trans_list>
+      </state>
+
+      <state id="6">
+      <trans_list length="3">
+        <t>-128 9 6 x</t>
+        <t>10 10 168 4</t>
+        <t>11 127 6 x</t>
+      </trans_list>
+      </state>
+
+      <state id="7">
+      <trans_list length="7">
+        <t>-128 9 7 x</t>
+        <t>10 10 7 1</t>
+        <t>11 38 7 x</t>
+        <t>39 39 171 x</t>
+        <t>40 91 7 x</t>
+        <t>92 92 8 x</t>
+        <t>93 127 7 x</t>
+      </trans_list>
+      </state>
+
+      <state id="8">
+      <trans_list length="3">
+        <t>-128 9 7 x</t>
+        <t>10 10 7 1</t>
+        <t>11 127 7 x</t>
+      </trans_list>
+      </state>
+
+      <state id="9">
+      <trans_list length="7">
+        <t>-128 47 168 5</t>
+        <t>48 57 181 x</t>
+        <t>58 64 168 5</t>
+        <t>65 70 181 x</t>
+        <t>71 96 168 5</t>
+        <t>97 102 181 x</t>
+        <t>103 127 168 5</t>
+      </trans_list>
+      </state>
+
+      <state id="10" final="t">
+      <state_actions>6 7 x</state_actions>
+      <trans_list length="61">
+        <t>-128 -1 10 8</t>
+        <t>0 0 10 9</t>
+        <t>1 8 10 8</t>
+        <t>9 9 11 x</t>
+        <t>10 10 10 10</t>
+        <t>11 12 10 8</t>
+        <t>13 13 11 x</t>
+        <t>14 31 10 8</t>
+        <t>32 32 11 x</t>
+        <t>33 33 12 x</t>
+        <t>34 34 10 11</t>
+        <t>35 35 13 12</t>
+        <t>36 37 10 8</t>
+        <t>38 38 14 x</t>
+        <t>39 39 15 12</t>
+        <t>40 43 10 13</t>
+        <t>44 44 10 8</t>
+        <t>45 45 10 13</t>
+        <t>46 46 10 8</t>
+        <t>47 47 10 14</t>
+        <t>48 57 16 x</t>
+        <t>58 58 17 x</t>
+        <t>59 59 10 8</t>
+        <t>60 60 18 x</t>
+        <t>61 61 19 x</t>
+        <t>62 62 20 x</t>
+        <t>63 64 10 8</t>
+        <t>65 90 21 15</t>
+        <t>91 91 10 16</t>
+        <t>92 92 10 8</t>
+        <t>93 93 10 17</t>
+        <t>94 94 10 8</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 8</t>
+        <t>97 97 22 x</t>
+        <t>98 98 21 15</t>
+        <t>99 99 33 x</t>
+        <t>100 100 45 x</t>
+        <t>101 101 46 x</t>
+        <t>102 102 50 x</t>
+        <t>103 104 21 15</t>
+        <t>105 105 55 x</t>
+        <t>106 107 21 15</t>
+        <t>108 108 68 x</t>
+        <t>109 109 75 x</t>
+        <t>110 110 79 x</t>
+        <t>111 111 21 15</t>
+        <t>112 112 95 x</t>
+        <t>113 113 21 15</t>
+        <t>114 114 112 x</t>
+        <t>115 115 119 x</t>
+        <t>116 116 132 x</t>
+        <t>117 117 152 x</t>
+        <t>118 118 21 15</t>
+        <t>119 119 157 x</t>
+        <t>120 122 21 15</t>
+        <t>123 123 10 8</t>
+        <t>124 124 164 x</t>
+        <t>125 125 10 8</t>
+        <t>126 126 165 12</t>
+        <t>127 127 10 8</t>
+      </trans_list>
+      </state>
+
+      <state id="11" final="t">
+      <trans_list length="7">
+        <t>-128 8 10 18</t>
+        <t>9 9 11 x</t>
+        <t>10 12 10 18</t>
+        <t>13 13 11 x</t>
+        <t>14 31 10 18</t>
+        <t>32 32 11 x</t>
+        <t>33 127 10 18</t>
+      </trans_list>
+      </state>
+
+      <state id="12" final="t">
+      <trans_list length="3">
+        <t>-128 60 10 19</t>
+        <t>61 61 10 20</t>
+        <t>62 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="13" final="t">
+      <trans_list length="3">
+        <t>-128 9 0 x</t>
+        <t>10 10 10 0</t>
+        <t>11 127 0 x</t>
+      </trans_list>
+      </state>
+
+      <state id="14" final="t">
+      <trans_list length="3">
+        <t>-128 37 10 19</t>
+        <t>38 38 10 21</t>
+        <t>39 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="15" final="t">
+      <trans_list length="7">
+        <t>-128 9 1 x</t>
+        <t>10 10 1 1</t>
+        <t>11 38 1 x</t>
+        <t>39 39 10 2</t>
+        <t>40 91 1 x</t>
+        <t>92 92 2 x</t>
+        <t>93 127 1 x</t>
+      </trans_list>
+      </state>
+
+      <state id="16" final="t">
+      <trans_list length="3">
+        <t>-128 47 10 22</t>
+        <t>48 57 16 x</t>
+        <t>58 127 10 22</t>
+      </trans_list>
+      </state>
+
+      <state id="17" final="t">
+      <trans_list length="5">
+        <t>-128 57 10 19</t>
+        <t>58 58 10 23</t>
+        <t>59 60 10 19</t>
+        <t>61 61 10 24</t>
+        <t>62 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="18" final="t">
+      <trans_list length="5">
+        <t>-128 44 10 19</t>
+        <t>45 45 10 25</t>
+        <t>46 60 10 19</t>
+        <t>61 61 10 26</t>
+        <t>62 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="19" final="t">
+      <trans_list length="4">
+        <t>-128 60 10 19</t>
+        <t>61 61 10 27</t>
+        <t>62 62 10 28</t>
+        <t>63 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="20" final="t">
+      <trans_list length="3">
+        <t>-128 60 10 19</t>
+        <t>61 61 10 29</t>
+        <t>62 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="21" final="t">
+      <trans_list length="9">
+        <t>-128 47 10 30</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 30</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 30</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 30</t>
+        <t>97 122 21 15</t>
+        <t>123 127 10 30</t>
+      </trans_list>
+      </state>
+
+      <state id="22" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 23 x</t>
+        <t>100 107 21 15</t>
+        <t>108 108 27 x</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="23" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 24 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="24" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 104 21 15</t>
+        <t>105 105 25 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="25" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 110 21 15</t>
+        <t>111 111 26 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="26" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 21 32</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="27" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 111 21 15</t>
+        <t>112 112 28 x</t>
+        <t>113 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="28" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 103 21 15</t>
+        <t>104 104 29 x</t>
+        <t>105 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="29" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 30 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="30" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 120 21 15</t>
+        <t>121 121 31 x</t>
+        <t>122 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="31" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 111 21 15</t>
+        <t>112 112 32 x</t>
+        <t>113 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="32" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 33</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="33" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 101 21 15</t>
+        <t>102 102 34 x</t>
+        <t>103 110 21 15</t>
+        <t>111 111 35 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="34" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 21 34</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="35" final="t">
+      <trans_list length="12">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 108 21 15</t>
+        <t>109 109 36 x</t>
+        <t>110 110 39 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="36" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 108 21 15</t>
+        <t>109 109 37 x</t>
+        <t>110 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="37" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 104 21 15</t>
+        <t>105 105 38 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="38" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 21 35</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="39" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 40 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="40" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 41 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="41" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 42 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="42" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 116 21 15</t>
+        <t>117 117 43 x</t>
+        <t>118 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="43" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 44 x</t>
+        <t>100 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="44" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 21 36</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="45" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 110 21 15</t>
+        <t>111 111 21 37</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="46" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 47 x</t>
+        <t>109 109 21 15</t>
+        <t>110 110 49 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="47" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 48 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="48" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 38</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="49" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 99 21 15</t>
+        <t>100 100 21 39</t>
+        <t>101 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="50" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 104 21 15</t>
+        <t>105 105 51 x</t>
+        <t>106 110 21 15</t>
+        <t>111 111 54 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="51" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 52 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="52" final="t">
+      <trans_list length="12">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 53 x</t>
+        <t>98 99 21 15</t>
+        <t>100 100 21 40</t>
+        <t>101 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="53" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 21 41</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="54" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 21 42</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="55" final="t">
+      <trans_list length="16">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 101 21 15</t>
+        <t>102 102 21 43</t>
+        <t>103 103 56 x</t>
+        <t>104 109 21 15</t>
+        <t>110 110 60 x</t>
+        <t>111 115 21 15</t>
+        <t>116 116 66 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="56" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 57 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="57" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 110 21 15</t>
+        <t>111 111 58 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="58" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 59 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="59" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 44</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="60" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 61 x</t>
+        <t>100 104 21 15</t>
+        <t>105 105 65 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="61" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 62 x</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="62" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 116 21 15</t>
+        <t>117 117 63 x</t>
+        <t>118 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="63" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 99 21 15</t>
+        <t>100 100 64 x</t>
+        <t>101 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="64" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 45</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="65" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 21 46</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="66" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 67 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="67" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 21 47</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="68" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 69 x</t>
+        <t>102 104 21 15</t>
+        <t>105 105 70 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="69" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 119 21 15</t>
+        <t>120 120 21 48</t>
+        <t>121 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="70" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 71 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="71" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 72 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="72" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 73 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="73" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 74 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="74" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 21 49</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="75" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 76 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="76" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 77 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="77" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 78 x</t>
+        <t>100 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="78" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 103 21 15</t>
+        <t>104 104 21 50</t>
+        <t>105 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="79" final="t">
+      <trans_list length="15">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 80 x</t>
+        <t>98 100 21 15</t>
+        <t>101 101 87 x</t>
+        <t>102 102 89 x</t>
+        <t>103 110 21 15</t>
+        <t>111 111 90 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="80" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 108 21 15</t>
+        <t>109 109 81 x</t>
+        <t>110 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="81" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 82 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="82" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 83 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="83" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 111 21 15</t>
+        <t>112 112 84 x</t>
+        <t>113 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="84" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 85 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="85" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 86 x</t>
+        <t>100 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="86" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 51</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="87" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 119 21 15</t>
+        <t>120 120 88 x</t>
+        <t>121 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="88" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 21 52</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="89" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 21 53</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="90" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 91 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="91" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 92 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="92" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 93 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="93" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 94 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="94" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 108 21 15</t>
+        <t>109 109 21 54</t>
+        <t>110 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="95" final="t">
+      <trans_list length="14">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 96 x</t>
+        <t>98 99 21 15</t>
+        <t>100 100 104 x</t>
+        <t>101 113 21 15</t>
+        <t>114 114 105 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="96" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 97 x</t>
+        <t>115 115 21 15</t>
+        <t>116 116 100 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="97" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 98 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="98" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 99 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="99" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 21 55</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="100" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 101 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="101" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 102 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="102" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 103 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="103" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 21 56</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="104" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 21 57</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="105" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 104 21 15</t>
+        <t>105 105 106 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="106" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 58</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 58</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 58</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 58</t>
+        <t>97 109 21 15</t>
+        <t>110 110 107 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 58</t>
+      </trans_list>
+      </state>
+
+      <state id="107" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 108 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="108" final="t">
+      <trans_list length="9">
+        <t>-128 47 10 59</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 59</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 59</t>
+        <t>95 95 109 x</t>
+        <t>96 96 10 59</t>
+        <t>97 122 21 15</t>
+        <t>123 127 10 59</t>
+      </trans_list>
+      </state>
+
+      <state id="109" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 119 21 15</t>
+        <t>120 120 110 x</t>
+        <t>121 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="110" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 108 21 15</t>
+        <t>109 109 111 x</t>
+        <t>110 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="111" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 21 60</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="112" final="t">
+      <trans_list length="15">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 113 x</t>
+        <t>102 107 21 15</t>
+        <t>108 108 21 61</t>
+        <t>109 110 21 15</t>
+        <t>111 111 117 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="113" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 99 21 15</t>
+        <t>100 100 21 62</t>
+        <t>101 105 21 15</t>
+        <t>106 106 114 x</t>
+        <t>107 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="114" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 115 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="115" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 116 x</t>
+        <t>100 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="116" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 21 63</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="117" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 110 21 15</t>
+        <t>111 111 118 x</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="118" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 21 64</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="119" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 98 21 15</t>
+        <t>99 99 120 x</t>
+        <t>100 116 21 15</t>
+        <t>117 117 125 x</t>
+        <t>118 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="120" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 121 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="121" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 122 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="122" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 123 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="123" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 124 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="124" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 21 65</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="125" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 21 15</t>
+        <t>98 98 126 x</t>
+        <t>99 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="126" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 111 21 15</t>
+        <t>112 112 127 x</t>
+        <t>113 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="127" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 128 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="128" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 129 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="129" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 130 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="130" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 131 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="131" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 113 21 15</t>
+        <t>114 114 21 66</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="132" final="t">
+      <trans_list length="17">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 103 21 15</t>
+        <t>104 104 133 x</t>
+        <t>105 110 21 15</t>
+        <t>111 111 135 x</t>
+        <t>112 113 21 15</t>
+        <t>114 114 138 x</t>
+        <t>115 120 21 15</t>
+        <t>121 121 145 x</t>
+        <t>122 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="133" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 134 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="134" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 21 67</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="135" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 106 21 15</t>
+        <t>107 107 136 x</t>
+        <t>108 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="136" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 137 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="137" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 21 68</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="138" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 139 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="139" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 140 x</t>
+        <t>111 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="140" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 141 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="141" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 142 x</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="142" final="t">
+      <trans_list length="10">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 97 143 x</t>
+        <t>98 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="143" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 144 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="144" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 69</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="145" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 111 21 15</t>
+        <t>112 112 146 x</t>
+        <t>113 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="146" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 147 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="147" final="t">
+      <trans_list length="9">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 148 x</t>
+        <t>96 96 10 31</t>
+        <t>97 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="148" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 99 21 15</t>
+        <t>100 100 149 x</t>
+        <t>101 104 21 15</t>
+        <t>105 105 151 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="149" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 150 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="150" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 101 21 15</t>
+        <t>102 102 21 70</t>
+        <t>103 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="151" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 99 21 15</t>
+        <t>100 100 21 71</t>
+        <t>101 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="152" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 109 21 15</t>
+        <t>110 110 153 x</t>
+        <t>111 114 21 15</t>
+        <t>115 115 155 x</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="153" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 99 21 15</t>
+        <t>100 100 154 x</t>
+        <t>101 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="154" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 110 21 15</t>
+        <t>111 111 21 72</t>
+        <t>112 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="155" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 156 x</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="156" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 114 21 15</t>
+        <t>115 115 21 73</t>
+        <t>116 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="157" final="t">
+      <trans_list length="13">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 103 21 15</t>
+        <t>104 104 158 x</t>
+        <t>105 113 21 15</t>
+        <t>114 114 161 x</t>
+        <t>115 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="158" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 104 21 15</t>
+        <t>105 105 159 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="159" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 107 21 15</t>
+        <t>108 108 160 x</t>
+        <t>109 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="160" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 74</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="161" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 104 21 15</t>
+        <t>105 105 162 x</t>
+        <t>106 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="162" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 115 21 15</t>
+        <t>116 116 163 x</t>
+        <t>117 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="163" final="t">
+      <trans_list length="11">
+        <t>-128 47 10 31</t>
+        <t>48 57 21 15</t>
+        <t>58 64 10 31</t>
+        <t>65 90 21 15</t>
+        <t>91 94 10 31</t>
+        <t>95 95 21 15</t>
+        <t>96 96 10 31</t>
+        <t>97 100 21 15</t>
+        <t>101 101 21 75</t>
+        <t>102 122 21 15</t>
+        <t>123 127 10 31</t>
+      </trans_list>
+      </state>
+
+      <state id="164" final="t">
+      <trans_list length="3">
+        <t>-128 123 10 19</t>
+        <t>124 124 10 76</t>
+        <t>125 127 10 19</t>
+      </trans_list>
+      </state>
+
+      <state id="165" final="t">
+      <trans_list length="3">
+        <t>-128 9 3 x</t>
+        <t>10 10 10 3</t>
+        <t>11 127 3 x</t>
+      </trans_list>
+      </state>
+
+      <state id="166" final="t">
+      <state_actions>6 7 x</state_actions>
+      <trans_list length="8">
+        <t>-128 -1 166 77</t>
+        <t>0 0 166 78</t>
+        <t>1 44 166 77</t>
+        <t>45 45 166 79</t>
+        <t>46 91 166 77</t>
+        <t>92 92 167 x</t>
+        <t>93 93 166 80</t>
+        <t>94 127 166 77</t>
+      </trans_list>
+      </state>
+
+      <state id="167" final="t">
+      <trans_list length="18">
+        <t>-128 9 166 81</t>
+        <t>10 10 166 82</t>
+        <t>11 47 166 81</t>
+        <t>48 48 166 83</t>
+        <t>49 96 166 81</t>
+        <t>97 97 166 84</t>
+        <t>98 98 166 85</t>
+        <t>99 101 166 81</t>
+        <t>102 102 166 86</t>
+        <t>103 109 166 81</t>
+        <t>110 110 166 87</t>
+        <t>111 113 166 81</t>
+        <t>114 114 166 88</t>
+        <t>115 115 166 81</t>
+        <t>116 116 166 89</t>
+        <t>117 117 166 81</t>
+        <t>118 118 166 90</t>
+        <t>119 127 166 81</t>
+      </trans_list>
+      </state>
+
+      <state id="168" final="t">
+      <state_actions>6 7 x</state_actions>
+      <trans_list length="47">
+        <t>-128 -1 168 91</t>
+        <t>0 0 168 92</t>
+        <t>1 8 168 91</t>
+        <t>9 9 169 x</t>
+        <t>10 10 168 93</t>
+        <t>11 12 168 91</t>
+        <t>13 13 169 x</t>
+        <t>14 31 168 91</t>
+        <t>32 32 169 x</t>
+        <t>33 33 168 91</t>
+        <t>34 34 170 12</t>
+        <t>35 35 172 12</t>
+        <t>36 36 173 x</t>
+        <t>37 37 174 x</t>
+        <t>38 38 168 91</t>
+        <t>39 39 175 12</t>
+        <t>40 41 168 91</t>
+        <t>42 42 176 x</t>
+        <t>43 44 168 91</t>
+        <t>45 45 177 x</t>
+        <t>46 46 178 x</t>
+        <t>47 47 168 94</t>
+        <t>48 48 179 12</t>
+        <t>49 57 180 x</t>
+        <t>58 58 182 x</t>
+        <t>59 59 168 91</t>
+        <t>60 60 184 x</t>
+        <t>61 61 168 91</t>
+        <t>62 62 186 x</t>
+        <t>63 63 168 91</t>
+        <t>64 64 187 x</t>
+        <t>65 90 188 95</t>
+        <t>91 91 189 x</t>
+        <t>92 94 168 91</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 91</t>
+        <t>97 100 188 95</t>
+        <t>101 101 190 x</t>
+        <t>102 102 193 x</t>
+        <t>103 107 188 95</t>
+        <t>108 108 196 x</t>
+        <t>109 115 188 95</t>
+        <t>116 116 199 x</t>
+        <t>117 118 188 95</t>
+        <t>119 119 200 x</t>
+        <t>120 122 188 95</t>
+        <t>123 127 168 91</t>
+      </trans_list>
+      </state>
+
+      <state id="169" final="t">
+      <trans_list length="7">
+        <t>-128 8 168 96</t>
+        <t>9 9 169 x</t>
+        <t>10 12 168 96</t>
+        <t>13 13 169 x</t>
+        <t>14 31 168 96</t>
+        <t>32 32 169 x</t>
+        <t>33 127 168 96</t>
+      </trans_list>
+      </state>
+
+      <state id="170" final="t">
+      <trans_list length="7">
+        <t>-128 9 4 x</t>
+        <t>10 10 4 1</t>
+        <t>11 33 4 x</t>
+        <t>34 34 171 x</t>
+        <t>35 91 4 x</t>
+        <t>92 92 5 x</t>
+        <t>93 127 4 x</t>
+      </trans_list>
+      </state>
+
+      <state id="171" final="t">
+      <trans_list length="3">
+        <t>-128 104 168 97</t>
+        <t>105 105 168 98</t>
+        <t>106 127 168 97</t>
+      </trans_list>
+      </state>
+
+      <state id="172" final="t">
+      <trans_list length="3">
+        <t>-128 9 6 x</t>
+        <t>10 10 168 4</t>
+        <t>11 127 6 x</t>
+      </trans_list>
+      </state>
+
+      <state id="173" final="t">
+      <trans_list length="13">
+        <t>-128 32 168 99</t>
+        <t>33 33 168 100</t>
+        <t>34 41 168 99</t>
+        <t>42 42 168 101</t>
+        <t>43 46 168 99</t>
+        <t>47 47 168 102</t>
+        <t>48 62 168 99</t>
+        <t>63 63 168 103</t>
+        <t>64 93 168 99</t>
+        <t>94 94 168 104</t>
+        <t>95 125 168 99</t>
+        <t>126 126 168 105</t>
+        <t>127 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="174" final="t">
+      <trans_list length="13">
+        <t>-128 32 168 99</t>
+        <t>33 33 168 106</t>
+        <t>34 41 168 99</t>
+        <t>42 42 168 107</t>
+        <t>43 46 168 99</t>
+        <t>47 47 168 108</t>
+        <t>48 62 168 99</t>
+        <t>63 63 168 109</t>
+        <t>64 93 168 99</t>
+        <t>94 94 168 110</t>
+        <t>95 125 168 99</t>
+        <t>126 126 168 111</t>
+        <t>127 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="175" final="t">
+      <trans_list length="7">
+        <t>-128 9 7 x</t>
+        <t>10 10 7 1</t>
+        <t>11 38 7 x</t>
+        <t>39 39 171 x</t>
+        <t>40 91 7 x</t>
+        <t>92 92 8 x</t>
+        <t>93 127 7 x</t>
+      </trans_list>
+      </state>
+
+      <state id="176" final="t">
+      <trans_list length="3">
+        <t>-128 41 168 99</t>
+        <t>42 42 168 112</t>
+        <t>43 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="177" final="t">
+      <trans_list length="5">
+        <t>-128 44 168 99</t>
+        <t>45 45 168 113</t>
+        <t>46 61 168 99</t>
+        <t>62 62 168 114</t>
+        <t>63 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="178" final="t">
+      <trans_list length="3">
+        <t>-128 45 168 99</t>
+        <t>46 46 168 115</t>
+        <t>47 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="179" final="t">
+      <trans_list length="5">
+        <t>-128 47 168 116</t>
+        <t>48 57 180 x</t>
+        <t>58 119 168 116</t>
+        <t>120 120 9 x</t>
+        <t>121 127 168 116</t>
+      </trans_list>
+      </state>
+
+      <state id="180" final="t">
+      <trans_list length="3">
+        <t>-128 47 168 116</t>
+        <t>48 57 180 x</t>
+        <t>58 127 168 116</t>
+      </trans_list>
+      </state>
+
+      <state id="181" final="t">
+      <trans_list length="7">
+        <t>-128 47 168 117</t>
+        <t>48 57 181 x</t>
+        <t>58 64 168 117</t>
+        <t>65 70 181 x</t>
+        <t>71 96 168 117</t>
+        <t>97 102 181 x</t>
+        <t>103 127 168 117</t>
+      </trans_list>
+      </state>
+
+      <state id="182" final="t">
+      <trans_list length="4">
+        <t>-128 60 168 99</t>
+        <t>61 61 168 118</t>
+        <t>62 62 183 x</t>
+        <t>63 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="183" final="t">
+      <trans_list length="3">
+        <t>-128 61 168 119</t>
+        <t>62 62 168 120</t>
+        <t>63 127 168 119</t>
+      </trans_list>
+      </state>
+
+      <state id="184" final="t">
+      <trans_list length="15">
+        <t>-128 32 168 99</t>
+        <t>33 33 168 121</t>
+        <t>34 41 168 99</t>
+        <t>42 42 168 122</t>
+        <t>43 46 168 99</t>
+        <t>47 47 168 123</t>
+        <t>48 57 168 99</t>
+        <t>58 58 168 124</t>
+        <t>59 61 168 99</t>
+        <t>62 62 185 x</t>
+        <t>63 93 168 99</t>
+        <t>94 94 168 125</t>
+        <t>95 125 168 99</t>
+        <t>126 126 168 126</t>
+        <t>127 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="185" final="t">
+      <trans_list length="11">
+        <t>-128 32 168 127</t>
+        <t>33 33 168 128</t>
+        <t>34 41 168 127</t>
+        <t>42 42 168 129</t>
+        <t>43 46 168 127</t>
+        <t>47 47 168 130</t>
+        <t>48 93 168 127</t>
+        <t>94 94 168 131</t>
+        <t>95 125 168 127</t>
+        <t>126 126 168 132</t>
+        <t>127 127 168 127</t>
+      </trans_list>
+      </state>
+
+      <state id="186" final="t">
+      <trans_list length="13">
+        <t>-128 32 168 99</t>
+        <t>33 33 168 133</t>
+        <t>34 41 168 99</t>
+        <t>42 42 168 134</t>
+        <t>43 46 168 99</t>
+        <t>47 47 168 135</t>
+        <t>48 62 168 99</t>
+        <t>63 63 168 136</t>
+        <t>64 93 168 99</t>
+        <t>94 94 168 137</t>
+        <t>95 125 168 99</t>
+        <t>126 126 168 138</t>
+        <t>127 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="187" final="t">
+      <trans_list length="11">
+        <t>-128 32 168 99</t>
+        <t>33 33 168 139</t>
+        <t>34 41 168 99</t>
+        <t>42 42 168 140</t>
+        <t>43 46 168 99</t>
+        <t>47 47 168 141</t>
+        <t>48 93 168 99</t>
+        <t>94 94 168 142</t>
+        <t>95 125 168 99</t>
+        <t>126 126 168 143</t>
+        <t>127 127 168 99</t>
+      </trans_list>
+      </state>
+
+      <state id="188" final="t">
+      <trans_list length="9">
+        <t>-128 47 168 144</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 144</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 144</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 144</t>
+        <t>97 122 188 95</t>
+        <t>123 127 168 144</t>
+      </trans_list>
+      </state>
+
+      <state id="189" final="t">
+      <trans_list length="3">
+        <t>-128 93 168 145</t>
+        <t>94 94 168 146</t>
+        <t>95 127 168 145</t>
+      </trans_list>
+      </state>
+
+      <state id="190" final="t">
+      <trans_list length="13">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 110 188 95</t>
+        <t>111 111 191 x</t>
+        <t>112 113 188 95</t>
+        <t>114 114 192 x</t>
+        <t>115 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="191" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 101 188 95</t>
+        <t>102 102 188 148</t>
+        <t>103 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="192" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 113 188 95</t>
+        <t>114 114 188 149</t>
+        <t>115 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="193" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 113 188 95</t>
+        <t>114 114 194 x</t>
+        <t>115 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="194" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 110 188 95</t>
+        <t>111 111 195 x</t>
+        <t>112 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="195" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 108 188 95</t>
+        <t>109 109 188 150</t>
+        <t>110 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="196" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 100 188 95</t>
+        <t>101 101 197 x</t>
+        <t>102 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="197" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 113 188 95</t>
+        <t>114 114 198 x</t>
+        <t>115 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="198" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 113 188 95</t>
+        <t>114 114 188 151</t>
+        <t>115 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="199" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 110 188 95</t>
+        <t>111 111 188 152</t>
+        <t>112 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="200" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 103 188 95</t>
+        <t>104 104 201 x</t>
+        <t>105 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="201" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 100 188 95</t>
+        <t>101 101 202 x</t>
+        <t>102 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="202" final="t">
+      <trans_list length="11">
+        <t>-128 47 168 147</t>
+        <t>48 57 188 95</t>
+        <t>58 64 168 147</t>
+        <t>65 90 188 95</t>
+        <t>91 94 168 147</t>
+        <t>95 95 188 95</t>
+        <t>96 96 168 147</t>
+        <t>97 109 188 95</t>
+        <t>110 110 188 153</t>
+        <t>111 122 188 95</t>
+        <t>123 127 168 147</t>
+      </trans_list>
+      </state>
+
+      <state id="203" final="t">
+      <state_actions>6 7 x</state_actions>
+      <trans_list length="8">
+        <t>-128 9 203 154</t>
+        <t>10 10 203 155</t>
+        <t>11 33 203 154</t>
+        <t>34 34 203 156</t>
+        <t>35 90 203 154</t>
+        <t>91 91 203 157</t>
+        <t>92 92 204 x</t>
+        <t>93 127 203 154</t>
+      </trans_list>
+      </state>
+
+      <state id="204" final="t">
+      <trans_list length="14">
+        <t>-128 96 203 158</t>
+        <t>97 97 203 159</t>
+        <t>98 98 203 160</t>
+        <t>99 101 203 158</t>
+        <t>102 102 203 161</t>
+        <t>103 109 203 158</t>
+        <t>110 110 203 162</t>
+        <t>111 113 203 158</t>
+        <t>114 114 203 163</t>
+        <t>115 115 203 158</t>
+        <t>116 116 203 164</t>
+        <t>117 117 203 158</t>
+        <t>118 118 203 165</t>
+        <t>119 127 203 158</t>
+      </trans_list>
+      </state>
+    </state_list>
+  </machine>
+</ragel_def>
+<ragel_def name="section_parse">
+  <alphtype>int</alphtype>
+  <machine>
+    <action_list length="5">
+      <action id="0" name="clear_words" line="97" col="21"><text> word = lit = 0; word_len = lit_len = 0; </text></action>
+      <action id="1" name="store_lit" line="98" col="19"><text> lit = tokdata; lit_len = toklen; </text></action>
+      <action id="2" name="incl_err" line="101" col="18"><text> scan_error() &lt;&lt; "bad include statement" &lt;&lt; endl; </text></action>
+      <action id="3" name="handle_include" line="105" col="2"><text>
+		#if 0
+		char *inclSectionName = word;
+		char *inclFileName = 0;
+
+		/* Implement defaults for the input file and section name. */
+		if ( inclSectionName == 0 )
+			inclSectionName = parser-&gt;sectionName;
+
+		if ( lit != 0 ) 
+			inclFileName = prepareFileName( lit, lit_len );
+		else
+			inclFileName = fileName;
+
+		/* Check for a recursive include structure. Add the current file/section
+		 * name then check if what we are including is already in the stack. */
+		includeStack.append( IncludeStackItem( fileName, parser-&gt;sectionName ) );
+
+		if ( recursiveInclude( inclFileName, inclSectionName ) )
+			scan_error() &lt;&lt; "include: this is a recursive include operation" &lt;&lt; endl;
+		else {
+			/* Open the input file for reading. */
+			ifstream *inFile = new ifstream( inclFileName );
+			if ( ! inFile-&gt;is_open() ) {
+				scan_error() &lt;&lt; "include: could not open " &lt;&lt; 
+						inclFileName &lt;&lt; " for reading" &lt;&lt; endl;
+			}
+
+			Scanner scanner( inclFileName, *inFile, output, parser,
+					inclSectionName, includeDepth+1 );
+			scanner.do_scan( );
+			delete inFile;
+		}
+
+		/* Remove the last element (len-1) */
+		includeStack.remove( -1 );
+		#endif
+	</text></action>
+      <action id="4" name="handle_token" line="152" col="2"><text>
+		InputLoc loc;
+
+		#ifdef PRINT_TOKENS
+		cerr &lt;&lt; "scanner:" &lt;&lt; line &lt;&lt; ":" &lt;&lt; column &lt;&lt; 
+				": sending token to the parser " &lt;&lt; Parser_lelNames[*p];
+		cerr &lt;&lt; " " &lt;&lt; toklen;
+		if ( tokdata != 0 )
+			cerr &lt;&lt; " " &lt;&lt; tokdata;
+		cerr &lt;&lt; endl;
+		#endif
+
+		loc.fileName = fileName;
+		loc.line = line;
+		loc.col = column;
+
+		parser-&gt;token( loc, type, tokdata, toklen );
+	</text></action>
+    </action_list>
+    <action_table_list length="4">
+      <action_table id="0" length="1">2</action_table>
+      <action_table id="1" length="2">0 1</action_table>
+      <action_table id="2" length="1">3</action_table>
+      <action_table id="3" length="1">4</action_table>
+    </action_table_list>
+    <start_state>3</start_state>
+    <error_state>0</error_state>
+    <entry_points>
+      <entry name="main">3</entry>
+    </entry_points>
+    <state_list length="4">
+      <state id="0">
+      <trans_list length="0">
+      </trans_list>
+      </state>
+
+      <state id="1">
+      <state_actions>x x 0</state_actions>
+      <trans_list length="3">
+        <t>-2147483648 131 x 0</t>
+        <t>132 132 2 1</t>
+        <t>133 2147483647 x 0</t>
+      </trans_list>
+      </state>
+
+      <state id="2">
+      <state_actions>x x 0</state_actions>
+      <trans_list length="3">
+        <t>-2147483648 58 x 0</t>
+        <t>59 59 3 2</t>
+        <t>60 2147483647 x 0</t>
+      </trans_list>
+      </state>
+
+      <state id="3" final="t">
+      <trans_list length="3">
+        <t>-2147483648 128 3 3</t>
+        <t>129 129 1 x</t>
+        <t>130 2147483647 3 3</t>
+      </trans_list>
+      </state>
+    </state_list>
+  </machine>
+</ragel_def>
+<host line="1" col="1">/*
+ *  Copyright 2006-2007 Adrian Thurston &lt;thurston@complang.org&gt;
+ */
+
+/*  This file is part of Ragel.
+ *
+ *  Ragel is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ * 
+ *  Ragel is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ * 
+ *  You should have received a copy of the GNU General Public License
+ *  along with Ragel; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ */
+
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string.h&gt;
+
+#include "colm.h"
+#include "lmscan.h"
+#include "lmparse.h"
+#include "parsedata.h"
+#include "avltree.h"
+#include "vector.h"
+
+//#define PRINT_TOKENS
+
+using std::ifstream;
+using std::istream;
+using std::ostream;
+using std::cout;
+using std::cerr;
+using std::endl;
+
+</host>
+<write def_name="section_parse" line="45" col="2"><arg>data</arg></write>
+<host line="46">
+
+void Scanner::sectionParseInit()
+{
+	</host>
+<write def_name="section_parse" line="50" col="5"><arg>init</arg></write>
+<host line="51">}
+
+ostream &amp;Scanner::scan_error()
+{
+	/* Maintain the error count. */
+	gblErrorCount += 1;
+	cerr &lt;&lt; fileName &lt;&lt; ":" &lt;&lt; line &lt;&lt; ":" &lt;&lt; column &lt;&lt; ": ";
+	return cerr;
+}
+
+bool Scanner::recursiveInclude( char *inclFileName, char *inclSectionName )
+{
+	for ( IncludeStack::Iter si = includeStack; si.lte(); si++ ) {
+		if ( strcmp( si-&gt;fileName, inclFileName ) == 0 &amp;&amp;
+				strcmp( si-&gt;sectionName, inclSectionName ) == 0 )
+		{
+			return true;
+		}
+	}
+	return false;	
+}
+
+void Scanner::updateCol()
+{
+	char *from = lastnl;
+	if ( from == 0 )
+		from = tokstart;
+	//cerr &lt;&lt; "adding " &lt;&lt; tokend - from &lt;&lt; " to column" &lt;&lt; endl;
+	column += tokend - from;
+	lastnl = 0;
+}
+
+void Scanner::token( int type, char c )
+{
+	token( type, &amp;c, &amp;c + 1 );
+}
+
+void Scanner::token( int type )
+{
+	token( type, 0, 0 );
+}
+
+</host>
+<host line="178">
+
+void Scanner::token( int type, char *start, char *end )
+{
+	char *tokdata = 0;
+	int toklen = 0;
+	int *p = &amp;type;
+	int *pe = &amp;type + 1;
+
+	if ( start != 0 ) {
+		toklen = end-start;
+		tokdata = new char[toklen+1];
+		memcpy( tokdata, start, toklen );
+		tokdata[toklen] = 0;
+	}
+
+	</host>
+<write def_name="section_parse" line="196" col="3"><arg>exec</arg></write>
+<host line="197">
+
+	updateCol();
+}
+
+void Scanner::endSection( )
+{
+	/* Execute the eof actions for the section parser. */
+	</host>
+<write def_name="section_parse" line="207" col="3"><arg>eof</arg></write>
+<host line="208">
+}
+
+</host>
+<host line="516">
+
+</host>
+<write def_name="rlscan" line="518" col="4"><arg>data</arg></write>
+<host line="519">
+void Scanner::do_scan()
+{
+	int bufsize = 8;
+	char *buf = new char[bufsize];
+	const char last_char = 0;
+	int cs, act, have = 0;
+	int top, stack[32];
+	bool execute = true;
+
+	sectionParseInit();
+	</host>
+<write def_name="rlscan" line="530" col="5"><arg>init</arg></write>
+<host line="531">
+	while ( execute ) {
+		char *p = buf + have;
+		int space = bufsize - have;
+
+		if ( space == 0 ) {
+			/* We filled up the buffer trying to scan a token. Grow it. */
+			bufsize = bufsize * 2;
+			char *newbuf = new char[bufsize];
+
+			/* Recompute p and space. */
+			p = newbuf + have;
+			space = bufsize - have;
+
+			/* Patch up pointers possibly in use. */
+			if ( tokstart != 0 )
+				tokstart = newbuf + ( tokstart - buf );
+			tokend = newbuf + ( tokend - buf );
+
+			/* Copy the new buffer in. */
+			memcpy( newbuf, buf, have );
+			delete[] buf;
+			buf = newbuf;
+		}
+
+		input.read( p, space );
+		int len = input.gcount();
+
+		/* If we see eof then append the EOF char. */
+	 	if ( len == 0 ) {
+			p[0] = last_char, len = 1;
+			execute = false;
+		}
+
+		char *pe = p + len;
+		</host>
+<write def_name="rlscan" line="566" col="6"><arg>exec</arg></write>
+<host line="567">
+		/* Check if we failed. */
+		if ( cs == rlscan_error ) {
+			/* Machine failed before finding a token. I'm not yet sure if this
+			 * is reachable. */
+			scan_error() &lt;&lt; "scanner error" &lt;&lt; endl;
+			exit(1);
+		}
+
+		/* Decide if we need to preserve anything. */
+		char *preserve = tokstart;
+
+		/* Now set up the prefix. */
+		if ( preserve == 0 )
+			have = 0;
+		else {
+			/* There is data that needs to be shifted over. */
+			have = pe - preserve;
+			memmove( buf, preserve, have );
+			unsigned int shiftback = preserve - buf;
+			if ( tokstart != 0 )
+				tokstart -= shiftback;
+			tokend -= shiftback;
+
+			preserve = buf;
+		}
+	}
+	delete[] buf;
+
+	InputLoc loc;
+	loc.fileName = "&lt;EOF&gt;";
+	loc.line = line;
+	loc.col = 1;
+	parser-&gt;token( loc, _eof, 0, 0 );
+}
+
+void scan( char *fileName, istream &amp;input, ostream &amp;output )
+{
+	Scanner scanner( fileName, input, output, 0, 0, 0 );
+}
+</host>
+</ragel>
+##### EXP #####
+SWITCH
+  token( KW_When ); 
+  token( KW_Eof ); 
+  token( KW_Err ); 
+  token( KW_Lerr ); 
+  token( KW_To ); 
+  token( KW_From ); 
+  token( TK_Word, tokstart, tokend ); 
+SWITCH
+  token( KW_Lex ); 
+  token( KW_Action ); 
+  token( KW_AlphType ); 
+  token( KW_Commit ); 
+  token( KW_Undo ); 
+  token( KW_Final ); 
+  token( KW_Translate ); 
+  token( KW_Token ); 
+  token( KW_Literal ); 
+  token( KW_NonTerm ); 
+  token( KW_Uses ); 
+  token( KW_Parser ); 
+  token( KW_Include ); 
+  token( KW_Write ); 
+  token( KW_Nfa ); 
+  token( KW_Pda ); 
+  token( KW_Rl ); 
+  token( KW_Cfl ); 
+  token( KW_Ignore ); 
+  token( KW_End ); 
+  token( KW_Pattern ); 
+  token( KW_Construct ); 
+  token( KW_Red ); 
+  token( KW_TypeId ); 
+  token( KW_TypeDef ); 
+  token( KW_If ); 
+  token( KW_Init ); 
+  token( KW_Reject ); 
+  token( KW_While ); 
+  token( KW_Else ); 
+  token( KW_SubParser ); 
+  token( KW_Next ); 
+  token( KW_Match ); 
+  token( KW_For ); 
+  token( KW_Iter ); 
+  token( KW_Find ); 
+  token( KW_Root ); 
+  token( KW_PrintXML ); 
+  token( KW_Then ); 
+  token( KW_Do ); 
+  token( KW_Namespace ); 
+  token( KW_Scanner ); 
+  token( TK_Word, tokstart, tokend ); 

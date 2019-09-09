@@ -1,0 +1,438 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var GotoCallRet_start  int  = 7
+var GotoCallRet_first_final  int  = 7
+var GotoCallRet_error  int  = 0
+var GotoCallRet_en_garble_line  int  = 3
+var GotoCallRet_en_alp_comm  int  = 5
+var GotoCallRet_en_dig_comm  int  = 6
+var GotoCallRet_en_main  int  = 7
+var _GotoCallRet_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _GotoCallRet_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+func prepare() {
+
+	{
+		cs = int(GotoCallRet_start);
+		top = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		goto _resume;
+		
+		_again:
+		switch cs  {
+			case 7:
+			goto st7;
+			case 0:
+			goto st0;
+			case 1:
+			goto st1;
+			case 2:
+			goto st2;
+			case 3:
+			goto st3;
+			case 4:
+			goto st4;
+			case 8:
+			goto st8;
+			case 5:
+			goto st5;
+			case 9:
+			goto st9;
+			case 6:
+			goto st6;
+			case 10:
+			goto st10;
+			
+		}
+		_resume:
+		switch cs  {
+			case 7:
+			goto st_case_7;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 8:
+			goto st_case_8;
+			case 5:
+			goto st_case_5;
+			case 9:
+			goto st_case_9;
+			case 6:
+			goto st_case_6;
+			case 10:
+			goto st_case_10;
+			
+		}
+		goto st_out;
+		ctr2:
+		{fmt.Print( "correct command\n" );}
+		
+		
+		goto st7;
+		st7:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof7;
+			
+		}
+		st_case_7:
+		switch {
+			case ( data[p ]) > 57 :
+			{
+				if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+					{
+						goto ctr10;
+					}
+					
+				}
+			} 
+			case ( data[p ]) >= 48 :
+			{
+				goto ctr10;
+			}
+			
+		}
+		{
+			goto ctr0;
+		}
+		ctr0:
+		{{p = p - 1;
+			}
+			{goto st3;}}
+		
+		
+		goto st0;
+		ctr7:
+		{{p = p - 1;
+			} 
+			{top -= 1;
+				cs = stack[top];
+				goto _again;}
+		}
+		
+		
+		goto st0;
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr10:
+		{comm = (( data[p ]));
+		}
+		
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof1;
+			
+		}
+		st_case_1:
+		if ( data[p ]) == 32  {
+			{
+				goto ctr1;
+			}
+			
+		}
+		{
+			goto ctr0;
+		}
+		ctr1:
+		{if ( comm >= 'a' ) {
+				{stack[top] = 2;
+					top+= 1;
+					goto st5;}} else {
+				{stack[top] = 2;
+					top+= 1;
+					goto st6;}}
+		}
+		
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof2;
+			
+		}
+		st_case_2:
+		if ( data[p ]) == 10  {
+			{
+				goto ctr2;
+			}
+			
+		}
+		{
+			goto ctr0;
+		}
+		st3:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof3;
+			
+		}
+		st_case_3:
+		if ( data[p ]) == 10  {
+			{
+				goto ctr4;
+			}
+			
+		}
+		{
+			goto ctr3;
+		}
+		ctr3:
+		{fmt.Print( "error: garbling line\n" );}
+		
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof4;
+			
+		}
+		st_case_4:
+		if ( data[p ]) == 10  {
+			{
+				goto ctr6;
+			}
+			
+		}
+		{
+			goto st4;
+		}
+		ctr4:
+		{fmt.Print( "error: garbling line\n" );}
+		{{goto st7;}}
+		
+		
+		goto st8;
+		ctr6:
+		{{goto st7;}}
+		
+		
+		goto st8;
+		st8:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof8;
+			
+		}
+		st_case_8:
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof5;
+			
+		}
+		st_case_5:
+		switch {
+			case ( data[p ]) > 90 :
+			{
+				if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+					{
+						goto st9;
+					}
+					
+				}
+			} 
+			case ( data[p ]) >= 65 :
+			{
+				goto st9;
+			}
+			
+		}
+		{
+			goto ctr7;
+		}
+		st9:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof9;
+			
+		}
+		st_case_9:
+		switch {
+			case ( data[p ]) > 90 :
+			{
+				if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+					{
+						goto st9;
+					}
+					
+				}
+			} 
+			case ( data[p ]) >= 65 :
+			{
+				goto st9;
+			}
+			
+		}
+		{
+			goto ctr7;
+		}
+		st6:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof6;
+			
+		}
+		st_case_6:
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto st10;
+			}
+			
+		}
+		{
+			goto ctr7;
+		}
+		st10:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof10;
+			
+		}
+		st_case_10:
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto st10;
+			}
+			
+		}
+		{
+			goto ctr7;
+		}
+		st_out:
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 3:
+					fallthrough
+					case 4:
+					fallthrough
+					case 8:
+					{fmt.Print( "error: failed to recover\n" );}
+					
+					break;
+					case 5:
+					fallthrough
+					case 6:
+					{{p = p - 1;
+						} 
+						{top -= 1;
+							cs = stack[top];
+							goto _again;}
+					}
+					
+					break;
+					case 1:
+					fallthrough
+					case 2:
+					{{p = p - 1;
+						}
+						{goto st3;}}
+					
+					break;
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= GotoCallRet_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"lkajsdf\n",
+	"2134\n",
+	"(\n",
+	"\n",
+	"*234234()0909 092 -234aslkf09`1 11\n",
+	"1\n",
+	"909\n",
+	"1 a\n",
+	"11 1\n",
+	"a 1\n",
+	"aa a\n",
+	"1 1\n",
+	"1 123456\n",
+	"a a\n",
+	"a abcdef\n",
+	"h",
+	"a aa1",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

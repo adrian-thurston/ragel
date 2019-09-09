@@ -1,0 +1,416 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+class << self
+	attr_accessor :_scanner_trans_keys 
+	private :_scanner_trans_keys, :_scanner_trans_keys=
+end
+self._scanner_trans_keys = [
+0, 2, 0, 1, 0, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_char_class 
+	private :_scanner_char_class, :_scanner_char_class=
+end
+self._scanner_char_class = [
+0, 1, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_index_offsets 
+	private :_scanner_index_offsets, :_scanner_index_offsets=
+end
+self._scanner_index_offsets = [
+0, 3, 5, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_indicies 
+	private :_scanner_indicies, :_scanner_indicies=
+end
+self._scanner_indicies = [
+1, 1, 2, 4, 5, 1, 1, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_index_defaults 
+	private :_scanner_index_defaults, :_scanner_index_defaults=
+end
+self._scanner_index_defaults = [
+0, 3, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_trans_cond_spaces 
+	private :_scanner_trans_cond_spaces, :_scanner_trans_cond_spaces=
+end
+self._scanner_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_cond_targs 
+	private :_scanner_cond_targs, :_scanner_cond_targs=
+end
+self._scanner_cond_targs = [
+1, 0, 1, 1, 2, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_cond_actions 
+	private :_scanner_cond_actions, :_scanner_cond_actions=
+end
+self._scanner_cond_actions = [
+1, 0, 2, 5, 6, 7, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_to_state_actions 
+	private :_scanner_to_state_actions, :_scanner_to_state_actions=
+end
+self._scanner_to_state_actions = [
+0, 3, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_from_state_actions 
+	private :_scanner_from_state_actions, :_scanner_from_state_actions=
+end
+self._scanner_from_state_actions = [
+0, 4, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_eof_trans 
+	private :_scanner_eof_trans, :_scanner_eof_trans=
+end
+self._scanner_eof_trans = [
+1, 0, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_targs 
+	private :_scanner_nfa_targs, :_scanner_nfa_targs=
+end
+self._scanner_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_offsets 
+	private :_scanner_nfa_offsets, :_scanner_nfa_offsets=
+end
+self._scanner_nfa_offsets = [
+0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_push_actions 
+	private :_scanner_nfa_push_actions, :_scanner_nfa_push_actions=
+end
+self._scanner_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_pop_trans 
+	private :_scanner_nfa_pop_trans, :_scanner_nfa_pop_trans=
+end
+self._scanner_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :scanner_start 
+end
+self.scanner_start  = 1;
+
+class << self
+	attr_accessor :scanner_first_final 
+end
+self.scanner_first_final  = 1;
+
+class << self
+	attr_accessor :scanner_error 
+end
+self.scanner_error  = -1;
+
+class << self
+	attr_accessor :scanner_en_main 
+end
+self.scanner_en_main  = 1;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	ts = 1
+	te = 1
+	act = 1
+	token = 1
+	begin
+		cs = scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+		
+	end
+	begin
+		_trans = 0;
+		_have = 0;
+		_cont = 1;
+		_keys = 0;
+		_inds = 0;
+		while ( _cont == 1  )
+			begin
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( p == eof  )
+							begin
+								if ( _scanner_eof_trans[cs] > 0  )
+									begin
+										_trans = _scanner_eof_trans[cs] - 1;
+										_have = 1;
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+									
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								case  _scanner_from_state_actions[cs]  
+								when -2 then
+								begin
+								end
+								when 4  then
+								begin
+									begin
+										begin
+											ts = p;
+											
+										end
+										
+									end
+									
+									
+								end
+							end
+							_keys = (cs<<1) ;
+							_inds = _scanner_index_offsets[cs] ;
+							if ( ( data[p ].ord) <= 99 && ( data[p ].ord) >= 97  )
+								begin
+									_ic = _scanner_char_class[( data[p ].ord) - 97];
+									if ( _ic <= _scanner_trans_keys[_keys+1 ]&& _ic >= _scanner_trans_keys[_keys ] )
+										_trans = _scanner_indicies[_inds + ( _ic - _scanner_trans_keys[_keys ])  ];
+										
+										else
+										_trans = _scanner_index_defaults[cs];
+										
+									end
+									
+								end
+								
+								else
+								begin
+									_trans = _scanner_index_defaults[cs];
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _cont == 1  )
+						begin
+							cs = _scanner_cond_targs[_trans];
+							case  _scanner_cond_actions[_trans]  
+							when -2 then
+							begin
+							end
+							when 2  then
+							begin
+								begin
+									begin
+										te = p+1;
+										begin
+											print( "pat2\n" );
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							when 5  then
+							begin
+								begin
+									begin
+										te = p+1;
+										begin
+											print( "any\n" );
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							when 1  then
+							begin
+								begin
+									begin
+										case  act  
+										when -2 then
+										begin
+										end
+										when 1  then
+										begin
+											p = ((te))-1;
+											begin
+												print( "pat1\n" );
+												
+											end
+											
+										end
+										when 3  then
+										begin
+											p = ((te))-1;
+											begin
+												print( "any\n" );
+												
+											end
+											
+											
+										end
+									end
+									
+								end
+								
+								
+							end
+							
+						end
+						when 6  then
+						begin
+							begin
+								begin
+									te = p+1;
+									
+								end
+								
+							end
+							begin
+								begin
+									act = 1;
+									
+								end
+								
+							end
+							
+						end
+						when 7  then
+						begin
+							begin
+								begin
+									te = p+1;
+									
+								end
+								
+							end
+							begin
+								begin
+									act = 3;
+									
+								end
+								
+							end
+							
+							
+						end
+					end
+					case  _scanner_to_state_actions[cs]  
+					when -2 then
+					begin
+					end
+					when 3  then
+					begin
+						begin
+							begin
+								ts = 0;
+								
+							end
+							
+						end
+						
+						
+					end
+				end
+				if ( _cont == 1  )
+					p += 1;
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+
+end
+
+end
+
+end
+if cs >= scanner_first_final
+puts "ACCEPT"
+else
+puts "FAIL"
+end
+end
+
+inp = [
+"a",
+]
+
+inplen = 1
+
+inp.each { |str| run_machine(str) }
+

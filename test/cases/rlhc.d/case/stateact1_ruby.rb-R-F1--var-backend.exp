@@ -1,0 +1,340 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+
+
+class << self
+	attr_accessor :_state_act_trans_keys 
+	private :_state_act_trans_keys, :_state_act_trans_keys=
+end
+self._state_act_trans_keys = [
+1, 0, 3, 3, 0, 0, 2, 2, 2, 2, 2, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_char_class 
+	private :_state_act_char_class, :_state_act_char_class=
+end
+self._state_act_char_class = [
+0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_index_offsets 
+	private :_state_act_index_offsets, :_state_act_index_offsets=
+end
+self._state_act_index_offsets = [
+0, 0, 1, 2, 3, 4, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_indicies 
+	private :_state_act_indicies, :_state_act_indicies=
+end
+self._state_act_indicies = [
+0, 2, 3, 3, 3, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_index_defaults 
+	private :_state_act_index_defaults, :_state_act_index_defaults=
+end
+self._state_act_index_defaults = [
+0, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_trans_cond_spaces 
+	private :_state_act_trans_cond_spaces, :_state_act_trans_cond_spaces=
+end
+self._state_act_trans_cond_spaces = [
+-1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_cond_targs 
+	private :_state_act_cond_targs, :_state_act_cond_targs=
+end
+self._state_act_cond_targs = [
+2, 0, 5, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_cond_actions 
+	private :_state_act_cond_actions, :_state_act_cond_actions=
+end
+self._state_act_cond_actions = [
+0, 0, 3, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_to_state_actions 
+	private :_state_act_to_state_actions, :_state_act_to_state_actions=
+end
+self._state_act_to_state_actions = [
+0, 0, 1, 4, 6, 4, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_from_state_actions 
+	private :_state_act_from_state_actions, :_state_act_from_state_actions=
+end
+self._state_act_from_state_actions = [
+0, 0, 2, 5, 7, 5, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_nfa_targs 
+	private :_state_act_nfa_targs, :_state_act_nfa_targs=
+end
+self._state_act_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_nfa_offsets 
+	private :_state_act_nfa_offsets, :_state_act_nfa_offsets=
+end
+self._state_act_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_nfa_push_actions 
+	private :_state_act_nfa_push_actions, :_state_act_nfa_push_actions=
+end
+self._state_act_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_state_act_nfa_pop_trans 
+	private :_state_act_nfa_pop_trans, :_state_act_nfa_pop_trans=
+end
+self._state_act_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :state_act_start 
+end
+self.state_act_start  = 4;
+
+class << self
+	attr_accessor :state_act_first_final 
+end
+self.state_act_first_final  = 4;
+
+class << self
+	attr_accessor :state_act_error 
+end
+self.state_act_error  = 0;
+
+class << self
+	attr_accessor :state_act_en_main 
+end
+self.state_act_en_main  = 4;
+
+class << self
+	attr_accessor :state_act_en_main_line_again 
+end
+self.state_act_en_main_line_again  = 3;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	begin
+		cs = state_act_start;
+		
+	end
+	begin
+		_trans = 0;
+		_have = 0;
+		_cont = 1;
+		_keys = 0;
+		_inds = 0;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								case  _state_act_from_state_actions[cs]  
+								when -2 then
+								begin
+								end
+								when 5  then
+								begin
+									begin
+										print( "b2\n" );
+										
+									end
+									
+								end
+								when 2  then
+								begin
+									begin
+										print( "c2\n" );
+										
+									end
+									
+								end
+								when 7  then
+								begin
+									begin
+										print( "a2\n" );
+										
+									end
+									begin
+										print( "b2\n" );
+										
+									end
+									
+									
+								end
+							end
+							_keys = (cs<<1) ;
+							_inds = _state_act_index_offsets[cs] ;
+							if ( ( data[p ].ord) <= 105 && ( data[p ].ord) >= 10  )
+								begin
+									_ic = _state_act_char_class[( data[p ].ord) - 10];
+									if ( _ic <= _state_act_trans_keys[_keys+1 ]&& _ic >= _state_act_trans_keys[_keys ] )
+										_trans = _state_act_indicies[_inds + ( _ic - _state_act_trans_keys[_keys ])  ];
+										
+										else
+										_trans = _state_act_index_defaults[cs];
+										
+									end
+									
+								end
+								
+								else
+								begin
+									_trans = _state_act_index_defaults[cs];
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _cont == 1  )
+						begin
+							cs = _state_act_cond_targs[_trans];
+							case  _state_act_cond_actions[_trans]  
+							when -2 then
+							begin
+							end
+							when 3  then
+							begin
+								begin
+									begin
+										cs = 3;
+										
+									end
+									
+								end
+								
+								
+							end
+						end
+						case  _state_act_to_state_actions[cs]  
+						when -2 then
+						begin
+						end
+						when 4  then
+						begin
+							begin
+								print( "b1\n" );
+								
+							end
+							
+						end
+						when 1  then
+						begin
+							begin
+								print( "c1\n" );
+								
+							end
+							
+						end
+						when 6  then
+						begin
+							begin
+								print( "a1\n" );
+								
+							end
+							begin
+								print( "b1\n" );
+								
+							end
+							
+							
+						end
+					end
+					if ( cs == 0  )
+						_cont = 0;
+						
+					end
+					if ( _cont == 1  )
+						p += 1;
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+
+end
+
+end
+if cs >= state_act_first_final
+	puts "ACCEPT"
+	else
+	puts "FAIL"
+	end
+end
+
+inp = [
+"hi\nhi\n",
+]
+
+inplen = 1
+
+inp.each { |str| run_machine(str) }
+

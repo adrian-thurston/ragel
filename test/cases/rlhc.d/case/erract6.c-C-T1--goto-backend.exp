@@ -1,0 +1,232 @@
+#include <stdio.h>
+#define BUFSIZE 2048
+
+struct errintrans
+{
+	int cs;
+};
+
+
+
+static const char  _errintrans_key_offsets [] = { 0, 0, 3, 0 ,  };
+static const char  _errintrans_trans_keys [] = { 10, 48, 57, 10, 48, 57, 0 ,  };
+static const char  _errintrans_single_lengths [] = { 0, 1, 1, 0 ,  };
+static const char  _errintrans_range_lengths [] = { 0, 1, 1, 0 ,  };
+static const char  _errintrans_index_offsets [] = { 0, 0, 3, 0 ,  };
+static const char  _errintrans_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _errintrans_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 0 ,  };
+static const char  _errintrans_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _errintrans_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _errintrans_cond_targs [] = { 2, 0, 1, 2, 0, 1, 0 ,  };
+static const char  _errintrans_cond_actions [] = { 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _errintrans_nfa_targs [] = { 0, 0 ,  };
+static const char  _errintrans_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _errintrans_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _errintrans_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  errintrans_start  = 1;
+static const int  errintrans_first_final  = 2;
+static const int  errintrans_error  = 0;
+static const int  errintrans_en_main  = 1;
+void errintrans_init( struct errintrans *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) errintrans_start;
+	}
+}
+
+void errintrans_execute( struct errintrans *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _errintrans_trans_keys + _errintrans_key_offsets[(fsm->cs)];
+		_trans = ( unsigned int  ) _errintrans_index_offsets[(fsm->cs)];
+		_klen = ( int ) _errintrans_single_lengths[(fsm->cs)];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_trans += ( unsigned int  ) (_mid - _keys);
+					goto _match;
+				}
+				
+			}
+			
+			_keys += _klen;
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		_klen = ( int ) _errintrans_range_lengths[(fsm->cs)];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + (_klen<<1)- 2;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 2;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid + 1  ))
+				)
+				_lower = _mid + 2;
+				
+				else
+				{
+					_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+					goto _match;
+				}
+				
+			}
+			
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		
+		_match :
+		_ckeys = _errintrans_cond_keys + _errintrans_trans_offsets[_trans];
+		_klen = ( int ) _errintrans_trans_lengths[_trans];
+		_cond = ( unsigned int  ) _errintrans_trans_offsets[_trans];
+		_cpc = 0;
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( _cpc < ( int ) (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( _cpc > ( int ) (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_cond += ( unsigned int  ) (_mid - _ckeys);
+					goto _match_cond;
+				}
+				
+			}
+			
+			(fsm->cs) = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		(fsm->cs) = ( int ) _errintrans_cond_targs[_cond];
+		
+		_again :
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+int errintrans_finish( struct errintrans *fsm )
+{
+	if ( fsm->cs == errintrans_error )
+	return -1;
+	if ( fsm->cs >= errintrans_first_final )
+	return 1;
+	return 0;
+}
+
+
+struct errintrans fsm;
+#include <string.h>
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	errintrans_init( &fsm );
+	errintrans_execute( &fsm, buf, len );
+	if ( errintrans_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+
+int main()
+{
+	test(
+	"good, does not have numbers\n"
+	);
+	
+	test(
+	"bad, has numbers 666\n"
+	);
+	
+	return 0;
+}
+

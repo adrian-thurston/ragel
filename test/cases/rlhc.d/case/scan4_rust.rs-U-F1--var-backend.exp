@@ -1,0 +1,215 @@
+static mut ts : i32
+= 0;
+static mut te : i32
+= 0;
+static mut act : i32 = 0;
+static mut token : i32 = 0;
+
+
+
+
+
+static _scanner_trans_keys: [u8 ; 8] = [ 0, 2, 0, 1, 0, 2, 0 , 0 ];
+static _scanner_char_class: [i8 ; 5] = [ 0, 1, 2, 0 , 0 ];
+static _scanner_index_offsets: [i8 ; 5] = [ 0, 3, 5, 0 , 0 ];
+static _scanner_indicies: [i8 ; 10] = [ 1, 1, 2, 4, 5, 1, 1, 2, 0 , 0 ];
+static _scanner_index_defaults: [i8 ; 5] = [ 0, 3, 0, 0 , 0 ];
+static _scanner_trans_cond_spaces: [i8 ; 8] = [ -1, -1, -1, -1, -1, -1, 0 , 0 ];
+static _scanner_cond_targs: [i8 ; 8] = [ 1, 0, 1, 1, 2, 2, 0 , 0 ];
+static _scanner_cond_actions: [i8 ; 8] = [ 1, 0, 2, 5, 6, 7, 0 , 0 ];
+static _scanner_to_state_actions: [i8 ; 5] = [ 0, 3, 0, 0 , 0 ];
+static _scanner_from_state_actions: [i8 ; 5] = [ 0, 4, 0, 0 , 0 ];
+static _scanner_eof_trans: [i8 ; 5] = [ 1, 0, 1, 0 , 0 ];
+static _scanner_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _scanner_nfa_offsets: [i8 ; 5] = [ 0, 0, 0, 0 , 0 ];
+static _scanner_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _scanner_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static scanner_start : i32 = 1;
+static scanner_first_final : i32 = 1;
+static scanner_error : i32 = -1;
+static scanner_en_main : i32 = 1;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( scanner_start ) as i32;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+	
+	{
+		let mut _trans  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		let mut _keys :i32 = 0;
+		let mut _inds :i32 = 0;
+		while ( _cont == 1  )
+		{
+		
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( p == eof  ) {
+						{
+							if ( _scanner_eof_trans[(cs) as usize]> 0  ) {
+								{
+									_trans = ( _scanner_eof_trans[(cs) as usize] ) as u32- 1;
+									_have = 1;
+								}
+								
+							}
+							if ( _have == 0  ) {
+								{
+								}
+								
+							}
+						}
+						
+						
+					}
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							match ( _scanner_from_state_actions[(cs) as usize] ) {
+								4  => {
+									{{ts = p;
+										}}
+									
+								}
+								
+								_ => {}
+							}
+							_keys = ( (cs<<1)  ) as i32;
+							_inds = ( _scanner_index_offsets[(cs) as usize] ) as i32;
+							if ( ( data[(p ) as usize]
+							) <= 99 && ( data[(p ) as usize]
+							) >= 97  ) {
+								{
+									let mut _ic  = ( _scanner_char_class[(( ( data[(p ) as usize]
+									)  ) as i32- 97) as usize] ) as i32;
+									if ( _ic <= ( _scanner_trans_keys[(_keys+1 ) as usize]
+									) as i32&& _ic >= ( _scanner_trans_keys[(_keys ) as usize]
+									) as i32 ) {
+										_trans = ( _scanner_indicies[(_inds + ( ( _ic - ( _scanner_trans_keys[(_keys ) as usize]
+										) as i32)   ) as i32) as usize]
+										) as u32;
+										
+									}
+									else {
+										_trans = ( _scanner_index_defaults[(cs) as usize] ) as u32;
+										
+									}
+								}
+								
+							}
+							else {
+								{
+									_trans = ( _scanner_index_defaults[(cs) as usize] ) as u32;
+								}
+								
+								
+							}
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _scanner_cond_targs[(_trans) as usize] ) as i32;
+							match ( _scanner_cond_actions[(_trans) as usize] ) {
+								2  => {
+									{{te = p+1;
+											{print!( "{}", "pat2\n" );
+											}
+										}}
+									
+								}
+								5  => {
+									{{te = p+1;
+										}}
+									
+								}
+								1  => {
+									{{match ( act  ) {
+												1  => {
+													p = ((te))-1;
+													{print!( "{}", "pat1\n" );
+													}
+													
+												}
+												_ => {
+													p = ((te))-1;
+													
+												}
+												
+											}
+										}
+									}
+									
+								}
+								6  => {
+									{{te = p+1;
+										}}
+									{{act = 1;
+										}}
+									
+								}
+								7  => {
+									{{te = p+1;
+										}}
+									{{act = 3;
+										}}
+									
+								}
+								
+								_ => {}
+							}
+							match ( _scanner_to_state_actions[(cs) as usize] ) {
+								3  => {
+									{{ts = 0;
+										}}
+									
+								}
+								
+								_ => {}
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= scanner_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "ba a".to_string() ); }
+}
+

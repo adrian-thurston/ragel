@@ -1,0 +1,227 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+
+
+static const char  _include_test_1_nfa_targs [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _include_test_1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  include_test_1_start  = 1;
+static const int  include_test_1_first_final  = 8;
+static const int  include_test_1_error  = 0;
+static const int  include_test_1_en_main  = 1;
+void test( char *p )
+{
+	int cs;
+	
+	{
+		cs = ( int ) include_test_1_start;
+	}
+	
+	{
+		int _nbreak;
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 98  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 98  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ((*( p  ))
+			)== 98  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ((*( p  ))
+			)== 0  )
+			{
+				goto ctr7;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 8:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto f0;
+		ctr2: cs = 3;
+		goto f1;
+		ctr3: cs = 4;
+		goto f2;
+		ctr4: cs = 5;
+		goto f3;
+		ctr5: cs = 6;
+		goto f4;
+		ctr6: cs = 7;
+		goto f5;
+		ctr7: cs = 8;
+		goto f6;
+		
+		f0:
+		_nbreak = 0;
+		{
+			printf(" a1");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		f2:
+		_nbreak = 0;
+		{
+			printf(" a2");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		f4:
+		_nbreak = 0;
+		{
+			printf(" a3");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		f6:
+		_nbreak = 0;
+		{
+			{
+				p += 1;
+				_nbreak = 1;
+				
+			}
+			
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		f1:
+		_nbreak = 0;
+		{
+			printf(" b1");
+		}
+		{
+			printf(" nr1");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		f3:
+		_nbreak = 0;
+		{
+			printf(" b2");
+		}
+		{
+			printf(" nr2");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		f5:
+		_nbreak = 0;
+		{
+			printf(" b3");
+		}
+		{
+			printf(" nr3");
+		}
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		goto _resume;
+		_out: {}
+	}
+	printf("\n");
+}
+
+int main()
+{
+	test( "ababab" );
+	return 0;
+}
+

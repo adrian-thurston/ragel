@@ -1,0 +1,562 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		char comm;
+		int top;
+		int [] stack = new int [32];
+		int ts;
+		int te;
+		int act;
+		int val;
+		
+		
+		
+		
+		static readonly sbyte  []_GotoCallRet_to_state_actions = { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0,  };
+		static readonly sbyte  []_GotoCallRet_from_state_actions = { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0,  };
+		static readonly sbyte  []_GotoCallRet_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_GotoCallRet_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_GotoCallRet_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_GotoCallRet_nfa_pop_trans = { 0, 0,  };
+		static readonly int  GotoCallRet_start  = 6;
+		static readonly int  GotoCallRet_first_final  = 6;
+		static readonly int  GotoCallRet_error  = 0;
+		static readonly int  GotoCallRet_en_handle  = 5;
+		static readonly int  GotoCallRet_en_one  = 10;
+		static readonly int  GotoCallRet_en_two  = 13;
+		static readonly int  GotoCallRet_en_main  = 6;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)GotoCallRet_start;
+				top = 0;
+				ts = 0;
+				te = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( _GotoCallRet_from_state_actions[cs]  ) {
+					case 5:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				switch ( cs  ) {
+					case 6:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr10;
+						}
+						case '\u0020':
+						{
+							goto ctr12;
+						}
+						case '\u005b':
+						{
+							goto ctr13;
+						}
+						case '\u007b':
+						{
+							goto ctr15;
+						}
+						
+					}
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr14;
+					}
+					
+					{
+						goto ctr11;
+					}
+					case 0:
+					goto _out;
+					case 7:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr18;
+					}
+					
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr19;
+					}
+					
+					{
+						goto ctr20;
+					}
+					case 1:
+					if ( ( data[p ]) == '\u0066' )
+					{
+						goto ctr2;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 2:
+					if ( ( data[p ]) == '\u006f' )
+					{
+						goto ctr4;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 3:
+					if ( ( data[p ]) == '\u0069' )
+					{
+						goto ctr6;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 4:
+					if ( ( data[p ]) == '\u006c' )
+					{
+						goto ctr8;
+					}
+					
+					{
+						goto ctr7;
+					}
+					case 8:
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr19;
+					}
+					
+					{
+						goto ctr20;
+					}
+					case 5:
+					{
+						goto ctr9;
+					}
+					case 9:
+					{
+						goto ctr11;
+					}
+					case 10:
+					switch ( ( data[p ])  ) {
+						case '\u0020':
+						{
+							goto ctr21;
+						}
+						case '\u005b':
+						{
+							goto ctr22;
+						}
+						case '\u007b':
+						{
+							goto ctr24;
+						}
+						case '\u007d':
+						{
+							goto ctr25;
+						}
+						
+					}
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr23;
+					}
+					
+					{
+						goto ctr11;
+					}
+					case 11:
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr23;
+					}
+					
+					{
+						goto ctr27;
+					}
+					case 12:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr25;
+					}
+					
+					{
+						goto ctr29;
+					}
+					case 13:
+					switch ( ( data[p ])  ) {
+						case '\u0020':
+						{
+							goto ctr30;
+						}
+						case '\u005b':
+						{
+							goto ctr31;
+						}
+						case '\u005d':
+						{
+							goto ctr32;
+						}
+						case '\u007b':
+						{
+							goto ctr34;
+						}
+						
+					}
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr33;
+					}
+					
+					{
+						goto ctr11;
+					}
+					case 14:
+					if ( ( data[p ]) == '\u0020' )
+					{
+						goto ctr32;
+					}
+					
+					{
+						goto ctr36;
+					}
+					case 15:
+					if ( '\u0061'<= ( data[p ]) && ( data[p ]) <= '\u007a' )
+					{
+						goto ctr33;
+					}
+					
+					{
+						goto ctr38;
+					}
+					
+				}
+				ctr11: cs = 0;
+				goto _again;
+				ctr18: cs = 1;
+				goto _again;
+				ctr2: cs = 2;
+				goto _again;
+				ctr4: cs = 3;
+				goto _again;
+				ctr6: cs = 4;
+				goto _again;
+				ctr7: cs = 6;
+				goto f0;
+				ctr8: cs = 6;
+				goto f1;
+				ctr10: cs = 6;
+				goto f5;
+				ctr12: cs = 6;
+				goto f6;
+				ctr13: cs = 6;
+				goto f7;
+				ctr15: cs = 6;
+				goto f9;
+				ctr20: cs = 6;
+				goto f10;
+				ctr14: cs = 7;
+				goto f8;
+				ctr19: cs = 8;
+				goto _again;
+				ctr9: cs = 9;
+				goto f3;
+				ctr21: cs = 10;
+				goto f11;
+				ctr22: cs = 10;
+				goto f12;
+				ctr24: cs = 10;
+				goto f13;
+				ctr27: cs = 10;
+				goto f14;
+				ctr29: cs = 10;
+				goto f15;
+				ctr23: cs = 11;
+				goto _again;
+				ctr25: cs = 12;
+				goto _again;
+				ctr30: cs = 13;
+				goto f16;
+				ctr31: cs = 13;
+				goto f17;
+				ctr34: cs = 13;
+				goto f18;
+				ctr36: cs = 13;
+				goto f19;
+				ctr38: cs = 13;
+				goto f20;
+				ctr32: cs = 14;
+				goto _again;
+				ctr33: cs = 15;
+				goto _again;
+				
+				f3:
+				{Console.Write( "handle " );{p = p - 1;
+					}if ( val == 1 )
+					{
+						cs = (10);
+					} 
+					if ( val == 2 )
+					{
+						cs = (13);
+					} 
+					if ( val == 3 )
+					{
+						cs = 6;} 
+				}
+				
+				goto _again;
+				f8:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f13:
+				{{te = p+1;
+						{Console.Write( "{ " );{stack[top] = cs;
+								top += 1;
+								cs = (10);
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f12:
+				{{te = p+1;
+						{Console.Write( "[ " );{stack[top] = cs;
+								top += 1;
+								cs = (13);
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f11:
+				{{te = p+1;
+						{Console.Write( "space " );}
+					}}
+				
+				goto _again;
+				f15:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "} " );{top-= 1;
+								cs = stack[top];
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f14:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "word " );val = 1;
+							{cs = (5);
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f18:
+				{{te = p+1;
+						{Console.Write( "{ " );{stack[top] = cs;
+								top += 1;
+								cs = (10);
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f17:
+				{{te = p+1;
+						{Console.Write( "[ " );{stack[top] = cs;
+								top += 1;
+								cs = (13);
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f16:
+				{{te = p+1;
+						{Console.Write( "space " );}
+					}}
+				
+				goto _again;
+				f19:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "] " );{top-= 1;
+								cs = stack[top];
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f20:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "word " );val = 2;
+							{cs = (5);
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f9:
+				{{te = p+1;
+						{Console.Write( "{ " );{stack[top] = cs;
+								top += 1;
+								cs = 10;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f7:
+				{{te = p+1;
+						{Console.Write( "[ " );{stack[top] = cs;
+								top += 1;
+								cs = 13;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f1:
+				{{te = p+1;
+						{Console.Write( "this is the foil" );}
+					}}
+				
+				goto _again;
+				f6:
+				{{te = p+1;
+						{Console.Write( "space " );}
+					}}
+				
+				goto _again;
+				f5:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f10:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "word " );val = 3;
+							{cs = 5;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				f0:
+				{{p = ((te))-1;
+						{Console.Write( "word " );val = 3;
+							{cs = 5;
+								goto _again;}}
+					}}
+				
+				goto _again;
+				
+				_again:
+				switch ( _GotoCallRet_to_state_actions[cs]  ) {
+					case 3:
+					{{ts = 0;
+						}}
+					
+					break;
+					
+				}
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( cs  ) {
+						case 7:
+						goto ctr20;
+						case 1:
+						goto ctr7;
+						case 2:
+						goto ctr7;
+						case 3:
+						goto ctr7;
+						case 4:
+						goto ctr7;
+						case 8:
+						goto ctr20;
+						case 11:
+						goto ctr27;
+						case 12:
+						goto ctr29;
+						case 14:
+						goto ctr36;
+						case 15:
+						goto ctr38;
+						
+					}
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= GotoCallRet_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"{a{b[c d]d}c}\n",
+			"[a{b[c d]d}c}\n",
+			"[a[b]c]d{ef{g{h}i}j}l\n",
+			"{{[]}}\n",
+			"a b c\n",
+			"{a b c}\n",
+			"[a b c]\n",
+			"{]\n",
+			"{{}\n",
+			"[[[[[[]]]]]]\n",
+			"[[[[[[]]}]]]\n",
+		};
+		
+		
+		static readonly int inplen = 11;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

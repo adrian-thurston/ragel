@@ -1,0 +1,169 @@
+host( "working/erract7.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	
+	
+}@
+array s8 _foo_actions( 0, 2 ) = { 0, 1, 0, 1, 1, 1, 2, 0 };
+
+array s8 _foo_to_state_actions( 0, 5 ) = { 0, 5, 5, 5, 5, 5, 5, 0 };
+
+array s8 _foo_eof_actions( 0, 3 ) = { 0, 3, 3, 3, 3, 3, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 6;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/erract7.rl", 19 ) @{
+	
+	int main()
+	{
+		int cs;
+		char *p = "hello", *pe = p + strlen(p);
+		char *eof = pe;
+	}@
+	{
+		cs = cast(int)foo_start;
+	}
+	
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr1;
+			}
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr0;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 88 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr0;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 88 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr0;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 88 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr0;
+			}
+			case 6:
+			{
+				goto ctr0;
+			}
+		}
+		
+		ctr0: cs = 0; goto f1;
+		ctr1: cs = 2; goto f2;
+		ctr2: cs = 3; goto f2;
+		ctr3: cs = 4; goto f2;
+		ctr4: cs = 5; goto f2;
+		ctr5: cs = 6; goto f2;
+		
+		f2: _acts = offset( _foo_actions, 1 ); goto execFuncs;
+		f1: _acts = offset( _foo_actions, 3 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _foo_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _foo_actions, _acts ) ) {
+				case 0{
+					host( "working/erract7.rl", 11 ) ${ printf("char: %c\n", *p); }$
+				}
+				case 1{
+					host( "working/erract7.rl", 12 ) ${ printf("err: %c\n", *p); }$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		_acts = offset( _foo_actions, _foo_to_state_actions[cs] );
+		_nacts = cast(uint)deref( _foo_actions, _acts ); _acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _foo_actions, _acts ) ) {
+				case 2{
+					host( "working/erract7.rl", 13 ) ${ printf("to state: %c\n", *p); }$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			index s8 __acts;
+			uint __nacts;
+			__acts = offset( _foo_actions, _foo_eof_actions[cs] );
+			__nacts = cast(uint)deref( _foo_actions, __acts ); __acts += 1;
+			while ( __nacts > 0 ) {
+				switch ( deref( _foo_actions, __acts ) ) {
+					case 1{
+						host( "working/erract7.rl", 12 ) ${ printf("err: %c\n", *p); }$
+					}
+				}
+				__acts += 1;
+				__nacts -= 1;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/erract7.rl", 28 ) @{
+		
+		printf( "rest: %s\n", p );
+		
+		return 0;
+	}
+	
+}@

@@ -1,0 +1,355 @@
+host( "working/recdescent1.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@PROHIBIT_FEATFLAGS: --var-backend
+	*
+	* Test growable stack.
+	*/
+	
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	
+	
+	
+}@
+value int recdescent_start = 2;
+value int recdescent_first_final = 2;
+value int recdescent_error = 0;
+
+value int recdescent_en_main = 2;
+
+array s8 _recdescent_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _recdescent_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _recdescent_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _recdescent_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/recdescent1.rl", 73 ) @{
+	
+	void test( char *buf )
+	{
+		int cs;
+		int *stack;
+		int top, stack_size;
+		char *p, *pe, *eof, *item = 0;
+		
+		int len = strlen( buf );
+		
+	}@
+	{
+		cs = cast(int)recdescent_start;
+		top = 0;
+	}
+	host( "working/recdescent1.rl", 84 ) @{
+		
+		stack_size = 1;
+		stack = (int*)malloc( sizeof(int) * stack_size );
+		
+		p = buf;
+		pe = buf + len;
+		eof = pe;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		goto _resume;
+		
+		_again:
+		switch ( cs ) {
+			case 2: goto st2;
+			case 0: goto st0;
+			case 3: goto st3;
+			case 4: goto st4;
+			case 1: goto st1;
+		}
+		
+		_resume:
+		switch ( cs )
+		{
+			case 2:
+			goto st_case_2;
+			case 0:
+			goto st_case_0;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 1:
+			goto st_case_1;
+		}
+		goto st_out;
+		ctr5:
+		host( "working/recdescent1.rl", 47 ) ${
+			if ( top == 0 ) {
+				printf( "STRAY CLOSE\n" );
+				{p+= 1; cs = 2; goto _out;}
+			}
+			
+			printf( "returning from main\n" );
+			${p = p - 1; }$
+			${top -= 1;cs = stack[top];host( "working/recdescent1.rl", 23 ) ${ 
+					if ( stack_size > (top * 4) ) {
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+						printf( "shrinking stack\n" );
+					}
+				}$goto _again;}$
+		}$
+		
+		goto st2;
+		ctr6:
+		host( "working/recdescent1.rl", 34 ) ${
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+		}$
+		
+		goto st2;
+		ctr10:
+		host( "working/recdescent1.rl", 34 ) ${
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+		}$
+		host( "working/recdescent1.rl", 47 ) ${
+			if ( top == 0 ) {
+				printf( "STRAY CLOSE\n" );
+				{p+= 1; cs = 2; goto _out;}
+			}
+			
+			printf( "returning from main\n" );
+			${p = p - 1; }$
+			${top -= 1;cs = stack[top];host( "working/recdescent1.rl", 23 ) ${ 
+					if ( stack_size > (top * 4) ) {
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+						printf( "shrinking stack\n" );
+					}
+				}$goto _again;}$
+		}$
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		switch( ( deref( data, p )) ) {
+			case 32: {
+				goto st2;
+			}
+			case 95: {
+				goto ctr3;
+			}
+			case 123: {
+				goto ctr4;
+			}
+			case 125: {
+				goto ctr5;
+			}
+		}
+		if ( ( deref( data, p )) < 48 ) {
+			if ( 9 <= ( deref( data, p )) && ( deref( data, p )) <= 10 ) {
+				goto st2;
+			}
+		} else if ( ( deref( data, p )) > 57 ) {
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr3;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr3;
+			}
+		} else {
+			goto ctr2;
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		ctr2:
+		host( "working/recdescent1.rl", 31 ) ${ item = p; }$
+		
+		goto st3;
+		ctr11:
+		host( "working/recdescent1.rl", 34 ) ${
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+		}$
+		host( "working/recdescent1.rl", 31 ) ${ item = p; }$
+		
+		goto st3;
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		switch( ( deref( data, p )) ) {
+			case 32: {
+				goto ctr6;
+			}
+			case 95: {
+				goto ctr8;
+			}
+			case 123: {
+				goto ctr9;
+			}
+			case 125: {
+				goto ctr10;
+			}
+		}
+		if ( ( deref( data, p )) < 48 ) {
+			if ( 9 <= ( deref( data, p )) && ( deref( data, p )) <= 10 ) {
+				goto ctr6;
+			}
+		} else if ( ( deref( data, p )) > 57 ) {
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr8;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr8;
+			}
+		} else {
+			goto st3;
+		}
+		{
+			goto st0;
+		}
+		ctr3:
+		host( "working/recdescent1.rl", 31 ) ${ item = p; }$
+		
+		goto st4;
+		ctr8:
+		host( "working/recdescent1.rl", 34 ) ${
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+		}$
+		host( "working/recdescent1.rl", 31 ) ${ item = p; }$
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		switch( ( deref( data, p )) ) {
+			case 32: {
+				goto ctr6;
+			}
+			case 95: {
+				goto st4;
+			}
+			case 123: {
+				goto ctr9;
+			}
+			case 125: {
+				goto ctr10;
+			}
+		}
+		if ( ( deref( data, p )) < 48 ) {
+			if ( 9 <= ( deref( data, p )) && ( deref( data, p )) <= 10 ) {
+				goto ctr6;
+			}
+		} else if ( ( deref( data, p )) > 57 ) {
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto st4;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto st4;
+			}
+		} else {
+			goto ctr11;
+		}
+		{
+			goto st0;
+		}
+		ctr4:
+		host( "working/recdescent1.rl", 41 ) ${
+			printf( "calling main\n" );
+			${host( "working/recdescent1.rl", 15 ) ${ 
+					if ( top == stack_size ) {
+						printf( "growing stack\n" );
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+					}
+				}$stack[top] = 1; top+= 1; goto st2;}$}$
+		
+		goto st1;
+		ctr9:
+		host( "working/recdescent1.rl", 34 ) ${
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+		}$
+		host( "working/recdescent1.rl", 41 ) ${
+			printf( "calling main\n" );
+			${host( "working/recdescent1.rl", 15 ) ${ 
+					if ( top == stack_size ) {
+						printf( "growing stack\n" );
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+					}
+				}$stack[top] = 1; top+= 1; goto st2;}$}$
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 125 ) {
+			goto st2;
+		}
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof1: cs = 1; goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( cs ) {
+				case 3: 
+				fallthrough;
+				case 4: 
+				host( "working/recdescent1.rl", 34 ) ${
+					printf( "item: " );
+					fwrite( item, 1, p-item, stdout );
+					printf( "\n" );
+				}$
+				break;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/recdescent1.rl", 93 ) @{
+		
+		if ( cs == recdescent_error ) {
+			/* Machine failed before finding a token. */
+			printf( "PARSE ERROR\n" );
+		}
+	}
+	
+	int main()
+	{
+		test( "88 foo { 99 {{{{}}}}{ } }");
+		test( "76 } sadf");
+	return 0;
+}
+
+}@

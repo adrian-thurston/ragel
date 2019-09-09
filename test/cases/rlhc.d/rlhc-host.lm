@@ -1,0 +1,281 @@
+namespace host
+	lex 
+		rl NL / '\n' /
+
+		token escape
+			/ '@' any /
+
+		literal `={ `}= `${ `}$ `@{ `}@
+
+		token host_any / any /
+	end
+
+	def tok
+		[`${ stmt* `}$]
+	|	[`={ expr `}=]
+	|	[escape]
+	|	[host_any]
+end
+
+lex 
+	rl NL / '\n' /
+
+	rl s_literal
+		/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
+
+	rl d_literal
+		/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+	rl c_comment 
+		/ '/*' ( any | NL )* :>> '*/' /
+
+	rl cpp_comment
+		/ '//' [^\n]* NL /
+
+	literal `array `value `TRUE `FALSE
+			`while `switch `case
+			`if `else `offset `index
+			`goto `deref `entry `label `default
+			`host `cast `match `pat
+
+	literal `uint `const
+			`s8 `s16 `s32 `s64
+			`s128 `nil `export
+			`fallthrough `u `c `break
+
+	token ident
+		/( alpha | '_' ) ( alpha | digit | '_' )*/
+
+	token uint
+		/ digit+ /
+
+	token hex_number
+		/ '0x' [0-9a-fA-F]+ /
+
+	ignore
+		/ c_comment | cpp_comment /
+
+	token string
+		/ s_literal | d_literal /
+
+	ignore / ( [ \t] | NL )+ /
+
+	literal `$ `{ `} `= `[ `]
+			`- `, `. `; `( `) `:
+			`? `* `+ `> `< `&
+			`~ `! `!= `== `<< `>>
+			`+= `&& `|| `<= `>=
+			`@ `-= `-> `={ `${ `@{
+end
+
+def embedded_host
+	[`host `( string `, uint `) `={ host::tok* host::`}=]
+|	[`host `( string `, uint `) `${ host::tok* host::`}$]
+|	[`host `( string `, uint `) `@{ host::tok* host::`}@]
+
+def type
+	[ident]
+|	[ident ident]
+|	[`uint]
+|	[`s8]
+|	[`s16]
+|	[`s32]
+|	[`s64]
+|	[`s128]
+
+def expr_factor
+	[embedded_host]
+|	[ident]
+|	[ident `[ expr `]]
+|	[ident `[ expr `] `. ident]
+|	[`offset `( ident `, expr `)]
+|	[`deref `( ident `, expr `)]
+|	[number]
+|	[`TRUE]
+|	[`FALSE]
+|	[`nil]
+|	[hex_number]
+|	[string]
+|	[embedded_host `-> expr_factor]
+|	[`( expr `)]
+|	[`cast `( type `) expr_factor]
+
+def lvalue
+	[embedded_host]
+|	[ident]
+|	[ident `[ expr `]]
+|	[ident `[ expr `] `. ident]
+|	[embedded_host `-> lvalue]
+
+def expr_factor_op
+	[`! expr_factor_op]
+|	[`~ expr_factor_op]
+|	[expr_factor]
+
+def expr_bitwise
+	[expr_bitwise `& expr_factor_op]
+|	[expr_factor_op]
+
+def expr_mult
+	[expr_mult `* expr_bitwise]
+|	[expr_bitwise]
+
+def add_op
+	[`+] | [`-]
+
+def expr_add
+	[expr_add add_op expr_mult]
+|	[expr_mult]
+
+def shift_op
+	[`<<] | [`>>]
+
+def expr_shift
+	[expr_shift shift_op expr_add]
+|	[expr_add]
+
+def test_op
+	[`<] | [`>] | [`<=] | [`>=] |
+	[`==] | [`!=] | [`&&] | [`||]
+
+def expr_test
+	[expr_test test_op expr_shift]
+|	[expr_shift]
+
+def expr
+	[expr_test]
+
+def sint
+	[uint]
+|	[`- uint]
+
+def number
+	[`u `( uint `)]
+|	[`c `( uint `)]
+|	[sint]
+
+def comma_num
+	[`, number]
+
+def num_list
+	[number comma_num*]
+|	[]
+
+def static_array
+	[`array type ident `( number `, number  `) `= `{ num_list `} `;]
+
+def static_value
+	[`value type ident `= number `;]
+
+def while_stmt
+	[`while `( expr `) stmt]
+
+def entry_loop
+	[`entry `{ stmt* `}]
+
+def label_stmt
+	Id: int
+	[`label ident `{ stmt* `}]
+
+def else_if_clause
+	[`else `if `( expr `) stmt]
+
+def else_clause
+	[`else stmt]
+
+def if_stmt [
+	`if `( expr `) stmt
+	else_if_clause* else_clause?
+]
+
+def match_stmt
+	[`match `( E: expr `) `{ P: pat_block* D: default_block? `}]
+
+def pat_block
+	[`pat expr `{ stmt* `}]
+
+def switch_stmt
+	[`switch `( expr `) `{ stmt* `}]
+
+def case_block
+	[`case expr `{ stmt* `}]
+
+def default_block
+	[`default `{ stmt* `}]
+
+def case_label
+	[`case expr `:]
+
+def goto_label
+	[ident `:]
+
+def opt_init
+	[`= expr]
+|	[]
+
+def opt_ptr
+	[`*]
+|	[]
+
+def opt_const
+	[`const]
+|	[]
+
+def declaration
+	[opt_const type ident opt_init `;]
+
+def export_stmt
+	[`export type ident number `;]
+
+def index_stmt
+	[`index type  ident `;]
+
+def goto_stmt
+	Id: int
+	[`goto ident `;]
+
+def fallthrough
+	[`fallthrough `;]
+
+def break_stmt
+	[`break `;]
+
+def block
+	[`{ stmt* `}]
+
+def expr_stmt
+	[expr `;]
+
+def assign_op
+	[`=] | [`+=] | [`-=]
+
+def assign_stmt
+	[LValue: lvalue assign_op expr `;]
+
+def stmt
+	[embedded_host]
+|	[static_array]
+|	[static_value]
+|	[declaration]
+|	[index_stmt]
+|	[export_stmt]
+|	[assign_stmt]
+|	[expr_stmt]
+|	[entry_loop]
+|	[label_stmt]
+|	[while_stmt]
+|	[if_stmt]
+|	[match_stmt]
+|	[switch_stmt]
+|	[case_block]
+|	[default_block]
+|	[case_label]
+|	[goto_label]
+|	[goto_stmt]
+|	[fallthrough]
+|	[break_stmt]
+|	[block]
+
+def start
+	[stmt*]
+

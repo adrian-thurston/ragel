@@ -1,0 +1,144 @@
+host( "working/erract6.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Test of a transition going to the error state.
+	*/
+	
+	#include <stdio.h>
+	#define BUFSIZE 2048
+	
+	struct errintrans
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+value int errintrans_start = 1;
+value int errintrans_first_final = 2;
+value int errintrans_error = 0;
+
+value int errintrans_en_main = 1;
+
+array s8 _errintrans_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _errintrans_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _errintrans_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _errintrans_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/erract6.rl", 27 ) @{
+	
+	void errintrans_init( struct errintrans *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)errintrans_start;
+	}
+	host( "working/erract6.rl", 31 ) @{
+	}
+	
+	void errintrans_execute( struct errintrans *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( host( "-", 1 ) ={ fsm->cs}= )
+		{
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 0:
+			goto st_case_0;
+		}
+		goto st_out;
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		if ( ( deref( data, p )) == 10 ) {
+			goto st2;
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st0;
+		}
+		{
+			goto st1;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) == 10 ) {
+			goto st2;
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st0;
+		}
+		{
+			goto st1;
+		}
+		st_case_0:
+		st0:
+		host( "-", 1 ) ={ fsm->cs}= = 0;
+		goto _out;
+		st_out:
+		_test_eof1: host( "-", 1 ) ={ fsm->cs}= = 1; goto _test_eof; 
+		_test_eof2: host( "-", 1 ) ={ fsm->cs}= = 2; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/erract6.rl", 39 ) @{
+	}
+	
+	int errintrans_finish( struct errintrans *fsm )
+	{
+		if ( fsm->cs == errintrans_error )
+		return -1;
+		if ( fsm->cs >= errintrans_first_final )
+		return 1;
+		return 0;
+	}
+	
+	
+	struct errintrans fsm;
+	#include <string.h>
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		errintrans_init( &fsm );
+		errintrans_execute( &fsm, buf, len );
+		if ( errintrans_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	
+	int main()
+	{
+		test(
+		"good, does not have numbers\n"
+		);
+		
+		test(
+		"bad, has numbers 666\n"
+		);
+		
+		return 0;
+	}
+	
+}@

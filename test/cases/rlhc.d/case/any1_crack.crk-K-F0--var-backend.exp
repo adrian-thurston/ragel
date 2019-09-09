@@ -1,0 +1,100 @@
+import crack.io cout;
+import crack.lang Buffer;
+
+
+
+
+
+
+
+
+const array[byte ] _any1_trans_keys = [ 1, 0, 1, 0, 1, 0, 0,  ];
+const array[int16 ] _any1_char_class = [ 0 ,  ];
+const array[int16 ] _any1_index_offsets = [ 0, 0, 0, 0 ,  ];
+const array[int16 ] _any1_indicies = [ 0 ,  ];
+const array[int16 ] _any1_index_defaults = [ 0, 0, 1, 0 ,  ];
+const array[int16 ] _any1_trans_cond_spaces = [ -1, -1, 0 ,  ];
+const array[int16 ] _any1_cond_targs = [ 2, 0, 0 ,  ];
+const array[int16 ] _any1_cond_actions = [ 0, 0, 0 ,  ];
+const array[int16 ] _any1_nfa_targs = [ 0, 0 ,  ];
+const array[int16 ] _any1_nfa_offsets = [ 0, 0, 0, 0 ,  ];
+const array[int16 ] _any1_nfa_push_actions = [ 0, 0 ,  ];
+const array[int16 ] _any1_nfa_pop_trans = [ 0, 0 ,  ];
+const int  any1_start  = 1;
+const int  any1_first_final  = 2;
+const int  any1_error  = 0;
+const int  any1_en_main  = 1;
+void m( String s )
+{
+	byteptr data = s.buffer;
+	int p = 0;
+	int pe = s.size;
+	int cs;
+	String buffer;
+	
+	if ( 1 ) {
+		cs = int ( any1_start );
+		
+	}
+	if ( 1 ) {
+		uint32 _trans = 0;
+		uint32 _have = 0;
+		uint32 _cont = 1;
+		while ( _cont == 1  )
+		{
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_trans = uint32  ( _any1_index_defaults[cs] );
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = int ( _any1_cond_targs[_trans] );
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		
+	}
+	if ( cs >= any1_first_final ) {
+		cout `ACCEPT\n`;
+	}
+	else {
+		cout `FAIL\n`;
+	}
+}
+
+void main()
+{
+	m( "" );
+	m( "x" );
+	m( "xx" );
+}
+
+main();

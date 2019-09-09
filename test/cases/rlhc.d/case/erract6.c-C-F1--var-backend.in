@@ -1,0 +1,152 @@
+host( "working/erract6.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Test of a transition going to the error state.
+	*/
+	
+	#include <stdio.h>
+	#define BUFSIZE 2048
+	
+	struct errintrans
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array char _errintrans_trans_keys( 0, 2 ) = { 1, 0, 0, 2, 0, 2, 0 };
+
+array s8 _errintrans_char_class( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 };
+
+array s8 _errintrans_index_offsets( 0, 3 ) = { 0, 0, 3, 0 };
+
+array s8 _errintrans_indicies( 0, 2 ) = { 1, 0, 2, 1, 0, 2, 0 };
+
+array s8 _errintrans_index_defaults( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _errintrans_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, 0 };
+
+array s8 _errintrans_cond_targs( 0, 2 ) = { 1, 2, 0, 0 };
+
+array s8 _errintrans_cond_actions( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _errintrans_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _errintrans_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _errintrans_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _errintrans_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int errintrans_start = 1;
+value int errintrans_first_final = 2;
+value int errintrans_error = 0;
+
+value int errintrans_en_main = 1;
+
+host( "working/erract6.rl", 27 ) @{
+	
+	void errintrans_init( struct errintrans *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)errintrans_start;
+	}
+	host( "working/erract6.rl", 31 ) @{
+	}
+	
+	void errintrans_execute( struct errintrans *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index char _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _errintrans_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
+					_inds = offset( _errintrans_indicies, _errintrans_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+					
+					if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_errintrans_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _errintrans_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _errintrans_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _errintrans_indicies, _inds + cast(int)( _ic - cast(int)deref( _errintrans_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_errintrans_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+					}
+					else {
+						_trans = cast(uint)_errintrans_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					host( "-", 1 ) ={ fsm->cs}= = cast(int)_errintrans_cond_targs[_trans];
+					
+					if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/erract6.rl", 39 ) @{
+	}
+	
+	int errintrans_finish( struct errintrans *fsm )
+	{
+		if ( fsm->cs == errintrans_error )
+		return -1;
+		if ( fsm->cs >= errintrans_first_final )
+		return 1;
+		return 0;
+	}
+	
+	
+	struct errintrans fsm;
+	#include <string.h>
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		errintrans_init( &fsm );
+		errintrans_execute( &fsm, buf, len );
+		if ( errintrans_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	
+	int main()
+	{
+		test(
+		"good, does not have numbers\n"
+		);
+		
+		test(
+		"bad, has numbers 666\n"
+		);
+		
+		return 0;
+	}
+	
+}@

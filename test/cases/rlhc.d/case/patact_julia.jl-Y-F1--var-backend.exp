@@ -1,0 +1,432 @@
+const _patact_trans_keys = UInt8[1, 0, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 8, 8, 11, 11, 9, 9, 10, 10, 0, 11, 2, 5, 2, 5, 2, 11, 0, 11, 4, 5, 7, 11, 0, 11, 2, 5, 2, 5, 2, 11, 6, 6, 0 , ]
+const _patact_char_class = Int8[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 7, 8, 7, 7, 9, 7, 7, 10, 7, 7, 11, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0 , ]
+const _patact_index_offsets = Int8[0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 32, 36, 46, 58, 60, 65, 77, 81, 85, 95, 0 , ]
+const _patact_indicies = Int8[1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0 , ]
+const _patact_index_defaults = Int8[0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 21, 0, 28, 30, 21, 35, 36, 21, 10, 43, 45, 21, 0 , ]
+const _patact_trans_cond_spaces = Int8[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , ]
+const _patact_cond_targs = Int8[17, 2, 3, 4, 17, 17, 6, 7, 8, 17, 24, 10, 11, 12, 24, 24, 14, 15, 16, 24, 17, 0, 17, 18, 19, 17, 20, 1, 17, 18, 17, 5, 21, 22, 23, 21, 21, 24, 24, 25, 26, 27, 9, 24, 25, 24, 13, 28, 0 , ]
+const _patact_cond_actions = Int8[1, 0, 0, 0, 2, 3, 0, 0, 0, 4, 5, 0, 0, 0, 6, 7, 0, 0, 0, 8, 11, 0, 12, 13, 13, 14, 15, 0, 16, 17, 18, 0, 19, 0, 0, 20, 21, 22, 23, 24, 24, 15, 0, 25, 26, 27, 0, 28, 0 , ]
+const _patact_to_state_actions = Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 9, 0, 0, 0, 9, 0 , ]
+const _patact_from_state_actions = Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 10, 0, 0, 0, 10, 0 , ]
+const _patact_eof_trans = Int8[0, 1, 1, 1, 1, 6, 6, 6, 6, 11, 11, 11, 11, 16, 16, 16, 16, 0, 1, 29, 31, 0, 36, 37, 0, 11, 44, 46, 0, 0 , ]
+const _patact_nfa_targs = Int8[0, 0 , ]
+const _patact_nfa_offsets = Int8[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , ]
+const _patact_nfa_push_actions = Int8[0, 0 , ]
+const _patact_nfa_pop_trans = Int8[0, 0 , ]
+const patact_start  = 17
+const patact_first_final  = 17
+const patact_error  = 0
+const patact_en_other  = 21
+const patact_en_exec_test  = 24
+const patact_en_semi  = 28
+const patact_en_main  = 17
+function m( data::AbstractString )
+	p = 0
+	pe = length(data)
+	eof = length(data)
+	cs = 0
+	buffer = ""
+	comm = 0;
+	top = 0;
+	stack = Int [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+	ts = 0;
+	te = 0;
+	act = 0;
+	value = 0;
+	
+	cs = convert(Int, patact_start )
+	ts = 0
+	te = 0
+	act = 0
+	_trans = 0;
+	_have = 0;
+	_cont = 1;
+	_keys = 0;
+	_inds = 0;
+	while _cont == 1 
+		if cs == 0 
+			_cont = 0
+			
+		end
+		_have = 0
+		if p == pe 
+			if p == eof 
+				if _patact_eof_trans[1+(cs)]> 0 
+					_trans = convert(UInt, _patact_eof_trans[1+(cs)] )- 1
+					_have = 1
+					
+				end
+				if _have == 0 
+					
+				end
+				
+			end
+			if _have == 0 
+				_cont = 0
+				
+			end
+			
+		end
+		if _cont == 1 
+			if _have == 0 
+				if _patact_from_state_actions[1+(cs)] == 10 
+					{
+						ts = p
+						
+					}
+					
+				end
+				_keys = (cs<<1)
+				_inds = _patact_index_offsets[1+(cs)]
+				if (data[1+(p )])<= 122 && (data[1+(p )])>= 10 
+					_ic = convert(Int, _patact_char_class[1+(convert(Int, (data[1+(p )]) )- 10)] );
+					if _ic <= convert(Int, _patact_trans_keys[1+(_keys+1 )] )&& _ic >= convert(Int, _patact_trans_keys[1+(_keys )] )
+						_trans = convert(UInt, _patact_indicies[1+(_inds + convert(Int, (_ic - convert(Int, _patact_trans_keys[1+(_keys )] )) ))] )
+						
+					else
+						_trans = convert(UInt, _patact_index_defaults[1+(cs)] )
+						
+					end
+					
+				else
+					_trans = convert(UInt, _patact_index_defaults[1+(cs)] )
+					
+				end
+				
+			end
+			if _cont == 1 
+				cs = convert(Int, _patact_cond_targs[1+(_trans)] )
+				if _patact_cond_actions[1+(_trans)] == 15 
+					{
+						te = p+1
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 19 
+					{
+						te = p+1
+						print( "space\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 21 
+					{
+						te = p
+						p = p - 1
+						print( "word\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 20 
+					{
+						te = p
+						p = p - 1
+						print( "num\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 8 
+					{
+						te = p+1
+						print( "word (c/lbh)\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 22 
+					{
+						te = p+1
+						print( "space\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 6 
+					{
+						te = p+1
+						print( "num (c/switch)\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 23 
+					{
+						te = p+1
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 27 
+					{
+						te = p
+						p = p - 1
+						print( "word (w/lbh)\n" );
+						{
+							p = ((te-1))-1
+							
+						}
+						
+						{
+							cs = 21
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 25 
+					{
+						te = p
+						p = p - 1
+						print( "num (w/switch)\n" );
+						{
+							p = ((te-1))-1
+							
+						}
+						
+						{
+							cs = 21
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 7 
+					{
+						p = ((te))-1
+						print( "word (w/lbh)\n" );
+						{
+							p = ((te-1))-1
+							
+						}
+						
+						{
+							cs = 21
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 5 
+					{
+						if act  == 7 
+							p = ((te))-1
+							print( "num (w/switch)\n" );
+							
+						elseif act  == 8 
+							p = ((te))-1
+							print( "num (w/switch)\n" );
+							{
+								p = ((te-1))-1
+								
+							}
+							
+							{
+								cs = 21
+								
+							}
+							
+						end
+						
+					}
+					
+					
+				elseif _patact_cond_actions[1+(_trans)] == 28 
+					{
+						te = p+1
+						print( "in semi\n" );
+						{
+							cs = 17
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 4 
+					{
+						te = p+1
+						print( "word (c/lbh)\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 11 
+					{
+						te = p+1
+						print( "space\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 2 
+					{
+						te = p+1
+						print( "num (c/switch)\n" );
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 14 
+					{
+						te = p+1
+						print( "going to semi\n" );
+						{
+							p = p - 1
+							
+						}
+						{
+							cs = 28
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 12 
+					{
+						te = p+1
+						print( "immdiate\n" );
+						{
+							cs = 24
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 18 
+					{
+						te = p
+						p = p - 1
+						print( "word (w/lbh)\n" );
+						{
+							p = p - 1
+							
+						}
+						{
+							cs = 21
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 16 
+					{
+						te = p
+						p = p - 1
+						print( "num (w/switch)\n" );
+						{
+							p = p - 1
+							
+						}
+						{
+							cs = 21
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 3 
+					{
+						p = ((te))-1
+						print( "word (w/lbh)\n" );
+						{
+							p = p - 1
+							
+						}
+						{
+							cs = 21
+							
+						}
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 1 
+					{
+						if act  == 15 
+							p = ((te))-1
+							print( "num (w/switch)\n" );
+							
+						elseif act  == 16 
+							p = ((te))-1
+							print( "num (w/switch)\n" );
+							{
+								p = p - 1
+								
+							}
+							{
+								cs = 21
+								
+							}
+							
+						end
+						
+					}
+					
+					
+				elseif _patact_cond_actions[1+(_trans)] == 26 
+					{
+						te = p+1
+						
+					}
+					{
+						act = 7
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 24 
+					{
+						te = p+1
+						
+					}
+					{
+						act = 8
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 17 
+					{
+						te = p+1
+						
+					}
+					{
+						act = 15
+						
+					}
+					
+				elseif _patact_cond_actions[1+(_trans)] == 13 
+					{
+						te = p+1
+						
+					}
+					{
+						act = 16
+						
+					}
+					
+				end
+				if _patact_to_state_actions[1+(cs)] == 9 
+					{
+						ts = 0
+						
+					}
+					
+				end
+				if cs == 0 
+					_cont = 0
+					
+				end
+				if _cont == 1 
+					p += 1
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	if ( cs >= patact_first_final )
+		println( "ACCEPT" );
+	else
+		println( "FAIL" );
+	end
+end
+
+m( "abcd foix\n" );
+m( "abcd\nanother\n" );
+m( "123 foix\n" );
+m( "!abcd foix\n" );
+m( "!abcd\nanother\n" );
+m( "!123 foix\n" );
+m( ";" );

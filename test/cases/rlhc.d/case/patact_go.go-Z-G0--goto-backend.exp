@@ -1,0 +1,985 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+var ts  int ;
+var te  int ;
+var act  int ;
+var value  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _patact_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 2, 2, 6, 2, 2, 7, 2, 2, 17, 2, 2, 18, 0  }
+var _patact_to_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0  }
+var _patact_from_state_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0  }
+var _patact_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _patact_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _patact_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _patact_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var patact_start  int  = 17
+var patact_first_final  int  = 17
+var patact_error  int  = 0
+var patact_en_other  int  = 21
+var patact_en_exec_test  int  = 24
+var patact_en_semi  int  = 28
+var patact_en_main  int  = 17
+func prepare() {
+
+	{
+		cs = int(patact_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _acts int
+		var  _nacts uint 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		_acts = int(_patact_from_state_actions[cs] );
+		_nacts = uint(_patact_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _patact_actions[_acts ] {
+					case 1:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		switch cs  {
+			case 17:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr36;
+				}
+				case 32:
+				{
+					goto ctr36;
+				}
+				case 33:
+				{
+					goto ctr38;
+				}
+				case 50:
+				{
+					goto ctr40;
+				}
+				case 59:
+				{
+					goto ctr41;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) > 57 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr42;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 48 :
+				{
+					goto ctr39;
+				}
+				
+			}
+			{
+				goto ctr37;
+			}
+			case 0:
+			goto _out;
+			case 18:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr44;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr39;
+				}
+				
+			}
+			{
+				goto ctr43;
+			}
+			case 1:
+			if ( data[p ]) == 102  {
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr43;
+			}
+			case 2:
+			if ( data[p ]) == 111  {
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr43;
+			}
+			case 3:
+			if ( data[p ]) == 105  {
+				{
+					goto ctr6;
+				}
+				
+			}
+			{
+				goto ctr43;
+			}
+			case 4:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr8;
+				}
+				
+			}
+			{
+				goto ctr43;
+			}
+			case 19:
+			switch ( data[p ])  {
+				case 32:
+				{
+					goto ctr44;
+				}
+				case 50:
+				{
+					goto ctr47;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr39;
+				}
+				
+			}
+			{
+				goto ctr46;
+			}
+			case 20:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr50;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr42;
+				}
+				
+			}
+			{
+				goto ctr49;
+			}
+			case 5:
+			if ( data[p ]) == 102  {
+				{
+					goto ctr11;
+				}
+				
+			}
+			{
+				goto ctr16;
+			}
+			case 6:
+			if ( data[p ]) == 111  {
+				{
+					goto ctr13;
+				}
+				
+			}
+			{
+				goto ctr16;
+			}
+			case 7:
+			if ( data[p ]) == 105  {
+				{
+					goto ctr15;
+				}
+				
+			}
+			{
+				goto ctr16;
+			}
+			case 8:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr17;
+				}
+				
+			}
+			{
+				goto ctr16;
+			}
+			case 21:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr51;
+				}
+				case 32:
+				{
+					goto ctr51;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) > 57 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr53;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 48 :
+				{
+					goto ctr52;
+				}
+				
+			}
+			{
+				goto ctr37;
+			}
+			case 22:
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr52;
+				}
+				
+			}
+			{
+				goto ctr55;
+			}
+			case 23:
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr53;
+				}
+				
+			}
+			{
+				goto ctr57;
+			}
+			case 24:
+			switch ( data[p ])  {
+				case 10:
+				{
+					goto ctr58;
+				}
+				case 32:
+				{
+					goto ctr58;
+				}
+				case 33:
+				{
+					goto ctr59;
+				}
+				case 50:
+				{
+					goto ctr61;
+				}
+				
+			}
+			switch {
+				case ( data[p ]) > 57 :
+				{
+					if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+						{
+							goto ctr62;
+						}
+						
+					}
+				} 
+				case ( data[p ]) >= 48 :
+				{
+					goto ctr60;
+				}
+				
+			}
+			{
+				goto ctr37;
+			}
+			case 25:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr64;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr60;
+				}
+				
+			}
+			{
+				goto ctr63;
+			}
+			case 9:
+			if ( data[p ]) == 102  {
+				{
+					goto ctr20;
+				}
+				
+			}
+			{
+				goto ctr63;
+			}
+			case 10:
+			if ( data[p ]) == 111  {
+				{
+					goto ctr22;
+				}
+				
+			}
+			{
+				goto ctr63;
+			}
+			case 11:
+			if ( data[p ]) == 105  {
+				{
+					goto ctr24;
+				}
+				
+			}
+			{
+				goto ctr63;
+			}
+			case 12:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr26;
+				}
+				
+			}
+			{
+				goto ctr63;
+			}
+			case 26:
+			switch ( data[p ])  {
+				case 32:
+				{
+					goto ctr64;
+				}
+				case 50:
+				{
+					goto ctr67;
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr60;
+				}
+				
+			}
+			{
+				goto ctr66;
+			}
+			case 27:
+			if ( data[p ]) == 32  {
+				{
+					goto ctr70;
+				}
+				
+			}
+			if 97 <= ( data[p ]) && ( data[p ]) <= 122  {
+				{
+					goto ctr62;
+				}
+				
+			}
+			{
+				goto ctr69;
+			}
+			case 13:
+			if ( data[p ]) == 102  {
+				{
+					goto ctr29;
+				}
+				
+			}
+			{
+				goto ctr34;
+			}
+			case 14:
+			if ( data[p ]) == 111  {
+				{
+					goto ctr31;
+				}
+				
+			}
+			{
+				goto ctr34;
+			}
+			case 15:
+			if ( data[p ]) == 105  {
+				{
+					goto ctr33;
+				}
+				
+			}
+			{
+				goto ctr34;
+			}
+			case 16:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr35;
+				}
+				
+			}
+			{
+				goto ctr34;
+			}
+			case 28:
+			if ( data[p ]) == 59  {
+				{
+					goto ctr71;
+				}
+				
+			}
+			{
+				goto ctr37;
+			}
+			
+		}
+		ctr37: cs = 0;
+		goto _again;
+		ctr44: cs = 1;
+		goto _again;
+		ctr2: cs = 2;
+		goto _again;
+		ctr4: cs = 3;
+		goto _again;
+		ctr6: cs = 4;
+		goto _again;
+		ctr50: cs = 5;
+		goto _again;
+		ctr11: cs = 6;
+		goto _again;
+		ctr13: cs = 7;
+		goto _again;
+		ctr15: cs = 8;
+		goto _again;
+		ctr64: cs = 9;
+		goto _again;
+		ctr20: cs = 10;
+		goto _again;
+		ctr22: cs = 11;
+		goto _again;
+		ctr24: cs = 12;
+		goto _again;
+		ctr70: cs = 13;
+		goto _again;
+		ctr29: cs = 14;
+		goto _again;
+		ctr31: cs = 15;
+		goto _again;
+		ctr33: cs = 16;
+		goto _again;
+		ctr43: cs = 17;
+		goto f0;
+		ctr8: cs = 17;
+		goto f1;
+		ctr16: cs = 17;
+		goto f2;
+		ctr17: cs = 17;
+		goto f3;
+		ctr36: cs = 17;
+		goto f10;
+		ctr38: cs = 17;
+		goto f11;
+		ctr41: cs = 17;
+		goto f13;
+		ctr46: cs = 17;
+		goto f15;
+		ctr49: cs = 17;
+		goto f17;
+		ctr39: cs = 18;
+		goto f12;
+		ctr47: cs = 18;
+		goto f16;
+		ctr40: cs = 19;
+		goto f12;
+		ctr42: cs = 20;
+		goto f14;
+		ctr51: cs = 21;
+		goto f18;
+		ctr55: cs = 21;
+		goto f19;
+		ctr57: cs = 21;
+		goto f20;
+		ctr52: cs = 22;
+		goto _again;
+		ctr53: cs = 23;
+		goto _again;
+		ctr63: cs = 24;
+		goto f4;
+		ctr26: cs = 24;
+		goto f5;
+		ctr34: cs = 24;
+		goto f6;
+		ctr35: cs = 24;
+		goto f7;
+		ctr58: cs = 24;
+		goto f21;
+		ctr59: cs = 24;
+		goto f22;
+		ctr66: cs = 24;
+		goto f24;
+		ctr69: cs = 24;
+		goto f26;
+		ctr60: cs = 25;
+		goto f23;
+		ctr67: cs = 25;
+		goto f25;
+		ctr61: cs = 26;
+		goto f23;
+		ctr62: cs = 27;
+		goto f14;
+		ctr71: cs = 28;
+		goto f27;
+		
+		f14: _acts = int(5 );
+		goto execFuncs;
+		f18: _acts = int(7 );
+		goto execFuncs;
+		f20: _acts = int(9 );
+		goto execFuncs;
+		f19: _acts = int(11 );
+		goto execFuncs;
+		f7: _acts = int(13 );
+		goto execFuncs;
+		f21: _acts = int(15 );
+		goto execFuncs;
+		f5: _acts = int(17 );
+		goto execFuncs;
+		f22: _acts = int(19 );
+		goto execFuncs;
+		f26: _acts = int(21 );
+		goto execFuncs;
+		f24: _acts = int(23 );
+		goto execFuncs;
+		f6: _acts = int(25 );
+		goto execFuncs;
+		f4: _acts = int(27 );
+		goto execFuncs;
+		f27: _acts = int(29 );
+		goto execFuncs;
+		f3: _acts = int(31 );
+		goto execFuncs;
+		f10: _acts = int(33 );
+		goto execFuncs;
+		f1: _acts = int(35 );
+		goto execFuncs;
+		f13: _acts = int(37 );
+		goto execFuncs;
+		f11: _acts = int(39 );
+		goto execFuncs;
+		f17: _acts = int(41 );
+		goto execFuncs;
+		f15: _acts = int(43 );
+		goto execFuncs;
+		f2: _acts = int(45 );
+		goto execFuncs;
+		f0: _acts = int(47 );
+		goto execFuncs;
+		f25: _acts = int(49 );
+		goto execFuncs;
+		f23: _acts = int(52 );
+		goto execFuncs;
+		f16: _acts = int(55 );
+		goto execFuncs;
+		f12: _acts = int(58 );
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = uint(_patact_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _patact_actions[_acts ] {
+					case 2:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 3:
+					{{te = p+1;
+							{fmt.Print( "space\n" );}
+						}}
+					
+					break;
+					case 4:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word\n" );}
+						}}
+					
+					break;
+					case 5:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "num\n" );}
+						}}
+					
+					break;
+					case 6:
+					{{act = 7;
+						}}
+					
+					break;
+					case 7:
+					{{act = 8;
+						}}
+					
+					break;
+					case 8:
+					{{te = p+1;
+							{fmt.Print( "word (c/lbh)\n" );}
+						}}
+					
+					break;
+					case 9:
+					{{te = p+1;
+							{fmt.Print( "space\n" );}
+						}}
+					
+					break;
+					case 10:
+					{{te = p+1;
+							{fmt.Print( "num (c/switch)\n" );}
+						}}
+					
+					break;
+					case 11:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 12:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word (w/lbh)\n" );{p = (( te-1))-1;
+								}
+								
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 13:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "num (w/switch)\n" );{p = (( te-1))-1;
+								}
+								
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 14:
+					{{p = ((te))-1;
+							{fmt.Print( "word (w/lbh)\n" );{p = (( te-1))-1;
+								}
+								
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 15:
+					{{switch act  {
+								case 7 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );}
+								
+								break;
+								case 8 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );{p = (( te-1))-1;
+									}
+									
+									{cs = 21;
+										goto _again;}}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					case 16:
+					{{te = p+1;
+							{fmt.Print( "in semi\n" );{cs = 17;
+									goto _again;}}
+						}}
+					
+					break;
+					case 17:
+					{{act = 15;
+						}}
+					
+					break;
+					case 18:
+					{{act = 16;
+						}}
+					
+					break;
+					case 19:
+					{{te = p+1;
+							{fmt.Print( "word (c/lbh)\n" );}
+						}}
+					
+					break;
+					case 20:
+					{{te = p+1;
+							{fmt.Print( "space\n" );}
+						}}
+					
+					break;
+					case 21:
+					{{te = p+1;
+							{fmt.Print( "num (c/switch)\n" );}
+						}}
+					
+					break;
+					case 22:
+					{{te = p+1;
+							{fmt.Print( "going to semi\n" );{p = p - 1;
+								} 
+								{cs = 28;
+									goto _again;}}
+						}}
+					
+					break;
+					case 23:
+					{{te = p+1;
+							{fmt.Print( "immdiate\n" );{cs = 24;
+									goto _again;}}
+						}}
+					
+					break;
+					case 24:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "word (w/lbh)\n" );{p = p - 1;
+								} 
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 25:
+					{{te = p;
+							p = p - 1;
+							{fmt.Print( "num (w/switch)\n" );{p = p - 1;
+								} 
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 26:
+					{{p = ((te))-1;
+							{fmt.Print( "word (w/lbh)\n" );{p = p - 1;
+								} 
+								{cs = 21;
+									goto _again;}}
+						}}
+					
+					break;
+					case 27:
+					{{switch act  {
+								case 15 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );}
+								
+								break;
+								case 16 :
+								p = ((te))-1;
+								{fmt.Print( "num (w/switch)\n" );{p = p - 1;
+									} 
+									{cs = 21;
+										goto _again;}}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		goto _again;
+		
+		_again:
+		_acts = int(_patact_to_state_actions[cs] );
+		_nacts = uint(_patact_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _patact_actions[_acts ] {
+					case 0:
+					{{ts = 0;
+						}}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 18:
+					goto ctr43;
+					case 1:
+					goto ctr43;
+					case 2:
+					goto ctr43;
+					case 3:
+					goto ctr43;
+					case 4:
+					goto ctr43;
+					case 19:
+					goto ctr46;
+					case 20:
+					goto ctr49;
+					case 5:
+					goto ctr16;
+					case 6:
+					goto ctr16;
+					case 7:
+					goto ctr16;
+					case 8:
+					goto ctr16;
+					case 22:
+					goto ctr55;
+					case 23:
+					goto ctr57;
+					case 25:
+					goto ctr63;
+					case 9:
+					goto ctr63;
+					case 10:
+					goto ctr63;
+					case 11:
+					goto ctr63;
+					case 12:
+					goto ctr63;
+					case 26:
+					goto ctr66;
+					case 27:
+					goto ctr69;
+					case 13:
+					goto ctr34;
+					case 14:
+					goto ctr34;
+					case 15:
+					goto ctr34;
+					case 16:
+					goto ctr34;
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= patact_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"abcd foix\n",
+	"abcd\nanother\n",
+	"123 foix\n",
+	"!abcd foix\n",
+	"!abcd\nanother\n",
+	"!123 foix\n",
+	";",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

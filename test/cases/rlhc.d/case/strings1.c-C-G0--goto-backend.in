@@ -1,0 +1,2882 @@
+host( "working/strings1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	#ifdef PERF_TEST
+	
+	/* Calibrated to 1s on yoho. */
+	#define perf_iters ( 3448275ll * S )
+	
+	int _perf_dummy = 0;
+	#define perf_printf(...) ( _perf_dummy += 1 )
+	#define perf_loop long _pi; for ( _pi = 0; _pi < perf_iters; _pi++ )
+	
+	#else
+	
+	#define perf_printf(...) printf( __VA_ARGS__ )
+	#define perf_loop
+	
+	#endif
+	
+	struct strs
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _strs_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _strs_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _strs_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _strs_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int strs_start = 1;
+value int strs_first_final = 308;
+value int strs_error = 0;
+
+value int strs_en_main = 1;
+
+host( "working/strings1.rl", 152 ) @{
+	
+	void strs_run( const char *_data, int _len )
+	{
+		perf_loop
+		{
+			struct strs fsm;
+			const char *p = _data;
+			const char *pe = _data + _len;
+			
+			
+		}@
+		{
+			host( "-", 1 ) ={ fsm.cs}= = cast(int)strs_start;
+		}
+		host( "working/strings1.rl", 163 ) @{
+		}@
+		{
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( host( "-", 1 ) ={ fsm.cs}= == 0 )
+			goto _out;
+			_resume:
+			switch ( host( "-", 1 ) ={ fsm.cs}= ) {
+				case 1:
+				switch( ( deref( data, p )) ) {
+					case 65: {
+						goto ctr0;
+					}
+					case 66: {
+						goto ctr2;
+					}
+					case 70: {
+						goto ctr3;
+					}
+					case 73: {
+						goto ctr4;
+					}
+					case 76: {
+						goto ctr5;
+					}
+					case 80: {
+						goto ctr6;
+					}
+					case 81: {
+						goto ctr7;
+					}
+					case 83: {
+						goto ctr8;
+					}
+					case 84: {
+						goto ctr9;
+					}
+					case 95: {
+						goto ctr10;
+					}
+					case 97: {
+						goto ctr11;
+					}
+					case 98: {
+						goto ctr12;
+					}
+					case 99: {
+						goto ctr13;
+					}
+					case 100: {
+						goto ctr14;
+					}
+					case 101: {
+						goto ctr15;
+					}
+					case 102: {
+						goto ctr16;
+					}
+					case 103: {
+						goto ctr17;
+					}
+					case 104: {
+						goto ctr18;
+					}
+					case 105: {
+						goto ctr19;
+					}
+					case 106: {
+						goto ctr20;
+					}
+					case 108: {
+						goto ctr21;
+					}
+					case 109: {
+						goto ctr22;
+					}
+					case 112: {
+						goto ctr23;
+					}
+					case 114: {
+						goto ctr24;
+					}
+					case 115: {
+						goto ctr25;
+					}
+					case 116: {
+						goto ctr26;
+					}
+					case 117: {
+						goto ctr27;
+					}
+					case 120: {
+						goto ctr28;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 0:
+				goto _out;
+				case 2:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr29;
+				}
+				{
+					goto ctr1;
+				}
+				case 3:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr30;
+				}
+				{
+					goto ctr1;
+				}
+				case 4:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr31;
+				}
+				{
+					goto ctr1;
+				}
+				case 5:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr32;
+				}
+				{
+					goto ctr1;
+				}
+				case 6:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr33;
+				}
+				{
+					goto ctr1;
+				}
+				case 308:
+				if ( ( deref( data, p )) == 10 ) {
+					goto ctr37;
+				}
+				{
+					goto ctr1;
+				}
+				case 309:
+				{
+					goto ctr1;
+				}
+				case 7:
+				if ( ( deref( data, p )) == 80 ) {
+					goto ctr34;
+				}
+				{
+					goto ctr1;
+				}
+				case 8:
+				if ( ( deref( data, p )) == 80 ) {
+					goto ctr35;
+				}
+				{
+					goto ctr1;
+				}
+				case 9:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 10:
+				if ( ( deref( data, p )) == 10 ) {
+					goto ctr37;
+				}
+				{
+					goto ctr1;
+				}
+				case 11:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr38;
+				}
+				{
+					goto ctr1;
+				}
+				case 12:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr39;
+				}
+				{
+					goto ctr1;
+				}
+				case 13:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr40;
+				}
+				{
+					goto ctr1;
+				}
+				case 14:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr35;
+				}
+				{
+					goto ctr1;
+				}
+				case 15:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr41;
+				}
+				{
+					goto ctr1;
+				}
+				case 16:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr42;
+				}
+				{
+					goto ctr1;
+				}
+				case 17:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 18:
+				if ( ( deref( data, p )) == 87 ) {
+					goto ctr43;
+				}
+				{
+					goto ctr1;
+				}
+				case 19:
+				if ( ( deref( data, p )) == 86 ) {
+					goto ctr44;
+				}
+				{
+					goto ctr1;
+				}
+				case 20:
+				if ( ( deref( data, p )) == 83 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 21:
+				if ( ( deref( data, p )) == 72 ) {
+					goto ctr45;
+				}
+				{
+					goto ctr1;
+				}
+				case 22:
+				if ( ( deref( data, p )) == 82 ) {
+					goto ctr46;
+				}
+				{
+					goto ctr1;
+				}
+				case 23:
+				switch( ( deref( data, p )) ) {
+					case 86: {
+						goto ctr36;
+					}
+					case 106: {
+						goto ctr36;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 24:
+				if ( ( deref( data, p )) == 86 ) {
+					goto ctr47;
+				}
+				{
+					goto ctr1;
+				}
+				case 25:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr48;
+				}
+				{
+					goto ctr1;
+				}
+				case 26:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 27:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr49;
+				}
+				{
+					goto ctr1;
+				}
+				case 28:
+				switch( ( deref( data, p )) ) {
+					case 97: {
+						goto ctr50;
+					}
+					case 114: {
+						goto ctr51;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 29:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr52;
+				}
+				{
+					goto ctr1;
+				}
+				case 30:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr53;
+				}
+				{
+					goto ctr1;
+				}
+				case 31:
+				if ( ( deref( data, p )) == 83 ) {
+					goto ctr54;
+				}
+				{
+					goto ctr1;
+				}
+				case 32:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr55;
+				}
+				{
+					goto ctr1;
+				}
+				case 33:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr51;
+				}
+				{
+					goto ctr1;
+				}
+				case 34:
+				if ( ( deref( data, p )) == 117 ) {
+					goto ctr56;
+				}
+				{
+					goto ctr1;
+				}
+				case 35:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr42;
+				}
+				{
+					goto ctr1;
+				}
+				case 36:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr57;
+				}
+				{
+					goto ctr1;
+				}
+				case 37:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr58;
+				}
+				{
+					goto ctr1;
+				}
+				case 38:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr59;
+				}
+				{
+					goto ctr1;
+				}
+				case 39:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr53;
+				}
+				{
+					goto ctr1;
+				}
+				case 40:
+				switch( ( deref( data, p )) ) {
+					case 68: {
+						goto ctr60;
+					}
+					case 71: {
+						goto ctr61;
+					}
+					case 73: {
+						goto ctr62;
+					}
+					case 95: {
+						goto ctr63;
+					}
+					case 101: {
+						goto ctr64;
+					}
+					case 102: {
+						goto ctr65;
+					}
+					case 105: {
+						goto ctr4;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 41:
+				if ( ( deref( data, p )) == 89 ) {
+					goto ctr66;
+				}
+				{
+					goto ctr1;
+				}
+				case 42:
+				if ( ( deref( data, p )) == 78 ) {
+					goto ctr67;
+				}
+				{
+					goto ctr1;
+				}
+				case 43:
+				if ( ( deref( data, p )) == 65 ) {
+					goto ctr68;
+				}
+				{
+					goto ctr1;
+				}
+				case 44:
+				if ( ( deref( data, p )) == 77 ) {
+					goto ctr69;
+				}
+				{
+					goto ctr1;
+				}
+				case 45:
+				if ( ( deref( data, p )) == 73 ) {
+					goto ctr70;
+				}
+				{
+					goto ctr1;
+				}
+				case 46:
+				if ( ( deref( data, p )) == 67 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 47:
+				if ( ( deref( data, p )) == 76 ) {
+					goto ctr71;
+				}
+				{
+					goto ctr1;
+				}
+				case 48:
+				if ( ( deref( data, p )) == 79 ) {
+					goto ctr72;
+				}
+				{
+					goto ctr1;
+				}
+				case 49:
+				if ( ( deref( data, p )) == 66 ) {
+					goto ctr73;
+				}
+				{
+					goto ctr1;
+				}
+				case 50:
+				if ( ( deref( data, p )) == 65 ) {
+					goto ctr74;
+				}
+				{
+					goto ctr1;
+				}
+				case 51:
+				if ( ( deref( data, p )) == 76 ) {
+					goto ctr75;
+				}
+				{
+					goto ctr1;
+				}
+				case 52:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr76;
+				}
+				{
+					goto ctr1;
+				}
+				case 53:
+				if ( ( deref( data, p )) == 79 ) {
+					goto ctr77;
+				}
+				{
+					goto ctr1;
+				}
+				case 54:
+				if ( ( deref( data, p )) == 70 ) {
+					goto ctr78;
+				}
+				{
+					goto ctr1;
+				}
+				case 55:
+				if ( ( deref( data, p )) == 70 ) {
+					goto ctr79;
+				}
+				{
+					goto ctr1;
+				}
+				case 56:
+				if ( ( deref( data, p )) == 83 ) {
+					goto ctr80;
+				}
+				{
+					goto ctr1;
+				}
+				case 57:
+				if ( ( deref( data, p )) == 69 ) {
+					goto ctr81;
+				}
+				{
+					goto ctr1;
+				}
+				case 58:
+				if ( ( deref( data, p )) == 84 ) {
+					goto ctr82;
+				}
+				{
+					goto ctr1;
+				}
+				case 59:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr83;
+				}
+				{
+					goto ctr1;
+				}
+				case 60:
+				if ( ( deref( data, p )) == 84 ) {
+					goto ctr84;
+				}
+				{
+					goto ctr1;
+				}
+				case 61:
+				if ( ( deref( data, p )) == 65 ) {
+					goto ctr85;
+				}
+				{
+					goto ctr1;
+				}
+				case 62:
+				if ( ( deref( data, p )) == 66 ) {
+					goto ctr86;
+				}
+				{
+					goto ctr1;
+				}
+				case 63:
+				if ( ( deref( data, p )) == 76 ) {
+					goto ctr87;
+				}
+				{
+					goto ctr1;
+				}
+				case 64:
+				if ( ( deref( data, p )) == 69 ) {
+					goto ctr88;
+				}
+				{
+					goto ctr1;
+				}
+				case 65:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 66:
+				if ( ( deref( data, p )) == 79 ) {
+					goto ctr89;
+				}
+				{
+					goto ctr1;
+				}
+				case 67:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr90;
+				}
+				{
+					goto ctr1;
+				}
+				case 68:
+				switch( ( deref( data, p )) ) {
+					case 103: {
+						goto ctr91;
+					}
+					case 115: {
+						goto ctr92;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 69:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr93;
+				}
+				{
+					goto ctr1;
+				}
+				case 70:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr94;
+				}
+				{
+					goto ctr1;
+				}
+				case 71:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 72:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr95;
+				}
+				{
+					goto ctr1;
+				}
+				case 73:
+				if ( ( deref( data, p )) == 100 ) {
+					goto ctr96;
+				}
+				{
+					goto ctr1;
+				}
+				case 74:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr97;
+				}
+				{
+					goto ctr1;
+				}
+				case 75:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr98;
+				}
+				{
+					goto ctr1;
+				}
+				case 76:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr99;
+				}
+				{
+					goto ctr1;
+				}
+				case 77:
+				if ( ( deref( data, p )) == 117 ) {
+					goto ctr100;
+				}
+				{
+					goto ctr1;
+				}
+				case 78:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr101;
+				}
+				{
+					goto ctr1;
+				}
+				case 79:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr102;
+				}
+				{
+					goto ctr1;
+				}
+				case 80:
+				if ( ( deref( data, p )) == 100 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 81:
+				switch( ( deref( data, p )) ) {
+					case 97: {
+						goto ctr103;
+					}
+					case 98: {
+						goto ctr104;
+					}
+					case 99: {
+						goto ctr105;
+					}
+					case 100: {
+						goto ctr106;
+					}
+					case 101: {
+						goto ctr107;
+					}
+					case 103: {
+						goto ctr108;
+					}
+					case 108: {
+						goto ctr109;
+					}
+					case 110: {
+						goto ctr110;
+					}
+					case 114: {
+						goto ctr111;
+					}
+					case 116: {
+						goto ctr112;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 82:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr113;
+				}
+				{
+					goto ctr1;
+				}
+				case 83:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr114;
+				}
+				{
+					goto ctr1;
+				}
+				case 84:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr115;
+				}
+				{
+					goto ctr1;
+				}
+				case 85:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr116;
+				}
+				{
+					goto ctr1;
+				}
+				case 86:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr117;
+				}
+				{
+					goto ctr1;
+				}
+				case 87:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr118;
+				}
+				{
+					goto ctr1;
+				}
+				case 88:
+				if ( ( deref( data, p )) == 102 ) {
+					goto ctr119;
+				}
+				{
+					goto ctr1;
+				}
+				case 89:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr120;
+				}
+				{
+					goto ctr1;
+				}
+				case 90:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr48;
+				}
+				{
+					goto ctr1;
+				}
+				case 91:
+				switch( ( deref( data, p )) ) {
+					case 115: {
+						goto ctr121;
+					}
+					case 117: {
+						goto ctr122;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 92:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr123;
+				}
+				{
+					goto ctr1;
+				}
+				case 93:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr124;
+				}
+				{
+					goto ctr1;
+				}
+				case 94:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr125;
+				}
+				{
+					goto ctr1;
+				}
+				case 95:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr126;
+				}
+				{
+					goto ctr1;
+				}
+				case 96:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr127;
+				}
+				{
+					goto ctr1;
+				}
+				case 97:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr42;
+				}
+				{
+					goto ctr1;
+				}
+				case 98:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr128;
+				}
+				{
+					goto ctr1;
+				}
+				case 99:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr129;
+				}
+				{
+					goto ctr1;
+				}
+				case 100:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr130;
+				}
+				{
+					goto ctr1;
+				}
+				case 101:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr131;
+				}
+				{
+					goto ctr1;
+				}
+				case 102:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr132;
+				}
+				{
+					goto ctr1;
+				}
+				case 103:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr133;
+				}
+				{
+					goto ctr1;
+				}
+				case 104:
+				switch( ( deref( data, p )) ) {
+					case 100: {
+						goto ctr134;
+					}
+					case 110: {
+						goto ctr135;
+					}
+					case 118: {
+						goto ctr136;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 105:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr137;
+				}
+				{
+					goto ctr1;
+				}
+				case 106:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr138;
+				}
+				{
+					goto ctr1;
+				}
+				case 107:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr139;
+				}
+				{
+					goto ctr1;
+				}
+				case 108:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr140;
+				}
+				{
+					goto ctr1;
+				}
+				case 109:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 110:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr141;
+				}
+				{
+					goto ctr1;
+				}
+				case 111:
+				if ( ( deref( data, p )) == 119 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 112:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr142;
+				}
+				{
+					goto ctr1;
+				}
+				case 113:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr143;
+				}
+				{
+					goto ctr1;
+				}
+				case 114:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr144;
+				}
+				{
+					goto ctr1;
+				}
+				case 115:
+				switch( ( deref( data, p )) ) {
+					case 100: {
+						goto ctr134;
+					}
+					case 110: {
+						goto ctr135;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 116:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr145;
+				}
+				{
+					goto ctr1;
+				}
+				case 117:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr146;
+				}
+				{
+					goto ctr1;
+				}
+				case 118:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr147;
+				}
+				{
+					goto ctr1;
+				}
+				case 119:
+				if ( ( deref( data, p )) == 117 ) {
+					goto ctr148;
+				}
+				{
+					goto ctr1;
+				}
+				case 120:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr149;
+				}
+				{
+					goto ctr1;
+				}
+				case 121:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr150;
+				}
+				{
+					goto ctr1;
+				}
+				case 122:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr151;
+				}
+				{
+					goto ctr1;
+				}
+				case 123:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr152;
+				}
+				{
+					goto ctr1;
+				}
+				case 124:
+				if ( ( deref( data, p )) == 120 ) {
+					goto ctr153;
+				}
+				{
+					goto ctr1;
+				}
+				case 125:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr154;
+				}
+				{
+					goto ctr1;
+				}
+				case 126:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr155;
+				}
+				{
+					goto ctr1;
+				}
+				case 127:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr156;
+				}
+				{
+					goto ctr1;
+				}
+				case 128:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr157;
+				}
+				{
+					goto ctr1;
+				}
+				case 129:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr158;
+				}
+				{
+					goto ctr1;
+				}
+				case 130:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr159;
+				}
+				{
+					goto ctr1;
+				}
+				case 131:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 132:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr160;
+				}
+				{
+					goto ctr1;
+				}
+				case 133:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr161;
+				}
+				{
+					goto ctr1;
+				}
+				case 134:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr162;
+				}
+				{
+					goto ctr1;
+				}
+				case 135:
+				if ( ( deref( data, p )) == 103 ) {
+					goto ctr163;
+				}
+				{
+					goto ctr1;
+				}
+				case 136:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr164;
+				}
+				{
+					goto ctr1;
+				}
+				case 137:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr165;
+				}
+				{
+					goto ctr1;
+				}
+				case 138:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr166;
+				}
+				{
+					goto ctr1;
+				}
+				case 139:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr167;
+				}
+				{
+					goto ctr1;
+				}
+				case 140:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr168;
+				}
+				{
+					goto ctr1;
+				}
+				case 141:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr169;
+				}
+				{
+					goto ctr1;
+				}
+				case 142:
+				if ( ( deref( data, p )) == 102 ) {
+					goto ctr170;
+				}
+				{
+					goto ctr1;
+				}
+				case 143:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr171;
+				}
+				{
+					goto ctr1;
+				}
+				case 144:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr172;
+				}
+				{
+					goto ctr1;
+				}
+				case 145:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr173;
+				}
+				{
+					goto ctr1;
+				}
+				case 146:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr174;
+				}
+				{
+					goto ctr1;
+				}
+				case 147:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr175;
+				}
+				{
+					goto ctr1;
+				}
+				case 148:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr176;
+				}
+				{
+					goto ctr1;
+				}
+				case 149:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr177;
+				}
+				{
+					goto ctr1;
+				}
+				case 150:
+				if ( ( deref( data, p )) == 102 ) {
+					goto ctr178;
+				}
+				{
+					goto ctr1;
+				}
+				case 151:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 152:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr179;
+				}
+				{
+					goto ctr1;
+				}
+				case 153:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr180;
+				}
+				{
+					goto ctr1;
+				}
+				case 154:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr181;
+				}
+				{
+					goto ctr1;
+				}
+				case 155:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr182;
+				}
+				{
+					goto ctr1;
+				}
+				case 156:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr183;
+				}
+				{
+					goto ctr1;
+				}
+				case 157:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr94;
+				}
+				{
+					goto ctr1;
+				}
+				case 158:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr184;
+				}
+				{
+					goto ctr1;
+				}
+				case 159:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr185;
+				}
+				{
+					goto ctr1;
+				}
+				case 160:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr186;
+				}
+				{
+					goto ctr1;
+				}
+				case 161:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr187;
+				}
+				{
+					goto ctr1;
+				}
+				case 162:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr188;
+				}
+				{
+					goto ctr1;
+				}
+				case 163:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr189;
+				}
+				{
+					goto ctr1;
+				}
+				case 164:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr190;
+				}
+				{
+					goto ctr1;
+				}
+				case 165:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr191;
+				}
+				{
+					goto ctr1;
+				}
+				case 166:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr192;
+				}
+				{
+					goto ctr1;
+				}
+				case 167:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr88;
+				}
+				{
+					goto ctr1;
+				}
+				case 168:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr193;
+				}
+				{
+					goto ctr1;
+				}
+				case 169:
+				if ( ( deref( data, p )) == 98 ) {
+					goto ctr194;
+				}
+				{
+					goto ctr1;
+				}
+				case 170:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr195;
+				}
+				{
+					goto ctr1;
+				}
+				case 171:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr196;
+				}
+				{
+					goto ctr1;
+				}
+				case 172:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr197;
+				}
+				{
+					goto ctr1;
+				}
+				case 173:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr198;
+				}
+				{
+					goto ctr1;
+				}
+				case 174:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr199;
+				}
+				{
+					goto ctr1;
+				}
+				case 175:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr200;
+				}
+				{
+					goto ctr1;
+				}
+				case 176:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr201;
+				}
+				{
+					goto ctr1;
+				}
+				case 177:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr202;
+				}
+				{
+					goto ctr1;
+				}
+				case 178:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr203;
+				}
+				{
+					goto ctr1;
+				}
+				case 179:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr204;
+				}
+				{
+					goto ctr1;
+				}
+				case 180:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr159;
+				}
+				{
+					goto ctr1;
+				}
+				case 181:
+				if ( ( deref( data, p )) == 119 ) {
+					goto ctr205;
+				}
+				{
+					goto ctr1;
+				}
+				case 182:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr206;
+				}
+				{
+					goto ctr1;
+				}
+				case 183:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr207;
+				}
+				{
+					goto ctr1;
+				}
+				case 184:
+				if ( ( deref( data, p )) == 70 ) {
+					goto ctr208;
+				}
+				{
+					goto ctr1;
+				}
+				case 185:
+				if ( ( deref( data, p )) == 85 ) {
+					goto ctr209;
+				}
+				{
+					goto ctr1;
+				}
+				case 186:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr210;
+				}
+				{
+					goto ctr1;
+				}
+				case 187:
+				if ( ( deref( data, p )) == 80 ) {
+					goto ctr211;
+				}
+				{
+					goto ctr1;
+				}
+				case 188:
+				if ( ( deref( data, p )) == 118 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 189:
+				switch( ( deref( data, p )) ) {
+					case 101: {
+						goto ctr162;
+					}
+					case 116: {
+						goto ctr212;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 190:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr213;
+				}
+				{
+					goto ctr1;
+				}
+				case 191:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr214;
+				}
+				{
+					goto ctr1;
+				}
+				case 192:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr215;
+				}
+				{
+					goto ctr1;
+				}
+				case 193:
+				switch( ( deref( data, p )) ) {
+					case 115: {
+						goto ctr216;
+					}
+					case 117: {
+						goto ctr217;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 194:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 195:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr218;
+				}
+				{
+					goto ctr1;
+				}
+				case 196:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr219;
+				}
+				{
+					goto ctr1;
+				}
+				case 197:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 198:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr220;
+				}
+				{
+					goto ctr1;
+				}
+				case 199:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr221;
+				}
+				{
+					goto ctr1;
+				}
+				case 200:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr141;
+				}
+				{
+					goto ctr1;
+				}
+				case 201:
+				switch( ( deref( data, p )) ) {
+					case 100: {
+						goto ctr222;
+					}
+					case 110: {
+						goto ctr102;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 202:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr223;
+				}
+				{
+					goto ctr1;
+				}
+				case 203:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr224;
+				}
+				{
+					goto ctr1;
+				}
+				case 204:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 205:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr225;
+				}
+				{
+					goto ctr1;
+				}
+				case 206:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr216;
+				}
+				{
+					goto ctr1;
+				}
+				case 207:
+				switch( ( deref( data, p )) ) {
+					case 108: {
+						goto ctr226;
+					}
+					case 115: {
+						goto ctr227;
+					}
+					case 116: {
+						goto ctr228;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 208:
+				switch( ( deref( data, p )) ) {
+					case 110: {
+						goto ctr229;
+					}
+					case 112: {
+						goto ctr230;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 209:
+				if ( ( deref( data, p )) == 117 ) {
+					goto ctr231;
+				}
+				{
+					goto ctr1;
+				}
+				case 210:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 211:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr224;
+				}
+				{
+					goto ctr1;
+				}
+				case 212:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr232;
+				}
+				{
+					goto ctr1;
+				}
+				case 213:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr216;
+				}
+				{
+					goto ctr1;
+				}
+				case 214:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr216;
+				}
+				{
+					goto ctr1;
+				}
+				case 215:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr233;
+				}
+				{
+					goto ctr1;
+				}
+				case 216:
+				if ( ( deref( data, p )) == 100 ) {
+					goto ctr179;
+				}
+				{
+					goto ctr1;
+				}
+				case 217:
+				switch( ( deref( data, p )) ) {
+					case 101: {
+						goto ctr234;
+					}
+					case 110: {
+						goto ctr235;
+					}
+					case 111: {
+						goto ctr236;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 218:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr219;
+				}
+				{
+					goto ctr1;
+				}
+				case 219:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr237;
+				}
+				{
+					goto ctr1;
+				}
+				case 220:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr48;
+				}
+				{
+					goto ctr1;
+				}
+				case 221:
+				if ( ( deref( data, p )) == 117 ) {
+					goto ctr42;
+				}
+				{
+					goto ctr1;
+				}
+				case 222:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr238;
+				}
+				{
+					goto ctr1;
+				}
+				case 223:
+				if ( ( deref( data, p )) == 103 ) {
+					goto ctr41;
+				}
+				{
+					goto ctr1;
+				}
+				case 224:
+				if ( ( deref( data, p )) == 120 ) {
+					goto ctr239;
+				}
+				{
+					goto ctr1;
+				}
+				case 225:
+				switch( ( deref( data, p )) ) {
+					case 105: {
+						goto ctr42;
+					}
+					case 116: {
+						goto ctr240;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 226:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr241;
+				}
+				{
+					goto ctr1;
+				}
+				case 227:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr102;
+				}
+				{
+					goto ctr1;
+				}
+				case 228:
+				switch( ( deref( data, p )) ) {
+					case 97: {
+						goto ctr242;
+					}
+					case 101: {
+						goto ctr243;
+					}
+					case 105: {
+						goto ctr244;
+					}
+					case 111: {
+						goto ctr245;
+					}
+					case 112: {
+						goto ctr246;
+					}
+					case 114: {
+						goto ctr247;
+					}
+					case 119: {
+						goto ctr248;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 229:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr249;
+				}
+				{
+					goto ctr1;
+				}
+				case 230:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr140;
+				}
+				{
+					goto ctr1;
+				}
+				case 231:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr250;
+				}
+				{
+					goto ctr1;
+				}
+				case 232:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr251;
+				}
+				{
+					goto ctr1;
+				}
+				case 233:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr219;
+				}
+				{
+					goto ctr1;
+				}
+				case 234:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr252;
+				}
+				{
+					goto ctr1;
+				}
+				case 235:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr253;
+				}
+				{
+					goto ctr1;
+				}
+				case 236:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr178;
+				}
+				{
+					goto ctr1;
+				}
+				case 237:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr254;
+				}
+				{
+					goto ctr1;
+				}
+				case 238:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr159;
+				}
+				{
+					goto ctr1;
+				}
+				case 239:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr255;
+				}
+				{
+					goto ctr1;
+				}
+				case 240:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr256;
+				}
+				{
+					goto ctr1;
+				}
+				case 241:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr257;
+				}
+				{
+					goto ctr1;
+				}
+				case 242:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr258;
+				}
+				{
+					goto ctr1;
+				}
+				case 243:
+				if ( ( deref( data, p )) == 102 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 244:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr259;
+				}
+				{
+					goto ctr1;
+				}
+				case 245:
+				switch( ( deref( data, p )) ) {
+					case 97: {
+						goto ctr102;
+					}
+					case 101: {
+						goto ctr36;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 246:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr260;
+				}
+				{
+					goto ctr1;
+				}
+				case 247:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr139;
+				}
+				{
+					goto ctr1;
+				}
+				case 248:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr261;
+				}
+				{
+					goto ctr1;
+				}
+				case 249:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr262;
+				}
+				{
+					goto ctr1;
+				}
+				case 250:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr35;
+				}
+				{
+					goto ctr1;
+				}
+				case 251:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr263;
+				}
+				{
+					goto ctr1;
+				}
+				case 252:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr264;
+				}
+				{
+					goto ctr1;
+				}
+				case 253:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 254:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr265;
+				}
+				{
+					goto ctr1;
+				}
+				case 255:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr266;
+				}
+				{
+					goto ctr1;
+				}
+				case 256:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr267;
+				}
+				{
+					goto ctr1;
+				}
+				case 257:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr268;
+				}
+				{
+					goto ctr1;
+				}
+				case 258:
+				if ( ( deref( data, p )) == 121 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 259:
+				if ( 112 <= ( deref( data, p )) && ( deref( data, p )) <= 113 ) {
+					goto ctr269;
+				}
+				{
+					goto ctr1;
+				}
+				case 260:
+				if ( ( deref( data, p )) == 104 ) {
+					goto ctr268;
+				}
+				{
+					goto ctr1;
+				}
+				case 261:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr270;
+				}
+				{
+					goto ctr1;
+				}
+				case 262:
+				if ( ( deref( data, p )) == 119 ) {
+					goto ctr218;
+				}
+				{
+					goto ctr1;
+				}
+				case 263:
+				switch( ( deref( data, p )) ) {
+					case 97: {
+						goto ctr271;
+					}
+					case 101: {
+						goto ctr272;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 264:
+				switch( ( deref( data, p )) ) {
+					case 105: {
+						goto ctr159;
+					}
+					case 108: {
+						goto ctr182;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 265:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr273;
+				}
+				{
+					goto ctr1;
+				}
+				case 266:
+				switch( ( deref( data, p )) ) {
+					case 99: {
+						goto ctr274;
+					}
+					case 109: {
+						goto ctr275;
+					}
+					case 115: {
+						goto ctr276;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 267:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr268;
+				}
+				{
+					goto ctr1;
+				}
+				case 268:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr277;
+				}
+				{
+					goto ctr1;
+				}
+				case 269:
+				if ( ( deref( data, p )) == 118 ) {
+					goto ctr140;
+				}
+				{
+					goto ctr1;
+				}
+				case 270:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr42;
+				}
+				{
+					goto ctr1;
+				}
+				case 271:
+				switch( ( deref( data, p )) ) {
+					case 114: {
+						goto ctr278;
+					}
+					case 117: {
+						goto ctr279;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 272:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr280;
+				}
+				{
+					goto ctr1;
+				}
+				case 273:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr42;
+				}
+				{
+					goto ctr1;
+				}
+				case 274:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr56;
+				}
+				{
+					goto ctr1;
+				}
+				case 275:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr180;
+				}
+				{
+					goto ctr1;
+				}
+				case 276:
+				switch( ( deref( data, p )) ) {
+					case 112: {
+						goto ctr281;
+					}
+					case 116: {
+						goto ctr282;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 277:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr283;
+				}
+				{
+					goto ctr1;
+				}
+				case 278:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr140;
+				}
+				{
+					goto ctr1;
+				}
+				case 279:
+				switch( ( deref( data, p )) ) {
+					case 100: {
+						goto ctr284;
+					}
+					case 114: {
+						goto ctr285;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 280:
+				switch( ( deref( data, p )) ) {
+					case 101: {
+						goto ctr234;
+					}
+					case 105: {
+						goto ctr159;
+					}
+					case 111: {
+						goto ctr236;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 281:
+				switch( ( deref( data, p )) ) {
+					case 99: {
+						goto ctr286;
+					}
+					case 108: {
+						goto ctr254;
+					}
+					case 110: {
+						goto ctr287;
+					}
+					case 116: {
+						goto ctr288;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 282:
+				switch( ( deref( data, p )) ) {
+					case 97: {
+						goto ctr289;
+					}
+					case 109: {
+						goto ctr264;
+					}
+					case 112: {
+						goto ctr268;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 283:
+				if ( ( deref( data, p )) == 115 ) {
+					goto ctr290;
+				}
+				{
+					goto ctr1;
+				}
+				case 284:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr291;
+				}
+				{
+					goto ctr1;
+				}
+				case 285:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr292;
+				}
+				{
+					goto ctr1;
+				}
+				case 286:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr264;
+				}
+				{
+					goto ctr1;
+				}
+				case 287:
+				if ( ( deref( data, p )) == 99 ) {
+					goto ctr274;
+				}
+				{
+					goto ctr1;
+				}
+				case 288:
+				if ( ( deref( data, p )) == 111 ) {
+					goto ctr293;
+				}
+				{
+					goto ctr1;
+				}
+				case 289:
+				if ( ( deref( data, p )) == 117 ) {
+					goto ctr48;
+				}
+				{
+					goto ctr1;
+				}
+				case 290:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr294;
+				}
+				{
+					goto ctr1;
+				}
+				case 291:
+				if ( ( deref( data, p )) == 114 ) {
+					goto ctr295;
+				}
+				{
+					goto ctr1;
+				}
+				case 292:
+				if ( ( deref( data, p )) == 109 ) {
+					goto ctr296;
+				}
+				{
+					goto ctr1;
+				}
+				case 293:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr297;
+				}
+				{
+					goto ctr1;
+				}
+				case 294:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr298;
+				}
+				{
+					goto ctr1;
+				}
+				case 295:
+				if ( ( deref( data, p )) == 97 ) {
+					goto ctr299;
+				}
+				{
+					goto ctr1;
+				}
+				case 296:
+				if ( ( deref( data, p )) == 116 ) {
+					goto ctr300;
+				}
+				{
+					goto ctr1;
+				}
+				case 297:
+				if ( ( deref( data, p )) == 101 ) {
+					goto ctr301;
+				}
+				{
+					goto ctr1;
+				}
+				case 298:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr302;
+				}
+				{
+					goto ctr1;
+				}
+				case 299:
+				if ( ( deref( data, p )) == 95 ) {
+					goto ctr303;
+				}
+				{
+					goto ctr1;
+				}
+				case 300:
+				if ( ( deref( data, p )) == 70 ) {
+					goto ctr211;
+				}
+				{
+					goto ctr1;
+				}
+				case 301:
+				switch( ( deref( data, p )) ) {
+					case 110: {
+						goto ctr304;
+					}
+					case 112: {
+						goto ctr305;
+					}
+				}
+				{
+					goto ctr1;
+				}
+				case 302:
+				if ( ( deref( data, p )) == 108 ) {
+					goto ctr306;
+				}
+				{
+					goto ctr1;
+				}
+				case 303:
+				if ( ( deref( data, p )) == 105 ) {
+					goto ctr307;
+				}
+				{
+					goto ctr1;
+				}
+				case 304:
+				if ( ( deref( data, p )) == 110 ) {
+					goto ctr308;
+				}
+				{
+					goto ctr1;
+				}
+				case 305:
+				if ( ( deref( data, p )) == 107 ) {
+					goto ctr36;
+				}
+				{
+					goto ctr1;
+				}
+				case 306:
+				if ( ( deref( data, p )) == 112 ) {
+					goto ctr218;
+				}
+				{
+					goto ctr1;
+				}
+				case 307:
+				if ( ( deref( data, p )) == 100 ) {
+					goto ctr14;
+				}
+				{
+					goto ctr1;
+				}
+			}
+			
+			ctr1: host( "-", 1 ) ={ fsm.cs}= = 0; goto _again;
+			ctr0: host( "-", 1 ) ={ fsm.cs}= = 2; goto _again;
+			ctr29: host( "-", 1 ) ={ fsm.cs}= = 3; goto _again;
+			ctr30: host( "-", 1 ) ={ fsm.cs}= = 4; goto _again;
+			ctr31: host( "-", 1 ) ={ fsm.cs}= = 5; goto _again;
+			ctr32: host( "-", 1 ) ={ fsm.cs}= = 6; goto _again;
+			ctr2: host( "-", 1 ) ={ fsm.cs}= = 7; goto _again;
+			ctr34: host( "-", 1 ) ={ fsm.cs}= = 8; goto _again;
+			ctr35: host( "-", 1 ) ={ fsm.cs}= = 9; goto _again;
+			ctr36: host( "-", 1 ) ={ fsm.cs}= = 10; goto _again;
+			ctr3: host( "-", 1 ) ={ fsm.cs}= = 11; goto _again;
+			ctr38: host( "-", 1 ) ={ fsm.cs}= = 12; goto _again;
+			ctr39: host( "-", 1 ) ={ fsm.cs}= = 13; goto _again;
+			ctr40: host( "-", 1 ) ={ fsm.cs}= = 14; goto _again;
+			ctr4: host( "-", 1 ) ={ fsm.cs}= = 15; goto _again;
+			ctr41: host( "-", 1 ) ={ fsm.cs}= = 16; goto _again;
+			ctr42: host( "-", 1 ) ={ fsm.cs}= = 17; goto _again;
+			ctr5: host( "-", 1 ) ={ fsm.cs}= = 18; goto _again;
+			ctr43: host( "-", 1 ) ={ fsm.cs}= = 19; goto _again;
+			ctr44: host( "-", 1 ) ={ fsm.cs}= = 20; goto _again;
+			ctr6: host( "-", 1 ) ={ fsm.cs}= = 21; goto _again;
+			ctr45: host( "-", 1 ) ={ fsm.cs}= = 22; goto _again;
+			ctr46: host( "-", 1 ) ={ fsm.cs}= = 23; goto _again;
+			ctr7: host( "-", 1 ) ={ fsm.cs}= = 24; goto _again;
+			ctr47: host( "-", 1 ) ={ fsm.cs}= = 25; goto _again;
+			ctr48: host( "-", 1 ) ={ fsm.cs}= = 26; goto _again;
+			ctr8: host( "-", 1 ) ={ fsm.cs}= = 27; goto _again;
+			ctr49: host( "-", 1 ) ={ fsm.cs}= = 28; goto _again;
+			ctr50: host( "-", 1 ) ={ fsm.cs}= = 29; goto _again;
+			ctr52: host( "-", 1 ) ={ fsm.cs}= = 30; goto _again;
+			ctr53: host( "-", 1 ) ={ fsm.cs}= = 31; goto _again;
+			ctr54: host( "-", 1 ) ={ fsm.cs}= = 32; goto _again;
+			ctr55: host( "-", 1 ) ={ fsm.cs}= = 33; goto _again;
+			ctr51: host( "-", 1 ) ={ fsm.cs}= = 34; goto _again;
+			ctr56: host( "-", 1 ) ={ fsm.cs}= = 35; goto _again;
+			ctr9: host( "-", 1 ) ={ fsm.cs}= = 36; goto _again;
+			ctr57: host( "-", 1 ) ={ fsm.cs}= = 37; goto _again;
+			ctr58: host( "-", 1 ) ={ fsm.cs}= = 38; goto _again;
+			ctr59: host( "-", 1 ) ={ fsm.cs}= = 39; goto _again;
+			ctr10: host( "-", 1 ) ={ fsm.cs}= = 40; goto _again;
+			ctr60: host( "-", 1 ) ={ fsm.cs}= = 41; goto _again;
+			ctr66: host( "-", 1 ) ={ fsm.cs}= = 42; goto _again;
+			ctr67: host( "-", 1 ) ={ fsm.cs}= = 43; goto _again;
+			ctr68: host( "-", 1 ) ={ fsm.cs}= = 44; goto _again;
+			ctr69: host( "-", 1 ) ={ fsm.cs}= = 45; goto _again;
+			ctr70: host( "-", 1 ) ={ fsm.cs}= = 46; goto _again;
+			ctr61: host( "-", 1 ) ={ fsm.cs}= = 47; goto _again;
+			ctr71: host( "-", 1 ) ={ fsm.cs}= = 48; goto _again;
+			ctr72: host( "-", 1 ) ={ fsm.cs}= = 49; goto _again;
+			ctr73: host( "-", 1 ) ={ fsm.cs}= = 50; goto _again;
+			ctr74: host( "-", 1 ) ={ fsm.cs}= = 51; goto _again;
+			ctr75: host( "-", 1 ) ={ fsm.cs}= = 52; goto _again;
+			ctr76: host( "-", 1 ) ={ fsm.cs}= = 53; goto _again;
+			ctr77: host( "-", 1 ) ={ fsm.cs}= = 54; goto _again;
+			ctr78: host( "-", 1 ) ={ fsm.cs}= = 55; goto _again;
+			ctr79: host( "-", 1 ) ={ fsm.cs}= = 56; goto _again;
+			ctr80: host( "-", 1 ) ={ fsm.cs}= = 57; goto _again;
+			ctr81: host( "-", 1 ) ={ fsm.cs}= = 58; goto _again;
+			ctr82: host( "-", 1 ) ={ fsm.cs}= = 59; goto _again;
+			ctr83: host( "-", 1 ) ={ fsm.cs}= = 60; goto _again;
+			ctr84: host( "-", 1 ) ={ fsm.cs}= = 61; goto _again;
+			ctr85: host( "-", 1 ) ={ fsm.cs}= = 62; goto _again;
+			ctr86: host( "-", 1 ) ={ fsm.cs}= = 63; goto _again;
+			ctr87: host( "-", 1 ) ={ fsm.cs}= = 64; goto _again;
+			ctr88: host( "-", 1 ) ={ fsm.cs}= = 65; goto _again;
+			ctr62: host( "-", 1 ) ={ fsm.cs}= = 66; goto _again;
+			ctr89: host( "-", 1 ) ={ fsm.cs}= = 67; goto _again;
+			ctr90: host( "-", 1 ) ={ fsm.cs}= = 68; goto _again;
+			ctr91: host( "-", 1 ) ={ fsm.cs}= = 69; goto _again;
+			ctr93: host( "-", 1 ) ={ fsm.cs}= = 70; goto _again;
+			ctr94: host( "-", 1 ) ={ fsm.cs}= = 71; goto _again;
+			ctr92: host( "-", 1 ) ={ fsm.cs}= = 72; goto _again;
+			ctr95: host( "-", 1 ) ={ fsm.cs}= = 73; goto _again;
+			ctr96: host( "-", 1 ) ={ fsm.cs}= = 74; goto _again;
+			ctr97: host( "-", 1 ) ={ fsm.cs}= = 75; goto _again;
+			ctr98: host( "-", 1 ) ={ fsm.cs}= = 76; goto _again;
+			ctr99: host( "-", 1 ) ={ fsm.cs}= = 77; goto _again;
+			ctr100: host( "-", 1 ) ={ fsm.cs}= = 78; goto _again;
+			ctr101: host( "-", 1 ) ={ fsm.cs}= = 79; goto _again;
+			ctr102: host( "-", 1 ) ={ fsm.cs}= = 80; goto _again;
+			ctr63: host( "-", 1 ) ={ fsm.cs}= = 81; goto _again;
+			ctr103: host( "-", 1 ) ={ fsm.cs}= = 82; goto _again;
+			ctr113: host( "-", 1 ) ={ fsm.cs}= = 83; goto _again;
+			ctr114: host( "-", 1 ) ={ fsm.cs}= = 84; goto _again;
+			ctr115: host( "-", 1 ) ={ fsm.cs}= = 85; goto _again;
+			ctr116: host( "-", 1 ) ={ fsm.cs}= = 86; goto _again;
+			ctr117: host( "-", 1 ) ={ fsm.cs}= = 87; goto _again;
+			ctr118: host( "-", 1 ) ={ fsm.cs}= = 88; goto _again;
+			ctr119: host( "-", 1 ) ={ fsm.cs}= = 89; goto _again;
+			ctr120: host( "-", 1 ) ={ fsm.cs}= = 90; goto _again;
+			ctr104: host( "-", 1 ) ={ fsm.cs}= = 91; goto _again;
+			ctr121: host( "-", 1 ) ={ fsm.cs}= = 92; goto _again;
+			ctr123: host( "-", 1 ) ={ fsm.cs}= = 93; goto _again;
+			ctr124: host( "-", 1 ) ={ fsm.cs}= = 94; goto _again;
+			ctr125: host( "-", 1 ) ={ fsm.cs}= = 95; goto _again;
+			ctr126: host( "-", 1 ) ={ fsm.cs}= = 96; goto _again;
+			ctr127: host( "-", 1 ) ={ fsm.cs}= = 97; goto _again;
+			ctr122: host( "-", 1 ) ={ fsm.cs}= = 98; goto _again;
+			ctr128: host( "-", 1 ) ={ fsm.cs}= = 99; goto _again;
+			ctr129: host( "-", 1 ) ={ fsm.cs}= = 100; goto _again;
+			ctr130: host( "-", 1 ) ={ fsm.cs}= = 101; goto _again;
+			ctr131: host( "-", 1 ) ={ fsm.cs}= = 102; goto _again;
+			ctr132: host( "-", 1 ) ={ fsm.cs}= = 103; goto _again;
+			ctr133: host( "-", 1 ) ={ fsm.cs}= = 104; goto _again;
+			ctr134: host( "-", 1 ) ={ fsm.cs}= = 105; goto _again;
+			ctr137: host( "-", 1 ) ={ fsm.cs}= = 106; goto _again;
+			ctr138: host( "-", 1 ) ={ fsm.cs}= = 107; goto _again;
+			ctr139: host( "-", 1 ) ={ fsm.cs}= = 108; goto _again;
+			ctr140: host( "-", 1 ) ={ fsm.cs}= = 109; goto _again;
+			ctr135: host( "-", 1 ) ={ fsm.cs}= = 110; goto _again;
+			ctr141: host( "-", 1 ) ={ fsm.cs}= = 111; goto _again;
+			ctr136: host( "-", 1 ) ={ fsm.cs}= = 112; goto _again;
+			ctr142: host( "-", 1 ) ={ fsm.cs}= = 113; goto _again;
+			ctr143: host( "-", 1 ) ={ fsm.cs}= = 114; goto _again;
+			ctr144: host( "-", 1 ) ={ fsm.cs}= = 115; goto _again;
+			ctr105: host( "-", 1 ) ={ fsm.cs}= = 116; goto _again;
+			ctr145: host( "-", 1 ) ={ fsm.cs}= = 117; goto _again;
+			ctr146: host( "-", 1 ) ={ fsm.cs}= = 118; goto _again;
+			ctr147: host( "-", 1 ) ={ fsm.cs}= = 119; goto _again;
+			ctr148: host( "-", 1 ) ={ fsm.cs}= = 120; goto _again;
+			ctr149: host( "-", 1 ) ={ fsm.cs}= = 121; goto _again;
+			ctr150: host( "-", 1 ) ={ fsm.cs}= = 122; goto _again;
+			ctr151: host( "-", 1 ) ={ fsm.cs}= = 123; goto _again;
+			ctr152: host( "-", 1 ) ={ fsm.cs}= = 124; goto _again;
+			ctr153: host( "-", 1 ) ={ fsm.cs}= = 125; goto _again;
+			ctr154: host( "-", 1 ) ={ fsm.cs}= = 126; goto _again;
+			ctr155: host( "-", 1 ) ={ fsm.cs}= = 127; goto _again;
+			ctr156: host( "-", 1 ) ={ fsm.cs}= = 128; goto _again;
+			ctr157: host( "-", 1 ) ={ fsm.cs}= = 129; goto _again;
+			ctr158: host( "-", 1 ) ={ fsm.cs}= = 130; goto _again;
+			ctr159: host( "-", 1 ) ={ fsm.cs}= = 131; goto _again;
+			ctr106: host( "-", 1 ) ={ fsm.cs}= = 132; goto _again;
+			ctr160: host( "-", 1 ) ={ fsm.cs}= = 133; goto _again;
+			ctr161: host( "-", 1 ) ={ fsm.cs}= = 134; goto _again;
+			ctr162: host( "-", 1 ) ={ fsm.cs}= = 135; goto _again;
+			ctr163: host( "-", 1 ) ={ fsm.cs}= = 136; goto _again;
+			ctr164: host( "-", 1 ) ={ fsm.cs}= = 137; goto _again;
+			ctr165: host( "-", 1 ) ={ fsm.cs}= = 138; goto _again;
+			ctr166: host( "-", 1 ) ={ fsm.cs}= = 139; goto _again;
+			ctr167: host( "-", 1 ) ={ fsm.cs}= = 140; goto _again;
+			ctr168: host( "-", 1 ) ={ fsm.cs}= = 141; goto _again;
+			ctr169: host( "-", 1 ) ={ fsm.cs}= = 142; goto _again;
+			ctr170: host( "-", 1 ) ={ fsm.cs}= = 143; goto _again;
+			ctr171: host( "-", 1 ) ={ fsm.cs}= = 144; goto _again;
+			ctr172: host( "-", 1 ) ={ fsm.cs}= = 145; goto _again;
+			ctr173: host( "-", 1 ) ={ fsm.cs}= = 146; goto _again;
+			ctr174: host( "-", 1 ) ={ fsm.cs}= = 147; goto _again;
+			ctr175: host( "-", 1 ) ={ fsm.cs}= = 148; goto _again;
+			ctr176: host( "-", 1 ) ={ fsm.cs}= = 149; goto _again;
+			ctr177: host( "-", 1 ) ={ fsm.cs}= = 150; goto _again;
+			ctr178: host( "-", 1 ) ={ fsm.cs}= = 151; goto _again;
+			ctr107: host( "-", 1 ) ={ fsm.cs}= = 152; goto _again;
+			ctr179: host( "-", 1 ) ={ fsm.cs}= = 153; goto _again;
+			ctr180: host( "-", 1 ) ={ fsm.cs}= = 154; goto _again;
+			ctr181: host( "-", 1 ) ={ fsm.cs}= = 155; goto _again;
+			ctr182: host( "-", 1 ) ={ fsm.cs}= = 156; goto _again;
+			ctr183: host( "-", 1 ) ={ fsm.cs}= = 157; goto _again;
+			ctr108: host( "-", 1 ) ={ fsm.cs}= = 158; goto _again;
+			ctr184: host( "-", 1 ) ={ fsm.cs}= = 159; goto _again;
+			ctr185: host( "-", 1 ) ={ fsm.cs}= = 160; goto _again;
+			ctr186: host( "-", 1 ) ={ fsm.cs}= = 161; goto _again;
+			ctr187: host( "-", 1 ) ={ fsm.cs}= = 162; goto _again;
+			ctr188: host( "-", 1 ) ={ fsm.cs}= = 163; goto _again;
+			ctr189: host( "-", 1 ) ={ fsm.cs}= = 164; goto _again;
+			ctr190: host( "-", 1 ) ={ fsm.cs}= = 165; goto _again;
+			ctr191: host( "-", 1 ) ={ fsm.cs}= = 166; goto _again;
+			ctr192: host( "-", 1 ) ={ fsm.cs}= = 167; goto _again;
+			ctr109: host( "-", 1 ) ={ fsm.cs}= = 168; goto _again;
+			ctr193: host( "-", 1 ) ={ fsm.cs}= = 169; goto _again;
+			ctr194: host( "-", 1 ) ={ fsm.cs}= = 170; goto _again;
+			ctr195: host( "-", 1 ) ={ fsm.cs}= = 171; goto _again;
+			ctr196: host( "-", 1 ) ={ fsm.cs}= = 172; goto _again;
+			ctr197: host( "-", 1 ) ={ fsm.cs}= = 173; goto _again;
+			ctr198: host( "-", 1 ) ={ fsm.cs}= = 174; goto _again;
+			ctr199: host( "-", 1 ) ={ fsm.cs}= = 175; goto _again;
+			ctr200: host( "-", 1 ) ={ fsm.cs}= = 176; goto _again;
+			ctr201: host( "-", 1 ) ={ fsm.cs}= = 177; goto _again;
+			ctr202: host( "-", 1 ) ={ fsm.cs}= = 178; goto _again;
+			ctr203: host( "-", 1 ) ={ fsm.cs}= = 179; goto _again;
+			ctr204: host( "-", 1 ) ={ fsm.cs}= = 180; goto _again;
+			ctr110: host( "-", 1 ) ={ fsm.cs}= = 181; goto _again;
+			ctr205: host( "-", 1 ) ={ fsm.cs}= = 182; goto _again;
+			ctr206: host( "-", 1 ) ={ fsm.cs}= = 183; goto _again;
+			ctr207: host( "-", 1 ) ={ fsm.cs}= = 184; goto _again;
+			ctr208: host( "-", 1 ) ={ fsm.cs}= = 185; goto _again;
+			ctr209: host( "-", 1 ) ={ fsm.cs}= = 186; goto _again;
+			ctr210: host( "-", 1 ) ={ fsm.cs}= = 187; goto _again;
+			ctr211: host( "-", 1 ) ={ fsm.cs}= = 188; goto _again;
+			ctr111: host( "-", 1 ) ={ fsm.cs}= = 189; goto _again;
+			ctr212: host( "-", 1 ) ={ fsm.cs}= = 190; goto _again;
+			ctr213: host( "-", 1 ) ={ fsm.cs}= = 191; goto _again;
+			ctr214: host( "-", 1 ) ={ fsm.cs}= = 192; goto _again;
+			ctr215: host( "-", 1 ) ={ fsm.cs}= = 193; goto _again;
+			ctr216: host( "-", 1 ) ={ fsm.cs}= = 194; goto _again;
+			ctr217: host( "-", 1 ) ={ fsm.cs}= = 195; goto _again;
+			ctr218: host( "-", 1 ) ={ fsm.cs}= = 196; goto _again;
+			ctr219: host( "-", 1 ) ={ fsm.cs}= = 197; goto _again;
+			ctr112: host( "-", 1 ) ={ fsm.cs}= = 198; goto _again;
+			ctr220: host( "-", 1 ) ={ fsm.cs}= = 199; goto _again;
+			ctr221: host( "-", 1 ) ={ fsm.cs}= = 200; goto _again;
+			ctr64: host( "-", 1 ) ={ fsm.cs}= = 201; goto _again;
+			ctr222: host( "-", 1 ) ={ fsm.cs}= = 202; goto _again;
+			ctr223: host( "-", 1 ) ={ fsm.cs}= = 203; goto _again;
+			ctr224: host( "-", 1 ) ={ fsm.cs}= = 204; goto _again;
+			ctr65: host( "-", 1 ) ={ fsm.cs}= = 205; goto _again;
+			ctr225: host( "-", 1 ) ={ fsm.cs}= = 206; goto _again;
+			ctr11: host( "-", 1 ) ={ fsm.cs}= = 207; goto _again;
+			ctr226: host( "-", 1 ) ={ fsm.cs}= = 208; goto _again;
+			ctr229: host( "-", 1 ) ={ fsm.cs}= = 209; goto _again;
+			ctr231: host( "-", 1 ) ={ fsm.cs}= = 210; goto _again;
+			ctr230: host( "-", 1 ) ={ fsm.cs}= = 211; goto _again;
+			ctr227: host( "-", 1 ) ={ fsm.cs}= = 212; goto _again;
+			ctr232: host( "-", 1 ) ={ fsm.cs}= = 213; goto _again;
+			ctr228: host( "-", 1 ) ={ fsm.cs}= = 214; goto _again;
+			ctr12: host( "-", 1 ) ={ fsm.cs}= = 215; goto _again;
+			ctr233: host( "-", 1 ) ={ fsm.cs}= = 216; goto _again;
+			ctr13: host( "-", 1 ) ={ fsm.cs}= = 217; goto _again;
+			ctr234: host( "-", 1 ) ={ fsm.cs}= = 218; goto _again;
+			ctr235: host( "-", 1 ) ={ fsm.cs}= = 219; goto _again;
+			ctr237: host( "-", 1 ) ={ fsm.cs}= = 220; goto _again;
+			ctr236: host( "-", 1 ) ={ fsm.cs}= = 221; goto _again;
+			ctr14: host( "-", 1 ) ={ fsm.cs}= = 222; goto _again;
+			ctr238: host( "-", 1 ) ={ fsm.cs}= = 223; goto _again;
+			ctr15: host( "-", 1 ) ={ fsm.cs}= = 224; goto _again;
+			ctr239: host( "-", 1 ) ={ fsm.cs}= = 225; goto _again;
+			ctr240: host( "-", 1 ) ={ fsm.cs}= = 226; goto _again;
+			ctr241: host( "-", 1 ) ={ fsm.cs}= = 227; goto _again;
+			ctr16: host( "-", 1 ) ={ fsm.cs}= = 228; goto _again;
+			ctr242: host( "-", 1 ) ={ fsm.cs}= = 229; goto _again;
+			ctr249: host( "-", 1 ) ={ fsm.cs}= = 230; goto _again;
+			ctr243: host( "-", 1 ) ={ fsm.cs}= = 231; goto _again;
+			ctr250: host( "-", 1 ) ={ fsm.cs}= = 232; goto _again;
+			ctr251: host( "-", 1 ) ={ fsm.cs}= = 233; goto _again;
+			ctr244: host( "-", 1 ) ={ fsm.cs}= = 234; goto _again;
+			ctr252: host( "-", 1 ) ={ fsm.cs}= = 235; goto _again;
+			ctr253: host( "-", 1 ) ={ fsm.cs}= = 236; goto _again;
+			ctr245: host( "-", 1 ) ={ fsm.cs}= = 237; goto _again;
+			ctr254: host( "-", 1 ) ={ fsm.cs}= = 238; goto _again;
+			ctr246: host( "-", 1 ) ={ fsm.cs}= = 239; goto _again;
+			ctr255: host( "-", 1 ) ={ fsm.cs}= = 240; goto _again;
+			ctr256: host( "-", 1 ) ={ fsm.cs}= = 241; goto _again;
+			ctr257: host( "-", 1 ) ={ fsm.cs}= = 242; goto _again;
+			ctr258: host( "-", 1 ) ={ fsm.cs}= = 243; goto _again;
+			ctr247: host( "-", 1 ) ={ fsm.cs}= = 244; goto _again;
+			ctr259: host( "-", 1 ) ={ fsm.cs}= = 245; goto _again;
+			ctr248: host( "-", 1 ) ={ fsm.cs}= = 246; goto _again;
+			ctr260: host( "-", 1 ) ={ fsm.cs}= = 247; goto _again;
+			ctr17: host( "-", 1 ) ={ fsm.cs}= = 248; goto _again;
+			ctr261: host( "-", 1 ) ={ fsm.cs}= = 249; goto _again;
+			ctr262: host( "-", 1 ) ={ fsm.cs}= = 250; goto _again;
+			ctr18: host( "-", 1 ) ={ fsm.cs}= = 251; goto _again;
+			ctr263: host( "-", 1 ) ={ fsm.cs}= = 252; goto _again;
+			ctr264: host( "-", 1 ) ={ fsm.cs}= = 253; goto _again;
+			ctr19: host( "-", 1 ) ={ fsm.cs}= = 254; goto _again;
+			ctr265: host( "-", 1 ) ={ fsm.cs}= = 255; goto _again;
+			ctr266: host( "-", 1 ) ={ fsm.cs}= = 256; goto _again;
+			ctr267: host( "-", 1 ) ={ fsm.cs}= = 257; goto _again;
+			ctr268: host( "-", 1 ) ={ fsm.cs}= = 258; goto _again;
+			ctr20: host( "-", 1 ) ={ fsm.cs}= = 259; goto _again;
+			ctr269: host( "-", 1 ) ={ fsm.cs}= = 260; goto _again;
+			ctr21: host( "-", 1 ) ={ fsm.cs}= = 261; goto _again;
+			ctr270: host( "-", 1 ) ={ fsm.cs}= = 262; goto _again;
+			ctr22: host( "-", 1 ) ={ fsm.cs}= = 263; goto _again;
+			ctr271: host( "-", 1 ) ={ fsm.cs}= = 264; goto _again;
+			ctr272: host( "-", 1 ) ={ fsm.cs}= = 265; goto _again;
+			ctr273: host( "-", 1 ) ={ fsm.cs}= = 266; goto _again;
+			ctr274: host( "-", 1 ) ={ fsm.cs}= = 267; goto _again;
+			ctr275: host( "-", 1 ) ={ fsm.cs}= = 268; goto _again;
+			ctr277: host( "-", 1 ) ={ fsm.cs}= = 269; goto _again;
+			ctr276: host( "-", 1 ) ={ fsm.cs}= = 270; goto _again;
+			ctr23: host( "-", 1 ) ={ fsm.cs}= = 271; goto _again;
+			ctr278: host( "-", 1 ) ={ fsm.cs}= = 272; goto _again;
+			ctr280: host( "-", 1 ) ={ fsm.cs}= = 273; goto _again;
+			ctr279: host( "-", 1 ) ={ fsm.cs}= = 274; goto _again;
+			ctr24: host( "-", 1 ) ={ fsm.cs}= = 275; goto _again;
+			ctr25: host( "-", 1 ) ={ fsm.cs}= = 276; goto _again;
+			ctr281: host( "-", 1 ) ={ fsm.cs}= = 277; goto _again;
+			ctr283: host( "-", 1 ) ={ fsm.cs}= = 278; goto _again;
+			ctr282: host( "-", 1 ) ={ fsm.cs}= = 279; goto _again;
+			ctr284: host( "-", 1 ) ={ fsm.cs}= = 280; goto _again;
+			ctr285: host( "-", 1 ) ={ fsm.cs}= = 281; goto _again;
+			ctr286: host( "-", 1 ) ={ fsm.cs}= = 282; goto _again;
+			ctr289: host( "-", 1 ) ={ fsm.cs}= = 283; goto _again;
+			ctr290: host( "-", 1 ) ={ fsm.cs}= = 284; goto _again;
+			ctr291: host( "-", 1 ) ={ fsm.cs}= = 285; goto _again;
+			ctr292: host( "-", 1 ) ={ fsm.cs}= = 286; goto _again;
+			ctr287: host( "-", 1 ) ={ fsm.cs}= = 287; goto _again;
+			ctr288: host( "-", 1 ) ={ fsm.cs}= = 288; goto _again;
+			ctr293: host( "-", 1 ) ={ fsm.cs}= = 289; goto _again;
+			ctr26: host( "-", 1 ) ={ fsm.cs}= = 290; goto _again;
+			ctr294: host( "-", 1 ) ={ fsm.cs}= = 291; goto _again;
+			ctr295: host( "-", 1 ) ={ fsm.cs}= = 292; goto _again;
+			ctr296: host( "-", 1 ) ={ fsm.cs}= = 293; goto _again;
+			ctr297: host( "-", 1 ) ={ fsm.cs}= = 294; goto _again;
+			ctr298: host( "-", 1 ) ={ fsm.cs}= = 295; goto _again;
+			ctr299: host( "-", 1 ) ={ fsm.cs}= = 296; goto _again;
+			ctr300: host( "-", 1 ) ={ fsm.cs}= = 297; goto _again;
+			ctr301: host( "-", 1 ) ={ fsm.cs}= = 298; goto _again;
+			ctr302: host( "-", 1 ) ={ fsm.cs}= = 299; goto _again;
+			ctr303: host( "-", 1 ) ={ fsm.cs}= = 300; goto _again;
+			ctr27: host( "-", 1 ) ={ fsm.cs}= = 301; goto _again;
+			ctr304: host( "-", 1 ) ={ fsm.cs}= = 302; goto _again;
+			ctr306: host( "-", 1 ) ={ fsm.cs}= = 303; goto _again;
+			ctr307: host( "-", 1 ) ={ fsm.cs}= = 304; goto _again;
+			ctr308: host( "-", 1 ) ={ fsm.cs}= = 305; goto _again;
+			ctr305: host( "-", 1 ) ={ fsm.cs}= = 306; goto _again;
+			ctr28: host( "-", 1 ) ={ fsm.cs}= = 307; goto _again;
+			ctr33: host( "-", 1 ) ={ fsm.cs}= = 308; goto _again;
+			ctr37: host( "-", 1 ) ={ fsm.cs}= = 309; goto _again;
+			
+			_again:
+			if ( host( "-", 1 ) ={ fsm.cs}= == 0 )
+			goto _out;
+			p += 1;
+			if ( p != pe )
+			goto _resume;
+			_test_eof: {}
+			_out: {}
+		}
+		host( "working/strings1.rl", 164 ) @{
+			
+			if ( fsm.cs >= strs_first_final ) {
+				perf_printf("ACCEPT\n");
+			}
+			else {
+				perf_printf("FAIL\n");
+			}
+		}
+	}
+	
+	void test( const char *buf )
+	{
+		int len = strlen( buf );
+		strs_run( buf, len );
+	}
+	
+	
+	int main()
+	{
+		test( "stdin\n" );
+		test( "bad_alloc\n" );
+		test( "_GLOBAL_OFFSET_TABLE_\n" );
+		test( "not in\n" );
+		test(
+		"isatty\n"
+		"junk on end.\n"
+		);
+		
+		return 0;
+	}
+	
+}@

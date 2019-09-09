@@ -1,0 +1,347 @@
+host( "working/forder3.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct forder
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+value int forder_start = 1;
+value int forder_first_final = 11;
+value int forder_error = 0;
+
+value int forder_en_main = 1;
+
+array s8 _forder_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _forder_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _forder_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _forder_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/forder3.rl", 31 ) @{
+	
+	void forder_init( struct forder *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)forder_start;
+	}
+	host( "working/forder3.rl", 35 ) @{
+	}
+	
+	void forder_execute( struct forder *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( host( "-", 1 ) ={ fsm->cs}= )
+		{
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 11:
+			goto st_case_11;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+		}
+		goto st_out;
+		st_case_1:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr0;
+			}
+			case 97: {
+				goto ctr2;
+			}
+			case 98: {
+				goto ctr3;
+			}
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		host( "-", 1 ) ={ fsm->cs}= = 0;
+		goto _out;
+		ctr0:
+		host( "working/forder3.rl", 25 ) ${printf("enter m2\n");}$
+		host( "working/forder3.rl", 26 ) ${printf("enter m2\n");}$
+		host( "working/forder3.rl", 26 ) ${printf("accept m2\n");}$
+		
+		goto st11;
+		ctr5:
+		host( "working/forder3.rl", 26 ) ${printf("accept m2\n");}$
+		
+		goto st11;
+		ctr8:
+		host( "working/forder3.rl", 24 ) ${printf("accept m1\n");}$
+		
+		goto st11;
+		ctr13:
+		host( "working/forder3.rl", 24 ) ${printf("accept m1\n");}$
+		host( "working/forder3.rl", 26 ) ${printf("accept m2\n");}$
+		
+		goto st11;
+		st11:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof11;
+		st_case_11:
+		{
+			goto st0;
+		}
+		ctr2:
+		host( "working/forder3.rl", 18 ) ${printf("enter m1 aa\n");}$
+		host( "working/forder3.rl", 26 ) ${printf("enter m2\n");}$
+		
+		goto st2;
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) == 97 ) {
+			goto st3;
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr5;
+			}
+			case 97: {
+				goto st2;
+			}
+			case 98: {
+				goto ctr7;
+			}
+		}
+		{
+			goto st0;
+		}
+		ctr7:
+		host( "working/forder3.rl", 18 ) ${printf("leave m1 aa\n");}$
+		host( "working/forder3.rl", 19 ) ${printf("through m1 b\n");}$
+		
+		goto st4;
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr8;
+			}
+			case 97: {
+				goto st5;
+			}
+			case 98: {
+				goto st4;
+			}
+		}
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr8;
+			}
+			case 97: {
+				goto st5;
+			}
+		}
+		{
+			goto st0;
+		}
+		ctr3:
+		host( "working/forder3.rl", 17 ) ${printf("enter m1 aa\n");}$
+		host( "working/forder3.rl", 18 ) ${printf("enter m1 aa\n");}$
+		host( "working/forder3.rl", 18 ) ${printf("leave m1 aa\n");}$
+		host( "working/forder3.rl", 19 ) ${printf("through m1 b\n");}$
+		host( "working/forder3.rl", 26 ) ${printf("enter m2\n");}$
+		
+		goto st6;
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr8;
+			}
+			case 97: {
+				goto st5;
+			}
+			case 98: {
+				goto st7;
+			}
+		}
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr8;
+			}
+			case 97: {
+				goto st5;
+			}
+			case 98: {
+				goto st8;
+			}
+		}
+		{
+			goto st0;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof8;
+		st_case_8:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr13;
+			}
+			case 97: {
+				goto st9;
+			}
+			case 98: {
+				goto st6;
+			}
+		}
+		{
+			goto st0;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof9;
+		st_case_9:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr8;
+			}
+			case 97: {
+				goto st10;
+			}
+		}
+		{
+			goto st0;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof10;
+		st_case_10:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr13;
+			}
+			case 97: {
+				goto st9;
+			}
+		}
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof11: host( "-", 1 ) ={ fsm->cs}= = 11; goto _test_eof; 
+		_test_eof2: host( "-", 1 ) ={ fsm->cs}= = 2; goto _test_eof; 
+		_test_eof3: host( "-", 1 ) ={ fsm->cs}= = 3; goto _test_eof; 
+		_test_eof4: host( "-", 1 ) ={ fsm->cs}= = 4; goto _test_eof; 
+		_test_eof5: host( "-", 1 ) ={ fsm->cs}= = 5; goto _test_eof; 
+		_test_eof6: host( "-", 1 ) ={ fsm->cs}= = 6; goto _test_eof; 
+		_test_eof7: host( "-", 1 ) ={ fsm->cs}= = 7; goto _test_eof; 
+		_test_eof8: host( "-", 1 ) ={ fsm->cs}= = 8; goto _test_eof; 
+		_test_eof9: host( "-", 1 ) ={ fsm->cs}= = 9; goto _test_eof; 
+		_test_eof10: host( "-", 1 ) ={ fsm->cs}= = 10; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/forder3.rl", 43 ) @{
+	}
+	
+	int forder_finish( struct forder *fsm )
+	{
+		if ( fsm->cs == forder_error )
+		return -1;
+		if ( fsm->cs >= forder_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct forder fsm;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		forder_init( &fsm );
+		forder_execute( &fsm, buf, len );
+		if ( forder_finish( &fsm ) > 0 )
+		printf("ACCEPT\n");
+		else
+		printf("FAIL\n");
+	}
+	
+	int main()
+	{
+		test( "aaaaaabbbaa\n" );
+		test( "\n" );
+		test( "bbbbbbaaaaaaa\n" );
+		test( "bbbbbbaaaaaa\n" );
+		test( "aaaaa\n" );
+		
+		return 0;
+	}
+	
+}@

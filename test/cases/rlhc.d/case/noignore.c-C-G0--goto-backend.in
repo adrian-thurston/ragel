@@ -1,0 +1,178 @@
+host( "working/noignore.rl", 1 ) @{/*
+	* @@LANG: c
+	*
+	* Tests the no-ignore property following ragel section close. Can't be
+	* garbling up whitespace or ragel comments( C defines ).
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	#define DEF 1
+	
+}@
+array s8 _atoi_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array s8 _atoi_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 7;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/noignore.rl", 20 ) @{
+	
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)atoi_start;
+	}
+	host( "working/noignore.rl", 28 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr2: cs = 3; goto _again;
+		ctr3: cs = 4; goto _again;
+		ctr4: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		ctr6: cs = 7; goto f0;
+		
+		f0: _acts = offset( _atoi_actions, 1 ); goto execFuncs;
+		
+		execFuncs:
+		_nacts = cast(uint)deref( _atoi_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _atoi_actions, _acts ) ) {
+				case 0{
+					host( "working/noignore.rl", 14 ) ${ printf( "hello\n" ); }$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/noignore.rl", 35 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= atoi_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hello\n",
+	};
+	
+	int inplen = 9;
+	
+	int main( )
+	{
+		#ifndef DEF
+		printf("DEF not defined -- noignore problem\n" );
+		#else
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		#endif
+		return 0;
+	}
+	
+}@

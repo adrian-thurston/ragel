@@ -1,0 +1,169 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+
+
+
+
+
+
+
+let _rangei_trans_keys : int array = [|
+1; 0; 1; 2; 1; 2; 0; 3; 1; 5; 1; 4; 0; 5; 1; 0; 0 ; 
+|]
+let _rangei_char_class : int array = [|
+0; 0; 0; 0; 0; 1; 1; 1; 1; 1; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 1; 1; 1; 1; 1; 3; 3; 3; 4; 4; 4; 1; 1; 1; 1; 1; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 1; 1; 1; 1; 1; 5; 5; 5; 0 ; 
+|]
+let _rangei_index_offsets : int array = [|
+0; 0; 2; 4; 8; 13; 17; 23; 0 ; 
+|]
+let _rangei_indicies : int array = [|
+0; 0; 2; 2; 3; 3; 3; 3; 4; 4; 1; 4; 4; 5; 1; 5; 5; 6; 6; 6; 6; 6; 6; 0 ; 
+|]
+let _rangei_index_defaults : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 0 ; 
+|]
+let _rangei_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _rangei_cond_targs : int array = [|
+2; 0; 3; 4; 5; 6; 7; 0 ; 
+|]
+let _rangei_cond_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _rangei_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _rangei_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _rangei_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _rangei_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let rangei_start  : int  = 1
+let rangei_first_final  : int  = 7
+let rangei_error  : int  = 0
+let rangei_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := rangei_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _rangei_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 125 && ( Char.code data.[p.contents] )>= 60  then
+						begin
+							begin
+								let _ic  : int  ref = ref _rangei_char_class.(( Char.code data.[p.contents] )- 60) in
+								if _ic.contents<= _rangei_trans_keys.( _keys.contents+1  )&& _ic.contents>= _rangei_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _rangei_indicies.( _inds.contents+ ( _ic.contents- _rangei_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _rangei_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _rangei_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _rangei_cond_targs.(_trans.contents);
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= rangei_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "AaBbAa";
+exec "Aa`bAa";
+exec "AaB@Aa";
+exec "AaBbMa";
+exec "AaBbma";
+()
+;;
+

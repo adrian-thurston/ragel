@@ -1,0 +1,445 @@
+host( "working/cppscan3.rl", 1 ) @{/*
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using namespace std;
+	
+	#define TK_Dlit 192
+	#define TK_Slit 193
+	#define TK_Float 194
+	#define TK_Id 195
+	#define TK_NameSep 197
+	#define TK_Arrow 211
+	#define TK_PlusPlus 212
+	#define TK_MinusMinus 213
+	#define TK_ArrowStar 214
+	#define TK_DotStar 215
+	#define TK_ShiftLeft 216
+	#define TK_ShiftRight 217
+	#define TK_IntegerDecimal 218
+	#define TK_IntegerOctal 219
+	#define TK_IntegerHex 220
+	#define TK_EqualsEquals 223
+	#define TK_NotEquals 224
+	#define TK_AndAnd 225
+	#define TK_OrOr 226
+	#define TK_MultAssign 227
+	#define TK_DivAssign 228
+	#define TK_PercentAssign 229
+	#define TK_PlusAssign 230
+	#define TK_MinusAssign 231
+	#define TK_AmpAssign 232
+	#define TK_CaretAssign 233
+	#define TK_BarAssign 234
+	#define TK_DotDotDot 240
+	#define TK_Whitespace 241
+	#define TK_Comment 242
+	
+	#define BUFSIZE 4096
+	
+	char buf[BUFSIZE];
+	
+	struct Scanner
+	{
+		int cs, act;
+		const char *ts, *te;
+		
+		void token( int tok );
+		void run();
+		
+		void init( );
+		void execute( const char *data, int len );
+		int finish( );
+	};
+	
+	
+	
+}@
+array s8 _Scanner_actions( 0, 45 ) = { 0, 1, 2, 1, 3, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 1, 28, 1, 29, 1, 30, 1, 31, 1, 32, 1, 33, 1, 34, 1, 35, 1, 36, 1, 37, 1, 38, 1, 39, 1, 40, 1, 41, 1, 42, 1, 43, 1, 44, 1, 45, 2, 0, 1, 2, 3, 4, 2, 3, 5, 2, 3, 6, 2, 3, 7, 0 };
+
+array char _Scanner_trans_keys( 0, 28 ) = { 1, 0, 0, 24, 1, 0, 0, 24, 1, 0, 11, 11, 9, 14, 13, 14, 8, 8, 8, 12, 0, 0, 13, 20, 2, 28, 2, 28, 16, 16, 16, 16, 6, 16, 16, 16, 9, 16, 10, 17, 8, 8, 8, 14, 13, 26, 13, 26, 8, 16, 11, 27, 11, 26, 22, 26, 22, 26, 22, 26, 13, 26, 22, 26, 11, 26, 15, 15, 16, 16, 13, 27, 3, 27, 16, 16, 16, 28, 0 };
+
+array s8 _Scanner_char_class( 0, 28 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 4, 4, 8, 9, 4, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 4, 4, 16, 17, 4, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 22, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 21, 21, 21, 4, 24, 4, 25, 21, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 26, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 27, 21, 21, 4, 28, 4, 4, 0 };
+
+array s16 _Scanner_index_offsets( 0, 329 ) = { 0, 0, 25, 25, 50, 50, 51, 57, 59, 60, 65, 66, 74, 101, 128, 129, 130, 141, 142, 150, 158, 159, 166, 180, 194, 203, 220, 236, 241, 246, 251, 265, 270, 286, 287, 288, 303, 328, 329, 0 };
+
+array s8 _Scanner_indicies( 0, 74 ) = { 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 8, 9, 9, 0, 0, 10, 10, 10, 10, 12, 12, 11, 11, 11, 13, 15, 17, 17, 16, 16, 16, 17, 17, 17, 19, 1, 20, 21, 22, 4, 23, 24, 25, 26, 27, 28, 29, 30, 31, 20, 32, 32, 32, 32, 33, 32, 20, 34, 32, 32, 35, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 38, 39, 40, 37, 37, 37, 37, 37, 37, 37, 37, 37, 41, 42, 43, 37, 37, 37, 37, 37, 37, 44, 45, 37, 37, 37, 37, 37, 46, 47, 49, 50, 37, 37, 51, 37, 52, 52, 52, 52, 53, 53, 53, 53, 54, 55, 53, 55, 53, 53, 53, 55, 10, 10, 53, 53, 53, 53, 53, 55, 53, 55, 53, 53, 53, 55, 11, 37, 37, 37, 14, 37, 37, 37, 56, 52, 57, 58, 58, 57, 57, 57, 57, 54, 57, 57, 59, 59, 57, 57, 59, 60, 52, 61, 58, 58, 61, 61, 61, 61, 54, 61, 61, 62, 62, 61, 61, 62, 63, 63, 61, 61, 63, 64, 64, 57, 57, 64, 65, 65, 57, 57, 65, 17, 17, 66, 66, 66, 17, 17, 17, 66, 67, 67, 66, 66, 67, 68, 68, 66, 66, 68, 52, 57, 29, 29, 57, 57, 57, 57, 54, 57, 57, 59, 59, 57, 57, 59, 69, 70, 32, 32, 71, 71, 71, 32, 32, 32, 32, 32, 32, 71, 71, 32, 32, 1, 71, 71, 71, 4, 71, 71, 71, 71, 71, 32, 32, 71, 71, 71, 32, 32, 32, 32, 32, 32, 71, 71, 32, 32, 72, 73, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 74, 0 };
+
+array s8 _Scanner_index_defaults( 0, 71 ) = { 0, 1, 1, 4, 4, 7, 0, 0, 11, 11, 14, 16, 18, 18, 37, 37, 37, 37, 37, 37, 48, 37, 53, 53, 37, 57, 61, 61, 57, 57, 66, 66, 57, 37, 37, 71, 71, 37, 37, 0 };
+
+array s8 _Scanner_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _Scanner_cond_targs( 0, 38 ) = { 12, 1, 12, 2, 3, 12, 4, 12, 12, 7, 23, 8, 9, 12, 10, 12, 12, 30, 13, 14, 12, 15, 16, 17, 18, 19, 21, 24, 25, 32, 33, 34, 35, 36, 37, 38, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 20, 12, 12, 12, 5, 22, 12, 6, 12, 12, 12, 26, 28, 11, 12, 27, 12, 29, 12, 12, 31, 12, 12, 12, 12, 12, 12, 12, 0 };
+
+array s8 _Scanner_cond_actions( 0, 93 ) = { 79, 0, 7, 0, 0, 5, 0, 77, 51, 0, 0, 0, 0, 55, 0, 57, 75, 0, 0, 0, 53, 0, 0, 0, 0, 0, 3, 3, 90, 90, 0, 0, 0, 84, 0, 0, 73, 71, 21, 31, 23, 37, 27, 43, 33, 45, 35, 0, 69, 47, 49, 0, 87, 61, 0, 9, 29, 63, 93, 0, 0, 65, 0, 13, 0, 11, 67, 0, 15, 17, 19, 59, 39, 41, 25, 0 };
+
+array s8 _Scanner_to_state_actions( 0, 81 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_from_state_actions( 0, 1 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_eof_trans( 0, 72 ) = { 0, 1, 1, 1, 1, 8, 1, 1, 8, 8, 8, 17, 0, 37, 38, 38, 38, 38, 38, 38, 49, 38, 54, 54, 38, 58, 62, 62, 58, 58, 67, 67, 58, 38, 38, 72, 72, 38, 38, 0 };
+
+array s8 _Scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _Scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _Scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _Scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int Scanner_start = 12;
+value int Scanner_first_final = 12;
+value int Scanner_error = 0;
+
+value int Scanner_en_main = 12;
+
+host( "working/cppscan3.rl", 132 ) @{
+	
+	void Scanner::init( )
+	{
+	}@
+	{
+		cs = cast(int)Scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/cppscan3.rl", 136 ) @{
+	}
+	
+	/* Returns the count of bytes still in the buffer 
+	* (shifted to the biginning) */
+	void Scanner::execute( const char *data, int len )
+	{
+		const char *p = data;
+		const char *pe = data + len;
+		const char *eof = pe;
+		
+	}@
+	{
+		int _trans = 0;
+		index s8 _acts;
+		uint _nacts;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_acts = offset( _Scanner_actions, _Scanner_from_state_actions[cs] );
+				_nacts = cast(uint)deref( _Scanner_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _Scanner_actions, _acts ) ) {
+						case 2 {
+							host( "NONE", 1 ) ${${ts = p;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				_keys = offset( _Scanner_trans_keys, (cs<<1) );
+				_inds = offset( _Scanner_indicies, _Scanner_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 126 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_Scanner_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _Scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _Scanner_trans_keys, _keys ) )
+					_trans = cast(int)deref( _Scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _Scanner_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_Scanner_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_Scanner_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_Scanner_cond_targs[_trans];
+				
+				if ( _Scanner_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				_acts = offset( _Scanner_actions, _Scanner_cond_actions[_trans] );
+				_nacts = cast(uint)deref( _Scanner_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _Scanner_actions, _acts ) )
+					{
+						case 3 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$
+						}
+						case 4 {
+							host( "working/cppscan3.rl", 70 ) ${${act = 3;}$}$
+						}
+						case 5 {
+							host( "working/cppscan3.rl", 79 ) ${${act = 4;}$}$
+						}
+						case 6 {
+							host( "working/cppscan3.rl", 83 ) ${${act = 5;}$}$
+						}
+						case 7 {
+							host( "working/cppscan3.rl", 87 ) ${${act = 6;}$}$
+						}
+						case 8 {
+							host( "working/cppscan3.rl", 64 ) ${${te = p+1;host( "working/cppscan3.rl", 64 ) ${ token( TK_Slit );}$}$}$
+						}
+						case 9 {
+							host( "working/cppscan3.rl", 66 ) ${${te = p+1;host( "working/cppscan3.rl", 66 ) ${ token( TK_Dlit );}$}$}$
+						}
+						case 10 {
+							host( "working/cppscan3.rl", 79 ) ${${te = p+1;host( "working/cppscan3.rl", 79 ) ${ token( TK_Float );}$}$}$
+						}
+						case 11 {
+							host( "working/cppscan3.rl", 83 ) ${${te = p+1;host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$}$}$
+						}
+						case 12 {
+							host( "working/cppscan3.rl", 87 ) ${${te = p+1;host( "working/cppscan3.rl", 87 ) ${ token( TK_IntegerOctal );}$}$}$
+						}
+						case 13 {
+							host( "working/cppscan3.rl", 91 ) ${${te = p+1;host( "working/cppscan3.rl", 91 ) ${ token( TK_IntegerHex );}$}$}$
+						}
+						case 14 {
+							host( "working/cppscan3.rl", 94 ) ${${te = p+1;host( "working/cppscan3.rl", 94 ) ${token( TK_NameSep );}$}$}$
+						}
+						case 15 {
+							host( "working/cppscan3.rl", 95 ) ${${te = p+1;host( "working/cppscan3.rl", 95 ) ${token( TK_EqualsEquals );}$}$}$
+						}
+						case 16 {
+							host( "working/cppscan3.rl", 96 ) ${${te = p+1;host( "working/cppscan3.rl", 96 ) ${token( TK_NotEquals );}$}$}$
+						}
+						case 17 {
+							host( "working/cppscan3.rl", 97 ) ${${te = p+1;host( "working/cppscan3.rl", 97 ) ${token( TK_AndAnd );}$}$}$
+						}
+						case 18 {
+							host( "working/cppscan3.rl", 98 ) ${${te = p+1;host( "working/cppscan3.rl", 98 ) ${token( TK_OrOr );}$}$}$
+						}
+						case 19 {
+							host( "working/cppscan3.rl", 99 ) ${${te = p+1;host( "working/cppscan3.rl", 99 ) ${token( TK_MultAssign );}$}$}$
+						}
+						case 20 {
+							host( "working/cppscan3.rl", 100 ) ${${te = p+1;host( "working/cppscan3.rl", 100 ) ${token( TK_DivAssign );}$}$}$
+						}
+						case 21 {
+							host( "working/cppscan3.rl", 101 ) ${${te = p+1;host( "working/cppscan3.rl", 101 ) ${token( TK_PercentAssign );}$}$}$
+						}
+						case 22 {
+							host( "working/cppscan3.rl", 102 ) ${${te = p+1;host( "working/cppscan3.rl", 102 ) ${token( TK_PlusAssign );}$}$}$
+						}
+						case 23 {
+							host( "working/cppscan3.rl", 103 ) ${${te = p+1;host( "working/cppscan3.rl", 103 ) ${token( TK_MinusAssign );}$}$}$
+						}
+						case 24 {
+							host( "working/cppscan3.rl", 104 ) ${${te = p+1;host( "working/cppscan3.rl", 104 ) ${token( TK_AmpAssign );}$}$}$
+						}
+						case 25 {
+							host( "working/cppscan3.rl", 105 ) ${${te = p+1;host( "working/cppscan3.rl", 105 ) ${token( TK_CaretAssign );}$}$}$
+						}
+						case 26 {
+							host( "working/cppscan3.rl", 106 ) ${${te = p+1;host( "working/cppscan3.rl", 106 ) ${token( TK_BarAssign );}$}$}$
+						}
+						case 27 {
+							host( "working/cppscan3.rl", 107 ) ${${te = p+1;host( "working/cppscan3.rl", 107 ) ${token( TK_PlusPlus );}$}$}$
+						}
+						case 28 {
+							host( "working/cppscan3.rl", 108 ) ${${te = p+1;host( "working/cppscan3.rl", 108 ) ${token( TK_MinusMinus );}$}$}$
+						}
+						case 29 {
+							host( "working/cppscan3.rl", 110 ) ${${te = p+1;host( "working/cppscan3.rl", 110 ) ${token( TK_ArrowStar );}$}$}$
+						}
+						case 30 {
+							host( "working/cppscan3.rl", 111 ) ${${te = p+1;host( "working/cppscan3.rl", 111 ) ${token( TK_DotStar );}$}$}$
+						}
+						case 31 {
+							host( "working/cppscan3.rl", 114 ) ${${te = p+1;host( "working/cppscan3.rl", 114 ) ${ token( TK_DotDotDot );}$}$}$
+						}
+						case 32 {
+							host( "working/cppscan3.rl", 117 ) ${${te = p+1;host( "working/cppscan3.rl", 117 ) ${ token( ts[0] );}$}$}$
+						}
+						case 33 {
+							host( "working/cppscan3.rl", 119 ) ${${te = p+1;host( "working/cppscan3.rl", 119 ) ${
+										token( TK_Comment );
+									}$}$}$
+						}
+						case 34 {
+							host( "working/cppscan3.rl", 119 ) ${${te = p+1;host( "working/cppscan3.rl", 119 ) ${
+										token( TK_Comment );
+									}$}$}$
+						}
+						case 35 {
+							host( "working/cppscan3.rl", 70 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 70 ) ${ token( TK_Id );}$}$}$
+						}
+						case 36 {
+							host( "working/cppscan3.rl", 79 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 79 ) ${ token( TK_Float );}$}$}$
+						}
+						case 37 {
+							host( "working/cppscan3.rl", 83 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$}$}$
+						}
+						case 38 {
+							host( "working/cppscan3.rl", 87 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 87 ) ${ token( TK_IntegerOctal );}$}$}$
+						}
+						case 39 {
+							host( "working/cppscan3.rl", 91 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 91 ) ${ token( TK_IntegerHex );}$}$}$
+						}
+						case 40 {
+							host( "working/cppscan3.rl", 109 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 109 ) ${token( TK_Arrow );}$}$}$
+						}
+						case 41 {
+							host( "working/cppscan3.rl", 117 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 117 ) ${ token( ts[0] );}$}$}$
+						}
+						case 42 {
+							host( "working/cppscan3.rl", 126 ) ${${te = p;p = p - 1;host( "working/cppscan3.rl", 126 ) ${ token( TK_Whitespace );}$}$}$
+						}
+						case 43 {
+							host( "working/cppscan3.rl", 83 ) ${${p = ((te))-1;
+									host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$}$}$
+						}
+						case 44 {
+							host( "working/cppscan3.rl", 117 ) ${${p = ((te))-1;
+									host( "working/cppscan3.rl", 117 ) ${ token( ts[0] );}$}$}$
+						}
+						case 45 {
+							host( "NONE", 1 ) ${${switch( act ) {
+										case 0 {
+											host( "NONE", 1 ) ${${cs = 0; goto _again;}$}$ }
+										case 3 {
+											p = ((te))-1;
+											host( "working/cppscan3.rl", 70 ) ${ token( TK_Id );}$ }
+										case 4 {
+											p = ((te))-1;
+											host( "working/cppscan3.rl", 79 ) ${ token( TK_Float );}$ }
+										case 5 {
+											p = ((te))-1;
+											host( "working/cppscan3.rl", 83 ) ${ token( TK_IntegerDecimal );}$ }
+										case 6 {
+											p = ((te))-1;
+											host( "working/cppscan3.rl", 87 ) ${ token( TK_IntegerOctal );}$ }
+									}}$
+							}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				_acts = offset( _Scanner_actions, _Scanner_to_state_actions[cs] );
+				_nacts = cast(uint)deref( _Scanner_actions, _acts ); _acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _Scanner_actions, _acts ) ) {
+						case 0 {
+							host( "NONE", 1 ) ${${ts = nil;}$}$
+						}
+						case 1 {
+							host( "NONE", 1 ) ${${act = 0;}$}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+				if ( p == eof )
+				{
+					if ( _Scanner_eof_trans[cs] > 0 ) {
+						_trans = cast(int)_Scanner_eof_trans[cs] - 1;
+						goto _match_cond;
+					}
+				}
+				
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/cppscan3.rl", 147 ) @{
+		
+		cout << "P: " << (p - data) << endl;
+	}
+	
+	int Scanner::finish( )
+	{
+		if ( cs == Scanner_error )
+		return -1;
+		if ( cs >= Scanner_first_final )
+		return 1;
+		return 0;
+	}
+	
+	
+	void Scanner::token( int tok )
+	{
+		const char *data = ts;
+		int len = te - ts;
+		cout << "<" << tok << "> ";
+		for ( int i = 0; i < len; i++ )
+		cout << data[i];
+		cout << '\n';
+	}
+	
+	void test( const char *buf )
+	{
+		int len = strlen( buf );
+		std::ios::sync_with_stdio(false);
+		Scanner scanner;
+		scanner.init();
+		
+		scanner.execute( buf, len );
+		if ( scanner.cs == Scanner_error ) {
+			/* Machine failed before finding a token. */
+			cout << "PARSE ERROR" << endl;
+		}
+		
+		/* FIXME: Last token may get lost. */
+		scanner.finish();
+	}
+	
+	int main()
+	{
+		test(
+		"\"\\\"hi\" /*\n"
+		"*/\n"
+		"44 .44\n"
+		"44. 44\n"
+		"44 . 44\n"
+		"44.44\n"
+		"_hithere22"
+		);
+		
+		test(
+		"'\\''\"\\n\\d'\\\"\"\n"
+		"hi\n"
+		"99\n"
+		".99\n"
+		"99e-4\n"
+		"->*\n"
+		"||\n"
+		"0x98\n"
+		"0x\n"
+		"//\n"
+		"/* * */"
+		);
+		
+		test(
+		"'\n"
+		"'\n"
+		);
+		
+	}
+	
+}@

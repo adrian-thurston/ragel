@@ -1,0 +1,19 @@
+
+new M: map<str, str>()
+
+AE: list_el<str> = argv->head_el
+while AE {
+	M->insert( AE->value, AE->value )
+	AE = AE->next
+}
+
+for V: str in M {
+	print "[V]
+	M->find( V )
+}
+##### ARGS #####
+a b c
+##### EXP #####
+a
+b
+c

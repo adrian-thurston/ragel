@@ -1,0 +1,239 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let i = ref 0
+let c = ref 0
+
+
+
+
+
+
+let _foo_actions : int array = [|
+0; 1; 0; 1; 1; 0 ; 
+|]
+let _foo_trans_keys : int array = [|
+1; 0; 2; 2; 2; 2; 0; 2; 1; 0; 0 ; 
+|]
+let _foo_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 2; 2; 2; 2; 2; 2; 2; 2; 2; 0 ; 
+|]
+let _foo_index_offsets : int array = [|
+0; 0; 1; 2; 5; 0 ; 
+|]
+let _foo_indicies : int array = [|
+0; 2; 3; 1; 4; 0 ; 
+|]
+let _foo_index_defaults : int array = [|
+0; 1; 1; 1; 1; 0 ; 
+|]
+let _foo_trans_cond_spaces : int array = [|
+-1; -1; 0; 0; 0; 0 ; 
+|]
+let _foo_trans_offsets : int array = [|
+0; 1; 2; 4; 6; 0 ; 
+|]
+let _foo_cond_targs : int array = [|
+2; 0; 3; 2; 4; 0; 0; 3; 0 ; 
+|]
+let _foo_cond_actions : int array = [|
+3; 0; 3; 1; 0; 0; 0; 1; 0 ; 
+|]
+let _foo_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _foo_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0 ; 
+|]
+let _foo_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _foo_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let foo_start  : int  = 1
+let foo_first_final  : int  = 4
+let foo_error  : int  = 0
+let foo_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := foo_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _cond  : int  ref = ref 0 in
+	let _acts : int ref = ref 0 in
+	let _nacts : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	let _cpc : int  ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _foo_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 57 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _foo_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _foo_trans_keys.( _keys.contents+1  )&& _ic.contents>= _foo_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _foo_indicies.( _inds.contents+ ( _ic.contents- _foo_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _foo_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _foo_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;_cond  := _foo_trans_offsets.(_trans.contents);
+						_cpc  := 0;
+						if _foo_trans_cond_spaces.(_trans.contents) = 0  then
+						begin
+							if (i .contents > 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;
+						end
+						;
+						_cond  := _cond.contents + _cpc.contents;
+						
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _foo_cond_targs.(_cond.contents);
+						if _foo_cond_actions.(_cond.contents)!= 0  then
+						begin
+							begin
+								_acts  := _foo_cond_actions.(_cond.contents);
+								_nacts  := _foo_actions.( _acts.contents );
+								_acts  := _acts.contents + 1;
+								while _nacts.contents> 0  do
+								begin
+									if _foo_actions.( _acts.contents ) = 0  then
+									begin
+										begin
+											i := i .contents - 1;
+											c := ( (( Char.code data.[p.contents] )) )
+											;
+											print_string( "item: " );
+											print_int( c.contents );
+											print_string( "\n" );
+											
+										end;
+										
+									end
+									else if _foo_actions.( _acts.contents ) = 1  then
+									begin
+										begin
+											i := ( (( Char.code data.[p.contents] )) - 48 )
+											;
+											print_string( "count: " );
+											print_int( i.contents );
+											print_string( "\n" );
+											
+										end;
+										
+									end
+									;
+									_nacts  := _nacts.contents - 1;
+									_acts  := _acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= foo_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "00\n";
+exec "019\n";
+exec "190\n";
+exec "1719\n";
+exec "1040000\n";
+exec "104000a\n";
+exec "104000\n";
+()
+;;
+

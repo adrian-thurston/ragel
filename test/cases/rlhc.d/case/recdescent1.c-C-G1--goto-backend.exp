@@ -1,0 +1,463 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+
+static const char  _recdescent_eof_actions [] = { 0, 0, 0, 4, 4, 0 ,  };
+static const char  _recdescent_nfa_targs [] = { 0, 0 ,  };
+static const char  _recdescent_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _recdescent_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _recdescent_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  recdescent_start  = 2;
+static const int  recdescent_first_final  = 2;
+static const int  recdescent_error  = 0;
+static const int  recdescent_en_main  = 2;
+void test( char *buf )
+{
+	int cs;
+	int *stack;
+	int top, stack_size;
+	char *p, *pe, *eof, *item = 0;
+	
+	int len = strlen( buf );
+	
+	
+	{
+		cs = ( int ) recdescent_start;
+		top = 0;
+	}
+	stack_size = 1;
+	stack = (int*)malloc( sizeof(int) * stack_size );
+	
+	p = buf;
+	pe = buf + len;
+	eof = pe;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 2:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr0;
+				}
+				case 95:
+				{
+					goto ctr3;
+				}
+				case 123:
+				{
+					goto ctr4;
+				}
+				case 125:
+				{
+					goto ctr5;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 9 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 10  )
+				{
+					goto ctr0;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 90  )
+				{
+					if ( 97 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 122  )
+					{
+						goto ctr3;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)>= 65  )
+				{
+					goto ctr3;
+				}
+				
+			} 
+			else
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 3:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr6;
+				}
+				case 95:
+				{
+					goto ctr8;
+				}
+				case 123:
+				{
+					goto ctr9;
+				}
+				case 125:
+				{
+					goto ctr10;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 9 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 10  )
+				{
+					goto ctr6;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 90  )
+				{
+					if ( 97 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 122  )
+					{
+						goto ctr8;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)>= 65  )
+				{
+					goto ctr8;
+				}
+				
+			} 
+			else
+			{
+				goto ctr7;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr6;
+				}
+				case 95:
+				{
+					goto ctr12;
+				}
+				case 123:
+				{
+					goto ctr9;
+				}
+				case 125:
+				{
+					goto ctr10;
+				}
+				
+			}
+			if ( ((*( p  ))
+			)< 48  )
+			{
+				if ( 9 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 10  )
+				{
+					goto ctr6;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( ((*( p  ))
+				)> 90  )
+				{
+					if ( 97 <= ((*( p  ))
+					)&& ((*( p  ))
+					)<= 122  )
+					{
+						goto ctr12;
+					}
+					
+				} 
+				else if ( ((*( p  ))
+				)>= 65  )
+				{
+					goto ctr12;
+				}
+				
+			} 
+			else
+			{
+				goto ctr11;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 1:
+			if ( ((*( p  ))
+			)== 125  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr4: cs = 1;
+		goto f1;
+		ctr9: cs = 1;
+		goto f5;
+		ctr0: cs = 2;
+		goto _again;
+		ctr5: cs = 2;
+		goto f2;
+		ctr6: cs = 2;
+		goto f3;
+		ctr10: cs = 2;
+		goto f6;
+		ctr7: cs = 3;
+		goto _again;
+		ctr2: cs = 3;
+		goto f0;
+		ctr11: cs = 3;
+		goto f4;
+		ctr12: cs = 4;
+		goto _again;
+		ctr3: cs = 4;
+		goto f0;
+		ctr8: cs = 4;
+		goto f4;
+		
+		f0:
+		{
+			item = p; 
+		}
+		
+		goto _again;
+		f3:
+		{
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+			
+		}
+		
+		goto _again;
+		f1:
+		{
+			printf( "calling main\n" );
+			{
+				{
+					if ( top == stack_size ) {
+						printf( "growing stack\n" );
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+					}
+					
+				}
+				stack[top] = cs;
+				top += 1;
+				cs = 2;
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f2:
+		{
+			if ( top == 0 ) {
+				printf( "STRAY CLOSE\n" );
+				{
+					p += 1;
+					goto _out; 
+				}
+				
+			}
+			
+			printf( "returning from main\n" );
+			{
+				p = p - 1;
+				
+			}
+			
+			{
+				top-= 1;
+				cs = stack[top];
+				{
+					if ( stack_size > (top * 4) ) {
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+						printf( "shrinking stack\n" );
+					}
+					
+				}
+				goto _again;
+			}
+			
+			
+		}
+		
+		goto _again;
+		f4:
+		{
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+			
+		}
+		{
+			item = p; 
+		}
+		
+		goto _again;
+		f5:
+		{
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+			
+		}
+		{
+			printf( "calling main\n" );
+			{
+				{
+					if ( top == stack_size ) {
+						printf( "growing stack\n" );
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+					}
+					
+				}
+				stack[top] = cs;
+				top += 1;
+				cs = 2;
+				goto _again;
+			}
+			
+		}
+		
+		goto _again;
+		f6:
+		{
+			printf( "item: " );
+			fwrite( item, 1, p-item, stdout );
+			printf( "\n" );
+			
+		}
+		{
+			if ( top == 0 ) {
+				printf( "STRAY CLOSE\n" );
+				{
+					p += 1;
+					goto _out; 
+				}
+				
+			}
+			
+			printf( "returning from main\n" );
+			{
+				p = p - 1;
+				
+			}
+			
+			{
+				top-= 1;
+				cs = stack[top];
+				{
+					if ( stack_size > (top * 4) ) {
+						stack_size = top * 2;
+						stack = (int*)realloc( stack, sizeof(int)*stack_size );
+						printf( "shrinking stack\n" );
+					}
+					
+				}
+				goto _again;
+			}
+			
+			
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( _recdescent_eof_actions[cs] ) {
+				case 4:
+				{
+					printf( "item: " );
+					fwrite( item, 1, p-item, stdout );
+					printf( "\n" );
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+	if ( cs == recdescent_error ) {
+		/* Machine failed before finding a token. */
+		printf( "PARSE ERROR\n" );
+	}
+}
+
+int main()
+{
+	test( "88 foo { 99 {{{{}}}}{ } }");
+	test( "76 } sadf");
+	return 0;
+}
+

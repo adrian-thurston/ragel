@@ -1,0 +1,253 @@
+package main
+import "fmt"
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _indep_key_offsets [] int8  = [] int8  { 0, 0, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 0  }
+var _indep_trans_keys [] byte  = [] byte  { 49, 51, 52, 54, 104, 101, 108, 108, 111, 10, 72, 104, 69, 101, 76, 108, 76, 108, 79, 111, 0 }
+var _indep_single_lengths [] int8  = [] int8  { 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0  }
+var _indep_range_lengths [] int8  = [] int8  { 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _indep_index_offsets [] int8  = [] int8  { 0, 0, 3, 5, 7, 9, 11, 13, 15, 18, 21, 24, 27, 30, 0  }
+var _indep_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _indep_trans_offsets [] int8  = [] int8  { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 0  }
+var _indep_trans_lengths [] int8  = [] int8  { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _indep_cond_keys [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _indep_cond_targs [] int8  = [] int8  { 2, 8, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0, 13, 0, 9, 9, 0, 10, 10, 0, 11, 11, 0, 12, 12, 0, 7, 7, 0, 0, 0  }
+var _indep_cond_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _indep_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _indep_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _indep_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _indep_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var indep_start  int  = 1
+var indep_first_final  int  = 13
+var indep_error  int  = 0
+var indep_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(indep_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _klen int 
+		var  _keys int
+		var  _ckeys int
+		var  _cpc int 
+		var  _trans uint 
+		var  _cond  uint   = 0
+		var  _have  uint   = 0
+		var  _cont  uint   = 1
+		for _cont == 1  {
+			{
+			
+				if cs == 0  {
+					_cont = 0;
+					
+				}
+				_have = 0;
+				if p == pe  {
+					{
+						if _have == 0  {
+							_cont = 0;
+							
+						}
+					}
+					
+				}
+				if _cont == 1  {
+					{
+						if _have == 0  {
+							{
+								_keys = int(_indep_key_offsets[cs] );
+								_trans = uint(_indep_index_offsets[cs]);
+								_have = 0;
+								_klen = int(_indep_single_lengths[cs]);
+								if _klen > 0  {
+									{
+										var  _lower int
+										var  _mid int
+										var  _upper int
+										_lower = _keys;
+										_upper = _keys + _klen - 1;
+										for _upper >= _lower && _have == 0  {
+											{
+												_mid = _lower + ((_upper-_lower) >> 1);
+												switch {
+													case ( data[p ]) < _indep_trans_keys[_mid ]:
+													_upper = _mid - 1;
+													
+													case ( data[p ]) > _indep_trans_keys[_mid ]:
+													_lower = _mid + 1;
+													
+													default:
+													{
+														_trans += uint((_mid - _keys));
+														_have = 1;
+													}
+													
+												}
+											}
+											
+										}
+										if _have == 0  {
+											{
+												_keys += _klen;
+												_trans += uint(_klen);
+											}
+											
+										}
+									}
+									
+									
+								}
+								if _have == 0  {
+									{
+										_klen = int(_indep_range_lengths[cs]);
+										if _klen > 0  {
+											{
+												var  _lower int
+												var  _mid int
+												var  _upper int
+												_lower = _keys;
+												_upper = _keys + (_klen<<1) - 2;
+												for _have == 0 && _lower <= _upper  {
+													{
+														_mid = _lower + (((_upper-_lower) >> 1) & ^1);
+														switch {
+															case ( data[p ]) < _indep_trans_keys[_mid ]:
+															_upper = _mid - 2;
+															
+															case ( data[p ]) > _indep_trans_keys[_mid + 1 ]:
+															_lower = _mid + 2;
+															
+															default:
+															{
+																_trans += uint(((_mid - _keys)>>1));
+																_have = 1;
+															}
+															
+														}
+													}
+													
+												}
+												if _have == 0  {
+													_trans += uint(_klen);
+													
+												}
+											}
+											
+										}
+									}
+									
+									
+								}
+								_ckeys = int(_indep_trans_offsets[_trans] );
+								_klen = int(_indep_trans_lengths[_trans]);
+								_cond = uint(_indep_trans_offsets[_trans]);
+								_have = 0;
+								_cpc = 0;
+								{
+									var  _lower int
+									var  _mid int
+									var  _upper int
+									_lower = _ckeys;
+									_upper = _ckeys + _klen - 1;
+									for _have == 0 && _lower <= _upper  {
+										{
+											_mid = _lower + ((_upper-_lower) >> 1);
+											switch {
+												case _cpc < int(_indep_cond_keys[_mid ]):
+												_upper = _mid - 1;
+												
+												case _cpc > int(_indep_cond_keys[_mid ]):
+												_lower = _mid + 1;
+												
+												default:
+												{
+													_cond += uint((_mid - _ckeys));
+													_have = 1;
+												}
+												
+											}
+										}
+										
+									}
+									if _have == 0  {
+										{
+											cs = 0;
+											_cont = 0;
+										}
+										
+									}
+								}
+							}
+							
+						}
+						if _cont == 1  {
+							{
+								cs = int(_indep_cond_targs[_cond]);
+								if cs == 0  {
+									_cont = 0;
+									
+								}
+								if _cont == 1  {
+									p += 1;
+									
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+	}
+}
+func finish() {
+	if cs >= indep_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"1hello\n",
+	"1HELLO\n",
+	"1HeLLo\n",
+	"2hello\n",
+	"2HELLO\n",
+	"2HeLLo\n",
+	"3hello\n",
+	"3HELLO\n",
+	"3HeLLo\n",
+	"4hello\n",
+	"4HELLO\n",
+	"4HeLLo\n",
+	"5hello\n",
+	"5HELLO\n",
+	"5HeLLo\n",
+	"6hello\n",
+	"6HELLO\n",
+	"6HeLLo\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

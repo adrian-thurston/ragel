@@ -1,0 +1,37 @@
+namespace fail
+	lex
+		ignore /space+/
+		literal `# `{ `} `!
+		token id /[a-zA-Z_]+/ 
+	end
+
+	def item
+		[id]
+	|	[`{ item* `}]
+
+	def start
+		[item* `!]
+end
+
+lex
+	ignore /space+/
+	literal `# `{ `}
+	token id /[a-zA-Z_]+/ 
+end
+
+def item
+	[id]
+|	[`{ item* `}]
+
+def start
+	[fail::start]
+|	[item*]
+
+new P: parser<start>()
+
+cons Id: id "D"
+
+send P ["a b c" Id "e f g\n" ] eos
+print [ P->tree ]
+##### EXP #####
+a b cDe f g

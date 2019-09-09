@@ -1,0 +1,159 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+
+
+static const char  _include_test_1_trans_keys [] = { 1, 0, 2, 2, 3, 3, 2, 2, 3, 3, 2, 2, 3, 3, 0, 0, 1, 0, 0 ,  };
+static const char  _include_test_1_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 ,  };
+static const char  _include_test_1_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 0 ,  };
+static const char  _include_test_1_indicies [] = { 0, 2, 3, 4, 5, 6, 7, 0 ,  };
+static const char  _include_test_1_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _include_test_1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _include_test_1_cond_targs [] = { 2, 0, 3, 4, 5, 6, 7, 8, 0 ,  };
+static const char  _include_test_1_cond_actions [] = { 1, 0, 2, 3, 4, 5, 6, 7, 0 ,  };
+static const char  _include_test_1_nfa_targs [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _include_test_1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  include_test_1_start  = 1;
+static const int  include_test_1_first_final  = 8;
+static const int  include_test_1_error  = 0;
+static const int  include_test_1_en_main  = 1;
+void test( char *p )
+{
+	int cs;
+	
+	{
+		cs = ( int ) include_test_1_start;
+	}
+	
+	{
+		unsigned int _trans = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_keys;
+		const char  *_inds;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _include_test_1_trans_keys + (cs<<1);
+					_inds = _include_test_1_indicies + _include_test_1_index_offsets[cs];
+					if ( ((*( p  ))
+					)<= 98 && ((*( p  ))
+					)>= 0  )
+					{
+						int _ic = ( int ) _include_test_1_char_class[( int ) ((*( p  ))
+						)- 0];
+						if ( _ic <= ( int ) (*( _keys+1  ))
+						&& _ic >= ( int ) (*( _keys  ))
+						)
+						_trans = ( unsigned int  ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+						) ))
+						;
+						
+						else
+						_trans = ( unsigned int  ) _include_test_1_index_defaults[cs];
+						
+					}
+					
+					else
+					{
+						_trans = ( unsigned int  ) _include_test_1_index_defaults[cs];
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _include_test_1_cond_targs[_trans];
+					switch ( _include_test_1_cond_actions[_trans] ) {
+						case 1 :
+						{
+							printf(" a1");
+						}
+						
+						break;
+						case 3 :
+						{
+							printf(" a2");
+						}
+						
+						break;
+						case 5 :
+						{
+							printf(" a3");
+						}
+						
+						break;
+						case 7 :
+						{
+							{
+								p+= 1;
+								_cont = 0;
+								
+							}
+							
+						}
+						
+						break;
+						case 2 :
+						{
+							printf(" b1");
+						}
+						{
+							printf(" nr1");
+						}
+						
+						break;
+						case 4 :
+						{
+							printf(" b2");
+						}
+						{
+							printf(" nr2");
+						}
+						
+						break;
+						case 6 :
+						{
+							printf(" b3");
+						}
+						{
+							printf(" nr3");
+						}
+						
+						break;
+						
+					}
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+	printf("\n");
+}
+
+int main()
+{
+	test( "ababab" );
+	return 0;
+}
+

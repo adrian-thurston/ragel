@@ -1,0 +1,247 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+
+
+static const char  _include_test_1_actions [] = { 0, 1, 0, 1, 4, 1, 7, 1, 9, 2, 1, 2, 2, 5, 3, 2, 8, 6, 0 ,  };
+static const char  _include_test_1_nfa_targs [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _include_test_1_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _include_test_1_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  include_test_1_start  = 1;
+static const int  include_test_1_first_final  = 8;
+static const int  include_test_1_error  = 0;
+static const int  include_test_1_en_main  = 1;
+void test( char *p )
+{
+	int cs;
+	
+	{
+		cs = ( int ) include_test_1_start;
+	}
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		int _nbreak;
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 98  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 98  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ((*( p  ))
+			)== 98  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ((*( p  ))
+			)== 0  )
+			{
+				goto ctr7;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 8:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto f0;
+		ctr2: cs = 3;
+		goto f1;
+		ctr3: cs = 4;
+		goto f2;
+		ctr4: cs = 5;
+		goto f3;
+		ctr5: cs = 6;
+		goto f4;
+		ctr6: cs = 7;
+		goto f5;
+		ctr7: cs = 8;
+		goto f6;
+		
+		f0: _acts = _include_test_1_actions + 1 ;
+		goto execFuncs;
+		f2: _acts = _include_test_1_actions + 3 ;
+		goto execFuncs;
+		f4: _acts = _include_test_1_actions + 5 ;
+		goto execFuncs;
+		f6: _acts = _include_test_1_actions + 7 ;
+		goto execFuncs;
+		f1: _acts = _include_test_1_actions + 9 ;
+		goto execFuncs;
+		f3: _acts = _include_test_1_actions + 12 ;
+		goto execFuncs;
+		f5: _acts = _include_test_1_actions + 15 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nbreak = 0;
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					printf(" a1");
+				}
+				
+				break;
+				case 1:
+				{
+					printf(" b1");
+				}
+				
+				break;
+				case 2:
+				{
+					printf(" nr1");
+				}
+				
+				break;
+				case 3:
+				{
+					printf(" nr2");
+				}
+				
+				break;
+				case 4:
+				{
+					printf(" a2");
+				}
+				
+				break;
+				case 5:
+				{
+					printf(" b2");
+				}
+				
+				break;
+				case 6:
+				{
+					printf(" nr3");
+				}
+				
+				break;
+				case 7:
+				{
+					printf(" a3");
+				}
+				
+				break;
+				case 8:
+				{
+					printf(" b3");
+				}
+				
+				break;
+				case 9:
+				{
+					{
+						p += 1;
+						_nbreak = 1;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		if ( _nbreak == 1  )
+		goto _out;
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		goto _resume;
+		_out: {}
+	}
+	printf("\n");
+}
+
+int main()
+{
+	test( "ababab" );
+	return 0;
+}
+

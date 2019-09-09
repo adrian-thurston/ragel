@@ -1,0 +1,197 @@
+#include <string.h>
+#include <stdio.h>
+
+int i ;
+int c ;
+
+
+
+
+
+static const char  _foo_actions [] = { 0, 1, 0, 1, 1, 0 ,  };
+static const char  _foo_trans_keys [] = { 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 ,  };
+static const char  _foo_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ,  };
+static const char  _foo_index_offsets [] = { 0, 0, 1, 2, 5, 0 ,  };
+static const char  _foo_indicies [] = { 0, 2, 3, 1, 4, 0 ,  };
+static const char  _foo_index_defaults [] = { 0, 1, 1, 1, 1, 0 ,  };
+static const char  _foo_trans_cond_spaces [] = { -1, -1, 0, 0, 0, 0 ,  };
+static const char  _foo_trans_offsets [] = { 0, 1, 2, 4, 6, 0 ,  };
+static const char  _foo_cond_targs [] = { 2, 0, 3, 2, 4, 0, 0, 3, 0 ,  };
+static const char  _foo_cond_actions [] = { 3, 0, 3, 1, 0, 0, 0, 1, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 4;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) foo_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _trans = 0;
+		unsigned int _cond = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		int _cpc;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _foo_trans_keys + (cs<<1);
+		_inds = _foo_indicies + _foo_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 57 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _foo_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _foo_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _foo_index_defaults[cs];
+		}
+		
+		
+		_cond = ( unsigned int  ) _foo_trans_offsets[_trans];
+		_cpc = 0;
+		switch ( _foo_trans_cond_spaces[_trans] ) {
+			case 0 :
+			if ( (i > 0) )
+			_cpc += 1;
+			
+			
+			break;
+			
+		}
+		_cond += ( unsigned int  ) _cpc;
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _foo_cond_targs[_cond];
+		if ( _foo_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		_acts = _foo_actions + _foo_cond_actions[_cond];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					i = i - 1;
+					c = ( int ) ( (((*( p  ))
+					)) )
+					;
+					printf( "%s", "item: " );
+					printf( "%d", c );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				case 1 :
+				{
+					i = ( int ) ( (((*( p  ))
+					)) - 48 )
+					;
+					printf( "%s", "count: " );
+					printf( "%d", i );
+					printf( "%s", "\n" );
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= foo_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"00\n",
+	"019\n",
+	"190\n",
+	"1719\n",
+	"1040000\n",
+	"104000a\n",
+	"104000\n",
+};
+
+int inplen = 7;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

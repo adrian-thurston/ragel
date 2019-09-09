@@ -1,0 +1,1016 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const char  _scanner_trans_keys [] = { 1, 0, 0, 24, 1, 0, 0, 24, 1, 0, 11, 11, 9, 14, 13, 14, 2, 2, 2, 12, 0, 0, 13, 20, 2, 28, 2, 28, 16, 16, 16, 16, 6, 16, 16, 16, 9, 16, 10, 17, 8, 8, 8, 14, 13, 26, 13, 26, 2, 16, 11, 27, 11, 26, 13, 26, 11, 26, 15, 15, 16, 16, 13, 27, 3, 27, 16, 16, 16, 28, 0 ,  };
+static const char  _scanner_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 4, 4, 8, 9, 4, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 4, 4, 16, 17, 4, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 22, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 21, 21, 21, 4, 24, 4, 25, 21, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 26, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 27, 21, 21, 4, 28, 4, 4, 0 ,  };
+static const short  _scanner_index_offsets [] = { 0, 0, 25, 25, 50, 50, 51, 57, 59, 60, 71, 72, 80, 107, 134, 135, 136, 147, 148, 156, 164, 165, 172, 186, 200, 215, 232, 248, 262, 278, 279, 280, 295, 320, 321, 0 ,  };
+static const char  _scanner_indicies [] = { 0, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0, 4, 4, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 8, 9, 9, 0, 0, 10, 10, 10, 10, 12, 12, 11, 11, 11, 11, 11, 11, 11, 11, 11, 13, 15, 17, 17, 16, 16, 16, 17, 17, 17, 19, 1, 20, 21, 22, 4, 23, 24, 25, 26, 27, 28, 29, 30, 31, 20, 32, 32, 32, 32, 33, 32, 20, 34, 32, 32, 35, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 38, 39, 40, 37, 37, 37, 37, 37, 37, 37, 37, 37, 41, 42, 43, 37, 37, 37, 37, 37, 37, 44, 45, 37, 37, 37, 37, 37, 46, 47, 49, 50, 37, 37, 51, 37, 52, 52, 52, 52, 53, 53, 53, 53, 54, 55, 53, 55, 53, 53, 53, 55, 10, 10, 53, 53, 53, 53, 53, 55, 53, 55, 53, 53, 53, 55, 11, 37, 37, 37, 37, 37, 37, 37, 37, 37, 14, 37, 37, 37, 56, 52, 57, 58, 58, 57, 57, 57, 57, 54, 57, 57, 59, 59, 57, 57, 59, 60, 52, 61, 58, 58, 61, 61, 61, 61, 54, 61, 61, 62, 62, 61, 61, 62, 17, 17, 63, 63, 63, 17, 17, 17, 63, 64, 64, 63, 63, 64, 52, 57, 29, 29, 57, 57, 57, 57, 54, 57, 57, 59, 59, 57, 57, 59, 65, 66, 32, 32, 67, 67, 67, 32, 32, 32, 32, 32, 32, 67, 67, 32, 32, 1, 67, 67, 67, 4, 67, 67, 67, 67, 67, 32, 32, 67, 67, 67, 32, 32, 32, 32, 32, 32, 67, 67, 32, 32, 68, 69, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 37, 70, 0 ,  };
+static const char  _scanner_index_defaults [] = { 0, 1, 1, 4, 4, 7, 0, 0, 11, 11, 14, 16, 18, 18, 37, 37, 37, 37, 37, 37, 48, 37, 53, 53, 37, 57, 61, 63, 57, 37, 37, 67, 67, 37, 37, 0 ,  };
+static const char  _scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _scanner_cond_targs [] = { 12, 1, 12, 2, 3, 12, 4, 12, 12, 7, 23, 8, 9, 12, 10, 12, 12, 27, 13, 14, 12, 15, 16, 17, 18, 19, 21, 24, 25, 28, 29, 30, 31, 32, 33, 34, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 20, 12, 12, 12, 5, 22, 12, 6, 12, 12, 12, 26, 12, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0 ,  };
+static const char  _scanner_cond_actions [] = { 1, 0, 2, 0, 0, 3, 0, 4, 5, 0, 0, 0, 0, 6, 0, 7, 8, 0, 0, 0, 11, 0, 0, 0, 0, 0, 12, 12, 13, 13, 0, 0, 0, 14, 0, 0, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 0, 26, 27, 28, 0, 29, 30, 0, 31, 32, 33, 34, 35, 0, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 0 ,  };
+static const char  _scanner_to_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _scanner_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _scanner_eof_trans [] = { 0, 1, 1, 1, 1, 8, 1, 1, 8, 8, 8, 17, 0, 37, 38, 38, 38, 38, 38, 38, 49, 38, 54, 54, 38, 58, 62, 64, 58, 38, 38, 68, 68, 38, 38, 0 ,  };
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  scanner_start  = 12;
+static const int  scanner_first_final  = 12;
+static const int  scanner_error  = 0;
+static const int  scanner_en_main  = 12;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		int _trans = 0;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		switch ( _scanner_from_state_actions[cs] ) {
+			case 10 :
+			{
+				{
+					ts = p;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		_keys = _scanner_trans_keys + (cs<<1);
+		_inds = _scanner_indicies + _scanner_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 126 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _scanner_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _scanner_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _scanner_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _scanner_cond_targs[_trans];
+		if ( _scanner_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		switch ( _scanner_cond_actions[_trans] ) {
+			case 12 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			
+			break;
+			case 3 :
+			{
+				{
+					te = p+1;
+					{
+						token = 193;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 2 :
+			{
+				{
+					te = p+1;
+					{
+						token = 192;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 31 :
+			{
+				{
+					te = p+1;
+					{
+						token = 194;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 35 :
+			{
+				{
+					te = p+1;
+					{
+						token = 218;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 37 :
+			{
+				{
+					te = p+1;
+					{
+						token = 219;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 39 :
+			{
+				{
+					te = p+1;
+					{
+						token = 220;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 40 :
+			{
+				{
+					te = p+1;
+					{
+						token = 197;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 41 :
+			{
+				{
+					te = p+1;
+					{
+						token = 223;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 17 :
+			{
+				{
+					te = p+1;
+					{
+						token = 224;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 19 :
+			{
+				{
+					te = p+1;
+					{
+						token = 225;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 45 :
+			{
+				{
+					te = p+1;
+					{
+						token = 226;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 21 :
+			{
+				{
+					te = p+1;
+					{
+						token = 227;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 32 :
+			{
+				{
+					te = p+1;
+					{
+						token = 228;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 18 :
+			{
+				{
+					te = p+1;
+					{
+						token = 229;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 23 :
+			{
+				{
+					te = p+1;
+					{
+						token = 230;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 25 :
+			{
+				{
+					te = p+1;
+					{
+						token = 231;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 20 :
+			{
+				{
+					te = p+1;
+					{
+						token = 232;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 43 :
+			{
+				{
+					te = p+1;
+					{
+						token = 233;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 44 :
+			{
+				{
+					te = p+1;
+					{
+						token = 234;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 22 :
+			{
+				{
+					te = p+1;
+					{
+						token = 212;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 24 :
+			{
+				{
+					te = p+1;
+					{
+						token = 213;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 27 :
+			{
+				{
+					te = p+1;
+					{
+						token = 214;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 28 :
+			{
+				{
+					te = p+1;
+					{
+						token = 215;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 5 :
+			{
+				{
+					te = p+1;
+					{
+						token = 240;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 11 :
+			{
+				{
+					te = p+1;
+					{
+						token = ( int ) ( ts[0] )
+						;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 6 :
+			{
+				{
+					te = p+1;
+					{
+						token = 242;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 7 :
+			{
+				{
+					te = p+1;
+					{
+						token = 242;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 42 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 195;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 30 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 194;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 33 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 218;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 36 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 219;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 38 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 220;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 26 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 211;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 16 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = ( int ) ( ts[0] )
+						;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 15 :
+			{
+				{
+					te = p;
+					p = p - 1;
+					{
+						token = 241;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 8 :
+			{
+				{
+					p = ((te))-1;
+					{
+						token = 218;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 4 :
+			{
+				{
+					p = ((te))-1;
+					{
+						token = ( int ) ( ts[0] )
+						;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+				}
+				
+			}
+			
+			break;
+			case 1 :
+			{
+				{
+					switch ( act  ) {
+						case 0 :
+						{
+							{
+								cs = 0;
+								goto _again;
+							}
+							
+						}
+						
+						break;
+						case 3 :
+						p = ((te))-1;
+						{
+							token = 195;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+							
+						}
+						
+						break;
+						case 4 :
+						p = ((te))-1;
+						{
+							token = 194;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+							
+						}
+						
+						break;
+						case 5 :
+						p = ((te))-1;
+						{
+							token = 218;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+							
+						}
+						
+						break;
+						case 6 :
+						p = ((te))-1;
+						{
+							token = 219;
+							printf( "%s", "<" );
+							printf( "%d", token );
+							printf( "%s", "> " );
+							fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+							
+						}
+						
+						break;
+						
+					}
+					
+				}
+				
+				
+			}
+			
+			break;
+			case 14 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 3;
+					
+				}
+				
+			}
+			
+			break;
+			case 29 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 4;
+					
+				}
+				
+			}
+			
+			break;
+			case 13 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 5;
+					
+				}
+				
+			}
+			
+			break;
+			case 34 :
+			{
+				{
+					te = p+1;
+					
+				}
+				
+			}
+			{
+				{
+					act = 6;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch ( _scanner_to_state_actions[cs] ) {
+			case 9 :
+			{
+				{
+					ts = 0;
+					
+				}
+				
+			}
+			{
+				{
+					act = 0;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			if ( _scanner_eof_trans[cs]> 0  )
+			{
+				_trans = ( int ) _scanner_eof_trans[cs]- 1;
+				goto _match_cond;
+			}
+			
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+	"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+	"'\n'\n",
+};
+
+int inplen = 3;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

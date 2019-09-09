@@ -1,0 +1,180 @@
+host( "working/call4_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class call4_java
+	{
+		int target ;
+		int top ;
+		int stack [] = new int[32];
+		
+		
+		
+		
+		
+	}@
+	array s8 _call4_actions( 0, 3 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 };
+	
+	array char _call4_trans_keys( 0, 11 ) = { u(1), u(0), u(10), u(10), u(6), u(6), u(10), u(10), u(8), u(8), u(5), u(5), u(4), u(4), u(7), u(7), u(6), u(6), u(5), u(5), u(9), u(9), u(11), u(11), u(7), u(7), u(0), u(3), u(1), u(0), u(1), u(0), u(1), u(0), u(0) };
+	
+	array s8 _call4_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 };
+	
+	array s8 _call4_index_offsets( 0, 16 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0 };
+	
+	array s8 _call4_indicies( 0, 15 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 };
+	
+	array s8 _call4_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+	
+	array s8 _call4_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _call4_cond_targs( 0, 16 ) = { 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0 };
+	
+	array s8 _call4_cond_actions( 0, 7 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 5, 7, 0 };
+	
+	array s8 _call4_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _call4_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _call4_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _call4_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int call4_start = 13;
+	value int call4_first_final = 13;
+	value int call4_error = 0;
+	
+	value int call4_en_unused = 1;
+	value int call4_en_one = 7;
+	value int call4_en_two = 10;
+	value int call4_en_main = 13;
+	
+	host( "working/call4_java.rl", 36 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)call4_start;
+			top = 0;
+		}
+		host( "working/call4_java.rl", 41 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			String _s;
+		}@
+		{
+			int _trans = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_keys = offset( _call4_trans_keys, (cs<<1) );
+					_inds = offset( _call4_indicies, _call4_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 119 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_call4_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _call4_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _call4_trans_keys, _keys ) )
+						_trans = cast(int)deref( _call4_indicies, _inds + cast(int)( _ic - cast(int)deref( _call4_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_call4_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_call4_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_call4_cond_targs[_trans];
+					
+					if ( _call4_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_acts = offset( _call4_actions, _call4_cond_actions[_trans] );
+					_nacts = cast(uint)deref( _call4_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _call4_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/call4_java.rl", 18 ) ${System.out.print( "one\n" );
+									${top -= 1;cs = stack[top];goto _again;}$}$
+							}
+							case 1 {
+								host( "working/call4_java.rl", 21 ) ${System.out.print( "two\n" );
+									${top -= 1;cs = stack[top];goto _again;}$}$
+							}
+							case 2 {
+								host( "working/call4_java.rl", 25 ) ${target = 7;
+									${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={target}=; goto _again;}$}$
+							}
+							case 3 {
+								host( "working/call4_java.rl", 27 ) ${target = 10;
+									${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={target}=; goto _again;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+				}
+				label _again {
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/call4_java.rl", 52 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= call4_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"1one2two1one\n",
+		};
+		
+		static final int inplen = 1;
+		
+		public static void main (String[] args)
+		{
+			call4_java machine = new call4_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

@@ -1,0 +1,232 @@
+#include <stdio.h>
+#include <string.h>
+
+
+
+static const char  _foo_key_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 0 ,  };
+static const char  _foo_trans_keys [] = { 104, 101, 88, 88, 88, 0 ,  };
+static const char  _foo_single_lengths [] = { 0, 1, 1, 1, 1, 1, 0, 0 ,  };
+static const char  _foo_range_lengths [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_index_offsets [] = { 0, 0, 2, 4, 6, 8, 10, 0 ,  };
+static const char  _foo_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _foo_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0 ,  };
+static const char  _foo_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _foo_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_cond_targs [] = { 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 0, 0 ,  };
+static const char  _foo_cond_actions [] = { 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 2, 0 ,  };
+static const char  _foo_to_state_actions [] = { 0, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _foo_eof_actions [] = { 0, 2, 2, 2, 2, 2, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 6;
+static const int  foo_error  = 0;
+static const int  foo_en_main  = 1;
+int main()
+{
+	int cs;
+	char *p = "hello", *pe = p + strlen(p);
+	char *eof = pe;
+	
+	{
+		cs = ( int ) foo_start;
+	}
+	
+	{
+		int _klen;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _foo_trans_keys + _foo_key_offsets[cs];
+		_trans = ( unsigned int  ) _foo_index_offsets[cs];
+		_klen = ( int ) _foo_single_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_trans += ( unsigned int  ) (_mid - _keys);
+					goto _match;
+				}
+				
+			}
+			
+			_keys += _klen;
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		_klen = ( int ) _foo_range_lengths[cs];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + (_klen<<1)- 2;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 2;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid + 1  ))
+				)
+				_lower = _mid + 2;
+				
+				else
+				{
+					_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+					goto _match;
+				}
+				
+			}
+			
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		
+		_match :
+		_ckeys = _foo_cond_keys + _foo_trans_offsets[_trans];
+		_klen = ( int ) _foo_trans_lengths[_trans];
+		_cond = ( unsigned int  ) _foo_trans_offsets[_trans];
+		_cpc = 0;
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( _cpc < ( int ) (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( _cpc > ( int ) (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_cond += ( unsigned int  ) (_mid - _ckeys);
+					goto _match_cond;
+				}
+				
+			}
+			
+			cs = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		cs = ( int ) _foo_cond_targs[_cond];
+		if ( _foo_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		switch ( _foo_cond_actions[_cond] ) {
+			case 3 :
+			{
+				printf("char: %c\n", *p); 
+			}
+			
+			break;
+			case 2 :
+			{
+				printf("err: %c\n", *p); 
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch ( _foo_to_state_actions[cs] ) {
+			case 1 :
+			{
+				printf("to state: %c\n", *p); 
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			switch ( _foo_eof_actions[cs] ) {
+				case 2 :
+				{
+					printf("err: %c\n", *p); 
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+	printf( "rest: %s\n", p );
+	
+	return 0;
+}
+

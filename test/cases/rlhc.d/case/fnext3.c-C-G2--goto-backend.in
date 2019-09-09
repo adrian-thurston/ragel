@@ -1,0 +1,308 @@
+host( "working/fnext3.rl", 1 ) @{/*
+	* @@LANG: c
+	*
+	* Tests fnext in combination with fbreak.
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char comm;
+	int top;
+	int stack [32];
+	
+	
+	
+	int cs;
+	char *ts, *te;
+	int act;
+	
+}@
+value int fnext_start = 1;
+value int fnext_first_final = 6;
+value int fnext_error = 0;
+
+value int fnext_en_main = 1;
+value int fnext_en_e = 2;
+value int fnext_en_l = 3;
+value int fnext_en_o = 9;
+value int fnext_en_nl = 5;
+
+array s8 _fnext_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _fnext_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _fnext_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _fnext_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/fnext3.rl", 30 ) @{
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)fnext_start;
+		ts = nil;
+		te = nil;
+	}
+	host( "working/fnext3.rl", 34 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		
+		while ( cs != fnext_error && p < pe ) {
+			printf( "%c\n", *p );
+		}@
+		{
+			int _nbreak;
+			if ( p == pe )
+			goto _test_eof;
+			goto _resume;
+			
+			_again:
+			switch ( cs ) {
+				case 1: goto st1;
+				case 0: goto st0;
+				case 6: goto st6;
+				case 2: goto st2;
+				case 7: goto st7;
+				case 3: goto st3;
+				case 4: goto st4;
+				case 8: goto st8;
+				case 5: goto st5;
+				case 10: goto st10;
+				case 9: goto st9;
+			}
+			
+			_resume:
+			switch ( cs )
+			{
+				case 1:
+				goto st_case_1;
+				case 0:
+				goto st_case_0;
+				case 6:
+				goto st_case_6;
+				case 2:
+				goto st_case_2;
+				case 7:
+				goto st_case_7;
+				case 3:
+				goto st_case_3;
+				case 4:
+				goto st_case_4;
+				case 8:
+				goto st_case_8;
+				case 5:
+				goto st_case_5;
+				case 10:
+				goto st_case_10;
+				case 9:
+				goto st_case_9;
+			}
+			goto st_out;
+			st1:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof1;
+			st_case_1:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr0;
+			}
+			{
+				goto st0;
+			}
+			st_case_0:
+			st0:
+			cs = 0;
+			goto _out;
+			ctr0:
+			cs = 6;
+			_nbreak = 0;
+			host( "working/fnext3.rl", 18 ) ${ /*h*/  cs = 2;{p+= 1; _nbreak = 1;} }$
+			if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			st6:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof6;
+			st_case_6:
+			{
+				goto st0;
+			}
+			st2:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof2;
+			st_case_2:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr2;
+			}
+			{
+				goto st0;
+			}
+			ctr2:
+			cs = 7;
+			_nbreak = 0;
+			host( "working/fnext3.rl", 19 ) ${ /*e*/  cs = 3;}$
+			host( "working/fnext3.rl", 19 ) ${ {p+= 1; _nbreak = 1;} }$
+			if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			st7:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof7;
+			st_case_7:
+			{
+				goto st0;
+			}
+			st3:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof3;
+			st_case_3:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr3;
+			}
+			{
+				goto st0;
+			}
+			ctr3:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 20 ) ${ {p+= 1; cs = 4; _nbreak = 1;} }$
+			if ( _nbreak == 1 )
+			goto _out;
+			
+			goto st4;
+			st4:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof4;
+			st_case_4:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr4;
+			}
+			{
+				goto st0;
+			}
+			ctr4:
+			cs = 8;
+			_nbreak = 0;
+			host( "working/fnext3.rl", 20 ) ${ /*ll*/ cs = 9;}$
+			host( "working/fnext3.rl", 20 ) ${ {p+= 1; _nbreak = 1;} }$
+			if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			st8:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof8;
+			st_case_8:
+			{
+				goto st0;
+			}
+			st5:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof5;
+			st_case_5:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr5;
+			}
+			{
+				goto st0;
+			}
+			ctr5:
+			_nbreak = 0;
+			host( "working/fnext3.rl", 22 ) ${ /*nl*/ {p+= 1; cs = 10; _nbreak = 1;} printf("ACCEPT\n"); }$
+			if ( _nbreak == 1 )
+			goto _out;
+			
+			goto st10;
+			st10:
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof10;
+			st_case_10:
+			{
+				goto st0;
+			}
+			ctr6:
+			cs = 9;
+			_nbreak = 0;
+			host( "working/fnext3.rl", 21 ) ${${te = p+1;host( "working/fnext3.rl", 21 ) ${ /*o*/  cs = 5;{p+= 1; _nbreak = 1;} }$}$}$
+			if ( _nbreak == 1 )
+			goto _out;
+			
+			goto _again;
+			st9:
+			host( "NONE", 1 ) ${${ts = nil;}$}$
+			p+= 1;
+			if ( p == pe )
+			goto _test_eof9;
+			st_case_9:
+			host( "NONE", 1 ) ${${ts = p;}$}$
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr6;
+			}
+			{
+				goto st0;
+			}
+			st_out:
+			_test_eof1: cs = 1; goto _test_eof; 
+			_test_eof6: cs = 6; goto _test_eof; 
+			_test_eof2: cs = 2; goto _test_eof; 
+			_test_eof7: cs = 7; goto _test_eof; 
+			_test_eof3: cs = 3; goto _test_eof; 
+			_test_eof4: cs = 4; goto _test_eof; 
+			_test_eof8: cs = 8; goto _test_eof; 
+			_test_eof5: cs = 5; goto _test_eof; 
+			_test_eof10: cs = 10; goto _test_eof; 
+			_test_eof9: cs = 9; goto _test_eof; 
+			
+			_test_eof: {}
+			_out: {}
+		}
+		host( "working/fnext3.rl", 44 ) @{
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= fnext_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"hello\n"
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

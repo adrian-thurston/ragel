@@ -1,0 +1,116 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+	
+	
+	
+	
+	
+	
+		static readonly char  []_zlen1_trans_keys = { '\u0001', '\u0000', '\u0001', '\u0000', '\u0000',  };
+		static readonly sbyte  []_zlen1_char_class = { 0,  };
+		static readonly sbyte  []_zlen1_index_offsets = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_indicies = { 0,  };
+		static readonly sbyte  []_zlen1_index_defaults = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_trans_cond_spaces = { -1, 0,  };
+		static readonly sbyte  []_zlen1_cond_targs = { 0, 0,  };
+		static readonly sbyte  []_zlen1_cond_actions = { 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_offsets = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_pop_trans = { 0, 0,  };
+		static readonly int  zlen1_start  = 1;
+		static readonly int  zlen1_first_final  = 1;
+		static readonly int  zlen1_error  = 0;
+		static readonly int  zlen1_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)zlen1_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				uint _trans = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				while ( _cont == 1 )
+				{
+				
+					if ( cs == 0 )
+					_cont = 0;
+					
+					_have = 0;
+					if ( p == pe  )
+					{
+						if ( _have == 0 )
+						_cont = 0;
+						
+					}
+					
+					if ( _cont == 1 )
+					{
+						if ( _have == 0 )
+						{
+							_trans = (uint )_zlen1_index_defaults[cs];
+						}
+						
+						if ( _cont == 1 )
+						{
+							cs = (int)_zlen1_cond_targs[_trans];
+							if ( cs == 0 )
+							_cont = 0;
+							
+							if ( _cont == 1 )
+							p += 1;
+							
+						}
+					}
+					
+				}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= zlen1_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"",
+			"x",
+		};
+		
+		
+		static readonly int inplen = 2;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

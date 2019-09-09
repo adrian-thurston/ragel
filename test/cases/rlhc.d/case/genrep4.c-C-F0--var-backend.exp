@@ -1,0 +1,364 @@
+#include <stddef.h>  /* NULL */
+#include <stdint.h>  /* uint64_t */
+#include <stdlib.h>  /* malloc(3) free(3) */
+#include <stdbool.h> /* bool */
+#include <string.h>
+#include <stdio.h>
+
+struct nfa_bp_rec
+{
+	long state;
+	const unsigned char *p;
+	int popTrans;
+	long q_2;
+};
+
+struct nfa_bp_rec nfa_bp[1024];
+long nfa_len = 0;
+long nfa_count = 0;
+
+long c;
+
+struct nfa_state_rec
+{
+	long c;
+};
+
+struct nfa_state_rec nfa_s[1024];
+
+void nfa_push()
+{
+	nfa_s[nfa_len].c = c;
+}
+
+void nfa_pop()
+{
+	c = nfa_s[nfa_len].c;
+}
+
+long q_2;
+
+static const char  _match_any_actions [] = { 0, 0, 1, 1, 1, 2, 1, 0, 2, 2, 4, 2, 2, 5, 2, 2, 6, 3, 2, 9, 3, 3, 2, 10, 3, 0 ,  };
+static const unsigned char  _match_any_trans_keys [] = { 1u, 0u, 1u, 0u, 2u, 2u, 1u, 0u, 1u, 0u, 0u, 0u, 1u, 0u, 2u, 2u, 1u, 0u, 0u, 0u, 1u, 0u, 1u, 0u, 0u,  };
+static const char  _match_any_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 ,  };
+static const char  _match_any_index_offsets [] = { 0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 4, 4, 0 ,  };
+static const char  _match_any_indicies [] = { 1, 2, 3, 4, 0 ,  };
+static const char  _match_any_index_defaults [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0 ,  };
+static const char  _match_any_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0, 0 ,  };
+static const char  _match_any_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 0 ,  };
+static const char  _match_any_cond_targs [] = { 0, 3, 6, 8, 10, 0, 11, 0 ,  };
+static const char  _match_any_cond_actions [] = { 0, 0, 0, 0, 0, 0, 6, 0 ,  };
+static const char  _match_any_nfa_targs [] = { 0, 1, 2, 3, 5, 2, 4, 1, 7, 3, 9, 7, 4, 0 ,  };
+static const char  _match_any_nfa_offsets [] = { 0, 1, 0, 3, 0, 0, 7, 0, 9, 0, 0, 0, 0 ,  };
+static const char  _match_any_nfa_push_actions [] = { 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0 ,  };
+static const char  _match_any_nfa_pop_trans [] = { 0, 0, 4, 0, 7, 6, 5, 0, 8, 0, 7, 6, 5, 0 ,  };
+static const int  match_any_start  = 1;
+static const int  match_any_first_final  = 11;
+static const int  match_any_error  = 0;
+static const int  match_any_en_main  = 1;
+int test( const char *data )
+{
+	int cs;
+	const unsigned char *p = (const unsigned char *)data;
+	const unsigned char *pe = p + strlen(data) + 1;
+	const unsigned char *eof = pe;
+	
+	printf( "%s\n", data );
+	
+	
+	{
+		cs = ( int ) match_any_start;
+		nfa_len = 0;
+	}
+	
+	{
+		unsigned int _nfa_cont = 1;
+		unsigned int _nfa_repeat = 1;
+		while ( _nfa_cont != 0  )
+		{
+			unsigned int _trans = 0;
+			unsigned int _have = 0;
+			unsigned int _cont = 1;
+			unsigned int _cond = 0;
+			const char  *_acts;
+			unsigned int _nacts;
+			const unsigned char  *_keys;
+			const char  *_inds;
+			int _cpc;
+			while ( _cont == 1  )
+			{
+			
+				if ( cs == 0  )
+				_cont = 0;
+				
+				_have = 0;
+				if ( p == pe  )
+				{
+					if ( _have == 0  )
+					_cont = 0;
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					if ( _have == 0  )
+					{
+						if ( _match_any_nfa_offsets[cs] )
+						{
+							int alt = 0; 
+							int new_recs = _match_any_nfa_targs[( int ) _match_any_nfa_offsets[cs]];
+							while ( alt < new_recs  )
+							{ 
+								nfa_bp[nfa_len].state 
+								= _match_any_nfa_targs[( int ) _match_any_nfa_offsets[cs]+ 1 + alt];
+								nfa_bp[nfa_len].p 
+								= p;
+								nfa_bp[nfa_len].popTrans 
+								= ( long ) _match_any_nfa_offsets[cs]+ 1 + alt;
+								switch ( _match_any_nfa_push_actions[( int ) _match_any_nfa_offsets[cs]+ 1 + alt] ) {
+									case 1 :
+									{
+										nfa_bp[nfa_len].q_2 = q_2;
+										
+									}
+									
+									break;
+									
+								}
+								nfa_len += 1;
+								alt += 1;
+							}
+							
+						}
+						
+						_keys = _match_any_trans_keys + (cs<<1);
+						_inds = _match_any_indicies + _match_any_index_offsets[cs];
+						if ( ((*( p  ))
+						)<= 97 && ((*( p  ))
+						)>= 32  )
+						{
+							int _ic = ( int ) _match_any_char_class[( int ) ((*( p  ))
+							)- 32];
+							if ( _ic <= ( int ) (*( _keys+1  ))
+							&& _ic >= ( int ) (*( _keys  ))
+							)
+							_trans = ( unsigned int  ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+							) ))
+							;
+							
+							else
+							_trans = ( unsigned int  ) _match_any_index_defaults[cs];
+							
+						}
+						
+						else
+						{
+							_trans = ( unsigned int  ) _match_any_index_defaults[cs];
+						}
+						
+						
+						_cond = ( unsigned int  ) _match_any_trans_offsets[_trans];
+						_cpc = 0;
+						switch ( _match_any_trans_cond_spaces[_trans] ) {
+							case 0 :
+							if ( (p+1 == eof ) )
+							_cpc += 1;
+							
+							
+							break;
+							case 1 :
+							if ( (({printf("  marker\n");1;}) ) )
+							_cpc += 1;
+							
+							
+							break;
+							
+						}
+						_cond += ( unsigned int  ) _cpc;
+					}
+					
+					if ( _cont == 1  )
+					{
+						cs = ( int ) _match_any_cond_targs[_cond];
+						if ( _match_any_cond_actions[_cond]!= 0  )
+						{
+							_acts = _match_any_actions + _match_any_cond_actions[_cond];
+							_nacts = ( unsigned int  ) (*( _acts  ))
+							;
+							_acts += 1;
+							while ( _nacts > 0  )
+							{
+								switch ( (*( _acts  ))
+								) {
+									case 0 :
+									{
+										printf("----- MATCH\n");
+									}
+									
+									break;
+									
+								}
+								_nacts -= 1;
+								_acts += 1;
+							}
+							
+						}
+						
+						
+						if ( cs == 0  )
+						_cont = 0;
+						
+						if ( _cont == 1  )
+						p += 1;
+						
+					}
+				}
+				
+			}
+			
+			_nfa_repeat = 1;
+			while ( _nfa_repeat  )
+			{
+				_nfa_repeat = 0;
+				if ( nfa_len > 0  )
+				{
+					int _pop_test = 1;
+					nfa_count += 1;
+					nfa_len -= 1;
+					p = nfa_bp[nfa_len].p;
+					switch ( _match_any_nfa_pop_trans[nfa_bp[nfa_len].popTrans] ) {
+						case 5 :
+						_pop_test = (({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) );
+						if ( !_pop_test  )
+						break;
+						
+						_pop_test = (({ 1; })
+						);
+						
+						break;
+						case 6 :
+						_pop_test = (({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) );
+						if ( !_pop_test  )
+						break;
+						
+						_pop_test = (({ ++q_2 < 3; })
+						);
+						
+						break;
+						case 7 :
+						_pop_test = (({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) );
+						if ( !_pop_test  )
+						break;
+						
+						_pop_test = (({ ++q_2 >= 2; })
+						);
+						
+						break;
+						case 4 :
+						_pop_test = (({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) );
+						if ( !_pop_test  )
+						break;
+						
+						_cpc = 0;
+						if ( (({printf("  marker\n");1;}) ) )
+						_cpc += 1;
+						
+						_pop_test = _cpc == 1;
+						if ( !_pop_test  )
+						break;
+						
+						_pop_test = (({  q_2 = 0; 1; })
+						);
+						
+						break;
+						case 8 :
+						_pop_test = (({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) );
+						if ( !_pop_test  )
+						break;
+						
+						_cpc = 0;
+						if ( (({printf("  marker\n");1;}) ) )
+						_cpc += 1;
+						
+						_pop_test = _cpc == 1;
+						if ( !_pop_test  )
+						break;
+						
+						_pop_test = (({  q_2 = 0; 1; })
+						);
+						
+						break;
+						
+					}
+					if ( _pop_test  )
+					{
+						cs = nfa_bp[nfa_len].state;
+						_nfa_cont = 1;
+						_nfa_repeat = 0;
+					}
+					
+					else
+					{
+						_nfa_cont = 0;
+						_nfa_repeat = 1;
+					}
+					
+				}
+				
+				else
+				{
+					_nfa_cont = 0;
+					_nfa_repeat = 0;
+				}
+				
+			}
+			
+		}
+		
+	}
+	return 0;
+}
+
+int main()
+{
+	test( "a " );
+	test( "aa " );
+	test( "aaa " );
+	test( "aaaa " );
+	
+	test( "a a " );
+	test( "aa aa " );
+	test( "aaa aaa " );
+	test( "aaaa aaaa " );
+	
+	test( "a a a " );
+	test( "aa aa aa " );
+	test( "aaa aaa aaa " );
+	test( "aaaa aaaa aaaa " );
+	
+	test( "aa a " );
+	test( "aa aaa " );
+	test( "aa aaaa " );
+	
+	test( "aaa a " );
+	test( "aaa aa " );
+	test( "aaa aaaa " );
+	
+	return 0;
+}
+

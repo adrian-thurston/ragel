@@ -1,0 +1,4 @@
+#!/bin/bash
+
+time bash $(dirname $0)/timed "$@"
+

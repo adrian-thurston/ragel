@@ -1,0 +1,239 @@
+host( "working/atoi1_ocaml.rl", 1 ) @{(*
+	* @@LANG: ocaml
+	* @@GENERATED: true
+	*)
+	
+	let neg = ref 0
+	let value = ref 0
+	
+	
+	
+	
+	
+	
+}@
+array s8 _atoi_key_offsets( 0, 9 ) = { 0, 0, 4, 6, 9, 0 };
+
+array int _atoi_trans_keys( 0, 57 ) = { 43, 45, 48, 57, 48, 57, 10, 48, 57, 0 };
+
+array s8 _atoi_single_lengths( 0, 2 ) = { 0, 2, 0, 1, 0, 0 };
+
+array s8 _atoi_range_lengths( 0, 1 ) = { 0, 1, 1, 1, 0, 0 };
+
+array s8 _atoi_index_offsets( 0, 9 ) = { 0, 0, 4, 6, 9, 0 };
+
+array s8 _atoi_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _atoi_trans_offsets( 0, 9 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+
+array s8 _atoi_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _atoi_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_cond_targs( 0, 4 ) = { 2, 2, 3, 0, 3, 0, 4, 3, 0, 0, 0 };
+
+array s8 _atoi_cond_actions( 0, 5 ) = { 1, 2, 3, 0, 4, 0, 5, 4, 0, 0, 0 };
+
+array s8 _atoi_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _atoi_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _atoi_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int atoi_start = 1;
+value int atoi_first_final = 4;
+value int atoi_error = 0;
+
+value int atoi_en_main = 1;
+
+host( "working/atoi1_ocaml.rl", 45 ) @{
+	
+	let exec data = 
+	let buffer = String.create(1024) in 
+	let blen :int ref = ref 0 in
+	let cs = ref 0 in
+	let p = ref 0 in
+	let pe = ref (String.length data) in
+	value := 0;
+	neg := 0;
+}@
+{
+	cs = cast(int)atoi_start;
+}
+host( "working/atoi1_ocaml.rl", 55 ) @{
+}@
+{
+	int _klen;
+	index int _keys;
+	index s8 _ckeys;
+	int _cpc;
+	uint _trans;
+	uint _cond = 0;
+	uint _have = 0;
+	uint _cont = 1;
+	while ( _cont == 1 ) {
+		
+		if ( cs == 0 )
+		_cont = 0;
+		_have = 0;
+		if ( p == pe ) {
+			if ( _have == 0 )
+			_cont = 0;
+		}
+		if ( _cont == 1 ) {
+			if ( _have == 0 ) {
+				_keys = offset( _atoi_trans_keys, _atoi_key_offsets[cs] );
+				_trans = cast(uint)_atoi_index_offsets[cs];
+				_have = 0;
+				
+				_klen = cast(int)_atoi_single_lengths[cs];
+				if ( _klen > 0 ) {
+					index int _lower;
+					index int _mid;
+					index int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( _upper >= _lower && _have == 0 ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( deref( data, p )) < deref( _atoi_trans_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( ( deref( data, p )) > deref( _atoi_trans_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_trans += cast(uint)(_mid - _keys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						_keys += _klen;
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				if ( _have == 0 ) {
+					_klen = cast(int)_atoi_range_lengths[cs];
+					if ( _klen > 0 ) {
+						index int _lower;
+						index int _mid;
+						index int _upper;
+						_lower = _keys;
+						_upper = _keys + (_klen<<1) - 2;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+							if ( ( deref( data, p )) < deref( _atoi_trans_keys, _mid ) )
+							_upper = _mid - 2;
+							else if ( ( deref( data, p )) > deref( _atoi_trans_keys, _mid + 1 ) )
+							_lower = _mid + 2;
+							else {
+								_trans += cast(uint)((_mid - _keys)>>1);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 )
+						_trans += cast(uint)_klen;
+					}
+				}
+				
+				_ckeys = offset( _atoi_cond_keys, _atoi_trans_offsets[_trans] );
+				_klen = cast(int)_atoi_trans_lengths[_trans];
+				_cond = cast(uint)_atoi_trans_offsets[_trans];
+				_have = 0;
+				
+				_cpc = 0;
+				{
+					index s8 _lower;
+					index s8 _mid;
+					index s8 _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( _have == 0 && _lower <= _upper ) {
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < cast(int)deref( _atoi_cond_keys, _mid ) )
+						_upper = _mid - 1;
+						else if ( _cpc > cast(int)deref( _atoi_cond_keys, _mid ) )
+						_lower = _mid + 1;
+						else {
+							_cond += cast(uint)(_mid - _ckeys);
+							_have = 1;
+						}
+					}
+					if ( _have == 0 ) {
+						cs = 0;
+						_cont = 0;
+					}
+				}
+			}
+			if ( _cont == 1 ) {
+				cs = cast(int)_atoi_cond_targs[_cond];
+				
+				switch ( _atoi_cond_actions[_cond] ) {
+					case 1 {
+						host( "working/atoi1_ocaml.rl", 12 ) ${neg := 0;
+							value := 0;
+						}$
+					}
+					case 4 {
+						host( "working/atoi1_ocaml.rl", 19 ) ${value := value .contents * 10  + ( ={( deref( data, p ))}= - 48 )
+							;
+						}$
+					}
+					case 2 {
+						host( "working/atoi1_ocaml.rl", 12 ) ${neg := 0;
+							value := 0;
+						}$
+						host( "working/atoi1_ocaml.rl", 16 ) ${neg := 1;
+						}$
+					}
+					case 3 {
+						host( "working/atoi1_ocaml.rl", 12 ) ${neg := 0;
+							value := 0;
+						}$
+						host( "working/atoi1_ocaml.rl", 19 ) ${value := value .contents * 10  + ( ={( deref( data, p ))}= - 48 )
+							;
+						}$
+					}
+					case 5 {
+						host( "working/atoi1_ocaml.rl", 23 ) ${if neg .contents != 0  then
+							begin
+							value := -1  * value.contents;
+							
+							end 
+							;
+						}$
+						host( "working/atoi1_ocaml.rl", 30 ) ${print_int( value.contents );
+							print_string( "\n" );
+						}$
+					}
+				}
+				
+				if ( cs == 0 )
+				_cont = 0;
+				if ( _cont == 1 )
+				p += 1;
+				
+			}}
+	}
+}
+host( "working/atoi1_ocaml.rl", 56 ) @{
+	if !cs >= atoi_first_final then
+	print_string "ACCEPT\n"
+	else
+	print_string "FAIL\n"
+	;;
+	
+	let () =
+	exec "1\n";
+	exec "12\n";
+	exec "222222\n";
+	exec "+2123\n";
+	exec "213 3213\n";
+	exec "-12321\n";
+	exec "--123\n";
+	exec "-99\n";
+	exec " -3000\n";
+	()
+	;;
+	
+}@

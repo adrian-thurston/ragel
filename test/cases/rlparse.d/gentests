@@ -1,0 +1,50 @@
+#!/bin/bash
+
+. ../colm.sh
+
+export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
+
+[ -d working ] || mkdir working
+
+for fn in case/*.rl; do
+
+	FA="--reduce-frontend --colm-frontend"
+	for frontend in $FA; do
+
+		exp=${fn%.rl}$frontend.exp
+		exp=${exp#case/}
+
+		out=${fn%.rl}$frontend.out
+		out=../working/${out#case/}
+
+		diff=${fn%.rl}$frontend.diff
+		diff=../working/${diff#case/}
+
+		sh=${fn%.rl}$frontend.sh
+		sh=working/${sh#case/}
+
+#		lang=`echo $fn | awk -vFS=- '{ print $2 }'`
+#	
+#		case $lang in
+#			A) lang=csharp;;
+#			C) lang=c;;
+#			J) lang=java;;
+#			K) lang=crack;;
+#			O) lang=ocaml;;
+#			R) lang=ruby;;
+#			U) lang=rust;;
+#			Y) lang=julia;;
+#			Z) lang=go;;
+#		esac
+
+		rm -f $sh
+
+		echo echo testing $fn $frontend >> $sh
+		echo cd case >> $sh
+		echo ../rlparse $frontend ${fn#case/} '>' $out >> $sh
+		echo diff -u $exp $out '>' $diff >> $sh
+
+		echo $sh
+	done
+done
+

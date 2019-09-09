@@ -1,0 +1,564 @@
+#include <iostream>
+#include <string.h>
+using namespace std;
+
+#define TK_Dlit 192
+#define TK_Slit 193
+#define TK_Float 194
+#define TK_Id 195
+#define TK_NameSep 197
+#define TK_Arrow 211
+#define TK_PlusPlus 212
+#define TK_MinusMinus 213
+#define TK_ArrowStar 214
+#define TK_DotStar 215
+#define TK_ShiftLeft 216
+#define TK_ShiftRight 217
+#define TK_IntegerDecimal 218
+#define TK_IntegerOctal 219
+#define TK_IntegerHex 220
+#define TK_EqualsEquals 223
+#define TK_NotEquals 224
+#define TK_AndAnd 225
+#define TK_OrOr 226
+#define TK_MultAssign 227
+#define TK_DivAssign 228
+#define TK_PercentAssign 229
+#define TK_PlusAssign 230
+#define TK_MinusAssign 231
+#define TK_AmpAssign 232
+#define TK_CaretAssign 233
+#define TK_BarAssign 234
+#define TK_DotDotDot 240
+#define TK_Whitespace 241
+#define TK_Comment 242
+
+#define BUFSIZE 4096
+
+int tok;
+char buf[BUFSIZE];
+const char *ts, *te;
+void token( const char *data, int len );
+bool discard = false;
+
+struct Scanner
+{
+	int cs;
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	int init( );
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	int execute( const char *data, int len );
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	int finish( );
+};
+
+
+
+static const char  _Scanner_actions [] = { 0, 1, 27, 1, 31, 1, 32, 2, 0, 33, 2, 1, 33, 2, 2, 33, 2, 3, 33, 2, 4, 33, 2, 5, 33, 2, 6, 33, 2, 7, 33, 2, 8, 33, 2, 9, 33, 2, 10, 33, 2, 11, 33, 2, 12, 33, 2, 13, 33, 2, 14, 33, 2, 15, 33, 2, 16, 33, 2, 17, 33, 2, 18, 33, 2, 19, 33, 2, 20, 33, 2, 21, 33, 2, 22, 33, 2, 23, 33, 2, 24, 33, 2, 25, 33, 2, 28, 33, 2, 29, 33, 2, 30, 33, 3, 32, 2, 33, 3, 32, 4, 33, 3, 32, 26, 33, 4, 32, 27, 30, 33, 0 ,  };
+static const char  _Scanner_trans_keys [] = { 1, 0, 2, 28, 0, 24, 1, 0, 0, 24, 1, 0, 11, 11, 9, 14, 13, 14, 8, 8, 8, 12, 0, 0, 13, 20, 2, 28, 16, 16, 1, 0, 16, 16, 6, 16, 16, 16, 9, 16, 10, 17, 8, 8, 8, 14, 13, 26, 13, 26, 8, 16, 11, 27, 11, 26, 22, 26, 22, 26, 22, 26, 13, 26, 22, 26, 11, 26, 15, 15, 16, 16, 13, 27, 3, 27, 16, 16, 16, 28, 0 ,  };
+static const char  _Scanner_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 4, 5, 6, 7, 4, 4, 8, 9, 4, 10, 11, 12, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 4, 4, 16, 17, 4, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 22, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 21, 21, 21, 4, 24, 4, 25, 21, 4, 18, 18, 18, 18, 19, 20, 21, 21, 21, 21, 21, 26, 21, 21, 21, 21, 21, 21, 21, 21, 23, 21, 21, 27, 21, 21, 4, 28, 4, 4, 0 ,  };
+static const short  _Scanner_index_offsets [] = { 0, 0, 27, 52, 52, 77, 77, 78, 84, 86, 87, 92, 93, 101, 128, 129, 129, 130, 141, 142, 150, 158, 159, 166, 180, 194, 203, 220, 236, 241, 246, 251, 265, 270, 286, 287, 288, 303, 328, 329, 0 ,  };
+static const char  _Scanner_indicies [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 3, 16, 16, 16, 16, 17, 16, 3, 18, 16, 16, 19, 21, 20, 20, 22, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 23, 21, 24, 24, 24, 24, 24, 24, 25, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 26, 27, 28, 28, 21, 21, 29, 29, 29, 29, 31, 31, 30, 30, 30, 32, 34, 35, 35, 21, 21, 21, 35, 35, 35, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 37, 38, 39, 21, 21, 21, 21, 21, 21, 21, 21, 21, 40, 41, 42, 21, 21, 21, 21, 21, 21, 43, 44, 21, 21, 21, 21, 21, 45, 46, 47, 48, 21, 21, 49, 21, 50, 50, 50, 50, 21, 21, 21, 21, 51, 52, 21, 52, 21, 21, 21, 52, 29, 29, 21, 21, 21, 21, 21, 52, 21, 52, 21, 21, 21, 52, 53, 21, 21, 21, 54, 21, 21, 21, 55, 50, 21, 56, 56, 21, 21, 21, 21, 51, 21, 21, 57, 57, 21, 21, 57, 58, 50, 21, 56, 56, 21, 21, 21, 21, 51, 21, 21, 59, 59, 21, 21, 59, 60, 60, 21, 21, 60, 61, 61, 21, 21, 61, 62, 62, 21, 21, 62, 35, 35, 21, 21, 21, 35, 35, 35, 21, 63, 63, 21, 21, 63, 64, 64, 21, 21, 64, 50, 21, 65, 65, 21, 21, 21, 21, 51, 21, 21, 57, 57, 21, 21, 57, 66, 67, 68, 68, 21, 21, 21, 68, 68, 68, 68, 68, 68, 21, 21, 68, 68, 20, 21, 21, 21, 24, 21, 21, 21, 21, 21, 68, 68, 21, 21, 21, 68, 68, 68, 68, 68, 68, 21, 21, 68, 68, 69, 70, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 71, 0 ,  };
+static const char  _Scanner_index_defaults [] = { 0, 0, 20, 20, 24, 24, 21, 21, 21, 30, 30, 33, 21, 36, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 0 ,  };
+static const char  _Scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _Scanner_cond_targs [] = { 13, 14, 2, 15, 16, 17, 4, 18, 19, 20, 22, 25, 26, 33, 34, 35, 36, 37, 38, 39, 2, 0, 15, 3, 4, 15, 5, 15, 8, 24, 9, 10, 15, 11, 15, 31, 13, 15, 15, 15, 15, 15, 15, 15, 15, 15, 21, 15, 15, 6, 23, 7, 15, 9, 11, 15, 27, 29, 12, 28, 15, 30, 15, 32, 15, 33, 15, 15, 36, 15, 15, 15, 0 ,  };
+static const char  _Scanner_cond_actions [] = { 106, 102, 5, 102, 102, 102, 5, 102, 102, 102, 102, 102, 98, 98, 102, 102, 94, 94, 102, 102, 0, 3, 10, 0, 0, 7, 0, 82, 0, 16, 0, 0, 85, 0, 88, 25, 91, 34, 49, 37, 58, 43, 67, 52, 70, 55, 73, 76, 79, 0, 16, 0, 16, 1, 1, 46, 22, 19, 0, 22, 22, 19, 19, 25, 25, 19, 28, 31, 13, 61, 64, 40, 0 ,  };
+static const char  _Scanner_eof_actions [] = { 0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Scanner_start  = 1;
+static const int  Scanner_first_final  = 13;
+static const int  Scanner_error  = 0;
+static const int  Scanner_en_main  = 1;
+int Scanner::init( )
+{
+	tok = 0;
+	ts = 0;
+	te = 0;
+	
+	
+	{
+		cs = ( int ) Scanner_start;
+	}
+	return 1;
+}
+
+int Scanner::execute( const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
+	
+	
+	{
+		unsigned int _trans = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _have == 0  )
+					{
+						const char  *__acts;
+						unsigned int __nacts;
+						__acts = _Scanner_actions + _Scanner_eof_actions[cs];
+						__nacts = ( unsigned int  ) (*( __acts  ))
+						;
+						__acts += 1;
+						while ( __nacts > 0  )
+						{
+							switch ( (*( __acts  ))
+							) {
+								case 31 :
+								{
+									if ( tok != 0 ) {
+										const char *rst_data;
+										
+										if ( tok == TK_Comment || tok == TK_Whitespace ) {
+											/* Reset comment status, don't send. */
+											discard = false;
+											
+											/* Restart right at the error point if consuming whitespace or
+											* a comment. Consume may have spanned multiple buffers. */
+											rst_data = p;
+										}
+										else {
+											/* Send the token. */
+											token( ts, te - ts + 1 );
+											
+											/* Restart right after the token. */
+											rst_data = te+1;
+										}
+										
+										ts = 0;
+										{
+											p = ((rst_data))-1;
+											
+										}
+										
+										
+										{
+											cs = 1;
+											
+										}
+									}
+									
+								}
+								
+								break;
+								
+							}
+							__nacts -= 1;
+							__acts += 1;
+						}
+						
+					}
+					
+				}
+				
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _Scanner_trans_keys + (cs<<1);
+					_inds = _Scanner_indicies + _Scanner_index_offsets[cs];
+					if ( ((*( p  ))
+					)<= 126 && ((*( p  ))
+					)>= 10  )
+					{
+						int _ic = ( int ) _Scanner_char_class[( int ) ((*( p  ))
+						)- 10];
+						if ( _ic <= ( int ) (*( _keys+1  ))
+						&& _ic >= ( int ) (*( _keys  ))
+						)
+						_trans = ( unsigned int  ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+						) ))
+						;
+						
+						else
+						_trans = ( unsigned int  ) _Scanner_index_defaults[cs];
+						
+					}
+					
+					else
+					{
+						_trans = ( unsigned int  ) _Scanner_index_defaults[cs];
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _Scanner_cond_targs[_trans];
+					if ( _Scanner_cond_actions[_trans]!= 0  )
+					{
+						_acts = _Scanner_actions + _Scanner_cond_actions[_trans];
+						_nacts = ( unsigned int  ) (*( _acts  ))
+						;
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							switch ( (*( _acts  ))
+							) {
+								case 0 :
+								{
+									tok = TK_Slit;
+								}
+								
+								break;
+								case 1 :
+								{
+									tok = TK_Dlit;
+								}
+								
+								break;
+								case 2 :
+								{
+									tok = TK_Id;
+								}
+								
+								break;
+								case 3 :
+								{
+									tok = TK_Float;
+								}
+								
+								break;
+								case 4 :
+								{
+									tok = TK_IntegerDecimal;
+								}
+								
+								break;
+								case 5 :
+								{
+									tok = TK_IntegerOctal;
+								}
+								
+								break;
+								case 6 :
+								{
+									tok = TK_IntegerHex;
+								}
+								
+								break;
+								case 7 :
+								{
+									tok = TK_NameSep;
+								}
+								
+								break;
+								case 8 :
+								{
+									tok = TK_EqualsEquals;
+								}
+								
+								break;
+								case 9 :
+								{
+									tok = TK_NotEquals;
+								}
+								
+								break;
+								case 10 :
+								{
+									tok = TK_AndAnd;
+								}
+								
+								break;
+								case 11 :
+								{
+									tok = TK_OrOr;
+								}
+								
+								break;
+								case 12 :
+								{
+									tok = TK_MultAssign;
+								}
+								
+								break;
+								case 13 :
+								{
+									tok = TK_DivAssign;
+								}
+								
+								break;
+								case 14 :
+								{
+									tok = TK_PercentAssign;
+								}
+								
+								break;
+								case 15 :
+								{
+									tok = TK_PlusAssign;
+								}
+								
+								break;
+								case 16 :
+								{
+									tok = TK_MinusAssign;
+								}
+								
+								break;
+								case 17 :
+								{
+									tok = TK_AmpAssign;
+								}
+								
+								break;
+								case 18 :
+								{
+									tok = TK_CaretAssign;
+								}
+								
+								break;
+								case 19 :
+								{
+									tok = TK_BarAssign;
+								}
+								
+								break;
+								case 20 :
+								{
+									tok = TK_PlusPlus;
+								}
+								
+								break;
+								case 21 :
+								{
+									tok = TK_MinusMinus;
+								}
+								
+								break;
+								case 22 :
+								{
+									tok = TK_Arrow;
+								}
+								
+								break;
+								case 23 :
+								{
+									tok = TK_ArrowStar;
+								}
+								
+								break;
+								case 24 :
+								{
+									tok = TK_DotStar;
+								}
+								
+								break;
+								case 25 :
+								{
+									tok = TK_DotDotDot;
+								}
+								
+								break;
+								case 26 :
+								{
+									tok = (((*( p  ))
+									));
+								}
+								
+								break;
+								case 27 :
+								{
+									discard = true;
+									
+								}
+								
+								break;
+								case 28 :
+								{
+									tok = TK_Comment;
+								}
+								
+								break;
+								case 29 :
+								{
+									tok = TK_Comment;
+								}
+								
+								break;
+								case 30 :
+								{
+									tok = TK_Whitespace;
+								}
+								
+								break;
+								case 31 :
+								{
+									if ( tok != 0 ) {
+										const char *rst_data;
+										
+										if ( tok == TK_Comment || tok == TK_Whitespace ) {
+											/* Reset comment status, don't send. */
+											discard = false;
+											
+											/* Restart right at the error point if consuming whitespace or
+											* a comment. Consume may have spanned multiple buffers. */
+											rst_data = p;
+										}
+										else {
+											/* Send the token. */
+											token( ts, te - ts + 1 );
+											
+											/* Restart right after the token. */
+											rst_data = te+1;
+										}
+										
+										ts = 0;
+										{
+											p = ((rst_data))-1;
+											
+										}
+										
+										
+										{
+											cs = 1;
+											
+										}
+									}
+									
+								}
+								
+								break;
+								case 32 :
+								{
+									ts=p;
+								}
+								
+								break;
+								case 33 :
+								{
+									te=p;
+								}
+								
+								break;
+								
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+						
+					}
+					
+					
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+int Scanner::finish( )
+{
+	if ( cs == Scanner_error )
+	return -1;
+	if ( cs >= Scanner_first_final )
+	return 1;
+	return 0;
+}
+
+
+void token( const char *data, int len )
+{
+	cout << "<" << tok << "> ";
+	for ( int i = 0; i < len; i++ )
+	cout << data[i];
+	cout << '\n';
+}
+
+void test( const char * data )
+{
+	Scanner scanner;
+	scanner.init();
+	scanner.execute( data, strlen(data) );
+	scanner.finish();
+	if ( tok != 0 && tok != TK_Comment && tok != TK_Whitespace )
+	token( ts, te - ts + 1 );
+}
+
+int main()
+{
+	test(
+	"/*\n"
+	" *  Copyright \n"
+	" */\n"
+	"\n"
+	"\n"
+	"/* Move ranges to the singles list. */\n"
+	"void RedFsmAp::move( RedStateAp *state )\n"
+	"{\n"
+	"	RedTranst &range = state->outRange;\n"
+	"	for ( int rpos = 0; rpos < range.length(); ) {\n"
+	"		if ( can( range, rpos ) ) {\n"
+	"			while ( range[rpos].value != range[rpos+1].value ) {\n"
+	"				single.append( range[rpos+1] );\n"
+	"			}\n"
+	"			\n"
+	"			range[rpos].highKey = range[rpos+1].highKey;\n"
+	"		}\n"
+	"		else if ( keyOps->span( range[rpos].lowKey, range[rpos].highKey ) == 1 ) {\n"
+	"			single.append( range[rpos] );\n"
+	"		}\n"
+	"	}\n"
+	"}\n"
+	"\n" );
+	
+	test( 
+	"->*\n"
+	".*\n"
+	"/*\"*/\n"
+	"\"/*\"\n"
+	"L'\"'\n"
+	"L\"'\"\n"
+	"...\n" );
+}
+

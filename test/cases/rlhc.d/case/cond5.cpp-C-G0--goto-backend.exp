@@ -1,0 +1,239 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+static const char  _foo_actions [] = { 0, 2, 0, 4, 2, 1, 4, 2, 2, 4, 2, 3, 4, 3, 0, 3, 4, 3, 1, 2, 4, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 4;
+static const int  foo_en_main  = 1;
+void test( const char *str )
+{
+	int cs = foo_start;
+	int c = 0;
+	const char *p = str;
+	const char *pe = str + strlen( str );
+	char last = '0';
+	
+	cout << "run:";
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr0;
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (c++ < 5) )
+				ck += 1;
+				
+				if ( (*p == last+1 ) )
+				ck += 2;
+				
+				if ( ck < 2  )
+				{
+					if ( 1 <= ck  )
+					{			goto ctr2;
+					}
+					
+				} 
+				else if ( ck > 2  )
+				{
+					goto ctr4;
+				} 
+				else
+				{
+					goto ctr3;
+				}
+				
+				goto ctr5;
+				
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 4:
+			{
+				goto ctr1;
+			}
+			case 2:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr6;
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (c++ < 5) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto ctr2;
+				}
+				
+				goto ctr5;
+				
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr7;
+			}
+			
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				int ck = 0;
+				if ( (*p == last+1 ) )
+				ck += 1;
+				
+				if ( 1 <= ck  )
+				{		goto ctr3;
+				}
+				
+				goto ctr5;
+				
+			}
+			
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 4;
+		goto f0;
+		ctr6: cs = 4;
+		goto f4;
+		ctr7: cs = 4;
+		goto f5;
+		ctr5: cs = 0;
+		goto _again;
+		ctr4: cs = 1;
+		goto f3;
+		ctr2: cs = 2;
+		goto f1;
+		ctr3: cs = 3;
+		goto f2;
+		
+		f1: _acts = _foo_actions + 1 ;
+		goto execFuncs;
+		f4: _acts = _foo_actions + 4 ;
+		goto execFuncs;
+		f5: _acts = _foo_actions + 7 ;
+		goto execFuncs;
+		f2: _acts = _foo_actions + 10 ;
+		goto execFuncs;
+		f3: _acts = _foo_actions + 13 ;
+		goto execFuncs;
+		f0: _acts = _foo_actions + 17 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					cout << " d1"; 
+				}
+				
+				break;
+				case 1:
+				{
+					cout << " see_five"; 
+				}
+				
+				break;
+				case 2:
+				{
+					cout << " in_sequence"; 
+				}
+				
+				break;
+				case 3:
+				{
+					last = *p; cout << " d2"; 
+				}
+				
+				break;
+				case 4:
+				{
+					cout << " |";
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+	if ( cs < foo_first_final )
+	cout << " failure";
+	cout << endl;
+}
+
+int main()
+{
+	test( "123456789012\n" );  // fails both
+	test( "123456789\n" );  // fails five
+	test( "1234\n" );  // fails five
+	test( "13245\n" );  // fails sequence
+	test( "12345\n" );  // succeeds in both
+	return 0;
+}
+

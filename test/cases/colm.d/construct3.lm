@@ -1,0 +1,18 @@
+
+lex
+	ignore /[ \t\n]+/
+	token id /[a-z0-9]+/
+	literal `, `. `* `( `)
+end
+
+def bigger [`( item* `)]
+
+def item [id] | [bigger]
+
+def lang [item*]
+
+B: bigger = construct bigger "( b1 b2 )"
+print[ @construct lang "a [B] c" '\n' ]
+
+##### EXP #####
+a ( b1 b2 ) c

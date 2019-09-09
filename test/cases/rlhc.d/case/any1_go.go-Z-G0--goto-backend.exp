@@ -1,0 +1,95 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _any1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _any1_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0  }
+var _any1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _any1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var any1_start  int  = 1
+var any1_first_final  int  = 2
+var any1_error  int  = 0
+var any1_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(any1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+	
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch cs  {
+			case 1:
+			{
+				goto ctr0;
+			}
+			case 2:
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		
+		_again:
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= any1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"",
+	"x",
+	"xx",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

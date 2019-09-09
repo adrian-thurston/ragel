@@ -1,0 +1,297 @@
+host( "working/gotocallret3_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			char comm;
+			int top;
+			int [] stack = new int [32];
+			
+			
+			
+			
+		}@
+		array s8 _gotocallret_actions( 0, 8 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 5, 1, 7, 1, 8, 2, 0, 1, 2, 4, 6, 0 };
+		
+		array s8 _gotocallret_eof_actions( 0, 13 ) = { 0, 13, 13, 5, 5, 7, 7, 0, 5, 0, 0, 0 };
+		
+		array s8 _gotocallret_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _gotocallret_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _gotocallret_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _gotocallret_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int gotocallret_start = 7;
+		value int gotocallret_first_final = 7;
+		value int gotocallret_error = 0;
+		
+		value int gotocallret_en_garble_line = 3;
+		value int gotocallret_en_alp_comm = 5;
+		value int gotocallret_en_dig_comm = 6;
+		value int gotocallret_en_main = 7;
+		
+		host( "working/gotocallret3_cs.rl", 64 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)gotocallret_start;
+				top = 0;
+			}
+			host( "working/gotocallret3_cs.rl", 69 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				index s8 _acts;
+				uint _nacts;
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				_resume:
+				switch ( cs ) {
+					case 7:
+					if ( ( deref( data, p )) > c(57) ) {
+						if ( c(97) <= ( deref( data, p )) && ( deref( data, p )) <= c(122) ) {
+							goto ctr10;
+						}
+					} else if ( ( deref( data, p )) >= c(48) ) {
+						goto ctr10;
+					}
+					{
+						goto ctr0;
+					}
+					case 0:
+					goto _out;
+					case 1:
+					if ( ( deref( data, p )) == c(32) ) {
+						goto ctr1;
+					}
+					{
+						goto ctr0;
+					}
+					case 2:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr2;
+					}
+					{
+						goto ctr0;
+					}
+					case 3:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr4;
+					}
+					{
+						goto ctr3;
+					}
+					case 4:
+					if ( ( deref( data, p )) == c(10) ) {
+						goto ctr6;
+					}
+					{
+						goto ctr5;
+					}
+					case 8:
+					{
+						goto ctr11;
+					}
+					case 5:
+					if ( ( deref( data, p )) > c(90) ) {
+						if ( c(97) <= ( deref( data, p )) && ( deref( data, p )) <= c(122) ) {
+							goto ctr8;
+						}
+					} else if ( ( deref( data, p )) >= c(65) ) {
+						goto ctr8;
+					}
+					{
+						goto ctr7;
+					}
+					case 9:
+					if ( ( deref( data, p )) > c(90) ) {
+						if ( c(97) <= ( deref( data, p )) && ( deref( data, p )) <= c(122) ) {
+							goto ctr8;
+						}
+					} else if ( ( deref( data, p )) >= c(65) ) {
+						goto ctr8;
+					}
+					{
+						goto ctr7;
+					}
+					case 6:
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(57) ) {
+						goto ctr9;
+					}
+					{
+						goto ctr7;
+					}
+					case 10:
+					if ( c(48) <= ( deref( data, p )) && ( deref( data, p )) <= c(57) ) {
+						goto ctr9;
+					}
+					{
+						goto ctr7;
+					}
+				}
+				
+				ctr11: cs = 0; goto _again;
+				ctr0: cs = 0; goto f0;
+				ctr7: cs = 0; goto f7;
+				ctr10: cs = 1; goto f8;
+				ctr1: cs = 2; goto f1;
+				ctr5: cs = 4; goto _again;
+				ctr3: cs = 4; goto f4;
+				ctr2: cs = 7; goto f2;
+				ctr4: cs = 8; goto f5;
+				ctr6: cs = 8; goto f6;
+				ctr8: cs = 9; goto _again;
+				ctr9: cs = 10; goto _again;
+				
+				f4: _acts = offset( _gotocallret_actions, 1 ); goto execFuncs;
+				f6: _acts = offset( _gotocallret_actions, 3 ); goto execFuncs;
+				f7: _acts = offset( _gotocallret_actions, 7 ); goto execFuncs;
+				f8: _acts = offset( _gotocallret_actions, 9 ); goto execFuncs;
+				f2: _acts = offset( _gotocallret_actions, 11 ); goto execFuncs;
+				f0: _acts = offset( _gotocallret_actions, 13 ); goto execFuncs;
+				f5: _acts = offset( _gotocallret_actions, 15 ); goto execFuncs;
+				f1: _acts = offset( _gotocallret_actions, 18 ); goto execFuncs;
+				
+				execFuncs:
+				_nacts = cast(uint)deref( _gotocallret_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _gotocallret_actions, _acts ) ) {
+						case 0{
+							host( "working/gotocallret3_cs.rl", 23 ) ${Console.Write( "error: garbling line\n" );}$
+						}
+						case 1{
+							host( "working/gotocallret3_cs.rl", 24 ) ${cs = 7;}$
+						}
+						case 3{
+							host( "working/gotocallret3_cs.rl", 34 ) ${${p = p - 1; }$${top-= 1;cs = stack[top];}$}$
+						}
+						case 4{
+							host( "working/gotocallret3_cs.rl", 42 ) ${if ( comm >= 97 )
+								{
+									${stack[top] = cs; top += 1;cs = 5; }$} 
+								else {
+									${stack[top] = cs; top += 1;cs = 6; }$}
+							}$
+						}
+						case 5{
+							host( "working/gotocallret3_cs.rl", 53 ) ${comm = ={( deref( data, p ))}=;
+							}$
+						}
+						case 6{
+							host( "working/gotocallret3_cs.rl", 54 ) ${Console.Write( "prints\n" );}$
+						}
+						case 7{
+							host( "working/gotocallret3_cs.rl", 55 ) ${Console.Write( "correct command\n" );}$
+						}
+						case 8{
+							host( "working/gotocallret3_cs.rl", 59 ) ${${p = p - 1; }$cs = 3;}$
+						}
+					}
+					_acts += 1;
+					_nacts -= 1;
+				}
+				
+				goto _again;
+				
+				_again:
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+				_test_eof: {}
+				if ( p == eof )
+				{
+					index s8 __acts;
+					uint __nacts;
+					__acts = offset( _gotocallret_actions, _gotocallret_eof_actions[cs] );
+					__nacts = cast(uint)deref( _gotocallret_actions, __acts ); __acts += 1;
+					while ( __nacts > 0 ) {
+						switch ( deref( _gotocallret_actions, __acts ) ) {
+							case 2{
+								host( "working/gotocallret3_cs.rl", 25 ) ${Console.Write( "error: failed to recover\n" );}$
+							}
+							case 3{
+								host( "working/gotocallret3_cs.rl", 34 ) ${${p = p - 1; }$${top-= 1;cs = stack[top];}$}$
+							}
+							case 8{
+								host( "working/gotocallret3_cs.rl", 59 ) ${${p = p - 1; }$cs = 3;}$
+							}
+						}
+						__acts += 1;
+						__nacts -= 1;
+					}
+				}
+				
+				_out: {}
+			}
+			host( "working/gotocallret3_cs.rl", 80 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= gotocallret_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"lkajsdf\n",
+				"2134\n",
+				"(\n",
+				"\n",
+				"*234234()0909 092 -234aslkf09`1 11\n",
+				"1\n",
+				"909\n",
+				"1 a\n",
+				"11 1\n",
+				"a 1\n",
+				"aa a\n",
+				"1 1\n",
+				"1 123456\n",
+				"a a\n",
+				"a abcdef\n",
+				"h",
+				"a aa1",
+			};
+			
+			
+			static readonly int inplen = 17;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

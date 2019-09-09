@@ -1,0 +1,206 @@
+host( "working/scan3_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class scan3_java
+	{
+		int
+		ts ;
+		int
+		te ;
+		int act ;
+		int token ;
+		
+		
+		
+		
+		
+	}@
+	array char _scanner_trans_keys( 0, 1 ) = { u(1), u(0), u(0), u(1), u(1), u(0), u(0) };
+	
+	array s8 _scanner_char_class( 0, 1 ) = { 0, 1, 0 };
+	
+	array s8 _scanner_index_offsets( 0, 2 ) = { 0, 0, 2, 0 };
+	
+	array s8 _scanner_indicies( 0, 2 ) = { 0, 2, 0 };
+	
+	array s8 _scanner_index_defaults( 0, 4 ) = { 0, 1, 4, 0 };
+	
+	array s8 _scanner_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _scanner_cond_targs( 0, 2 ) = { 2, 0, 2, 1, 2, 0 };
+	
+	array s8 _scanner_cond_actions( 0, 6 ) = { 3, 0, 4, 5, 6, 0 };
+	
+	array s8 _scanner_to_state_actions( 0, 1 ) = { 0, 1, 0, 0 };
+	
+	array s8 _scanner_from_state_actions( 0, 2 ) = { 0, 2, 0, 0 };
+	
+	array s8 _scanner_eof_trans( 0, 4 ) = { 0, 0, 4, 0 };
+	
+	array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+	
+	array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int scanner_start = 1;
+	value int scanner_first_final = 1;
+	value int scanner_error = 0;
+	
+	value int scanner_en_main = 1;
+	
+	host( "working/scan3_java.rl", 34 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)scanner_start;
+			ts = nil;
+			te = nil;
+			act = 0;
+		}
+		host( "working/scan3_java.rl", 39 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			int eof = len;
+			String _s;
+		}@
+		{
+			int _trans = 0;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					switch ( _scanner_from_state_actions[cs] ) {
+						case 2 {
+							host( "NONE", 1 ) ${${ts = p;}$}$
+						}
+					}
+					
+					_keys = offset( _scanner_trans_keys, (cs<<1) );
+					_inds = offset( _scanner_indicies, _scanner_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 98 && ( deref( data, p )) >= 97 )
+					{
+						int _ic = cast(int)_scanner_char_class[cast(int)( deref( data, p )) - 97];
+						if ( _ic <= cast(int)deref( _scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _scanner_trans_keys, _keys ) )
+						_trans = cast(int)deref( _scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_scanner_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_scanner_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_scanner_cond_targs[_trans];
+					
+					if ( _scanner_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					switch ( _scanner_cond_actions[_trans] ) {
+						case 5 {
+							host( "NONE", 1 ) ${${switch( act ) {
+										case 1 {
+											p = ((te))-1;
+											host( "working/scan3_java.rl", 22 ) ${System.out.print( "pat1\n" );
+											}$ }
+										case 2 {
+											p = ((te))-1;
+											host( "working/scan3_java.rl", 24 ) ${System.out.print( "pat2\n" );
+											}$ }
+										case 3 {
+											p = ((te))-1;
+											host( "working/scan3_java.rl", 26 ) ${System.out.print( "pat3\n" );
+											}$ }
+									}}$
+							}$
+						}
+						case 3 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/scan3_java.rl", 22 ) ${${act = 1;}$}$
+						}
+						case 4 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/scan3_java.rl", 24 ) ${${act = 2;}$}$
+						}
+						case 6 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$	host( "working/scan3_java.rl", 26 ) ${${act = 3;}$}$
+						}
+					}
+					
+					
+				}
+				label _again {
+					switch ( _scanner_to_state_actions[cs] ) {
+						case 1 {
+							host( "NONE", 1 ) ${${ts = nil;}$}$
+						}
+					}
+					
+					if ( cs == 0 )
+					goto _out;
+					p+= 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+					if ( p == eof )
+					{
+						if ( _scanner_eof_trans[cs] > 0 ) {
+							_trans = cast(int)_scanner_eof_trans[cs] - 1;
+							goto _match_cond;
+						}
+					}
+					
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/scan3_java.rl", 51 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"ab89",
+		};
+		
+		static final int inplen = 1;
+		
+		public static void main (String[] args)
+		{
+			scan3_java machine = new scan3_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

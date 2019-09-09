@@ -1,0 +1,283 @@
+host( "working/gotocallret2_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	char comm ;
+	int top ;
+	int stack [32];
+	char * ts ;
+	char * te ;
+	int act ;
+	int val ;
+	
+	
+	
+	
+	
+}@
+array char _GotoCallRet_trans_keys( 0, 11 ) = { 1, 0, 6, 6, 9, 9, 7, 7, 8, 8, 1, 0, 0, 10, 2, 9, 5, 9, 1, 0, 2, 11, 5, 9, 2, 2, 2, 10, 2, 2, 5, 9, 0 };
+
+array s8 _GotoCallRet_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 4, 1, 1, 1, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5, 5, 8, 5, 5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 10, 1, 11, 0 };
+
+array s8 _GotoCallRet_index_offsets( 0, 54 ) = { 0, 0, 1, 2, 3, 4, 4, 15, 23, 28, 28, 38, 43, 44, 53, 54, 0 };
+
+array s8 _GotoCallRet_indicies( 0, 26 ) = { 1, 2, 3, 4, 6, 7, 8, 9, 7, 10, 10, 10, 10, 10, 11, 13, 12, 12, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 16, 7, 17, 17, 17, 17, 17, 18, 19, 17, 17, 17, 17, 17, 19, 22, 23, 24, 25, 25, 25, 25, 25, 26, 24, 25, 25, 25, 25, 25, 0 };
+
+array s8 _GotoCallRet_index_defaults( 0, 28 ) = { 0, 0, 0, 0, 0, 5, 7, 12, 12, 7, 7, 20, 21, 7, 27, 28, 0 };
+
+array s8 _GotoCallRet_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _GotoCallRet_cond_targs( 0, 15 ) = { 6, 2, 3, 4, 6, 9, 6, 0, 6, 6, 7, 6, 6, 1, 8, 10, 10, 11, 10, 12, 10, 10, 13, 13, 14, 15, 13, 13, 13, 0 };
+
+array s8 _GotoCallRet_cond_actions( 0, 21 ) = { 1, 0, 0, 0, 2, 4, 6, 0, 7, 8, 9, 10, 11, 0, 0, 12, 13, 0, 14, 0, 15, 16, 17, 18, 0, 0, 19, 20, 21, 0 };
+
+array s8 _GotoCallRet_to_state_actions( 0, 3 ) = { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0 };
+
+array s8 _GotoCallRet_from_state_actions( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0 };
+
+array s8 _GotoCallRet_eof_trans( 0, 29 ) = { 0, 1, 1, 1, 1, 0, 0, 13, 13, 0, 0, 21, 22, 0, 28, 29, 0 };
+
+array s8 _GotoCallRet_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _GotoCallRet_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _GotoCallRet_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int GotoCallRet_start = 6;
+value int GotoCallRet_first_final = 6;
+value int GotoCallRet_error = 0;
+
+value int GotoCallRet_en_handle = 5;
+value int GotoCallRet_en_one = 10;
+value int GotoCallRet_en_two = 13;
+value int GotoCallRet_en_main = 6;
+
+host( "working/gotocallret2_c.rl", 84 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)GotoCallRet_start;
+		top = 0;
+		ts = nil;
+		te = nil;
+	}
+	host( "working/gotocallret2_c.rl", 91 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+		char *eof = pe;
+	}@
+	{
+		int _trans = 0;
+		index char _keys;
+		index s8 _inds;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				switch ( _GotoCallRet_from_state_actions[cs] ) {
+					case 5 {
+						host( "NONE", 1 ) ${${ts = p;}$}$
+					}
+				}
+				
+				_keys = offset( _GotoCallRet_trans_keys, (cs<<1) );
+				_inds = offset( _GotoCallRet_indicies, _GotoCallRet_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 125 && ( deref( data, p )) >= 10 )
+				{
+					int _ic = cast(int)_GotoCallRet_char_class[cast(int)( deref( data, p )) - 10];
+					if ( _ic <= cast(int)deref( _GotoCallRet_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _GotoCallRet_trans_keys, _keys ) )
+					_trans = cast(int)deref( _GotoCallRet_indicies, _inds + cast(int)( _ic - cast(int)deref( _GotoCallRet_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_GotoCallRet_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_GotoCallRet_index_defaults[cs];
+				}
+				
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_GotoCallRet_cond_targs[_trans];
+				
+				if ( _GotoCallRet_cond_actions[_trans] == 0 )
+				goto _again;
+				
+				switch ( _GotoCallRet_cond_actions[_trans] ) {
+					case 4 {
+						host( "working/gotocallret2_c.rl", 22 ) ${printf( "%s", "handle " );
+							${p = p - 1; }$if ( val == 1 )
+							{
+								${cs = host( "-", 1 ) ={10}=;}$
+							} 
+							if ( val == 2 )
+							{
+								${cs = host( "-", 1 ) ={13}=;}$
+							} 
+							if ( val == 3 )
+							{
+								${cs = 6;}$} 
+						}$
+					}
+					case 9 {
+						host( "NONE", 1 ) ${${te = p+1;}$}$
+					}
+					case 14 {
+						host( "working/gotocallret2_c.rl", 38 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 38 ) ${printf( "%s", "{ " );
+										${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={10}=; goto _again;}$}$}$}$
+						}
+						case 13 {
+							host( "working/gotocallret2_c.rl", 40 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 40 ) ${printf( "%s", "[ " );
+										${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={13}=; goto _again;}$}$}$}$
+						}
+						case 12 {
+							host( "working/gotocallret2_c.rl", 47 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 47 ) ${printf( "%s", "space " );
+									}$}$}$
+						}
+						case 16 {
+							host( "working/gotocallret2_c.rl", 42 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 42 ) ${printf( "%s", "} " );
+									${top -= 1;cs = stack[top];goto _again;}$}$}$}$
+					}
+					case 15 {
+						host( "working/gotocallret2_c.rl", 44 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 44 ) ${printf( "%s", "word " );
+									val = 1;
+									${cs = host( "-", 1 ) ={5}=; goto _again;}$}$}$}$
+					}
+					case 19 {
+						host( "working/gotocallret2_c.rl", 52 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 52 ) ${printf( "%s", "{ " );
+										${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={10}=; goto _again;}$}$}$}$
+						}
+						case 18 {
+							host( "working/gotocallret2_c.rl", 54 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 54 ) ${printf( "%s", "[ " );
+										${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={13}=; goto _again;}$}$}$}$
+						}
+						case 17 {
+							host( "working/gotocallret2_c.rl", 61 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 61 ) ${printf( "%s", "space " );
+									}$}$}$
+						}
+						case 20 {
+							host( "working/gotocallret2_c.rl", 56 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 56 ) ${printf( "%s", "] " );
+										${top -= 1;cs = stack[top];goto _again;}$}$}$}$
+						}
+						case 21 {
+							host( "working/gotocallret2_c.rl", 58 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 58 ) ${printf( "%s", "word " );
+										val = 2;
+										${cs = host( "-", 1 ) ={5}=; goto _again;}$}$}$}$
+						}
+						case 10 {
+							host( "working/gotocallret2_c.rl", 66 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 66 ) ${printf( "%s", "{ " );
+											${stack[top] = cs; top += 1;cs = 10; goto _again;}$}$}$}$
+							}
+							case 8 {
+								host( "working/gotocallret2_c.rl", 68 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 68 ) ${printf( "%s", "[ " );
+											${stack[top] = cs; top += 1;cs = 13; goto _again;}$}$}$}$
+							}
+							case 2 {
+								host( "working/gotocallret2_c.rl", 73 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 73 ) ${printf( "%s", "this is the foil" );
+										}$}$}$
+							}
+							case 7 {
+								host( "working/gotocallret2_c.rl", 75 ) ${${te = p+1;host( "working/gotocallret2_c.rl", 75 ) ${printf( "%s", "space " );
+										}$}$}$
+							}
+							case 6 {
+								host( "working/gotocallret2_c.rl", 77 ) ${${te = p+1;}$}$
+							}
+							case 11 {
+								host( "working/gotocallret2_c.rl", 70 ) ${${te = p;p = p - 1;host( "working/gotocallret2_c.rl", 70 ) ${printf( "%s", "word " );
+											val = 3;
+											${cs = 5; goto _again;}$}$}$}$
+							}
+							case 1 {
+								host( "working/gotocallret2_c.rl", 70 ) ${${p = ((te))-1;
+										host( "working/gotocallret2_c.rl", 70 ) ${printf( "%s", "word " );
+											val = 3;
+											${cs = 5; goto _again;}$}$}$}$
+							}
+						}
+						
+						
+					}
+					label _again {
+						switch ( _GotoCallRet_to_state_actions[cs] ) {
+							case 3 {
+								host( "NONE", 1 ) ${${ts = nil;}$}$
+							}
+						}
+						
+						if ( cs == 0 )
+						goto _out;
+						p+= 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+						if ( p == eof )
+						{
+							if ( _GotoCallRet_eof_trans[cs] > 0 ) {
+								_trans = cast(int)_GotoCallRet_eof_trans[cs] - 1;
+								goto _match_cond;
+							}
+						}
+						
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/gotocallret2_c.rl", 99 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= GotoCallRet_first_final )
+				printf( "ACCEPT\n" );
+				else
+				printf( "FAIL\n" );
+			}
+			
+			char *inp[] = {
+				"{a{b[c d]d}c}\n",
+				"[a{b[c d]d}c}\n",
+			"[a[b]c]d{ef{g{h}i}j}l\n",
+			"{{[]}}\n",
+			"a b c\n",
+			"{a b c}\n",
+			"[a b c]\n",
+			"{]\n",
+				"{{}\n",
+					"[[[[[[]]]]]]\n",
+					"[[[[[[]]}]]]\n",
+			};
+			
+			int inplen = 11;
+			
+			int main( )
+			{
+				int i;
+				for ( i = 0; i < inplen; i++ ) {
+					init();
+					exec( inp[i], strlen(inp[i]) );
+					finish();
+				}
+				return 0;
+			}
+			
+		}@

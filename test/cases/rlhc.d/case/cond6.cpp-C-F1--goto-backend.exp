@@ -1,0 +1,150 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+static const char  _cond_trans_keys [] = { 1, 0, 2, 3, 3, 4, 0, 2, 1, 0, 0 ,  };
+static const char  _cond_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 3, 4, 0 ,  };
+static const char  _cond_index_offsets [] = { 0, 0, 2, 4, 7, 0 ,  };
+static const char  _cond_indicies [] = { 0, 2, 4, 5, 6, 1, 7, 0 ,  };
+static const char  _cond_index_defaults [] = { 0, 1, 3, 1, 1, 0 ,  };
+static const char  _cond_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0, -1, -1, 0 ,  };
+static const char  _cond_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 7, 8, 0 ,  };
+static const char  _cond_cond_targs [] = { 1, 0, 2, 2, 2, 2, 3, 4, 3, 0 ,  };
+static const char  _cond_cond_actions [] = { 0, 0, 1, 0, 2, 3, 0, 4, 0, 0 ,  };
+static const char  _cond_nfa_targs [] = { 0, 0 ,  };
+static const char  _cond_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+static const char  _cond_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _cond_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  cond_start  = 1;
+static const int  cond_first_final  = 4;
+static const int  cond_en_main  = 1;
+void test( const char *str )
+{
+	int cs = cond_start, n = 0;
+	const char *p = str;
+	const char *pe = str + strlen( str );
+	
+	
+	{
+		int _trans = 0;
+		unsigned int _cond = 0;
+		const char  *_keys;
+		const char  *_inds;
+		int _cpc;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _cond_trans_keys + (cs<<1);
+		_inds = _cond_indicies + _cond_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 41 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _cond_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _cond_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _cond_index_defaults[cs];
+		}
+		
+		
+		_cond = ( unsigned int  ) _cond_trans_offsets[_trans];
+		_cpc = 0;
+		switch ( _cond_trans_cond_spaces[_trans] ) {
+			case 0 :
+			if ( (!n) )
+			_cpc += 1;
+			
+			
+			break;
+			
+		}
+		_cond += ( unsigned int  ) _cpc;
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _cond_cond_targs[_cond];
+		if ( _cond_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		switch ( _cond_cond_actions[_cond] ) {
+			case 1 :
+			{
+				n=0;
+			}
+			
+			break;
+			case 2 :
+			{
+				n++;
+			}
+			
+			break;
+			case 3 :
+			{
+				n--;
+			}
+			
+			break;
+			case 4 :
+			{
+				cout << "success";
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+	if ( cs < cond_first_final )
+	cout << "failure";
+	cout << endl;
+}
+
+int main()
+{
+	test( "( ( )\n" );
+	test( "()()\n" );
+	test( "(((\n" );
+	test( "((()\n" );
+	test( "((())\n" );
+	test( "()\n" );
+	test( "((()))\n" );
+	test( "(()())\n" );
+	test( "((())()(((()))))\n" );
+	return 0;
+}
+

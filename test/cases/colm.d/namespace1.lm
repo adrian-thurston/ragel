@@ -1,0 +1,23 @@
+namespace n1
+
+	lex
+		token id / 'a' .. 'z' /
+		ignore / '\n' | '\t' | ' ' /
+	end
+
+	def start
+		[id*]
+end
+
+parse P: n1::start[stdin]
+print[ @P ]
+##### IN #####
+a
+  b
+  c
+d
+##### EXP #####
+a
+  b
+  c
+d

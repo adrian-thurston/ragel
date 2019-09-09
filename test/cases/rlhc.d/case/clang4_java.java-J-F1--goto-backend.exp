@@ -1,0 +1,715 @@
+class clang4_java
+{
+	int pos ;
+	int line ;
+	
+	
+	
+	
+	
+	private static char  _clang_trans_keys [] = { 1, 0, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 0, 13, 8, 9, 8, 10, 0, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 1, 13, 0,  };
+	private static byte  _clang_char_class [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 4, 4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 4, 4, 4, 4, 4, 4, 4, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 4, 12, 4, 4, 11, 4, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 13, 11, 11, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+	private static short  _clang_index_offsets [] = { 0, 0, 14, 28, 42, 56, 70, 84, 86, 89, 103, 116, 129, 142, 155, 168, 181, 194, 207, 0 ,  };
+	private static byte  _clang_indicies [] = { 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 5, 6, 5, 5, 5, 2, 5, 5, 5, 5, 5, 5, 7, 5, 5, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 8, 9, 10, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 10, 8, 8, 8, 8, 11, 8, 8, 8, 8, 8, 8, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 14, 14, 15, 15, 15, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 16, 17, 16, 18, 16, 19, 20, 21, 22, 22, 16, 22, 24, 25, 26, 25, 27, 25, 28, 29, 30, 31, 31, 25, 31, 33, 34, 35, 34, 36, 34, 37, 38, 39, 40, 40, 34, 40, 24, 8, 26, 25, 27, 25, 12, 29, 30, 31, 31, 25, 31, 42, 43, 44, 43, 45, 46, 47, 48, 48, 49, 49, 43, 50, 52, 53, 54, 53, 55, 53, 56, 14, 14, 57, 57, 53, 57, 59, 60, 61, 60, 62, 60, 63, 64, 64, 64, 64, 60, 64, 42, 43, 44, 43, 45, 46, 47, 48, 48, 49, 49, 43, 49, 66, 67, 68, 67, 69, 67, 70, 71, 71, 71, 72, 67, 72, 0 ,  };
+	private static byte  _clang_index_defaults [] = { 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 11, 23, 32, 23, 41, 51, 58, 41, 65, 0 ,  };
+	private static byte  _clang_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+	private static byte  _clang_cond_targs [] = { 1, 1, 12, 9, 0, 2, 2, 3, 4, 4, 5, 10, 6, 10, 15, 18, 11, 1, 2, 13, 14, 17, 16, 10, 10, 11, 1, 2, 13, 14, 17, 16, 10, 10, 11, 1, 2, 13, 14, 17, 16, 10, 10, 11, 1, 2, 7, 13, 17, 16, 8, 10, 10, 11, 1, 2, 13, 16, 10, 10, 11, 1, 2, 13, 16, 10, 10, 11, 1, 2, 13, 18, 16, 0 ,  };
+	private static byte  _clang_cond_actions [] = { 1, 2, 0, 0, 0, 1, 2, 0, 0, 3, 0, 0, 0, 3, 1, 4, 4, 5, 5, 4, 4, 4, 4, 6, 7, 8, 9, 9, 8, 8, 8, 8, 10, 11, 12, 13, 13, 12, 12, 12, 12, 14, 15, 16, 17, 17, 1, 16, 1, 16, 0, 18, 19, 20, 21, 21, 20, 20, 22, 23, 24, 25, 25, 24, 1, 26, 27, 28, 29, 29, 28, 1, 28, 0 ,  };
+	private static byte  _clang_eof_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 10, 6, 14, 18, 22, 14, 26, 0 ,  };
+	private static byte  _clang_nfa_targs [] = { 0, 0 ,  };
+	private static byte  _clang_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+	private static byte  _clang_nfa_push_actions [] = { 0, 0 ,  };
+	private static byte  _clang_nfa_pop_trans [] = { 0, 0 ,  };
+	private static int  clang_start  = 10;
+	private static int  clang_first_final  = 10;
+	private static int  clang_error  = 0;
+	private static int  clang_en_main  = 10;
+	int cs;
+	
+	void init()
+	{
+		pos = 0;
+		line = 1;
+		{
+			cs = (int)clang_start;
+			
+		}
+	}
+	
+	void exec( char data[], int len )
+	{
+		char buffer [] = new char[1024];
+		int blen = 0;
+		int p = 0;
+		int pe = len;
+		
+		int eof = len;
+		String _s;
+		{
+			int _trans = 0;
+			int _keys;
+			int _inds;
+			int _goto_targ = 0;
+			_goto: while ( true ) {
+				switch ( _goto_targ ) {
+					case 0:
+					if ( p == pe  )
+					{
+						_goto_targ = 4;
+						if (true)
+						continue _goto;
+					}
+					
+					if ( cs == 0  )
+					{
+						_goto_targ = 5;
+						if (true)
+						continue _goto;
+					}
+					
+					case 1:
+					_keys = (cs<<1) ;
+					_inds = _clang_index_offsets[cs] ;
+					if ( ( data[p ]) <= 255  )
+					{
+						int _ic = (int)_clang_char_class[(int)( data[p ]) - 0];
+						if ( _ic <= (int)_clang_trans_keys[_keys+1 ]&& _ic >= (int)_clang_trans_keys[_keys ] )
+						_trans = (int)_clang_indicies[_inds + (int)( _ic - (int)_clang_trans_keys[_keys ])  ];
+						
+						else
+						_trans = (int)_clang_index_defaults[cs];
+						
+						
+					}
+					
+					else
+					{
+						_trans = (int)_clang_index_defaults[cs];
+						
+					}
+					
+					{
+						_goto_targ = 2;
+						if (true)
+						continue _goto;
+					}
+					
+					case 2:
+					cs = (int)_clang_cond_targs[_trans];
+					if ( _clang_cond_actions[_trans] == 0  )
+					{
+						_goto_targ = 3;
+						if (true)
+						continue _goto;
+					}
+					
+					switch ( _clang_cond_actions[_trans]  ) {
+						case 1 :
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 5 :
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 3 :
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 22 :
+						{
+							System.out.print( "ident(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						
+						break;
+						case 10 :
+						{
+							System.out.print( "literal(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						
+						break;
+						case 18 :
+						{
+							System.out.print( "float(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						
+						break;
+						case 14 :
+						{
+							System.out.print( "int(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						
+						break;
+						case 26 :
+						{
+							System.out.print( "hex(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						
+						break;
+						case 6 :
+						{
+							System.out.print( "symbol(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						
+						break;
+						case 2 :
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 4 :
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 25 :
+						{
+							System.out.print( "ident(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 23 :
+						{
+							System.out.print( "ident(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 13 :
+						{
+							System.out.print( "literal(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 11 :
+						{
+							System.out.print( "literal(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 21 :
+						{
+							System.out.print( "float(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 19 :
+						{
+							System.out.print( "float(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 17 :
+						{
+							System.out.print( "int(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 15 :
+						{
+							System.out.print( "int(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 29 :
+						{
+							System.out.print( "hex(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 27 :
+						{
+							System.out.print( "hex(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 9 :
+						{
+							System.out.print( "symbol(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						
+						break;
+						case 7 :
+						{
+							System.out.print( "symbol(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							line = line + 1;
+							
+						}
+						
+						break;
+						case 24 :
+						{
+							System.out.print( "ident(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 12 :
+						{
+							System.out.print( "literal(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 20 :
+						{
+							System.out.print( "float(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 16 :
+						{
+							System.out.print( "int(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 28 :
+						{
+							System.out.print( "hex(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						case 8 :
+						{
+							System.out.print( "symbol(" );
+							System.out.print( line );
+							System.out.print( "," );
+							System.out.print( blen );
+							System.out.print( "): " );
+							System.out.print( new String( buffer, 0, blen ) );
+							System.out.print( "\n" );
+							
+						}
+						{
+							blen = 0;
+							
+						}
+						{
+							buffer[blen] = (( data[p ]));
+							blen += 1;
+							
+						}
+						
+						break;
+						
+					}
+					
+					case 3:
+					if ( cs == 0  )
+					{
+						_goto_targ = 5;
+						if (true)
+						continue _goto;
+					}
+					
+					p+= 1;
+					if ( p != pe  )
+					{
+						_goto_targ = 1;
+						if (true)
+						continue _goto;
+					}
+					
+					
+					case 4:
+					{
+					
+					}
+					if ( p == eof  )
+					{
+						switch ( _clang_eof_actions[cs]  ) {
+							case 22 :
+							{
+								System.out.print( "ident(" );
+								System.out.print( line );
+								System.out.print( "," );
+								System.out.print( blen );
+								System.out.print( "): " );
+								System.out.print( new String( buffer, 0, blen ) );
+								System.out.print( "\n" );
+								
+							}
+							
+							break;
+							case 10 :
+							{
+								System.out.print( "literal(" );
+								System.out.print( line );
+								System.out.print( "," );
+								System.out.print( blen );
+								System.out.print( "): " );
+								System.out.print( new String( buffer, 0, blen ) );
+								System.out.print( "\n" );
+								
+							}
+							
+							break;
+							case 18 :
+							{
+								System.out.print( "float(" );
+								System.out.print( line );
+								System.out.print( "," );
+								System.out.print( blen );
+								System.out.print( "): " );
+								System.out.print( new String( buffer, 0, blen ) );
+								System.out.print( "\n" );
+								
+							}
+							
+							break;
+							case 14 :
+							{
+								System.out.print( "int(" );
+								System.out.print( line );
+								System.out.print( "," );
+								System.out.print( blen );
+								System.out.print( "): " );
+								System.out.print( new String( buffer, 0, blen ) );
+								System.out.print( "\n" );
+								
+							}
+							
+							break;
+							case 26 :
+							{
+								System.out.print( "hex(" );
+								System.out.print( line );
+								System.out.print( "," );
+								System.out.print( blen );
+								System.out.print( "): " );
+								System.out.print( new String( buffer, 0, blen ) );
+								System.out.print( "\n" );
+								
+							}
+							
+							break;
+							case 6 :
+							{
+								System.out.print( "symbol(" );
+								System.out.print( line );
+								System.out.print( "," );
+								System.out.print( blen );
+								System.out.print( "): " );
+								System.out.print( new String( buffer, 0, blen ) );
+								System.out.print( "\n" );
+								
+							}
+							
+							break;
+							
+						}
+						
+					}
+					
+					
+					case 5:
+					{
+					
+					}
+					
+					
+				}
+				break;
+			}
+			
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= clang_first_final )
+		System.out.println( "ACCEPT" );
+		else
+		System.out.println( "FAIL" );
+	}
+	
+	static final String inp[] = {
+		"999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n",
+		"wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n",
+	};
+	
+	static final int inplen = 2;
+	
+	public static void main (String[] args)
+	{
+		clang4_java machine = new clang4_java();
+		for ( int i = 0; i < inplen; i++ ) {
+			machine.init();
+			machine.exec( inp[i].toCharArray(), inp[i].length() );
+			machine.finish();
+		}
+	}
+}

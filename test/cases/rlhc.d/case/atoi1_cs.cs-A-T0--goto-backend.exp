@@ -1,0 +1,278 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int neg;
+		int value;
+		
+		
+		
+		
+		static readonly sbyte  []_atoi_actions = { 0, 1, 0, 1, 2, 2, 0, 1, 2, 0, 2, 2, 3, 4, 0,  };
+		static readonly sbyte  []_atoi_key_offsets = { 0, 0, 4, 6, 9, 0,  };
+		static readonly char  []_atoi_trans_keys = { '\u002b', '\u002d', '\u0030', '\u0039', '\u0030', '\u0039', '\u000a', '\u0030', '\u0039', '\u0000',  };
+		static readonly sbyte  []_atoi_single_lengths = { 0, 2, 0, 1, 0, 0,  };
+		static readonly sbyte  []_atoi_range_lengths = { 0, 1, 1, 1, 0, 0,  };
+		static readonly sbyte  []_atoi_index_offsets = { 0, 0, 4, 6, 9, 0,  };
+		static readonly sbyte  []_atoi_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
+		static readonly sbyte  []_atoi_trans_offsets = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0,  };
+		static readonly sbyte  []_atoi_trans_lengths = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  };
+		static readonly sbyte  []_atoi_cond_keys = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_atoi_cond_targs = { 2, 2, 3, 0, 3, 0, 4, 3, 0, 0, 0,  };
+		static readonly sbyte  []_atoi_cond_actions = { 1, 5, 8, 0, 3, 0, 11, 3, 0, 0, 0,  };
+		static readonly sbyte  []_atoi_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_atoi_nfa_offsets = { 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_atoi_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_atoi_nfa_pop_trans = { 0, 0,  };
+		static readonly int  atoi_start  = 1;
+		static readonly int  atoi_first_final  = 4;
+		static readonly int  atoi_error  = 0;
+		static readonly int  atoi_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+			value = 0;
+			neg = 0;
+			
+			{
+				cs = (int)atoi_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _klen;
+				uint _trans = 0;
+				uint _cond = 0;
+				int _acts;
+				uint _nacts;
+				int _keys;
+				int _ckeys;
+				int _cpc;
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume :
+				_keys = _atoi_key_offsets[cs] ;
+				_trans = (uint )_atoi_index_offsets[cs];
+				_klen = (int)_atoi_single_lengths[cs];
+				if ( _klen > 0 )
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( data[p ]) < _atoi_trans_keys[_mid ] )
+						_upper = _mid - 1;
+						
+						else if ( ( data[p ]) > _atoi_trans_keys[_mid ] )
+						_lower = _mid + 1;
+						
+						else
+						{
+							_trans += (uint )(_mid - _keys);
+							goto _match;
+						}
+						
+					}
+					
+					_keys += _klen;
+					_trans += (uint )_klen;
+				}
+				
+				
+				_klen = (int)_atoi_range_lengths[cs];
+				if ( _klen > 0 )
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( data[p ]) < _atoi_trans_keys[_mid ] )
+						_upper = _mid - 2;
+						
+						else if ( ( data[p ]) > _atoi_trans_keys[_mid + 1] )
+						_lower = _mid + 2;
+						
+						else
+						{
+							_trans += (uint )((_mid - _keys)>>1);
+							goto _match;
+						}
+						
+					}
+					
+					_trans += (uint )_klen;
+				}
+				
+				
+				
+				_match :
+				_ckeys = _atoi_trans_offsets[_trans] ;
+				_klen = (int)_atoi_trans_lengths[_trans];
+				_cond = (uint )_atoi_trans_offsets[_trans];
+				_cpc = 0;
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < (int)_atoi_cond_keys[_mid ] )
+						_upper = _mid - 1;
+						
+						else if ( _cpc > (int)_atoi_cond_keys[_mid ] )
+						_lower = _mid + 1;
+						
+						else
+						{
+							_cond += (uint )(_mid - _ckeys);
+							goto _match_cond;
+						}
+						
+					}
+					
+					cs = 0;
+					goto _again;
+				}
+				
+				_match_cond :
+				cs = (int)_atoi_cond_targs[_cond];
+				if ( _atoi_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				
+				_acts = _atoi_cond_actions[_cond] ;
+				_nacts = (uint )_atoi_actions[_acts ];
+				_acts += 1;
+				while ( _nacts > 0 )
+				{
+					switch ( _atoi_actions[_acts ] ) {
+						case 0:
+						{neg = 0;
+							value = 0;
+						}
+						
+						break;
+						case 1:
+						{neg = 1;
+						}
+						
+						break;
+						case 2:
+						{value = value * 10 + ( int ) ( (( data[p ])) - 48 )
+							;
+						}
+						
+						break;
+						case 3:
+						{if ( neg != 0 )
+							{
+								value = -1 * value;
+								
+							} 
+						}
+						
+						break;
+						case 4:
+						{Console.Write( value );Console.Write( "\n" );}
+						
+						break;
+						
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+				
+				
+				_again :
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				
+				_test_eof :
+				{}
+				
+				_out :
+				{}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= atoi_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"1\n",
+			"12\n",
+			"222222\n",
+			"+2123\n",
+			"213 3213\n",
+			"-12321\n",
+			"--123\n",
+			"-99\n",
+			" -3000\n",
+		};
+		
+		
+		static readonly int inplen = 9;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

@@ -1,0 +1,230 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+	
+	
+	
+	
+	
+	
+		static readonly sbyte  []_zlen1_key_offsets = { 0, 0, 0,  };
+		static readonly char  []_zlen1_trans_keys = { '\u0000',  };
+		static readonly sbyte  []_zlen1_single_lengths = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_range_lengths = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_index_offsets = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_trans_cond_spaces = { -1, 0,  };
+		static readonly sbyte  []_zlen1_trans_offsets = { 0, 0,  };
+		static readonly sbyte  []_zlen1_trans_lengths = { 1, 0,  };
+		static readonly sbyte  []_zlen1_cond_keys = { 0, 0,  };
+		static readonly sbyte  []_zlen1_cond_targs = { 0, 0,  };
+		static readonly sbyte  []_zlen1_cond_actions = { 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_offsets = { 0, 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_zlen1_nfa_pop_trans = { 0, 0,  };
+		static readonly int  zlen1_start  = 1;
+		static readonly int  zlen1_first_final  = 1;
+		static readonly int  zlen1_error  = 0;
+		static readonly int  zlen1_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)zlen1_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _klen;
+				int _keys;
+				int _ckeys;
+				int _cpc;
+				uint _trans;
+				uint _cond = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				while ( _cont == 1 )
+				{
+				
+					if ( cs == 0 )
+					_cont = 0;
+					
+					_have = 0;
+					if ( p == pe  )
+					{
+						if ( _have == 0 )
+						_cont = 0;
+						
+					}
+					
+					if ( _cont == 1 )
+					{
+						if ( _have == 0 )
+						{
+							_keys = _zlen1_key_offsets[cs] ;
+							_trans = (uint )_zlen1_index_offsets[cs];
+							_have = 0;
+							_klen = (int)_zlen1_single_lengths[cs];
+							if ( _klen > 0 )
+							{
+								int _lower;
+								int _mid;
+								int _upper;
+								_lower = _keys;
+								_upper = _keys + _klen - 1;
+								while ( _upper >= _lower && _have == 0 )
+								{
+									_mid = _lower + ((_upper-_lower) >> 1);
+									if ( ( data[p ]) < _zlen1_trans_keys[_mid ] )
+									_upper = _mid - 1;
+									
+									else if ( ( data[p ]) > _zlen1_trans_keys[_mid ] )
+									_lower = _mid + 1;
+									
+									else
+									{
+										_trans += (uint )(_mid - _keys);
+										_have = 1;
+									}
+									
+								}
+								
+								if ( _have == 0 )
+								{
+									_keys += _klen;
+									_trans += (uint )_klen;
+								}
+								
+							}
+							
+							
+							if ( _have == 0 )
+							{
+								_klen = (int)_zlen1_range_lengths[cs];
+								if ( _klen > 0 )
+								{
+									int _lower;
+									int _mid;
+									int _upper;
+									_lower = _keys;
+									_upper = _keys + (_klen<<1) - 2;
+									while ( _have == 0&& _lower <= _upper  )
+									{
+										_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+										if ( ( data[p ]) < _zlen1_trans_keys[_mid ] )
+										_upper = _mid - 2;
+										
+										else if ( ( data[p ]) > _zlen1_trans_keys[_mid + 1] )
+										_lower = _mid + 2;
+										
+										else
+										{
+											_trans += (uint )((_mid - _keys)>>1);
+											_have = 1;
+										}
+										
+									}
+									
+									if ( _have == 0 )
+									_trans += (uint )_klen;
+									
+								}
+								
+							}
+							
+							
+							_ckeys = _zlen1_trans_offsets[_trans] ;
+							_klen = (int)_zlen1_trans_lengths[_trans];
+							_cond = (uint )_zlen1_trans_offsets[_trans];
+							_have = 0;
+							_cpc = 0;
+							{
+								int _lower;
+								int _mid;
+								int _upper;
+								_lower = _ckeys;
+								_upper = _ckeys + _klen - 1;
+								while ( _have == 0&& _lower <= _upper  )
+								{
+									_mid = _lower + ((_upper-_lower) >> 1);
+									if ( _cpc < (int)_zlen1_cond_keys[_mid ] )
+									_upper = _mid - 1;
+									
+									else if ( _cpc > (int)_zlen1_cond_keys[_mid ] )
+									_lower = _mid + 1;
+									
+									else
+									{
+										_cond += (uint )(_mid - _ckeys);
+										_have = 1;
+									}
+									
+								}
+								
+								if ( _have == 0 )
+								{
+									cs = 0;
+									_cont = 0;
+								}
+								
+							}
+						}
+						
+						if ( _cont == 1 )
+						{
+							cs = (int)_zlen1_cond_targs[_cond];
+							if ( cs == 0 )
+							_cont = 0;
+							
+							if ( _cont == 1 )
+							p += 1;
+							
+						}
+					}
+					
+				}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= zlen1_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"",
+			"x",
+		};
+		
+		
+		static readonly int inplen = 2;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

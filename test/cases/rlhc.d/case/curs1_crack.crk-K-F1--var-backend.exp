@@ -1,0 +1,168 @@
+import crack.io cout;
+import crack.lang Buffer;
+
+int return_to;
+
+
+
+
+
+const array[byte ] _curs1_trans_keys = [ 1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0,  ];
+const array[int16 ] _curs1_char_class = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 ,  ];
+const array[int16 ] _curs1_index_offsets = [ 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 ,  ];
+const array[int16 ] _curs1_indicies = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  ];
+const array[int16 ] _curs1_index_defaults = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  ];
+const array[int16 ] _curs1_trans_cond_spaces = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  ];
+const array[int16 ] _curs1_cond_targs = [ 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 ,  ];
+const array[int16 ] _curs1_cond_actions = [ 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 4, 0 ,  ];
+const array[int16 ] _curs1_nfa_targs = [ 0, 0 ,  ];
+const array[int16 ] _curs1_nfa_offsets = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _curs1_nfa_push_actions = [ 0, 0 ,  ];
+const array[int16 ] _curs1_nfa_pop_trans = [ 0, 0 ,  ];
+const int  curs1_start  = 1;
+const int  curs1_first_final  = 14;
+const int  curs1_error  = 0;
+const int  curs1_en_unused  = 2;
+const int  curs1_en_one  = 8;
+const int  curs1_en_two  = 11;
+const int  curs1_en_main  = 1;
+void m( String s )
+{
+	byteptr data = s.buffer;
+	int p = 0;
+	int pe = s.size;
+	int cs;
+	String buffer;
+	
+	if ( 1 ) {
+		cs = int ( curs1_start );
+		
+	}
+	if ( 1 ) {
+		int _ps;
+		uint32 _trans = 0;
+		uint32 _have = 0;
+		uint32 _cont = 1;
+		int _keys = 0;
+		int _inds = 0;
+		while ( _cont == 1  )
+		{
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = (cs<<1);
+					_inds = _curs1_index_offsets[cs];
+					if ( (data[p ])<= 119 && (data[p ])>= 10  )
+					{
+						int _ic = int ( _curs1_char_class[int ( (data[p ]) )- 10] );
+						if ( _ic <= int ( _curs1_trans_keys[_keys+1 ] )&& _ic >= int ( _curs1_trans_keys[_keys ] ) )
+						_trans = uint32  ( _curs1_indicies[_inds + int ( (_ic - int ( _curs1_trans_keys[_keys ] )) )] );
+						
+						else
+						_trans = uint32  ( _curs1_index_defaults[cs] );
+						
+						
+					}
+					
+					else
+					{
+						_trans = uint32  ( _curs1_index_defaults[cs] );
+						
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					_ps = cs;
+					cs = int ( _curs1_cond_targs[_trans] );
+					if ( _curs1_cond_actions[_trans] == 3  ) {
+						if ( 1 ) {
+							cout.format( "one\n" );
+							if ( 1 ) {
+								cs = (return_to);
+								
+							}
+							
+						}
+						
+					}
+					else if ( _curs1_cond_actions[_trans] == 4  ) {
+						if ( 1 ) {
+							cout.format( "two\n" );
+							if ( 1 ) {
+								cs = (return_to);
+								
+							}
+							
+						}
+						
+					}
+					else if ( _curs1_cond_actions[_trans] == 1  ) {
+						if ( 1 ) {
+							return_to = (_ps);
+							if ( 1 ) {
+								cs = 8;
+								
+							}
+							
+						}
+						
+					}
+					else if ( _curs1_cond_actions[_trans] == 2  ) {
+						if ( 1 ) {
+							return_to = (_ps);
+							if ( 1 ) {
+								cs = 11;
+								
+							}
+							
+						}
+						
+					}
+					;
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		
+	}
+	if ( cs >= curs1_first_final ) {
+		cout `ACCEPT\n`;
+	}
+	else {
+		cout `FAIL\n`;
+	}
+}
+
+void main()
+{
+	m( "1one2two1one\n" );
+}
+
+main();

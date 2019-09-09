@@ -1,0 +1,123 @@
+#
+# Character classes
+#
+rl CTL /0..31 | 127/
+rl CR /13/
+rl LF /10/
+rl SP /32/
+rl HT /9/
+rl CHAR /0..127/
+
+rl separators / '(' | ')' | '<' | '>' 
+		| '@' | ',' | ';' | ':' | '\\' 
+		| '"' | '/' | '[' | ']' | '?' 
+		| '=' | '{' | '}' | SP | HT /
+
+rl token_char /CHAR - CTL - separators/
+
+#
+# Literal tokens
+#
+
+literal `HTTP/ `:
+token SPT /' '/
+token CRLF /CR LF/
+
+#
+# Request Line
+#
+
+token method /token_char+/
+
+token request_uri /(^SP)+/
+
+token http_number /digit+ '.' digit+/
+
+def http_version 
+	[ `HTTP/ http_number ]
+
+def request_line 
+	[method SPT request_uri 
+	 SPT http_version CRLF]
+
+#
+# Header
+#
+
+token field_name /token_char+/
+
+lex
+	token fv_plain /(^(CR|LF))*/
+	token fv_ext /CR LF (SP|HT)/
+	token fv_term /CR LF/
+end
+
+def fv 
+	[fv_plain]
+|	[fv_ext]
+
+def field_value 
+	[fv* fv_term]
+
+def header 
+	[field_name `: field_value]
+
+#
+# Request
+#
+
+def request
+	[request_line header* CRLF]
+
+parse R: request*[ stdin ]
+
+if !R {
+	print( error )
+	exit( 1 )
+}
+
+for FV: fv in R {
+	if match FV [fv_ext]
+		FV = cons fv " "
+}
+
+print( R )
+
+##### IN #####
+GET /hi/there/ HTTP/1.1
+
+GET /hithere/ HTTP/1.1
+Host: localhost:3535
+User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.12) Gecko/20080207 Ubuntu/7.10 (gutsy) Firefox/2.0.0.12
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+Cache-Control: max-age=0
+
+GET foo HTTP/1.1
+hello: foo
+hi: there
+	my
+ friend
+
+##### EXP #####
+GET /hi/there/ HTTP/1.1
+
+GET /hithere/ HTTP/1.1
+Host: localhost:3535
+User-Agent: Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.12) Gecko/20080207 Ubuntu/7.10 (gutsy) Firefox/2.0.0.12
+Accept: text/xml,application/xml,application/xhtml+xml,text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+Cache-Control: max-age=0
+
+GET foo HTTP/1.1
+hello: foo
+hi: there my friend
+

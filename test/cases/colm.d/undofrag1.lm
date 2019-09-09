@@ -1,0 +1,66 @@
+
+lex
+	ignore /space+/
+	literal `# `{ `}
+	token id2 /[a-zA-Z_]+/ 
+end
+
+def item2
+	[id2]
+|	[`{ item2* `}]
+
+def start2
+	[item2*]
+
+
+context ctx
+
+	SP: parser<start2> 
+
+	lex
+		ignore /space+/
+		literal `* `( `) `!
+		token semi_nl /';\n'/
+		token id /[a-zA-Z_]+/ 
+	end
+
+	def item 
+		[id]
+	|	[`( item* `)]
+
+
+	def A [] {
+		print( 'A\n' )
+		send SP "{ A{d} }"
+	}
+
+	def B [] {
+		print( 'B\n' )
+		send SP "{ B{d} }"
+	}
+
+	def start1 
+		[A item* `!]
+	|	[B item* semi_nl]
+
+end # ctx
+
+
+CTX: ctx = new ctx()
+CTX->SP = new parser<start2>()
+send CTX->SP "a b{c}"
+
+parse Input: ctx::start1( CTX )[stdin]
+
+send CTX->SP "{e}f g"
+
+print( Input )
+print( CTX->SP->finish(), '\n' )
+
+##### IN #####
+a b c ( d ) e f g ;
+##### EXP #####
+A
+B
+a b c ( d ) e f g ;
+a b{c}{ B{d} }{e}f g

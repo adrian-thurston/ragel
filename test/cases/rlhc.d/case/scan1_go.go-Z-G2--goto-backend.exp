@@ -1,0 +1,486 @@
+package main
+import "fmt"
+
+var ts  int ;
+var te  int ;
+var act  int ;
+var token  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var scanner_start  int  = 7
+var scanner_first_final  int  = 7
+var scanner_error  int  = 0
+var scanner_en_main  int  = 7
+var _scanner_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _scanner_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _scanner_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+func prepare() {
+
+	{
+		cs = int(scanner_start);
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		switch cs  {
+			case 7:
+			goto st_case_7;
+			case 0:
+			goto st_case_0;
+			case 1:
+			goto st_case_1;
+			case 8:
+			goto st_case_8;
+			case 2:
+			goto st_case_2;
+			case 9:
+			goto st_case_9;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 10:
+			goto st_case_10;
+			
+		}
+		goto st_out;
+		ctr25:
+		{{switch act  {
+					case 0 :
+					{{goto st0;}}
+					
+					break;
+					case 4 :
+					p = ((te))-1;
+					{fmt.Print( "lm switch1  " );if ( p + 1 == te ) {
+							fmt.Print( "yes" );
+						}
+						fmt.Print( "\n" );}
+					
+					break;
+					case 5 :
+					p = ((te))-1;
+					{fmt.Print( "lm switch2  " );if ( p + 1 == te ) {
+							fmt.Print( "yes" );
+						}
+						fmt.Print( "\n" );}
+					
+					break;
+					
+				}
+			}
+		}
+		
+		
+		goto st7;
+		ctr2:
+		{{te = p+1;
+			}}
+		
+		
+		goto st7;
+		ctr11:
+		{{p = ((te))-1;
+				{fmt.Print( "on lag      " );if ( p + 1 == te ) {
+						fmt.Print( "yes" );
+					}
+					fmt.Print( "\n" );}
+			}}
+		
+		
+		goto st7;
+		ctr12:
+		{{te = p+1;
+				{fmt.Print( "on lag      " );if ( p + 1 == te ) {
+						fmt.Print( "yes" );
+					}
+					fmt.Print( "\n" );}
+			}}
+		
+		
+		goto st7;
+		ctr15:
+		{{te = p+1;
+			}}
+		
+		
+		goto st7;
+		ctr16:
+		{{te = p+1;
+				{fmt.Print( "on last     " );if ( p + 1 == te ) {
+						fmt.Print( "yes" );
+					}
+					fmt.Print( "\n" );}
+			}}
+		
+		
+		goto st7;
+		ctr21:
+		{{te = p;
+				p = p - 1;
+				{fmt.Print( "on next     " );if ( p + 1 == te ) {
+						fmt.Print( "yes" );
+					}
+					fmt.Print( "\n" );}
+			}}
+		
+		
+		goto st7;
+		ctr23:
+		{{te = p;
+				p = p - 1;
+				{fmt.Print( "on lag      " );if ( p + 1 == te ) {
+						fmt.Print( "yes" );
+					}
+					fmt.Print( "\n" );}
+			}}
+		
+		
+		goto st7;
+		st7:
+		{{ts = 0;
+			}}
+		{{act = 0;
+			}}
+		
+		p+= 1;
+		if p == pe  {
+			goto _test_eof7;
+			
+		}
+		st_case_7:
+		{{ts = p;
+			}}
+		switch ( data[p ])  {
+			case 10:
+			{
+				goto ctr15;
+			}
+			case 97:
+			{
+				goto ctr16;
+			}
+			case 98:
+			{
+				goto st8;
+			}
+			case 99:
+			{
+				goto st2;
+			}
+			case 100:
+			{
+				goto st6;
+			}
+			
+		}
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto st1;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st1:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof1;
+			
+		}
+		st_case_1:
+		switch ( data[p ])  {
+			case 46:
+			{
+				goto ctr2;
+			}
+			case 100:
+			{
+				goto st1;
+			}
+			
+		}
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto st1;
+			}
+			
+		}
+		{
+			goto ctr25;
+		}
+		st8:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof8;
+			
+		}
+		st_case_8:
+		if ( data[p ]) == 98  {
+			{
+				goto st8;
+			}
+			
+		}
+		{
+			goto ctr21;
+		}
+		st2:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof2;
+			
+		}
+		st_case_2:
+		if ( data[p ]) == 49  {
+			{
+				goto ctr4;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		ctr4:
+		{{te = p+1;
+			}}
+		
+		
+		goto st9;
+		st9:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof9;
+			
+		}
+		st_case_9:
+		if ( data[p ]) == 100  {
+			{
+				goto st3;
+			}
+			
+		}
+		{
+			goto ctr23;
+		}
+		st3:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof3;
+			
+		}
+		st_case_3:
+		if ( data[p ]) == 120  {
+			{
+				goto st4;
+			}
+			
+		}
+		{
+			goto ctr11;
+		}
+		st4:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof4;
+			
+		}
+		st_case_4:
+		if ( data[p ]) == 120  {
+			{
+				goto st5;
+			}
+			
+		}
+		{
+			goto ctr11;
+		}
+		st5:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof5;
+			
+		}
+		st_case_5:
+		if ( data[p ]) == 120  {
+			{
+				goto ctr12;
+			}
+			
+		}
+		{
+			goto ctr11;
+		}
+		st6:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof6;
+			
+		}
+		st_case_6:
+		switch ( data[p ])  {
+			case 46:
+			{
+				goto ctr2;
+			}
+			case 49:
+			{
+				goto ctr13;
+			}
+			case 50:
+			{
+				goto ctr14;
+			}
+			case 100:
+			{
+				goto st1;
+			}
+			
+		}
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto st1;
+			}
+			
+		}
+		{
+			goto st0;
+		}
+		ctr13:
+		{{te = p+1;
+			}}
+		{{act = 4;
+			}}
+		
+		
+		goto st10;
+		ctr14:
+		{{te = p+1;
+			}}
+		{{act = 5;
+			}}
+		
+		
+		goto st10;
+		st10:
+		p+= 1;
+		if p == pe  {
+			goto _test_eof10;
+			
+		}
+		st_case_10:
+		switch ( data[p ])  {
+			case 46:
+			{
+				goto ctr2;
+			}
+			case 100:
+			{
+				goto st1;
+			}
+			
+		}
+		if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+			{
+				goto st1;
+			}
+			
+		}
+		{
+			goto ctr25;
+		}
+		st_out:
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if p == eof  {
+			{
+				switch cs  {
+					case 1:
+					goto ctr25;
+					case 8:
+					goto ctr21;
+					case 9:
+					goto ctr23;
+					case 3:
+					goto ctr11;
+					case 4:
+					goto ctr11;
+					case 5:
+					goto ctr11;
+					case 10:
+					goto ctr25;
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= scanner_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"abbc1d1d2\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

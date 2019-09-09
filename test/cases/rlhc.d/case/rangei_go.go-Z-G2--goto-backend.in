@@ -1,0 +1,203 @@
+host( "working/rangei_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+value int rangei_start = 1;
+value int rangei_first_final = 7;
+value int rangei_error = 0;
+
+value int rangei_en_main = 1;
+
+array s8 _rangei_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _rangei_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _rangei_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _rangei_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/rangei_go.rl", 30 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)rangei_start;
+	}
+	host( "working/rangei_go.rl", 33 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( cs )
+		{
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			case 2:
+			goto st_case_2;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 5:
+			goto st_case_5;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+		}
+		goto st_out;
+		st_case_1:
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st2;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st2;
+		}
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st3;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st3;
+		}
+		{
+			goto st0;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		if ( ( deref( data, p )) > 93 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st4;
+			}
+		} else if ( ( deref( data, p )) >= 60 ) {
+			goto st4;
+		}
+		{
+			goto st0;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		if ( ( deref( data, p )) > 90 ) {
+			if ( 94 <= ( deref( data, p )) && ( deref( data, p )) <= 125 ) {
+				goto st5;
+			}
+		} else if ( ( deref( data, p )) >= 65 ) {
+			goto st5;
+		}
+		{
+			goto st0;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		if ( ( deref( data, p )) < 86 ) {
+			if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 69 ) {
+				goto st6;
+			}
+		} else if ( ( deref( data, p )) > 101 ) {
+			if ( 118 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st6;
+			}
+		} else {
+			goto st6;
+		}
+		{
+			goto st0;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		if ( 60 <= ( deref( data, p )) && ( deref( data, p )) <= 125 ) {
+			goto st7;
+		}
+		{
+			goto st0;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		{
+			goto st0;
+		}
+		st_out:
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof5: cs = 5; goto _test_eof; 
+		_test_eof6: cs = 6; goto _test_eof; 
+		_test_eof7: cs = 7; goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/rangei_go.rl", 39 ) @{
+	}
+	func finish() {
+		if cs >= rangei_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"AaBbAa",
+		"Aa`bAa",
+		"AaB@@Aa",
+		"AaBbMa",
+		"AaBbma",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

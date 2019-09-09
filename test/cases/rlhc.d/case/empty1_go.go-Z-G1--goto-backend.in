@@ -1,0 +1,95 @@
+host( "working/empty1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	
+	
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _empty1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_nfa_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _empty1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int empty1_start = 1;
+value int empty1_first_final = 2;
+value int empty1_error = 0;
+
+value int empty1_en_main = 1;
+
+host( "working/empty1_go.rl", 23 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)empty1_start;
+	}
+	host( "working/empty1_go.rl", 26 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+		}
+		
+		ctr0: cs = 0; goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/empty1_go.rl", 32 ) @{
+	}
+	func finish() {
+		if cs >= empty1_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"",
+		"x",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

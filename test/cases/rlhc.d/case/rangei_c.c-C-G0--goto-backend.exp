@@ -1,0 +1,235 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+static const char  _rangei_nfa_targs [] = { 0, 0 ,  };
+static const char  _rangei_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _rangei_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _rangei_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  rangei_start  = 1;
+static const int  rangei_first_final  = 7;
+static const int  rangei_error  = 0;
+static const int  rangei_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) rangei_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+	
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr0;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 65  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr2;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 65  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)> 93  )
+			{
+				if ( 97 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr3;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 60  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)> 90  )
+			{
+				if ( 94 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 125  )
+				{
+					goto ctr4;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 65  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)< 86  )
+			{
+				if ( 65 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 69  )
+				{
+					goto ctr5;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 101  )
+			{
+				if ( 118 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 122  )
+				{
+					goto ctr5;
+				}
+				
+			} 
+			else
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( 60 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 125  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 7:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		ctr2: cs = 3;
+		goto _again;
+		ctr3: cs = 4;
+		goto _again;
+		ctr4: cs = 5;
+		goto _again;
+		ctr5: cs = 6;
+		goto _again;
+		ctr6: cs = 7;
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= rangei_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"AaBbAa",
+	"Aa`bAa",
+	"AaB@Aa",
+	"AaBbMa",
+	"AaBbma",
+};
+
+int inplen = 5;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

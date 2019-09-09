@@ -1,0 +1,145 @@
+host( "working/cond6.rl", 1 ) @{/* 
+	* @@LANG: c++
+	*/
+	
+	/* Balanced parenthesis with conditions. */
+	
+	#include <iostream>
+	#include <string.h>
+	using std::cout;
+	using std::endl;
+	
+}@
+array s8 _cond_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _cond_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _cond_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _cond_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int cond_start = 1;
+value int cond_first_final = 4;
+
+value int cond_en_main = 1;
+
+host( "working/cond6.rl", 15 ) @{
+	
+	void test( const char *str )
+	{
+		int cs = cond_start, n = 0;
+		const char *p = str;
+		const char *pe = str + strlen( str );
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					goto ctr0;
+				}
+				case 40: {
+					goto ctr2;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch( ( deref( data, p )) ) {
+				case 40: {
+					goto ctr4;
+				}
+				case 41: {
+					int ck = 0;
+					if ( host( "working/cond6.rl", 26 ) ={!n}= ) ck += 1;
+					if ( ck > 0 ) {
+						goto ctr6;
+					} else {
+						goto ctr5;
+					}
+					
+				}
+			}
+			{
+				goto ctr3;
+			}
+			case 3:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr7;
+				}
+				case 32: {
+					goto ctr8;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 1; goto _again;
+		ctr3: cs = 2; goto _again;
+		ctr2: cs = 2; goto f0;
+		ctr4: cs = 2; goto f1;
+		ctr8: cs = 3; goto _again;
+		ctr7: cs = 4; goto f3;
+		ctr5: cs = 2; goto f2;
+		ctr6: cs = 3; goto _again;
+		
+		f0:
+		host( "working/cond6.rl", 24 ) ${n=0;}$
+		goto _again;
+		f1:
+		host( "working/cond6.rl", 25 ) ${n++;}$
+		goto _again;
+		f2:
+		host( "working/cond6.rl", 25 ) ${n--;}$
+		goto _again;
+		f3:
+		host( "working/cond6.rl", 28 ) ${cout << "success";}$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/cond6.rl", 31 ) @{
+		if ( cs < cond_first_final )
+		cout << "failure";
+		cout << endl;
+	}
+	
+	int main()
+	{
+		test( "( ( )\n" );
+		test( "()()\n" );
+		test( "(((\n" );
+		test( "((()\n" );
+		test( "((())\n" );
+		test( "()\n" );
+		test( "((()))\n" );
+		test( "(()())\n" );
+		test( "((())()(((()))))\n" );
+		return 0;
+	}
+	
+}@

@@ -1,0 +1,444 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int ts;
+		int te;
+		int act;
+		int token;
+		
+		
+		
+		
+		static readonly sbyte  []_scanner_to_state_actions = { 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_from_state_actions = { 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_pop_trans = { 0, 0,  };
+		static readonly int  scanner_start  = 7;
+		static readonly int  scanner_first_final  = 7;
+		static readonly int  scanner_error  = 0;
+		static readonly int  scanner_en_main  = 7;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)scanner_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume:
+				switch ( _scanner_from_state_actions[cs]  ) {
+					case 9:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				switch ( cs  ) {
+					case 7:
+					switch ( ( data[p ])  ) {
+						case '\u000a':
+						{
+							goto ctr15;
+						}
+						case '\u0061':
+						{
+							goto ctr16;
+						}
+						case '\u0062':
+						{
+							goto ctr17;
+						}
+						case '\u0063':
+						{
+							goto ctr18;
+						}
+						case '\u0064':
+						{
+							goto ctr19;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr3;
+					}
+					
+					{
+						goto ctr5;
+					}
+					case 0:
+					goto _out;
+					case 1:
+					switch ( ( data[p ])  ) {
+						case '\u002e':
+						{
+							goto ctr2;
+						}
+						case '\u0064':
+						{
+							goto ctr3;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr3;
+					}
+					
+					{
+						goto ctr25;
+					}
+					case 8:
+					if ( ( data[p ]) == '\u0062' )
+					{
+						goto ctr17;
+					}
+					
+					{
+						goto ctr21;
+					}
+					case 2:
+					if ( ( data[p ]) == '\u0031' )
+					{
+						goto ctr4;
+					}
+					
+					{
+						goto ctr5;
+					}
+					case 9:
+					if ( ( data[p ]) == '\u0064' )
+					{
+						goto ctr24;
+					}
+					
+					{
+						goto ctr23;
+					}
+					case 3:
+					if ( ( data[p ]) == '\u0078' )
+					{
+						goto ctr8;
+					}
+					
+					{
+						goto ctr11;
+					}
+					case 4:
+					if ( ( data[p ]) == '\u0078' )
+					{
+						goto ctr10;
+					}
+					
+					{
+						goto ctr11;
+					}
+					case 5:
+					if ( ( data[p ]) == '\u0078' )
+					{
+						goto ctr12;
+					}
+					
+					{
+						goto ctr11;
+					}
+					case 6:
+					switch ( ( data[p ])  ) {
+						case '\u002e':
+						{
+							goto ctr2;
+						}
+						case '\u0031':
+						{
+							goto ctr13;
+						}
+						case '\u0032':
+						{
+							goto ctr14;
+						}
+						case '\u0064':
+						{
+							goto ctr3;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr3;
+					}
+					
+					{
+						goto ctr5;
+					}
+					case 10:
+					switch ( ( data[p ])  ) {
+						case '\u002e':
+						{
+							goto ctr2;
+						}
+						case '\u0064':
+						{
+							goto ctr3;
+						}
+						
+					}
+					if ( '\u0030'<= ( data[p ]) && ( data[p ]) <= '\u0039' )
+					{
+						goto ctr3;
+					}
+					
+					{
+						goto ctr25;
+					}
+					
+				}
+				ctr5: cs = 0;
+				goto _again;
+				ctr3: cs = 1;
+				goto _again;
+				ctr18: cs = 2;
+				goto _again;
+				ctr24: cs = 3;
+				goto _again;
+				ctr8: cs = 4;
+				goto _again;
+				ctr10: cs = 5;
+				goto _again;
+				ctr19: cs = 6;
+				goto _again;
+				ctr25: cs = 7;
+				goto f0;
+				ctr2: cs = 7;
+				goto f1;
+				ctr11: cs = 7;
+				goto f3;
+				ctr12: cs = 7;
+				goto f4;
+				ctr15: cs = 7;
+				goto f9;
+				ctr16: cs = 7;
+				goto f10;
+				ctr21: cs = 7;
+				goto f11;
+				ctr23: cs = 7;
+				goto f12;
+				ctr17: cs = 8;
+				goto _again;
+				ctr4: cs = 9;
+				goto f2;
+				ctr13: cs = 10;
+				goto f5;
+				ctr14: cs = 10;
+				goto f6;
+				
+				f2:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f10:
+				{{te = p+1;
+						{Console.Write( "on last     " );if ( p + 1 == te )
+							{
+								Console.Write( "yes" );
+							} 
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f4:
+				{{te = p+1;
+						{Console.Write( "on lag      " );if ( p + 1 == te )
+							{
+								Console.Write( "yes" );
+							} 
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f1:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f9:
+				{{te = p+1;
+					}}
+				
+				goto _again;
+				f11:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "on next     " );if ( p + 1 == te )
+							{
+								Console.Write( "yes" );
+							} 
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f12:
+				{{te = p;
+						p = p - 1;
+						{Console.Write( "on lag      " );if ( p + 1 == te )
+							{
+								Console.Write( "yes" );
+							} 
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f3:
+				{{p = ((te))-1;
+						{Console.Write( "on lag      " );if ( p + 1 == te )
+							{
+								Console.Write( "yes" );
+							} 
+							Console.Write( "\n" );}
+					}}
+				
+				goto _again;
+				f0:
+				{{switch ( act  ) {
+							case 0:
+							{{cs = 0;
+									goto _again;}}
+							
+							break;
+							case 4:
+							p = ((te))-1;
+							{Console.Write( "lm switch1  " );if ( p + 1 == te )
+								{
+									Console.Write( "yes" );
+								} 
+								Console.Write( "\n" );}
+							
+							break;
+							case 5:
+							p = ((te))-1;
+							{Console.Write( "lm switch2  " );if ( p + 1 == te )
+								{
+									Console.Write( "yes" );
+								} 
+								Console.Write( "\n" );}
+							
+							break;
+							
+						}
+					}
+				}
+				
+				goto _again;
+				f5:
+				{{te = p+1;
+					}}
+				{{act = 4;
+					}}
+				
+				goto _again;
+				f6:
+				{{te = p+1;
+					}}
+				{{act = 5;
+					}}
+				
+				goto _again;
+				
+				_again:
+				switch ( _scanner_to_state_actions[cs]  ) {
+					case 8:
+					{{ts = 0;
+						}}
+					{{act = 0;
+						}}
+					
+					break;
+					
+				}
+				if ( cs == 0 )
+				goto _out;
+				
+				p+= 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				_test_eof: {}
+				if ( p == eof  )
+				{
+					switch ( cs  ) {
+						case 1:
+						goto ctr25;
+						case 8:
+						goto ctr21;
+						case 9:
+						goto ctr23;
+						case 3:
+						goto ctr11;
+						case 4:
+						goto ctr11;
+						case 5:
+						goto ctr11;
+						case 10:
+						goto ctr25;
+						
+					}
+				}
+				
+				
+				_out: {}
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"abbc1d1d2\n",
+		};
+		
+		
+		static readonly int inplen = 1;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

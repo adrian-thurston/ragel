@@ -1,0 +1,646 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int ts;
+		int te;
+		int act;
+		int token;
+		
+		
+		
+		
+		static readonly short  []_scanner_key_offsets = { 0, 0, 3, 3, 6, 6, 7, 11, 13, 14, 16, 17, 23, 54, 56, 57, 58, 60, 61, 63, 66, 67, 71, 79, 85, 88, 98, 107, 117, 126, 127, 128, 135, 144, 145, 0,  };
+		static readonly char  []_scanner_trans_keys = { '\u000a', '\u0022', '\u005c', '\u000a', '\u0027', '\u005c', '\u002e', '\u002b', '\u002d', '\u0030', '\u0039', '\u0030', '\u0039', '\u0021', '\u0021', '\u002f', '\u000a', '\u0030', '\u0039', '\u0041', '\u0046', '\u0061', '\u0066', '\u0021', '\u0022', '\u0025', '\u0026', '\u0027', '\u002a', '\u002b', '\u002d', '\u002e', '\u002f', '\u0030', '\u003a', '\u003d', '\u004c', '\u005e', '\u005f', '\u007c', '\u0023', '\u002c', '\u0031', '\u0039', '\u003b', '\u0040', '\u0041', '\u005a', '\u005b', '\u0060', '\u0061', '\u007a', '\u007b', '\u007e', '\u0021', '\u007e', '\u003d', '\u003d', '\u0026', '\u003d', '\u003d', '\u002b', '\u003d', '\u002d', '\u003d', '\u003e', '\u002a', '\u002a', '\u002e', '\u0030', '\u0039', '\u0045', '\u0046', '\u004c', '\u0065', '\u0066', '\u006c', '\u0030', '\u0039', '\u0046', '\u004c', '\u0066', '\u006c', '\u0030', '\u0039', '\u0021', '\u002f', '\u003d', '\u002e', '\u0045', '\u004c', '\u0055', '\u0065', '\u006c', '\u0075', '\u0078', '\u0030', '\u0039', '\u002e', '\u0045', '\u004c', '\u0055', '\u0065', '\u006c', '\u0075', '\u0030', '\u0039', '\u004c', '\u0055', '\u006c', '\u0075', '\u0030', '\u0039', '\u0041', '\u0046', '\u0061', '\u0066', '\u002e', '\u0045', '\u004c', '\u0055', '\u0065', '\u006c', '\u0075', '\u0030', '\u0039', '\u003a', '\u003d', '\u005f', '\u0030', '\u0039', '\u0041', '\u005a', '\u0061', '\u007a', '\u0022', '\u0027', '\u005f', '\u0030', '\u0039', '\u0041', '\u005a', '\u0061', '\u007a', '\u003d', '\u003d', '\u007c', '\u0000',  };
+		static readonly sbyte  []_scanner_single_lengths = { 0, 3, 0, 3, 0, 1, 2, 0, 1, 2, 1, 0, 17, 0, 1, 1, 2, 1, 2, 3, 1, 2, 6, 4, 3, 8, 7, 4, 7, 1, 1, 1, 3, 1, 2, 0,  };
+		static readonly sbyte  []_scanner_range_lengths = { 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 3, 7, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 3, 1, 0, 0, 3, 3, 0, 0, 0,  };
+		static readonly short  []_scanner_index_offsets = { 0, 0, 4, 5, 9, 10, 12, 16, 18, 20, 23, 25, 29, 54, 56, 58, 60, 63, 65, 68, 72, 74, 78, 86, 92, 96, 106, 115, 123, 132, 134, 136, 141, 148, 150, 0,  };
+		static readonly sbyte  []_scanner_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
+		static readonly short  []_scanner_trans_offsets = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 0,  };
+		static readonly sbyte  []_scanner_trans_lengths = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  };
+		static readonly sbyte  []_scanner_cond_keys = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_cond_targs = { 12, 12, 2, 1, 1, 12, 12, 4, 3, 3, 12, 12, 7, 7, 23, 12, 23, 12, 9, 8, 9, 12, 8, 12, 10, 27, 27, 27, 12, 14, 1, 15, 16, 3, 17, 18, 19, 21, 24, 25, 29, 30, 32, 33, 31, 34, 12, 28, 12, 31, 12, 31, 12, 13, 12, 13, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 20, 12, 12, 12, 12, 5, 22, 12, 6, 12, 12, 6, 12, 12, 22, 12, 12, 12, 12, 12, 23, 12, 8, 10, 12, 12, 22, 6, 12, 12, 6, 12, 12, 11, 26, 12, 22, 6, 12, 12, 6, 12, 12, 26, 12, 12, 12, 12, 12, 27, 27, 27, 12, 22, 6, 12, 12, 6, 12, 12, 28, 12, 12, 12, 12, 12, 31, 31, 31, 31, 12, 1, 3, 31, 31, 31, 31, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 0,  };
+		static readonly sbyte  []_scanner_cond_actions = { 1, 2, 0, 0, 0, 1, 3, 0, 0, 0, 5, 4, 0, 0, 0, 1, 0, 1, 0, 0, 0, 6, 0, 7, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 12, 12, 13, 0, 0, 14, 0, 0, 0, 11, 13, 11, 0, 11, 0, 11, 0, 15, 0, 17, 16, 18, 16, 19, 20, 16, 21, 16, 22, 23, 16, 24, 25, 0, 16, 27, 26, 28, 0, 29, 16, 0, 31, 31, 0, 31, 31, 29, 30, 31, 31, 31, 31, 0, 30, 0, 0, 32, 16, 29, 0, 35, 35, 0, 35, 35, 0, 34, 33, 29, 0, 37, 37, 0, 37, 37, 34, 36, 39, 39, 39, 39, 0, 0, 0, 38, 29, 0, 35, 35, 0, 35, 35, 13, 33, 40, 16, 41, 16, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 42, 43, 16, 44, 45, 16, 1, 1, 1, 1, 4, 1, 1, 4, 4, 4, 8, 15, 16, 16, 16, 16, 16, 16, 26, 16, 30, 30, 16, 33, 36, 38, 33, 16, 16, 42, 42, 16, 16, 0,  };
+		static readonly sbyte  []_scanner_to_state_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_from_state_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_eof_trans_indexed = { 0, 12, 12, 12, 12, 15, 12, 12, 15, 15, 15, 19, 0, 21, 22, 22, 22, 22, 22, 22, 32, 22, 35, 35, 22, 38, 40, 42, 38, 22, 22, 46, 46, 22, 22, 0,  };
+		static readonly short  []_scanner_eof_trans_direct = { 0, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 0, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 0,  };
+		static readonly sbyte  []_scanner_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_scanner_nfa_pop_trans = { 0, 0,  };
+		static readonly int  scanner_start  = 12;
+		static readonly int  scanner_first_final  = 12;
+		static readonly int  scanner_error  = 0;
+		static readonly int  scanner_en_main  = 12;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)scanner_start;
+				ts = 0;
+				te = 0;
+				act = 0;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _klen;
+				int _keys;
+				int _ckeys;
+				int _cpc;
+				uint _trans = 0;
+				uint _cond = 0;
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume :
+				switch ( _scanner_from_state_actions[cs]  ) {
+					case 10:
+					{{ts = p;
+						}}
+					
+					break;
+					
+				}
+				_keys = _scanner_key_offsets[cs] ;
+				_trans = (uint )_scanner_index_offsets[cs];
+				_klen = (int)_scanner_single_lengths[cs];
+				if ( _klen > 0 )
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _keys;
+					_upper = _keys + _klen - 1;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( ( data[p ]) < _scanner_trans_keys[_mid ] )
+						_upper = _mid - 1;
+						
+						else if ( ( data[p ]) > _scanner_trans_keys[_mid ] )
+						_lower = _mid + 1;
+						
+						else
+						{
+							_trans += (uint )(_mid - _keys);
+							goto _match;
+						}
+						
+					}
+					
+					_keys += _klen;
+					_trans += (uint )_klen;
+				}
+				
+				
+				_klen = (int)_scanner_range_lengths[cs];
+				if ( _klen > 0 )
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _keys;
+					_upper = _keys + (_klen<<1) - 2;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+						if ( ( data[p ]) < _scanner_trans_keys[_mid ] )
+						_upper = _mid - 2;
+						
+						else if ( ( data[p ]) > _scanner_trans_keys[_mid + 1] )
+						_lower = _mid + 2;
+						
+						else
+						{
+							_trans += (uint )((_mid - _keys)>>1);
+							goto _match;
+						}
+						
+					}
+					
+					_trans += (uint )_klen;
+				}
+				
+				
+				
+				_match :
+				_ckeys = _scanner_trans_offsets[_trans] ;
+				_klen = (int)_scanner_trans_lengths[_trans];
+				_cond = (uint )_scanner_trans_offsets[_trans];
+				_cpc = 0;
+				{
+					int _lower;
+					int _mid;
+					int _upper;
+					_lower = _ckeys;
+					_upper = _ckeys + _klen - 1;
+					while ( true  )
+					{
+						if ( _upper < _lower  )
+						break;
+						
+						
+						_mid = _lower + ((_upper-_lower) >> 1);
+						if ( _cpc < (int)_scanner_cond_keys[_mid ] )
+						_upper = _mid - 1;
+						
+						else if ( _cpc > (int)_scanner_cond_keys[_mid ] )
+						_lower = _mid + 1;
+						
+						else
+						{
+							_cond += (uint )(_mid - _ckeys);
+							goto _match_cond;
+						}
+						
+					}
+					
+					cs = 0;
+					goto _again;
+				}
+				
+				_match_cond :
+				cs = (int)_scanner_cond_targs[_cond];
+				if ( _scanner_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				
+				switch ( _scanner_cond_actions[_cond]  ) {
+					case 12:
+					{{te = p+1;
+						}}
+					
+					break;
+					case 3:
+					{{te = p+1;
+							{token = 193;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 2:
+					{{te = p+1;
+							{token = 192;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 31:
+					{{te = p+1;
+							{token = 194;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 35:
+					{{te = p+1;
+							{token = 218;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 37:
+					{{te = p+1;
+							{token = 219;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 39:
+					{{te = p+1;
+							{token = 220;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 40:
+					{{te = p+1;
+							{token = 197;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 41:
+					{{te = p+1;
+							{token = 223;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 17:
+					{{te = p+1;
+							{token = 224;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 19:
+					{{te = p+1;
+							{token = 225;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 45:
+					{{te = p+1;
+							{token = 226;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 21:
+					{{te = p+1;
+							{token = 227;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 32:
+					{{te = p+1;
+							{token = 228;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 18:
+					{{te = p+1;
+							{token = 229;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 23:
+					{{te = p+1;
+							{token = 230;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 25:
+					{{te = p+1;
+							{token = 231;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 20:
+					{{te = p+1;
+							{token = 232;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 43:
+					{{te = p+1;
+							{token = 233;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 44:
+					{{te = p+1;
+							{token = 234;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 22:
+					{{te = p+1;
+							{token = 212;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 24:
+					{{te = p+1;
+							{token = 213;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 27:
+					{{te = p+1;
+							{token = 214;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 28:
+					{{te = p+1;
+							{token = 215;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 5:
+					{{te = p+1;
+							{token = 240;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 11:
+					{{te = p+1;
+							{token = ( int ) ( data[ts] )
+								;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 6:
+					{{te = p+1;
+							{token = 242;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 7:
+					{{te = p+1;
+							{token = 242;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 42:
+					{{te = p;
+							p = p - 1;
+							{token = 195;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 30:
+					{{te = p;
+							p = p - 1;
+							{token = 194;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 33:
+					{{te = p;
+							p = p - 1;
+							{token = 218;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 36:
+					{{te = p;
+							p = p - 1;
+							{token = 219;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 38:
+					{{te = p;
+							p = p - 1;
+							{token = 220;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 26:
+					{{te = p;
+							p = p - 1;
+							{token = 211;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 16:
+					{{te = p;
+							p = p - 1;
+							{token = ( int ) ( data[ts] )
+								;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 15:
+					{{te = p;
+							p = p - 1;
+							{token = 241;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 8:
+					{{p = ((te))-1;
+							{token = 218;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 4:
+					{{p = ((te))-1;
+							{token = ( int ) ( data[ts] )
+								;
+								Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+								Console.Write( "\n" );}
+						}}
+					
+					break;
+					case 1:
+					{{switch ( act  ) {
+								case 0:
+								{{cs = 0;
+										goto _again;}}
+								
+								break;
+								case 3:
+								p = ((te))-1;
+								{token = 195;
+									Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+									Console.Write( "\n" );}
+								
+								break;
+								case 4:
+								p = ((te))-1;
+								{token = 194;
+									Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+									Console.Write( "\n" );}
+								
+								break;
+								case 5:
+								p = ((te))-1;
+								{token = 218;
+									Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+									Console.Write( "\n" );}
+								
+								break;
+								case 6:
+								p = ((te))-1;
+								{token = 219;
+									Console.Write( "<" );Console.Write( token );Console.Write( "> " );Console.Write( new String( data , ts , te - ts ) );
+									Console.Write( "\n" );}
+								
+								break;
+								
+							}
+						}
+					}
+					
+					break;
+					case 14:
+					{{te = p+1;
+						}}
+					{{act = 3;
+						}}
+					
+					break;
+					case 29:
+					{{te = p+1;
+						}}
+					{{act = 4;
+						}}
+					
+					break;
+					case 13:
+					{{te = p+1;
+						}}
+					{{act = 5;
+						}}
+					
+					break;
+					case 34:
+					{{te = p+1;
+						}}
+					{{act = 6;
+						}}
+					
+					break;
+					
+				}
+				
+				_again :
+				switch ( _scanner_to_state_actions[cs]  ) {
+					case 9:
+					{{ts = 0;
+						}}
+					{{act = 0;
+						}}
+					
+					break;
+					
+				}
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				
+				_test_eof :
+				{}
+				if ( p == eof  )
+				{
+					if ( _scanner_eof_trans_direct[cs] > 0 )
+					{
+						_trans = (uint )_scanner_eof_trans_direct[cs] - 1;
+						_cond = (uint )_scanner_trans_offsets[_trans];
+						goto _match_cond;
+					}
+					
+				}
+				
+				
+				
+				_out :
+				{}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= scanner_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+			"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+			"'\n'\n",
+		};
+		
+		
+		static readonly int inplen = 3;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

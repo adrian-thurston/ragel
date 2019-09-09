@@ -1,0 +1,43 @@
+lex
+	token id /[a-zA-Z_][a-zA-Z0-9_]*/
+	literal `= `< `> `/
+	ignore /[ \t\n\r\v]+/
+end
+
+def attr 
+	[id `= id]
+
+def open_tag 
+	[`< id attr* `>]
+
+def close_tag
+	[`< `/ id `>]
+
+def tag 
+	[open_tag item* close_tag]
+
+def item
+	[tag]
+|	[id]
+
+parse PersonTag: tag[ stdin ]
+
+match PersonTag
+	["<person name=" Val:id attr*">" item* "</person>"]
+
+NameTag1: tag = construct tag 
+	["<name type=person>" ^Val "</name>"]
+
+NameTag2: tag = construct tag 
+	"<name type=person>[^Val]</name>"
+
+print( NameTag1, '\n' )
+print( NameTag2, '\n' )
+
+##### IN #####
+<person name=adrian hometown=kingston>
+	<t1 foo=bar2 e=f></t2>
+</person>
+##### EXP #####
+<name type=person>adrian</name>
+<name type=person>adrian</name>

@@ -1,0 +1,157 @@
+host( "working/caseindep_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			
+			
+			
+			
+			
+		}@
+		array char _indep_trans_keys( 0, 11 ) = { c(1), c(0), c(2), c(3), c(9), c(9), c(8), c(8), c(10), c(10), c(10), c(10), c(11), c(11), c(0), c(0), c(5), c(9), c(4), c(8), c(6), c(10), c(6), c(10), c(7), c(11), c(1), c(0), c(0) };
+		
+		array s8 _indep_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 5, 1, 1, 1, 6, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 9, 1, 1, 1, 10, 1, 1, 11, 0 };
+		
+		array s8 _indep_index_offsets( 0, 33 ) = { 0, 0, 2, 3, 4, 5, 6, 7, 8, 13, 18, 23, 28, 33, 0 };
+		
+		array s8 _indep_indicies( 0, 12 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 1, 1, 1, 9, 10, 1, 1, 1, 10, 11, 1, 1, 1, 11, 12, 1, 1, 1, 12, 7, 1, 1, 1, 7, 0 };
+		
+		array s8 _indep_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+		
+		array s8 _indep_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+		
+		array s8 _indep_cond_targs( 0, 13 ) = { 2, 0, 8, 3, 4, 5, 6, 7, 13, 9, 10, 11, 12, 0 };
+		
+		array s8 _indep_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _indep_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _indep_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _indep_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _indep_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int indep_start = 1;
+		value int indep_first_final = 13;
+		value int indep_error = 0;
+		
+		value int indep_en_main = 1;
+		
+		host( "working/caseindep_cs.rl", 29 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)indep_start;
+			}
+			host( "working/caseindep_cs.rl", 34 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _trans = 0;
+				index char _keys;
+				index s8 _inds;
+				entry {
+					if ( p == pe )
+					goto _test_eof;
+					if ( cs == 0 )
+					goto _out;
+					label _resume {
+						_keys = offset( _indep_trans_keys, (cs<<1) );
+						_inds = offset( _indep_indicies, _indep_index_offsets[cs] );
+						
+						if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
+						{
+							int _ic = cast(int)_indep_char_class[cast(int)( deref( data, p )) - 10];
+							if ( _ic <= cast(int)deref( _indep_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _indep_trans_keys, _keys ) )
+							_trans = cast(int)deref( _indep_indicies, _inds + cast(int)( _ic - cast(int)deref( _indep_trans_keys, _keys ) )  ); 
+							else
+							_trans = cast(int)_indep_index_defaults[cs];
+						}
+						else {
+							_trans = cast(int)_indep_index_defaults[cs];
+						}
+						
+						goto _match_cond;
+					}
+					label _match_cond {
+						cs = cast(int)_indep_cond_targs[_trans];
+						
+						if ( cs == 0 )
+						goto _out;
+						p+= 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/caseindep_cs.rl", 45 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= indep_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"1hello\n",
+				"1HELLO\n",
+				"1HeLLo\n",
+				"2hello\n",
+				"2HELLO\n",
+				"2HeLLo\n",
+				"3hello\n",
+				"3HELLO\n",
+				"3HeLLo\n",
+				"4hello\n",
+				"4HELLO\n",
+				"4HeLLo\n",
+				"5hello\n",
+				"5HELLO\n",
+				"5HeLLo\n",
+				"6hello\n",
+				"6HELLO\n",
+				"6HeLLo\n",
+			};
+			
+			
+			static readonly int inplen = 18;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

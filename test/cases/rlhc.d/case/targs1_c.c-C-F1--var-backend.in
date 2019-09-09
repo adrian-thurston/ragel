@@ -1,0 +1,159 @@
+host( "working/targs1_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	int return_to ;
+	
+	
+	
+	
+	
+}@
+array char _targs1_trans_keys( 0, 11 ) = { 1, 0, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 0, 3, 1, 0, 1, 0, 1, 0, 0 };
+
+array s8 _targs1_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 };
+
+array s8 _targs1_index_offsets( 0, 16 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0 };
+
+array s8 _targs1_indicies( 0, 15 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 };
+
+array s8 _targs1_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _targs1_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _targs1_cond_targs( 0, 16 ) = { 2, 0, 3, 4, 5, 6, 14, 8, 9, 15, 11, 12, 16, 13, 13, 13, 0 };
+
+array s8 _targs1_cond_actions( 0, 4 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 3, 4, 0 };
+
+array s8 _targs1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _targs1_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _targs1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _targs1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int targs1_start = 13;
+value int targs1_first_final = 13;
+value int targs1_error = 0;
+
+value int targs1_en_unused = 1;
+value int targs1_en_one = 7;
+value int targs1_en_two = 10;
+value int targs1_en_main = 13;
+
+host( "working/targs1_c.rl", 34 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)targs1_start;
+	}
+	host( "working/targs1_c.rl", 41 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index char _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _targs1_trans_keys, (cs<<1) );
+					_inds = offset( _targs1_indicies, _targs1_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 119 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_targs1_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _targs1_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _targs1_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _targs1_indicies, _inds + cast(int)( _ic - cast(int)deref( _targs1_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_targs1_index_defaults[cs];
+					}
+					else {
+						_trans = cast(uint)_targs1_index_defaults[cs];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_targs1_cond_targs[_trans];
+					
+					switch ( _targs1_cond_actions[_trans] ) {
+						case 1 {
+							host( "working/targs1_c.rl", 16 ) ${printf( "%s", "one\n" );
+								${cs = host( "-", 1 ) ={return_to}=;}$}$
+						}
+						case 2 {
+							host( "working/targs1_c.rl", 19 ) ${printf( "%s", "two\n" );
+								${cs = host( "-", 1 ) ={return_to}=;}$}$
+						}
+						case 3 {
+							host( "working/targs1_c.rl", 23 ) ${return_to = ={cs}=;
+								${cs = 7;}$}$
+						}
+						case 4 {
+							host( "working/targs1_c.rl", 25 ) ${return_to = ={cs}=;
+								${cs = 10;}$}$
+						}
+					}
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/targs1_c.rl", 48 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= targs1_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"1one2two1one\n",
+	};
+	
+	int inplen = 1;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

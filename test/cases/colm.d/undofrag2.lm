@@ -1,0 +1,49 @@
+context undo
+
+	lex
+		ignore /( ' ' | '\t')+/
+		literal `* `( `) `^ `;
+		token NL /'\n'/
+		token id /[a-zA-Z_]+/
+	end
+
+	Out: parser<out>
+
+	def out_item
+		[id]
+	|	[`( item* `)]
+
+	def out 
+		[out_item*]
+
+	def item 
+		[id]
+		{
+			send Out [r1]
+		}
+	|	[`( item* `)]
+		{
+			send Out ['(']
+			send Out [r2]
+			send Out [')']
+		}
+
+	def A1 []
+	def A2 []
+
+	def start 
+		[A1 item* `^]
+	|	[A2 item* `; NL]
+
+end # undo
+
+Undo: undo = new undo()
+Undo->Out = new parser<undo::out>( Undo )
+
+parse Input: undo::start( Undo )[ stdin ]
+print( Input )
+
+##### IN #####
+a b c;
+##### EXP #####
+a b c;

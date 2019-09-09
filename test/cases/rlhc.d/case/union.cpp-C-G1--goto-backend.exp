@@ -1,0 +1,1002 @@
+#include <iostream>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+using namespace std;
+
+#define BUFSIZE 2048
+
+struct Concurrent
+{
+	Concurrent() :
+	cur_char(0),
+	start_word(0),
+	start_comment(0),
+	start_literal(0)
+	{}
+	
+	int cur_char;
+	int start_word;
+	int start_comment;
+	int start_literal;
+	
+	int cs;
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	void init( );
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	void execute( const char *data, int len );
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	int finish( );
+};
+
+
+
+static const char  _Concurrent_eof_actions [] = { 0, 5, 5, 0, 9, 5, 5, 0, 5, 0, 9, 5, 14, 5, 14, 5, 5, 5, 0 ,  };
+static const char  _Concurrent_nfa_targs [] = { 0, 0 ,  };
+static const char  _Concurrent_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _Concurrent_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _Concurrent_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  Concurrent_start  = 0;
+static const int  Concurrent_first_final  = 0;
+static const int  Concurrent_error  = -1;
+static const int  Concurrent_en_main  = 0;
+void Concurrent::init( )
+{
+	cur_char = 0;
+	
+	{
+		cs = ( int ) Concurrent_start;
+	}
+}
+
+void Concurrent::execute( const char *data, int len )
+{
+	const char *p = data;
+	const char *pe = data + len;
+	const char *eof = pe;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		_resume:
+		switch ( cs  ) {
+			case 0:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr1;
+				}
+				case 39:
+				{
+					goto ctr2;
+				}
+				case 47:
+				{
+					goto ctr3;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr1;
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 1:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr5;
+				}
+				case 39:
+				{
+					goto ctr6;
+				}
+				case 47:
+				{
+					goto ctr7;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr4;
+			}
+			case 2:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr9;
+				}
+				case 39:
+				{
+					goto ctr10;
+				}
+				case 47:
+				{
+					goto ctr11;
+				}
+				case 92:
+				{
+					goto ctr12;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr8;
+			}
+			case 3:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr14;
+				}
+				case 39:
+				{
+					goto ctr15;
+				}
+				case 47:
+				{
+					goto ctr16;
+				}
+				case 92:
+				{
+					goto ctr17;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr14;
+			}
+			
+			{
+				goto ctr13;
+			}
+			case 4:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr19;
+				}
+				case 39:
+				{
+					goto ctr20;
+				}
+				case 47:
+				{
+					goto ctr21;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr19;
+			}
+			
+			{
+				goto ctr18;
+			}
+			case 5:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr5;
+				}
+				case 39:
+				{
+					goto ctr6;
+				}
+				case 42:
+				{
+					goto ctr22;
+				}
+				case 47:
+				{
+					goto ctr7;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr4;
+			}
+			case 6:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr23;
+				}
+				case 39:
+				{
+					goto ctr24;
+				}
+				case 42:
+				{
+					goto ctr25;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr23;
+			}
+			
+			{
+				goto ctr22;
+			}
+			case 7:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr27;
+				}
+				case 39:
+				{
+					goto ctr28;
+				}
+				case 42:
+				{
+					goto ctr29;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr27;
+			}
+			
+			{
+				goto ctr26;
+			}
+			case 8:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr31;
+				}
+				case 39:
+				{
+					goto ctr32;
+				}
+				case 42:
+				{
+					goto ctr33;
+				}
+				case 92:
+				{
+					goto ctr34;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr31;
+			}
+			
+			{
+				goto ctr30;
+			}
+			case 9:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr36;
+				}
+				case 39:
+				{
+					goto ctr37;
+				}
+				case 42:
+				{
+					goto ctr38;
+				}
+				case 92:
+				{
+					goto ctr39;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr36;
+			}
+			
+			{
+				goto ctr35;
+			}
+			case 10:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr41;
+				}
+				case 39:
+				{
+					goto ctr42;
+				}
+				case 42:
+				{
+					goto ctr43;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr41;
+			}
+			
+			{
+				goto ctr40;
+			}
+			case 11:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr23;
+				}
+				case 39:
+				{
+					goto ctr24;
+				}
+				case 42:
+				{
+					goto ctr25;
+				}
+				case 47:
+				{
+					goto ctr44;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr23;
+			}
+			
+			{
+				goto ctr22;
+			}
+			case 12:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr46;
+				}
+				case 39:
+				{
+					goto ctr47;
+				}
+				case 47:
+				{
+					goto ctr48;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr46;
+			}
+			
+			{
+				goto ctr45;
+			}
+			case 13:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr31;
+				}
+				case 39:
+				{
+					goto ctr32;
+				}
+				case 42:
+				{
+					goto ctr33;
+				}
+				case 47:
+				{
+					goto ctr49;
+				}
+				case 92:
+				{
+					goto ctr34;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr31;
+			}
+			
+			{
+				goto ctr30;
+			}
+			case 14:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr51;
+				}
+				case 39:
+				{
+					goto ctr52;
+				}
+				case 47:
+				{
+					goto ctr53;
+				}
+				case 92:
+				{
+					goto ctr54;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr51;
+			}
+			
+			{
+				goto ctr50;
+			}
+			case 15:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr9;
+				}
+				case 39:
+				{
+					goto ctr10;
+				}
+				case 42:
+				{
+					goto ctr30;
+				}
+				case 47:
+				{
+					goto ctr11;
+				}
+				case 92:
+				{
+					goto ctr12;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr8;
+			}
+			case 16:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr9;
+				}
+				case 47:
+				{
+					goto ctr11;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr9;
+			}
+			
+			{
+				goto ctr8;
+			}
+			case 17:
+			switch ( ((*( p  ))
+			) ) {
+				case 32:
+				{
+					goto ctr31;
+				}
+				case 42:
+				{
+					goto ctr33;
+				}
+				
+			}
+			if ( 9 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 13  )
+			{
+				goto ctr31;
+			}
+			
+			{
+				goto ctr30;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto f1;
+		ctr5: cs = 0;
+		goto f5;
+		ctr19: cs = 0;
+		goto f10;
+		ctr46: cs = 0;
+		goto f15;
+		ctr0: cs = 1;
+		goto f0;
+		ctr4: cs = 1;
+		goto f1;
+		ctr18: cs = 1;
+		goto f9;
+		ctr45: cs = 1;
+		goto f14;
+		ctr13: cs = 2;
+		goto f0;
+		ctr8: cs = 2;
+		goto f1;
+		ctr2: cs = 2;
+		goto f2;
+		ctr6: cs = 2;
+		goto f6;
+		ctr20: cs = 2;
+		goto f11;
+		ctr50: cs = 2;
+		goto f14;
+		ctr47: cs = 2;
+		goto f16;
+		ctr14: cs = 3;
+		goto f1;
+		ctr9: cs = 3;
+		goto f5;
+		ctr51: cs = 3;
+		goto f15;
+		ctr15: cs = 4;
+		goto f0;
+		ctr10: cs = 4;
+		goto f1;
+		ctr52: cs = 4;
+		goto f14;
+		ctr3: cs = 5;
+		goto f3;
+		ctr7: cs = 5;
+		goto f7;
+		ctr21: cs = 5;
+		goto f12;
+		ctr48: cs = 5;
+		goto f17;
+		ctr26: cs = 6;
+		goto f0;
+		ctr22: cs = 6;
+		goto f1;
+		ctr40: cs = 6;
+		goto f9;
+		ctr27: cs = 7;
+		goto f1;
+		ctr23: cs = 7;
+		goto f5;
+		ctr41: cs = 7;
+		goto f10;
+		ctr35: cs = 8;
+		goto f0;
+		ctr30: cs = 8;
+		goto f1;
+		ctr28: cs = 8;
+		goto f2;
+		ctr24: cs = 8;
+		goto f6;
+		ctr42: cs = 8;
+		goto f11;
+		ctr36: cs = 9;
+		goto f1;
+		ctr31: cs = 9;
+		goto f5;
+		ctr37: cs = 10;
+		goto f0;
+		ctr32: cs = 10;
+		goto f1;
+		ctr29: cs = 11;
+		goto f0;
+		ctr25: cs = 11;
+		goto f1;
+		ctr43: cs = 11;
+		goto f9;
+		ctr44: cs = 12;
+		goto f1;
+		ctr38: cs = 13;
+		goto f0;
+		ctr33: cs = 13;
+		goto f1;
+		ctr49: cs = 14;
+		goto f1;
+		ctr16: cs = 15;
+		goto f3;
+		ctr11: cs = 15;
+		goto f7;
+		ctr53: cs = 15;
+		goto f17;
+		ctr17: cs = 16;
+		goto f0;
+		ctr12: cs = 16;
+		goto f1;
+		ctr54: cs = 16;
+		goto f14;
+		ctr39: cs = 17;
+		goto f0;
+		ctr34: cs = 17;
+		goto f1;
+		
+		f1:
+		{
+			cur_char += 1;
+			
+		}
+		
+		goto _again;
+		f0:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			start_word = cur_char;
+			
+		}
+		
+		goto _again;
+		f5:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "word: " << start_word << 
+			" " << cur_char-1 << endl;
+			
+		}
+		
+		goto _again;
+		f7:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			start_comment = cur_char;
+			
+		}
+		
+		goto _again;
+		f14:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "comment: " << start_comment <<
+			" " << cur_char-1 << endl;
+			
+		}
+		
+		goto _again;
+		f6:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			start_literal = cur_char;
+			
+		}
+		
+		goto _again;
+		f9:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "literal: " << start_literal <<
+			" " << cur_char-1 << endl;
+			
+		}
+		
+		goto _again;
+		f3:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			start_word = cur_char;
+			
+		}
+		{
+			start_comment = cur_char;
+			
+		}
+		
+		goto _again;
+		f2:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			start_word = cur_char;
+			
+		}
+		{
+			start_literal = cur_char;
+			
+		}
+		
+		goto _again;
+		f15:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "word: " << start_word << 
+			" " << cur_char-1 << endl;
+			
+		}
+		{
+			cout << "comment: " << start_comment <<
+			" " << cur_char-1 << endl;
+			
+		}
+		
+		goto _again;
+		f10:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "word: " << start_word << 
+			" " << cur_char-1 << endl;
+			
+		}
+		{
+			cout << "literal: " << start_literal <<
+			" " << cur_char-1 << endl;
+			
+		}
+		
+		goto _again;
+		f12:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			start_comment = cur_char;
+			
+		}
+		{
+			cout << "literal: " << start_literal <<
+			" " << cur_char-1 << endl;
+			
+		}
+		
+		goto _again;
+		f17:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "comment: " << start_comment <<
+			" " << cur_char-1 << endl;
+			
+		}
+		{
+			start_comment = cur_char;
+			
+		}
+		
+		goto _again;
+		f16:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "comment: " << start_comment <<
+			" " << cur_char-1 << endl;
+			
+		}
+		{
+			start_literal = cur_char;
+			
+		}
+		
+		goto _again;
+		f11:
+		{
+			cur_char += 1;
+			
+		}
+		{
+			cout << "literal: " << start_literal <<
+			" " << cur_char-1 << endl;
+			
+		}
+		{
+			start_literal = cur_char;
+			
+		}
+		
+		goto _again;
+		
+		_again:
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( _Concurrent_eof_actions[cs] ) {
+				case 5:
+				{
+					cout << "word: " << start_word << 
+					" " << cur_char-1 << endl;
+					
+				}
+				
+				break;
+				case 14:
+				{
+					cout << "word: " << start_word << 
+					" " << cur_char-1 << endl;
+					
+				}
+				{
+					cout << "comment: " << start_comment <<
+					" " << cur_char-1 << endl;
+					
+				}
+				
+				break;
+				case 9:
+				{
+					cout << "word: " << start_word << 
+					" " << cur_char-1 << endl;
+					
+				}
+				{
+					cout << "literal: " << start_literal <<
+					" " << cur_char-1 << endl;
+					
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+	}
+}
+
+int Concurrent::finish( )
+{
+	if ( cs == Concurrent_error )
+	return -1;
+	if ( cs >= Concurrent_first_final )
+	return 1;
+	return 0;
+}
+
+void test( const char *buf )
+{
+	Concurrent concurrent;
+	concurrent.init();
+	concurrent.execute( buf, strlen(buf) );
+	if ( concurrent.finish() > 0 )
+	cout << "ACCEPT" << endl;
+	else
+	cout << "FAIL" << endl;
+}
+
+int main()
+{
+	test( 
+	"/* in a comment,\n"
+	" * ' and now in a literal string\n"
+	" */ \n"
+	" \n"
+	"the comment has now ended but the literal string lives on\n"
+	"\n"
+	"' comment closed\n" );
+	test( "/* * ' \\' */ \\' '\n" );
+	test( "/**/'\\''/*/*/\n" );
+	return 0;
+}
+

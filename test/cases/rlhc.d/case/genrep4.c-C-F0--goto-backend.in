@@ -1,0 +1,303 @@
+host( "working/genrep4.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	#include <stddef.h>  /* NULL */
+	#include <stdint.h>  /* uint64_t */
+	#include <stdlib.h>  /* malloc(3) free(3) */
+	#include <stdbool.h> /* bool */
+	#include <string.h>
+	#include <stdio.h>
+	
+	struct nfa_bp_rec
+	{
+		long state;
+		const unsigned char *p;
+		int popTrans;
+		long q_2;
+	};
+	
+	struct nfa_bp_rec nfa_bp[1024];
+	long nfa_len = 0;
+	long nfa_count = 0;
+	
+	long c;
+	
+	struct nfa_state_rec
+	{
+		long c;
+	};
+	
+	struct nfa_state_rec nfa_s[1024];
+	
+	void nfa_push()
+	{
+		nfa_s[nfa_len].c = c;
+	}
+	
+	void nfa_pop()
+	{
+		c = nfa_s[nfa_len].c;
+	}
+	
+	long q_2;
+	
+}@
+array s8 _match_any_actions( 0, 10 ) = { 0, 0, 1, 1, 1, 2, 1, 0, 2, 2, 4, 2, 2, 5, 2, 2, 6, 3, 2, 9, 3, 3, 2, 10, 3, 0 };
+
+array unsigned char _match_any_trans_keys( 0, 2 ) = { u(1), u(0), u(1), u(0), u(2), u(2), u(1), u(0), u(1), u(0), u(0), u(0), u(1), u(0), u(2), u(2), u(1), u(0), u(0), u(0), u(1), u(0), u(1), u(0), u(0) };
+
+array s8 _match_any_char_class( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 };
+
+array s8 _match_any_index_offsets( 0, 4 ) = { 0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 4, 4, 0 };
+
+array s8 _match_any_indicies( 0, 4 ) = { 1, 2, 3, 4, 0 };
+
+array s8 _match_any_index_defaults( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0 };
+
+array s8 _match_any_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, 0, 0 };
+
+array s8 _match_any_trans_offsets( 0, 5 ) = { 0, 1, 2, 3, 4, 5, 0 };
+
+array s8 _match_any_cond_targs( 0, 11 ) = { 0, 3, 6, 8, 10, 0, 11, 0 };
+
+array s8 _match_any_cond_actions( 0, 6 ) = { 0, 0, 0, 0, 0, 0, 6, 0 };
+
+array s8 _match_any_nfa_targs( 0, 9 ) = { 0, 1, 2, 3, 5, 2, 4, 1, 7, 3, 9, 7, 4, 0 };
+
+array s8 _match_any_nfa_offsets( 0, 9 ) = { 0, 1, 0, 3, 0, 0, 7, 0, 9, 0, 0, 0, 0 };
+
+array s8 _match_any_nfa_push_actions( 0, 1 ) = { 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0 };
+
+array s8 _match_any_nfa_pop_trans( 0, 8 ) = { 0, 0, 4, 0, 7, 6, 5, 0, 8, 0, 7, 6, 5, 0 };
+
+value int match_any_start = 1;
+value int match_any_first_final = 11;
+value int match_any_error = 0;
+
+value int match_any_en_main = 1;
+
+host( "working/genrep4.rl", 91 ) @{
+	
+	int test( const char *data )
+	{
+		int cs;
+		const unsigned char *p = (const unsigned char *)data;
+		const unsigned char *pe = p + strlen(data) + 1;
+		const unsigned char *eof = pe;
+		
+		printf( "%s\n", data );
+		
+	}@
+	{
+		cs = cast(int)match_any_start;
+		nfa_len = 0;
+	}
+	host( "working/genrep4.rl", 103 ) @{
+	}@
+	{
+		int _trans = 0;
+		uint _cond = 0;
+		index s8 _acts;
+		uint _nacts;
+		index unsigned char _keys;
+		index s8 _inds;
+		int _cpc;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				if ( _match_any_nfa_offsets[cs] ) {
+					int alt = 0; 
+					int new_recs = _match_any_nfa_targs[cast(int)_match_any_nfa_offsets[cs]];
+					while ( alt < new_recs ) { 
+						nfa_bp[nfa_len].state = _match_any_nfa_targs[cast(int)_match_any_nfa_offsets[cs] + 1 + alt];
+						nfa_bp[nfa_len].p = p;
+						nfa_bp[nfa_len].popTrans = cast(long)_match_any_nfa_offsets[cs] + 1 + alt;
+						
+						switch ( _match_any_nfa_push_actions[cast(int)_match_any_nfa_offsets[cs] + 1 + alt] ) {
+							case 1 {
+								host( "working/genrep4.rl", 54 ) ${
+									nfa_bp[nfa_len].q_2 = q_2;
+								}$
+							}
+						}
+						nfa_len += 1;
+						alt += 1;
+					}
+				}
+				_keys = offset( _match_any_trans_keys, (cs<<1) );
+				_inds = offset( _match_any_indicies, _match_any_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 97 && ( deref( data, p )) >= 32 )
+				{
+					int _ic = cast(int)_match_any_char_class[cast(int)( deref( data, p )) - 32];
+					if ( _ic <= cast(int)deref( _match_any_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _match_any_trans_keys, _keys ) )
+					_trans = cast(int)deref( _match_any_indicies, _inds + cast(int)( _ic - cast(int)deref( _match_any_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_match_any_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_match_any_index_defaults[cs];
+				}
+				
+				_cond = cast(uint)_match_any_trans_offsets[_trans];
+				
+				_cpc = 0;
+				switch ( _match_any_trans_cond_spaces[_trans] ) {
+					
+					case 0 {
+						if ( host( "working/genrep4.rl", 49 ) ={ p+1 == eof }= ) _cpc += 1;
+					}
+				}
+				_cond += cast(uint)_cpc;
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_match_any_cond_targs[_cond];
+				
+				if ( _match_any_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				_acts = offset( _match_any_actions, _match_any_cond_actions[_cond] );
+				_nacts = cast(uint)deref( _match_any_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _match_any_actions, _acts ) )
+					{
+						case 0 {
+							host( "working/genrep4.rl", 87 ) ${printf("----- MATCH\n");}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+		if ( nfa_len > 0 ) {
+			nfa_count += 1;
+			nfa_len -= 1;
+			p = nfa_bp[nfa_len].p;
+			int _pop_test = 1;
+			switch ( _match_any_nfa_pop_trans[nfa_bp[nfa_len].popTrans] ) {
+				case 5 {
+					_pop_test = host( "working/genrep4.rl", 59 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep4.rl", 68 ) ={
+						({ 1; })
+					}=;
+					
+				}
+				case 6 {
+					_pop_test = host( "working/genrep4.rl", 59 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep4.rl", 72 ) ={
+						({ ++q_2 < 3; })
+					}=;
+					
+				}
+				case 7 {
+					_pop_test = host( "working/genrep4.rl", 59 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep4.rl", 76 ) ={
+						({ ++q_2 >= 2; })
+					}=;
+					
+				}
+				case 4 {
+					_pop_test = host( "working/genrep4.rl", 59 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_cpc = 0;
+					if ( host( "working/genrep4.rl", 81 ) ={ ({printf("  marker\n");1;}) }= ) _cpc += 1;
+					_pop_test = _cpc == 1;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep4.rl", 64 ) ={
+						({  q_2 = 0; 1; })
+					}=;
+					
+				}
+				case 8 {
+					_pop_test = host( "working/genrep4.rl", 59 ) ={ ({
+							q_2 = nfa_bp[nfa_len].q_2;
+							1;
+						}) }=;
+					if ( !_pop_test ) break;
+					_cpc = 0;
+					if ( host( "working/genrep4.rl", 81 ) ={ ({printf("  marker\n");1;}) }= ) _cpc += 1;
+					_pop_test = _cpc == 1;
+					if ( !_pop_test ) break;
+					_pop_test = host( "working/genrep4.rl", 64 ) ={
+						({  q_2 = 0; 1; })
+					}=;
+					
+				}
+			}
+			if ( _pop_test ) {
+				cs = nfa_bp[nfa_len].state;
+				goto _resume;
+			}
+			goto _out;
+		}
+	}
+	host( "working/genrep4.rl", 104 ) @{
+		
+		return 0;
+	}
+	
+	int main()
+	{
+		test( "a " );
+		test( "aa " );
+		test( "aaa " );
+		test( "aaaa " );
+		
+		test( "a a " );
+		test( "aa aa " );
+		test( "aaa aaa " );
+		test( "aaaa aaaa " );
+		
+		test( "a a a " );
+		test( "aa aa aa " );
+		test( "aaa aaa aaa " );
+		test( "aaaa aaaa aaaa " );
+		
+		test( "aa a " );
+		test( "aa aaa " );
+		test( "aa aaaa " );
+		
+		test( "aaa a " );
+		test( "aaa aa " );
+		test( "aaa aaaa " );
+		
+		return 0;
+	}
+	
+}@

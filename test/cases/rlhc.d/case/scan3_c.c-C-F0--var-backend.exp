@@ -1,0 +1,310 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const char  _scanner_actions [] = { 0, 1, 0, 1, 1, 1, 6, 2, 2, 3, 2, 2, 4, 2, 2, 5, 0 ,  };
+static const char  _scanner_trans_keys [] = { 1, 0, 0, 1, 1, 0, 0 ,  };
+static const char  _scanner_char_class [] = { 0, 1, 0 ,  };
+static const char  _scanner_index_offsets [] = { 0, 0, 2, 0 ,  };
+static const char  _scanner_indicies [] = { 0, 2, 0 ,  };
+static const char  _scanner_index_defaults [] = { 0, 1, 4, 0 ,  };
+static const char  _scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0 ,  };
+static const char  _scanner_cond_targs [] = { 2, 0, 2, 1, 2, 0 ,  };
+static const char  _scanner_cond_actions [] = { 7, 0, 10, 5, 13, 0 ,  };
+static const char  _scanner_to_state_actions [] = { 0, 1, 0, 0 ,  };
+static const char  _scanner_from_state_actions [] = { 0, 3, 0, 0 ,  };
+static const char  _scanner_eof_trans [] = { 0, 0, 4, 0 ,  };
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  scanner_start  = 1;
+static const int  scanner_first_final  = 1;
+static const int  scanner_error  = 0;
+static const int  scanner_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		unsigned int _trans = 0;
+		unsigned int _have = 0;
+		unsigned int _cont = 1;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _scanner_eof_trans[cs]> 0  )
+					{
+						_trans = ( unsigned int  ) _scanner_eof_trans[cs]- 1;
+						_have = 1;
+					}
+					
+					if ( _have == 0  )
+					{
+					}
+					
+				}
+				
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_acts = _scanner_actions + _scanner_from_state_actions[cs];
+					_nacts = ( unsigned int  ) (*( _acts  ))
+					;
+					_acts += 1;
+					while ( _nacts > 0  )
+					{
+						switch ( (*( _acts  ))
+						) {
+							case 1 :
+							{
+								{
+									ts = p;
+									
+								}
+								
+							}
+							
+							break;
+							
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+					_keys = _scanner_trans_keys + (cs<<1);
+					_inds = _scanner_indicies + _scanner_index_offsets[cs];
+					if ( ((*( p  ))
+					)<= 98 && ((*( p  ))
+					)>= 97  )
+					{
+						int _ic = ( int ) _scanner_char_class[( int ) ((*( p  ))
+						)- 97];
+						if ( _ic <= ( int ) (*( _keys+1  ))
+						&& _ic >= ( int ) (*( _keys  ))
+						)
+						_trans = ( unsigned int  ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+						) ))
+						;
+						
+						else
+						_trans = ( unsigned int  ) _scanner_index_defaults[cs];
+						
+					}
+					
+					else
+					{
+						_trans = ( unsigned int  ) _scanner_index_defaults[cs];
+					}
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = ( int ) _scanner_cond_targs[_trans];
+					if ( _scanner_cond_actions[_trans]!= 0  )
+					{
+						_acts = _scanner_actions + _scanner_cond_actions[_trans];
+						_nacts = ( unsigned int  ) (*( _acts  ))
+						;
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							switch ( (*( _acts  ))
+							) {
+								case 2 :
+								{
+									{
+										te = p+1;
+										
+									}
+									
+								}
+								
+								break;
+								case 3 :
+								{
+									{
+										act = 1;
+										
+									}
+									
+								}
+								
+								break;
+								case 4 :
+								{
+									{
+										act = 2;
+										
+									}
+									
+								}
+								
+								break;
+								case 5 :
+								{
+									{
+										act = 3;
+										
+									}
+									
+								}
+								
+								break;
+								case 6 :
+								{
+									{
+										switch ( act  ) {
+											case 1 :
+											p = ((te))-1;
+											{
+												printf( "%s", "pat1\n" );
+												
+											}
+											
+											break;
+											case 2 :
+											p = ((te))-1;
+											{
+												printf( "%s", "pat2\n" );
+												
+											}
+											
+											break;
+											case 3 :
+											p = ((te))-1;
+											{
+												printf( "%s", "pat3\n" );
+												
+											}
+											
+											break;
+											
+										}
+										
+									}
+									
+									
+								}
+								
+								break;
+								
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+						
+					}
+					
+					
+					_acts = _scanner_actions + _scanner_to_state_actions[cs];
+					_nacts = ( unsigned int  ) (*( _acts  ))
+					;
+					_acts += 1;
+					while ( _nacts > 0  )
+					{
+						switch ( (*( _acts  ))
+						) {
+							case 0 :
+							{
+								{
+									ts = 0;
+									
+								}
+								
+							}
+							
+							break;
+							
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+				}
+			}
+			
+		}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"ab89",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

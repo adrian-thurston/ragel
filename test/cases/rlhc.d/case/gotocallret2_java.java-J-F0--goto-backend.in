@@ -1,0 +1,312 @@
+host( "working/gotocallret2_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class gotocallret2_java
+	{
+		char comm ;
+		int top ;
+		int stack [] = new int[32];
+		int
+		ts ;
+		int
+		te ;
+		int act ;
+		int val ;
+		
+		
+		
+		
+		
+	}@
+	array s8 _GotoCallRet_actions( 0, 20 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 0 };
+	
+	array char _GotoCallRet_trans_keys( 0, 11 ) = { u(1), u(0), u(6), u(6), u(9), u(9), u(7), u(7), u(8), u(8), u(1), u(0), u(0), u(10), u(2), u(9), u(5), u(9), u(1), u(0), u(2), u(11), u(5), u(9), u(2), u(2), u(2), u(10), u(2), u(2), u(5), u(9), u(0) };
+	
+	array s8 _GotoCallRet_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 4, 1, 1, 1, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5, 5, 8, 5, 5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 10, 1, 11, 0 };
+	
+	array s8 _GotoCallRet_index_offsets( 0, 54 ) = { 0, 0, 1, 2, 3, 4, 4, 15, 23, 28, 28, 38, 43, 44, 53, 54, 0 };
+	
+	array s8 _GotoCallRet_indicies( 0, 26 ) = { 1, 2, 3, 4, 6, 7, 8, 9, 7, 10, 10, 10, 10, 10, 11, 13, 12, 12, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 16, 7, 17, 17, 17, 17, 17, 18, 19, 17, 17, 17, 17, 17, 19, 22, 23, 24, 25, 25, 25, 25, 25, 26, 24, 25, 25, 25, 25, 25, 0 };
+	
+	array s8 _GotoCallRet_index_defaults( 0, 28 ) = { 0, 0, 0, 0, 0, 5, 7, 12, 12, 7, 7, 20, 21, 7, 27, 28, 0 };
+	
+	array s8 _GotoCallRet_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _GotoCallRet_cond_targs( 0, 15 ) = { 6, 2, 3, 4, 6, 9, 6, 0, 6, 6, 7, 6, 6, 1, 8, 10, 10, 11, 10, 12, 10, 10, 13, 13, 14, 15, 13, 13, 13, 0 };
+	
+	array s8 _GotoCallRet_cond_actions( 0, 41 ) = { 41, 0, 0, 0, 33, 1, 37, 0, 35, 31, 7, 29, 39, 0, 0, 13, 11, 0, 9, 0, 17, 15, 23, 21, 0, 0, 19, 25, 27, 0 };
+	
+	array s8 _GotoCallRet_to_state_actions( 0, 3 ) = { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0 };
+	
+	array s8 _GotoCallRet_from_state_actions( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0 };
+	
+	array s8 _GotoCallRet_eof_trans( 0, 29 ) = { 0, 1, 1, 1, 1, 0, 0, 13, 13, 0, 0, 21, 22, 0, 28, 29, 0 };
+	
+	array s8 _GotoCallRet_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _GotoCallRet_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _GotoCallRet_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _GotoCallRet_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int GotoCallRet_start = 6;
+	value int GotoCallRet_first_final = 6;
+	value int GotoCallRet_error = 0;
+	
+	value int GotoCallRet_en_handle = 5;
+	value int GotoCallRet_en_one = 10;
+	value int GotoCallRet_en_two = 13;
+	value int GotoCallRet_en_main = 6;
+	
+	host( "working/gotocallret2_java.rl", 86 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)GotoCallRet_start;
+			top = 0;
+			ts = nil;
+			te = nil;
+		}
+		host( "working/gotocallret2_java.rl", 91 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			int eof = len;
+			String _s;
+		}@
+		{
+			int _trans = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_acts = offset( _GotoCallRet_actions, _GotoCallRet_from_state_actions[cs] );
+					_nacts = cast(uint)deref( _GotoCallRet_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _GotoCallRet_actions, _acts ) ) {
+							case 2 {
+								host( "NONE", 1 ) ${${ts = p;}$}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					_keys = offset( _GotoCallRet_trans_keys, (cs<<1) );
+					_inds = offset( _GotoCallRet_indicies, _GotoCallRet_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 125 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_GotoCallRet_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _GotoCallRet_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _GotoCallRet_trans_keys, _keys ) )
+						_trans = cast(int)deref( _GotoCallRet_indicies, _inds + cast(int)( _ic - cast(int)deref( _GotoCallRet_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_GotoCallRet_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_GotoCallRet_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_GotoCallRet_cond_targs[_trans];
+					
+					if ( _GotoCallRet_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_acts = offset( _GotoCallRet_actions, _GotoCallRet_cond_actions[_trans] );
+					_nacts = cast(uint)deref( _GotoCallRet_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _GotoCallRet_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/gotocallret2_java.rl", 24 ) ${System.out.print( "handle " );
+									${p = p - 1; }$if ( val == 1 )
+									{
+										${cs = host( "-", 1 ) ={10}=;}$
+									} 
+									if ( val == 2 )
+									{
+										${cs = host( "-", 1 ) ={13}=;}$
+									} 
+									if ( val == 3 )
+									{
+										${cs = 6;}$} 
+								}$
+							}
+							case 3 {
+								host( "NONE", 1 ) ${${te = p+1;}$}$
+							}
+							case 4 {
+								host( "working/gotocallret2_java.rl", 40 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 40 ) ${System.out.print( "{ " );
+												${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={10}=; goto _again;}$}$}$}$
+								}
+								case 5 {
+									host( "working/gotocallret2_java.rl", 42 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 42 ) ${System.out.print( "[ " );
+												${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={13}=; goto _again;}$}$}$}$
+								}
+								case 6 {
+									host( "working/gotocallret2_java.rl", 49 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 49 ) ${System.out.print( "space " );
+											}$}$}$
+								}
+								case 7 {
+									host( "working/gotocallret2_java.rl", 44 ) ${${te = p;p = p - 1;host( "working/gotocallret2_java.rl", 44 ) ${System.out.print( "} " );
+											${top -= 1;cs = stack[top];goto _again;}$}$}$}$
+							}
+							case 8 {
+								host( "working/gotocallret2_java.rl", 46 ) ${${te = p;p = p - 1;host( "working/gotocallret2_java.rl", 46 ) ${System.out.print( "word " );
+											val = 1;
+											${cs = host( "-", 1 ) ={5}=; goto _again;}$}$}$}$
+							}
+							case 9 {
+								host( "working/gotocallret2_java.rl", 54 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 54 ) ${System.out.print( "{ " );
+												${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={10}=; goto _again;}$}$}$}$
+								}
+								case 10 {
+									host( "working/gotocallret2_java.rl", 56 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 56 ) ${System.out.print( "[ " );
+												${stack[top] = cs; top += 1;cs = host( "-", 1 ) ={13}=; goto _again;}$}$}$}$
+								}
+								case 11 {
+									host( "working/gotocallret2_java.rl", 63 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 63 ) ${System.out.print( "space " );
+											}$}$}$
+								}
+								case 12 {
+									host( "working/gotocallret2_java.rl", 58 ) ${${te = p;p = p - 1;host( "working/gotocallret2_java.rl", 58 ) ${System.out.print( "] " );
+												${top -= 1;cs = stack[top];goto _again;}$}$}$}$
+								}
+								case 13 {
+									host( "working/gotocallret2_java.rl", 60 ) ${${te = p;p = p - 1;host( "working/gotocallret2_java.rl", 60 ) ${System.out.print( "word " );
+												val = 2;
+												${cs = host( "-", 1 ) ={5}=; goto _again;}$}$}$}$
+								}
+								case 14 {
+									host( "working/gotocallret2_java.rl", 68 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 68 ) ${System.out.print( "{ " );
+													${stack[top] = cs; top += 1;cs = 10; goto _again;}$}$}$}$
+									}
+									case 15 {
+										host( "working/gotocallret2_java.rl", 70 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 70 ) ${System.out.print( "[ " );
+													${stack[top] = cs; top += 1;cs = 13; goto _again;}$}$}$}$
+									}
+									case 16 {
+										host( "working/gotocallret2_java.rl", 75 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 75 ) ${System.out.print( "this is the foil" );
+												}$}$}$
+									}
+									case 17 {
+										host( "working/gotocallret2_java.rl", 77 ) ${${te = p+1;host( "working/gotocallret2_java.rl", 77 ) ${System.out.print( "space " );
+												}$}$}$
+									}
+									case 18 {
+										host( "working/gotocallret2_java.rl", 79 ) ${${te = p+1;}$}$
+									}
+									case 19 {
+										host( "working/gotocallret2_java.rl", 72 ) ${${te = p;p = p - 1;host( "working/gotocallret2_java.rl", 72 ) ${System.out.print( "word " );
+													val = 3;
+													${cs = 5; goto _again;}$}$}$}$
+									}
+									case 20 {
+										host( "working/gotocallret2_java.rl", 72 ) ${${p = ((te))-1;
+												host( "working/gotocallret2_java.rl", 72 ) ${System.out.print( "word " );
+													val = 3;
+													${cs = 5; goto _again;}$}$}$}$
+									}
+								}
+								_nacts -= 1;
+								_acts += 1;
+							}
+							
+							
+						}
+						label _again {
+							_acts = offset( _GotoCallRet_actions, _GotoCallRet_to_state_actions[cs] );
+							_nacts = cast(uint)deref( _GotoCallRet_actions, _acts ); _acts += 1;
+							while ( _nacts > 0 ) {
+								switch ( deref( _GotoCallRet_actions, _acts ) ) {
+									case 1 {
+										host( "NONE", 1 ) ${${ts = nil;}$}$
+									}
+								}
+								_nacts -= 1;
+								_acts += 1;
+							}
+							
+							if ( cs == 0 )
+							goto _out;
+							p += 1;
+							if ( p != pe )
+							goto _resume;
+						}
+						label _test_eof { {}
+							if ( p == eof )
+							{
+								if ( _GotoCallRet_eof_trans[cs] > 0 ) {
+									_trans = cast(int)_GotoCallRet_eof_trans[cs] - 1;
+									goto _match_cond;
+								}
+							}
+							
+						}
+						label _out { {}
+						}
+					}
+				}
+				host( "working/gotocallret2_java.rl", 103 ) @{
+				}
+				
+				void finish( )
+				{
+					if ( cs >= GotoCallRet_first_final )
+					System.out.println( "ACCEPT" );
+					else
+					System.out.println( "FAIL" );
+				}
+				
+				static final String inp[] = {
+					"{a{b[c d]d}c}\n",
+					"[a{b[c d]d}c}\n",
+				"[a[b]c]d{ef{g{h}i}j}l\n",
+				"{{[]}}\n",
+				"a b c\n",
+				"{a b c}\n",
+				"[a b c]\n",
+				"{]\n",
+					"{{}\n",
+						"[[[[[[]]]]]]\n",
+						"[[[[[[]]}]]]\n",
+				};
+				
+				static final int inplen = 11;
+				
+				public static void main (String[] args)
+				{
+					gotocallret2_java machine = new gotocallret2_java();
+					for ( int i = 0; i < inplen; i++ ) {
+						machine.init();
+						machine.exec( inp[i].toCharArray(), inp[i].length() );
+						machine.finish();
+					}
+				}
+			}
+		}@

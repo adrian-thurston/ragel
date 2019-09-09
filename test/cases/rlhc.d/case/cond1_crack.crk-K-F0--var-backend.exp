@@ -1,0 +1,278 @@
+import crack.io cout;
+import crack.lang Buffer;
+
+int i;
+int j;
+int k;
+
+
+
+
+
+const array[int16 ] _foo_actions = [ 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 2, 0, 1, 2, 0, 2, 2, 1, 2, 3, 0, 1, 2, 0 ,  ];
+const array[byte ] _foo_trans_keys = [ 1, 0, 2, 2, 2, 2, 2, 2, 3, 4, 3, 4, 3, 4, 5, 5, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 0, 0,  ];
+const array[int16 ] _foo_char_class = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5, 0 ,  ];
+const array[int16 ] _foo_index_offsets = [ 0, 0, 1, 2, 3, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 0 ,  ];
+const array[int16 ] _foo_indicies = [ 0, 2, 3, 4, 5, 6, 7, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 0 ,  ];
+const array[int16 ] _foo_index_defaults = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  ];
+const array[int16 ] _foo_trans_cond_spaces = [ -1, -1, -1, -1, -1, 1, -1, 5, 4, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  ];
+const array[int16 ] _foo_trans_offsets = [ 0, 1, 2, 3, 4, 5, 7, 8, 16, 20, 21, 22, 23, 24, 25, 26, 27, 0 ,  ];
+const array[int16 ] _foo_cond_targs = [ 2, 0, 3, 4, 5, 0, 7, 6, 0, 11, 7, 12, 9, 13, 10, 14, 0, 7, 9, 10, 8, 15, 8, 8, 8, 8, 8, 8, 0 ,  ];
+const array[int16 ] _foo_cond_actions = [ 7, 0, 9, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 13, 5, 21, 1, 15, 18, 24, 0 ,  ];
+const array[int16 ] _foo_nfa_targs = [ 0, 0 ,  ];
+const array[int16 ] _foo_nfa_offsets = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _foo_nfa_push_actions = [ 0, 0 ,  ];
+const array[int16 ] _foo_nfa_pop_trans = [ 0, 0 ,  ];
+const int  foo_start  = 1;
+const int  foo_first_final  = 15;
+const int  foo_error  = 0;
+const int  foo_en_main  = 1;
+void m( String s )
+{
+	byteptr data = s.buffer;
+	int p = 0;
+	int pe = s.size;
+	int cs;
+	String buffer;
+	
+	if ( 1 ) {
+		cs = int ( foo_start );
+		
+	}
+	if ( 1 ) {
+		uint32 _trans = 0;
+		uint32 _have = 0;
+		uint32 _cont = 1;
+		uint32 _cond = 0;
+		int _acts = 0;
+		uint32 _nacts;
+		int _keys = 0;
+		int _inds = 0;
+		int _cpc;
+		while ( _cont == 1  )
+		{
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( _have == 0  )
+				_cont = 0;
+				
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = (cs<<1);
+					_inds = _foo_index_offsets[cs];
+					if ( (data[p ])<= 99 && (data[p ])>= 10  )
+					{
+						int _ic = int ( _foo_char_class[int ( (data[p ]) )- 10] );
+						if ( _ic <= int ( _foo_trans_keys[_keys+1 ] )&& _ic >= int ( _foo_trans_keys[_keys ] ) )
+						_trans = uint32  ( _foo_indicies[_inds + int ( (_ic - int ( _foo_trans_keys[_keys ] )) )] );
+						
+						else
+						_trans = uint32  ( _foo_index_defaults[cs] );
+						
+						
+					}
+					
+					else
+					{
+						_trans = uint32  ( _foo_index_defaults[cs] );
+						
+					}
+					
+					_cond = uint32  ( _foo_trans_offsets[_trans] );
+					_cpc = 0;
+					if ( _foo_trans_cond_spaces[_trans] == 0  ) {
+						if ( (i != 0) )
+						_cpc += 1;
+						
+						
+					}
+					else if ( _foo_trans_cond_spaces[_trans] == 1  ) {
+						if ( (j != 0) )
+						_cpc += 1;
+						
+						
+					}
+					else if ( _foo_trans_cond_spaces[_trans] == 2  ) {
+						if ( (k != 0) )
+						_cpc += 1;
+						
+						
+					}
+					else if ( _foo_trans_cond_spaces[_trans] == 3  ) {
+						if ( (i != 0) )
+						_cpc += 1;
+						
+						if ( (j != 0) )
+						_cpc += 2;
+						
+						
+					}
+					else if ( _foo_trans_cond_spaces[_trans] == 4  ) {
+						if ( (j != 0) )
+						_cpc += 1;
+						
+						if ( (k != 0) )
+						_cpc += 2;
+						
+						
+					}
+					else if ( _foo_trans_cond_spaces[_trans] == 5  ) {
+						if ( (i != 0) )
+						_cpc += 1;
+						
+						if ( (j != 0) )
+						_cpc += 2;
+						
+						if ( (k != 0) )
+						_cpc += 4;
+						
+						
+					}
+					;
+					_cond += uint32  ( _cpc );
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = int ( _foo_cond_targs[_cond] );
+					if ( _foo_cond_actions[_cond]!= 0  )
+					{
+						_acts = _foo_cond_actions[_cond];
+						_nacts = uint32  ( _foo_actions[_acts ] );
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							if ( _foo_actions[_acts ] == 0  ) {
+								if ( 1 ) {
+									cout.format( "  one\n" );
+									
+								}
+								
+							}
+							else if ( _foo_actions[_acts ] == 1  ) {
+								if ( 1 ) {
+									cout.format( "  two\n" );
+									
+								}
+								
+							}
+							else if ( _foo_actions[_acts ] == 2  ) {
+								if ( 1 ) {
+									cout.format( "  three\n" );
+									
+								}
+								
+							}
+							else if ( _foo_actions[_acts ] == 3  ) {
+								if ( 1 ) {
+									if ( ((data[p ])) == 48 )
+									{
+										i = 0;
+										
+									} 
+									else {
+										i = 1;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _foo_actions[_acts ] == 4  ) {
+								if ( 1 ) {
+									if ( ((data[p ])) == 48 )
+									{
+										j = 0;
+										
+									} 
+									else {
+										j = 1;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _foo_actions[_acts ] == 5  ) {
+								if ( 1 ) {
+									if ( ((data[p ])) == 48 )
+									{
+										k = 0;
+										
+									} 
+									else {
+										k = 1;
+										
+									}
+									
+								}
+								
+							}
+							else if ( _foo_actions[_acts ] == 6  ) {
+								if ( 1 ) {
+									if ( 1 ) {
+										p+= 1;
+										_cont = 0;
+										
+									}
+									
+								}
+								
+							}
+							;
+							_nacts -= 1;
+							_acts += 1;
+							
+						}
+						
+						
+					}
+					
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		
+	}
+	if ( cs >= foo_first_final ) {
+		cout `ACCEPT\n`;
+	}
+	else {
+		cout `FAIL\n`;
+	}
+}
+
+void main()
+{
+	m( "000abc\n" );
+	m( "100abc\n" );
+	m( "010abc\n" );
+	m( "110abc\n" );
+	m( "001abc\n" );
+	m( "101abc\n" );
+	m( "011abc\n" );
+	m( "111abc\n" );
+}
+
+main();

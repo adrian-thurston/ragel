@@ -1,0 +1,185 @@
+host( "working/erract2_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	
+	
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _erract_eof_actions( 0, 5 ) = { 0, 1, 3, 3, 3, 3, 5, 0, 0 };
+
+array s8 _erract_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _erract_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _erract_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _erract_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int erract_start = 1;
+value int erract_first_final = 7;
+value int erract_error = 0;
+
+value int erract_en_main = 1;
+
+host( "working/erract2_go.rl", 37 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)erract_start;
+	}
+	host( "working/erract2_go.rl", 40 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) == 104 ) {
+				goto ctr1;
+			}
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) == 101 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr2;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr2;
+			}
+			case 4:
+			if ( ( deref( data, p )) == 108 ) {
+				goto ctr5;
+			}
+			{
+				goto ctr2;
+			}
+			case 5:
+			if ( ( deref( data, p )) == 111 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr2;
+			}
+			case 6:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr8;
+			}
+			{
+				goto ctr7;
+			}
+			case 7:
+			{
+				goto ctr9;
+			}
+		}
+		
+		ctr9: cs = 0; goto _again;
+		ctr0: cs = 0; goto f1;
+		ctr2: cs = 0; goto f3;
+		ctr7: cs = 0; goto f5;
+		ctr1: cs = 2; goto _again;
+		ctr3: cs = 3; goto _again;
+		ctr4: cs = 4; goto _again;
+		ctr5: cs = 5; goto _again;
+		ctr6: cs = 6; goto _again;
+		ctr8: cs = 7; goto _again;
+		
+		f1:
+		host( "working/erract2_go.rl", 15 ) ${fmt.Print( "err_start\n" );}$	host( "working/erract2_go.rl", 16 ) ${fmt.Print( "err_all\n" );}$
+		goto _again;
+		f3:
+		host( "working/erract2_go.rl", 16 ) ${fmt.Print( "err_all\n" );}$	host( "working/erract2_go.rl", 17 ) ${fmt.Print( "err_middle\n" );}$
+		goto _again;
+		f5:
+		host( "working/erract2_go.rl", 16 ) ${fmt.Print( "err_all\n" );}$	host( "working/erract2_go.rl", 18 ) ${fmt.Print( "err_out\n" );}$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( _erract_eof_actions[cs] ) {
+				case 1{
+					host( "working/erract2_go.rl", 15 ) ${fmt.Print( "err_start\n" );}$	host( "working/erract2_go.rl", 20 ) ${fmt.Print( "eof_start\n" );}$	host( "working/erract2_go.rl", 16 ) ${fmt.Print( "err_all\n" );}$	host( "working/erract2_go.rl", 21 ) ${fmt.Print( "eof_all\n" );}$
+				}
+				case 3{
+					host( "working/erract2_go.rl", 16 ) ${fmt.Print( "err_all\n" );}$	host( "working/erract2_go.rl", 17 ) ${fmt.Print( "err_middle\n" );}$	host( "working/erract2_go.rl", 21 ) ${fmt.Print( "eof_all\n" );}$	host( "working/erract2_go.rl", 22 ) ${fmt.Print( "eof_middle\n" );}$
+				}
+				case 5{
+					host( "working/erract2_go.rl", 16 ) ${fmt.Print( "err_all\n" );}$	host( "working/erract2_go.rl", 18 ) ${fmt.Print( "err_out\n" );}$	host( "working/erract2_go.rl", 21 ) ${fmt.Print( "eof_all\n" );}$	host( "working/erract2_go.rl", 23 ) ${fmt.Print( "eof_out\n" );}$
+				}
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/erract2_go.rl", 47 ) @{
+	}
+	func finish() {
+		if cs >= erract_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"",
+		"h",
+		"x",
+		"he",
+		"hx",
+		"hel",
+		"hex",
+		"hell",
+		"helx",
+		"hello",
+		"hellx",
+		"hello\n",
+		"hellox",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

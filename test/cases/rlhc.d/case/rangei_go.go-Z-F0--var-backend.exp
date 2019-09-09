@@ -1,0 +1,135 @@
+package main
+import "fmt"
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _rangei_trans_keys [] byte  = [] byte  { 1, 0, 1, 2, 1, 2, 0, 3, 1, 5, 1, 4, 0, 5, 1, 0, 0 }
+var _rangei_char_class [] int8  = [] int8  { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 3, 3, 3, 4, 4, 4, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 5, 5, 5, 0  }
+var _rangei_index_offsets [] int8  = [] int8  { 0, 0, 2, 4, 8, 13, 17, 23, 0  }
+var _rangei_indicies [] int8  = [] int8  { 0, 0, 2, 2, 3, 3, 3, 3, 4, 4, 1, 4, 4, 5, 1, 5, 5, 6, 6, 6, 6, 6, 6, 0  }
+var _rangei_index_defaults [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 0  }
+var _rangei_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, 0  }
+var _rangei_cond_targs [] int8  = [] int8  { 2, 0, 3, 4, 5, 6, 7, 0  }
+var _rangei_cond_actions [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0  }
+var _rangei_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _rangei_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _rangei_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _rangei_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var rangei_start  int  = 1
+var rangei_first_final  int  = 7
+var rangei_error  int  = 0
+var rangei_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(rangei_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _trans  uint   = 0
+		var  _have  uint   = 0
+		var  _cont  uint   = 1
+		var  _keys int
+		var  _inds int
+		for _cont == 1  {
+			{
+			
+				if cs == 0  {
+					_cont = 0;
+					
+				}
+				_have = 0;
+				if p == pe  {
+					{
+						if _have == 0  {
+							_cont = 0;
+							
+						}
+					}
+					
+				}
+				if _cont == 1  {
+					{
+						if _have == 0  {
+							{
+								_keys = int((cs<<1) );
+								_inds = int(_rangei_index_offsets[cs] );
+								switch {
+									case ( data[p ]) <= 125 && ( data[p ]) >= 60 :
+									{
+										var  _ic  int   = int(_rangei_char_class[int(( data[p ]) )- 60])
+										switch {
+											case _ic <= int(_rangei_trans_keys[_keys+1 ])&& _ic >= int(_rangei_trans_keys[_keys ]):
+											_trans = uint(_rangei_indicies[_inds + int(( _ic - int(_rangei_trans_keys[_keys ]))  )]);
+											
+											default:
+											_trans = uint(_rangei_index_defaults[cs]);
+											
+										}
+									}
+									
+									default:
+									{
+										_trans = uint(_rangei_index_defaults[cs]);
+									}
+									
+									
+								}
+							}
+							
+						}
+						if _cont == 1  {
+							{
+								cs = int(_rangei_cond_targs[_trans]);
+								if cs == 0  {
+									_cont = 0;
+									
+								}
+								if _cont == 1  {
+									p += 1;
+									
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+	}
+}
+func finish() {
+	if cs >= rangei_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"AaBbAa",
+	"Aa`bAa",
+	"AaB@Aa",
+	"AaBbMa",
+	"AaBbma",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

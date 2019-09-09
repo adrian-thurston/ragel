@@ -1,0 +1,12 @@
+#/bin/sh
+#
+
+source=$1
+output=$2
+mode=$3
+shift 3;
+
+echo "sedsubst: generating $output from $source"
+test -f $output && rm -f $output
+sed "$@" $source > $output
+chmod $mode $output

@@ -1,0 +1,266 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _eofact_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 2, 1, 3, 2, 0, 2, 0  }
+var _eofact_eof_actions [] int8  = [] int8  { 0, 9, 1, 1, 1, 1, 5, 5, 5, 5, 3, 0, 7, 0  }
+var _eofact_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _eofact_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _eofact_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _eofact_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var eofact_start  int  = 1
+var eofact_first_final  int  = 10
+var eofact_error  int  = 0
+var eofact_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(eofact_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+	
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch cs  {
+			case 1:
+			switch ( data[p ])  {
+				case 104:
+				{
+					goto ctr0;
+				}
+				case 116:
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( data[p ]) == 101  {
+				{
+					goto ctr3;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr4;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( data[p ]) == 108  {
+				{
+					goto ctr5;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( data[p ]) == 111  {
+				{
+					goto ctr6;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( data[p ]) == 10  {
+				{
+					goto ctr11;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( data[p ]) == 104  {
+				{
+					goto ctr7;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( data[p ]) == 101  {
+				{
+					goto ctr8;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( data[p ]) == 114  {
+				{
+					goto ctr9;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( data[p ]) == 101  {
+				{
+					goto ctr10;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		ctr3: cs = 3;
+		goto _again;
+		ctr4: cs = 4;
+		goto _again;
+		ctr5: cs = 5;
+		goto _again;
+		ctr2: cs = 6;
+		goto _again;
+		ctr7: cs = 7;
+		goto _again;
+		ctr8: cs = 8;
+		goto _again;
+		ctr9: cs = 9;
+		goto _again;
+		ctr6: cs = 10;
+		goto _again;
+		ctr11: cs = 11;
+		goto _again;
+		ctr10: cs = 12;
+		goto _again;
+		
+		_again:
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		if p == eof  {
+			{
+				var  __acts int
+				var  __nacts uint 
+				__acts = int(_eofact_eof_actions[cs] );
+				__nacts = uint(_eofact_actions[__acts ]);
+				__acts += 1;
+				for __nacts > 0  {
+					{
+						switch _eofact_actions[__acts ] {
+							case 0:
+							{fmt.Print( "a1\n" );}
+							
+							break;
+							case 1:
+							{fmt.Print( "a2\n" );}
+							
+							break;
+							case 2:
+							{fmt.Print( "a3\n" );}
+							
+							break;
+							case 3:
+							{fmt.Print( "a4\n" );}
+							
+							break;
+							
+						}
+						__acts += 1;
+						__nacts -= 1;
+					}
+					
+				}
+			}
+			
+			
+		}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= eofact_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"",
+	"h",
+	"hell",
+	"hello",
+	"hello\n",
+	"t",
+	"ther",
+	"there",
+	"friend",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

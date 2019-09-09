@@ -1,0 +1,448 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+
+
+static const int  foo_start  = 1;
+static const int  foo_en_main  = 1;
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+void test( char *str )
+{
+	int len = strlen( str );
+	int cs = foo_start;
+	char *p = str, *pe = str+len;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 1:
+			goto st_case_1;
+			case 0:
+			goto st_case_0;
+			
+		}
+		goto st_out;
+		ctr2:
+		{
+			cout << "char: " << (int)*p << endl;
+		}
+		
+		
+		goto st1;
+		ctr0:
+		{
+			cout << "char: " << (int)*p << endl;
+		}
+		
+		
+		goto st1;
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		if ( ((*( p  ))
+		)< 32  )
+		{
+			if ( ((*( p  ))
+			)< 10  )
+			{
+				if ( 0 <= ((*( p  ))
+				) )
+				{
+					goto ctr0;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 19  )
+			{
+				if ( ((*( p  ))
+				)> 29  )
+				{
+					{
+						int ck = 0;
+						if ( ((cout << "c1 ", true)) )
+						ck += 1;
+						
+						if ( ((cout << "c2 ", true)) )
+						ck += 2;
+						
+						if ( ((cout << "c3 ", true)) )
+						ck += 4;
+						
+						if ( ck < 3  )
+						{
+							if ( ck < 1  )
+							{
+								goto ctr2;
+							} 
+							else if ( ck > 1  )
+							{
+								goto ctr2;
+							} 
+							else
+							{
+								goto ctr2;
+							}
+							
+						} 
+						else if ( ck > 3  )
+						{
+							if ( ck < 5  )
+							{
+								goto ctr2;
+							} 
+							else if ( ck > 5  )
+							{
+								if ( ck > 6  )
+								{
+									goto ctr2;
+								} 
+								else
+								{
+									goto ctr2;
+								}
+								
+							} 
+							else
+							{
+								goto ctr2;
+							}
+							
+						} 
+						else
+						{
+							goto ctr2;
+						}
+						
+						
+					}
+				} 
+				else
+				{
+					int ck = 0;
+					if ( ((cout << "c1 ", true)) )
+					ck += 1;
+					
+					if ( ((cout << "c2 ", true)) )
+					ck += 2;
+					
+					if ( ck < 1  )
+					{
+						goto ctr2;
+					} 
+					else if ( ck > 1  )
+					{
+						if ( ck > 2  )
+						{
+							goto ctr2;
+						} 
+						else
+						{
+							goto ctr2;
+						}
+						
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+					
+				}
+				
+			} 
+			else
+			{
+				int ck = 0;
+				if ( ((cout << "c1 ", true)) )
+				ck += 1;
+				
+				if ( ck > 0  )
+				{
+					goto ctr2;
+				} 
+				else
+				{
+					goto ctr2;
+				}
+				
+				
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 38  )
+		{
+			if ( ((*( p  ))
+			)< 41  )
+			{
+				{
+					int ck = 0;
+					if ( ((cout << "c1 ", true)) )
+					ck += 1;
+					
+					if ( ((cout << "c2 ", true)) )
+					ck += 2;
+					
+					if ( ((cout << "c3 ", true)) )
+					ck += 4;
+					
+					if ( ck < 3  )
+					{
+						if ( ck < 1  )
+						{
+							goto ctr2;
+						} 
+						else if ( ck > 1  )
+						{
+							goto ctr2;
+						} 
+						else
+						{
+							goto ctr2;
+						}
+						
+					} 
+					else if ( ck > 3  )
+					{
+						if ( ck < 5  )
+						{
+							goto ctr2;
+						} 
+						else if ( ck > 5  )
+						{
+							if ( ck > 6  )
+							{
+								goto ctr2;
+							} 
+							else
+							{
+								goto ctr2;
+							}
+							
+						} 
+						else
+						{
+							goto ctr2;
+						}
+						
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+					
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 50  )
+			{
+				if ( ((*( p  ))
+				)> 60  )
+				{
+					if ( ((*( p  ))
+					)<= 70  )
+					{
+						goto ctr0;
+					}
+					
+				} 
+				else
+				{
+					int ck = 0;
+					if ( ((cout << "c1 ", true)) )
+					ck += 1;
+					
+					if ( ck > 0  )
+					{
+						goto ctr2;
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+					
+				}
+				
+			} 
+			else
+			{
+				int ck = 0;
+				if ( ((cout << "c1 ", true)) )
+				ck += 1;
+				
+				if ( ((cout << "c3 ", true)) )
+				ck += 2;
+				
+				if ( ck < 1  )
+				{
+					goto ctr2;
+				} 
+				else if ( ck > 1  )
+				{
+					if ( ck > 2  )
+					{
+						goto ctr2;
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+				} 
+				else
+				{
+					goto ctr2;
+				}
+				
+				
+			}
+			
+		} 
+		else
+		{
+			int ck = 0;
+			if ( ((cout << "c1 ", true)) )
+			ck += 1;
+			
+			if ( ((cout << "c2 ", true)) )
+			ck += 2;
+			
+			if ( ((cout << "c3 ", true)) )
+			ck += 4;
+			
+			if ( ((cout << "c4 ", true)) )
+			ck += 8;
+			
+			if ( ck < 7  )
+			{
+				if ( ck < 3  )
+				{
+					if ( ck < 1  )
+					{
+						goto ctr2;
+					} 
+					else if ( ck > 1  )
+					{
+						goto ctr2;
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+				} 
+				else if ( ck > 3  )
+				{
+					if ( ck < 5  )
+					{
+						goto ctr2;
+					} 
+					else if ( ck > 5  )
+					{
+						goto ctr2;
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+				} 
+				else
+				{
+					goto ctr2;
+				}
+				
+			} 
+			else if ( ck > 7  )
+			{
+				if ( ck < 11  )
+				{
+					if ( ck < 9  )
+					{
+						goto ctr2;
+					} 
+					else if ( ck > 9  )
+					{
+						goto ctr2;
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+				} 
+				else if ( ck > 11  )
+				{
+					if ( ck < 13  )
+					{
+						goto ctr2;
+					} 
+					else if ( ck > 13  )
+					{
+						if ( ck > 14  )
+						{
+							goto ctr2;
+						} 
+						else
+						{
+							goto ctr2;
+						}
+						
+					} 
+					else
+					{
+						goto ctr2;
+					}
+					
+				} 
+				else
+				{
+					goto ctr2;
+				}
+				
+			} 
+			else
+			{
+				goto ctr2;
+			}
+			
+			
+		}
+		
+		{
+			goto st0;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st_out:
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+char data[] = { 5, 15, 25, 31, 35, 39, 45, 55, 65, 0 };
+
+int main()
+{
+	test( data );
+	return 0;
+}
+

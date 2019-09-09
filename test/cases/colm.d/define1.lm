@@ -1,0 +1,7 @@
+
+print "[def1] [def2] [def3]!
+
+##### COMP #####
+-E def1=def1 -Edef2=def2 -Edef3=
+##### EXP #####
+def1 def2 !

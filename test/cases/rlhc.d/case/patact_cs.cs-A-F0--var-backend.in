@@ -1,0 +1,320 @@
+host( "working/patact_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			char comm;
+			int top;
+			int [] stack = new int [32];
+			int ts;
+			int te;
+			int act;
+			int value;
+			
+			
+			
+			
+		}@
+		array s8 _patact_actions( 0, 27 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 19, 1, 20, 1, 21, 1, 22, 1, 23, 1, 24, 1, 25, 1, 26, 1, 27, 2, 2, 6, 2, 2, 7, 2, 2, 17, 2, 2, 18, 0 };
+		
+		array char _patact_trans_keys( 0, 11 ) = { c(1), c(0), c(8), c(8), c(11), c(11), c(9), c(9), c(10), c(10), c(8), c(8), c(11), c(11), c(9), c(9), c(10), c(10), c(8), c(8), c(11), c(11), c(9), c(9), c(10), c(10), c(8), c(8), c(11), c(11), c(9), c(9), c(10), c(10), c(0), c(11), c(2), c(5), c(2), c(5), c(2), c(11), c(0), c(11), c(4), c(5), c(7), c(11), c(0), c(11), c(2), c(5), c(2), c(5), c(2), c(11), c(6), c(6), c(0) };
+		
+		array s8 _patact_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 7, 7, 7, 7, 8, 7, 7, 9, 7, 7, 10, 7, 7, 11, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0 };
+		
+		array s8 _patact_index_offsets( 0, 95 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 32, 36, 46, 58, 60, 65, 77, 81, 85, 95, 0 };
+		
+		array s8 _patact_indicies( 0, 47 ) = { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0 };
+		
+		array s8 _patact_index_defaults( 0, 45 ) = { 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 21, 0, 28, 30, 21, 35, 36, 21, 10, 43, 45, 21, 0 };
+		
+		array s8 _patact_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+		
+		array s8 _patact_cond_targs( 0, 28 ) = { 17, 2, 3, 4, 17, 17, 6, 7, 8, 17, 24, 10, 11, 12, 24, 24, 14, 15, 16, 24, 17, 0, 17, 18, 19, 17, 20, 1, 17, 18, 17, 5, 21, 22, 23, 21, 21, 24, 24, 25, 26, 27, 9, 24, 25, 24, 13, 28, 0 };
+		
+		array s8 _patact_cond_actions( 0, 58 ) = { 47, 0, 0, 0, 35, 45, 0, 0, 0, 31, 27, 0, 0, 0, 17, 25, 0, 0, 0, 13, 33, 0, 39, 58, 58, 37, 5, 0, 43, 55, 41, 0, 7, 0, 0, 11, 9, 15, 19, 52, 52, 5, 0, 23, 49, 21, 0, 29, 0 };
+		
+		array s8 _patact_to_state_actions( 0, 1 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0 };
+		
+		array s8 _patact_from_state_actions( 0, 3 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 3, 0 };
+		
+		array s8 _patact_eof_trans( 0, 46 ) = { 0, 1, 1, 1, 1, 6, 6, 6, 6, 11, 11, 11, 11, 16, 16, 16, 16, 0, 1, 29, 31, 0, 36, 37, 0, 11, 44, 46, 0, 0 };
+		
+		array s8 _patact_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _patact_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _patact_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _patact_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int patact_start = 17;
+		value int patact_first_final = 17;
+		value int patact_error = 0;
+		
+		value int patact_en_other = 21;
+		value int patact_en_exec_test = 24;
+		value int patact_en_semi = 28;
+		value int patact_en_main = 17;
+		
+		host( "working/patact_cs.rl", 57 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)patact_start;
+				ts = nil;
+				te = nil;
+				act = 0;
+			}
+			host( "working/patact_cs.rl", 62 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				uint _trans = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				index s8 _acts;
+				uint _nacts;
+				index char _keys;
+				index s8 _inds;
+				while ( _cont == 1 ) {
+					
+					if ( cs == 0 )
+					_cont = 0;
+					_have = 0;
+					if ( p == pe ) {
+						if ( p == eof )
+						{
+							if ( _patact_eof_trans[cs] > 0 ) {
+								_trans = cast(uint)_patact_eof_trans[cs] - 1;
+								_have = 1;
+							}
+							if ( _have == 0 ) {
+							}
+						}
+						
+						if ( _have == 0 )
+						_cont = 0;
+					}
+					if ( _cont == 1 ) {
+						if ( _have == 0 ) {
+							_acts = offset( _patact_actions, _patact_from_state_actions[cs] );
+							_nacts = cast(uint)deref( _patact_actions, _acts );
+							_acts += 1;
+							while ( _nacts > 0 ) {
+								switch ( deref( _patact_actions, _acts ) ) {
+									case 1 {
+										host( "NONE", 1 ) ${${ts = p;}$}$
+									}
+								}
+								_nacts -= 1;
+								_acts += 1;
+							}
+							
+							_keys = offset( _patact_trans_keys, (cs<<1) );
+							_inds = offset( _patact_indicies, _patact_index_offsets[cs] );
+							
+							if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 10 )
+							{
+								int _ic = cast(int)_patact_char_class[cast(int)( deref( data, p )) - 10];
+								if ( _ic <= cast(int)deref( _patact_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _patact_trans_keys, _keys ) )
+								_trans = cast(uint)deref( _patact_indicies, _inds + cast(int)( _ic - cast(int)deref( _patact_trans_keys, _keys ) )  ); 
+								else
+								_trans = cast(uint)_patact_index_defaults[cs];
+							}
+							else {
+								_trans = cast(uint)_patact_index_defaults[cs];
+							}
+							
+						}
+						if ( _cont == 1 ) {
+							cs = cast(int)_patact_cond_targs[_trans];
+							
+							if ( _patact_cond_actions[_trans] != 0 ) {
+								_acts = offset( _patact_actions, _patact_cond_actions[_trans] );
+								_nacts = cast(uint)deref( _patact_actions, _acts );
+								_acts += 1;
+								while ( _nacts > 0 )
+								{
+									switch ( deref( _patact_actions, _acts ) )
+									{
+										case 2 {
+											host( "NONE", 1 ) ${${te = p+1;}$}$
+										}
+										case 3 {
+											host( "working/patact_cs.rl", 26 ) ${${te = p+1;host( "working/patact_cs.rl", 26 ) ${Console.Write( "space\n" );}$}$}$
+										}
+										case 4 {
+											host( "working/patact_cs.rl", 24 ) ${${te = p;p = p - 1;host( "working/patact_cs.rl", 24 ) ${Console.Write( "word\n" );}$}$}$
+										}
+										case 5 {
+											host( "working/patact_cs.rl", 25 ) ${${te = p;p = p - 1;host( "working/patact_cs.rl", 25 ) ${Console.Write( "num\n" );}$}$}$
+										}
+										case 6 {
+											host( "working/patact_cs.rl", 33 ) ${${act = 7;}$}$
+										}
+										case 7 {
+											host( "working/patact_cs.rl", 34 ) ${${act = 8;}$}$
+										}
+										case 8 {
+											host( "working/patact_cs.rl", 31 ) ${${te = p+1;host( "working/patact_cs.rl", 31 ) ${Console.Write( "word (c/lbh)\n" );}$}$}$
+										}
+										case 9 {
+											host( "working/patact_cs.rl", 32 ) ${${te = p+1;host( "working/patact_cs.rl", 32 ) ${Console.Write( "space\n" );}$}$}$
+										}
+										case 10 {
+											host( "working/patact_cs.rl", 35 ) ${${te = p+1;host( "working/patact_cs.rl", 35 ) ${Console.Write( "num (c/switch)\n" );}$}$}$
+										}
+										case 11 {
+											host( "working/patact_cs.rl", 36 ) ${${te = p+1;}$}$
+										}
+										case 12 {
+											host( "working/patact_cs.rl", 30 ) ${${te = p;p = p - 1;host( "working/patact_cs.rl", 30 ) ${Console.Write( "word (w/lbh)\n" );${p = (( te-1))-1;}$
+														${cs = 21;}$}$}$}$
+										}
+										case 13 {
+											host( "working/patact_cs.rl", 34 ) ${${te = p;p = p - 1;host( "working/patact_cs.rl", 34 ) ${Console.Write( "num (w/switch)\n" );${p = (( te-1))-1;}$
+														${cs = 21;}$}$}$}$
+										}
+										case 14 {
+											host( "working/patact_cs.rl", 30 ) ${${p = ((te))-1;
+													host( "working/patact_cs.rl", 30 ) ${Console.Write( "word (w/lbh)\n" );${p = (( te-1))-1;}$
+														${cs = 21;}$}$}$}$
+										}
+										case 15 {
+											host( "NONE", 1 ) ${${switch( act ) {
+														case 7 {
+															p = ((te))-1;
+															host( "working/patact_cs.rl", 33 ) ${Console.Write( "num (w/switch)\n" );}$ }
+														case 8 {
+															p = ((te))-1;
+															host( "working/patact_cs.rl", 34 ) ${Console.Write( "num (w/switch)\n" );${p = (( te-1))-1;}$
+																${cs = 21;}$}$ }
+													}}$
+											}$
+										}
+										case 16 {
+											host( "working/patact_cs.rl", 40 ) ${${te = p+1;host( "working/patact_cs.rl", 40 ) ${Console.Write( "in semi\n" );${cs = 17;}$}$}$}$
+										}
+										case 17 {
+											host( "working/patact_cs.rl", 47 ) ${${act = 15;}$}$
+										}
+										case 18 {
+											host( "working/patact_cs.rl", 48 ) ${${act = 16;}$}$
+										}
+										case 19 {
+											host( "working/patact_cs.rl", 45 ) ${${te = p+1;host( "working/patact_cs.rl", 45 ) ${Console.Write( "word (c/lbh)\n" );}$}$}$
+										}
+										case 20 {
+											host( "working/patact_cs.rl", 46 ) ${${te = p+1;host( "working/patact_cs.rl", 46 ) ${Console.Write( "space\n" );}$}$}$
+										}
+										case 21 {
+											host( "working/patact_cs.rl", 49 ) ${${te = p+1;host( "working/patact_cs.rl", 49 ) ${Console.Write( "num (c/switch)\n" );}$}$}$
+										}
+										case 22 {
+											host( "working/patact_cs.rl", 50 ) ${${te = p+1;host( "working/patact_cs.rl", 50 ) ${Console.Write( "going to semi\n" );${p = p - 1; }$${cs = 28;}$}$}$}$
+										}
+										case 23 {
+											host( "working/patact_cs.rl", 51 ) ${${te = p+1;host( "working/patact_cs.rl", 51 ) ${Console.Write( "immdiate\n" );${cs = 24;}$}$}$}$
+										}
+										case 24 {
+											host( "working/patact_cs.rl", 44 ) ${${te = p;p = p - 1;host( "working/patact_cs.rl", 44 ) ${Console.Write( "word (w/lbh)\n" );${p = p - 1; }$${cs = 21;}$}$}$}$
+										}
+										case 25 {
+											host( "working/patact_cs.rl", 48 ) ${${te = p;p = p - 1;host( "working/patact_cs.rl", 48 ) ${Console.Write( "num (w/switch)\n" );${p = p - 1; }$${cs = 21;}$}$}$}$
+										}
+										case 26 {
+											host( "working/patact_cs.rl", 44 ) ${${p = ((te))-1;
+													host( "working/patact_cs.rl", 44 ) ${Console.Write( "word (w/lbh)\n" );${p = p - 1; }$${cs = 21;}$}$}$}$
+										}
+										case 27 {
+											host( "NONE", 1 ) ${${switch( act ) {
+														case 15 {
+															p = ((te))-1;
+															host( "working/patact_cs.rl", 47 ) ${Console.Write( "num (w/switch)\n" );}$ }
+														case 16 {
+															p = ((te))-1;
+															host( "working/patact_cs.rl", 48 ) ${Console.Write( "num (w/switch)\n" );${p = p - 1; }$${cs = 21;}$}$ }
+													}}$
+											}$
+										}
+									}
+									_nacts -= 1;
+									_acts += 1;
+								}
+							}
+							
+							_acts = offset( _patact_actions, _patact_to_state_actions[cs] );
+							_nacts = cast(uint)deref( _patact_actions, _acts );
+							_acts += 1;
+							while ( _nacts > 0 ) {
+								switch ( deref( _patact_actions, _acts ) ) {
+									case 0 {
+										host( "NONE", 1 ) ${${ts = nil;}$}$
+									}
+								}
+								_nacts -= 1;
+								_acts += 1;
+							}
+							
+							if ( cs == 0 )
+							_cont = 0;
+							if ( _cont == 1 )
+							p += 1;
+							
+						}}
+				}
+			}
+			host( "working/patact_cs.rl", 73 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= patact_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"abcd foix\n",
+				"abcd\nanother\n",
+				"123 foix\n",
+				"!abcd foix\n",
+				"!abcd\nanother\n",
+				"!123 foix\n",
+				";",
+			};
+			
+			
+			static readonly int inplen = 7;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

@@ -1,0 +1,559 @@
+global GblActionParams: bool = false
+global GblSectionPass: bool = false
+
+bool action_params_find( Machine: str, Action: str )
+= cc_action_params_find
+
+bool action_params_insert( Machine: str, Action: str )
+= cc_action_params_insert
+
+rl ident
+	/( alpha | '_' ) ( alpha | digit | '_' )*/
+
+rl number
+	/ digit+ /
+
+rl hex_number
+	/ '0x' [0-9a-fA-F]+ /
+
+rl hex_char
+	/ '0x' [0-9a-fA-F]{2}  /
+
+## Optimization for hex chars that appear near to each other. Converts the
+## string of 2-digit hex chars into a single string. The parse tree walker
+## concatenates the chars.
+#rl hex_string /
+#	hex_char
+#	(
+#		(
+#			[\t\n ]+ |
+#			[\t\n ]* '.' [\t\n ]*
+#		)
+#		hex_char
+#	)+
+#/
+
+rl NL / '\n' /
+
+rl c_comment 
+	/ '/*' ( any | NL )* :>> '*/' /
+
+rl cpp_comment
+	/ '//' [^\n]* NL /
+
+rl ruby_comment
+	/ '#' [^\n]* NL /
+
+rl s_literal
+	/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
+
+rl d_literal
+	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
+
+rl host_re_literal
+	/ '/' ([^/\\] | NL | '\\' (any | NL))* '/' /
+
+namespace srlex
+	lex
+		ignore /[\t\n ]+/
+		literal `:: `; `)
+		token word /[a-zA-Z_][a-zA-Z0-9_]*/
+	end
+end
+
+struct machine
+	Name: str
+	ActionParams: map<str, str>
+end
+
+global MachineMap: map<str, machine> = new map<str, machine>()
+global CurMachine: machine
+
+global Lang: str
+
+lex
+	token select /''/
+	{
+		if Lang == "ruby"
+			input->push( make_token( typeid<ruby_select>, '' ) )
+		elsif Lang == "ocaml"
+			input->push( make_token( typeid<ocaml_select>, '' ) )
+		elsif Lang == "crack"
+			input->push( make_token( typeid<crack_select>, '' ) )
+		else
+			input->push( make_token( typeid<c_select>, '' ) )
+	}
+
+	token c_select //
+	token ruby_select //
+	token ocaml_select //
+	token crack_select //
+end
+
+
+namespace ragel
+	lex
+		literal `}%% -ni
+
+		ignore /[\t\n ]+/
+		ignore /'#' any* :> '\n'/
+
+		literal `^ `| `- `, `: `! `? `.
+		literal `( `) `{ -ni ni- `} `* `& `+
+
+		literal `-- `:> `:>> `<: `-> `**
+
+		literal `|* `*| `=> 
+
+		literal `@ `> `< `% `$
+		literal `from `to `eof `lerr `err
+		literal `when `inwhen `outwhen `>? `$? `%? 
+
+		literal `:= `|= `= `; `.. `../i `::
+
+		literal `>~ `$~ `%~ `<~ `@~ `<>~ 
+		literal `>* `$* `%* `<* `@* `<>* 
+		literal `>/ `$/ `%/ `</ `@/ `<>/ 
+		literal `>! `$! `%! `<! `@! `<>! 
+		literal `>^ `$^ `%^ `<^ `@^ `<>^ 
+		literal `<>
+
+		literal `machine `action `variable `alphtype
+				`access `write `getkey `export `import
+				`include `prepush `postpop `nfaprepush `nfapostpop
+
+		literal `:nfa `:cond `:condplus `:condstar `):
+
+		token string /
+			'"' ( [^"\\] | '\\' any )* '"' 'i'? |
+			"'" ( [^'\\] | '\\' any )* "'" 'i'?
+		/
+
+		# token hex_string / hex_string /
+
+		token lex_regex_open /'/'/ -ni
+		token lex_sqopen_pos /'['/ -ni
+		token lex_sqopen_neg /'[^'/ -ni
+
+		token word / [a-zA-Z_][a-zA-Z0-9_]* /
+		token uint / number /
+		token hex / hex_number /
+	end 
+
+	lex
+		token re_dot / '.' /
+		token re_star / '*' /
+		token re_char / ^( '\\' | '.' | '*' | '[' | '/' ) | '\\' . any /
+		token re_close / '/' 'i'? /
+		token re_sqopen_pos /'['/
+		token re_sqopen_neg /'[^'/
+	end
+
+	lex
+		token re_or_dash / '-' /
+		token re_or_char / ^( '\\' | '-' | ']' ) | '\\' . any /
+		token re_or_sqclose / ']' /
+	end
+
+	# Not cannot start with '{', terminated by ';', rewritten into { inline_expr }
+	token _inline_expr_reparse
+		/[^{;] [^;]* ';'/ {
+			R: str = input->pull( match_length - 1 )
+			input->pull( 1 )
+			input->push( "}" )
+			input->push( R )
+			input->push( "{" )
+		}
+
+	token variable_name /ident/
+
+	def inline_expr_reparse
+		[_inline_expr_reparse] :Reparse
+	|	[action_expr] :ActionExpr
+
+	def join
+		[join `, expression] :Rec
+	|	[expression] :Base
+
+	def expression
+		[expr_left expression_op_list] :Expression
+	
+	def expression_op_list
+		[expression_op expression_op_list] :Op
+	|	[] :Empty
+
+	def expression_op
+		[`| term] :Or
+	|	[`& term] :And
+	|	[`- term] :Sub
+	|	[`-- term] :Ssub
+
+	def expr_left
+		[term] :Term
+
+	def term
+		[term_left term_op_list_short] :Term
+	
+	def term_left
+		[factor_label] :FactorLabel
+
+	# This list is done manually to get shortest match.
+	def term_op_list_short
+		[] :Empty
+	|	[term_op term_op_list_short] :Terms
+
+	def term_op
+		[factor_label] :None
+	|	[`. factor_label] :Dot
+	|	[`:> factor_label] :ColonLt
+	|	[`:>> factor_label] :ColonLtLt
+	|	[`<: factor_label] :GtColon
+
+	def factor_label
+		[word `: factor_label] :Label
+	|	[factor_ep] :Ep
+
+	def factor_ep
+		[factor_aug `-> epsilon_target] :Epsilon
+	|	[factor_aug] :Base
+
+	def epsilon_target
+		[epsilon_target `:: word] :Rec
+	|	[word] :Base
+
+	def action_expr
+		[`{ c_select     CInlineExpr: c_inline::inline_expr c_inline::`}] :C
+	|	[`{ ruby_select  RubyInlineExpr: ruby_inline::inline_expr ruby_inline::`}]
+	|	[`{ ocaml_select OCamlInlineExpr: ocaml_inline::inline_expr ocaml_inline::`}]
+	|	[`{ crack_select CrackInlineExpr: crack_inline::inline_expr crack_inline::`}]
+
+	def action_block
+		[`{ c_select     CInlineBlock: c_inline::inline_block c_inline::`}] :C
+	|	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
+	|	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
+	|	[`{ crack_select CrackInlineBlock: crack_inline::inline_block crack_inline::`}]
+
+	def action_arg_list
+		[action_arg_list `, action_ref] :Rec
+	|	[action_ref] :Base
+
+	def opt_action_arg_list
+		[action_arg_list] :List
+	|	[] :Empty
+
+	def named_action_ref
+		[word] :Plain
+		{
+			if ! GblSectionPass {
+				if action_params_find( CurMachine->Name, $lhs.word )
+					reject
+			}
+		}
+	|	[word `( opt_action_arg_list `)] :Args
+		{
+			if ! GblSectionPass {
+				if ! action_params_find( CurMachine->Name, $lhs.word )
+					reject
+			}
+		}
+
+	def action_ref 
+		[named_action_ref] :NamedRef
+	|	[`( named_action_ref `)] :ParenNamed
+	|	[action_block] :Block
+	
+	def priority_name
+		[word] :Word
+
+	def error_name
+		[word] :Word
+
+	def priority_aug
+		[uint] :NoSign
+	|	[`+ uint] :Plus
+	|	[`- uint] :Minus
+
+	def aug_base
+		[`@] :Finish | [`>] :Enter | [`%] :Leave | [`$] :All
+
+	def aug_cond
+		[`>?] :Start1 | [`$?] :All1 | [`%?] :Leave1
+	|	[`> `when] :Start2 | [`$ `when] :All2 | [`% `when] :Leave2
+	|	[`inwhen] :Start3 | [`when] :All3 | [`outwhen] :Leave3
+
+	def aug_to_state
+		[`>~] :Start1 | [`<~] :NotStart1 | [`$~] :All1
+	|	[`%~] :Final1 | [`@~] :NotFinal1 | [`<>~] :Middle1
+	|	[`> `to] :Start2 | [`< `to] :NotStart2 | [`$ `to] :All2
+	|	[`% `to] :Final2 | [`@ `to] :NotFinal2 | [`<> `to] :Middle2
+
+	def aug_from_state
+		[`>*] :Start1 | [`<*] :NotStart1 | [`$*] :All1
+	|	[`%*] :Final1 | [`@*] :NotFinal1 | [`<>*] :Middle1
+	|	[`> `from] :Start2 | [`< `from] :NotStart2 | [`$ `from] :All2
+	|	[`% `from] :Final2 | [`@ `from] :NotFinal2 | [`<> `from] :Middle2
+
+	def aug_eof
+		[`>/] :Start1 | [`</] :NotStart1 | [`$/] :All1
+	|	[`%/] :Final1 | [`@/] :NotFinal1 | [`<>/] :Middle1
+	|	[`> `eof] :Start2 | [`< `eof] :NotStart2 | [`$ `eof] :All2
+	|	[`% `eof] :Final2 | [`@ `eof] :NotFinal2 | [`<> `eof] :Middle2
+
+	def aug_gbl_error
+		[`>!] :Start1 | [`<!] :NotStart1 | [`$!] :All1
+	|	[`%!] :Final1 | [`@!] :NotFinal1 | [`<>!] :Middle1
+	|	[`> `err] :Start2 | [`< `err] :NotStart2 | [`$ `err] :All2
+	|	[`% `err] :Final2 | [`@ `err] :NotFinal2 | [`<> `err] :Middle2
+
+	def aug_local_error
+		[`>^] :Start1 | [`<^] :NotStart1 | [`$^] :All1
+	|	[`%^] :Final1 | [`@^] :NotFinal1 | [`<>^] :Middle1
+	|	[`> `lerr] :Start2 | [`< `lerr] :NotStart2 | [`$ `lerr] :All2
+	|	[`% `lerr] :Final2 | [`@ `lerr] :NotFinal2 | [`<> `lerr] :Middle2
+
+	def factor_aug
+		[factor_aug aug_base action_ref] :ActionRef
+	|	[factor_aug aug_base priority_aug] :PriorEmbed
+	|	[factor_aug aug_base `( priority_name `, priority_aug `)] :NamedPriorEmbed
+	|	[factor_aug aug_cond action_ref] :CondEmbed
+	|	[factor_aug aug_cond `! action_ref] :NegCondEmbed
+	|	[factor_aug aug_to_state action_ref] :ToStateAction
+	|	[factor_aug aug_from_state action_ref] :FromStateAction
+	|	[factor_aug aug_eof action_ref] :EofAction
+	|	[factor_aug aug_gbl_error action_ref] :GblErrorAction
+	|	[factor_aug aug_local_error action_ref] :LocalErrorDef
+	|	[factor_aug aug_local_error `( error_name `, action_ref `)] :LocalErrorName
+	|	[factor_rep] :Base
+
+	def factor_rep 
+		[factor_neg factor_rep_op_list] :Op
+
+	def factor_rep_op_list
+		[factor_rep_op factor_rep_op_list] :Rec
+	|	[] :Base
+
+	def factor_rep_op
+		[`*] :Star
+	|	[`**] :StarStar
+	|	[`?] :Optional
+	|	[`+] :Plus
+	|	[`{ factor_rep_num `}] :ExactRep
+	|	[`{ `, factor_rep_num `}] :MaxRep
+	|	[`{ factor_rep_num `, `}] :MinRep
+	|	[`{ LowRep: factor_rep_num `, HighRep: factor_rep_num `}] :RangeRep
+
+	def factor_rep_num
+		[uint] :RepNum
+
+	def factor_neg 
+		[`! factor_neg] :Bang
+	|	[`^ factor_neg] :Caret
+	|	[factor] :Base
+
+	def opt_max_arg
+		[`, action_ref] :Action
+	|	[] :Empty
+
+	def nfastar
+		[`:nfa]
+
+	def colon_cond
+		[`:cond] :Cond
+	|	[`:condstar] :CondStar
+	|	[`:condplus] :CondPlus
+
+	def factor 
+		[alphabet_num] :AlphabetNum
+	|	[word] :Word
+	|	[string] :String
+	#|	[hex_string] :HexString
+	|	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	|	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	|	[lex_regex_open regex re_close] :Regex
+	|	[RL1: range_lit `.. RL2: range_lit]   :Range
+	|	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
+	|	[nfastar  `( expression `,
+			Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
+			Repeat: action_ref `, Exit: action_ref `):] :Nfa
+	|	[colon_cond `( expression `, 
+			Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :Cond
+	|	[`( join `)] :Join
+
+	def regex
+		[reg_item_rep_list] :List
+	
+	def reg_item_rep_list
+		[reg_item_rep_list reg_item_rep] :Rec
+	|	[] :Base
+
+	def reg_item_rep
+		[reg_item re_star] :Star
+	|	[reg_item] :Base
+
+	def reg_item
+		[re_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	|	[re_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	|	[re_dot] :Dot
+	|	[re_char] :Char
+
+	def reg_or_data
+		[reg_or_data reg_or_char] :Data
+	|	[] :Base
+
+	def reg_or_char
+		[re_or_char] :Char
+	|	[Low: re_or_char re_or_dash High: re_or_char] :Range
+
+	def range_lit
+		[string] :String
+	|	[alphabet_num] :AN
+
+	def alphabet_num 
+		[uint] :Uint
+	|	[`- uint] :Neg
+	|	[hex] :Hex
+
+	def lm_act
+		[`=> action_ref] :ActionRef
+	|	[action_block] :ActionBlock
+
+	def opt_lm_act
+		[lm_act] :Act
+	|	[] :Empty
+
+	def lm_stmt
+		[join opt_lm_act `;] :LmStmt commit
+	|	[assignment] :Assignment
+	|	[action_spec] :ActionSpec
+
+	def lm_stmt_list
+		[lm_stmt_list lm_stmt] :Rec
+	|	[lm_stmt] :Base
+
+	def lm
+		[join] :Join
+	|	[`|* lm_stmt_list `*|] :Lm
+
+	#
+	# Actions
+	#
+	def action_param
+		[word] :Word
+
+	def action_param_list
+		[action_param_list `, action_param] :Rec
+	|	[action_param] :Base
+
+	def opt_action_param_list
+		[action_param_list] :List
+	|	[] :Empty
+
+	def action_params
+		[`( opt_action_param_list `)] :List
+		{
+			GblActionParams = true
+		}
+
+	def action_spec
+		[`action word action_params action_block] :ActionSpecParams commit
+		{
+			if ! GblSectionPass {
+				# Track that this action has params so we can parse appropriately
+				# when reducing.
+				# CurMachine->ActionParams->insert( $lhs.word, $lhs.word )
+				action_params_insert( CurMachine->Name, $lhs.word )
+			}
+
+			# Reset after parsing the block. 
+			GblActionParams = false
+		}
+	|	[`action word action_block] :ActionSpec commit
+		{
+			GblActionParams = false
+		}
+
+	def def_name
+		[word] :Word
+
+	#
+	# Machine Instantiations.
+	#
+	def assignment
+		[opt_export def_name `= join `;] :Assignment commit
+
+	def instantiation
+		[opt_export def_name `:= lm `;] :Instantiation commit
+
+	def nfa_expr
+		[nfa_expr `| term] :Union
+	|	[term] :Base
+
+	def nfa_round_spec
+		[Depth: uint `, Group: uint] :Spec
+
+	def nfa_round_list
+		[nfa_round_list `, nfa_round_spec] :Recurse
+	|	[nfa_round_spec] :Base
+
+	def nfa_rounds
+		[`( nfa_round_list `)] :Rounds
+
+	def nfa_union
+		[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
+
+	def alphtype_type
+		[W1: word] :One
+	|	[W1: word W2: word] :Two
+
+	def include_spec
+		[word] :Machine
+	|	[string] :File
+	|	[word string] :MachineFile
+
+	def opt_export
+		[`export] :Export
+	|	[] :Base
+
+	def write_arg
+		[word] :Word
+
+	def machine_name
+		[`machine word `;] :MachineName
+		{
+			Machine: machine = MachineMap->find( $lhs.word )
+
+			if !Machine
+			{
+				Machine = new machine()
+				Machine->Name = $lhs.word
+				Machine->ActionParams = new map<str, str>()
+				MachineMap->insert( Machine->Name, Machine )
+			}
+
+			CurMachine = Machine
+		}
+
+	def statement
+		[assignment] :Assignment
+	|	[instantiation] :Instantiation
+	|	[nfa_union] :NfaUnion
+	|	[action_spec] :ActionSpec
+	|	[`prepush action_block] :PrePush commit
+	|	[`postpop action_block] :PostPop commit
+	|	[`variable variable_name inline_expr_reparse] :Variable commit
+	|	[`alphtype alphtype_type `;] :AlphType commit
+	|	[`access inline_expr_reparse] :Access commit
+	|	[`write Cmd: word ArgList: write_arg* `;] :Write commit
+	|	[`getkey inline_expr_reparse] :GetKey commit
+	|	[`import string `;] :Import commit
+	|	[`include include_spec `;] :Include commit
+	|	[`nfaprepush action_block] :NfaPrePush commit
+	|	[`nfapostpop action_block] :NfaPostPop commit
+
+	def opt_machine_name
+		[machine_name] :MachineName
+	|	[] :Empty
+
+	def ragel_start
+		[opt_machine_name statement*]
+end

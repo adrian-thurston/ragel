@@ -1,0 +1,248 @@
+static mut comm : u8 = 0;
+static mut top : i32 = 0;
+static mut stack : [ i32 ; 32] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
+
+
+
+
+
+static _gotocallret_trans_keys: [u8 ; 24] = [ 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 5, 3, 3, 3, 5, 1, 0, 4, 5, 3, 3, 0 , 0 ];
+static _gotocallret_char_class: [i8 ; 115] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0 , 0 ];
+static _gotocallret_index_offsets: [i8 ; 13] = [ 0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0 , 0 ];
+static _gotocallret_indicies: [i8 ; 15] = [ 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 , 0 ];
+static _gotocallret_index_defaults: [i8 ; 13] = [ 0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0 , 0 ];
+static _gotocallret_trans_cond_spaces: [i8 ; 14] = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
+static _gotocallret_cond_targs: [i8 ; 14] = [ 0, 2, 7, 4, 8, 4, 8, 0, 9, 10, 1, 0, 0 , 0 ];
+static _gotocallret_cond_actions: [i8 ; 14] = [ 1, 2, 3, 5, 6, 0, 7, 8, 0, 0, 9, 0, 0 , 0 ];
+static _gotocallret_eof_actions: [i8 ; 13] = [ 0, 1, 1, 4, 4, 8, 8, 0, 4, 0, 0, 0 , 0 ];
+static _gotocallret_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _gotocallret_nfa_offsets: [i8 ; 13] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ];
+static _gotocallret_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _gotocallret_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static gotocallret_start : i32 = 7;
+static gotocallret_first_final : i32 = 7;
+static gotocallret_error : i32 = 0;
+static gotocallret_en_garble_line : i32 = 3;
+static gotocallret_en_alp_comm : i32 = 5;
+static gotocallret_en_dig_comm : i32 = 6;
+static gotocallret_en_main : i32 = 7;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( gotocallret_start ) as i32;
+		top = 0;
+	}
+	
+	{
+		let mut _trans  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		let mut _keys :i32 = 0;
+		let mut _inds :i32 = 0;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  ) {
+				_cont = 0;
+				
+			}
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( p == eof  ) {
+						{
+							if ( _have == 0  ) {
+								{
+									match ( _gotocallret_eof_actions[(cs) as usize] ) {
+										4  => {
+											{print!( "{}", "error: failed to recover\n" );
+											}
+											
+										}
+										8  => {
+											{{p = p - 1;
+												}{top-= 1;
+													cs = stack[(top) as usize];
+												}}
+											
+										}
+										1  => {
+											{{p = p - 1;
+												}{cs = 3;
+												}}
+											
+										}
+										
+										_ => {}
+									}
+								}
+								
+							}
+						}
+						
+						
+					}
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							_keys = ( (cs<<1)  ) as i32;
+							_inds = ( _gotocallret_index_offsets[(cs) as usize] ) as i32;
+							if ( ( data[(p ) as usize]
+							) <= 122 && ( data[(p ) as usize]
+							) >= 10  ) {
+								{
+									let mut _ic  = ( _gotocallret_char_class[(( ( data[(p ) as usize]
+									)  ) as i32- 10) as usize] ) as i32;
+									if ( _ic <= ( _gotocallret_trans_keys[(_keys+1 ) as usize]
+									) as i32&& _ic >= ( _gotocallret_trans_keys[(_keys ) as usize]
+									) as i32 ) {
+										_trans = ( _gotocallret_indicies[(_inds + ( ( _ic - ( _gotocallret_trans_keys[(_keys ) as usize]
+										) as i32)   ) as i32) as usize]
+										) as u32;
+										
+									}
+									else {
+										_trans = ( _gotocallret_index_defaults[(cs) as usize] ) as u32;
+										
+									}
+								}
+								
+							}
+							else {
+								{
+									_trans = ( _gotocallret_index_defaults[(cs) as usize] ) as u32;
+								}
+								
+								
+							}
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _gotocallret_cond_targs[(_trans) as usize] ) as i32;
+							match ( _gotocallret_cond_actions[(_trans) as usize] ) {
+								5  => {
+									{print!( "{}", "error: garbling line\n" );
+									}
+									
+								}
+								7  => {
+									{{cs = 7;
+										}}
+									
+								}
+								8  => {
+									{{p = p - 1;
+										}{top-= 1;
+											cs = stack[(top) as usize];
+										}}
+									
+								}
+								9  => {
+									{comm = (( data[(p ) as usize]
+										));
+									}
+									
+								}
+								3  => {
+									{print!( "{}", "correct command\n" );
+									}
+									
+								}
+								1  => {
+									{{p = p - 1;
+										}{cs = 3;
+										}}
+									
+								}
+								6  => {
+									{print!( "{}", "error: garbling line\n" );
+									}
+									{{cs = 7;
+										}}
+									
+								}
+								2  => {
+									{if ( comm >= 97 )
+										{
+											{stack[(top) as usize]
+												= cs;
+												top += 1;
+												cs = 5;
+											}} 
+										else {
+											{stack[(top) as usize]
+												= cs;
+												top += 1;
+												cs = 6;
+											}}
+									}
+									{print!( "{}", "prints\n" );
+									}
+									
+								}
+								
+								_ => {}
+							}
+							if ( cs == 0  ) {
+								_cont = 0;
+								
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= gotocallret_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "lkajsdf\n".to_string() ); }
+	unsafe { m( "2134\n".to_string() ); }
+	unsafe { m( "(\n".to_string() ); }
+	unsafe { m( "\n".to_string() ); }
+	unsafe { m( "*234234()0909 092 -234aslkf09`1 11\n".to_string() ); }
+	unsafe { m( "1\n".to_string() ); }
+	unsafe { m( "909\n".to_string() ); }
+	unsafe { m( "1 a\n".to_string() ); }
+	unsafe { m( "11 1\n".to_string() ); }
+	unsafe { m( "a 1\n".to_string() ); }
+	unsafe { m( "aa a\n".to_string() ); }
+	unsafe { m( "1 1\n".to_string() ); }
+	unsafe { m( "1 123456\n".to_string() ); }
+	unsafe { m( "a a\n".to_string() ); }
+	unsafe { m( "a abcdef\n".to_string() ); }
+	unsafe { m( "h".to_string() ); }
+	unsafe { m( "a aa1".to_string() ); }
+}
+

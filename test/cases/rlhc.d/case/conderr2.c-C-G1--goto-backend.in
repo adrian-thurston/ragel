@@ -1,0 +1,139 @@
+host( "working/conderr2.rl", 1 ) @{/* 
+	* @@LANG: c
+	*/
+	
+	#include <stdio.h>
+	
+	
+	
+}@
+array s8 _foo_eof_actions( 0, 2 ) = { 0, 0, 1, 2, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 4;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/conderr2.rl", 20 ) @{
+	
+	int main()
+	{
+		char buffer[] = " ;";
+		
+		char *p = buffer;
+		char *pe = buffer + sizeof(buffer);
+		char *eof = pe;
+		int  cs = foo_start;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					goto ctr0;
+				}
+				case 59: {
+					int ck = 0;
+					if ( host( "working/conderr2.rl", 10 ) ={ 0 }= ) ck += 1;
+					if ( 1 <= ck )
+					{		goto ctr2;
+					}
+					goto ctr3;
+					
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch( ( deref( data, p )) ) {
+				case 32: {
+					goto ctr0;
+				}
+				case 59: {
+					int ck = 0;
+					if ( host( "working/conderr2.rl", 10 ) ={ 0 }= ) ck += 1;
+					if ( ck > 0 ) {
+						goto ctr2;
+					} else {
+						goto ctr5;
+					}
+					
+				}
+			}
+			{
+				goto ctr4;
+			}
+			case 3:
+			if ( ( deref( data, p )) == 120 ) {
+				goto ctr7;
+			}
+			{
+				goto ctr6;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr6: cs = 0; goto f1;
+		ctr0: cs = 2; goto _again;
+		ctr4: cs = 3; goto _again;
+		ctr7: cs = 4; goto _again;
+		ctr3: cs = 0; goto _again;
+		ctr5: cs = 0; goto f0;
+		ctr2: cs = 2; goto _again;
+		
+		f0:
+		host( "working/conderr2.rl", 13 ) ${ printf("A\n"); }$
+		goto _again;
+		f1:
+		host( "working/conderr2.rl", 14 ) ${ printf("B\n"); }$
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( _foo_eof_actions[cs] ) {
+				case 1{
+					host( "working/conderr2.rl", 13 ) ${ printf("A\n"); }$
+				}
+				case 2{
+					host( "working/conderr2.rl", 14 ) ${ printf("B\n"); }$
+				}
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/conderr2.rl", 31 ) @{
+		
+		return 0;
+	} 
+	
+}@

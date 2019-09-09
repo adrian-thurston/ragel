@@ -1,0 +1,70 @@
+const _zlen1_trans_keys = UInt8[1, 0, 1, 0, 0 , ]
+const _zlen1_char_class = Int8[0 , ]
+const _zlen1_index_offsets = Int8[0, 0, 0 , ]
+const _zlen1_indicies = Int8[0 , ]
+const _zlen1_index_defaults = Int8[0, 0, 0 , ]
+const _zlen1_trans_cond_spaces = Int8[-1, 0 , ]
+const _zlen1_cond_targs = Int8[0, 0 , ]
+const _zlen1_cond_actions = Int8[0, 0 , ]
+const _zlen1_nfa_targs = Int8[0, 0 , ]
+const _zlen1_nfa_offsets = Int8[0, 0, 0 , ]
+const _zlen1_nfa_push_actions = Int8[0, 0 , ]
+const _zlen1_nfa_pop_trans = Int8[0, 0 , ]
+const zlen1_start  = 1
+const zlen1_first_final  = 1
+const zlen1_error  = 0
+const zlen1_en_main  = 1
+function m( data::AbstractString )
+	p = 0
+	pe = length(data)
+	eof = length(data)
+	cs = 0
+	buffer = ""
+	
+	cs = convert(Int, zlen1_start )
+	_trans = 0;
+	_have = 0;
+	_cont = 1;
+	while _cont == 1 
+		if cs == 0 
+			_cont = 0
+			
+		end
+		_have = 0
+		if p == pe 
+			if _have == 0 
+				_cont = 0
+				
+			end
+			
+		end
+		if _cont == 1 
+			if _have == 0 
+				_trans = convert(UInt, _zlen1_index_defaults[1+(cs)] )
+				
+			end
+			if _cont == 1 
+				cs = convert(Int, _zlen1_cond_targs[1+(_trans)] )
+				if cs == 0 
+					_cont = 0
+					
+				end
+				if _cont == 1 
+					p += 1
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	if ( cs >= zlen1_first_final )
+		println( "ACCEPT" );
+	else
+		println( "FAIL" );
+	end
+end
+
+m( "" );
+m( "x" );

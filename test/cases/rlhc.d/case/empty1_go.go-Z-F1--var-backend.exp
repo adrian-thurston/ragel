@@ -1,0 +1,109 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _empty1_trans_keys [] byte  = [] byte  { 1, 0, 1, 0, 0 }
+var _empty1_char_class [] int8  = [] int8  { 0  }
+var _empty1_index_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _empty1_indicies [] int8  = [] int8  { 0  }
+var _empty1_index_defaults [] int8  = [] int8  { 0, 0, 0  }
+var _empty1_trans_cond_spaces [] int8  = [] int8  { -1, 0  }
+var _empty1_cond_targs [] int8  = [] int8  { 0, 0  }
+var _empty1_cond_actions [] int8  = [] int8  { 0, 0  }
+var _empty1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _empty1_nfa_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _empty1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _empty1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var empty1_start  int  = 1
+var empty1_first_final  int  = 2
+var empty1_error  int  = 0
+var empty1_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(empty1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _trans  uint   = 0
+		var  _have  uint   = 0
+		var  _cont  uint   = 1
+		for _cont == 1  {
+			{
+			
+				if cs == 0  {
+					_cont = 0;
+					
+				}
+				_have = 0;
+				if p == pe  {
+					{
+						if _have == 0  {
+							_cont = 0;
+							
+						}
+					}
+					
+				}
+				if _cont == 1  {
+					{
+						if _have == 0  {
+							{
+								_trans = uint(_empty1_index_defaults[cs]);
+							}
+							
+						}
+						if _cont == 1  {
+							{
+								cs = int(_empty1_cond_targs[_trans]);
+								if cs == 0  {
+									_cont = 0;
+									
+								}
+								if _cont == 1  {
+									p += 1;
+									
+								}
+							}
+						}
+					}
+					
+				}
+			}
+			
+		}
+	}
+}
+func finish() {
+	if cs >= empty1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"",
+	"x",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

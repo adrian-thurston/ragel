@@ -1,0 +1,431 @@
+#
+# @LANG: ruby
+#
+# Test the host language scanning for ruby.
+#
+
+
+
+class << self
+	attr_accessor :_erract9_key_offsets 
+	private :_erract9_key_offsets, :_erract9_key_offsets=
+end
+self._erract9_key_offsets = [
+0, 0, 1, 2, 3, 4, 5, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_trans_keys 
+	private :_erract9_trans_keys, :_erract9_trans_keys=
+end
+self._erract9_trans_keys = [
+104, 101, 88, 88, 88, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_single_lengths 
+	private :_erract9_single_lengths, :_erract9_single_lengths=
+end
+self._erract9_single_lengths = [
+0, 1, 1, 1, 1, 1, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_range_lengths 
+	private :_erract9_range_lengths, :_erract9_range_lengths=
+end
+self._erract9_range_lengths = [
+0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_index_offsets 
+	private :_erract9_index_offsets, :_erract9_index_offsets=
+end
+self._erract9_index_offsets = [
+0, 0, 2, 4, 6, 8, 10, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_trans_cond_spaces 
+	private :_erract9_trans_cond_spaces, :_erract9_trans_cond_spaces=
+end
+self._erract9_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_trans_offsets 
+	private :_erract9_trans_offsets, :_erract9_trans_offsets=
+end
+self._erract9_trans_offsets = [
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_trans_lengths 
+	private :_erract9_trans_lengths, :_erract9_trans_lengths=
+end
+self._erract9_trans_lengths = [
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_cond_keys 
+	private :_erract9_cond_keys, :_erract9_cond_keys=
+end
+self._erract9_cond_keys = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_cond_targs 
+	private :_erract9_cond_targs, :_erract9_cond_targs=
+end
+self._erract9_cond_targs = [
+2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_cond_actions 
+	private :_erract9_cond_actions, :_erract9_cond_actions=
+end
+self._erract9_cond_actions = [
+3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_to_state_actions 
+	private :_erract9_to_state_actions, :_erract9_to_state_actions=
+end
+self._erract9_to_state_actions = [
+0, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_eof_actions 
+	private :_erract9_eof_actions, :_erract9_eof_actions=
+end
+self._erract9_eof_actions = [
+0, 2, 2, 2, 2, 2, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_nfa_targs 
+	private :_erract9_nfa_targs, :_erract9_nfa_targs=
+end
+self._erract9_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_nfa_offsets 
+	private :_erract9_nfa_offsets, :_erract9_nfa_offsets=
+end
+self._erract9_nfa_offsets = [
+0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_nfa_push_actions 
+	private :_erract9_nfa_push_actions, :_erract9_nfa_push_actions=
+end
+self._erract9_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_erract9_nfa_pop_trans 
+	private :_erract9_nfa_pop_trans, :_erract9_nfa_pop_trans=
+end
+self._erract9_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :erract9_start 
+end
+self.erract9_start  = 1;
+
+class << self
+	attr_accessor :erract9_first_final 
+end
+self.erract9_first_final  = 6;
+
+class << self
+	attr_accessor :erract9_error 
+end
+self.erract9_error  = 0;
+
+class << self
+	attr_accessor :erract9_en_main 
+end
+self.erract9_en_main  = 1;
+
+def run_machine( data )
+	p = 0;
+	pe = data.length
+	cs = 0
+	
+	begin
+		cs = erract9_start;
+		
+	end
+	begin
+		_klen= 0
+		;
+		_keys = 0;
+		_ckeys = 0;
+		_cpc= 0
+		;
+		_trans= 0
+		;
+		_cond = 0;
+		_have = 0;
+		_cont = 1;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( p == eof  )
+							begin
+								if ( _have == 0  )
+									begin
+										case  _erract9_eof_actions[cs]  
+										when -2 then
+										begin
+										end
+										when 2  then
+										begin
+											begin
+												print("err: ", data[p..p], "\n"); 
+											end
+											
+											
+										end
+									end
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _have == 0  )
+						_cont = 0;
+						
+					end
+					
+				end
+				
+			end
+			if ( _cont == 1  )
+				begin
+					if ( _have == 0  )
+						begin
+							_keys = _erract9_key_offsets[cs] ;
+							_trans = _erract9_index_offsets[cs];
+							_have = 0;
+							_klen = _erract9_single_lengths[cs];
+							if ( _klen > 0  )
+								begin
+									_lower = 0;
+									_mid = 0;
+									_upper = 0;
+									_lower = _keys;
+									_upper = _keys + _klen - 1;
+									while ( _upper >= _lower && _have == 0  )
+										begin
+											_mid = _lower + ((_upper-_lower) >> 1);
+											if ( ( data[p ].ord) < _erract9_trans_keys[_mid ] )
+												_upper = _mid - 1;
+												
+												elsif ( ( data[p ].ord) > _erract9_trans_keys[_mid ] )
+												_lower = _mid + 1;
+												
+												else
+												begin
+													_trans += (_mid - _keys);
+													_have = 1;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									if ( _have == 0  )
+										begin
+											_keys += _klen;
+											_trans += _klen;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							if ( _have == 0  )
+								begin
+									_klen = _erract9_range_lengths[cs];
+									if ( _klen > 0  )
+										begin
+											_lower = 0;
+											_mid = 0;
+											_upper = 0;
+											_lower = _keys;
+											_upper = _keys + (_klen<<1) - 2;
+											while ( _have == 0 && _lower <= _upper  )
+												begin
+													_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+													if ( ( data[p ].ord) < _erract9_trans_keys[_mid ] )
+														_upper = _mid - 2;
+														
+														elsif ( ( data[p ].ord) > _erract9_trans_keys[_mid + 1 ] )
+														_lower = _mid + 2;
+														
+														else
+														begin
+															_trans += ((_mid - _keys)>>1);
+															_have = 1;
+															
+														end
+														
+													end
+													
+												end
+												
+											end
+											if ( _have == 0  )
+												_trans += _klen;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							_ckeys = _erract9_trans_offsets[_trans] ;
+							_klen = _erract9_trans_lengths[_trans];
+							_cond = _erract9_trans_offsets[_trans];
+							_have = 0;
+							_cpc = 0;
+							begin
+								_lower = 0;
+								_mid = 0;
+								_upper = 0;
+								_lower = _ckeys;
+								_upper = _ckeys + _klen - 1;
+								while ( _have == 0 && _lower <= _upper  )
+									begin
+										_mid = _lower + ((_upper-_lower) >> 1);
+										if ( _cpc < _erract9_cond_keys[_mid ] )
+											_upper = _mid - 1;
+											
+											elsif ( _cpc > _erract9_cond_keys[_mid ] )
+											_lower = _mid + 1;
+											
+											else
+											begin
+												_cond += (_mid - _ckeys);
+												_have = 1;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+										cs = 0;
+										_cont = 0;
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _cont == 1  )
+						begin
+							cs = _erract9_cond_targs[_cond];
+							case  _erract9_cond_actions[_cond]  
+							when -2 then
+							begin
+							end
+							when 3  then
+							begin
+								begin
+									print("char: ", data[p..p], "\n"); 
+								end
+								
+							end
+							when 2  then
+							begin
+								begin
+									print("err: ", data[p..p], "\n"); 
+								end
+								
+								
+							end
+						end
+						case  _erract9_to_state_actions[cs]  
+						when -2 then
+						begin
+						end
+						when 1  then
+						begin
+							begin
+								print("to state: " , data[p..p], "\n"); 
+							end
+							
+							
+						end
+					end
+					if ( cs == 0  )
+						_cont = 0;
+						
+					end
+					if ( _cont == 1  )
+						p += 1;
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+
+end
+
+end
+print("rest: " , data[p..p+2], "\n")
+end
+
+inp = [
+"hello\n",
+]
+
+inp.each { |str| run_machine(str) }
+

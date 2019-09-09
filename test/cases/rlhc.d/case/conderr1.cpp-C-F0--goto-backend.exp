@@ -1,0 +1,177 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+
+
+static const char  _foo_actions [] = { 0, 1, 0, 0 ,  };
+static const char  _foo_trans_keys [] = { 1, 0, 2, 2, 0, 2, 1, 0, 0 ,  };
+static const char  _foo_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 ,  };
+static const char  _foo_index_offsets [] = { 0, 0, 1, 4, 0 ,  };
+static const char  _foo_indicies [] = { 1, 2, 0, 1, 0 ,  };
+static const char  _foo_index_defaults [] = { 0, 0, 0, 3, 0 ,  };
+static const char  _foo_trans_cond_spaces [] = { -1, 0, -1, -1, 0 ,  };
+static const char  _foo_trans_offsets [] = { 0, 1, 3, 4, 0 ,  };
+static const char  _foo_cond_targs [] = { 0, 0, 2, 3, 0, 0 ,  };
+static const char  _foo_cond_actions [] = { 1, 1, 0, 0, 0, 0 ,  };
+static const char  _foo_eof_actions [] = { 0, 1, 1, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 3;
+static const int  foo_en_main  = 1;
+void test( int c, const char *str )
+{
+	int cs = foo_start;
+	const char *p = str;
+	const char *pe = str + strlen( str );
+	const char *eof = pe;
+	
+	cout << "run:" << endl;
+	
+	{
+		int _trans = 0;
+		unsigned int _cond = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		int _cpc;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _foo_trans_keys + (cs<<1);
+		_inds = _foo_indicies + _foo_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 97 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _foo_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _foo_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _foo_index_defaults[cs];
+		}
+		
+		
+		_cond = ( unsigned int  ) _foo_trans_offsets[_trans];
+		_cpc = 0;
+		switch ( _foo_trans_cond_spaces[_trans] ) {
+			case 0 :
+			if ( (c) )
+			_cpc += 1;
+			
+			
+			break;
+			
+		}
+		_cond += ( unsigned int  ) _cpc;
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _foo_cond_targs[_cond];
+		if ( _foo_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		_acts = _foo_actions + _foo_cond_actions[_cond];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					cout << "  bail" << endl; 
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			const char  *__acts;
+			unsigned int __nacts;
+			__acts = _foo_actions + _foo_eof_actions[cs];
+			__nacts = ( unsigned int  ) (*( __acts  ))
+			;
+			__acts += 1;
+			while ( __nacts > 0  )
+			{
+				switch ( (*( __acts  ))
+				) {
+					case 0 :
+					{
+						cout << "  bail" << endl; 
+					}
+					
+					break;
+					
+				}
+				__nacts -= 1;
+				__acts += 1;
+			}
+			
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+	if ( cs >= foo_first_final )
+	cout << "  success" << endl;
+	else
+	cout << "  failure" << endl;
+	cout << endl;
+}
+
+int main()
+{
+	test( 1, "aa\n" );
+	test( 1, "ab\n" );
+	test( 0, "aa\n" );
+	test( 0, "ab\n" );
+	return 0;
+}
+

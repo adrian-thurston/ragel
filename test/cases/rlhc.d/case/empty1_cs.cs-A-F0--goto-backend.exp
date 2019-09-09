@@ -1,0 +1,105 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+	
+	
+	
+	
+	
+	
+		static readonly char  []_empty1_trans_keys = { '\u0001', '\u0000', '\u0001', '\u0000', '\u0000',  };
+		static readonly sbyte  []_empty1_char_class = { 0,  };
+		static readonly sbyte  []_empty1_index_offsets = { 0, 0, 0,  };
+		static readonly sbyte  []_empty1_indicies = { 0,  };
+		static readonly sbyte  []_empty1_index_defaults = { 0, 0, 0,  };
+		static readonly sbyte  []_empty1_trans_cond_spaces = { -1, 0,  };
+		static readonly sbyte  []_empty1_cond_targs = { 0, 0,  };
+		static readonly sbyte  []_empty1_cond_actions = { 0, 0,  };
+		static readonly sbyte  []_empty1_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_empty1_nfa_offsets = { 0, 0, 0,  };
+		static readonly sbyte  []_empty1_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_empty1_nfa_pop_trans = { 0, 0,  };
+		static readonly int  empty1_start  = 1;
+		static readonly int  empty1_first_final  = 2;
+		static readonly int  empty1_error  = 0;
+		static readonly int  empty1_en_main  = 1;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)empty1_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				int _trans = 0;
+				if ( p == pe  )
+				goto _test_eof;
+				
+				if ( cs == 0 )
+				goto _out;
+				
+				_resume :
+				_trans = (int)_empty1_index_defaults[cs];
+				goto _match_cond;
+				
+				_match_cond :
+				cs = (int)_empty1_cond_targs[_trans];
+				if ( cs == 0 )
+				goto _out;
+				
+				p += 1;
+				if ( p != pe  )
+				goto _resume;
+				
+				
+				_test_eof :
+				{}
+				
+				_out :
+				{}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= empty1_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"",
+			"x",
+		};
+		
+		
+		static readonly int inplen = 2;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

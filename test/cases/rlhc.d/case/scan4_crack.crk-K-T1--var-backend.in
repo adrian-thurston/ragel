@@ -1,0 +1,262 @@
+host( "working/scan4_crack.rl", 1 ) @{//
+	// @@LANG: crack
+	// @@GENERATED: true
+	//
+	
+	import crack.io cout;
+	import crack.lang Buffer;
+	
+	int
+	ts;
+	int
+	te;
+	int act;
+	int token;
+	
+	
+	
+	
+	
+}@
+array s8 _scanner_key_offsets( 0, 5 ) = { 0, 3, 5, 0 };
+
+array byte _scanner_trans_keys( 0, 99 ) = { c(99), c(97), c(98), c(97), c(98), c(99), c(97), c(98), c(0) };
+
+array s8 _scanner_single_lengths( 0, 2 ) = { 1, 2, 1, 0 };
+
+array s8 _scanner_range_lengths( 0, 1 ) = { 1, 0, 1, 0 };
+
+array s8 _scanner_index_offsets( 0, 6 ) = { 0, 3, 6, 0 };
+
+array s8 _scanner_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _scanner_trans_offsets( 0, 10 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0 };
+
+array s8 _scanner_trans_lengths( 0, 1 ) = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _scanner_cond_keys( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_cond_targs( 0, 2 ) = { 1, 0, 1, 2, 2, 1, 1, 0, 1, 1, 1, 0 };
+
+array s8 _scanner_cond_actions( 0, 7 ) = { 2, 0, 1, 6, 7, 5, 2, 0, 1, 1, 1, 0 };
+
+array s8 _scanner_to_state_actions( 0, 3 ) = { 0, 3, 0, 0 };
+
+array s8 _scanner_from_state_actions( 0, 4 ) = { 0, 4, 0, 0 };
+
+array s8 _scanner_eof_trans_indexed( 0, 2 ) = { 2, 0, 2, 0 };
+
+array s8 _scanner_eof_trans_direct( 0, 11 ) = { 10, 0, 11, 0 };
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int scanner_start = 1;
+value int scanner_first_final = 1;
+value int scanner_error = -1;
+
+value int scanner_en_main = 1;
+
+host( "working/scan4_crack.rl", 35 ) @{
+	
+	void m( String s )
+	{
+		byteptr data = s.buffer;
+		int p = 0;
+		int pe = s.size;
+		int cs;
+		String buffer;
+		int eof = pe;
+		
+	}@
+	{
+		cs = cast(int)scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/scan4_crack.rl", 46 ) @{
+	}@
+	{
+		int _klen;
+		index byte _keys;
+		index s8 _ckeys;
+		int _cpc;
+		uint _trans;
+		uint _cond = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		while ( _cont == 1 ) {
+			
+			_have = 0;
+			if ( p == pe ) {
+				if ( p == eof )
+				{
+					if ( _scanner_eof_trans_direct[cs] > 0 ) {
+						_trans = cast(uint)_scanner_eof_trans_direct[cs] - 1;
+						_cond = cast(uint)_scanner_trans_offsets[_trans];
+						_have = 1;
+					}
+					if ( _have == 0 ) {
+					}
+				}
+				
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					switch ( _scanner_from_state_actions[cs] ) {
+						case 4 {
+							host( "NONE", 1 ) ${${ts = p;}$}$
+						}
+					}
+					
+					_keys = offset( _scanner_trans_keys, _scanner_key_offsets[cs] );
+					_trans = cast(uint)_scanner_index_offsets[cs];
+					_have = 0;
+					
+					_klen = cast(int)_scanner_single_lengths[cs];
+					if ( _klen > 0 ) {
+						index byte _lower;
+						index byte _mid;
+						index byte _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0 ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _scanner_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _scanner_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					if ( _have == 0 ) {
+						_klen = cast(int)_scanner_range_lengths[cs];
+						if ( _klen > 0 ) {
+							index byte _lower;
+							index byte _mid;
+							index byte _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _scanner_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _scanner_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 )
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					_ckeys = offset( _scanner_cond_keys, _scanner_trans_offsets[_trans] );
+					_klen = cast(int)_scanner_trans_lengths[_trans];
+					_cond = cast(uint)_scanner_trans_offsets[_trans];
+					_have = 0;
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _scanner_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _scanner_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							cs = -1;
+							_cont = 0;
+						}
+					}
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_scanner_cond_targs[_cond];
+					
+					switch ( _scanner_cond_actions[_cond] ) {
+						case 2 {
+							host( "working/scan4_crack.rl", 25 ) ${${te = p+1;host( "working/scan4_crack.rl", 25 ) ${cout.format( "pat2\n" );
+									}$}$}$
+						}
+						case 5 {
+							host( "working/scan4_crack.rl", 28 ) ${${te = p+1;}$}$
+						}
+						case 1 {
+							host( "NONE", 1 ) ${${switch( act ) {
+										case 1 {
+											p = ((te))-1;
+											host( "working/scan4_crack.rl", 22 ) ${cout.format( "pat1\n" );
+											}$ }
+										default {
+											p = ((te))-1;
+										}
+									}}$
+							}$
+						}
+						case 6 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$
+							host( "working/scan4_crack.rl", 22 ) ${${act = 1;}$}$
+						}
+						case 7 {
+							host( "NONE", 1 ) ${${te = p+1;}$}$
+							host( "working/scan4_crack.rl", 28 ) ${${act = 3;}$}$
+						}
+					}
+					
+					switch ( _scanner_to_state_actions[cs] ) {
+						case 3 {
+							host( "NONE", 1 ) ${${ts = nil;}$}$
+						}
+					}
+					
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/scan4_crack.rl", 47 ) @{
+		
+		if ( cs >= scanner_first_final ) {
+			cout `ACCEPT\n`;
+		}
+		else {
+			cout `FAIL\n`;
+		}
+	}
+	
+	void main()
+	{
+		m( "ba a" );
+	}
+	
+	main();
+}@

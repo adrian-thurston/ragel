@@ -1,0 +1,446 @@
+import crack.io cout;
+import crack.lang Buffer;
+
+int pos;
+int line;
+
+
+
+
+
+const array[int16 ] _clang_actions = [ 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 2, 0, 2, 2, 1, 0, 2, 3, 1, 2, 3, 2, 2, 4, 1, 2, 4, 2, 2, 5, 1, 2, 5, 2, 2, 6, 1, 2, 6, 2, 2, 7, 1, 2, 7, 2, 2, 8, 1, 2, 8, 2, 3, 3, 1, 0, 3, 4, 1, 0, 3, 5, 1, 0, 3, 6, 1, 0, 3, 7, 1, 0, 3, 8, 1, 0, 0 ,  ];
+const array[int16 ] _clang_key_offsets = [ 0, 0, 3, 6, 7, 9, 12, 13, 15, 21, 22, 42, 62, 82, 103, 124, 143, 162, 182, 0 ,  ];
+const array[byte ] _clang_trans_keys = [ 10, 34, 92, 10, 39, 92, 10, 10, 33, 10, 33, 47, 10, 48, 57, 48, 57, 65, 70, 97, 102, 10, 10, 34, 39, 47, 48, 95, 33, 46, 49, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 47, 48, 95, 33, 46, 49, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 47, 48, 95, 33, 46, 49, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 33, 34, 39, 47, 48, 95, 35, 46, 49, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 46, 47, 95, 120, 33, 45, 48, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 47, 95, 33, 46, 48, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 47, 95, 33, 46, 48, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 46, 47, 95, 33, 45, 48, 57, 58, 64, 65, 90, 91, 96, 97, 122, 123, 126, 10, 34, 39, 47, 95, 33, 46, 48, 57, 58, 64, 65, 70, 71, 90, 91, 96, 97, 102, 103, 122, 123, 126, 0,  ];
+const array[int16 ] _clang_single_lengths = [ 0, 3, 3, 1, 2, 3, 1, 0, 0, 1, 6, 6, 6, 7, 7, 5, 5, 6, 5, 0 ,  ];
+const array[int16 ] _clang_range_lengths = [ 0, 0, 0, 0, 0, 0, 0, 1, 3, 0, 7, 7, 7, 7, 7, 7, 7, 7, 9, 0 ,  ];
+const array[int16 ] _clang_index_offsets = [ 0, 0, 4, 8, 10, 13, 17, 19, 21, 25, 27, 41, 55, 69, 84, 99, 112, 125, 139, 0 ,  ];
+const array[int16 ] _clang_trans_cond_spaces = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  ];
+const array[int16 ] _clang_trans_offsets = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 0 ,  ];
+const array[int16 ] _clang_trans_lengths = [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  ];
+const array[int16 ] _clang_cond_keys = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _clang_cond_targs = [ 1, 12, 9, 1, 2, 12, 3, 2, 2, 2, 4, 5, 4, 4, 5, 10, 4, 10, 6, 15, 0, 18, 18, 18, 0, 1, 1, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 4, 1, 2, 6, 14, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 7, 13, 16, 8, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 15, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 16, 11, 16, 11, 16, 11, 10, 10, 1, 2, 7, 13, 16, 11, 17, 11, 16, 11, 16, 11, 10, 10, 1, 2, 13, 16, 11, 18, 11, 18, 16, 11, 18, 16, 11, 10, 0 ,  ];
+const array[int16 ] _clang_cond_actions = [ 19, 0, 0, 1, 19, 0, 0, 1, 19, 1, 5, 0, 0, 5, 0, 0, 0, 5, 0, 1, 0, 22, 22, 22, 0, 19, 1, 5, 3, 3, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 0, 58, 55, 55, 81, 81, 81, 81, 81, 81, 81, 81, 81, 81, 17, 34, 31, 31, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 9, 58, 0, 55, 55, 0, 81, 81, 81, 81, 81, 81, 81, 81, 81, 17, 46, 43, 43, 1, 73, 73, 0, 73, 1, 73, 73, 73, 73, 73, 13, 40, 37, 37, 69, 69, 69, 1, 69, 69, 69, 69, 69, 11, 28, 25, 25, 61, 1, 61, 1, 61, 1, 61, 1, 61, 7, 46, 43, 43, 1, 73, 73, 73, 1, 73, 73, 73, 73, 73, 13, 52, 49, 49, 77, 77, 77, 1, 77, 1, 77, 77, 1, 77, 77, 15, 0 ,  ];
+const array[int16 ] _clang_eof_actions = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 9, 17, 13, 11, 7, 13, 15, 0 ,  ];
+const array[int16 ] _clang_nfa_targs = [ 0, 0 ,  ];
+const array[int16 ] _clang_nfa_offsets = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  ];
+const array[int16 ] _clang_nfa_push_actions = [ 0, 0 ,  ];
+const array[int16 ] _clang_nfa_pop_trans = [ 0, 0 ,  ];
+const int  clang_start  = 10;
+const int  clang_first_final  = 10;
+const int  clang_error  = 0;
+const int  clang_en_main  = 10;
+void m( String s )
+{
+	byteptr data = s.buffer;
+	int p = 0;
+	int pe = s.size;
+	int cs;
+	String buffer;
+	int eof = pe;
+	pos = 0;
+	line = 1;
+	
+	if ( 1 ) {
+		cs = int ( clang_start );
+		
+	}
+	if ( 1 ) {
+		int _klen;
+		uint32 _trans = 0;
+		uint32 _cond = 0;
+		uint32 _have = 0;
+		uint32 _cont = 1;
+		int _acts = 0;
+		uint32 _nacts;
+		int _keys = 0;
+		int _ckeys = 0;
+		int _cpc;
+		while ( _cont == 1  )
+		{
+			if ( cs == 0  )
+			_cont = 0;
+			
+			_have = 0;
+			if ( p == pe  )
+			{
+				if ( p == eof  )
+				{
+					if ( _have == 0  )
+					{
+						int __acts = 0;
+						uint32 __nacts;
+						__acts = _clang_eof_actions[cs];
+						__nacts = uint32  ( _clang_actions[__acts ] );
+						__acts += 1;
+						while ( __nacts > 0  )
+						{
+							if ( _clang_actions[__acts ] == 3  ) {
+								if ( 1 ) {
+									cout.format( "ident(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[__acts ] == 4  ) {
+								if ( 1 ) {
+									cout.format( "literal(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[__acts ] == 5  ) {
+								if ( 1 ) {
+									cout.format( "float(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[__acts ] == 6  ) {
+								if ( 1 ) {
+									cout.format( "int(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[__acts ] == 7  ) {
+								if ( 1 ) {
+									cout.format( "hex(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[__acts ] == 8  ) {
+								if ( 1 ) {
+									cout.format( "symbol(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							;
+							__nacts -= 1;
+							__acts += 1;
+							
+						}
+						
+						
+					}
+					
+					
+				}
+				
+				if ( _have == 0  )
+				_cont = 0;
+				
+				
+			}
+			
+			if ( _cont == 1  )
+			{
+				if ( _have == 0  )
+				{
+					_keys = _clang_key_offsets[cs];
+					_trans = uint32  ( _clang_index_offsets[cs] );
+					_have = 0;
+					_klen = int ( _clang_single_lengths[cs] );
+					if ( _klen > 0  )
+					{
+						int _lower = 0;
+						int _mid = 0;
+						int _upper = 0;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( (data[p ])< _clang_trans_keys[_mid ] )
+							_upper = _mid - 1;
+							
+							else if ( (data[p ])> _clang_trans_keys[_mid ] )
+							_lower = _mid + 1;
+							
+							else
+							{
+								_trans += uint32  ( (_mid - _keys) );
+								_have = 1;
+								
+							}
+							
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							_keys += _klen;
+							_trans += uint32  ( _klen );
+							
+						}
+						
+						
+					}
+					
+					if ( _have == 0  )
+					{
+						_klen = int ( _clang_range_lengths[cs] );
+						if ( _klen > 0  )
+						{
+							int _lower = 0;
+							int _mid = 0;
+							int _upper = 0;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1)- 2;
+							while ( _have == 0 && _lower <= _upper  )
+							{
+								_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+								if ( (data[p ])< _clang_trans_keys[_mid ] )
+								_upper = _mid - 2;
+								
+								else if ( (data[p ])> _clang_trans_keys[_mid + 1 ] )
+								_lower = _mid + 2;
+								
+								else
+								{
+									_trans += uint32  ( ((_mid - _keys)>>1) );
+									_have = 1;
+									
+								}
+								
+								
+							}
+							
+							if ( _have == 0  )
+							_trans += uint32  ( _klen );
+							
+							
+						}
+						
+						
+					}
+					
+					_ckeys = _clang_trans_offsets[_trans];
+					_klen = int ( _clang_trans_lengths[_trans] );
+					_cond = uint32  ( _clang_trans_offsets[_trans] );
+					_have = 0;
+					_cpc = 0;
+					if ( 1 ) {
+						int _lower = 0;
+						int _mid = 0;
+						int _upper = 0;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper  )
+						{
+							_mid = _lower + ((_upper-_lower)>> 1);
+							if ( _cpc < int ( _clang_cond_keys[_mid ] ) )
+							_upper = _mid - 1;
+							
+							else if ( _cpc > int ( _clang_cond_keys[_mid ] ) )
+							_lower = _mid + 1;
+							
+							else
+							{
+								_cond += uint32  ( (_mid - _ckeys) );
+								_have = 1;
+								
+							}
+							
+							
+						}
+						
+						if ( _have == 0  )
+						{
+							cs = 0;
+							_cont = 0;
+							
+						}
+						
+						
+					}
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					cs = int ( _clang_cond_targs[_cond] );
+					if ( _clang_cond_actions[_cond]!= 0  )
+					{
+						_acts = _clang_cond_actions[_cond];
+						_nacts = uint32  ( _clang_actions[_acts ] );
+						_acts += 1;
+						while ( _nacts > 0  )
+						{
+							if ( _clang_actions[_acts ] == 0  ) {
+								if ( 1 ) {
+									buffer = buffer + ((data[p ]));
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 1  ) {
+								if ( 1 ) {
+									buffer = "";
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 2  ) {
+								if ( 1 ) {
+									line = line + 1;
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 3  ) {
+								if ( 1 ) {
+									cout.format( "ident(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 4  ) {
+								if ( 1 ) {
+									cout.format( "literal(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 5  ) {
+								if ( 1 ) {
+									cout.format( "float(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 6  ) {
+								if ( 1 ) {
+									cout.format( "int(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 7  ) {
+								if ( 1 ) {
+									cout.format( "hex(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							else if ( _clang_actions[_acts ] == 8  ) {
+								if ( 1 ) {
+									cout.format( "symbol(" );
+									cout.format( line );
+									cout.format( "," );
+									cout.format( buffer.size );
+									cout.format( "): " );
+									cout.format( buffer );
+									cout.format( "\n" );
+									
+								}
+								
+							}
+							;
+							_nacts -= 1;
+							_acts += 1;
+							
+						}
+						
+						
+					}
+					
+					if ( cs == 0  )
+					_cont = 0;
+					
+					if ( _cont == 1  )
+					p += 1;
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
+		
+	}
+	if ( cs >= clang_first_final ) {
+		cout `ACCEPT\n`;
+	}
+	else {
+		cout `FAIL\n`;
+	}
+}
+
+void main()
+{
+	m( "999 0xaAFF99 99.99 /!\n!/ 'lksdj' //\n\"\n\nliteral\n\n\n\"0x00aba foobardd.ddsf 0x0.9\n" );
+	m( "wordwithnum00asdf\n000wordfollowsnum,makes new symbol\n\nfinishing early /! unfinished ...\n" );
+}
+
+main();

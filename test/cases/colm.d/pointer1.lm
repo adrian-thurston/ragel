@@ -1,0 +1,34 @@
+struct undo
+
+	lex
+		ignore /( ' ' | '\t')+/
+		literal `* `( `) `^ `;
+		token NL /'\n'/
+		token id /[a-zA-Z_]+/
+	end
+
+	struct foo
+		Start: start
+	end
+
+	def item 
+		[id]
+	|	[`( item* `)]
+
+	def start 
+		Foo: foo
+		[item* `; NL]
+
+end
+
+Undo: undo = new undo()
+
+parse Input: undo::start(Undo)[ stdin ]
+
+Input.Foo = new undo::foo()
+Input.Foo->Start = Input
+print[ @Input.Foo->Start ]
+###### IN ######
+a b c ( d e ) f;
+###### EXP ######
+a b c ( d e ) f;

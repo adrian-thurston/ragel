@@ -1,0 +1,298 @@
+#include <stdio.h>
+#include <string.h>
+
+struct forder
+{
+	int cs;
+};
+
+
+
+static const char  _forder_actions [] = { 0, 1, 4, 1, 7, 2, 1, 6, 2, 2, 3, 2, 4, 7, 3, 5, 6, 7, 5, 0, 1, 2, 3, 6, 0 ,  };
+static const char  _forder_key_offsets [] = { 0, 0, 3, 4, 7, 10, 12, 15, 18, 21, 23, 25, 0 ,  };
+static const char  _forder_trans_keys [] = { 10, 97, 98, 97, 10, 97, 98, 10, 97, 98, 10, 97, 10, 97, 98, 10, 97, 98, 10, 97, 98, 10, 97, 10, 97, 0 ,  };
+static const char  _forder_single_lengths [] = { 0, 3, 1, 3, 3, 2, 3, 3, 3, 2, 2, 0, 0 ,  };
+static const char  _forder_range_lengths [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _forder_index_offsets [] = { 0, 0, 4, 6, 10, 14, 17, 21, 25, 29, 32, 35, 0 ,  };
+static const char  _forder_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _forder_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 0 ,  };
+static const char  _forder_trans_lengths [] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _forder_cond_keys [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _forder_cond_targs [] = { 11, 2, 6, 0, 3, 0, 11, 2, 4, 0, 11, 5, 4, 0, 11, 5, 0, 11, 5, 7, 0, 11, 5, 8, 0, 11, 9, 6, 0, 11, 10, 0, 11, 9, 0, 0, 0 ,  };
+static const char  _forder_cond_actions [] = { 14, 5, 18, 0, 0, 0, 3, 0, 8, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 11, 0, 0, 0, 1, 0, 0, 11, 0, 0, 0, 0 ,  };
+static const char  _forder_nfa_targs [] = { 0, 0 ,  };
+static const char  _forder_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _forder_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _forder_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  forder_start  = 1;
+static const int  forder_first_final  = 11;
+static const int  forder_error  = 0;
+static const int  forder_en_main  = 1;
+void forder_init( struct forder *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) forder_start;
+	}
+}
+
+void forder_execute( struct forder *fsm, const char *_data, int _len )
+{
+	const char *p = _data;
+	const char *pe = _data+_len;
+	
+	
+	{
+		int _klen;
+		unsigned int _trans = 0;
+		unsigned int _cond = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_ckeys;
+		int _cpc;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _forder_trans_keys + _forder_key_offsets[(fsm->cs)];
+		_trans = ( unsigned int  ) _forder_index_offsets[(fsm->cs)];
+		_klen = ( int ) _forder_single_lengths[(fsm->cs)];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_trans += ( unsigned int  ) (_mid - _keys);
+					goto _match;
+				}
+				
+			}
+			
+			_keys += _klen;
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		_klen = ( int ) _forder_range_lengths[(fsm->cs)];
+		if ( _klen > 0  )
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _keys;
+			_upper = _keys + (_klen<<1)- 2;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + (((_upper-_lower)>> 1)& ~1);
+				if ( ((*( p  ))
+				)< (*( _mid  ))
+				)
+				_upper = _mid - 2;
+				
+				else if ( ((*( p  ))
+				)> (*( _mid + 1  ))
+				)
+				_lower = _mid + 2;
+				
+				else
+				{
+					_trans += ( unsigned int  ) ((_mid - _keys)>>1);
+					goto _match;
+				}
+				
+			}
+			
+			_trans += ( unsigned int  ) _klen;
+		}
+		
+		
+		
+		_match :
+		_ckeys = _forder_cond_keys + _forder_trans_offsets[_trans];
+		_klen = ( int ) _forder_trans_lengths[_trans];
+		_cond = ( unsigned int  ) _forder_trans_offsets[_trans];
+		_cpc = 0;
+		{
+			const char  *_lower;
+			const char  *_mid;
+			const char  *_upper;
+			_lower = _ckeys;
+			_upper = _ckeys + _klen - 1;
+			while ( 1 )
+			{
+				if ( _upper < _lower  )
+				break;
+				
+				
+				_mid = _lower + ((_upper-_lower)>> 1);
+				if ( _cpc < ( int ) (*( _mid  ))
+				)
+				_upper = _mid - 1;
+				
+				else if ( _cpc > ( int ) (*( _mid  ))
+				)
+				_lower = _mid + 1;
+				
+				else
+				{
+					_cond += ( unsigned int  ) (_mid - _ckeys);
+					goto _match_cond;
+				}
+				
+			}
+			
+			(fsm->cs) = 0;
+			goto _again;
+		}
+		
+		_match_cond :
+		(fsm->cs) = ( int ) _forder_cond_targs[_cond];
+		if ( _forder_cond_actions[_cond]== 0  )
+		goto _again;
+		
+		
+		_acts = _forder_actions + _forder_cond_actions[_cond];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					printf("enter m1 aa\n");
+				}
+				
+				break;
+				case 1 :
+				{
+					printf("enter m1 aa\n");
+				}
+				
+				break;
+				case 2 :
+				{
+					printf("leave m1 aa\n");
+				}
+				
+				break;
+				case 3 :
+				{
+					printf("through m1 b\n");
+				}
+				
+				break;
+				case 4 :
+				{
+					printf("accept m1\n");
+				}
+				
+				break;
+				case 5 :
+				{
+					printf("enter m2\n");
+				}
+				
+				break;
+				case 6 :
+				{
+					printf("enter m2\n");
+				}
+				
+				break;
+				case 7 :
+				{
+					printf("accept m2\n");
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+int forder_finish( struct forder *fsm )
+{
+	if ( fsm->cs == forder_error )
+	return -1;
+	if ( fsm->cs >= forder_first_final )
+	return 1;
+	return 0;
+}
+
+struct forder fsm;
+
+void test( char *buf )
+{
+	int len = strlen( buf );
+	forder_init( &fsm );
+	forder_execute( &fsm, buf, len );
+	if ( forder_finish( &fsm ) > 0 )
+	printf("ACCEPT\n");
+	else
+	printf("FAIL\n");
+}
+
+int main()
+{
+	test( "aaaaaabbbaa\n" );
+	test( "\n" );
+	test( "bbbbbbaaaaaaa\n" );
+	test( "bbbbbbaaaaaa\n" );
+	test( "aaaaa\n" );
+	
+	return 0;
+}
+

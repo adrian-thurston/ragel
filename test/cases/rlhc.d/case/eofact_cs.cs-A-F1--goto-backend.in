@@ -1,0 +1,172 @@
+host( "working/eofact_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			
+			
+			
+			
+			
+			
+		}@
+		array char _eofact_trans_keys( 0, 7 ) = { c(1), c(0), c(3), c(7), c(2), c(2), c(4), c(4), c(4), c(4), c(5), c(5), c(3), c(3), c(2), c(2), c(6), c(6), c(2), c(2), c(0), c(0), c(1), c(0), c(1), c(0), c(0) };
+		
+		array s8 _eofact_char_class( 0, 7 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 1, 1, 6, 1, 7, 0 };
+		
+		array s8 _eofact_index_offsets( 0, 14 ) = { 0, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 0 };
+		
+		array s8 _eofact_indicies( 0, 11 ) = { 0, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0 };
+		
+		array s8 _eofact_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+		
+		array s8 _eofact_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+		
+		array s8 _eofact_cond_targs( 0, 12 ) = { 2, 0, 6, 3, 4, 5, 10, 7, 8, 9, 12, 11, 0 };
+		
+		array s8 _eofact_cond_actions( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _eofact_eof_actions( 0, 5 ) = { 0, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 0, 5, 0 };
+		
+		array s8 _eofact_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _eofact_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _eofact_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _eofact_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int eofact_start = 1;
+		value int eofact_first_final = 10;
+		value int eofact_error = 0;
+		
+		value int eofact_en_main = 1;
+		
+		host( "working/eofact_cs.rl", 33 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)eofact_start;
+			}
+			host( "working/eofact_cs.rl", 38 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _trans = 0;
+				index char _keys;
+				index s8 _inds;
+				entry {
+					if ( p == pe )
+					goto _test_eof;
+					if ( cs == 0 )
+					goto _out;
+					label _resume {
+						_keys = offset( _eofact_trans_keys, (cs<<1) );
+						_inds = offset( _eofact_indicies, _eofact_index_offsets[cs] );
+						
+						if ( ( deref( data, p )) <= 116 && ( deref( data, p )) >= 10 )
+						{
+							int _ic = cast(int)_eofact_char_class[cast(int)( deref( data, p )) - 10];
+							if ( _ic <= cast(int)deref( _eofact_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _eofact_trans_keys, _keys ) )
+							_trans = cast(int)deref( _eofact_indicies, _inds + cast(int)( _ic - cast(int)deref( _eofact_trans_keys, _keys ) )  ); 
+							else
+							_trans = cast(int)_eofact_index_defaults[cs];
+						}
+						else {
+							_trans = cast(int)_eofact_index_defaults[cs];
+						}
+						
+						goto _match_cond;
+					}
+					label _match_cond {
+						cs = cast(int)_eofact_cond_targs[_trans];
+						
+						if ( cs == 0 )
+						goto _out;
+						p+= 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+						if ( p == eof )
+						{
+							switch ( _eofact_eof_actions[cs] ) {
+								case 2 {
+									host( "working/eofact_cs.rl", 18 ) ${Console.Write( "a1\n" );}$
+								}
+								case 4 {
+									host( "working/eofact_cs.rl", 19 ) ${Console.Write( "a2\n" );}$
+								}
+								case 3 {
+									host( "working/eofact_cs.rl", 20 ) ${Console.Write( "a3\n" );}$
+								}
+								case 5 {
+									host( "working/eofact_cs.rl", 21 ) ${Console.Write( "a4\n" );}$
+								}
+								case 1 {
+									host( "working/eofact_cs.rl", 18 ) ${Console.Write( "a1\n" );}$	host( "working/eofact_cs.rl", 20 ) ${Console.Write( "a3\n" );}$
+								}
+							}
+						}
+						
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/eofact_cs.rl", 49 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= eofact_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"",
+				"h",
+				"hell",
+				"hello",
+				"hello\n",
+				"t",
+				"ther",
+				"there",
+				"friend",
+			};
+			
+			
+			static readonly int inplen = 9;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

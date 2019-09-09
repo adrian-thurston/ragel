@@ -1,0 +1,329 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const char  _scanner_actions [] = { 0, 1, 0, 1, 1, 1, 5, 1, 6, 1, 7, 2, 2, 3, 2, 2, 4, 0 ,  };
+static const char  _scanner_to_state_actions [] = { 0, 1, 0, 0 ,  };
+static const char  _scanner_from_state_actions [] = { 0, 3, 0, 0 ,  };
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  scanner_start  = 1;
+static const int  scanner_first_final  = 1;
+static const int  scanner_error  = -1;
+static const int  scanner_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		_resume:
+		_acts = _scanner_actions + _scanner_from_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 1:
+				{
+					{
+						ts = p;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		switch ( cs  ) {
+			case 1:
+			switch ( ((*( p  ))
+			) ) {
+				case 97:
+				{
+					goto ctr5;
+				}
+				case 98:
+				{
+					goto ctr6;
+				}
+				
+			}
+			{
+				goto ctr4;
+			}
+			case 2:
+			if ( ((*( p  ))
+			)== 99  )
+			{
+				goto ctr3;
+			}
+			
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 98  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr7;
+			}
+			case 0:
+			if ( ((*( p  ))
+			)== 99  )
+			{
+				goto ctr3;
+			}
+			
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 98  )
+			{
+				goto ctr2;
+			}
+			
+			{
+				goto ctr7;
+			}
+			
+		}
+		ctr2: cs = 0;
+		goto _again;
+		ctr7: cs = 1;
+		goto f0;
+		ctr3: cs = 1;
+		goto f1;
+		ctr4: cs = 1;
+		goto f4;
+		ctr5: cs = 2;
+		goto f5;
+		ctr6: cs = 2;
+		goto f6;
+		
+		f1: _acts = _scanner_actions + 5 ;
+		goto execFuncs;
+		f4: _acts = _scanner_actions + 7 ;
+		goto execFuncs;
+		f0: _acts = _scanner_actions + 9 ;
+		goto execFuncs;
+		f5: _acts = _scanner_actions + 11 ;
+		goto execFuncs;
+		f6: _acts = _scanner_actions + 14 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 2:
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 3:
+				{
+					{
+						act = 1;
+						
+					}
+					
+				}
+				
+				break;
+				case 4:
+				{
+					{
+						act = 3;
+						
+					}
+					
+				}
+				
+				break;
+				case 5:
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "pat2\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 6:
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "any\n" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 7:
+				{
+					{
+						switch ( act  ) {
+							case 1 :
+							p = ((te))-1;
+							{
+								printf( "%s", "pat1\n" );
+								
+							}
+							
+							break;
+							case 3 :
+							p = ((te))-1;
+							{
+								printf( "%s", "any\n" );
+								
+							}
+							
+							break;
+							
+						}
+						
+					}
+					
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		_acts = _scanner_actions + _scanner_to_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					{
+						ts = 0;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 2:
+				goto ctr7;
+				case 0:
+				goto ctr7;
+				
+			}
+		}
+		
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"a",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

@@ -1,0 +1,188 @@
+host( "working/condrep4.rl", 1 ) @{/* 
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using std::cout;
+	using std::endl;
+	
+	
+	
+}@
+array char _foo_trans_keys( 0, 2 ) = { 1, 0, 2, 2, 2, 2, 0, 0, 1, 0, 0 };
+
+array s8 _foo_char_class( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 };
+
+array s8 _foo_index_offsets( 0, 3 ) = { 0, 0, 1, 2, 3, 0 };
+
+array s8 _foo_indicies( 0, 2 ) = { 1, 1, 2, 0 };
+
+array s8 _foo_index_defaults( 0, 3 ) = { 0, 0, 0, 3, 3, 0 };
+
+array s8 _foo_trans_cond_spaces( -1, 2 ) = { 1, 2, -1, -1, 0 };
+
+array s8 _foo_trans_offsets( 0, 7 ) = { 0, 2, 6, 7, 0 };
+
+array s8 _foo_cond_targs( 0, 4 ) = { 0, 2, 0, 3, 2, 3, 4, 0, 0 };
+
+array s8 _foo_cond_actions( 0, 2 ) = { 0, 2, 0, 0, 2, 0, 0, 0, 0 };
+
+array s8 _foo_from_state_actions( 0, 1 ) = { 0, 1, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 4;
+
+value int foo_en_main = 1;
+
+host( "working/condrep4.rl", 25 ) @{
+	
+	void test( int min, int max, const char *str )
+	{
+		int cs;
+		const char *p = str;
+		const char *pe = str + strlen( str ) + 1;
+		int c = 0, seen = 0;
+		
+		cout << "run " << str << " " << min << " " << max << ":";
+		
+	}@
+	{
+		cs = cast(int)foo_start;
+	}
+	host( "working/condrep4.rl", 36 ) @{
+	}@
+	{
+		int _trans = 0;
+		uint _cond = 0;
+		index char _keys;
+		index s8 _inds;
+		int _cpc;
+		entry {
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				switch ( _foo_from_state_actions[cs] ) {
+					case 1 {
+						host( "working/condrep4.rl", 14 ) ${ c = 0; }$
+					}
+				}
+				
+				_keys = offset( _foo_trans_keys, (cs<<1) );
+				_inds = offset( _foo_indicies, _foo_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 46 && ( deref( data, p )) >= 0 )
+				{
+					int _ic = cast(int)_foo_char_class[cast(int)( deref( data, p )) - 0];
+					if ( _ic <= cast(int)deref( _foo_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _foo_trans_keys, _keys ) )
+					_trans = cast(int)deref( _foo_indicies, _inds + cast(int)( _ic - cast(int)deref( _foo_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_foo_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_foo_index_defaults[cs];
+				}
+				
+				_cond = cast(uint)_foo_trans_offsets[_trans];
+				
+				_cpc = 0;
+				switch ( _foo_trans_cond_spaces[_trans] ) {
+					
+					case 1 {
+						if ( host( "working/condrep4.rl", 17 ) ={ ({ c < max; }) }= ) _cpc += 1;
+					}
+					case 2 {
+						if ( host( "working/condrep4.rl", 16 ) ={ ({ c >= min; }) }= ) _cpc += 1;
+						if ( host( "working/condrep4.rl", 17 ) ={ ({ c < max; }) }= ) _cpc += 2;
+					}
+				}
+				_cond += cast(uint)_cpc;
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_foo_cond_targs[_cond];
+				
+				if ( _foo_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				switch ( _foo_cond_actions[_cond] ) {
+					case 2 {
+						host( "working/condrep4.rl", 15 ) ${ c += 1; }$
+					}
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p+= 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/condrep4.rl", 37 ) @{
+		
+		cout << " " << seen;
+		
+		if ( cs >= foo_first_final )
+		cout << " success" << endl;
+		else
+		cout << " failure" << endl;
+	}
+	
+	int main()
+	{
+		test( 0, 0, "" );
+		test( 0, 1, "" );
+		test( 1, 1, "" );
+		test( 1, 2, "" );
+		test( 2, 2, "" );
+		test( 2, 3, "" );
+		
+		test( 0, 0, "." );
+		test( 0, 1, "." );
+		test( 1, 1, "." );
+		test( 1, 2, "." );
+		test( 2, 2, "." );
+		test( 2, 3, "." );
+		
+		test( 0, 0, ".." );
+		test( 0, 1, ".." );
+		test( 1, 1, ".." );
+		test( 1, 2, ".." );
+		test( 2, 2, ".." );
+		test( 2, 3, ".." );
+		
+		test( 0, 0, "..." );
+		test( 0, 1, "..." );
+		test( 1, 1, "..." );
+		test( 1, 2, "..." );
+		test( 2, 2, "..." );
+		test( 2, 3, "..." );
+		
+		test( 0, 0, "...." );
+		test( 0, 1, "...." );
+		test( 1, 1, "...." );
+		test( 1, 2, "...." );
+		test( 2, 2, "...." );
+		test( 2, 3, "...." );
+		return 0;
+	}
+	
+}@

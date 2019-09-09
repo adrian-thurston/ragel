@@ -1,0 +1,293 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+static const char  _indep_nfa_targs [] = { 0, 0 ,  };
+static const char  _indep_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _indep_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _indep_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  indep_start  = 1;
+static const int  indep_first_final  = 13;
+static const int  indep_error  = 0;
+static const int  indep_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) indep_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)> 51  )
+			{
+				if ( ((*( p  ))
+				)<= 54  )
+				{
+					goto ctr2;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)>= 49  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ((*( p  ))
+			)== 104  )
+			{
+				goto ctr3;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ((*( p  ))
+			)== 101  )
+			{
+				goto ctr4;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ((*( p  ))
+			)== 108  )
+			{
+				goto ctr5;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ((*( p  ))
+			)== 108  )
+			{
+				goto ctr6;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( ((*( p  ))
+			)== 111  )
+			{
+				goto ctr7;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ((*( p  ))
+			)== 10  )
+			{
+				goto ctr8;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 13:
+			{
+				goto ctr1;
+			}
+			case 8:
+			switch ( ((*( p  ))
+			) ) {
+				case 72:
+				{
+					goto ctr9;
+				}
+				case 104:
+				{
+					goto ctr9;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			switch ( ((*( p  ))
+			) ) {
+				case 69:
+				{
+					goto ctr10;
+				}
+				case 101:
+				{
+					goto ctr10;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr11;
+				}
+				case 108:
+				{
+					goto ctr11;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			switch ( ((*( p  ))
+			) ) {
+				case 76:
+				{
+					goto ctr12;
+				}
+				case 108:
+				{
+					goto ctr12;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			switch ( ((*( p  ))
+			) ) {
+				case 79:
+				{
+					goto ctr7;
+				}
+				case 111:
+				{
+					goto ctr7;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto _again;
+		ctr3: cs = 3;
+		goto _again;
+		ctr4: cs = 4;
+		goto _again;
+		ctr5: cs = 5;
+		goto _again;
+		ctr6: cs = 6;
+		goto _again;
+		ctr7: cs = 7;
+		goto _again;
+		ctr2: cs = 8;
+		goto _again;
+		ctr9: cs = 9;
+		goto _again;
+		ctr10: cs = 10;
+		goto _again;
+		ctr11: cs = 11;
+		goto _again;
+		ctr12: cs = 12;
+		goto _again;
+		ctr8: cs = 13;
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= indep_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"1hello\n",
+	"1HELLO\n",
+	"1HeLLo\n",
+	"2hello\n",
+	"2HELLO\n",
+	"2HeLLo\n",
+	"3hello\n",
+	"3HELLO\n",
+	"3HeLLo\n",
+	"4hello\n",
+	"4HELLO\n",
+	"4HeLLo\n",
+	"5hello\n",
+	"5HELLO\n",
+	"5HeLLo\n",
+	"6hello\n",
+	"6HELLO\n",
+	"6HeLLo\n",
+};
+
+int inplen = 18;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

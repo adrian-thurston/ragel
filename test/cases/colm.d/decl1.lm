@@ -1,0 +1,4 @@
+Int: int = 7
+print( Int, '\n' )
+##### EXP #####
+7

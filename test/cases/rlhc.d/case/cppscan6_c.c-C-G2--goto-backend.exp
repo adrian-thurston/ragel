@@ -1,0 +1,2214 @@
+#include <string.h>
+#include <stdio.h>
+
+char * ts ;
+char * te ;
+int act ;
+int token ;
+
+
+
+
+
+static const int  scanner_start  = 12;
+static const int  scanner_first_final  = 12;
+static const int  scanner_error  = 0;
+static const int  scanner_en_main  = 12;
+static const char  _scanner_nfa_targs [] = { 0, 0 ,  };
+static const char  _scanner_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _scanner_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _scanner_nfa_pop_trans [] = { 0, 0 ,  };
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		switch ( cs  ) {
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 17:
+			goto st_case_17;
+			case 18:
+			goto st_case_18;
+			case 19:
+			goto st_case_19;
+			case 20:
+			goto st_case_20;
+			case 21:
+			goto st_case_21;
+			case 5:
+			goto st_case_5;
+			case 22:
+			goto st_case_22;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 23:
+			goto st_case_23;
+			case 24:
+			goto st_case_24;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 25:
+			goto st_case_25;
+			case 26:
+			goto st_case_26;
+			case 11:
+			goto st_case_11;
+			case 27:
+			goto st_case_27;
+			case 28:
+			goto st_case_28;
+			case 29:
+			goto st_case_29;
+			case 30:
+			goto st_case_30;
+			case 31:
+			goto st_case_31;
+			case 32:
+			goto st_case_32;
+			case 33:
+			goto st_case_33;
+			case 34:
+			goto st_case_34;
+			case 0:
+			goto st_case_0;
+			
+		}
+		goto st_out;
+		ctr17:
+		{
+			{
+				switch ( act  ) {
+					case 0 :
+					{
+						{
+							goto st0;
+						}
+						
+					}
+					
+					break;
+					case 3 :
+					p = ((te))-1;
+					{
+						token = 195;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+					break;
+					case 4 :
+					p = ((te))-1;
+					{
+						token = 194;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+					break;
+					case 5 :
+					p = ((te))-1;
+					{
+						token = 218;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+					break;
+					case 6 :
+					p = ((te))-1;
+					{
+						token = 219;
+						printf( "%s", "<" );
+						printf( "%d", token );
+						printf( "%s", "> " );
+						fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+						
+					}
+					
+					break;
+					
+				}
+				
+			}
+			
+			
+		}
+		
+		
+		goto st12;
+		ctr3:
+		{
+			{
+				te = p+1;
+				{
+					token = 192;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr8:
+		{
+			{
+				te = p+1;
+				{
+					token = 193;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr23:
+		{
+			{
+				p = ((te))-1;
+				{
+					token = ( int ) ( ts[0] )
+					;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr13:
+		{
+			{
+				te = p+1;
+				{
+					token = 240;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr22:
+		{
+			{
+				te = p+1;
+				{
+					token = 242;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr25:
+		{
+			{
+				te = p+1;
+				{
+					token = 242;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr27:
+		{
+			{
+				p = ((te))-1;
+				{
+					token = 218;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr31:
+		{
+			{
+				te = p+1;
+				{
+					token = ( int ) ( ts[0] )
+					;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr48:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 241;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr101:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = ( int ) ( ts[0] )
+					;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr51:
+		{
+			{
+				te = p+1;
+				{
+					token = 224;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr53:
+		{
+			{
+				te = p+1;
+				{
+					token = 229;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr55:
+		{
+			{
+				te = p+1;
+				{
+					token = 225;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr56:
+		{
+			{
+				te = p+1;
+				{
+					token = 232;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr58:
+		{
+			{
+				te = p+1;
+				{
+					token = 227;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr60:
+		{
+			{
+				te = p+1;
+				{
+					token = 212;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr61:
+		{
+			{
+				te = p+1;
+				{
+					token = 230;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr63:
+		{
+			{
+				te = p+1;
+				{
+					token = 213;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr64:
+		{
+			{
+				te = p+1;
+				{
+					token = 231;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr67:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 211;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr68:
+		{
+			{
+				te = p+1;
+				{
+					token = 214;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr70:
+		{
+			{
+				te = p+1;
+				{
+					token = 215;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr77:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 194;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr76:
+		{
+			{
+				te = p+1;
+				{
+					token = 194;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr79:
+		{
+			{
+				te = p+1;
+				{
+					token = 228;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr91:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 218;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr83:
+		{
+			{
+				te = p+1;
+				{
+					token = 218;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr86:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 219;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr87:
+		{
+			{
+				te = p+1;
+				{
+					token = 219;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr89:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 220;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr90:
+		{
+			{
+				te = p+1;
+				{
+					token = 220;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr93:
+		{
+			{
+				te = p+1;
+				{
+					token = 197;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr95:
+		{
+			{
+				te = p+1;
+				{
+					token = 223;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr98:
+		{
+			{
+				te = p;
+				p = p - 1;
+				{
+					token = 195;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr100:
+		{
+			{
+				te = p+1;
+				{
+					token = 233;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr102:
+		{
+			{
+				te = p+1;
+				{
+					token = 234;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		ctr103:
+		{
+			{
+				te = p+1;
+				{
+					token = 226;
+					printf( "%s", "<" );
+					printf( "%d", token );
+					printf( "%s", "> " );
+					fwrite ( ts , 1 , te - ts , stdout );printf( "%s", "\n" );
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		goto st12;
+		st12:
+		{
+			{
+				ts = 0;
+				
+			}
+			
+		}
+		{
+			{
+				act = 0;
+				
+			}
+			
+		}
+		
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof12;
+		
+		st_case_12:
+		{
+			{
+				ts = p;
+				
+			}
+			
+		}
+		switch ( ((*( p  ))
+		) ) {
+			case 33:
+			{
+				goto st14;
+			}
+			case 34:
+			{
+				goto st1;
+			}
+			case 37:
+			{
+				goto st15;
+			}
+			case 38:
+			{
+				goto st16;
+			}
+			case 39:
+			{
+				goto st3;
+			}
+			case 42:
+			{
+				goto st17;
+			}
+			case 43:
+			{
+				goto st18;
+			}
+			case 45:
+			{
+				goto st19;
+			}
+			case 46:
+			{
+				goto ctr37;
+			}
+			case 47:
+			{
+				goto ctr38;
+			}
+			case 48:
+			{
+				goto ctr39;
+			}
+			case 58:
+			{
+				goto st29;
+			}
+			case 61:
+			{
+				goto st30;
+			}
+			case 76:
+			{
+				goto ctr44;
+			}
+			case 94:
+			{
+				goto st33;
+			}
+			case 95:
+			{
+				goto st31;
+			}
+			case 124:
+			{
+				goto st34;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( ((*( p  ))
+			)< 49  )
+			{
+				if ( 35 <= ((*( p  ))
+				)&& ((*( p  ))
+				)<= 44  )
+				{
+					goto ctr31;
+				}
+				
+			} 
+			else if ( ((*( p  ))
+			)> 57  )
+			{
+				if ( 59 <= ((*( p  ))
+				) )
+				{
+					goto ctr31;
+				}
+				
+			} 
+			else
+			{
+				goto ctr40;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( ((*( p  ))
+			)< 97  )
+			{
+				{
+					goto ctr31;
+				}
+			} 
+			else if ( ((*( p  ))
+			)> 122  )
+			{
+				if ( ((*( p  ))
+				)<= 126  )
+				{
+					goto ctr31;
+				}
+				
+			} 
+			else
+			{
+				goto st31;
+			}
+			
+		} 
+		else
+		{
+			goto st31;
+		}
+		
+		{
+			goto st13;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof13;
+		
+		st_case_13:
+		if ( 33 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 126  )
+		{
+			goto ctr48;
+		}
+		
+		{
+			goto st13;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof14;
+		
+		st_case_14:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr51;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st1:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof1;
+		
+		st_case_1:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr17;
+			}
+			case 34:
+			{
+				goto ctr3;
+			}
+			case 92:
+			{
+				goto st2;
+			}
+			
+		}
+		{
+			goto st1;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof2;
+		
+		st_case_2:
+		{
+			goto st1;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof15;
+		
+		st_case_15:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr53;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st16:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof16;
+		
+		st_case_16:
+		switch ( ((*( p  ))
+		) ) {
+			case 38:
+			{
+				goto ctr55;
+			}
+			case 61:
+			{
+				goto ctr56;
+			}
+			
+		}
+		{
+			goto ctr101;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof3;
+		
+		st_case_3:
+		switch ( ((*( p  ))
+		) ) {
+			case 10:
+			{
+				goto ctr17;
+			}
+			case 39:
+			{
+				goto ctr8;
+			}
+			case 92:
+			{
+				goto st4;
+			}
+			
+		}
+		{
+			goto st3;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof4;
+		
+		st_case_4:
+		{
+			goto st3;
+		}
+		st17:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof17;
+		
+		st_case_17:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr58;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st18:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof18;
+		
+		st_case_18:
+		switch ( ((*( p  ))
+		) ) {
+			case 43:
+			{
+				goto ctr60;
+			}
+			case 61:
+			{
+				goto ctr61;
+			}
+			
+		}
+		{
+			goto ctr101;
+		}
+		st19:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof19;
+		
+		st_case_19:
+		switch ( ((*( p  ))
+		) ) {
+			case 45:
+			{
+				goto ctr63;
+			}
+			case 61:
+			{
+				goto ctr64;
+			}
+			case 62:
+			{
+				goto st20;
+			}
+			
+		}
+		{
+			goto ctr101;
+		}
+		st20:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof20;
+		
+		st_case_20:
+		if ( ((*( p  ))
+		)== 42  )
+		{
+			goto ctr68;
+		}
+		
+		{
+			goto ctr67;
+		}
+		ctr37:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		
+		
+		goto st21;
+		st21:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof21;
+		
+		st_case_21:
+		switch ( ((*( p  ))
+		) ) {
+			case 42:
+			{
+				goto ctr70;
+			}
+			case 46:
+			{
+				goto st5;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr72;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof5;
+		
+		st_case_5:
+		if ( ((*( p  ))
+		)== 46  )
+		{
+			goto ctr13;
+		}
+		
+		{
+			goto ctr23;
+		}
+		ctr72:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 4;
+				
+			}
+			
+		}
+		
+		
+		goto st22;
+		st22:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof22;
+		
+		st_case_22:
+		switch ( ((*( p  ))
+		) ) {
+			case 69:
+			{
+				goto st6;
+			}
+			case 70:
+			{
+				goto ctr76;
+			}
+			case 76:
+			{
+				goto ctr76;
+			}
+			case 101:
+			{
+				goto st6;
+			}
+			case 102:
+			{
+				goto ctr76;
+			}
+			case 108:
+			{
+				goto ctr76;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr72;
+		}
+		
+		{
+			goto ctr77;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof6;
+		
+		st_case_6:
+		switch ( ((*( p  ))
+		) ) {
+			case 43:
+			{
+				goto st7;
+			}
+			case 45:
+			{
+				goto st7;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st23;
+		}
+		
+		{
+			goto ctr17;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof7;
+		
+		st_case_7:
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st23;
+		}
+		
+		{
+			goto ctr17;
+		}
+		st23:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof23;
+		
+		st_case_23:
+		switch ( ((*( p  ))
+		) ) {
+			case 70:
+			{
+				goto ctr76;
+			}
+			case 76:
+			{
+				goto ctr76;
+			}
+			case 102:
+			{
+				goto ctr76;
+			}
+			case 108:
+			{
+				goto ctr76;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto st23;
+		}
+		
+		{
+			goto ctr77;
+		}
+		ctr38:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		
+		
+		goto st24;
+		st24:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof24;
+		
+		st_case_24:
+		switch ( ((*( p  ))
+		) ) {
+			case 33:
+			{
+				goto st8;
+			}
+			case 47:
+			{
+				goto st10;
+			}
+			case 61:
+			{
+				goto ctr79;
+			}
+			
+		}
+		{
+			goto ctr101;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof8;
+		
+		st_case_8:
+		if ( ((*( p  ))
+		)== 33  )
+		{
+			goto st9;
+		}
+		
+		{
+			goto st8;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof9;
+		
+		st_case_9:
+		switch ( ((*( p  ))
+		) ) {
+			case 33:
+			{
+				goto st9;
+			}
+			case 47:
+			{
+				goto ctr22;
+			}
+			
+		}
+		{
+			goto st8;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof10;
+		
+		st_case_10:
+		if ( ((*( p  ))
+		)== 10  )
+		{
+			goto ctr25;
+		}
+		
+		{
+			goto st10;
+		}
+		ctr39:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 5;
+				
+			}
+			
+		}
+		
+		
+		goto st25;
+		st25:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof25;
+		
+		st_case_25:
+		switch ( ((*( p  ))
+		) ) {
+			case 46:
+			{
+				goto ctr72;
+			}
+			case 69:
+			{
+				goto st6;
+			}
+			case 76:
+			{
+				goto ctr83;
+			}
+			case 85:
+			{
+				goto ctr83;
+			}
+			case 101:
+			{
+				goto st6;
+			}
+			case 108:
+			{
+				goto ctr83;
+			}
+			case 117:
+			{
+				goto ctr83;
+			}
+			case 120:
+			{
+				goto st11;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr82;
+		}
+		
+		{
+			goto ctr91;
+		}
+		ctr82:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 6;
+				
+			}
+			
+		}
+		
+		
+		goto st26;
+		st26:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof26;
+		
+		st_case_26:
+		switch ( ((*( p  ))
+		) ) {
+			case 46:
+			{
+				goto ctr72;
+			}
+			case 69:
+			{
+				goto st6;
+			}
+			case 76:
+			{
+				goto ctr87;
+			}
+			case 85:
+			{
+				goto ctr87;
+			}
+			case 101:
+			{
+				goto st6;
+			}
+			case 108:
+			{
+				goto ctr87;
+			}
+			case 117:
+			{
+				goto ctr87;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr82;
+		}
+		
+		{
+			goto ctr86;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof11;
+		
+		st_case_11:
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto st27;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 70  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 102  )
+			{
+				goto st27;
+			}
+			
+		} 
+		else
+		{
+			goto st27;
+		}
+		
+		{
+			goto ctr27;
+		}
+		st27:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof27;
+		
+		st_case_27:
+		switch ( ((*( p  ))
+		) ) {
+			case 76:
+			{
+				goto ctr90;
+			}
+			case 85:
+			{
+				goto ctr90;
+			}
+			case 108:
+			{
+				goto ctr90;
+			}
+			case 117:
+			{
+				goto ctr90;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto st27;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 70  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 102  )
+			{
+				goto st27;
+			}
+			
+		} 
+		else
+		{
+			goto st27;
+		}
+		
+		{
+			goto ctr89;
+		}
+		ctr40:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 5;
+				
+			}
+			
+		}
+		
+		
+		goto st28;
+		st28:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof28;
+		
+		st_case_28:
+		switch ( ((*( p  ))
+		) ) {
+			case 46:
+			{
+				goto ctr72;
+			}
+			case 69:
+			{
+				goto st6;
+			}
+			case 76:
+			{
+				goto ctr83;
+			}
+			case 85:
+			{
+				goto ctr83;
+			}
+			case 101:
+			{
+				goto st6;
+			}
+			case 108:
+			{
+				goto ctr83;
+			}
+			case 117:
+			{
+				goto ctr83;
+			}
+			
+		}
+		if ( 48 <= ((*( p  ))
+		)&& ((*( p  ))
+		)<= 57  )
+		{
+			goto ctr40;
+		}
+		
+		{
+			goto ctr91;
+		}
+		st29:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof29;
+		
+		st_case_29:
+		if ( ((*( p  ))
+		)== 58  )
+		{
+			goto ctr93;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st30:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof30;
+		
+		st_case_30:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr95;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st31:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof31;
+		
+		st_case_31:
+		if ( ((*( p  ))
+		)== 95  )
+		{
+			goto st31;
+		}
+		
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto st31;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto st31;
+			}
+			
+		} 
+		else
+		{
+			goto st31;
+		}
+		
+		{
+			goto ctr98;
+		}
+		ctr44:
+		{
+			{
+				te = p+1;
+				
+			}
+			
+		}
+		{
+			{
+				act = 3;
+				
+			}
+			
+		}
+		
+		
+		goto st32;
+		st32:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof32;
+		
+		st_case_32:
+		switch ( ((*( p  ))
+		) ) {
+			case 34:
+			{
+				goto st1;
+			}
+			case 39:
+			{
+				goto st3;
+			}
+			case 95:
+			{
+				goto st31;
+			}
+			
+		}
+		if ( ((*( p  ))
+		)< 65  )
+		{
+			if ( 48 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 57  )
+			{
+				goto st31;
+			}
+			
+		} 
+		else if ( ((*( p  ))
+		)> 90  )
+		{
+			if ( 97 <= ((*( p  ))
+			)&& ((*( p  ))
+			)<= 122  )
+			{
+				goto st31;
+			}
+			
+		} 
+		else
+		{
+			goto st31;
+		}
+		
+		{
+			goto ctr98;
+		}
+		st33:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof33;
+		
+		st_case_33:
+		if ( ((*( p  ))
+		)== 61  )
+		{
+			goto ctr100;
+		}
+		
+		{
+			goto ctr101;
+		}
+		st34:
+		p+= 1;
+		if ( p == pe  )
+		goto _test_eof34;
+		
+		st_case_34:
+		switch ( ((*( p  ))
+		) ) {
+			case 61:
+			{
+				goto ctr102;
+			}
+			case 124:
+			{
+				goto ctr103;
+			}
+			
+		}
+		{
+			goto ctr101;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st_out:
+		_test_eof12: cs = 12;
+		goto _test_eof; 
+		_test_eof13: cs = 13;
+		goto _test_eof; 
+		_test_eof14: cs = 14;
+		goto _test_eof; 
+		_test_eof1: cs = 1;
+		goto _test_eof; 
+		_test_eof2: cs = 2;
+		goto _test_eof; 
+		_test_eof15: cs = 15;
+		goto _test_eof; 
+		_test_eof16: cs = 16;
+		goto _test_eof; 
+		_test_eof3: cs = 3;
+		goto _test_eof; 
+		_test_eof4: cs = 4;
+		goto _test_eof; 
+		_test_eof17: cs = 17;
+		goto _test_eof; 
+		_test_eof18: cs = 18;
+		goto _test_eof; 
+		_test_eof19: cs = 19;
+		goto _test_eof; 
+		_test_eof20: cs = 20;
+		goto _test_eof; 
+		_test_eof21: cs = 21;
+		goto _test_eof; 
+		_test_eof5: cs = 5;
+		goto _test_eof; 
+		_test_eof22: cs = 22;
+		goto _test_eof; 
+		_test_eof6: cs = 6;
+		goto _test_eof; 
+		_test_eof7: cs = 7;
+		goto _test_eof; 
+		_test_eof23: cs = 23;
+		goto _test_eof; 
+		_test_eof24: cs = 24;
+		goto _test_eof; 
+		_test_eof8: cs = 8;
+		goto _test_eof; 
+		_test_eof9: cs = 9;
+		goto _test_eof; 
+		_test_eof10: cs = 10;
+		goto _test_eof; 
+		_test_eof25: cs = 25;
+		goto _test_eof; 
+		_test_eof26: cs = 26;
+		goto _test_eof; 
+		_test_eof11: cs = 11;
+		goto _test_eof; 
+		_test_eof27: cs = 27;
+		goto _test_eof; 
+		_test_eof28: cs = 28;
+		goto _test_eof; 
+		_test_eof29: cs = 29;
+		goto _test_eof; 
+		_test_eof30: cs = 30;
+		goto _test_eof; 
+		_test_eof31: cs = 31;
+		goto _test_eof; 
+		_test_eof32: cs = 32;
+		goto _test_eof; 
+		_test_eof33: cs = 33;
+		goto _test_eof; 
+		_test_eof34: cs = 34;
+		goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( cs  ) {
+				case 13:
+				goto ctr48;
+				case 14:
+				goto ctr101;
+				case 1:
+				goto ctr17;
+				case 2:
+				goto ctr17;
+				case 15:
+				goto ctr101;
+				case 16:
+				goto ctr101;
+				case 3:
+				goto ctr17;
+				case 4:
+				goto ctr17;
+				case 17:
+				goto ctr101;
+				case 18:
+				goto ctr101;
+				case 19:
+				goto ctr101;
+				case 20:
+				goto ctr67;
+				case 21:
+				goto ctr101;
+				case 5:
+				goto ctr23;
+				case 22:
+				goto ctr77;
+				case 6:
+				goto ctr17;
+				case 7:
+				goto ctr17;
+				case 23:
+				goto ctr77;
+				case 24:
+				goto ctr101;
+				case 8:
+				goto ctr23;
+				case 9:
+				goto ctr23;
+				case 10:
+				goto ctr23;
+				case 25:
+				goto ctr91;
+				case 26:
+				goto ctr86;
+				case 11:
+				goto ctr27;
+				case 27:
+				goto ctr89;
+				case 28:
+				goto ctr91;
+				case 29:
+				goto ctr101;
+				case 30:
+				goto ctr101;
+				case 31:
+				goto ctr98;
+				case 32:
+				goto ctr98;
+				case 33:
+				goto ctr101;
+				case 34:
+				goto ctr101;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+}
+
+void finish( )
+{
+	if ( cs >= scanner_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+	"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+	"'\n'\n",
+};
+
+int inplen = 3;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

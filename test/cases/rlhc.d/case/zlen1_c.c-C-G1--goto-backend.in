@@ -1,0 +1,105 @@
+host( "working/zlen1_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	
+	
+	
+	
+	
+}@
+array s8 _zlen1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _zlen1_nfa_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _zlen1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _zlen1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int zlen1_start = 1;
+value int zlen1_first_final = 1;
+value int zlen1_error = 0;
+
+value int zlen1_en_main = 1;
+
+host( "working/zlen1_c.rl", 20 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)zlen1_start;
+	}
+	host( "working/zlen1_c.rl", 27 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+		}
+		
+		ctr0: cs = 0; goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/zlen1_c.rl", 34 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= zlen1_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"",
+		"x",
+	};
+	
+	int inplen = 2;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

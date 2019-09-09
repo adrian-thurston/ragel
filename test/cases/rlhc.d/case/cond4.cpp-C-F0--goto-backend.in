@@ -1,0 +1,160 @@
+host( "working/cond4.rl", 1 ) @{/* 
+	* @@LANG: c++
+	*/
+	
+	#include <iostream>
+	#include <string.h>
+	using std::cout;
+	using std::endl;
+	
+	
+	
+}@
+array s8 _foo_actions( 0, 1 ) = { 0, 1, 0, 0 };
+
+array char _foo_trans_keys( 0, 5 ) = { 1, 0, 0, 5, 0 };
+
+array s8 _foo_char_class( 0, 5 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4, 4, 4, 4, 4, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_index_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _foo_indicies( 0, 6 ) = { 0, 2, 3, 4, 5, 6, 0 };
+
+array s8 _foo_index_defaults( 0, 1 ) = { 0, 1, 0 };
+
+array s8 _foo_trans_cond_spaces( -1, 7 ) = { -1, -1, 0, 4, 6, 7, 5, 0 };
+
+array s8 _foo_trans_offsets( 0, 32 ) = { 0, 1, 2, 4, 8, 16, 32, 0 };
+
+array s8 _foo_cond_targs( 0, 1 ) = { 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _foo_cond_actions( 0, 1 ) = { 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+
+value int foo_en_main = 1;
+
+host( "working/cond4.rl", 27 ) @{
+	
+	void test( char *str )
+	{
+		int len = strlen( str );
+		int cs = foo_start;
+		char *p = str, *pe = str+len;
+	}@
+	{
+		int _trans = 0;
+		uint _cond = 0;
+		index s8 _acts;
+		uint _nacts;
+		index char _keys;
+		index s8 _inds;
+		int _cpc;
+		entry {
+			
+			if ( p == pe )
+			goto _test_eof;
+			if ( cs == 0 )
+			goto _out;
+			label _resume {
+				_keys = offset( _foo_trans_keys, (cs<<1) );
+				_inds = offset( _foo_indicies, _foo_index_offsets[cs] );
+				
+				if ( ( deref( data, p )) <= 70 && ( deref( data, p )) >= 0 )
+				{
+					int _ic = cast(int)_foo_char_class[cast(int)( deref( data, p )) - 0];
+					if ( _ic <= cast(int)deref( _foo_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _foo_trans_keys, _keys ) )
+					_trans = cast(int)deref( _foo_indicies, _inds + cast(int)( _ic - cast(int)deref( _foo_trans_keys, _keys ) )  ); 
+					else
+					_trans = cast(int)_foo_index_defaults[cs];
+				}
+				else {
+					_trans = cast(int)_foo_index_defaults[cs];
+				}
+				
+				_cond = cast(uint)_foo_trans_offsets[_trans];
+				
+				_cpc = 0;
+				switch ( _foo_trans_cond_spaces[_trans] ) {
+					
+					case 0 {
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) _cpc += 1;
+					}
+					case 4 {
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) _cpc += 1;
+						if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) _cpc += 2;
+					}
+					case 5 {
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) _cpc += 1;
+						if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) _cpc += 2;
+					}
+					case 6 {
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) _cpc += 1;
+						if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) _cpc += 2;
+						if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) _cpc += 4;
+					}
+					case 7 {
+						if ( host( "working/cond4.rl", 13 ) ={(cout << "c1 ", true)}= ) _cpc += 1;
+						if ( host( "working/cond4.rl", 14 ) ={(cout << "c2 ", true)}= ) _cpc += 2;
+						if ( host( "working/cond4.rl", 15 ) ={(cout << "c3 ", true)}= ) _cpc += 4;
+						if ( host( "working/cond4.rl", 16 ) ={(cout << "c4 ", true)}= ) _cpc += 8;
+					}
+				}
+				_cond += cast(uint)_cpc;
+				goto _match_cond;
+			}
+			label _match_cond {
+				cs = cast(int)_foo_cond_targs[_cond];
+				
+				if ( _foo_cond_actions[_cond] == 0 )
+				goto _again;
+				
+				_acts = offset( _foo_actions, _foo_cond_actions[_cond] );
+				_nacts = cast(uint)deref( _foo_actions, _acts );
+				_acts += 1;
+				while ( _nacts > 0 ) {
+					switch ( deref( _foo_actions, _acts ) )
+					{
+						case 0 {
+							host( "working/cond4.rl", 23 ) ${cout << "char: " << (int)*p << endl;}$
+						}
+					}
+					_nacts -= 1;
+					_acts += 1;
+				}
+				
+				
+			}
+			label _again {
+				if ( cs == 0 )
+				goto _out;
+				p += 1;
+				if ( p != pe )
+				goto _resume;
+			}
+			label _test_eof { {}
+			}
+			label _out { {}
+			}
+		}
+	}
+	host( "working/cond4.rl", 34 ) @{
+	}
+	
+	char data[] = { 5, 15, 25, 31, 35, 39, 45, 55, 65, 0 };
+	
+	int main()
+	{
+		test( data );
+		return 0;
+	}
+	
+}@

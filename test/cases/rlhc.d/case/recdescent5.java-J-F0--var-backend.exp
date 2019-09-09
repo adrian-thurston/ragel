@@ -1,0 +1,243 @@
+class recdescent5
+{
+
+
+	private static byte  _recdescent_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 2, 1, 0, 2, 1, 2, 2, 1, 3, 0 ,  };
+	private static char  _recdescent_trans_keys [] = { 1, 0, 5, 5, 0, 5, 0, 5, 0, 5, 0,  };
+	private static byte  _recdescent_char_class [] = { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1, 5, 0 ,  };
+	private static byte  _recdescent_index_offsets [] = { 0, 0, 1, 7, 13, 0 ,  };
+	private static byte  _recdescent_indicies [] = { 0, 0, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9, 10, 6, 1, 11, 12, 9, 10, 0 ,  };
+	private static byte  _recdescent_index_defaults [] = { 0, 1, 1, 1, 1, 0 ,  };
+	private static byte  _recdescent_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+	private static byte  _recdescent_cond_targs [] = { 2, 0, 3, 4, 1, 2, 2, 3, 4, 1, 2, 3, 4, 0 ,  };
+	private static byte  _recdescent_cond_actions [] = { 0, 0, 1, 1, 5, 7, 3, 0, 9, 12, 15, 9, 0, 0 ,  };
+	private static byte  _recdescent_eof_actions [] = { 0, 0, 0, 3, 3, 0 ,  };
+	private static byte  _recdescent_nfa_targs [] = { 0, 0 ,  };
+	private static byte  _recdescent_nfa_offsets [] = { 0, 0, 0, 0, 0, 0 ,  };
+	private static byte  _recdescent_nfa_push_actions [] = { 0, 0 ,  };
+	private static byte  _recdescent_nfa_pop_trans [] = { 0, 0 ,  };
+	private static int  recdescent_start  = 2;
+	private static int  recdescent_first_final  = 2;
+	private static int  recdescent_error  = 0;
+	private static int  recdescent_en_main  = 2;
+	static void test( char data[] )
+	{
+		int cs, p = 0, pe = data.length, eof = data.length, item = 0;
+		int stack[] = new int[1024];
+		int stack_size = 1;
+		int top;
+		
+		{
+			cs = (int)recdescent_start;
+			top = 0;
+			
+		}
+		{
+			int _trans = 0;
+			int _have = 0;
+			int _cont = 1;
+			int _acts;
+			int _nacts;
+			int _keys;
+			int _inds;
+			while ( _cont == 1  )
+			{
+				if ( cs == 0  )
+				_cont = 0;
+				
+				_have = 0;
+				if ( p == pe  )
+				{
+					if ( p == eof  )
+					{
+						if ( _have == 0  )
+						{
+							int __acts;
+							int __nacts;
+							__acts = _recdescent_eof_actions[cs] ;
+							__nacts = (int )_recdescent_actions[__acts ];
+							__acts += 1;
+							while ( __nacts > 0  )
+							{
+								switch ( _recdescent_actions[__acts ] ) {
+									case 1 :
+									{
+										String item_data = new String ( data, item, p-item );
+										System.out.print( "item: " );
+										System.out.print( item_data );
+										System.out.print( "\n" );
+										
+									}
+									
+									break;
+									
+								}
+								__nacts -= 1;
+								__acts += 1;
+								
+							}
+							
+							
+						}
+						
+						
+					}
+					
+					if ( _have == 0  )
+					_cont = 0;
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					if ( _have == 0  )
+					{
+						_keys = (cs<<1) ;
+						_inds = _recdescent_index_offsets[cs] ;
+						if ( ( data[p ]) <= 125 && ( data[p ]) >= 9  )
+						{
+							int _ic = (int)_recdescent_char_class[(int)( data[p ]) - 9];
+							if ( _ic <= (int)_recdescent_trans_keys[_keys+1 ]&& _ic >= (int)_recdescent_trans_keys[_keys ] )
+							_trans = (int )_recdescent_indicies[_inds + (int)( _ic - (int)_recdescent_trans_keys[_keys ])  ];
+							
+							else
+							_trans = (int )_recdescent_index_defaults[cs];
+							
+							
+						}
+						
+						else
+						{
+							_trans = (int )_recdescent_index_defaults[cs];
+							
+						}
+						
+						
+					}
+					
+					if ( _cont == 1  )
+					{
+						cs = (int)_recdescent_cond_targs[_trans];
+						if ( _recdescent_cond_actions[_trans] != 0  )
+						{
+							_acts = _recdescent_cond_actions[_trans] ;
+							_nacts = (int )_recdescent_actions[_acts ];
+							_acts += 1;
+							while ( _nacts > 0  )
+							{
+								switch ( _recdescent_actions[_acts ] ) {
+									case 0 :
+									{
+										item = p; 
+									}
+									
+									break;
+									case 1 :
+									{
+										String item_data = new String ( data, item, p-item );
+										System.out.print( "item: " );
+										System.out.print( item_data );
+										System.out.print( "\n" );
+										
+									}
+									
+									break;
+									case 2 :
+									{
+										System.out.print( "calling main\n" );
+										{
+											{
+												if ( top == stack_size ) {
+													System.out.print( "growing stack\n" );
+													stack_size = top * 2;
+													// Don't actually bother to resize here, but we do print messages.
+													//stack = (int*)realloc( stack, sizeof(int)*stack_size );
+												}
+												
+											}
+											stack[top] = cs;
+											top += 1;
+											cs = 2;
+											
+										}
+										
+									}
+									
+									break;
+									case 3 :
+									{
+										if ( top == 0 ) {
+											System.out.print( "STRAY CLOSE\n" );
+											{
+												p+= 1;
+												_cont = 0;
+												
+											}
+											
+										}
+										else {
+											System.out.print( "returning from main\n" );
+											{
+												p = p - 1;
+												
+											}
+											
+											{
+												top-= 1;
+												cs = stack[top];
+												{
+													if ( stack_size > (top * 4) ) {
+														stack_size = top * 2;
+														// Don't actually bother to resize here, but we do print messages.
+														//stack = (int*)realloc( stack, sizeof(int)*stack_size );
+														System.out.print( "shrinking stack\n" );
+													}
+													
+												}
+												
+											}
+											
+										}
+										
+									}
+									
+									break;
+									
+								}
+								_nacts -= 1;
+								_acts += 1;
+								
+							}
+							
+							
+						}
+						
+						if ( cs == 0  )
+						_cont = 0;
+						
+						if ( _cont == 1  )
+						p += 1;
+						
+						
+					}
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		if ( cs == recdescent_error )
+		System.out.println( "SCANNER ERROR" );
+	}
+	
+	public static void main( String args[] )
+	{
+		test( "88 foo { 99 {{{{}}}}{ } }".toCharArray() );
+		test( "76 } sadf".toCharArray() );
+	}
+}
+

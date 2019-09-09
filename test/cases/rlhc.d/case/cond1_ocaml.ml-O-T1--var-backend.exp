@@ -1,0 +1,526 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let i = ref 0
+let j = ref 0
+let k = ref 0
+
+
+
+
+
+
+let _foo_key_offsets : int array = [|
+0; 0; 2; 4; 6; 8; 10; 12; 13; 14; 15; 16; 17; 18; 19; 20; 0 ; 
+|]
+let _foo_trans_keys : int array = [|
+48; 49; 48; 49; 48; 49; 97; 98; 97; 98; 97; 98; 99; 10; 99; 99; 99; 99; 99; 99; 0 ; 
+|]
+let _foo_single_lengths : int array = [|
+0; 0; 0; 0; 2; 2; 2; 1; 1; 1; 1; 1; 1; 1; 1; 0; 0 ; 
+|]
+let _foo_range_lengths : int array = [|
+0; 1; 1; 1; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _foo_index_offsets : int array = [|
+0; 0; 2; 4; 6; 9; 12; 15; 17; 19; 21; 23; 25; 27; 29; 31; 0 ; 
+|]
+let _foo_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; 1; -1; -1; 5; -1; -1; 4; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _foo_trans_offsets : int array = [|
+0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 17; 18; 19; 22; 23; 24; 25; 26; 27; 28; 29; 30; 31; 32; 33; 34; 35; 36; 37; 38; 39; 0 ; 
+|]
+let _foo_trans_lengths : int array = [|
+1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 7; 1; 1; 3; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0 ; 
+|]
+let _foo_cond_keys : int array = [|
+0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 1; 2; 3; 4; 5; 6; 7; 0; 0; 1; 2; 3; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _foo_cond_targs : int array = [|
+2; 0; 3; 0; 4; 0; 5; 7; 0; 6; 11; 7; 12; 9; 13; 10; 14; 0; 6; 7; 9; 10; 0; 8; 0; 15; 0; 8; 0; 8; 0; 8; 0; 8; 0; 8; 0; 8; 0; 0; 0 ; 
+|]
+let _foo_cond_actions : int array = [|
+1; 0; 2; 0; 3; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 4; 0; 5; 0; 6; 0; 7; 0; 8; 0; 9; 0; 10; 0; 11; 0; 0; 0 ; 
+|]
+let _foo_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _foo_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _foo_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _foo_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let foo_start  : int  = 1
+let foo_first_final  : int  = 15
+let foo_error  : int  = 0
+let foo_en_main  : int  = 1
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+begin
+	cs  := foo_start;
+	
+end;
+begin
+	let _klen : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _ckeys : int ref = ref 0 in
+	let _cpc : int  ref = ref 0 in
+	let _trans : int  ref = ref 0 in
+	let _cond  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := _foo_key_offsets.(cs.contents);
+						_trans  := _foo_index_offsets.(cs.contents);
+						_have  := 0;
+						_klen  := _foo_single_lengths.(cs.contents);
+						if _klen.contents> 0  then
+						begin
+							begin
+								let _lower : int ref = ref 0 in
+								let _mid : int ref = ref 0 in
+								let _upper : int ref = ref 0 in
+								_lower  := _keys.contents;
+								_upper  := _keys.contents+ _klen.contents- 1;
+								while _upper.contents>= _lower.contents&& _have.contents= 0  do
+								begin
+									_mid  := _lower.contents+ ( ( _upper.contents-_lower.contents ) asr 1 );
+									if ( Char.code data.[p.contents] )< _foo_trans_keys.( _mid.contents ) then
+									begin
+										_upper  := _mid.contents- 1;
+										
+									end
+									else if ( Char.code data.[p.contents] )> _foo_trans_keys.( _mid.contents ) then
+									begin
+										_lower  := _mid.contents+ 1;
+										
+									end
+									else
+									begin
+										begin
+											_trans  := _trans.contents + ( _mid.contents- _keys.contents );
+											_have  := 1;
+											
+										end;
+										
+									end
+									;
+								end;
+								
+								done;
+								if _have.contents= 0  then
+								begin
+									begin
+										_keys  := _keys.contents + _klen.contents;
+										_trans  := _trans.contents + _klen.contents;
+										
+									end;
+									
+								end
+								;
+							end;
+							
+						end
+						;if _have.contents= 0  then
+						begin
+							begin
+								_klen  := _foo_range_lengths.(cs.contents);
+								if _klen.contents> 0  then
+								begin
+									begin
+										let _lower : int ref = ref 0 in
+										let _mid : int ref = ref 0 in
+										let _upper : int ref = ref 0 in
+										_lower  := _keys.contents;
+										_upper  := _keys.contents+ ( _klen.contents lsl 1 )- 2;
+										while _have.contents= 0 && _lower.contents<= _upper.contents do
+										begin
+											_mid  := _lower.contents+ ( ( ( _upper.contents-_lower.contents ) asr 1 ) land  lnot 1 );
+											if ( Char.code data.[p.contents] )< _foo_trans_keys.( _mid.contents ) then
+											begin
+												_upper  := _mid.contents- 2;
+												
+											end
+											else if ( Char.code data.[p.contents] )> _foo_trans_keys.( _mid.contents+ 1  ) then
+											begin
+												_lower  := _mid.contents+ 2;
+												
+											end
+											else
+											begin
+												begin
+													_trans  := _trans.contents + ( ( _mid.contents- _keys.contents ) asr 1 );
+													_have  := 1;
+													
+												end;
+												
+											end
+											;
+										end;
+										
+										done;
+										if _have.contents= 0  then
+										begin
+											_trans  := _trans.contents + _klen.contents;
+											
+										end
+										;
+									end;
+									
+								end
+								;
+							end;
+							
+						end
+						;_ckeys  := _foo_trans_offsets.(_trans.contents);
+						_klen  := _foo_trans_lengths.(_trans.contents);
+						_cond  := _foo_trans_offsets.(_trans.contents);
+						_have  := 0;
+						_cpc  := 0;
+						if _foo_trans_cond_spaces.(_trans.contents) = 0  then
+						begin
+							if (i .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;
+						end
+						else if _foo_trans_cond_spaces.(_trans.contents) = 1  then
+						begin
+							if (j .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;
+						end
+						else if _foo_trans_cond_spaces.(_trans.contents) = 2  then
+						begin
+							if (k .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;
+						end
+						else if _foo_trans_cond_spaces.(_trans.contents) = 3  then
+						begin
+							if (i .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;if (j .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 2;
+								
+							end
+							;
+						end
+						else if _foo_trans_cond_spaces.(_trans.contents) = 4  then
+						begin
+							if (j .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;if (k .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 2;
+								
+							end
+							;
+						end
+						else if _foo_trans_cond_spaces.(_trans.contents) = 5  then
+						begin
+							if (i .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 1;
+								
+							end
+							;if (j .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 2;
+								
+							end
+							;if (k .contents != 0) then
+							begin
+								_cpc  := _cpc.contents + 4;
+								
+							end
+							;
+						end
+						;
+						begin
+							let _lower : int ref = ref 0 in
+							let _mid : int ref = ref 0 in
+							let _upper : int ref = ref 0 in
+							_lower  := _ckeys.contents;
+							_upper  := _ckeys.contents+ _klen.contents- 1;
+							while _have.contents= 0 && _lower.contents<= _upper.contents do
+							begin
+								_mid  := _lower.contents+ ( ( _upper.contents-_lower.contents ) asr 1 );
+								if _cpc.contents< _foo_cond_keys.( _mid.contents ) then
+								begin
+									_upper  := _mid.contents- 1;
+									
+								end
+								else if _cpc.contents> _foo_cond_keys.( _mid.contents ) then
+								begin
+									_lower  := _mid.contents+ 1;
+									
+								end
+								else
+								begin
+									begin
+										_cond  := _cond.contents + ( _mid.contents- _ckeys.contents );
+										_have  := 1;
+										
+									end;
+									
+								end
+								;
+							end;
+							
+							done;
+							if _have.contents= 0  then
+							begin
+								begin
+									cs  := 0;
+									_cont  := 0;
+									
+								end;
+								
+							end
+							;
+						end;
+						
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _foo_cond_targs.(_cond.contents);
+						if _foo_cond_actions.(_cond.contents) = 8  then
+						begin
+							begin
+								print_string( "  one\n" );
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 4  then
+						begin
+							begin
+								print_string( "  two\n" );
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 6  then
+						begin
+							begin
+								print_string( "  three\n" );
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 1  then
+						begin
+							begin
+								if (( Char.code data.[p.contents] )) == 48  then
+								begin
+									i := 0;
+									
+								end 
+								else
+								begin
+									i := 1;
+									
+								end
+								;
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 2  then
+						begin
+							begin
+								if (( Char.code data.[p.contents] )) == 48  then
+								begin
+									j := 0;
+									
+								end 
+								else
+								begin
+									j := 1;
+									
+								end
+								;
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 3  then
+						begin
+							begin
+								if (( Char.code data.[p.contents] )) == 48  then
+								begin
+									k := 0;
+									
+								end 
+								else
+								begin
+									k := 1;
+									
+								end
+								;
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 5  then
+						begin
+							begin
+								begin
+									p := p.contents + 1;
+									_cont  := 0;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 9  then
+						begin
+							begin
+								print_string( "  one\n" );
+								
+							end;
+							begin
+								print_string( "  two\n" );
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 10  then
+						begin
+							begin
+								print_string( "  one\n" );
+								
+							end;
+							begin
+								print_string( "  three\n" );
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 7  then
+						begin
+							begin
+								print_string( "  two\n" );
+								
+							end;
+							begin
+								print_string( "  three\n" );
+								
+							end;
+							
+						end
+						else if _foo_cond_actions.(_cond.contents) = 11  then
+						begin
+							begin
+								print_string( "  one\n" );
+								
+							end;
+							begin
+								print_string( "  two\n" );
+								
+							end;
+							begin
+								print_string( "  three\n" );
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= foo_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "000abc\n";
+exec "100abc\n";
+exec "010abc\n";
+exec "110abc\n";
+exec "001abc\n";
+exec "101abc\n";
+exec "011abc\n";
+exec "111abc\n";
+()
+;;
+

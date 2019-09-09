@@ -1,0 +1,205 @@
+class goto1_java
+{
+	int target ;
+	
+	
+	
+	
+	
+	private static byte  _goto1_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 0 ,  };
+	private static char  _goto1_trans_keys [] = { 1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0,  };
+	private static byte  _goto1_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 ,  };
+	private static byte  _goto1_index_offsets [] = { 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 ,  };
+	private static byte  _goto1_indicies [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  };
+	private static byte  _goto1_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+	private static byte  _goto1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+	private static byte  _goto1_cond_targs [] = { 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 ,  };
+	private static byte  _goto1_cond_actions [] = { 0, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0 ,  };
+	private static byte  _goto1_nfa_targs [] = { 0, 0 ,  };
+	private static byte  _goto1_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+	private static byte  _goto1_nfa_push_actions [] = { 0, 0 ,  };
+	private static byte  _goto1_nfa_pop_trans [] = { 0, 0 ,  };
+	private static int  goto1_start  = 1;
+	private static int  goto1_first_final  = 14;
+	private static int  goto1_error  = 0;
+	private static int  goto1_en_unused  = 2;
+	private static int  goto1_en_one  = 8;
+	private static int  goto1_en_two  = 11;
+	private static int  goto1_en_main  = 1;
+	int cs;
+	
+	void init()
+	{
+		{
+			cs = (int)goto1_start;
+			
+		}
+	}
+	
+	void exec( char data[], int len )
+	{
+		char buffer [] = new char[1024];
+		int blen = 0;
+		int p = 0;
+		int pe = len;
+		
+		String _s;
+		{
+			int _trans = 0;
+			int _have = 0;
+			int _cont = 1;
+			int _acts;
+			int _nacts;
+			int _keys;
+			int _inds;
+			while ( _cont == 1  )
+			{
+				if ( cs == 0  )
+				_cont = 0;
+				
+				_have = 0;
+				if ( p == pe  )
+				{
+					if ( _have == 0  )
+					_cont = 0;
+					
+					
+				}
+				
+				if ( _cont == 1  )
+				{
+					if ( _have == 0  )
+					{
+						_keys = (cs<<1) ;
+						_inds = _goto1_index_offsets[cs] ;
+						if ( ( data[p ]) <= 119 && ( data[p ]) >= 10  )
+						{
+							int _ic = (int)_goto1_char_class[(int)( data[p ]) - 10];
+							if ( _ic <= (int)_goto1_trans_keys[_keys+1 ]&& _ic >= (int)_goto1_trans_keys[_keys ] )
+							_trans = (int )_goto1_indicies[_inds + (int)( _ic - (int)_goto1_trans_keys[_keys ])  ];
+							
+							else
+							_trans = (int )_goto1_index_defaults[cs];
+							
+							
+						}
+						
+						else
+						{
+							_trans = (int )_goto1_index_defaults[cs];
+							
+						}
+						
+						
+					}
+					
+					if ( _cont == 1  )
+					{
+						cs = (int)_goto1_cond_targs[_trans];
+						if ( _goto1_cond_actions[_trans] != 0  )
+						{
+							_acts = _goto1_cond_actions[_trans] ;
+							_nacts = (int )_goto1_actions[_acts ];
+							_acts += 1;
+							while ( _nacts > 0  )
+							{
+								switch ( _goto1_actions[_acts ] ) {
+									case 0 :
+									{
+										System.out.print( "one\n" );
+										target = 1;
+										{
+											cs = (target);
+											
+										}
+										
+									}
+									
+									break;
+									case 1 :
+									{
+										System.out.print( "two\n" );
+										target = 1;
+										{
+											cs = (target);
+											
+										}
+										
+									}
+									
+									break;
+									case 2 :
+									{
+										target = 8;
+										{
+											cs = (target);
+											
+										}
+										
+									}
+									
+									break;
+									case 3 :
+									{
+										target = 11;
+										{
+											cs = (target);
+											
+										}
+										
+									}
+									
+									break;
+									
+								}
+								_nacts -= 1;
+								_acts += 1;
+								
+							}
+							
+							
+						}
+						
+						if ( cs == 0  )
+						_cont = 0;
+						
+						if ( _cont == 1  )
+						p += 1;
+						
+						
+					}
+					
+					
+				}
+				
+				
+			}
+			
+			
+		}
+	}
+	
+	void finish( )
+	{
+		if ( cs >= goto1_first_final )
+		System.out.println( "ACCEPT" );
+		else
+		System.out.println( "FAIL" );
+	}
+	
+	static final String inp[] = {
+		"1one2two1one\n",
+	};
+	
+	static final int inplen = 1;
+	
+	public static void main (String[] args)
+	{
+		goto1_java machine = new goto1_java();
+		for ( int i = 0; i < inplen; i++ ) {
+			machine.init();
+			machine.exec( inp[i].toCharArray(), inp[i].length() );
+			machine.finish();
+		}
+	}
+}

@@ -1,0 +1,188 @@
+#include <iostream>
+#include <string.h>
+using std::cout;
+using std::endl;
+
+
+
+static const char  _foo_actions [] = { 0, 1, 0, 0 ,  };
+static const char  _foo_eof_actions [] = { 0, 1, 1, 0, 0 ,  };
+static const char  _foo_nfa_targs [] = { 0, 0 ,  };
+static const char  _foo_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _foo_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _foo_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  foo_start  = 1;
+static const int  foo_first_final  = 3;
+static const int  foo_en_main  = 1;
+void test( int c, const char *str )
+{
+	int cs = foo_start;
+	const char *p = str;
+	const char *pe = str + strlen( str );
+	const char *eof = pe;
+	
+	cout << "run:" << endl;
+	
+	{
+		const char  *_acts;
+		unsigned int _nacts;
+		
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( cs  ) {
+			case 1:
+			if ( ((*( p  ))
+			)== 97  )
+			{
+				int ck = 0;
+				if ( (c) )
+				ck += 1;
+				
+				if ( ck > 0  )
+				{
+					goto ctr2;
+				} 
+				else
+				{
+					goto ctr1;
+				}
+				
+				
+			}
+			
+			{
+				goto ctr0;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch ( ((*( p  ))
+			) ) {
+				case 10:
+				{
+					goto ctr3;
+				}
+				case 97:
+				{
+					int ck = 0;
+					if ( (c) )
+					ck += 1;
+					
+					if ( ck > 0  )
+					{
+						goto ctr2;
+					} 
+					else
+					{
+						goto ctr1;
+					}
+					
+					
+				}
+				
+			}
+			{
+				goto ctr0;
+			}
+			case 3:
+			{
+				goto ctr4;
+			}
+			
+		}
+		ctr4: cs = 0;
+		goto _again;
+		ctr0: cs = 0;
+		goto f0;
+		ctr3: cs = 3;
+		goto _again;
+		ctr1: cs = 0;
+		goto f0;
+		ctr2: cs = 2;
+		goto _again;
+		
+		f0: _acts = _foo_actions + 1 ;
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0:
+				{
+					cout << "  bail" << endl; 
+				}
+				
+				break;
+				
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		
+		goto _again;
+		
+		_again:
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			const char  *__acts;
+			unsigned int __nacts;
+			__acts = _foo_actions + _foo_eof_actions[cs];
+			__nacts = ( unsigned int  ) (*( __acts  ))
+			;
+			__acts += 1;
+			while ( __nacts > 0  )
+			{
+				switch ( (*( __acts  ))
+				) {
+					case 0:
+					{
+						cout << "  bail" << endl; 
+					}
+					
+					break;
+					
+				}
+				__acts += 1;
+				__nacts -= 1;
+			}
+			
+		}
+		
+		
+		_out: {}
+	}
+	if ( cs >= foo_first_final )
+	cout << "  success" << endl;
+	else
+	cout << "  failure" << endl;
+	cout << endl;
+}
+
+int main()
+{
+	test( 1, "aa\n" );
+	test( 1, "ab\n" );
+	test( 0, "aa\n" );
+	test( 0, "ab\n" );
+	return 0;
+}
+

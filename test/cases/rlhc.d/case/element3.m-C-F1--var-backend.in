@@ -1,0 +1,223 @@
+host( "working/element3.rl", 1 ) @{/*
+	* @@LANG: obj-c
+	*/
+	
+	#include <stdio.h>
+	#include <Foundation/Foundation.h>
+	
+	struct LangEl
+	{
+		int key;
+		char *name;
+	};
+	
+	@@interface Fsm : NSObject
+	{
+		@@public
+		int cs;
+	};
+	
+	// Initialize the machine. Invokes any init statement blocks. Returns 0
+	// if the machine begins in a non-accepting state and 1 if the machine
+	// begins in an accepting state.
+	- (int) initFsm;
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	- (int) executeWithData:( struct LangEl *)data len:(int)len;
+	
+	// Indicate that there is no more data. Returns -1 if the machine finishes
+	// in the error state and does not accept, 0 if the machine finishes
+	// in any other non-accepting state and 1 if the machine finishes in an
+	// accepting state.
+	- (int) finish;
+	
+	@@end;
+	
+	
+	@@implementation Fsm
+	
+	
+	
+}@
+array int _Fsm_trans_keys( 0, 2 ) = { 1, 0, 0, 0, 1, 2, 1, 0, 0 };
+
+array s8 _Fsm_char_class( 0, 2 ) = { 0, 1, 2, 0 };
+
+array s8 _Fsm_index_offsets( 0, 3 ) = { 0, 0, 1, 3, 0 };
+
+array s8 _Fsm_indicies( 0, 2 ) = { 0, 0, 2, 0 };
+
+array s8 _Fsm_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 0 };
+
+array s8 _Fsm_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, 0 };
+
+array s8 _Fsm_cond_targs( 0, 3 ) = { 2, 0, 3, 0 };
+
+array s8 _Fsm_cond_actions( 0, 1 ) = { 1, 0, 1, 0 };
+
+array s8 _Fsm_eof_actions( 0, 2 ) = { 0, 0, 0, 2, 0 };
+
+array s8 _Fsm_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _Fsm_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0 };
+
+array s8 _Fsm_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _Fsm_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int Fsm_start = 1;
+value int Fsm_first_final = 3;
+value int Fsm_error = 0;
+
+value int Fsm_en_main = 1;
+
+host( "working/element3.rl", 58 ) @{
+	
+	- (int) initFsm;
+	{
+	}@
+	{
+		cs = cast(int)Fsm_start;
+	}
+	host( "working/element3.rl", 62 ) @{
+		return 0;
+	}
+	
+	- (int) executeWithData:( struct LangEl *)_data len:(int)_len;
+	{
+		struct LangEl *p = _data;
+		struct LangEl *pe = _data + _len;
+		struct LangEl *eof = pe;
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index int _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( p == eof )
+				{
+					if ( _have == 0 ) {
+						switch ( _Fsm_eof_actions[cs] ) {
+							case 2 {
+								host( "working/element3.rl", 54 ) ${printf("accept\n");}$
+							}
+						}
+					}
+				}
+				
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _Fsm_trans_keys, (cs<<1) );
+					_inds = offset( _Fsm_indicies, _Fsm_index_offsets[cs] );
+					
+					if ( host( "-", 1 ) ={p->key}= <= 3 && host( "-", 1 ) ={p->key}= >= 1 )
+					{
+						int _ic = cast(int)_Fsm_char_class[cast(int)host( "-", 1 ) ={p->key}= - 1];
+						if ( _ic <= cast(int)deref( _Fsm_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _Fsm_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _Fsm_indicies, _inds + cast(int)( _ic - cast(int)deref( _Fsm_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_Fsm_index_defaults[cs];
+					}
+					else {
+						_trans = cast(uint)_Fsm_index_defaults[cs];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_Fsm_cond_targs[_trans];
+					
+					switch ( _Fsm_cond_actions[_trans] ) {
+						case 1 {
+							host( "working/element3.rl", 53 ) ${printf("%s\n", p->name);}$
+						}
+					}
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/element3.rl", 71 ) @{
+		
+		if ( self->cs == Fsm_error ) 
+		return -1;
+		return ( self->cs >= Fsm_first_final ) ? 1 : 0;
+	}
+	
+	- (int) finish;
+	{
+		if ( self->cs == Fsm_error ) 
+		return -1;
+		return ( self->cs >= Fsm_first_final ) ? 1 : 0;
+	}
+	
+	
+	@@end
+	
+	int main()
+	{
+		static Fsm *fsm;
+		static struct LangEl lel[] = { 
+			{1, "one"}, 
+			{2, "two-a"}, 
+			{2, "two-b"}, 
+			{2, "two-c"}, 
+			{3, "three"}
+		};
+		
+		fsm = [[Fsm alloc] init];
+		[fsm initFsm];
+		[fsm executeWithData:lel len:5];
+		[fsm finish];
+		
+		return 0;
+	}
+	
+	@@interface Fsm2 : NSObject
+	{
+		// The current state may be read and written to from outside of the
+		// machine.  From within action code, curs is -1 and writing to it has no
+		// effect.
+		@@public
+		int cs;
+		
+		@@protected
+		
+	}
+	
+	// Execute the machine on a block of data. Returns -1 if after processing
+	// the data, the machine is in the error state and can never accept, 0 if
+	// the machine is in a non-accepting state and 1 if the machine is in an
+	// accepting state.
+	- (int)
+	executeWithElements:(int) elements
+	length:(unsigned)length;
+	
+	@@end
+	
+	@@implementation Fsm2
+	- (int)
+	executeWithElements:(int)elements
+	length:(unsigned)length;
+	{
+		return 0;
+	}
+	@@end
+	
+}@

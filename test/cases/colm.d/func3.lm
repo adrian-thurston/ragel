@@ -1,0 +1,39 @@
+lex
+    literal `{ `}
+    literal `struct `type
+    token id /[A-Za-z_][A-Za-z_0-9]*/
+    ignore /[ \t\r\n]+/
+end
+
+def attribute
+    [`type id]
+
+def _struct
+    [`struct id `{ attribute* `}]
+
+def program
+    [_struct*]
+
+int func( P: program )
+{
+	print[ @ P ]
+}
+
+int main()
+{
+    parse P: program[ stdin ]
+	func( P )
+}
+
+main()
+
+##### IN #####
+struct S
+{
+	type T
+}
+##### EXP #####
+struct S
+{
+	type T
+}

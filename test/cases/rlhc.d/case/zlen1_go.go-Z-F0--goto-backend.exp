@@ -1,0 +1,93 @@
+package main
+import "fmt"
+
+
+
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _zlen1_trans_keys [] byte  = [] byte  { 1, 0, 1, 0, 0 }
+var _zlen1_char_class [] int8  = [] int8  { 0  }
+var _zlen1_index_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_indicies [] int8  = [] int8  { 0  }
+var _zlen1_index_defaults [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_trans_cond_spaces [] int8  = [] int8  { -1, 0  }
+var _zlen1_cond_targs [] int8  = [] int8  { 0, 0  }
+var _zlen1_cond_actions [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_offsets [] int8  = [] int8  { 0, 0, 0  }
+var _zlen1_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _zlen1_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var zlen1_start  int  = 1
+var zlen1_first_final  int  = 1
+var zlen1_error  int  = 0
+var zlen1_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(zlen1_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _trans  int   = 0
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_trans = int(_zlen1_index_defaults[cs]);
+		goto _match_cond;
+		
+		_match_cond :
+		cs = int(_zlen1_cond_targs[_trans]);
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= zlen1_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"",
+	"x",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

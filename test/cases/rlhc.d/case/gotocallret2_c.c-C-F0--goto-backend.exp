@@ -1,0 +1,586 @@
+#include <string.h>
+#include <stdio.h>
+
+char comm ;
+int top ;
+int stack [32];
+char * ts ;
+char * te ;
+int act ;
+int val ;
+
+
+
+
+
+static const char  _GotoCallRet_actions [] = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 1, 7, 1, 8, 1, 9, 1, 10, 1, 11, 1, 12, 1, 13, 1, 14, 1, 15, 1, 16, 1, 17, 1, 18, 1, 19, 1, 20, 0 ,  };
+static const char  _GotoCallRet_trans_keys [] = { 1, 0, 6, 6, 9, 9, 7, 7, 8, 8, 1, 0, 0, 10, 2, 9, 5, 9, 1, 0, 2, 11, 5, 9, 2, 2, 2, 10, 2, 2, 5, 9, 0 ,  };
+static const char  _GotoCallRet_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 4, 1, 1, 1, 5, 5, 5, 5, 5, 6, 5, 5, 7, 5, 5, 8, 5, 5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 10, 1, 11, 0 ,  };
+static const char  _GotoCallRet_index_offsets [] = { 0, 0, 1, 2, 3, 4, 4, 15, 23, 28, 28, 38, 43, 44, 53, 54, 0 ,  };
+static const char  _GotoCallRet_indicies [] = { 1, 2, 3, 4, 6, 7, 8, 9, 7, 10, 10, 10, 10, 10, 11, 13, 12, 12, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 16, 7, 17, 17, 17, 17, 17, 18, 19, 17, 17, 17, 17, 17, 19, 22, 23, 24, 25, 25, 25, 25, 25, 26, 24, 25, 25, 25, 25, 25, 0 ,  };
+static const char  _GotoCallRet_index_defaults [] = { 0, 0, 0, 0, 0, 5, 7, 12, 12, 7, 7, 20, 21, 7, 27, 28, 0 ,  };
+static const char  _GotoCallRet_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _GotoCallRet_cond_targs [] = { 6, 2, 3, 4, 6, 9, 6, 0, 6, 6, 7, 6, 6, 1, 8, 10, 10, 11, 10, 12, 10, 10, 13, 13, 14, 15, 13, 13, 13, 0 ,  };
+static const char  _GotoCallRet_cond_actions [] = { 41, 0, 0, 0, 33, 1, 37, 0, 35, 31, 7, 29, 39, 0, 0, 13, 11, 0, 9, 0, 17, 15, 23, 21, 0, 0, 19, 25, 27, 0 ,  };
+static const char  _GotoCallRet_to_state_actions [] = { 0, 0, 0, 0, 0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0 ,  };
+static const char  _GotoCallRet_from_state_actions [] = { 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0 ,  };
+static const char  _GotoCallRet_eof_trans [] = { 0, 1, 1, 1, 1, 0, 0, 13, 13, 0, 0, 21, 22, 0, 28, 29, 0 ,  };
+static const char  _GotoCallRet_nfa_targs [] = { 0, 0 ,  };
+static const char  _GotoCallRet_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _GotoCallRet_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _GotoCallRet_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  GotoCallRet_start  = 6;
+static const int  GotoCallRet_first_final  = 6;
+static const int  GotoCallRet_error  = 0;
+static const int  GotoCallRet_en_handle  = 5;
+static const int  GotoCallRet_en_one  = 10;
+static const int  GotoCallRet_en_two  = 13;
+static const int  GotoCallRet_en_main  = 6;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) GotoCallRet_start;
+		top = 0;
+		ts = 0;
+		te = 0;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	char *eof = pe;
+	
+	{
+		int _trans = 0;
+		const char  *_acts;
+		unsigned int _nacts;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_acts = _GotoCallRet_actions + _GotoCallRet_from_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 2 :
+				{
+					{
+						ts = p;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		_keys = _GotoCallRet_trans_keys + (cs<<1);
+		_inds = _GotoCallRet_indicies + _GotoCallRet_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 125 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _GotoCallRet_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _GotoCallRet_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _GotoCallRet_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _GotoCallRet_cond_targs[_trans];
+		if ( _GotoCallRet_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		_acts = _GotoCallRet_actions + _GotoCallRet_cond_actions[_trans];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 0 :
+				{
+					printf( "%s", "handle " );
+					{
+						p = p - 1;
+						
+					}
+					if ( val == 1 )
+					{
+						{
+							cs = (10);
+							
+						}
+						
+					} 
+					if ( val == 2 )
+					{
+						{
+							cs = (13);
+							
+						}
+						
+					} 
+					if ( val == 3 )
+					{
+						{
+							cs = 6;
+							
+						}
+					} 
+					
+				}
+				
+				break;
+				case 3 :
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 4 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "{ " );
+							{
+								stack[top] = cs;
+								top += 1;
+								cs = (10);
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 5 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "[ " );
+							{
+								stack[top] = cs;
+								top += 1;
+								cs = (13);
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 6 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "space " );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 7 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "} " );
+							{
+								top -= 1;
+								cs = stack[top];
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 8 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "word " );
+							val = 1;
+							{
+								cs = (5);
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 9 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "{ " );
+							{
+								stack[top] = cs;
+								top += 1;
+								cs = (10);
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 10 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "[ " );
+							{
+								stack[top] = cs;
+								top += 1;
+								cs = (13);
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 11 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "space " );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 12 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "] " );
+							{
+								top -= 1;
+								cs = stack[top];
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 13 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "word " );
+							val = 2;
+							{
+								cs = (5);
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 14 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "{ " );
+							{
+								stack[top] = cs;
+								top += 1;
+								cs = 10;
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 15 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "[ " );
+							{
+								stack[top] = cs;
+								top += 1;
+								cs = 13;
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 16 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "this is the foil" );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 17 :
+				{
+					{
+						te = p+1;
+						{
+							printf( "%s", "space " );
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 18 :
+				{
+					{
+						te = p+1;
+						
+					}
+					
+				}
+				
+				break;
+				case 19 :
+				{
+					{
+						te = p;
+						p = p - 1;
+						{
+							printf( "%s", "word " );
+							val = 3;
+							{
+								cs = 5;
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				case 20 :
+				{
+					{
+						p = ((te))-1;
+						{
+							printf( "%s", "word " );
+							val = 3;
+							{
+								cs = 5;
+								goto _again;
+							}
+							
+						}
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		
+		
+		_again :
+		_acts = _GotoCallRet_actions + _GotoCallRet_to_state_actions[cs];
+		_nacts = ( unsigned int  ) (*( _acts  ))
+		;
+		_acts += 1;
+		while ( _nacts > 0  )
+		{
+			switch ( (*( _acts  ))
+			) {
+				case 1 :
+				{
+					{
+						ts = 0;
+						
+					}
+					
+				}
+				
+				break;
+				
+			}
+			_nacts -= 1;
+			_acts += 1;
+		}
+		
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		p += 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		if ( p == eof  )
+		{
+			if ( _GotoCallRet_eof_trans[cs]> 0  )
+			{
+				_trans = ( int ) _GotoCallRet_eof_trans[cs]- 1;
+				goto _match_cond;
+			}
+			
+		}
+		
+		
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= GotoCallRet_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"{a{b[c d]d}c}\n",
+	"[a{b[c d]d}c}\n",
+	"[a[b]c]d{ef{g{h}i}j}l\n",
+	"{{[]}}\n",
+	"a b c\n",
+	"{a b c}\n",
+	"[a b c]\n",
+	"{]\n",
+	"{{}\n",
+	"[[[[[[]]]]]]\n",
+	"[[[[[[]]}]]]\n",
+};
+
+int inplen = 11;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

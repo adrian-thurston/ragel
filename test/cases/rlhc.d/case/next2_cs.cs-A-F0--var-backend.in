@@ -1,0 +1,196 @@
+host( "working/next2_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			int target;
+			int last;
+			
+			
+			
+			
+		}@
+		array s8 _next2_actions( 0, 5 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 0 };
+		
+		array char _next2_trans_keys( 0, 15 ) = { c(1), c(0), c(15), c(15), c(13), c(13), c(8), c(8), c(13), c(13), c(11), c(11), c(6), c(6), c(5), c(5), c(9), c(9), c(8), c(8), c(6), c(6), c(12), c(12), c(14), c(14), c(9), c(9), c(12), c(12), c(7), c(7), c(10), c(10), c(6), c(6), c(6), c(6), c(0), c(4), c(1), c(0), c(1), c(0), c(1), c(0), c(1), c(0), c(0) };
+		
+		array s8 _next2_char_class( 0, 15 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 6, 1, 1, 7, 1, 1, 1, 1, 1, 8, 9, 1, 1, 10, 11, 12, 13, 1, 14, 15, 0 };
+		
+		array s8 _next2_index_offsets( 0, 23 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 23, 23, 23, 23, 0 };
+		
+		array s8 _next2_indicies( 0, 21 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0 };
+		
+		array s8 _next2_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+		
+		array s8 _next2_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+		
+		array s8 _next2_cond_targs( 0, 23 ) = { 19, 0, 3, 4, 5, 6, 7, 20, 9, 10, 21, 12, 13, 22, 15, 16, 17, 18, 23, 19, 19, 1, 0 };
+		
+		array s8 _next2_cond_actions( 0, 11 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 5, 7, 9, 11, 0 };
+		
+		array s8 _next2_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _next2_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _next2_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _next2_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int next2_start = 19;
+		value int next2_first_final = 19;
+		value int next2_error = 0;
+		
+		value int next2_en_unused = 2;
+		value int next2_en_one = 8;
+		value int next2_en_two = 11;
+		value int next2_en_three = 14;
+		value int next2_en_main = 19;
+		
+		host( "working/next2_cs.rl", 53 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)next2_start;
+			}
+			host( "working/next2_cs.rl", 58 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				uint _trans = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				index s8 _acts;
+				uint _nacts;
+				index char _keys;
+				index s8 _inds;
+				while ( _cont == 1 ) {
+					
+					if ( cs == 0 )
+					_cont = 0;
+					_have = 0;
+					if ( p == pe ) {
+						if ( _have == 0 )
+						_cont = 0;
+					}
+					if ( _cont == 1 ) {
+						if ( _have == 0 ) {
+							_keys = offset( _next2_trans_keys, (cs<<1) );
+							_inds = offset( _next2_indicies, _next2_index_offsets[cs] );
+							
+							if ( ( deref( data, p )) <= 120 && ( deref( data, p )) >= 10 )
+							{
+								int _ic = cast(int)_next2_char_class[cast(int)( deref( data, p )) - 10];
+								if ( _ic <= cast(int)deref( _next2_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _next2_trans_keys, _keys ) )
+								_trans = cast(uint)deref( _next2_indicies, _inds + cast(int)( _ic - cast(int)deref( _next2_trans_keys, _keys ) )  ); 
+								else
+								_trans = cast(uint)_next2_index_defaults[cs];
+							}
+							else {
+								_trans = cast(uint)_next2_index_defaults[cs];
+							}
+							
+						}
+						if ( _cont == 1 ) {
+							cs = cast(int)_next2_cond_targs[_trans];
+							
+							if ( _next2_cond_actions[_trans] != 0 ) {
+								_acts = offset( _next2_actions, _next2_cond_actions[_trans] );
+								_nacts = cast(uint)deref( _next2_actions, _acts );
+								_acts += 1;
+								while ( _nacts > 0 )
+								{
+									switch ( deref( _next2_actions, _acts ) )
+									{
+										case 0 {
+											host( "working/next2_cs.rl", 20 ) ${Console.Write( "one\n" );target = 19;
+												${cs = host( "-", 1 ) ={target}=;}$}$
+										}
+										case 1 {
+											host( "working/next2_cs.rl", 23 ) ${Console.Write( "two\n" );target = 19;
+												${cs = host( "-", 1 ) ={target}=;}$}$
+										}
+										case 2 {
+											host( "working/next2_cs.rl", 26 ) ${Console.Write( "three\n" );target = 19;
+												${cs = host( "-", 1 ) ={target}=;}$}$
+										}
+										case 3 {
+											host( "working/next2_cs.rl", 30 ) ${target = 8;
+												${cs = host( "-", 1 ) ={target}=;}$last = 1;
+											}$
+										}
+										case 4 {
+											host( "working/next2_cs.rl", 34 ) ${target = 11;
+												${cs = host( "-", 1 ) ={target}=;}$last = 2;
+											}$
+										}
+										case 5 {
+											host( "working/next2_cs.rl", 39 ) ${if ( last == 2 )
+												{
+													target = 14;
+													${cs = host( "-", 1 ) ={target}=;}$
+												} 
+												last = 3;
+											}$
+										}
+									}
+									_nacts -= 1;
+									_acts += 1;
+								}
+							}
+							
+							if ( cs == 0 )
+							_cont = 0;
+							if ( _cont == 1 )
+							p += 1;
+							
+						}}
+				}
+			}
+			host( "working/next2_cs.rl", 69 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= next2_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"1one3x2two3three\n",
+			};
+			
+			
+			static readonly int inplen = 1;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

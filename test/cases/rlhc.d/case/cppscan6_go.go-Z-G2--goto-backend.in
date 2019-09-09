@@ -1,0 +1,1164 @@
+host( "working/cppscan6_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var ts  int ;
+	var te  int ;
+	var act  int ;
+	var token  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+value int scanner_start = 12;
+value int scanner_first_final = 12;
+value int scanner_error = 0;
+
+value int scanner_en_main = 12;
+
+array s8 _scanner_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _scanner_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _scanner_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+host( "working/cppscan6_go.rl", 122 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)scanner_start;
+		ts = nil;
+		te = nil;
+		act = 0;
+	}
+	host( "working/cppscan6_go.rl", 125 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+		var eof int = pe
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		switch ( cs )
+		{
+			case 12:
+			goto st_case_12;
+			case 13:
+			goto st_case_13;
+			case 14:
+			goto st_case_14;
+			case 1:
+			goto st_case_1;
+			case 2:
+			goto st_case_2;
+			case 15:
+			goto st_case_15;
+			case 16:
+			goto st_case_16;
+			case 3:
+			goto st_case_3;
+			case 4:
+			goto st_case_4;
+			case 17:
+			goto st_case_17;
+			case 18:
+			goto st_case_18;
+			case 19:
+			goto st_case_19;
+			case 20:
+			goto st_case_20;
+			case 21:
+			goto st_case_21;
+			case 5:
+			goto st_case_5;
+			case 22:
+			goto st_case_22;
+			case 6:
+			goto st_case_6;
+			case 7:
+			goto st_case_7;
+			case 23:
+			goto st_case_23;
+			case 24:
+			goto st_case_24;
+			case 8:
+			goto st_case_8;
+			case 9:
+			goto st_case_9;
+			case 10:
+			goto st_case_10;
+			case 25:
+			goto st_case_25;
+			case 26:
+			goto st_case_26;
+			case 11:
+			goto st_case_11;
+			case 27:
+			goto st_case_27;
+			case 28:
+			goto st_case_28;
+			case 29:
+			goto st_case_29;
+			case 30:
+			goto st_case_30;
+			case 31:
+			goto st_case_31;
+			case 32:
+			goto st_case_32;
+			case 33:
+			goto st_case_33;
+			case 34:
+			goto st_case_34;
+			case 0:
+			goto st_case_0;
+		}
+		goto st_out;
+		ctr17:
+		host( "NONE", 1 ) ${${switch( act ) {
+					case 0 {
+						host( "NONE", 1 ) ${${goto st0;}$}$ }
+					case 3 {
+						p = ((te))-1;
+						host( "working/cppscan6_go.rl", 33 ) ${token = 195;
+							fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+					case 4 {
+						p = ((te))-1;
+						host( "working/cppscan6_go.rl", 43 ) ${token = 194;
+							fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+					case 5 {
+						p = ((te))-1;
+						host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+							fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+					case 6 {
+						p = ((te))-1;
+						host( "working/cppscan6_go.rl", 53 ) ${token = 219;
+							fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$ }
+				}}$
+		}$
+		
+		goto st12;
+		ctr3:
+		host( "working/cppscan6_go.rl", 28 ) ${${te = p+1;host( "working/cppscan6_go.rl", 28 ) ${token = 192;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr8:
+		host( "working/cppscan6_go.rl", 25 ) ${${te = p+1;host( "working/cppscan6_go.rl", 25 ) ${token = 193;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr23:
+		host( "working/cppscan6_go.rl", 104 ) ${${p = ((te))-1;
+				host( "working/cppscan6_go.rl", 104 ) ${token = ( int ) ( data[ts] )
+					;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr13:
+		host( "working/cppscan6_go.rl", 100 ) ${${te = p+1;host( "working/cppscan6_go.rl", 100 ) ${token = 240;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr22:
+		host( "working/cppscan6_go.rl", 17 ) ${${te = p+1;host( "working/cppscan6_go.rl", 17 ) ${token = 242;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr25:
+		host( "working/cppscan6_go.rl", 17 ) ${${te = p+1;host( "working/cppscan6_go.rl", 17 ) ${token = 242;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr27:
+		host( "working/cppscan6_go.rl", 48 ) ${${p = ((te))-1;
+				host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr31:
+		host( "working/cppscan6_go.rl", 104 ) ${${te = p+1;host( "working/cppscan6_go.rl", 104 ) ${token = ( int ) ( data[ts] )
+					;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr48:
+		host( "working/cppscan6_go.rl", 111 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 111 ) ${token = 241;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr101:
+		host( "working/cppscan6_go.rl", 104 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 104 ) ${token = ( int ) ( data[ts] )
+					;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr51:
+		host( "working/cppscan6_go.rl", 66 ) ${${te = p+1;host( "working/cppscan6_go.rl", 66 ) ${token = 224;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr53:
+		host( "working/cppscan6_go.rl", 76 ) ${${te = p+1;host( "working/cppscan6_go.rl", 76 ) ${token = 229;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr55:
+		host( "working/cppscan6_go.rl", 68 ) ${${te = p+1;host( "working/cppscan6_go.rl", 68 ) ${token = 225;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr56:
+		host( "working/cppscan6_go.rl", 82 ) ${${te = p+1;host( "working/cppscan6_go.rl", 82 ) ${token = 232;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr58:
+		host( "working/cppscan6_go.rl", 72 ) ${${te = p+1;host( "working/cppscan6_go.rl", 72 ) ${token = 227;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr60:
+		host( "working/cppscan6_go.rl", 88 ) ${${te = p+1;host( "working/cppscan6_go.rl", 88 ) ${token = 212;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr61:
+		host( "working/cppscan6_go.rl", 78 ) ${${te = p+1;host( "working/cppscan6_go.rl", 78 ) ${token = 230;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr63:
+		host( "working/cppscan6_go.rl", 90 ) ${${te = p+1;host( "working/cppscan6_go.rl", 90 ) ${token = 213;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr64:
+		host( "working/cppscan6_go.rl", 80 ) ${${te = p+1;host( "working/cppscan6_go.rl", 80 ) ${token = 231;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr67:
+		host( "working/cppscan6_go.rl", 92 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 92 ) ${token = 211;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr68:
+		host( "working/cppscan6_go.rl", 94 ) ${${te = p+1;host( "working/cppscan6_go.rl", 94 ) ${token = 214;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr70:
+		host( "working/cppscan6_go.rl", 96 ) ${${te = p+1;host( "working/cppscan6_go.rl", 96 ) ${token = 215;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr77:
+		host( "working/cppscan6_go.rl", 43 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 43 ) ${token = 194;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr76:
+		host( "working/cppscan6_go.rl", 43 ) ${${te = p+1;host( "working/cppscan6_go.rl", 43 ) ${token = 194;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr79:
+		host( "working/cppscan6_go.rl", 74 ) ${${te = p+1;host( "working/cppscan6_go.rl", 74 ) ${token = 228;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr91:
+		host( "working/cppscan6_go.rl", 48 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr83:
+		host( "working/cppscan6_go.rl", 48 ) ${${te = p+1;host( "working/cppscan6_go.rl", 48 ) ${token = 218;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr86:
+		host( "working/cppscan6_go.rl", 53 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 53 ) ${token = 219;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr87:
+		host( "working/cppscan6_go.rl", 53 ) ${${te = p+1;host( "working/cppscan6_go.rl", 53 ) ${token = 219;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr89:
+		host( "working/cppscan6_go.rl", 58 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 58 ) ${token = 220;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr90:
+		host( "working/cppscan6_go.rl", 58 ) ${${te = p+1;host( "working/cppscan6_go.rl", 58 ) ${token = 220;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr93:
+		host( "working/cppscan6_go.rl", 62 ) ${${te = p+1;host( "working/cppscan6_go.rl", 62 ) ${token = 197;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr95:
+		host( "working/cppscan6_go.rl", 64 ) ${${te = p+1;host( "working/cppscan6_go.rl", 64 ) ${token = 223;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr98:
+		host( "working/cppscan6_go.rl", 33 ) ${${te = p;p = p - 1;host( "working/cppscan6_go.rl", 33 ) ${token = 195;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr100:
+		host( "working/cppscan6_go.rl", 84 ) ${${te = p+1;host( "working/cppscan6_go.rl", 84 ) ${token = 233;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr102:
+		host( "working/cppscan6_go.rl", 86 ) ${${te = p+1;host( "working/cppscan6_go.rl", 86 ) ${token = 234;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		ctr103:
+		host( "working/cppscan6_go.rl", 70 ) ${${te = p+1;host( "working/cppscan6_go.rl", 70 ) ${token = 226;
+					fmt.Print( "<" );fmt.Print( token );fmt.Print( "> " );fmt.Print( data[ts:te] );fmt.Print( "\n" );}$}$}$
+		
+		goto st12;
+		st12:
+		host( "NONE", 1 ) ${${ts = nil;}$}$
+		host( "NONE", 1 ) ${${act = 0;}$}$
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof12;
+		st_case_12:
+		host( "NONE", 1 ) ${${ts = p;}$}$
+		switch( ( deref( data, p )) ) {
+			case 33: {
+				goto st14;
+			}
+			case 34: {
+				goto st1;
+			}
+			case 37: {
+				goto st15;
+			}
+			case 38: {
+				goto st16;
+			}
+			case 39: {
+				goto st3;
+			}
+			case 42: {
+				goto st17;
+			}
+			case 43: {
+				goto st18;
+			}
+			case 45: {
+				goto st19;
+			}
+			case 46: {
+				goto ctr37;
+			}
+			case 47: {
+				goto ctr38;
+			}
+			case 48: {
+				goto ctr39;
+			}
+			case 58: {
+				goto st29;
+			}
+			case 61: {
+				goto st30;
+			}
+			case 76: {
+				goto ctr44;
+			}
+			case 94: {
+				goto st33;
+			}
+			case 95: {
+				goto st31;
+			}
+			case 124: {
+				goto st34;
+			}
+		}
+		if ( ( deref( data, p )) < 65 ) {
+			if ( ( deref( data, p )) < 49 ) {
+				if ( 35 <= ( deref( data, p )) && ( deref( data, p )) <= 44 ) {
+					goto ctr31;
+				}
+			} else if ( ( deref( data, p )) > 57 ) {
+				if ( 59 <= ( deref( data, p )) ) {
+					goto ctr31;
+				}
+			} else {
+				goto ctr40;
+			}
+		} else if ( ( deref( data, p )) > 90 ) {
+			if ( ( deref( data, p )) < 97 ) {
+				{
+					goto ctr31;
+				}
+			} else if ( ( deref( data, p )) > 122 ) {
+				if ( ( deref( data, p )) <= 126 ) {
+					goto ctr31;
+				}
+			} else {
+				goto st31;
+			}
+		} else {
+			goto st31;
+		}
+		{
+			goto st13;
+		}
+		st13:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof13;
+		st_case_13:
+		if ( 33 <= ( deref( data, p )) && ( deref( data, p )) <= 126 ) {
+			goto ctr48;
+		}
+		{
+			goto st13;
+		}
+		st14:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof14;
+		st_case_14:
+		if ( ( deref( data, p )) == 61 ) {
+			goto ctr51;
+		}
+		{
+			goto ctr101;
+		}
+		st1:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof1;
+		st_case_1:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr17;
+			}
+			case 34: {
+				goto ctr3;
+			}
+			case 92: {
+				goto st2;
+			}
+		}
+		{
+			goto st1;
+		}
+		st2:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof2;
+		st_case_2:
+		{
+			goto st1;
+		}
+		st15:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof15;
+		st_case_15:
+		if ( ( deref( data, p )) == 61 ) {
+			goto ctr53;
+		}
+		{
+			goto ctr101;
+		}
+		st16:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof16;
+		st_case_16:
+		switch( ( deref( data, p )) ) {
+			case 38: {
+				goto ctr55;
+			}
+			case 61: {
+				goto ctr56;
+			}
+		}
+		{
+			goto ctr101;
+		}
+		st3:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof3;
+		st_case_3:
+		switch( ( deref( data, p )) ) {
+			case 10: {
+				goto ctr17;
+			}
+			case 39: {
+				goto ctr8;
+			}
+			case 92: {
+				goto st4;
+			}
+		}
+		{
+			goto st3;
+		}
+		st4:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof4;
+		st_case_4:
+		{
+			goto st3;
+		}
+		st17:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof17;
+		st_case_17:
+		if ( ( deref( data, p )) == 61 ) {
+			goto ctr58;
+		}
+		{
+			goto ctr101;
+		}
+		st18:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof18;
+		st_case_18:
+		switch( ( deref( data, p )) ) {
+			case 43: {
+				goto ctr60;
+			}
+			case 61: {
+				goto ctr61;
+			}
+		}
+		{
+			goto ctr101;
+		}
+		st19:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof19;
+		st_case_19:
+		switch( ( deref( data, p )) ) {
+			case 45: {
+				goto ctr63;
+			}
+			case 61: {
+				goto ctr64;
+			}
+			case 62: {
+				goto st20;
+			}
+		}
+		{
+			goto ctr101;
+		}
+		st20:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof20;
+		st_case_20:
+		if ( ( deref( data, p )) == 42 ) {
+			goto ctr68;
+		}
+		{
+			goto ctr67;
+		}
+		ctr37:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		
+		goto st21;
+		st21:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof21;
+		st_case_21:
+		switch( ( deref( data, p )) ) {
+			case 42: {
+				goto ctr70;
+			}
+			case 46: {
+				goto st5;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr72;
+		}
+		{
+			goto ctr101;
+		}
+		st5:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof5;
+		st_case_5:
+		if ( ( deref( data, p )) == 46 ) {
+			goto ctr13;
+		}
+		{
+			goto ctr23;
+		}
+		ctr72:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		host( "working/cppscan6_go.rl", 43 ) ${${act = 4;}$}$
+		
+		goto st22;
+		st22:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof22;
+		st_case_22:
+		switch( ( deref( data, p )) ) {
+			case 69: {
+				goto st6;
+			}
+			case 70: {
+				goto ctr76;
+			}
+			case 76: {
+				goto ctr76;
+			}
+			case 101: {
+				goto st6;
+			}
+			case 102: {
+				goto ctr76;
+			}
+			case 108: {
+				goto ctr76;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr72;
+		}
+		{
+			goto ctr77;
+		}
+		st6:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof6;
+		st_case_6:
+		switch( ( deref( data, p )) ) {
+			case 43: {
+				goto st7;
+			}
+			case 45: {
+				goto st7;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st23;
+		}
+		{
+			goto ctr17;
+		}
+		st7:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof7;
+		st_case_7:
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st23;
+		}
+		{
+			goto ctr17;
+		}
+		st23:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof23;
+		st_case_23:
+		switch( ( deref( data, p )) ) {
+			case 70: {
+				goto ctr76;
+			}
+			case 76: {
+				goto ctr76;
+			}
+			case 102: {
+				goto ctr76;
+			}
+			case 108: {
+				goto ctr76;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto st23;
+		}
+		{
+			goto ctr77;
+		}
+		ctr38:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		
+		goto st24;
+		st24:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof24;
+		st_case_24:
+		switch( ( deref( data, p )) ) {
+			case 33: {
+				goto st8;
+			}
+			case 47: {
+				goto st10;
+			}
+			case 61: {
+				goto ctr79;
+			}
+		}
+		{
+			goto ctr101;
+		}
+		st8:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof8;
+		st_case_8:
+		if ( ( deref( data, p )) == 33 ) {
+			goto st9;
+		}
+		{
+			goto st8;
+		}
+		st9:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof9;
+		st_case_9:
+		switch( ( deref( data, p )) ) {
+			case 33: {
+				goto st9;
+			}
+			case 47: {
+				goto ctr22;
+			}
+		}
+		{
+			goto st8;
+		}
+		st10:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof10;
+		st_case_10:
+		if ( ( deref( data, p )) == 10 ) {
+			goto ctr25;
+		}
+		{
+			goto st10;
+		}
+		ctr39:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		host( "working/cppscan6_go.rl", 48 ) ${${act = 5;}$}$
+		
+		goto st25;
+		st25:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof25;
+		st_case_25:
+		switch( ( deref( data, p )) ) {
+			case 46: {
+				goto ctr72;
+			}
+			case 69: {
+				goto st6;
+			}
+			case 76: {
+				goto ctr83;
+			}
+			case 85: {
+				goto ctr83;
+			}
+			case 101: {
+				goto st6;
+			}
+			case 108: {
+				goto ctr83;
+			}
+			case 117: {
+				goto ctr83;
+			}
+			case 120: {
+				goto st11;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr82;
+		}
+		{
+			goto ctr91;
+		}
+		ctr82:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		host( "working/cppscan6_go.rl", 53 ) ${${act = 6;}$}$
+		
+		goto st26;
+		st26:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof26;
+		st_case_26:
+		switch( ( deref( data, p )) ) {
+			case 46: {
+				goto ctr72;
+			}
+			case 69: {
+				goto st6;
+			}
+			case 76: {
+				goto ctr87;
+			}
+			case 85: {
+				goto ctr87;
+			}
+			case 101: {
+				goto st6;
+			}
+			case 108: {
+				goto ctr87;
+			}
+			case 117: {
+				goto ctr87;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr82;
+		}
+		{
+			goto ctr86;
+		}
+		st11:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof11;
+		st_case_11:
+		if ( ( deref( data, p )) < 65 ) {
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto st27;
+			}
+		} else if ( ( deref( data, p )) > 70 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+				goto st27;
+			}
+		} else {
+			goto st27;
+		}
+		{
+			goto ctr27;
+		}
+		st27:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof27;
+		st_case_27:
+		switch( ( deref( data, p )) ) {
+			case 76: {
+				goto ctr90;
+			}
+			case 85: {
+				goto ctr90;
+			}
+			case 108: {
+				goto ctr90;
+			}
+			case 117: {
+				goto ctr90;
+			}
+		}
+		if ( ( deref( data, p )) < 65 ) {
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto st27;
+			}
+		} else if ( ( deref( data, p )) > 70 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 102 ) {
+				goto st27;
+			}
+		} else {
+			goto st27;
+		}
+		{
+			goto ctr89;
+		}
+		ctr40:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		host( "working/cppscan6_go.rl", 48 ) ${${act = 5;}$}$
+		
+		goto st28;
+		st28:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof28;
+		st_case_28:
+		switch( ( deref( data, p )) ) {
+			case 46: {
+				goto ctr72;
+			}
+			case 69: {
+				goto st6;
+			}
+			case 76: {
+				goto ctr83;
+			}
+			case 85: {
+				goto ctr83;
+			}
+			case 101: {
+				goto st6;
+			}
+			case 108: {
+				goto ctr83;
+			}
+			case 117: {
+				goto ctr83;
+			}
+		}
+		if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+			goto ctr40;
+		}
+		{
+			goto ctr91;
+		}
+		st29:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof29;
+		st_case_29:
+		if ( ( deref( data, p )) == 58 ) {
+			goto ctr93;
+		}
+		{
+			goto ctr101;
+		}
+		st30:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof30;
+		st_case_30:
+		if ( ( deref( data, p )) == 61 ) {
+			goto ctr95;
+		}
+		{
+			goto ctr101;
+		}
+		st31:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof31;
+		st_case_31:
+		if ( ( deref( data, p )) == 95 ) {
+			goto st31;
+		}
+		if ( ( deref( data, p )) < 65 ) {
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto st31;
+			}
+		} else if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st31;
+			}
+		} else {
+			goto st31;
+		}
+		{
+			goto ctr98;
+		}
+		ctr44:
+		host( "NONE", 1 ) ${${te = p+1;}$}$
+		host( "working/cppscan6_go.rl", 33 ) ${${act = 3;}$}$
+		
+		goto st32;
+		st32:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof32;
+		st_case_32:
+		switch( ( deref( data, p )) ) {
+			case 34: {
+				goto st1;
+			}
+			case 39: {
+				goto st3;
+			}
+			case 95: {
+				goto st31;
+			}
+		}
+		if ( ( deref( data, p )) < 65 ) {
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 57 ) {
+				goto st31;
+			}
+		} else if ( ( deref( data, p )) > 90 ) {
+			if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+				goto st31;
+			}
+		} else {
+			goto st31;
+		}
+		{
+			goto ctr98;
+		}
+		st33:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof33;
+		st_case_33:
+		if ( ( deref( data, p )) == 61 ) {
+			goto ctr100;
+		}
+		{
+			goto ctr101;
+		}
+		st34:
+		p+= 1;
+		if ( p == pe )
+		goto _test_eof34;
+		st_case_34:
+		switch( ( deref( data, p )) ) {
+			case 61: {
+				goto ctr102;
+			}
+			case 124: {
+				goto ctr103;
+			}
+		}
+		{
+			goto ctr101;
+		}
+		st_case_0:
+		st0:
+		cs = 0;
+		goto _out;
+		st_out:
+		_test_eof12: cs = 12; goto _test_eof; 
+		_test_eof13: cs = 13; goto _test_eof; 
+		_test_eof14: cs = 14; goto _test_eof; 
+		_test_eof1: cs = 1; goto _test_eof; 
+		_test_eof2: cs = 2; goto _test_eof; 
+		_test_eof15: cs = 15; goto _test_eof; 
+		_test_eof16: cs = 16; goto _test_eof; 
+		_test_eof3: cs = 3; goto _test_eof; 
+		_test_eof4: cs = 4; goto _test_eof; 
+		_test_eof17: cs = 17; goto _test_eof; 
+		_test_eof18: cs = 18; goto _test_eof; 
+		_test_eof19: cs = 19; goto _test_eof; 
+		_test_eof20: cs = 20; goto _test_eof; 
+		_test_eof21: cs = 21; goto _test_eof; 
+		_test_eof5: cs = 5; goto _test_eof; 
+		_test_eof22: cs = 22; goto _test_eof; 
+		_test_eof6: cs = 6; goto _test_eof; 
+		_test_eof7: cs = 7; goto _test_eof; 
+		_test_eof23: cs = 23; goto _test_eof; 
+		_test_eof24: cs = 24; goto _test_eof; 
+		_test_eof8: cs = 8; goto _test_eof; 
+		_test_eof9: cs = 9; goto _test_eof; 
+		_test_eof10: cs = 10; goto _test_eof; 
+		_test_eof25: cs = 25; goto _test_eof; 
+		_test_eof26: cs = 26; goto _test_eof; 
+		_test_eof11: cs = 11; goto _test_eof; 
+		_test_eof27: cs = 27; goto _test_eof; 
+		_test_eof28: cs = 28; goto _test_eof; 
+		_test_eof29: cs = 29; goto _test_eof; 
+		_test_eof30: cs = 30; goto _test_eof; 
+		_test_eof31: cs = 31; goto _test_eof; 
+		_test_eof32: cs = 32; goto _test_eof; 
+		_test_eof33: cs = 33; goto _test_eof; 
+		_test_eof34: cs = 34; goto _test_eof; 
+		
+		_test_eof: {}
+		if ( p == eof )
+		{
+			switch ( cs ) {
+				case 13: goto ctr48;
+				case 14: goto ctr101;
+				case 1: goto ctr17;
+				case 2: goto ctr17;
+				case 15: goto ctr101;
+				case 16: goto ctr101;
+				case 3: goto ctr17;
+				case 4: goto ctr17;
+				case 17: goto ctr101;
+				case 18: goto ctr101;
+				case 19: goto ctr101;
+				case 20: goto ctr67;
+				case 21: goto ctr101;
+				case 5: goto ctr23;
+				case 22: goto ctr77;
+				case 6: goto ctr17;
+				case 7: goto ctr17;
+				case 23: goto ctr77;
+				case 24: goto ctr101;
+				case 8: goto ctr23;
+				case 9: goto ctr23;
+				case 10: goto ctr23;
+				case 25: goto ctr91;
+				case 26: goto ctr86;
+				case 11: goto ctr27;
+				case 27: goto ctr89;
+				case 28: goto ctr91;
+				case 29: goto ctr101;
+				case 30: goto ctr101;
+				case 31: goto ctr98;
+				case 32: goto ctr98;
+				case 33: goto ctr101;
+				case 34: goto ctr101;
+			}
+		}
+		
+		_out: {}
+	}
+	host( "working/cppscan6_go.rl", 132 ) @{
+	}
+	func finish() {
+		if cs >= scanner_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"\"\\\"hi\" /!\n!/\n44 .44\n44. 44\n44 . 44\n44.44\n_hithere22",
+		"'\\''\"\\n\\d'\\\"\"\nhi\n99\n.99\n99e-4\n->*\n||\n0x98\n0x\n//\n/! * !/",
+		"'\n'\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

@@ -1,0 +1,159 @@
+host( "working/statechart1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Test in and out state actions.
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct state_chart
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array char _state_chart_trans_keys( 0, 9 ) = { 1, 0, 9, 9, 3, 6, 4, 5, 0, 7, 0, 8, 0, 8, 9, 9, 3, 6, 5, 5, 9, 9, 3, 6, 4, 4, 0, 8, 0 };
+
+array s8 _state_chart_char_class( 0, 9 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 4, 5, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 9, 0 };
+
+array s8 _state_chart_index_offsets( 0, 45 ) = { 0, 0, 1, 5, 7, 15, 24, 33, 34, 38, 39, 40, 44, 45, 0 };
+
+array s8 _state_chart_indicies( 0, 15 ) = { 0, 0, 1, 1, 2, 3, 4, 5, 1, 6, 7, 1, 1, 1, 8, 5, 1, 6, 9, 1, 1, 1, 8, 10, 5, 1, 6, 11, 1, 1, 1, 1, 10, 12, 12, 1, 1, 13, 4, 14, 14, 1, 1, 15, 3, 5, 1, 1, 9, 1, 1, 1, 8, 10, 0 };
+
+array s8 _state_chart_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+
+array s8 _state_chart_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+
+array s8 _state_chart_cond_targs( 0, 13 ) = { 2, 0, 3, 4, 6, 13, 5, 10, 4, 1, 6, 7, 8, 9, 11, 12, 0 };
+
+array s8 _state_chart_cond_actions( 0, 4 ) = { 0, 0, 0, 1, 2, 0, 0, 0, 3, 0, 4, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int state_chart_start = 13;
+value int state_chart_first_final = 13;
+value int state_chart_error = 0;
+
+value int state_chart_en_main = 13;
+
+host( "working/statechart1.rl", 54 ) @{
+	
+	void state_chart_init( struct state_chart *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)state_chart_start;
+	}
+	host( "working/statechart1.rl", 58 ) @{
+	}
+	
+	void state_chart_execute( struct state_chart *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		uint _trans = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index char _keys;
+		index s8 _inds;
+		while ( _cont == 1 ) {
+			
+			if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _state_chart_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
+					_inds = offset( _state_chart_indicies, _state_chart_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+					
+					if ( ( deref( data, p )) <= 120 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_state_chart_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _state_chart_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _state_chart_trans_keys, _keys ) )
+						_trans = cast(uint)deref( _state_chart_indicies, _inds + cast(int)( _ic - cast(int)deref( _state_chart_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(uint)_state_chart_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+					}
+					else {
+						_trans = cast(uint)_state_chart_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
+					}
+					
+				}
+				if ( _cont == 1 ) {
+					host( "-", 1 ) ={ fsm->cs}= = cast(int)_state_chart_cond_targs[_trans];
+					
+					switch ( _state_chart_cond_actions[_trans] ) {
+						case 3 {
+							host( "working/statechart1.rl", 21 ) ${ printf("a"); }$
+						}
+						case 4 {
+							host( "working/statechart1.rl", 22 ) ${ printf("b"); }$
+						}
+						case 1 {
+							host( "working/statechart1.rl", 23 ) ${ printf("a"); }$
+						}
+						case 2 {
+							host( "working/statechart1.rl", 24 ) ${ printf("b"); }$
+						}
+					}
+					
+					if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}}
+		}
+	}
+	host( "working/statechart1.rl", 66 ) @{
+	}
+	
+	int state_chart_finish( struct state_chart *fsm )
+	{
+		if ( fsm->cs == state_chart_error )
+		return -1;
+		if ( fsm->cs >= state_chart_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct state_chart sc;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		state_chart_init( &sc );
+		state_chart_execute( &sc, buf, len );
+		state_chart_finish( &sc );
+		printf("\n");
+	}
+	
+	int main()
+	{
+		test(
+		"aa0x0061aa b\n"
+		"bbb0x62b 0x61 0x000062\n"
+		);
+		
+		return 0;
+	}
+	
+}@

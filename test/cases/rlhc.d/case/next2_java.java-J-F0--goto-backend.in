@@ -1,0 +1,197 @@
+host( "working/next2_java.rl", 1 ) @{/*
+	* @@LANG: java
+	* @@GENERATED: true
+	*/
+	
+	
+	class next2_java
+	{
+		int target ;
+		int last ;
+		
+		
+		
+		
+		
+	}@
+	array s8 _next2_actions( 0, 5 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 0 };
+	
+	array char _next2_trans_keys( 0, 15 ) = { u(1), u(0), u(15), u(15), u(13), u(13), u(8), u(8), u(13), u(13), u(11), u(11), u(6), u(6), u(5), u(5), u(9), u(9), u(8), u(8), u(6), u(6), u(12), u(12), u(14), u(14), u(9), u(9), u(12), u(12), u(7), u(7), u(10), u(10), u(6), u(6), u(6), u(6), u(0), u(4), u(1), u(0), u(1), u(0), u(1), u(0), u(1), u(0), u(0) };
+	
+	array s8 _next2_char_class( 0, 15 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 6, 1, 1, 7, 1, 1, 1, 1, 1, 8, 9, 1, 1, 10, 11, 12, 13, 1, 14, 15, 0 };
+	
+	array s8 _next2_index_offsets( 0, 23 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 23, 23, 23, 23, 0 };
+	
+	array s8 _next2_indicies( 0, 21 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0 };
+	
+	array s8 _next2_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
+	
+	array s8 _next2_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 };
+	
+	array s8 _next2_cond_targs( 0, 23 ) = { 19, 0, 3, 4, 5, 6, 7, 20, 9, 10, 21, 12, 13, 22, 15, 16, 17, 18, 23, 19, 19, 1, 0 };
+	
+	array s8 _next2_cond_actions( 0, 11 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 5, 7, 9, 11, 0 };
+	
+	array s8 _next2_nfa_targs( 0, 0 ) = { 0, 0 };
+	
+	array s8 _next2_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	
+	array s8 _next2_nfa_push_actions( 0, 0 ) = { 0, 0 };
+	
+	array s8 _next2_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+	
+	value int next2_start = 19;
+	value int next2_first_final = 19;
+	value int next2_error = 0;
+	
+	value int next2_en_unused = 2;
+	value int next2_en_one = 8;
+	value int next2_en_two = 11;
+	value int next2_en_three = 14;
+	value int next2_en_main = 19;
+	
+	host( "working/next2_java.rl", 54 ) @{
+		int cs;
+		
+		void init()
+		{
+		}@
+		{
+			cs = cast(int)next2_start;
+		}
+		host( "working/next2_java.rl", 59 ) @{
+		}
+		
+		void exec( char data[], int len )
+		{
+			char buffer [] = new char[1024];
+			int blen = 0;
+			int p = 0;
+			int pe = len;
+			
+			String _s;
+		}@
+		{
+			int _trans = 0;
+			index s8 _acts;
+			uint _nacts;
+			index char _keys;
+			index s8 _inds;
+			entry {
+				
+				if ( p == pe )
+				goto _test_eof;
+				if ( cs == 0 )
+				goto _out;
+				label _resume {
+					_keys = offset( _next2_trans_keys, (cs<<1) );
+					_inds = offset( _next2_indicies, _next2_index_offsets[cs] );
+					
+					if ( ( deref( data, p )) <= 120 && ( deref( data, p )) >= 10 )
+					{
+						int _ic = cast(int)_next2_char_class[cast(int)( deref( data, p )) - 10];
+						if ( _ic <= cast(int)deref( _next2_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _next2_trans_keys, _keys ) )
+						_trans = cast(int)deref( _next2_indicies, _inds + cast(int)( _ic - cast(int)deref( _next2_trans_keys, _keys ) )  ); 
+						else
+						_trans = cast(int)_next2_index_defaults[cs];
+					}
+					else {
+						_trans = cast(int)_next2_index_defaults[cs];
+					}
+					
+					goto _match_cond;
+				}
+				label _match_cond {
+					cs = cast(int)_next2_cond_targs[_trans];
+					
+					if ( _next2_cond_actions[_trans] == 0 )
+					goto _again;
+					
+					_acts = offset( _next2_actions, _next2_cond_actions[_trans] );
+					_nacts = cast(uint)deref( _next2_actions, _acts );
+					_acts += 1;
+					while ( _nacts > 0 ) {
+						switch ( deref( _next2_actions, _acts ) )
+						{
+							case 0 {
+								host( "working/next2_java.rl", 17 ) ${System.out.print( "one\n" );
+									target = 19;
+									${cs = host( "-", 1 ) ={target}=;}$}$
+							}
+							case 1 {
+								host( "working/next2_java.rl", 21 ) ${System.out.print( "two\n" );
+									target = 19;
+									${cs = host( "-", 1 ) ={target}=;}$}$
+							}
+							case 2 {
+								host( "working/next2_java.rl", 25 ) ${System.out.print( "three\n" );
+									target = 19;
+									${cs = host( "-", 1 ) ={target}=;}$}$
+							}
+							case 3 {
+								host( "working/next2_java.rl", 30 ) ${target = 8;
+									${cs = host( "-", 1 ) ={target}=;}$last = 1;
+								}$
+							}
+							case 4 {
+								host( "working/next2_java.rl", 34 ) ${target = 11;
+									${cs = host( "-", 1 ) ={target}=;}$last = 2;
+								}$
+							}
+							case 5 {
+								host( "working/next2_java.rl", 39 ) ${if ( last == 2 )
+									{
+										target = 14;
+										${cs = host( "-", 1 ) ={target}=;}$
+									} 
+									last = 3;
+								}$
+							}
+						}
+						_nacts -= 1;
+						_acts += 1;
+					}
+					
+					
+				}
+				label _again {
+					if ( cs == 0 )
+					goto _out;
+					p += 1;
+					if ( p != pe )
+					goto _resume;
+				}
+				label _test_eof { {}
+				}
+				label _out { {}
+				}
+			}
+		}
+		host( "working/next2_java.rl", 70 ) @{
+		}
+		
+		void finish( )
+		{
+			if ( cs >= next2_first_final )
+			System.out.println( "ACCEPT" );
+			else
+			System.out.println( "FAIL" );
+		}
+		
+		static final String inp[] = {
+			"1one3x2two3three\n",
+		};
+		
+		static final int inplen = 1;
+		
+		public static void main (String[] args)
+		{
+			next2_java machine = new next2_java();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].toCharArray(), inp[i].length() );
+				machine.finish();
+			}
+		}
+	}
+}@

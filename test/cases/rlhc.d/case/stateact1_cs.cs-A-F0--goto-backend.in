@@ -1,0 +1,208 @@
+host( "working/stateact1_cs.rl", 1 ) @{/*
+	* @@LANG: csharp
+	* @@GENERATED: true
+	*/
+	
+	using System;
+	// Disables lots of warnings that appear in the test suite
+	#pragma warning disable 0168, 0169, 0219, 0162, 0414
+	namespace Test {
+		class Test
+		{
+			
+			
+			
+			
+			
+			
+		}@
+		array s8 _state_act_actions( 0, 6 ) = { 0, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 2, 0, 2, 2, 1, 3, 0 };
+		
+		array char _state_act_trans_keys( 0, 3 ) = { c(1), c(0), c(3), c(3), c(0), c(0), c(2), c(2), c(2), c(2), c(2), c(2), c(0) };
+		
+		array s8 _state_act_char_class( 0, 3 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 };
+		
+		array s8 _state_act_index_offsets( 0, 4 ) = { 0, 0, 1, 2, 3, 4, 0 };
+		
+		array s8 _state_act_indicies( 0, 3 ) = { 0, 2, 3, 3, 3, 0 };
+		
+		array s8 _state_act_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 0 };
+		
+		array s8 _state_act_trans_cond_spaces( -1, 0 ) = { -1, -1, -1, -1, 0 };
+		
+		array s8 _state_act_cond_targs( 0, 5 ) = { 2, 0, 5, 1, 0 };
+		
+		array s8 _state_act_cond_actions( 0, 9 ) = { 0, 0, 9, 0, 0 };
+		
+		array s8 _state_act_to_state_actions( 0, 11 ) = { 0, 0, 5, 1, 11, 1, 0 };
+		
+		array s8 _state_act_from_state_actions( 0, 14 ) = { 0, 0, 7, 3, 14, 3, 0 };
+		
+		array s8 _state_act_nfa_targs( 0, 0 ) = { 0, 0 };
+		
+		array s8 _state_act_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0 };
+		
+		array s8 _state_act_nfa_push_actions( 0, 0 ) = { 0, 0 };
+		
+		array s8 _state_act_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+		
+		value int state_act_start = 4;
+		value int state_act_first_final = 4;
+		value int state_act_error = 0;
+		
+		value int state_act_en_main = 4;
+		value int state_act_en_main_line_again = 3;
+		
+		host( "working/stateact1_cs.rl", 43 ) @{
+			int cs;
+			
+			void init()
+			{
+			}@
+			{
+				cs = cast(int)state_act_start;
+			}
+			host( "working/stateact1_cs.rl", 48 ) @{
+			}
+			
+			void exec( char[] data, int len )
+			{
+				int p = 0;
+				int pe = len;
+				int eof = len;
+				string _s;
+				char [] buffer = new char [1024];
+				int blen = 0;
+			}@
+			{
+				int _trans = 0;
+				index s8 _acts;
+				uint _nacts;
+				index char _keys;
+				index s8 _inds;
+				entry {
+					
+					if ( p == pe )
+					goto _test_eof;
+					if ( cs == 0 )
+					goto _out;
+					label _resume {
+						_acts = offset( _state_act_actions, _state_act_from_state_actions[cs] );
+						_nacts = cast(uint)deref( _state_act_actions, _acts );
+						_acts += 1;
+						while ( _nacts > 0 ) {
+							switch ( deref( _state_act_actions, _acts ) ) {
+								case 1 {
+									host( "working/stateact1_cs.rl", 19 ) ${Console.Write( "a2\n" );}$
+								}
+								case 3 {
+									host( "working/stateact1_cs.rl", 21 ) ${Console.Write( "b2\n" );}$
+								}
+								case 5 {
+									host( "working/stateact1_cs.rl", 23 ) ${Console.Write( "c2\n" );}$
+								}
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+						
+						_keys = offset( _state_act_trans_keys, (cs<<1) );
+						_inds = offset( _state_act_indicies, _state_act_index_offsets[cs] );
+						
+						if ( ( deref( data, p )) <= 105 && ( deref( data, p )) >= 10 )
+						{
+							int _ic = cast(int)_state_act_char_class[cast(int)( deref( data, p )) - 10];
+							if ( _ic <= cast(int)deref( _state_act_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _state_act_trans_keys, _keys ) )
+							_trans = cast(int)deref( _state_act_indicies, _inds + cast(int)( _ic - cast(int)deref( _state_act_trans_keys, _keys ) )  ); 
+							else
+							_trans = cast(int)_state_act_index_defaults[cs];
+						}
+						else {
+							_trans = cast(int)_state_act_index_defaults[cs];
+						}
+						
+						goto _match_cond;
+					}
+					label _match_cond {
+						cs = cast(int)_state_act_cond_targs[_trans];
+						
+						if ( _state_act_cond_actions[_trans] == 0 )
+						goto _again;
+						
+						_acts = offset( _state_act_actions, _state_act_cond_actions[_trans] );
+						_nacts = cast(uint)deref( _state_act_actions, _acts );
+						_acts += 1;
+						while ( _nacts > 0 ) {
+							switch ( deref( _state_act_actions, _acts ) )
+							{
+								case 6 {
+									host( "working/stateact1_cs.rl", 24 ) ${${cs = 3;}$}$
+								}
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+						
+						
+					}
+					label _again {
+						_acts = offset( _state_act_actions, _state_act_to_state_actions[cs] );
+						_nacts = cast(uint)deref( _state_act_actions, _acts ); _acts += 1;
+						while ( _nacts > 0 ) {
+							switch ( deref( _state_act_actions, _acts ) ) {
+								case 0 {
+									host( "working/stateact1_cs.rl", 18 ) ${Console.Write( "a1\n" );}$
+								}
+								case 2 {
+									host( "working/stateact1_cs.rl", 20 ) ${Console.Write( "b1\n" );}$
+								}
+								case 4 {
+									host( "working/stateact1_cs.rl", 22 ) ${Console.Write( "c1\n" );}$
+								}
+							}
+							_nacts -= 1;
+							_acts += 1;
+						}
+						
+						if ( cs == 0 )
+						goto _out;
+						p += 1;
+						if ( p != pe )
+						goto _resume;
+					}
+					label _test_eof { {}
+					}
+					label _out { {}
+					}
+				}
+			}
+			host( "working/stateact1_cs.rl", 59 ) @{
+			}
+			
+			void finish( )
+			{
+				if ( cs >= state_act_first_final )
+				Console.WriteLine( "ACCEPT" );
+				else
+				Console.WriteLine( "FAIL" );
+			}
+			
+			static readonly string[] inp = {
+				"hi\nhi\n",
+			};
+			
+			
+			static readonly int inplen = 1;
+			
+			public static void Main (string[] args)
+			{
+				Test machine = new Test();
+				for ( int i = 0; i < inplen; i++ ) {
+					machine.init();
+					machine.exec( inp[i].ToCharArray(), inp[i].Length );
+					machine.finish();
+				}
+			}
+		}
+	}
+}@

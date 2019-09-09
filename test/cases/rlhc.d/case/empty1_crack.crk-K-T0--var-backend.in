@@ -1,0 +1,199 @@
+host( "working/empty1_crack.rl", 1 ) @{//
+	// @@LANG: crack
+	// @@GENERATED: true
+	//
+	
+	import crack.io cout;
+	import crack.lang Buffer;
+	
+	
+	
+	
+	
+	
+	
+	
+}@
+array s8 _empty1_key_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array byte _empty1_trans_keys( 0, 0 ) = { c(0) };
+
+array s8 _empty1_single_lengths( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _empty1_range_lengths( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _empty1_index_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _empty1_trans_cond_spaces( -1, 0 ) = { -1, 0 };
+
+array s8 _empty1_trans_offsets( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_trans_lengths( 0, 1 ) = { 1, 0 };
+
+array s8 _empty1_cond_keys( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_cond_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_cond_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_nfa_offsets( 0, 0 ) = { 0, 0, 0 };
+
+array s8 _empty1_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _empty1_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int empty1_start = 1;
+value int empty1_first_final = 2;
+value int empty1_error = 0;
+
+value int empty1_en_main = 1;
+
+host( "working/empty1_crack.rl", 20 ) @{
+	
+	void m( String s )
+	{
+		byteptr data = s.buffer;
+		int p = 0;
+		int pe = s.size;
+		int cs;
+		String buffer;
+		
+	}@
+	{
+		cs = cast(int)empty1_start;
+	}
+	host( "working/empty1_crack.rl", 30 ) @{
+	}@
+	{
+		int _klen;
+		uint _trans = 0;
+		uint _cond = 0;
+		uint _have = 0;
+		uint _cont = 1;
+		index byte _keys;
+		index s8 _ckeys;
+		int _cpc;
+		while ( _cont == 1 ) {
+			
+			if ( cs == 0 )
+			_cont = 0;
+			_have = 0;
+			if ( p == pe ) {
+				if ( _have == 0 )
+				_cont = 0;
+			}
+			if ( _cont == 1 ) {
+				if ( _have == 0 ) {
+					_keys = offset( _empty1_trans_keys, _empty1_key_offsets[cs] );
+					_trans = cast(uint)_empty1_index_offsets[cs];
+					_have = 0;
+					
+					_klen = cast(int)_empty1_single_lengths[cs];
+					if ( _klen > 0 ) {
+						index byte _lower;
+						index byte _mid;
+						index byte _upper;
+						_lower = _keys;
+						_upper = _keys + _klen - 1;
+						while ( _upper >= _lower && _have == 0 ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( ( deref( data, p )) < deref( _empty1_trans_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( ( deref( data, p )) > deref( _empty1_trans_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_trans += cast(uint)(_mid - _keys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							_keys += _klen;
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					if ( _have == 0 ) {
+						_klen = cast(int)_empty1_range_lengths[cs];
+						if ( _klen > 0 ) {
+							index byte _lower;
+							index byte _mid;
+							index byte _upper;
+							_lower = _keys;
+							_upper = _keys + (_klen<<1) - 2;
+							while ( _have == 0 && _lower <= _upper ) {
+								_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+								if ( ( deref( data, p )) < deref( _empty1_trans_keys, _mid ) )
+								_upper = _mid - 2;
+								else if ( ( deref( data, p )) > deref( _empty1_trans_keys, _mid + 1 ) )
+								_lower = _mid + 2;
+								else {
+									_trans += cast(uint)((_mid - _keys)>>1);
+									_have = 1;
+								}
+							}
+							if ( _have == 0 )
+							_trans += cast(uint)_klen;
+						}
+					}
+					
+					_ckeys = offset( _empty1_cond_keys, _empty1_trans_offsets[_trans] );
+					_klen = cast(int)_empty1_trans_lengths[_trans];
+					_cond = cast(uint)_empty1_trans_offsets[_trans];
+					_have = 0;
+					
+					_cpc = 0;
+					{
+						index s8 _lower;
+						index s8 _mid;
+						index s8 _upper;
+						_lower = _ckeys;
+						_upper = _ckeys + _klen - 1;
+						while ( _have == 0 && _lower <= _upper ) {
+							_mid = _lower + ((_upper-_lower) >> 1);
+							if ( _cpc < cast(int)deref( _empty1_cond_keys, _mid ) )
+							_upper = _mid - 1;
+							else if ( _cpc > cast(int)deref( _empty1_cond_keys, _mid ) )
+							_lower = _mid + 1;
+							else {
+								_cond += cast(uint)(_mid - _ckeys);
+								_have = 1;
+							}
+						}
+						if ( _have == 0 ) {
+							cs = 0;
+							_cont = 0;
+						}
+					}
+				}
+				if ( _cont == 1 ) {
+					cs = cast(int)_empty1_cond_targs[_cond];
+					
+					if ( cs == 0 )
+					_cont = 0;
+					if ( _cont == 1 )
+					p += 1;
+					
+				}
+			}
+		}
+	}
+	host( "working/empty1_crack.rl", 31 ) @{
+		
+		if ( cs >= empty1_first_final ) {
+			cout `ACCEPT\n`;
+		}
+		else {
+			cout `FAIL\n`;
+		}
+	}
+	
+	void main()
+	{
+		m( "" );
+		m( "x" );
+	}
+	
+	main();
+}@

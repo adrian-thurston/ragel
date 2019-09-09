@@ -1,0 +1,600 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+class << self
+	attr_accessor :_scanner_actions 
+	private :_scanner_actions, :_scanner_actions=
+end
+self._scanner_actions = [
+0, 1, 0, 1, 1, 1, 5, 1, 6, 1, 7, 2, 2, 3, 2, 2, 4, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_key_offsets 
+	private :_scanner_key_offsets, :_scanner_key_offsets=
+end
+self._scanner_key_offsets = [
+0, 3, 5, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_trans_keys 
+	private :_scanner_trans_keys, :_scanner_trans_keys=
+end
+self._scanner_trans_keys = [
+99, 97, 98, 97, 98, 99, 97, 98, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_single_lengths 
+	private :_scanner_single_lengths, :_scanner_single_lengths=
+end
+self._scanner_single_lengths = [
+1, 2, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_range_lengths 
+	private :_scanner_range_lengths, :_scanner_range_lengths=
+end
+self._scanner_range_lengths = [
+1, 0, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_index_offsets 
+	private :_scanner_index_offsets, :_scanner_index_offsets=
+end
+self._scanner_index_offsets = [
+0, 3, 6, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_trans_cond_spaces 
+	private :_scanner_trans_cond_spaces, :_scanner_trans_cond_spaces=
+end
+self._scanner_trans_cond_spaces = [
+-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_trans_offsets 
+	private :_scanner_trans_offsets, :_scanner_trans_offsets=
+end
+self._scanner_trans_offsets = [
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_trans_lengths 
+	private :_scanner_trans_lengths, :_scanner_trans_lengths=
+end
+self._scanner_trans_lengths = [
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_cond_keys 
+	private :_scanner_cond_keys, :_scanner_cond_keys=
+end
+self._scanner_cond_keys = [
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_cond_targs 
+	private :_scanner_cond_targs, :_scanner_cond_targs=
+end
+self._scanner_cond_targs = [
+1, 0, 1, 2, 2, 1, 1, 0, 1, 1, 1, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_cond_actions 
+	private :_scanner_cond_actions, :_scanner_cond_actions=
+end
+self._scanner_cond_actions = [
+5, 0, 9, 11, 14, 7, 5, 0, 9, 9, 9, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_to_state_actions 
+	private :_scanner_to_state_actions, :_scanner_to_state_actions=
+end
+self._scanner_to_state_actions = [
+0, 1, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_from_state_actions 
+	private :_scanner_from_state_actions, :_scanner_from_state_actions=
+end
+self._scanner_from_state_actions = [
+0, 3, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_eof_trans_indexed 
+	private :_scanner_eof_trans_indexed, :_scanner_eof_trans_indexed=
+end
+self._scanner_eof_trans_indexed = [
+2, 0, 2, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_eof_trans_direct 
+	private :_scanner_eof_trans_direct, :_scanner_eof_trans_direct=
+end
+self._scanner_eof_trans_direct = [
+10, 0, 11, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_targs 
+	private :_scanner_nfa_targs, :_scanner_nfa_targs=
+end
+self._scanner_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_offsets 
+	private :_scanner_nfa_offsets, :_scanner_nfa_offsets=
+end
+self._scanner_nfa_offsets = [
+0, 0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_push_actions 
+	private :_scanner_nfa_push_actions, :_scanner_nfa_push_actions=
+end
+self._scanner_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_scanner_nfa_pop_trans 
+	private :_scanner_nfa_pop_trans, :_scanner_nfa_pop_trans=
+end
+self._scanner_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :scanner_start 
+end
+self.scanner_start  = 1;
+
+class << self
+	attr_accessor :scanner_first_final 
+end
+self.scanner_first_final  = 1;
+
+class << self
+	attr_accessor :scanner_error 
+end
+self.scanner_error  = -1;
+
+class << self
+	attr_accessor :scanner_en_main 
+end
+self.scanner_en_main  = 1;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	ts = 1
+	te = 1
+	act = 1
+	token = 1
+	begin
+		cs = scanner_start;
+		ts = 0;
+		te = 0;
+		act = 0;
+		
+	end
+	begin
+		_klen= 0
+		;
+		_trans = 0;
+		_cond = 0;
+		_have = 0;
+		_cont = 1;
+		_acts = 0;
+		_nacts= 0
+		;
+		_keys = 0;
+		_ckeys = 0;
+		_cpc= 0
+		;
+		while ( _cont == 1  )
+			begin
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( p == eof  )
+							begin
+								if ( _scanner_eof_trans_direct[cs] > 0  )
+									begin
+										_trans = _scanner_eof_trans_direct[cs] - 1;
+										_cond = _scanner_trans_offsets[_trans];
+										_have = 1;
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+									
+									end
+									
+								end
+								
+							end
+							
+						end
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_acts = _scanner_from_state_actions[cs] ;
+								_nacts = _scanner_actions[_acts ];
+								_acts += 1;
+								while ( _nacts > 0  )
+									begin
+										case  _scanner_actions[_acts ] 
+										when -2 then
+										begin
+										end
+										when 1  then
+										begin
+											begin
+												begin
+													ts = p;
+													
+												end
+												
+											end
+											
+											
+										end
+									end
+									_nacts -= 1;
+									_acts += 1;
+									
+								end
+								
+							end
+							_keys = _scanner_key_offsets[cs] ;
+							_trans = _scanner_index_offsets[cs];
+							_have = 0;
+							_klen = _scanner_single_lengths[cs];
+							if ( _klen > 0  )
+								begin
+									_lower = 0;
+									_mid = 0;
+									_upper = 0;
+									_lower = _keys;
+									_upper = _keys + _klen - 1;
+									while ( _upper >= _lower && _have == 0  )
+										begin
+											_mid = _lower + ((_upper-_lower) >> 1);
+											if ( ( data[p ].ord) < _scanner_trans_keys[_mid ] )
+												_upper = _mid - 1;
+												
+												elsif ( ( data[p ].ord) > _scanner_trans_keys[_mid ] )
+												_lower = _mid + 1;
+												
+												else
+												begin
+													_trans += (_mid - _keys);
+													_have = 1;
+													
+												end
+												
+											end
+											
+										end
+										
+									end
+									if ( _have == 0  )
+										begin
+											_keys += _klen;
+											_trans += _klen;
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							if ( _have == 0  )
+								begin
+									_klen = _scanner_range_lengths[cs];
+									if ( _klen > 0  )
+										begin
+											_lower = 0;
+											_mid = 0;
+											_upper = 0;
+											_lower = _keys;
+											_upper = _keys + (_klen<<1) - 2;
+											while ( _have == 0 && _lower <= _upper  )
+												begin
+													_mid = _lower + (((_upper-_lower) >> 1) & ~1);
+													if ( ( data[p ].ord) < _scanner_trans_keys[_mid ] )
+														_upper = _mid - 2;
+														
+														elsif ( ( data[p ].ord) > _scanner_trans_keys[_mid + 1 ] )
+														_lower = _mid + 2;
+														
+														else
+														begin
+															_trans += ((_mid - _keys)>>1);
+															_have = 1;
+															
+														end
+														
+													end
+													
+												end
+												
+											end
+											if ( _have == 0  )
+												_trans += _klen;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								
+							end
+							_ckeys = _scanner_trans_offsets[_trans] ;
+							_klen = _scanner_trans_lengths[_trans];
+							_cond = _scanner_trans_offsets[_trans];
+							_have = 0;
+							_cpc = 0;
+							begin
+								_lower = 0;
+								_mid = 0;
+								_upper = 0;
+								_lower = _ckeys;
+								_upper = _ckeys + _klen - 1;
+								while ( _have == 0 && _lower <= _upper  )
+									begin
+										_mid = _lower + ((_upper-_lower) >> 1);
+										if ( _cpc < _scanner_cond_keys[_mid ] )
+											_upper = _mid - 1;
+											
+											elsif ( _cpc > _scanner_cond_keys[_mid ] )
+											_lower = _mid + 1;
+											
+											else
+											begin
+												_cond += (_mid - _ckeys);
+												_have = 1;
+												
+											end
+											
+										end
+										
+									end
+									
+								end
+								if ( _have == 0  )
+									begin
+										cs = -1;
+										_cont = 0;
+										
+									end
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					if ( _cont == 1  )
+						begin
+							cs = _scanner_cond_targs[_cond];
+							if ( _scanner_cond_actions[_cond] != 0  )
+								begin
+									_acts = _scanner_cond_actions[_cond] ;
+									_nacts = _scanner_actions[_acts ];
+									_acts += 1;
+									while ( _nacts > 0  )
+										begin
+											case  _scanner_actions[_acts ] 
+											when -2 then
+											begin
+											end
+											when 2  then
+											begin
+												begin
+													begin
+														te = p+1;
+														
+													end
+													
+												end
+												
+											end
+											when 3  then
+											begin
+												begin
+													begin
+														act = 1;
+														
+													end
+													
+												end
+												
+											end
+											when 4  then
+											begin
+												begin
+													begin
+														act = 3;
+														
+													end
+													
+												end
+												
+											end
+											when 5  then
+											begin
+												begin
+													begin
+														te = p+1;
+														begin
+															print( "pat2\n" );
+															
+														end
+														
+													end
+													
+												end
+												
+											end
+											when 6  then
+											begin
+												begin
+													begin
+														te = p+1;
+														
+													end
+													
+												end
+												
+											end
+											when 7  then
+											begin
+												begin
+													begin
+														case  act  
+														when -2 then
+														begin
+														end
+														when 1  then
+														begin
+															p = ((te))-1;
+															begin
+																print( "pat1\n" );
+																
+															end
+															
+														end
+														else
+														begin
+															p = ((te))-1;
+															
+															
+														end
+													end
+													
+												end
+												
+												
+											end
+											
+											
+										end
+									end
+									_nacts -= 1;
+									_acts += 1;
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					_acts = _scanner_to_state_actions[cs] ;
+					_nacts = _scanner_actions[_acts ];
+					_acts += 1;
+					while ( _nacts > 0  )
+						begin
+							case  _scanner_actions[_acts ] 
+							when -2 then
+							begin
+							end
+							when 0  then
+							begin
+								begin
+									begin
+										ts = 0;
+										
+									end
+									
+								end
+								
+								
+							end
+						end
+						_nacts -= 1;
+						_acts += 1;
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					p += 1;
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	
+end
+
+end
+
+end
+
+end
+if cs >= scanner_first_final
+puts "ACCEPT"
+else
+puts "FAIL"
+end
+end
+
+inp = [
+"ba a",
+]
+
+inplen = 1
+
+inp.each { |str| run_machine(str) }
+

@@ -1,0 +1,204 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+
+static const char  _state_act_trans_keys [] = { 1, 0, 3, 3, 0, 0, 2, 2, 2, 2, 2, 2, 0 ,  };
+static const char  _state_act_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 ,  };
+static const char  _state_act_index_offsets [] = { 0, 0, 1, 2, 3, 4, 0 ,  };
+static const char  _state_act_indicies [] = { 0, 2, 3, 3, 3, 0 ,  };
+static const char  _state_act_index_defaults [] = { 0, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _state_act_trans_cond_spaces [] = { -1, -1, -1, -1, 0 ,  };
+static const char  _state_act_cond_targs [] = { 2, 0, 5, 1, 0 ,  };
+static const char  _state_act_cond_actions [] = { 0, 0, 3, 0, 0 ,  };
+static const char  _state_act_to_state_actions [] = { 0, 0, 1, 4, 6, 4, 0 ,  };
+static const char  _state_act_from_state_actions [] = { 0, 0, 2, 5, 7, 5, 0 ,  };
+static const char  _state_act_nfa_targs [] = { 0, 0 ,  };
+static const char  _state_act_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _state_act_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _state_act_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  state_act_start  = 4;
+static const int  state_act_first_final  = 4;
+static const int  state_act_error  = 0;
+static const int  state_act_en_main  = 4;
+static const int  state_act_en_main_line_again  = 3;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) state_act_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _trans = 0;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		switch ( _state_act_from_state_actions[cs] ) {
+			case 5 :
+			{
+				printf( "%s", "b2\n" );
+				
+			}
+			
+			break;
+			case 2 :
+			{
+				printf( "%s", "c2\n" );
+				
+			}
+			
+			break;
+			case 7 :
+			{
+				printf( "%s", "a2\n" );
+				
+			}
+			{
+				printf( "%s", "b2\n" );
+				
+			}
+			
+			break;
+			
+		}
+		_keys = _state_act_trans_keys + (cs<<1);
+		_inds = _state_act_indicies + _state_act_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 105 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _state_act_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _state_act_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _state_act_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _state_act_cond_targs[_trans];
+		if ( _state_act_cond_actions[_trans]== 0  )
+		goto _again;
+		
+		
+		switch ( _state_act_cond_actions[_trans] ) {
+			case 3 :
+			{
+				{
+					cs = 3;
+					
+				}
+				
+			}
+			
+			break;
+			
+		}
+		
+		_again :
+		switch ( _state_act_to_state_actions[cs] ) {
+			case 4 :
+			{
+				printf( "%s", "b1\n" );
+				
+			}
+			
+			break;
+			case 1 :
+			{
+				printf( "%s", "c1\n" );
+				
+			}
+			
+			break;
+			case 6 :
+			{
+				printf( "%s", "a1\n" );
+				
+			}
+			{
+				printf( "%s", "b1\n" );
+				
+			}
+			
+			break;
+			
+		}
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= state_act_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"hi\nhi\n",
+};
+
+int inplen = 1;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

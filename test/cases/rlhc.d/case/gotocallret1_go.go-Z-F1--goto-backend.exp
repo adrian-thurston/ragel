@@ -1,0 +1,231 @@
+package main
+import "fmt"
+
+var comm  byte ;
+var top  int ;
+var stack [32] int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _GotoCallRet_trans_keys [] byte  = [] byte  { 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 5, 3, 3, 3, 5, 1, 0, 4, 5, 3, 3, 0 }
+var _GotoCallRet_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0  }
+var _GotoCallRet_index_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0  }
+var _GotoCallRet_indicies [] int8  = [] int8  { 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0  }
+var _GotoCallRet_index_defaults [] int8  = [] int8  { 0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0  }
+var _GotoCallRet_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0  }
+var _GotoCallRet_cond_targs [] int8  = [] int8  { 0, 2, 7, 4, 8, 4, 8, 0, 9, 10, 1, 0, 0  }
+var _GotoCallRet_cond_actions [] int8  = [] int8  { 1, 2, 3, 5, 6, 0, 7, 8, 0, 0, 9, 0, 0  }
+var _GotoCallRet_eof_actions [] int8  = [] int8  { 0, 1, 1, 4, 4, 8, 8, 0, 4, 0, 0, 0  }
+var _GotoCallRet_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  }
+var _GotoCallRet_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _GotoCallRet_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var GotoCallRet_start  int  = 7
+var GotoCallRet_first_final  int  = 7
+var GotoCallRet_error  int  = 0
+var GotoCallRet_en_garble_line  int  = 3
+var GotoCallRet_en_alp_comm  int  = 5
+var GotoCallRet_en_dig_comm  int  = 6
+var GotoCallRet_en_main  int  = 7
+func prepare() {
+
+	{
+		cs = int(GotoCallRet_start);
+		top = 0;
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	var eof int = pe
+	
+	{
+		var  _trans  int   = 0
+		var  _keys int
+		var  _inds int
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume :
+		_keys = int((cs<<1) );
+		_inds = int(_GotoCallRet_index_offsets[cs] );
+		switch {
+			case ( data[p ]) <= 122 && ( data[p ]) >= 10 :
+			{
+				var  _ic  int   = int(_GotoCallRet_char_class[int(( data[p ]) )- 10])
+				switch {
+					case _ic <= int(_GotoCallRet_trans_keys[_keys+1 ])&& _ic >= int(_GotoCallRet_trans_keys[_keys ]):
+					_trans = int(_GotoCallRet_indicies[_inds + int(( _ic - int(_GotoCallRet_trans_keys[_keys ]))  )]);
+					
+					default:
+					_trans = int(_GotoCallRet_index_defaults[cs]);
+					
+				}
+			}
+			
+			default:
+			{
+				_trans = int(_GotoCallRet_index_defaults[cs]);
+			}
+			
+			
+		}
+		goto _match_cond;
+		
+		_match_cond :
+		cs = int(_GotoCallRet_cond_targs[_trans]);
+		if _GotoCallRet_cond_actions[_trans] == 0  {
+			goto _again;
+			
+			
+		}
+		switch _GotoCallRet_cond_actions[_trans]  {
+			case 5 :
+			{fmt.Print( "error: garbling line\n" );}
+			
+			break;
+			case 7 :
+			{{cs = 7;
+					goto _again;}}
+			
+			break;
+			case 8 :
+			{{p = p - 1;
+				} 
+				{top -= 1;
+					cs = stack[top];
+					goto _again;}
+			}
+			
+			break;
+			case 2 :
+			{if ( comm >= 'a' ) {
+					{stack[top] = cs;
+						top += 1;
+						cs = 5;
+						goto _again;}} else {
+					{stack[top] = cs;
+						top += 1;
+						cs = 6;
+						goto _again;}}
+			}
+			
+			break;
+			case 9 :
+			{comm = (( data[p ]));
+			}
+			
+			break;
+			case 3 :
+			{fmt.Print( "correct command\n" );}
+			
+			break;
+			case 1 :
+			{{p = p - 1;
+				}
+				{cs = 3;
+					goto _again;}}
+			
+			break;
+			case 6 :
+			{fmt.Print( "error: garbling line\n" );}
+			{{cs = 7;
+					goto _again;}}
+			
+			break;
+			
+		}
+		
+		_again :
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p+= 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		
+		_test_eof :
+		{}
+		if p == eof  {
+			{
+				switch _GotoCallRet_eof_actions[cs]  {
+					case 4 :
+					{fmt.Print( "error: failed to recover\n" );}
+					
+					break;
+					case 8 :
+					{{p = p - 1;
+						} 
+						{top -= 1;
+							cs = stack[top];
+							goto _again;}
+					}
+					
+					break;
+					case 1 :
+					{{p = p - 1;
+						}
+						{cs = 3;
+							goto _again;}}
+					
+					break;
+					
+				}
+			}
+			
+			
+		}
+		
+		_out :
+		{}
+		
+	}
+}
+func finish() {
+	if cs >= GotoCallRet_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"lkajsdf\n",
+	"2134\n",
+	"(\n",
+	"\n",
+	"*234234()0909 092 -234aslkf09`1 11\n",
+	"1\n",
+	"909\n",
+	"1 a\n",
+	"11 1\n",
+	"a 1\n",
+	"aa a\n",
+	"1 1\n",
+	"1 123456\n",
+	"a a\n",
+	"a abcdef\n",
+	"h",
+	"a aa1",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

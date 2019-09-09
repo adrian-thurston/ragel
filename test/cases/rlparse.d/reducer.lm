@@ -1,0 +1,2641 @@
+reduction TopLevel
+
+	# def machine_name
+	#	[`machine word `;] :MachineName
+	ragel::machine_name :MachineName
+	{
+		InputLoc sectionLoc;
+		string machine( $word->data, $word->length );
+
+		if ( includeDepth > 0 ) {
+			/* Check if the the machine is the one we are searching for. If
+			 * not, reset pd. Otherwise, rename it to target machine because we
+			 * are drawing the statements into target. */
+			if ( machine == searchMachine )
+				machine = targetMachine;
+		}
+
+		SectionDictEl *sdEl = id->sectionDict.find( machine.c_str() );
+		assert( sdEl != 0 );
+
+		ParseDataDictEl *pdEl = id->parseDataDict.find( machine );
+		if ( pdEl == 0 ) {
+			pdEl = new ParseDataDictEl( machine );
+			pdEl->value = new ParseData( id, machine,
+					id->nextMachineId++, sectionLoc, hostLang,
+					minimizeLevel, minimizeOpt );
+			id->parseDataDict.insert( pdEl );
+			id->parseDataList.append( pdEl->value );
+		}
+
+		pd = pdEl->value;
+	}
+
+	# def statement
+	#	[assignment] :Assignment
+	# |	[instantiation] :Instantiation
+	# |	[nfa_union] :NfaUnion
+	# |	[action_spec] :ActionSpec
+	# |	[`prepush action_block] :PrePush commit
+	# |	[`postpop action_block] :PostPop commit
+	# |	[`nfaprepush action_block] :NfaPrePush commit
+	# |	[`nfapostpop action_block] :NfaPostPop commit
+	# |	[`variable variable_name inline_expr_reparse] :Variable commit
+	# |	[`alphtype alphtype_type `;] :AlphType commit
+	# |	[`access inline_expr_reparse] :Access commit
+	# |	[`write Cmd: word ArgList: write_arg* `;] :Write commit
+	# |	[`getkey inline_expr_reparse] :GetKey commit
+	# |	[`import string `;] :Import commit
+	# |	[`include include_spec `;] :Include commit
+
+	# def assignment
+	#	[opt_export def_name `= join `;] :Assignment commit
+	ragel::assignment :Assignment
+	{
+		InputLoc loc = &$def_name->loc;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name( $def_name->tok.data, $def_name->tok.length );
+
+		/* Main machine must be an instance. */
+		bool isInstance = false;
+		if ( name == MAIN_MACHINE ) {
+			pd->id->warning(loc) << "main machine will be implicitly instantiated" << endl;
+			isInstance = true;
+		}
+
+		MachineDef *machineDef = new MachineDef( $join->join );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, isInstance );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+
+	# def instantiation
+	#	[opt_export def_name `:= lm `;] :Instantiation commit
+	ragel::instantiation :Instantiation
+	{
+		InputLoc loc = &$def_name->loc;
+
+		bool exportMachine = $opt_export->isSet;
+		if ( exportMachine )
+			exportContext.append( true );
+
+		string name( $def_name->tok.data, $def_name->tok.length );
+
+		MachineDef *machineDef = $lm->machineDef;
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+
+		if ( exportMachine )
+			exportContext.remove( exportContext.length()-1 );
+
+		/* Pass a location to join_or_lm */
+		if ( machineDef->join != 0 )
+			machineDef->join->loc = loc;
+	}
+
+	# def def_name
+	# 	[word] :Word
+	ragel::def_name
+	{
+		RedToken tok;
+		colm_location loc;
+	}
+
+	ragel::def_name :Word
+	{
+		string data( $word->data, $word->length );
+		$$->tok.set( $word, @word );
+		$$->loc = *@1;
+
+		/* Make/get the priority key. The name may have already been referenced
+		 * and therefore exist. */
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( data, pd->fsmCtx->nextPriorKey, &priorDictEl ) )
+			pd->fsmCtx->nextPriorKey += 1;
+		pd->curDefPriorKey = priorDictEl->value;
+
+		/* Make/get the local error key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+		pd->curDefLocalErrKey = localErrDictEl->value;
+	}
+
+	# def nfa_union
+	#	[def_name `|= nfa_rounds nfa_expr `;] :NfaUnion commit
+	ragel::nfa_union :NfaUnion
+	{
+		InputLoc loc = &$def_name->loc;
+		string name( $def_name->tok.data, $def_name->tok.length );
+
+		$nfa_expr->nfaUnion->roundsList = $nfa_rounds->roundsList;
+
+		MachineDef *machineDef = new MachineDef( $nfa_expr->nfaUnion );
+
+		/* Generic creation of machine for instantiation and assignment. */
+		tryMachineDef( loc, name, machineDef, true );
+	}
+
+	# def action_spec
+	#	[`action word action_params action_block] :ActionSpecParams commit
+	# |	[`action word action_block] :ActionSpec commit
+	ragel::action_spec
+	{
+		Action *action;
+	}
+
+	ragel::action_spec :ActionSpecParams
+	{
+		string data( $word->data, $word->length );
+		if ( pd->actionDict.find( data ) ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(@word) << "action \"" << data << "\" already defined" << endl;
+		}
+		else {
+			/* Add the action to the list of actions. */
+			Action *newAction = new Action( @1, data, 
+					$action_block->inlineList, pd->fsmCtx->nextCondId++ );
+
+			/* Insert to list and dict. */
+			pd->fsmCtx->actionList.append( newAction );
+			pd->actionDict.insert( newAction );
+
+			newAction->paramList = $action_params->paramList;
+			if ( $action_params->paramList != 0 )
+				newAction->argListMap = new ActionArgListMap;
+		}
+	}
+
+	ragel::action_spec :ActionSpec
+	{
+		string data( $word->data, $word->length );
+		if ( pd->actionDict.find( data ) ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(@word) << "action \"" << data << "\" already defined" << endl;
+		}
+		else {
+			/* Add the action to the list of actions. */
+			Action *newAction = new Action( @1, data, 
+					$action_block->inlineList, pd->fsmCtx->nextCondId++ );
+
+			/* Insert to list and dict. */
+			pd->fsmCtx->actionList.append( newAction );
+			pd->actionDict.insert( newAction );
+		}
+	}
+
+	# def statement
+	# |	[`prepush action_block] :PrePush commit
+	# |	[`postpop action_block] :PostPop commit
+	ragel::statement :PrePush
+	{
+		if ( pd->fsmCtx->prePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(@1) << "prepush code already defined" << endl;
+		}
+		pd->fsmCtx->prePushExpr = new InlineBlock( @1, $action_block->inlineList );
+
+	}
+	ragel::statement :PostPop
+	{
+		if ( pd->fsmCtx->postPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(@1) << "postpop code already defined" << endl;
+		}
+		pd->fsmCtx->postPopExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# def statement
+	#   [`nfaprepush action_block] :NfaPrePush commit
+	ragel::statement :NfaPrePush
+	{
+		if ( pd->fsmCtx->nfaPrePushExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(@1) << "nfa_pre_push code already defined" << endl;
+		}
+
+		pd->fsmCtx->nfaPrePushExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# def statement
+	#   [`nfapostpop action_block] :NfaPostPop commit
+	ragel::statement :NfaPostPop
+	{
+		if ( pd->fsmCtx->nfaPostPopExpr != 0 ) {
+			/* Recover by just ignoring the duplicate. */
+			pd->id->error(@1) << "nfa_post_pop code already defined" << endl;
+		}
+
+		pd->fsmCtx->nfaPostPopExpr = new InlineBlock( @1, $action_block->inlineList );
+	}
+
+	# def statement
+	# |	[`variable variable_name inline_expr_reparse] :Variable commit
+	# |	[`access inline_expr_reparse] :Access commit
+	ragel::statement :Variable
+	{
+		string data( $variable_name->data, $variable_name->length );
+		bool wasSet = pd->setVariable( data.c_str(),
+				$inline_expr_reparse->inlineList );
+		if ( !wasSet )
+			pd->id->error(@1) << "bad variable name: " << $variable_name->data << endl;
+	}
+
+	ragel::statement :Access
+	{
+		pd->fsmCtx->accessExpr = $inline_expr_reparse->inlineList;
+	}
+
+	# def statement
+	# |	[`write Cmd: word ArgList: write_arg* `;] :Write commit
+	ragel::statement :Write
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem = id->curItem->next;
+			InputItem *inputItem = id->curItem;
+
+			string cmd( $Cmd->data, $Cmd->length );
+			inputItem->writeArgs.push_back( cmd );
+			inputItem->writeArgs.insert( inputItem->writeArgs.end(), writeArgs.begin(), writeArgs.end() );
+
+			inputItem->pd = pd;
+		}
+
+		/* Clear the write args collector. */
+		writeArgs.clear();
+	}
+
+	# def alphtype_type
+	#	[W1: word] :One
+	# |	[W1: word W2: word] :Two
+	ragel::alphtype_type :One
+	{
+		string one( $W1->data, $W1->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			pd->id->error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	ragel::alphtype_type :Two
+	{
+		string one( $W1->data, $W1->length );
+		string two( $W2->data, $W2->length );
+		if ( ! pd->setAlphType( @W1, hostLang, one.c_str(), two.c_str() ) ) {
+			// Recover by ignoring the alphtype statement.
+			pd->id->error(@W1) << "\"" << one << 
+					"\" is not a valid alphabet type" << endl;
+		}
+	}
+
+	# def statement
+	# |	[`getkey inline_expr_reparse] :GetKey commit
+	# |	[`import string `;] :Import commit
+	ragel::statement :GetKey
+	{
+		pd->fsmCtx->getKeyExpr = $inline_expr_reparse->inlineList;
+	}
+
+	ragel::statement :Import
+	{
+		InputLoc loc = @string;
+		std::string fileName( $string->data, $string->length );
+
+		long length;
+		bool caseInsensitive;
+		char *unescaped = prepareLitString( pd->id, loc,
+					fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+
+		loadImport( unescaped );
+	}
+
+	# def statement
+	#   [`include include_spec `;] :Include commit
+	ragel::statement :Include
+	{
+		string fileName = id->inputFileName;
+		string machine = pd->sectionName;
+		bool fileSpecified = false;
+
+		if ( $include_spec->file.data != 0 ) {
+			fileName = string( $include_spec->file.data, $include_spec->file.length );
+
+			InputLoc loc = $include_spec->file.loc;
+			long length;
+			bool caseInsensitive;
+			char *unescaped = prepareLitString( pd->id, loc, fileName.c_str(), fileName.size(),
+					length, caseInsensitive );
+			fileName = unescaped;
+
+			fileSpecified = true;
+		}
+
+		if ( $include_spec->machine.data != 0 )
+			machine = string( $include_spec->machine.data, $include_spec->machine.length );
+
+		include( @1, fileSpecified, fileName, machine );
+	}
+
+	# def include_spec
+	#	[word] :Machine
+	# |	[string] :File
+	# |	[word string] :MachineFile
+
+	ragel::include_spec 
+	{
+		RedToken machine;
+		RedToken file;
+	}
+
+	ragel::include_spec :Machine
+	{
+		$$->machine.set( $word, @word );
+		$$->file.data = 0;
+	}
+
+	ragel::include_spec :File
+	{
+		$$->file.set( $string, @string );
+		$$->machine.data = 0;
+	}
+
+	ragel::include_spec :MachineFile
+	{
+		$$->machine.set( $word, @word );
+		$$->file.set( $string, @string );
+	}
+	
+
+	# def join
+	#	[join `, expression] :Rec
+	# |	[expression] :Base
+	ragel::join 
+	{
+		Join *join;
+	}
+
+	ragel::join :Rec
+	{
+		$$->join = $_join->join;
+		$$->join->exprList.append( $expression->expr );
+	}
+
+	ragel::join :Base
+	{
+		$$->join = new Join( $expression->expr );
+	}
+	
+	# def expression
+	#	[expr_left expression_op_list] :Expression
+	ragel::expression
+	{
+		Expression *expr;
+	}
+
+	ragel::expression :Expression
+	{
+		// 1. reverse the list
+		// 2. put the new term at the end.
+		Expression *prev = new Expression( $expr_left->term );
+		Expression *cur = $expression_op_list->expr;
+		while ( cur != 0 ) {
+			Expression *next = cur->expression;
+
+			/* Reverse. */
+			cur->expression = prev;
+
+			prev = cur;
+			cur = next;
+		}
+
+		$$->expr = prev;
+	}
+
+	ragel::expr_left
+	{
+		Term *term;
+	}
+
+	ragel::expr_left :Term
+	{
+		$$->term = $term->term;
+	}
+
+	# def expression_op_list
+	#	[expression_op expression_op_list] :Op
+	# |	[] :Empty
+	ragel::expression_op_list
+	{
+		Expression *expr;
+	}
+
+	ragel::expression_op_list :Op
+	{
+		$$->expr = new Expression( $_expression_op_list->expr,
+				$expression_op->term, $expression_op->type );
+	}
+
+	ragel::expression_op_list :Empty
+	{
+		$$->expr = 0;
+	}
+
+
+	# def expression_op
+	# 	[`| term] :Or
+	# |	[`& term] :And
+	# |	[`- term] :Sub
+	# |	[`-- term] :Ssub
+	ragel::expression_op
+	{
+		Expression::Type type;
+		Term *term;
+	}
+
+	ragel::expression_op :Or
+	{
+		$$->type = Expression::OrType;
+		$$->term = $term->term;
+	}
+
+	ragel::expression_op :And
+	{
+		$$->type = Expression::IntersectType;
+		$$->term = $term->term;
+	}
+
+	ragel::expression_op :Sub
+	{
+		$$->type = Expression::SubtractType;
+		$$->term = $term->term;
+	}
+
+	ragel::expression_op :Ssub
+	{
+		$$->type = Expression::StrongSubtractType;
+		$$->term = $term->term;
+	}
+
+
+	# def term
+	#	[term_left term_op_list_short] :Term
+	ragel::term
+	{
+		Term *term;
+	}
+
+	ragel::term :Term
+	{
+		// 1. reverse the list
+		// 2. put the new term at the end.
+		Term *prev = new Term( $term_left->fwa );
+		Term *cur = $term_op_list_short->term;
+		while ( cur != 0 ) {
+			Term *next = cur->term;
+
+			/* Reverse. */
+			cur->term = prev;
+
+			prev = cur;
+			cur = next;
+		}
+
+		$$->term = prev;
+	}
+
+	# def term_left
+	#	[factor_label] :FactorLabel
+	ragel::term_left
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::term_left :FactorLabel
+	{
+		$$->fwa = $factor_label->fwa;
+	}
+
+	# # This list is done manually to get shortest match.
+	# def term_op_list_short
+	# 	[] :Empty
+	# |	[term_op term_op_list_short] :Terms
+	ragel::term_op_list_short
+	{
+		Term *term;
+	}
+
+	ragel::term_op_list_short :Empty
+	{
+		$$->term = 0;
+	}
+
+	ragel::term_op_list_short :Terms
+	{
+		$$->term = new Term( $_term_op_list_short->term,
+				$term_op->fwa, $term_op->type );
+	}
+
+
+	# def term_op
+	#	[factor_label] :None
+	# |	[`. factor_label] :Dot
+	# |	[`:> factor_label] :ColonLt
+	# |	[`:>> factor_label] :ColonLtLt
+	# |	[`<: factor_label] :GtColon
+	ragel::term_op
+	{
+		Term::Type type;
+		FactorWithAug *fwa;
+	}
+
+	ragel::term_op :None
+	{
+		$$->type = Term::ConcatType;
+		$$->fwa = $factor_label->fwa;
+	}
+
+	ragel::term_op :Dot
+	{
+		$$->type = Term::ConcatType;
+		$$->fwa = $factor_label->fwa;
+	}
+
+	ragel::term_op :ColonLt
+	{
+		$$->type = Term::RightStartType;
+		$$->fwa = $factor_label->fwa;
+	}
+
+	ragel::term_op :ColonLtLt
+	{
+		$$->type = Term::RightFinishType;
+		$$->fwa = $factor_label->fwa;
+	}
+
+	ragel::term_op :GtColon
+	{
+		$$->type = Term::LeftType;
+		$$->fwa = $factor_label->fwa;
+	}
+
+	# def factor_label
+	#	[word `: factor_label] :Label
+	# |	[factor_ep] :Ep
+	ragel::factor_label
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::factor_label :Label
+	{
+		$$->fwa = $_factor_label->fwa;
+
+		InputLoc loc = @word;
+		string label( $word->data, $word->length );
+
+		$$->fwa->labels.insert( $$->fwa->labels.begin(), Label(loc, label) );
+
+		if ( pd->id->isBreadthLabel( label ) )
+			$$->fwa->labels[0].cut = true;
+	}
+
+	ragel::factor_label :Ep
+	{
+		$$->fwa = $factor_ep->fwa;
+	}
+
+	# def factor_ep
+	#	[factor_aug `-> epsilon_target] :Epsilon
+	# |	[factor_aug] :Base
+	ragel::factor_ep
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::factor_ep :Epsilon
+	{
+		$$->fwa = $factor_aug->fwa;
+		$1->fwa->epsilonLinks.append( EpsilonLink( @2, $epsilon_target->nameRef ) );
+	}
+
+	ragel::factor_ep :Base
+	{
+		$$->fwa = $factor_aug->fwa;
+	}
+
+	# def epsilon_target
+	# 	[epsilon_target `:: word] :Rec
+	# |	[word] :Base
+	ragel::epsilon_target
+	{
+		NameRef *nameRef;
+	}
+
+	ragel::epsilon_target :Rec
+	{
+		$$->nameRef = $_epsilon_target->nameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
+	ragel::epsilon_target :Base
+	{
+		$$->nameRef = new NameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
+	# def named_action_ref
+	#	[word] :Plain
+	# |	[word `( opt_action_arg_list `)] :Args
+	ragel::named_action_ref
+	{
+		Action *action;
+	}
+
+	ragel::named_action_ref :Plain
+	{
+		/* Set the name in the actionDict. */
+		string data( $word->data, $word->length );
+		Action *action = pd->actionDict.find( data );
+		if ( action != 0 ) {
+			if ( action->paramList != 0 )
+				pd->id->error(@word) << "expecting no action args for " << data << endp;
+
+			/* Pass up the action element */
+			$$->action = action;
+		}
+		else {
+			/* Will recover by returning null as the action. */
+			pd->id->error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			$$->action = 0;
+		}
+	}
+
+	ragel::named_action_ref :Args
+	{
+		/* Set the name in the actionDict. */
+		string data( $word->data, $word->length );
+		Action *action = pd->actionDict.find( data );
+		if ( action != 0 ) {
+			if ( action->paramList == 0 )
+				pd->id->error(@word) << "expecting action args" << endp;
+
+			/* Pass up the action element */
+			$$->action = action;
+		}
+		else {
+			/* Will recover by returning null as the action. */
+			pd->id->error(@word) << "action lookup of \"" << data << "\" failed" << endl;
+			$$->action = 0;
+		}
+
+		if ( $$->action != 0 ) {
+			ActionArgList *argList = $opt_action_arg_list->argList;
+			ActionParamList *paramList = action->paramList;
+
+			/* Make sure the number of actions line up. */
+			if ( argList->length() != paramList->length() ) {
+				pd->id->error(@1) << "wrong number of action "
+					"arguments for \"" << data << "\"" << endl;
+			}
+					
+			/* Now we need to specialize using the supplied args. We can only
+			 * present an Action* to fsmcodegen. */
+			ActionArgListMapEl *el = action->argListMap->find( argList );
+			if ( el == 0 ) {
+				/* Allocate an action representing this specialization. */
+				Action *specAction = Action::cons( @1, action,
+						argList, pd->fsmCtx->nextCondId++ );
+				pd->fsmCtx->actionList.append( specAction );
+
+				el = action->argListMap->insert( argList, specAction );
+			}
+			else {
+				/* Can delete $3->arg list. */
+				delete $opt_action_arg_list->argList;
+			}
+
+			$$->action = el->value;
+		}
+	}
+
+	# def action_arg_list
+	#	[action_arg_list `, action_ref] :Rec
+	# |	[action_ref] :Base
+	ragel::action_arg_list
+	{
+		ActionArgList *argList;
+	}
+
+	ragel::action_arg_list :Rec
+	{
+		$$->argList = $_action_arg_list->argList;
+		$$->argList->append( $action_ref->action );
+	}
+
+	ragel::action_arg_list :Base
+	{
+		$$->argList = new ActionArgList;
+		$$->argList->append( $action_ref->action );
+	}
+
+	# def opt_action_arg_list
+	#	[action_arg_list] :List
+	# |	[] :Empty
+	ragel::opt_action_arg_list
+	{
+		ActionArgList *argList;
+	}
+
+	ragel::opt_action_arg_list :List
+	{
+		$$->argList = $action_arg_list->argList;
+	}
+
+	ragel::opt_action_arg_list :Empty
+	{
+		$$->argList = new ActionArgList;
+	}
+
+	# def action_ref 
+	#	[named_action_ref] :NamedRef
+	# |	[`( named_action_ref `)] :ParenNamed
+	# |	[action_block] :Block
+	ragel::action_ref
+	{
+		Action *action;
+	}
+
+	ragel::action_ref :NamedRef
+	{
+		$$->action = $named_action_ref->action;
+	}
+
+	ragel::action_ref :ParenNamed
+	{
+		$$->action = $named_action_ref->action;
+	}
+
+	ragel::action_ref :Block
+	{
+		/* Create the action, add it to the list and pass up. */
+		Action *newAction = new Action( &$action_block->loc, std::string(),
+				$action_block->inlineList, pd->fsmCtx->nextCondId++ );
+		pd->fsmCtx->actionList.append( newAction );
+		$$->action = newAction;
+	}
+
+	# def action_params
+	#	[`( opt_action_param_list `)]
+	ragel::action_params
+	{
+		ActionParamList *paramList;
+	}
+
+	ragel::action_params :List
+	{
+		$$->paramList = $opt_action_param_list->paramList;
+		paramList = $2->paramList;
+	}
+
+	# def opt_action_param_list
+	# 	[action_param_list] :List
+	# |	[] :Empty
+	ragel::opt_action_param_list
+	{
+		ActionParamList *paramList;
+	}
+
+	ragel::opt_action_param_list :List
+	{
+		$$->paramList = $action_param_list->paramList;
+	}
+
+	ragel::opt_action_param_list :Empty
+	{
+		$$->paramList = new ActionParamList;
+	}
+
+	# def action_param
+	#	[word]
+	ragel::action_param
+	{
+		ActionParam *param;
+	}
+
+	ragel::action_param :Word
+	{
+		string param( $word->data, $word->length );
+		$$->param = new ActionParam( param );
+	}
+
+	# def action_param_list
+	# 	[action_param_list `, action_param]
+	# |	[action_param]
+	ragel::action_param_list
+	{
+		ActionParamList *paramList;
+	}
+
+	ragel::action_param_list :Rec
+	{
+		$$->paramList = $_action_param_list->paramList;
+		$$->paramList->append( $action_param->param );
+	}
+
+	ragel::action_param_list :Base
+	{
+		$$->paramList = new ActionParamList;
+		$$->paramList->append( $action_param->param );
+	}
+
+
+	# def action_block
+	#	[`{ c_select     CInlineBlock: c_inline::inline_block `}] :C
+	# |	[`{ ruby_select  RubyInlineBlock: ruby_inline::inline_block ruby_inline::`}]
+	# |	[`{ ocaml_select OCamlInlineBlock: ocaml_inline::inline_block ocaml_inline::`}]
+	# |	[`{ crack_select OCamlInlineBlock: crack_inline::inline_block crack_inline::`}]
+	ragel::action_block
+	{
+		colm_location loc;
+		InlineList *inlineList;
+	}
+
+	ragel::action_block :C
+	{
+		$$->loc = *@1;
+		$$->inlineList = $CInlineBlock->inlineList;
+	}
+
+	# def inline_expr_reparse
+	#	[_inline_expr_reparse] :Reparse
+	# |	[action_expr] :ActionExpr
+	ragel::inline_expr_reparse
+	{
+		InlineList *inlineList;
+	}
+	ragel::inline_expr_reparse :ActionExpr
+	{
+		$$->inlineList = $action_expr->inlineList;
+	}
+
+	# def action_expr
+	#	[`{ c_select     CInlineExpr: c_inline::inline_expr `}] :C
+	# |	[`{ ruby_select  RubyInlineExpr: ruby_inline::inline_expr ruby_inline::`}]
+	# |	[`{ ocaml_select OCamlInlineExpr: ocaml_inline::inline_expr ocaml_inline::`}]
+	# |	[`{ crack_select CrackInlineExpr: crack_inline::inline_expr crack_inline::`}]
+	ragel::action_expr
+	{
+		colm_location loc;
+		InlineList *inlineList;
+	}
+
+	ragel::action_expr :C
+	{
+		$$->loc = *@1;
+		$$->inlineList = $CInlineExpr->inlineList;
+	}
+
+	# def inline_block
+	#	[block_item_list] :List
+	c_inline::inline_block
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::inline_block :List
+	{
+		$$->inlineList = $block_item_list->inlineList;
+	}
+
+	# def block_item_list
+	# 	[block_item block_item_list] :Rec
+	# |	[] :Base
+	c_inline::block_item_list
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::block_item_list :Rec
+	{
+		$$->inlineList = $_block_item_list->inlineList;
+
+		if ( $block_item->inlineItem != 0 )
+			$$->inlineList->prepend( $block_item->inlineItem );
+		else if ( $block_item->inlineList != 0 ) {
+			$$->inlineList->prepend( *$block_item->inlineList );
+			delete $block_item->inlineList;
+		}
+	}
+
+	c_inline::block_item_list :Base
+	{
+		$$->inlineList = new InlineList;
+	}
+	
+	# def block_item
+	#	[expr_any] :ExprAny
+	# |	[block_symbol] :BlockSymbol
+	# |	[block_interpret] :BlockInterpret
+	# |	[`{ inline_block `}] :RecBlock
+	c_inline::block_item
+	{
+		InlineItem *inlineItem;
+		InlineList *inlineList;
+	}
+
+	c_inline::block_item :ExprAny
+	{
+		$$->inlineItem = $expr_any->inlineItem;
+	}
+
+	c_inline::block_item :BlockSymbol
+	{
+		$$->inlineItem = $block_symbol->inlineItem;
+	}
+
+	c_inline::block_item :BlockInterpret
+	{
+		$$->inlineItem = $block_interpret->inlineItem;
+	}
+
+	c_inline::block_item :RecBlock
+	{
+		$$->inlineList = $inline_block->inlineList;
+		$$->inlineList->prepend( new InlineItem( @1, "{", InlineItem::Text ) );
+		$$->inlineList->append( new InlineItem( @1, "}", InlineItem::Text ) );
+		$$->inlineItem = 0;
+	}
+
+	# def expr_any
+	#	[whitespace] :WS
+	#|	[comment] :Comment
+	#|	[string] :String
+	#|	[number] :Number
+	#|	[hex_number] :Hex
+	#|	[ident] :Ident
+	#|	[c_any] :Any
+	c_inline::expr_any
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::expr_any :WS
+	{
+		string data( $whitespace->data, $whitespace->length );
+		$$->inlineItem = new InlineItem( @whitespace, data, InlineItem::Text );
+	}
+		
+	c_inline::expr_any :Comment
+	{
+		string data( $comment->data, $comment->length );
+		$$->inlineItem = new InlineItem( @comment, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :String
+	{
+		string data( $string->data, $string->length );
+		$$->inlineItem = new InlineItem( @string, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Number
+	{
+		string data( $number->data, $number->length );
+		$$->inlineItem = new InlineItem( @number, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Hex
+	{
+		string data( $hex_number->data, $hex_number->length );
+		$$->inlineItem = new InlineItem( @hex_number, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Ident
+	{
+		string data( $ident->data, $ident->length );
+		$$->inlineItem = new InlineItem( @ident, data, InlineItem::Text );
+	}
+
+	c_inline::expr_any :Any
+	{
+		string data( $c_any->data, $c_any->length );
+		$$->inlineItem = new InlineItem( @c_any, data, InlineItem::Text );
+	}
+
+	# def block_symbol
+	#	[`,] :B1 | [`;] :B2 | [`(] :B3 | [`)] :B4 | [`*] :B5 | [`::] :B6
+	c_inline::block_symbol
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::block_symbol :B1
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B2
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B3
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B4
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B5
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	c_inline::block_symbol :B6
+	{
+		string data( $1->data, $1->length );
+		$$->inlineItem = new InlineItem( @1, data, InlineItem::Text );
+	}
+
+	# def state_ref
+	# 	[opt_name_sep state_ref_names] :Ref
+	c_inline::state_ref
+	{
+		NameRef *nameRef;
+	}
+
+	c_inline::state_ref :Ref
+	{
+		$$->nameRef = $state_ref_names->nameRef;
+		if ( $opt_name_sep->nameSep )
+			$$->nameRef->prepend( "" );
+	}
+
+	# def opt_name_sep
+	# 	[srlex::`::] :ColonColon
+	# |	[] :Empty
+	c_inline::opt_name_sep
+	{
+		bool nameSep;
+	}
+
+	c_inline::opt_name_sep :ColonColon
+	{
+		$$->nameSep = true;
+	}
+
+	c_inline::opt_name_sep :Empty
+	{
+		$$->nameSep = false;
+	}
+
+	# def state_ref_names
+	# 	[state_ref_names srlex::`:: srlex::word] :Rec
+	# |	[srlex::word] :Base
+	c_inline::state_ref_names
+	{
+		NameRef *nameRef;
+	}
+
+	c_inline::state_ref_names :Rec
+	{
+		$$->nameRef = $_state_ref_names->nameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
+	c_inline::state_ref_names :Base
+	{
+		$$->nameRef = new NameRef;
+		$$->nameRef->append( string( $word->data, $word->length ) );
+	}
+
+	# def block_interpret
+	#	[expr_interpret] :ExprInterpret
+	# |	[`fhold whitespace? `;] :Fhold
+	# |	[`fgoto whitespace? `* inline_expr `;] :FgotoExpr
+	# |	[`fnext whitespace? `* inline_expr `;] :FnextExpr
+	# |	[`fcall whitespace? `* inline_expr `;] :FcallExpr
+	# |	[`fncall whitespace? `* inline_expr `;] :FncallExpr
+	# |	[`fexec inline_expr `;] :Fexec
+	# |	[`fgoto state_ref srlex::`;] :FgotoSr
+	# |	[`fnext state_ref srlex::`;] :FnextSr
+	# |	[`fcall state_ref srlex::`;] :FcallSr
+	# |	[`fncall state_ref srlex::`;] :FncallSr
+	# |	[`fret `;] :Fret
+	# |	[`fnret `;] :Fnret
+	# |	[`fbreak `;] :Fbreak
+	# |	[`fnbreak `;] :Fnbreak
+	c_inline::block_interpret
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::block_interpret :Fhold
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Hold );
+	}
+	c_inline::block_interpret :FgotoExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::GotoExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FnextExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::NextExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FcallExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::CallExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FncallExpr
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::NcallExpr );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :Fexec
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Exec );
+		$$->inlineItem->children = $inline_expr->inlineList;
+	}
+	c_inline::block_interpret :FgotoSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Goto );
+	}
+	c_inline::block_interpret :FnextSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Next );
+	}
+	c_inline::block_interpret :FcallSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Call );
+	}
+	c_inline::block_interpret :FncallSr
+	{
+		$$->inlineItem = new InlineItem( @1,
+				$state_ref->nameRef, InlineItem::Ncall );
+	}
+	c_inline::block_interpret :Fret
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Ret );
+	}
+	c_inline::block_interpret :Fnret
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Nret );
+	}
+	c_inline::block_interpret :Fbreak
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Break );
+	}
+	c_inline::block_interpret :Fnbreak
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Nbreak );
+	}
+
+	c_inline::block_interpret :ExprInterpret
+	{
+		$$->inlineItem = $expr_interpret->inlineItem;
+	}
+
+	# def inline_expr
+	# 	[expr_item_list] :List
+	c_inline::inline_expr
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::inline_expr :List
+	{
+		$$->inlineList = $expr_item_list->inlineList;
+	}
+
+	# def expr_item_list
+	#	[expr_item_list expr_item] :Rec
+	# |	[] :Empty
+	c_inline::expr_item_list
+	{
+		InlineList *inlineList;
+	}
+
+	c_inline::expr_item_list :Rec
+	{
+		$$->inlineList = $_expr_item_list->inlineList;
+		$$->inlineList->append( $expr_item->inlineItem );
+	}
+
+	c_inline::expr_item_list :Empty
+	{
+		$$->inlineList = new InlineList;
+	}
+
+	# def expr_item
+	# 	[expr_any] :ExprAny
+	# |	[expr_symbol] :ExprSymbol
+	# |	[expr_interpret] :ExprInterpret
+	c_inline::expr_item
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::expr_item :ExprAny
+	{
+		$$->inlineItem = $expr_any->inlineItem;
+	}
+	c_inline::expr_item :ExprSymbol
+	{
+		string sym( $expr_symbol->sym );
+		$$->inlineItem = new InlineItem( &$expr_symbol->loc, sym, InlineItem::Text );
+	}
+	c_inline::expr_item :ExprInterpret
+	{
+		$$->inlineItem = $expr_interpret->inlineItem;
+	}
+
+	# def expr_symbol
+	#	[`,] | [`(] | [`)] | [`*] | [`::]
+	c_inline::expr_symbol
+	{
+		const char *sym;
+		colm_location loc;
+	}
+
+	c_inline::expr_symbol :Comma 
+		{ $$->loc = *@1; $$->sym = ","; }
+	c_inline::expr_symbol :Open 
+		{ $$->loc = *@1; $$->sym = "("; }
+	c_inline::expr_symbol :Close 
+		{ $$->loc = *@1; $$->sym = ")"; }
+	c_inline::expr_symbol :Star 
+		{ $$->loc = *@1; $$->sym = "*"; }
+	c_inline::expr_symbol :DoubleColon
+		{ $$->loc = *@1; $$->sym = "::"; }
+
+
+	# def expr_interpret
+	#	[`fpc] :Fpc
+	# |	[`fc] :Fc
+	# |	[`fcurs] :Fcurs
+	# |	[`ftargs]  :Ftargs
+	# |	[`fentry `( state_ref srlex::`)] :Fentry
+	# |	[var_ref] :VarRef
+	c_inline::expr_interpret
+	{
+		InlineItem *inlineItem;
+	}
+
+	c_inline::expr_interpret :Fpc
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::PChar );
+	}
+
+	c_inline::expr_interpret :Fc
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Char );
+	}
+
+	c_inline::expr_interpret :Fcurs
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Curs );
+	}
+
+	c_inline::expr_interpret :Ftargs
+	{
+		$$->inlineItem = new InlineItem( @1, InlineItem::Targs );
+	}
+
+	c_inline::expr_interpret :Fentry
+	{
+		$$->inlineItem = new InlineItem( @1, $state_ref->nameRef, InlineItem::Entry );
+	}
+
+	c_inline::expr_interpret :VarRef
+	{
+		string data( $1->data + 1, $1->length - 1 );
+		$$->inlineItem = new InlineItem( @1, InlineItem::Subst );
+
+		ActionParamList::Iter api = *paramList;
+		for ( ; api.lte(); api++ ) {
+			if ( (*api)->name == data )
+				break;
+		}
+
+		if ( api.end() )
+			pd->id->error( @1 ) << "invalid parameter reference \"$" << $1->data << "\"" << endl;
+		else {
+			$$->inlineItem->substPos = api.pos();
+		}
+	}
+
+	# def priority_aug
+	#	[uint] :NoSign
+	# |	[`+ uint] :Plus
+	# |	[`- uint] :Minus
+	ragel::priority_aug
+	{
+		int priorityNum;
+	}
+	ragel::priority_aug :NoSign
+	{
+		string data( $uint->data, $uint->length );
+		$$->priorityNum = tryLongScan( @1, data.c_str() );
+	}
+	ragel::priority_aug :Plus
+	{
+		string data( $uint->data, $uint->length );
+		$$->priorityNum = tryLongScan( @1, data.c_str() );
+	}
+	ragel::priority_aug :Minus
+	{
+		string data( $uint->data, $uint->length );
+		$$->priorityNum = -1 * tryLongScan( @1, data.c_str() );
+	}
+	
+	#def priority_name
+	#	[word] :Word
+
+	ragel::priority_name
+	{
+		int priorityName;
+	}
+
+	ragel::priority_name :Word
+	{
+		string data( $word->data, $word->length );
+
+		// Lookup/create the priority key.
+		PriorDictEl *priorDictEl;
+		if ( pd->priorDict.insert( data, pd->fsmCtx->nextPriorKey, &priorDictEl ) )
+			pd->fsmCtx->nextPriorKey += 1;
+
+		// Use the inserted/found priority key.
+		$$->priorityName = priorDictEl->value;
+	}
+
+	# def error_name
+	# 	[word] :Word
+	ragel::error_name
+	{
+		int errName;
+	}
+
+	ragel::error_name :Word
+	{
+		string data( $word->data, $word->length );
+		/* Lookup/create the priority key. */
+		LocalErrDictEl *localErrDictEl;
+		if ( pd->localErrDict.insert( data, pd->nextLocalErrKey, &localErrDictEl ) )
+			pd->nextLocalErrKey += 1;
+
+		/* Use the inserted/found priority key. */
+		$$->errName = localErrDictEl->value;
+	}
+
+	# def aug_base
+	# 	[`@] :Finish | [`>] :Enter | [`%] :Leave | [`$] :All
+
+	ragel::aug_base
+	{
+		colm_location loc;
+		AugType augType;
+	}
+
+	ragel::aug_base :Enter
+		{ $$->loc = *@1; $$->augType = at_start; }
+	ragel::aug_base :All
+		{ $$->loc = *@1; $$->augType = at_all; }
+	ragel::aug_base :Finish
+		{ $$->loc = *@1; $$->augType = at_finish; }
+	ragel::aug_base :Leave
+		{ $$->loc = *@1; $$->augType = at_leave; }
+
+	# def aug_cond
+	# 	[`>?] :Start1 | [`$?] :All1 | [`%?] :Leave1
+	# |	[`> `when] :Start2 | [`$ `when] :All2 | [`% `when] :Leave2
+	# |	[`inwhen] :Start3 | [`when] :All3 | [`outwhen] :Leave3
+
+	ragel::aug_cond
+	{
+		colm_location loc;
+		AugType augType;
+	}
+
+	ragel::aug_cond :Start1
+		{ $$->loc = *@1; $$->augType = at_start; }
+	ragel::aug_cond :Start2
+		{ $$->loc = *@1; $$->augType = at_start; }
+	ragel::aug_cond :Start3
+		{ $$->loc = *@1; $$->augType = at_start; }
+	ragel::aug_cond :All1
+		{ $$->loc = *@1; $$->augType = at_all; }
+	ragel::aug_cond :All2
+		{ $$->loc = *@1; $$->augType = at_all; }
+	ragel::aug_cond :All3
+		{ $$->loc = *@1; $$->augType = at_all; }
+	ragel::aug_cond :Leave1
+		{ $$->loc = *@1; $$->augType = at_leave; }
+	ragel::aug_cond :Leave2
+		{ $$->loc = *@1; $$->augType = at_leave; }
+	ragel::aug_cond :Leave3
+		{ $$->loc = *@1; $$->augType = at_leave; }
+
+	# def aug_to_state
+	# 	[`>~] :Start1 | [`<~] :NotStart1 | [`$~] :All1
+	# |	[`%~] :Final1 | [`@~] :NotFinal1 | [`<>~] :Middle1
+	# |	[`> `to] :Start2 | [`< `to] :NotStart2 | [`$ `to] :All2
+	# |	[`% `to] :Final2 | [`@ `to] :NotFinal2 | [`<> `to] :Middle2
+
+	ragel::aug_to_state
+	{
+		colm_location loc;
+		AugType augType;	
+	}
+
+	ragel::aug_to_state :Start1
+		{ $$->loc = *@1; $$->augType = at_start_to_state; }
+	ragel::aug_to_state :Start2
+		{ $$->loc = *@1; $$->augType = at_start_to_state; }
+	ragel::aug_to_state :NotStart1
+		{ $$->loc = *@1; $$->augType = at_not_start_to_state; }
+	ragel::aug_to_state :NotStart2
+		{ $$->loc = *@1; $$->augType = at_not_start_to_state; }
+	ragel::aug_to_state :All1
+		{ $$->loc = *@1; $$->augType = at_all_to_state; }
+	ragel::aug_to_state :All2
+		{ $$->loc = *@1; $$->augType = at_all_to_state; }
+	ragel::aug_to_state :Final1
+		{ $$->loc = *@1; $$->augType = at_final_to_state; }
+	ragel::aug_to_state :Final2
+		{ $$->loc = *@1; $$->augType = at_final_to_state; }
+	ragel::aug_to_state :NotFinal1
+		{ $$->loc = *@1; $$->augType = at_not_final_to_state; }
+	ragel::aug_to_state :NotFinal2
+		{ $$->loc = *@1; $$->augType = at_not_final_to_state; }
+	ragel::aug_to_state :Middle1
+		{ $$->loc = *@1; $$->augType = at_middle_to_state; }
+	ragel::aug_to_state :Middle2
+		{ $$->loc = *@1; $$->augType = at_middle_to_state; }
+
+	# def aug_from_state
+	# 	[`>*] :Start1 | [`<*] :NotStart1 | [`$*] :All1
+	# |	[`%*] :Final1 | [`@*] :NotFinal1 | [`<>*] :Middle1
+	# |	[`> `from] :Start2 | [`< `from] :NotStart2 | [`$ `from] :All2
+	# |	[`% `from] :Final2 | [`@ `from] :NotFinal2 | [`<> `from] :Middle2
+
+	ragel::aug_from_state
+	{
+		colm_location loc;
+		AugType augType;	
+	}
+
+	ragel::aug_from_state :Start1
+		{ $$->loc = *@1; $$->augType = at_start_from_state; }
+	ragel::aug_from_state :Start2
+		{ $$->loc = *@1; $$->augType = at_start_from_state; }
+	ragel::aug_from_state :NotStart1
+		{ $$->loc = *@1; $$->augType = at_not_start_from_state; }
+	ragel::aug_from_state :NotStart2
+		{ $$->loc = *@1; $$->augType = at_not_start_from_state; }
+	ragel::aug_from_state :All1
+		{ $$->loc = *@1; $$->augType = at_all_from_state; }
+	ragel::aug_from_state :All2
+		{ $$->loc = *@1; $$->augType = at_all_from_state; }
+	ragel::aug_from_state :Final1
+		{ $$->loc = *@1; $$->augType = at_final_from_state; }
+	ragel::aug_from_state :Final2
+		{ $$->loc = *@1; $$->augType = at_final_from_state; }
+	ragel::aug_from_state :NotFinal1
+		{ $$->loc = *@1; $$->augType = at_not_final_from_state; }
+	ragel::aug_from_state :NotFinal2
+		{ $$->loc = *@1; $$->augType = at_not_final_from_state; }
+	ragel::aug_from_state :Middle1
+		{ $$->loc = *@1; $$->augType = at_middle_from_state; }
+	ragel::aug_from_state :Middle2
+		{ $$->loc = *@1; $$->augType = at_middle_from_state; }
+
+	# def aug_eof
+	# 	[`>/] :Start1 | [`</] :NotStart1 | [`$/] :All1
+	# |	[`%/] :Final1 | [`@/] :NotFinal1 | [`<>/] :Middle1
+	# |	[`> `eof] :Start2 | [`< `eof] :NotStart2 | [`$ `eof] :All2
+	# |	[`% `eof] :Final2 | [`@ `eof] :NotFinal2 | [`<> `eof] :Middle2
+
+	ragel::aug_eof
+	{
+		colm_location loc;
+		AugType augType;	
+	}
+
+	ragel::aug_eof :Start1
+		{ $$->loc = *@1; $$->augType = at_start_eof; }
+	ragel::aug_eof :Start2
+		{ $$->loc = *@1; $$->augType = at_start_eof; }
+	ragel::aug_eof :NotStart1
+		{ $$->loc = *@1; $$->augType = at_not_start_eof; }
+	ragel::aug_eof :NotStart2
+		{ $$->loc = *@1; $$->augType = at_not_start_eof; }
+	ragel::aug_eof :All1
+		{ $$->loc = *@1; $$->augType = at_all_eof; }
+	ragel::aug_eof :All2
+		{ $$->loc = *@1; $$->augType = at_all_eof; }
+	ragel::aug_eof :Final1
+		{ $$->loc = *@1; $$->augType = at_final_eof; }
+	ragel::aug_eof :Final2
+		{ $$->loc = *@1; $$->augType = at_final_eof; }
+	ragel::aug_eof :NotFinal1
+		{ $$->loc = *@1; $$->augType = at_not_final_eof; }
+	ragel::aug_eof :NotFinal2
+		{ $$->loc = *@1; $$->augType = at_not_final_eof; }
+	ragel::aug_eof :Middle1
+		{ $$->loc = *@1; $$->augType = at_middle_eof; }
+	ragel::aug_eof :Middle2
+		{ $$->loc = *@1; $$->augType = at_middle_eof; }
+
+	# def aug_gbl_error
+	# 	[`>!] :Start1 | [`<!] :NotStart1 | [`$!] :All1
+	# |	[`%!] :Final1 | [`@!] :NotFinal1 | [`<>!] :Middle1
+	# |	[`> `err] :Start2 | [`< `err] :NotStart2 | [`$ `err] :All2
+	# |	[`% `err] :Final2 | [`@ `err] :NotFinal2 | [`<> `err] :Middle2
+
+	ragel::aug_gbl_error
+	{
+		colm_location loc;
+		AugType augType;	
+	}
+
+	ragel::aug_gbl_error :Start1
+		{ $$->loc = *@1; $$->augType = at_start_gbl_error; }
+	ragel::aug_gbl_error :Start2
+		{ $$->loc = *@1; $$->augType = at_start_gbl_error; }
+	ragel::aug_gbl_error :NotStart1
+		{ $$->loc = *@1; $$->augType = at_not_start_gbl_error; }
+	ragel::aug_gbl_error :NotStart2
+		{ $$->loc = *@1; $$->augType = at_not_start_gbl_error; }
+	ragel::aug_gbl_error :NotStart2
+		{ $$->loc = *@1; $$->augType = at_not_start_gbl_error; }
+	ragel::aug_gbl_error :All1
+		{ $$->loc = *@1; $$->augType = at_all_gbl_error; }
+	ragel::aug_gbl_error :All2
+		{ $$->loc = *@1; $$->augType = at_all_gbl_error; }
+	ragel::aug_gbl_error :Final1
+		{ $$->loc = *@1; $$->augType = at_final_gbl_error; }
+	ragel::aug_gbl_error :Final2
+		{ $$->loc = *@1; $$->augType = at_final_gbl_error; }
+	ragel::aug_gbl_error :NotFinal1
+		{ $$->loc = *@1; $$->augType = at_not_final_gbl_error; }
+	ragel::aug_gbl_error :NotFinal2
+		{ $$->loc = *@1; $$->augType = at_not_final_gbl_error; }
+	ragel::aug_gbl_error :Middle1
+		{ $$->loc = *@1; $$->augType = at_middle_gbl_error; }
+	ragel::aug_gbl_error :Middle2
+		{ $$->loc = *@1; $$->augType = at_middle_gbl_error; }
+
+	# def aug_local_error
+	# 	[`>^] :Start1 | [`<^] :NotStart1 | [`$^] :All1
+	# |	[`%^] :Final1 | [`@^] :NotFinal1 | [`<>^] :Middle1
+	# |	[`> `lerr] :Start2 | [`< `lerr] :NotStart2 | [`$ `lerr] :All2
+	# |	[`% `lerr] :Final2 | [`@ `lerr] :NotFinal2 | [`<> `lerr] :Middle2
+
+	ragel::aug_local_error
+	{
+		colm_location loc;
+		AugType augType;
+	}
+
+	ragel::aug_local_error :Start1
+		{ $$->loc = *@1; $$->augType = at_start_local_error; }
+
+	ragel::aug_local_error :Start2
+		{ $$->loc = *@1; $$->augType = at_start_local_error; }
+
+	ragel::aug_local_error :NotStart1
+		{ $$->loc = *@1; $$->augType = at_not_start_local_error; }
+
+	ragel::aug_local_error :NotStart2
+		{ $$->loc = *@1; $$->augType = at_not_start_local_error; }
+
+	ragel::aug_local_error :All1
+		{ $$->loc = *@1; $$->augType = at_all_local_error; }
+
+	ragel::aug_local_error :All2
+		{ $$->loc = *@1; $$->augType = at_all_local_error; }
+
+	ragel::aug_local_error :Final1
+		{ $$->loc = *@1; $$->augType = at_final_local_error; }
+
+	ragel::aug_local_error :Final2
+		{ $$->loc = *@1; $$->augType = at_final_local_error; }
+
+	ragel::aug_local_error :NotFinal1
+		{ $$->loc = *@1; $$->augType = at_not_final_local_error; }
+
+	ragel::aug_local_error :NotFinal2
+		{ $$->loc = *@1; $$->augType = at_not_final_local_error; }
+
+	ragel::aug_local_error :Middle1
+		{ $$->loc = *@1; $$->augType = at_middle_local_error; }
+
+	ragel::aug_local_error :Middle2
+		{ $$->loc = *@1; $$->augType = at_middle_local_error; }
+
+	# def factor_aug
+	#	[factor_aug aug_base action_ref] :ActionRef
+	# |	[factor_aug aug_base priority_aug] :PriorEmbed
+	# |	[factor_aug aug_base `( priority_name `, priority_aug `)] :NamedPriorEmbed
+	# |	[factor_aug aug_cond action_ref] :CondEmbed
+	# |	[factor_aug aug_cond `! action_ref] :NegCondEmbed
+	# |	[factor_aug aug_to_state action_ref] :ToStateAction
+	# |	[factor_aug aug_from_state action_ref] :FromStateAction
+	# |	[factor_aug aug_eof action_ref] :EofAction
+	# |	[factor_aug aug_gbl_error action_ref] :GblErrorAction
+	# |	[factor_aug aug_local_error action_ref] :LocalErrorDef
+	# |	[factor_aug aug_local_error `( word `, action_ref `)] :LocalErrorName
+	# |	[factor_rep] :Base
+	ragel::factor_aug
+	{
+		FactorWithAug *fwa;
+	}
+
+	ragel::factor_aug :ActionRef
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		/* Append the action to the factorWithAug, record the refernce from 
+		 * factorWithAug to the action and pass up the factorWithAug. */
+		$$->fwa->actions.append( ParserAction(
+				&$aug_base->loc, $aug_base->augType, 0, $action_ref->action ) );
+	}
+
+	ragel::factor_aug :PriorEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$1->fwa->priorityAugs.append( PriorityAug( $aug_base->augType,
+				pd->curDefPriorKey, $priority_aug->priorityNum ) );
+	}
+
+	ragel::factor_aug :NamedPriorEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$1->fwa->priorityAugs.append( PriorityAug( $aug_base->augType,
+				$priority_name->priorityName, $priority_aug->priorityNum ) );
+	}
+
+	ragel::factor_aug :CondEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
+				$aug_cond->augType, $action_ref->action, true ) );
+	}
+
+	ragel::factor_aug :NegCondEmbed
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->conditions.append( ConditionTest( &$aug_cond->loc, 
+				$aug_cond->augType, $action_ref->action, false ) );
+	}
+
+	ragel::factor_aug :ToStateAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_to_state->loc,
+				$aug_to_state->augType, 0, $action_ref->action ) );
+	}
+	
+	ragel::factor_aug :FromStateAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_from_state->loc,
+				$aug_from_state->augType, 0, $action_ref->action ) );
+	}
+
+	ragel::factor_aug :EofAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+		$1->fwa->actions.append( ParserAction( &$aug_eof->loc,
+				$aug_eof->augType, 0, $action_ref->action ) );
+	}
+
+	ragel::factor_aug :GblErrorAction
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$1->fwa->actions.append( ParserAction( &$aug_gbl_error->loc,
+				$aug_gbl_error->augType, pd->curDefLocalErrKey, $action_ref->action ) );
+	}
+
+	ragel::factor_aug :LocalErrorDef
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_local_error->loc, 
+				$aug_local_error->augType, pd->curDefLocalErrKey, $action_ref->action ) );
+	}
+
+	ragel::factor_aug :LocalErrorName
+	{
+		$$->fwa = $_factor_aug->fwa;
+
+		$$->fwa->actions.append( ParserAction( &$aug_local_error->loc, 
+				$aug_local_error->augType, $error_name->errName, $action_ref->action ) );
+	}
+
+	ragel::factor_aug :Base
+	{
+		$$->fwa = new FactorWithAug( $factor_rep->rep );
+	}
+
+	#def factor_rep 
+	#	[factor_neg factor_rep_op_list] :Op
+
+	ragel::factor_rep
+	{
+		FactorWithRep *rep;
+	}
+
+	ragel::factor_rep :Op
+	{
+		FactorWithRep *prev = new FactorWithRep( $factor_neg->neg );
+		FactorWithRep *cur = $factor_rep_op_list->rep;
+		while ( cur != 0 ) {
+			FactorWithRep *next = cur->factorWithRep;
+
+			/* Reverse. */
+			cur->factorWithRep = prev;
+
+			prev = cur;
+			cur = next;
+		}
+
+		$$->rep = prev;
+	}
+
+
+	# def factor_rep_op_list
+	#	[factor_rep_op factor_rep_op_list]
+	# |	[]
+	ragel::factor_rep_op_list
+	{
+		FactorWithRep *rep;
+	}
+	ragel::factor_rep_op_list :Rec
+	{
+		$$->rep = $factor_rep_op->rep;
+		$$->rep->factorWithRep = $_factor_rep_op_list->rep;
+	}
+	ragel::factor_rep_op_list :Base
+	{
+		$$->rep = 0;
+	}
+
+	# def factor_rep_op
+	#	[`*] :Star
+	# |	[`**] :StarStar
+	# |	[`?] :Optional
+	# |	[`+] :Plus
+	# |	[`{ factor_rep_num `}] :ExactRep
+	# |	[`{ `, factor_rep_num `}] :MaxRep
+	# |	[`{ factor_rep_num `, `}] :MinRep
+	# |	[`{ LowRep: factor_rep_num `, HighRep: factor_rep_num `}] :RangeRep
+	ragel::factor_rep_op
+	{
+		FactorWithRep *rep;
+	}
+	ragel::factor_rep_op :Star
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::StarType );
+	}
+	ragel::factor_rep_op :StarStar
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::StarStarType );
+	}
+	ragel::factor_rep_op :Optional
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::OptionalType );
+	}
+	ragel::factor_rep_op :Plus
+	{
+		$$->rep = new FactorWithRep( @1, 0, 0, 0, FactorWithRep::PlusType );
+	}
+	ragel::factor_rep_op :ExactRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				$factor_rep_num->rep, 0,
+				FactorWithRep::ExactType );
+	}
+	ragel::factor_rep_op :MaxRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				0, $factor_rep_num->rep,
+				FactorWithRep::MaxType );
+	}
+	ragel::factor_rep_op :MinRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				$factor_rep_num->rep, 0,
+				FactorWithRep::MinType );
+	}
+	ragel::factor_rep_op :RangeRep
+	{
+		$$->rep = new FactorWithRep( @1, 0,
+				$LowRep->rep, $HighRep->rep,
+				FactorWithRep::RangeType );
+	}
+
+	# def factor_rep_num
+	#	[uint]
+	ragel::factor_rep_num
+	{
+		int rep;
+	}
+
+	ragel::factor_rep_num :RepNum
+	{
+		// Convert the priority number to a long. Check for overflow.
+		string data( $uint->data, $uint->length );
+		errno = 0;
+		long rep = strtol( data.c_str(), 0, 10 );
+		if ( errno == ERANGE && rep == LONG_MAX ) {
+			// Repetition too large. Recover by returing repetition 1. */
+			pd->id->error(@uint) << "repetition number " << data << " overflows" << endl;
+			$$->rep = 1;
+		}
+		else {
+			// Cannot be negative, so no overflow.
+			$$->rep = rep;
+		}
+	}
+
+
+	# def factor_neg 
+	#	[`! factor_neg] :Bang
+	# |	[`^ factor_neg] :Caret
+	# |	[factor] :Base
+	ragel::factor_neg
+	{
+		FactorWithNeg *neg;
+	}
+
+	ragel::factor_neg :Bang
+	{
+		$$->neg = new FactorWithNeg( @1,
+				$_factor_neg->neg, FactorWithNeg::NegateType );
+	}
+
+	ragel::factor_neg :Caret
+	{
+		$$->neg = new FactorWithNeg( @1,
+				$_factor_neg->neg, FactorWithNeg::CharNegateType );
+	}
+
+	ragel::factor_neg :Base
+	{
+		$$->neg = new FactorWithNeg( $factor->factor );
+	}
+
+	# def opt_max_arg
+	#	[`, action_ref]
+	ragel::opt_max_arg
+	{
+		Action *action;
+	}
+
+	ragel::opt_max_arg :Action
+	{
+		$$->action = $action_ref->action;
+	}
+
+	ragel::opt_max_arg :Empty
+	{
+		$$->action = 0;
+	}
+
+	ragel::colon_cond
+	{
+		Factor::Type type;
+	}
+
+	ragel::colon_cond :Cond
+	{
+		$$->type = Factor::CondStar;
+	}
+
+	ragel::colon_cond :CondStar
+	{
+		$$->type = Factor::CondStar;
+	}
+
+	ragel::colon_cond :CondPlus
+	{
+		$$->type = Factor::CondPlus;
+	}
+
+
+	# def factor 
+	#	[alphabet_num] :AlphabetNum
+	# |	[word] :Word
+	# |	[string] :String
+	# |	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	# |	[lex_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	# |	[lex_regex_open regex re_close] :Regex
+	# |	[RL1: range_lit `.. RL2: range_lit]   :Range
+	# |	[RL1: range_lit `../i RL2: range_lit] :RangeIndep
+	# |	[`:nfa  `( uint `, expression `,
+	# 		Push: action_ref `, Pop: action_ref `, Init: action_ref `, Stay: action_ref `,
+	# 		Repeat: action_ref `, Exit: action_ref `):] :Nfa
+	# |	[`:cond  `( uint `, expression `, 
+	# 		Init: action_ref `, Inc: action_ref `, Min: action_ref OptMax: opt_max_arg `):] :Cond
+	# |	[`( join `)] :Join
+	ragel::factor
+	{
+		Factor *factor;
+	}
+
+	ragel::factor :Join
+	{
+		/* Create a new factor going to a parenthesized join. */
+		$$->factor = new Factor( $join->join );
+		$$->factor->join->loc = @1;
+	}
+
+	ragel::factor :AlphabetNum
+	{
+		$$->factor = new Factor( new Literal( $alphabet_num->tok.loc,
+				$alphabet_num->neg, $alphabet_num->tok.data,
+				$alphabet_num->tok.length, Literal::Number ) );
+	}
+
+	ragel::factor :Word
+	{
+		InputLoc loc = @word;
+		string s( $word->data, $word->length );
+		
+		/* Find the named graph. */
+		GraphDictEl *gdNode = pd->graphDict.find( s );
+		if ( gdNode == 0 ) {
+			/* Recover by returning null as the factor node. */
+			pd->id->error(loc) << "graph lookup of \"" << s << "\" failed" << endl;
+			$$->factor = 0;
+		}
+		else if ( gdNode->isInstance ) {
+			/* Recover by retuning null as the factor node. */
+			pd->id->error(loc) << "references to graph instantiations not allowed "
+					"in expressions" << endl;
+			$$->factor = 0;
+		}
+		else {
+			/* Create a factor node that is a lookup of an expression. */
+			$$->factor = new Factor( loc, gdNode->value );
+		}
+	}
+
+	ragel::factor :String
+	{
+		$$->factor = new Factor( new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString ) );
+	}
+
+	#ragel::factor :HexString
+	#{
+	#	$$->factor = new Factor( new Literal( @hex_string, false,
+	#	$hex_string->data, $hex_string->length, Literal::HexString ) );
+	#}
+
+	ragel::factor :Range
+	{
+		$$->factor = new Factor( new Range( $RL1->literal, $RL2->literal, false ) );
+	}
+
+	ragel::factor :RangeIndep
+	{
+		$$->factor = new Factor( new Range( $RL1->literal, $RL2->literal, true ) );
+	}
+
+	# |	[lex_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	ragel::factor :PosOrBlock
+	{
+		$$->factor = new Factor( new ReItem( @lex_sqopen_pos,
+				$reg_or_data->reOrBlock, ReItem::OrBlock ) );
+	}
+
+	ragel::factor :NegOrBlock
+	{
+		$$->factor = new Factor( new ReItem( @lex_sqopen_neg,
+				$reg_or_data->reOrBlock, ReItem::NegOrBlock ) );
+	}
+
+	ragel::factor :Nfa
+	{
+		/* push, pop, init, stay, repeat, exit */
+		$$->factor = new Factor( @1, pd->nextRepId++, $expression->expr,
+				$Push->action, $Pop->action, $Init->action, $Stay->action,
+				$Repeat->action, $Exit->action, Factor::NfaRep );
+	}
+
+	ragel::factor :Cond
+	{
+		/* init, inc, min, opt-max. */
+		$$->factor = new Factor( @2, pd->nextRepId++, $expression->expr,
+				$Init->action, $Inc->action, $Min->action, $OptMax->action, 0, 0, $1->type );
+	}
+
+	ragel::factor :Regex
+	{
+		bool caseInsensitive = false;
+		checkLitOptions( pd->id, @re_close, $re_close->data, $re_close->length, caseInsensitive );
+		if ( caseInsensitive )
+			$2->regExpr->caseInsensitive = true;
+		$$->factor = new Factor( $regex->regExpr );
+	}
+
+	# def regex
+	#	[reg_item_rep_list] :List
+	ragel::regex
+	{
+		RegExpr *regExpr;
+	}
+
+	ragel::regex :List
+	{
+		$$->regExpr = $reg_item_rep_list->regExpr;
+	}
+
+	# def reg_item_rep_list
+	# 	[reg_item_rep_list reg_item_rep] :Rec
+	# |	[] :Base
+	ragel::reg_item_rep_list
+	{
+		RegExpr *regExpr;
+	}
+	ragel::reg_item_rep_list :Rec
+	{
+		$$->regExpr = new RegExpr( $_reg_item_rep_list->regExpr,
+				$reg_item_rep->reItem );
+	}
+	ragel::reg_item_rep_list :Base
+	{
+		$$->regExpr = new RegExpr();
+	}
+
+	# def reg_item_rep
+	# 	[reg_item re_star] :Star
+	# |	[reg_item] :Base
+	ragel::reg_item_rep
+	{
+		ReItem *reItem;
+	}
+
+	ragel::reg_item_rep :Star
+	{
+		$$->reItem = $reg_item->reItem;
+		$$->reItem->star = true;
+	}
+
+	ragel::reg_item_rep :Base
+	{
+		$$->reItem = $reg_item->reItem;
+	}
+
+	# def reg_item
+	# 	[re_sqopen_pos reg_or_data re_or_sqclose] :PosOrBlock
+	# |	[re_sqopen_neg reg_or_data re_or_sqclose] :NegOrBlock
+	# |	[re_dot] :Dot
+	# |	[re_char] :Char
+	ragel::reg_item
+	{
+		ReItem *reItem;
+	}
+	ragel::reg_item :PosOrBlock
+	{
+		$$->reItem = new ReItem( @1, $reg_or_data->reOrBlock, ReItem::OrBlock );
+	}
+	ragel::reg_item :NegOrBlock
+	{
+		$$->reItem = new ReItem( @1, $reg_or_data->reOrBlock, ReItem::NegOrBlock );
+	}
+	ragel::reg_item :Dot
+	{
+		$$->reItem = new ReItem( @1, ReItem::Dot );
+	}
+	ragel::reg_item :Char
+	{
+		string data( $re_char->data, $re_char->length );
+		char *c = unescape( data.c_str() );
+		$$->reItem = new ReItem( @re_char, c, strlen(c) );
+		delete[] c;
+	}
+
+	# def reg_or_data
+	# 	[reg_or_data reg_or_char] :Data
+	# |	[] :Base
+	ragel::reg_or_data
+	{
+		ReOrBlock *reOrBlock;
+	}
+
+	ragel::reg_or_data :Data
+	{
+		/* An optimization to lessen the tree size. If an or char is directly
+		 * under the left side on the right and the right side is another or
+		 * char then paste them together and return the left side. Otherwise
+		 * just put the two under a new or data node. */
+		if ( $reg_or_char->reOrItem->type == ReOrItem::Data &&
+				$_reg_or_data->reOrBlock->type == ReOrBlock::RecurseItem &&
+				$_reg_or_data->reOrBlock->item->type == ReOrItem::Data )
+		{
+			/* Append the right side to right side of the left and toss the
+			 * right side. */
+			$_reg_or_data->reOrBlock->item->data.append( $reg_or_char->reOrItem->data );
+			delete $reg_or_char->reOrItem;
+			$$->reOrBlock = $_reg_or_data->reOrBlock;
+		}
+		else {
+			/* Can't optimize, put the left and right under a new node. */
+			$$->reOrBlock = new ReOrBlock( $_reg_or_data->reOrBlock, $reg_or_char->reOrItem );
+		}
+	}
+
+	ragel::reg_or_data :Base
+	{
+		$$->reOrBlock = new ReOrBlock();
+	}
+
+	# def reg_or_char
+	# 	[re_or_char] :Char
+	# |	[Low: re_or_char re_or_dash High: re_or_char] :Range
+	ragel::reg_or_char
+	{
+		ReOrItem *reOrItem;
+	}
+
+	ragel::reg_or_char :Char
+	{
+		// ReOrItem *reOrItem;
+		char *c = unescape( $re_or_char->data, $re_or_char->length );
+		$$->reOrItem = new ReOrItem( @re_or_char, c, 1 );
+		delete[] c;
+	}
+
+	ragel::reg_or_char :Range
+	{
+		// ReOrItem *reOrItem;
+		char *low = unescape( $Low->data, $Low->length );
+		char *high = unescape( $High->data, $High->length );
+		$$->reOrItem = new ReOrItem( @re_or_dash, low[0], high[0] );
+		delete[] low;
+		delete[] high;
+	}
+
+
+	# def alphabet_num 
+	#	[uint] :Uint
+	# |	[`- uint] :Neg
+	# |	[hex] :Hex
+	ragel::alphabet_num
+	{
+		bool neg;
+		RedToken tok;
+	}
+
+	ragel::alphabet_num :Uint
+	{
+		$$->neg = false;
+		$$->tok.set( $uint, @uint );
+	}
+
+	ragel::alphabet_num :Neg
+	{
+		$$->neg = true;
+		$$->tok.set( $uint, @1 );
+	}
+
+	ragel::alphabet_num :Hex
+	{
+		$$->neg = false;
+		$$->tok.set( $hex, @hex );
+	}
+
+	# def range_lit
+	#	[string] :String
+	# |	[alphabet_num] :AN
+	ragel::range_lit
+	{
+		Literal *literal;
+	}
+
+	ragel::range_lit :String
+	{
+		/* Range literals must have only one char. We restrict this in the
+		 * parse tree. */
+		$$->literal = new Literal( @string, false,
+				$string->data, $string->length, Literal::LitString );
+	}
+
+	ragel::range_lit :AN
+	{
+		$$->literal = new Literal( $alphabet_num->tok.loc,
+				$alphabet_num->neg, $alphabet_num->tok.data,
+				$alphabet_num->tok.length, Literal::Number );
+	}
+
+	# def lm
+	#	[join] :Join
+	# |	[`|* lm_stmt_list `*|] :Lm
+	ragel::lm
+	{
+		MachineDef *machineDef;
+	}
+
+	ragel::lm :Join
+	{
+		$$->machineDef = new MachineDef( $join->join );
+	}
+
+	ragel::lm :Lm
+	{
+		/* Create a new factor going to a longest match structure. Record in
+		 * the parse data that we have a longest match. */
+		LongestMatch *lm = new LongestMatch( @1, $lm_stmt_list->lmPartList );
+		pd->lmList.append( lm );
+		for ( LmPartList::Iter lmp = *$lm_stmt_list->lmPartList; lmp.lte(); lmp++ )
+			lmp->longestMatch = lm;
+		$$->machineDef = new MachineDef( lm );
+	}
+
+	# def lm_stmt_list
+	# 	[lm_stmt_list lm_stmt] :Rec
+	# |	[lm_stmt] :Base
+	ragel::lm_stmt_list
+	{
+		LmPartList *lmPartList;
+	}
+	ragel::lm_stmt_list :Rec
+	{
+		$$->lmPartList = $_lm_stmt_list->lmPartList;
+		if ( $lm_stmt->lmPart != 0 )
+			$$->lmPartList->append( $lm_stmt->lmPart );
+	}
+	ragel::lm_stmt_list :Base
+	{
+		$$->lmPartList = new LmPartList;
+		if ( $lm_stmt->lmPart != 0 )
+			$$->lmPartList->append( $lm_stmt->lmPart );
+	}
+
+
+	# def lm_stmt
+	# 	[join opt_lm_act `;] :LmStmt commit
+	# |	[assignment] :Assignment
+	# |	[action_spec] :ActionSpec
+
+	ragel::lm_stmt
+	{
+		LongestMatchPart *lmPart;
+	}
+
+	ragel::lm_stmt :LmStmt
+	{
+		InputLoc loc;
+		loc.line = 1;
+		loc.fileName = 0;
+
+		Join *join = $join->join;
+		Action *action = $opt_lm_act->action;
+
+		if ( action != 0 )
+			action->isLmAction = true;
+
+		/* Provide a location to join. Unfortunately We don't
+		 * have the start of the join as in other occurances. Use the end. */
+		join->loc = loc;
+
+		$$->lmPart = new LongestMatchPart( join, action, 
+				loc, pd->nextLongestMatchId++ );
+	}
+
+	ragel::lm_stmt :Assignment
+	{
+		$$->lmPart = 0;
+	}
+
+	ragel::lm_stmt :ActionSpec
+	{
+		$$->lmPart = 0;
+	}
+
+	# def opt_lm_act
+	#	[lm_act] :Act
+	# |	[] :Empty
+	ragel::opt_lm_act
+	{
+		Action *action;
+	}
+
+	ragel::opt_lm_act :Act
+	{
+		$$->action = $lm_act->action;
+	}
+
+	ragel::opt_lm_act :Empty
+	{
+		$$->action = 0;
+	}
+
+	# def lm_act
+	# 	[`=> action_ref] :ActionRef
+	# |	[action_block] :ActionBlock
+	ragel::lm_act
+	{
+		Action *action;
+	}
+	ragel::lm_act :ActionRef
+	{
+		$$->action = $action_ref->action;
+	}
+	ragel::lm_act :ActionBlock
+	{
+		/* Create the action, add it to the list and pass up. */
+		Action *newAction = new Action( &$action_block->loc, std::string(),
+				$action_block->inlineList, pd->fsmCtx->nextCondId++ );
+		pd->fsmCtx->actionList.append( newAction );
+		$$->action = newAction;
+	}
+
+	# def opt_export
+	#	[`export] :Export
+	# |	[] :Base
+	ragel::opt_export
+	{
+		bool isSet;
+	}
+
+	ragel::opt_export :Export
+	{
+		$$->isSet = true;
+	}
+
+	ragel::opt_export :Base
+	{
+		$$->isSet = false;
+	}
+
+
+	# def nfa_expr
+	#	[nfa_expr `| term] :Union
+	# |	[term] :Base
+	ragel::nfa_expr
+	{
+		NfaUnion *nfaUnion;
+	}
+
+	ragel::nfa_expr :Union
+	{
+		$$->nfaUnion = $_nfa_expr->nfaUnion;
+		$$->nfaUnion->terms.append( $term->term );
+	}
+
+	ragel::nfa_expr :Base
+	{
+		$$->nfaUnion = new NfaUnion();
+		$$->nfaUnion->terms.append( $term->term );
+	}
+	
+	# def nfa_round_spec
+	#	[uint `, uint]
+	ragel::nfa_round_spec
+	{
+		long depth;
+		long group;
+	}
+
+	ragel::nfa_round_spec :Spec
+	{
+		// Convert the priority number to a long. Check for overflow.
+		errno = 0;
+		$$->depth = strtol( $Depth->data, 0, 10 );
+		if ( $$->depth == LONG_MAX && errno == ERANGE )
+			pd->id->error(@Depth) << "rounds " << $Depth->data << " overflows" << endl;
+
+		$$->group = strtol( $Group->data, 0, 10 );
+		if ( $$->group == LONG_MAX && errno == ERANGE )
+			pd->id->error(@Groups) << "group " << $Group->data << " overflows" << endl;
+	}
+
+	# def nfa_round_list
+	#	[nfa_round_list `, nfa_round_spec] :Recurse
+	# |	[nfa_round_spec] :Base
+	ragel::nfa_round_list
+	{
+		NfaRoundVect *roundsList;
+	}
+
+	ragel::nfa_round_list :Recurse
+	{
+		$$->roundsList = $_nfa_round_list->roundsList;
+		$$->roundsList->append( NfaRound( $nfa_round_spec->depth,
+				$nfa_round_spec->group ) );
+	}
+
+	ragel::nfa_round_list :Base
+	{
+		$$->roundsList = new NfaRoundVect;
+		$$->roundsList->append( NfaRound( $nfa_round_spec->depth,
+				$nfa_round_spec->group ) );
+	}
+
+	# def nfa_rounds
+	#	[`( nfa_round_list `)] :Rounds
+	ragel::nfa_rounds
+	{
+		NfaRoundVect *roundsList;
+	}
+
+	ragel::nfa_rounds :Rounds
+	{
+		$$->roundsList = $nfa_round_list->roundsList;
+	}
+
+
+	ragel::write_arg :Word
+	{
+		string arg( $word->data, $word->length );
+		writeArgs.push_back( arg );
+	}
+
+	# Pass Through.
+	# def tok
+	# 	[ident] :Ident
+	# |	[number] :Number
+	# |	[hex_number] :HexNumber
+	# |	[comment] :Comment
+	# |	[string] :String
+	# |	[whitespace] :Whitespace
+	# |	[c_any] :Any
+	c_host::tok :Ident
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $ident->data, $ident->length );
+	}
+
+	c_host::tok :Number
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $number->data, $number->length );
+	}
+
+	c_host::tok :HexNumber
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $hex_number->data, $hex_number->length );
+	}
+
+	c_host::tok :Comment
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $comment->data, $comment->length );
+	}
+
+	c_host::tok :String
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $string->data, $string->length );
+	}
+
+	c_host::tok :Whitespace
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $whitespace->data, $whitespace->length );
+	}
+
+	c_host::tok :Any
+	{
+		if ( includeDepth == 0 )
+			id->curItem->data.write( $c_any->data, $c_any->length );
+	}
+
+	c_host::section :MultiLine
+	{
+		if ( includeDepth == 0 ) {
+			id->curItem = id->curItem->next;
+			id->curItem->pd = pd;
+			bool success = id->checkLastRef( id->curItem );
+			if ( ! success ) {
+				pda_run->fail_parsing = 1;
+				this->success = false;
+			}
+
+			id->curItem = id->curItem->next;
+		}
+	}
+end 
+
+#
+# The section pass will collect the list of input items and the unique
+# sections. This allows us to free compilation resources as we go forward with
+# the parsing pass. We can identify the last known reference to a particular
+# section.
+#
+# In the parsing pass we iterate the input item list created here.
+#
+
+reduction SectionPass
+	ragel::machine_name :MachineName
+	{
+		string machine( $word->data, $word->length );
+
+		SectionDictEl *sdEl = id->sectionDict.find( machine );
+		if ( sdEl == 0 ) {
+			sdEl = new SectionDictEl( machine );
+			sdEl->value = new Section( machine );
+			id->sectionDict.insert( sdEl );
+			id->sectionList.append( sdEl->value );
+		}
+
+		section = sdEl->value;
+	}
+
+	ragel::statement :Write
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::Write;
+		inputItem->loc = @Cmd;
+		inputItem->name = section->sectionName;
+		inputItem->section = section;
+
+		id->inputItems.append( inputItem );
+	}
+
+	c_host::section :MultiLine
+	{
+		InputItem *inputItem = new InputItem;
+		inputItem->type = InputItem::EndSection;
+		inputItem->loc = @3;
+		id->inputItems.append( inputItem );
+
+		if ( section != 0 ) {
+			inputItem->section = section;
+			section->lastReference = inputItem;
+		}
+
+		/* The end section may include a newline on the end, so
+		 * we use the last line, which will count the newline. */
+		inputItem = new InputItem;
+		inputItem->type = InputItem::HostData;
+		inputItem->loc = @3;
+		if ( inputItem->loc.fileName == 0 )
+			inputItem->loc = @1;
+				
+		id->inputItems.append( inputItem );
+	}
+end
+
+reduction IncludePass
+	ragel::machine_name :MachineName
+	{
+		sectionMachine = string( $word->data, $word->length );
+	}
+
+	c_host::section :MultiLine
+	{
+		if ( sectionMachine.size() > 0 && sectionMachine == targetMachine ) {
+			IncItem *incItem = new IncItem;
+			incItem->loc = @1;
+
+			/* The locations are token starts. Include the trailing }%% token. */
+			incItem->start = @1->byte;
+			incItem->end = @3->byte + $3->length;
+			incItem->length = incItem->end - incItem->start;
+
+			incItem->section = section;
+			incItems.append( incItem );
+		}
+	}
+end

@@ -1,0 +1,355 @@
+(*
+* @LANG: ocaml
+* @GENERATED: true
+*)
+
+let comm = ref 0
+let top = ref 0
+let stack = Array.make 32 0
+
+
+
+
+
+
+let _gotocallret_trans_keys : int array = [|
+1; 0; 2; 2; 0; 0; 0; 0; 0; 0; 4; 5; 3; 3; 3; 5; 1; 0; 4; 5; 3; 3; 0 ; 
+|]
+let _gotocallret_char_class : int array = [|
+0; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 2; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 1; 1; 1; 1; 1; 1; 1; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 4; 1; 1; 1; 1; 1; 1; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 5; 0 ; 
+|]
+let _gotocallret_index_offsets : int array = [|
+0; 0; 1; 2; 3; 4; 6; 7; 10; 10; 12; 0 ; 
+|]
+let _gotocallret_indicies : int array = [|
+1; 2; 4; 6; 8; 8; 9; 10; 0; 10; 8; 8; 9; 0 ; 
+|]
+let _gotocallret_index_defaults : int array = [|
+0; 0; 0; 3; 5; 7; 7; 0; 11; 7; 7; 0 ; 
+|]
+let _gotocallret_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _gotocallret_cond_targs : int array = [|
+0; 2; 7; 4; 8; 4; 8; 0; 9; 10; 1; 0; 0 ; 
+|]
+let _gotocallret_cond_actions : int array = [|
+1; 2; 3; 5; 6; 0; 7; 8; 0; 0; 9; 0; 0 ; 
+|]
+let _gotocallret_eof_actions : int array = [|
+0; 1; 1; 4; 4; 8; 8; 0; 4; 0; 0; 0 ; 
+|]
+let _gotocallret_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _gotocallret_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _gotocallret_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _gotocallret_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let gotocallret_start  : int  = 7
+let gotocallret_first_final  : int  = 7
+let gotocallret_error  : int  = 0
+let gotocallret_en_garble_line  : int  = 3
+let gotocallret_en_alp_comm  : int  = 5
+let gotocallret_en_dig_comm  : int  = 6
+let gotocallret_en_main  : int  = 7
+let exec data = 
+let buffer = String.create(1024) in 
+let blen :int ref = ref 0 in
+let cs = ref 0 in
+let p = ref 0 in
+let pe = ref (String.length data) in
+let eof = pe in
+begin
+	cs  := gotocallret_start;
+	top  := 0;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _have.contents= 0  then
+						begin
+							begin
+								if _gotocallret_eof_actions.(cs.contents) = 4  then
+								begin
+									begin
+										print_string( "error: failed to recover\n" );
+										
+									end;
+									
+								end
+								else if _gotocallret_eof_actions.(cs.contents) = 8  then
+								begin
+									begin
+										begin
+											p  := p.contents- 1;
+											
+										end;
+										begin
+											top := top.contents - 1;
+											cs  := stack.(top.contents);
+											
+										end;
+										
+									end;
+									
+								end
+								else if _gotocallret_eof_actions.(cs.contents) = 1  then
+								begin
+									begin
+										begin
+											p  := p.contents- 1;
+											
+										end;
+										begin
+											cs  := 3;
+											
+										end;
+										
+									end;
+									
+								end
+								;
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _gotocallret_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 122 && ( Char.code data.[p.contents] )>= 10  then
+						begin
+							begin
+								let _ic  : int  ref = ref _gotocallret_char_class.(( Char.code data.[p.contents] )- 10) in
+								if _ic.contents<= _gotocallret_trans_keys.( _keys.contents+1  )&& _ic.contents>= _gotocallret_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _gotocallret_indicies.( _inds.contents+ ( _ic.contents- _gotocallret_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _gotocallret_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _gotocallret_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _gotocallret_cond_targs.(_trans.contents);
+						if _gotocallret_cond_actions.(_trans.contents) = 5  then
+						begin
+							begin
+								print_string( "error: garbling line\n" );
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 7  then
+						begin
+							begin
+								begin
+									cs  := 7;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 8  then
+						begin
+							begin
+								begin
+									p  := p.contents- 1;
+									
+								end;
+								begin
+									top := top.contents - 1;
+									cs  := stack.(top.contents);
+									
+								end;
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 9  then
+						begin
+							begin
+								comm := (( Char.code data.[p.contents] ));
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 3  then
+						begin
+							begin
+								print_string( "correct command\n" );
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 1  then
+						begin
+							begin
+								begin
+									p  := p.contents- 1;
+									
+								end;
+								begin
+									cs  := 3;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 6  then
+						begin
+							begin
+								print_string( "error: garbling line\n" );
+								
+							end;
+							begin
+								begin
+									cs  := 7;
+									
+								end;
+								
+							end;
+							
+						end
+						else if _gotocallret_cond_actions.(_trans.contents) = 2  then
+						begin
+							begin
+								if comm .contents >= 97  then
+								begin
+									begin
+										Array.set stack top.contents cs.contents;top  := top.contents + 1;
+										cs  := 5;
+										
+									end;
+								end 
+								else
+								begin
+									begin
+										Array.set stack top.contents cs.contents;top  := top.contents + 1;
+										cs  := 6;
+										
+									end;
+								end
+								;
+								
+							end;
+							begin
+								print_string( "prints\n" );
+								
+							end;
+							
+						end
+						;
+						if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs >= gotocallret_first_final then
+print_string "ACCEPT\n"
+else
+print_string "FAIL\n"
+;;
+
+let () =
+exec "lkajsdf\n";
+exec "2134\n";
+exec "(\n";
+exec "\n";
+exec "*234234()0909 092 -234aslkf09`1 11\n";
+exec "1\n";
+exec "909\n";
+exec "1 a\n";
+exec "11 1\n";
+exec "a 1\n";
+exec "aa a\n";
+exec "1 1\n";
+exec "1 123456\n";
+exec "a a\n";
+exec "a abcdef\n";
+exec "h";
+exec "a aa1";
+()
+;;
+

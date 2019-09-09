@@ -1,0 +1,292 @@
+host( "working/statechart1.rl", 1 ) @{/*
+	* @@LANG: c
+	*/
+	
+	/*
+	* Test in and out state actions.
+	*/
+	
+	#include <stdio.h>
+	#include <string.h>
+	
+	struct state_chart
+	{
+		int cs;
+	};
+	
+	
+	
+}@
+array s8 _state_chart_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _state_chart_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _state_chart_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int state_chart_start = 13;
+value int state_chart_first_final = 13;
+value int state_chart_error = 0;
+
+value int state_chart_en_main = 13;
+
+host( "working/statechart1.rl", 54 ) @{
+	
+	void state_chart_init( struct state_chart *fsm )
+	{
+	}@
+	{
+		host( "-", 1 ) ={ fsm->cs}= = cast(int)state_chart_start;
+	}
+	host( "working/statechart1.rl", 58 ) @{
+	}
+	
+	void state_chart_execute( struct state_chart *fsm, const char *_data, int _len )
+	{
+		const char *p = _data;
+		const char *pe = _data+_len;
+		
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		_resume:
+		switch ( host( "-", 1 ) ={ fsm->cs}= ) {
+			case 13:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr5;
+				}
+				case 48: {
+					goto ctr9;
+				}
+				case 97: {
+					goto ctr8;
+				}
+				case 98: {
+					goto ctr10;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 1:
+			if ( ( deref( data, p )) == 120 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 2:
+			switch( ( deref( data, p )) ) {
+				case 48: {
+					goto ctr0;
+				}
+				case 54: {
+					goto ctr2;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			switch( ( deref( data, p )) ) {
+				case 49: {
+					goto ctr3;
+				}
+				case 50: {
+					goto ctr4;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr5;
+				}
+				case 32: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr7;
+				}
+				case 97: {
+					goto ctr8;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr5;
+				}
+				case 32: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr9;
+				}
+				case 97: {
+					goto ctr8;
+				}
+				case 98: {
+					goto ctr10;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			switch( ( deref( data, p )) ) {
+				case 10: {
+					goto ctr5;
+				}
+				case 32: {
+					goto ctr6;
+				}
+				case 48: {
+					goto ctr11;
+				}
+				case 98: {
+					goto ctr10;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 120 ) {
+				goto ctr12;
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			switch( ( deref( data, p )) ) {
+				case 48: {
+					goto ctr12;
+				}
+				case 54: {
+					goto ctr13;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ( deref( data, p )) == 50 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 120 ) {
+				goto ctr14;
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			switch( ( deref( data, p )) ) {
+				case 48: {
+					goto ctr14;
+				}
+				case 54: {
+					goto ctr15;
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ( deref( data, p )) == 49 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: host( "-", 1 ) ={ fsm->cs}= = 0; goto _again;
+		ctr9: host( "-", 1 ) ={ fsm->cs}= = 1; goto _again;
+		ctr0: host( "-", 1 ) ={ fsm->cs}= = 2; goto _again;
+		ctr2: host( "-", 1 ) ={ fsm->cs}= = 3; goto _again;
+		ctr3: host( "-", 1 ) ={ fsm->cs}= = 4; goto f0;
+		ctr8: host( "-", 1 ) ={ fsm->cs}= = 4; goto f2;
+		ctr6: host( "-", 1 ) ={ fsm->cs}= = 5; goto _again;
+		ctr4: host( "-", 1 ) ={ fsm->cs}= = 6; goto f1;
+		ctr10: host( "-", 1 ) ={ fsm->cs}= = 6; goto f3;
+		ctr11: host( "-", 1 ) ={ fsm->cs}= = 7; goto _again;
+		ctr12: host( "-", 1 ) ={ fsm->cs}= = 8; goto _again;
+		ctr13: host( "-", 1 ) ={ fsm->cs}= = 9; goto _again;
+		ctr7: host( "-", 1 ) ={ fsm->cs}= = 10; goto _again;
+		ctr14: host( "-", 1 ) ={ fsm->cs}= = 11; goto _again;
+		ctr15: host( "-", 1 ) ={ fsm->cs}= = 12; goto _again;
+		ctr5: host( "-", 1 ) ={ fsm->cs}= = 13; goto _again;
+		
+		f2:
+		host( "working/statechart1.rl", 21 ) ${ printf("a"); }$
+		goto _again;
+		f3:
+		host( "working/statechart1.rl", 22 ) ${ printf("b"); }$
+		goto _again;
+		f0:
+		host( "working/statechart1.rl", 23 ) ${ printf("a"); }$
+		goto _again;
+		f1:
+		host( "working/statechart1.rl", 24 ) ${ printf("b"); }$
+		goto _again;
+		
+		_again:
+		if ( host( "-", 1 ) ={ fsm->cs}= == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/statechart1.rl", 66 ) @{
+	}
+	
+	int state_chart_finish( struct state_chart *fsm )
+	{
+		if ( fsm->cs == state_chart_error )
+		return -1;
+		if ( fsm->cs >= state_chart_first_final )
+		return 1;
+		return 0;
+	}
+	
+	struct state_chart sc;
+	
+	void test( char *buf )
+	{
+		int len = strlen( buf );
+		state_chart_init( &sc );
+		state_chart_execute( &sc, buf, len );
+		state_chart_finish( &sc );
+		printf("\n");
+	}
+	
+	int main()
+	{
+		test(
+		"aa0x0061aa b\n"
+		"bbb0x62b 0x61 0x000062\n"
+		);
+		
+		return 0;
+	}
+	
+}@

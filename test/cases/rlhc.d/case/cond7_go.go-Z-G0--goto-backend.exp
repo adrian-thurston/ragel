@@ -1,0 +1,216 @@
+package main
+import "fmt"
+
+var i  int ;
+var c  int ;
+
+
+
+
+var cs int;
+var blen int;
+var buffer [1024] byte;
+
+var _foo_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 0  }
+var _foo_nfa_targs [] int8  = [] int8  { 0, 0  }
+var _foo_nfa_offsets [] int8  = [] int8  { 0, 0, 0, 0, 0, 0  }
+var _foo_nfa_push_actions [] int8  = [] int8  { 0, 0  }
+var _foo_nfa_pop_trans [] int8  = [] int8  { 0, 0  }
+var foo_start  int  = 1
+var foo_first_final  int  = 4
+var foo_error  int  = 0
+var foo_en_main  int  = 1
+func prepare() {
+
+	{
+		cs = int(foo_start);
+	}
+}
+
+func exec(data string) {
+	var p int = 0
+	var pe int = len(data)
+	
+	{
+		var  _acts int
+		var  _nacts uint 
+		if p == pe  {
+			goto _test_eof;
+			
+		}
+		if cs == 0  {
+			goto _out;
+			
+		}
+		_resume:
+		switch cs  {
+			case 1:
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					goto ctr0;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					var  ck  int   = 0
+					if (i > 0) {
+						ck += 1;
+						
+					}
+					switch {
+						case ck > 0 :
+						{
+							goto ctr3;
+						} 
+						default:
+						{
+							goto ctr2;
+						}
+						
+						
+					}
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( data[p ]) == 10  {
+				{
+					var  ck  int   = 0
+					if (i > 0) {
+						ck += 1;
+						
+					}
+					if ck <= 0  {
+						{
+							goto ctr4;
+						}
+						
+					}
+					goto ctr5;
+					
+				}
+				
+			}
+			if 48 <= ( data[p ]) && ( data[p ]) <= 57  {
+				{
+					var  ck  int   = 0
+					if (i > 0) {
+						ck += 1;
+						
+					}
+					if 1 <= ck  {
+						{		goto ctr6;
+						}
+						
+					}
+					goto ctr5;
+					
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: cs = 0;
+		goto _again;
+		ctr0: cs = 2;
+		goto f0;
+		ctr5: cs = 0;
+		goto _again;
+		ctr3: cs = 2;
+		goto f1;
+		ctr2: cs = 3;
+		goto f0;
+		ctr6: cs = 3;
+		goto f1;
+		ctr4: cs = 4;
+		goto _again;
+		
+		f1: _acts = int(1 );
+		goto execFuncs;
+		f0: _acts = int(3 );
+		goto execFuncs;
+		
+		execFuncs:
+		_nacts = uint(_foo_actions[_acts ]);
+		_acts += 1;
+		for _nacts > 0  {
+			{
+				switch _foo_actions[_acts ] {
+					case 0:
+					{i = i - 1;
+						c = ( int ) ( (( data[p ])) )
+						;
+						fmt.Print( "item: " );fmt.Print( c );fmt.Print( "\n" );}
+					
+					break;
+					case 1:
+					{i = ( int ) ( (( data[p ])) - 48 )
+						;
+						fmt.Print( "count: " );fmt.Print( i );fmt.Print( "\n" );}
+					
+					break;
+					
+				}
+				_acts += 1;
+				_nacts -= 1;
+			}
+			
+			
+		}
+		goto _again;
+		
+		_again:
+		if cs == 0  {
+			goto _out;
+			
+		}
+		p += 1;
+		if p != pe  {
+			goto _resume;
+			
+		}
+		_test_eof: {}
+		_out: {}
+	}
+}
+func finish() {
+	if cs >= foo_first_final {
+		fmt.Println("ACCEPT")
+	} else {
+		fmt.Println("FAIL")
+	}
+}
+var inp []string = []string {
+	"00\n",
+	"019\n",
+	"190\n",
+	"1719\n",
+	"1040000\n",
+	"104000a\n",
+	"104000\n",
+};
+
+func main() {
+	for _, data := range inp {
+		prepare()
+		exec(data)
+		finish()
+	}
+}

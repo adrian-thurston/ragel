@@ -1,0 +1,142 @@
+#include <string.h>
+#include <stdio.h>
+
+
+
+
+
+
+
+static const char  _indep_trans_keys [] = { 1, 0, 2, 3, 9, 9, 8, 8, 10, 10, 10, 10, 11, 11, 0, 0, 5, 9, 4, 8, 6, 10, 6, 10, 7, 11, 1, 0, 0 ,  };
+static const char  _indep_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 5, 1, 1, 1, 6, 1, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 9, 1, 1, 1, 10, 1, 1, 11, 0 ,  };
+static const char  _indep_index_offsets [] = { 0, 0, 2, 3, 4, 5, 6, 7, 8, 13, 18, 23, 28, 33, 0 ,  };
+static const char  _indep_indicies [] = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 1, 1, 1, 9, 10, 1, 1, 1, 10, 11, 1, 1, 1, 11, 12, 1, 1, 1, 12, 7, 1, 1, 1, 7, 0 ,  };
+static const char  _indep_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
+static const char  _indep_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
+static const char  _indep_cond_targs [] = { 2, 0, 8, 3, 4, 5, 6, 7, 13, 9, 10, 11, 12, 0 ,  };
+static const char  _indep_cond_actions [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _indep_nfa_targs [] = { 0, 0 ,  };
+static const char  _indep_nfa_offsets [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ,  };
+static const char  _indep_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _indep_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  indep_start  = 1;
+static const int  indep_first_final  = 13;
+static const int  indep_error  = 0;
+static const int  indep_en_main  = 1;
+int cs;
+int blen;
+char buffer[1024];
+
+void init()
+{
+
+	{
+		cs = ( int ) indep_start;
+	}
+}
+
+void exec( char *data, int len )
+{
+	char *p = data;
+	char *pe = data + len;
+	
+	{
+		int _trans = 0;
+		const char  *_keys;
+		const char  *_inds;
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( cs == 0  )
+		goto _out;
+		
+		_resume :
+		_keys = _indep_trans_keys + (cs<<1);
+		_inds = _indep_indicies + _indep_index_offsets[cs];
+		if ( ((*( p  ))
+		)<= 111 && ((*( p  ))
+		)>= 10  )
+		{
+			int _ic = ( int ) _indep_char_class[( int ) ((*( p  ))
+			)- 10];
+			if ( _ic <= ( int ) (*( _keys+1  ))
+			&& _ic >= ( int ) (*( _keys  ))
+			)
+			_trans = ( int ) (*( _inds + ( int ) (_ic - ( int ) (*( _keys  ))
+			) ))
+			;
+			
+			else
+			_trans = ( int ) _indep_index_defaults[cs];
+			
+		}
+		
+		else
+		{
+			_trans = ( int ) _indep_index_defaults[cs];
+		}
+		
+		
+		goto _match_cond;
+		
+		_match_cond :
+		cs = ( int ) _indep_cond_targs[_trans];
+		if ( cs == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		
+		_test_eof :
+		{}
+		
+		_out :
+		{}
+		
+	}
+}
+
+void finish( )
+{
+	if ( cs >= indep_first_final )
+	printf( "ACCEPT\n" );
+	else
+	printf( "FAIL\n" );
+}
+
+char *inp[] = {
+	"1hello\n",
+	"1HELLO\n",
+	"1HeLLo\n",
+	"2hello\n",
+	"2HELLO\n",
+	"2HeLLo\n",
+	"3hello\n",
+	"3HELLO\n",
+	"3HeLLo\n",
+	"4hello\n",
+	"4HELLO\n",
+	"4HeLLo\n",
+	"5hello\n",
+	"5HELLO\n",
+	"5HeLLo\n",
+	"6hello\n",
+	"6HELLO\n",
+	"6HeLLo\n",
+};
+
+int inplen = 18;
+
+int main( )
+{
+	int i;
+	for ( i = 0; i < inplen; i++ ) {
+		init();
+		exec( inp[i], strlen(inp[i]) );
+		finish();
+	}
+	return 0;
+}
+

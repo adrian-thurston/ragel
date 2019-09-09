@@ -1,0 +1,49 @@
+#!/bin/bash
+
+. ../colm.sh
+
+export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
+
+[ -d working ] || mkdir working
+
+echo working/* | xargs rm -f
+
+[ -z "$*" ] && set -- case/*.in
+
+for fn; do
+
+	exp=${fn%.in}.exp
+
+	out=${fn%.in}.out
+	out=working${out#case}
+
+	sh=${fn%.in}.sh
+	sh=working${sh#case}
+
+	diff=${fn%.in}.diff
+	diff=working${diff#case}
+
+	rm -f $sh
+
+	lang=`echo $fn | awk -vFS=- '{ print $2 }'`
+
+	case $lang in
+		A) lang=csharp;;
+		C) lang=c;;
+		J) lang=java;;
+		K) lang=crack;;
+		O) lang=ocaml;;
+		R) lang=ruby;;
+		U) lang=rust;;
+		Y) lang=julia;;
+		Z) lang=go;;
+	esac
+
+	echo echo executing $fn $lang >> $sh
+	echo ./rlhc $out $fn $lang >> $sh
+	echo diff $exp $out '>' $diff >> $sh
+
+	echo $sh
+
+done
+

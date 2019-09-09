@@ -1,0 +1,357 @@
+host( "working/cond1_go.rl", 1 ) @{/*
+	* @@LANG: go
+	* @@GENERATED: true
+	*/
+	
+	package main
+	import "fmt"
+	
+	var i  int ;
+	var j  int ;
+	var k  int ;
+	
+	
+	
+	
+	var cs int;
+	var blen int;
+	var buffer [1024] byte;
+	
+}@
+array s8 _foo_actions( 0, 6 ) = { 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 2, 0, 1, 2, 0, 2, 2, 1, 2, 3, 0, 1, 2, 0 };
+
+array s8 _foo_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _foo_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _foo_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int foo_start = 1;
+value int foo_first_final = 15;
+value int foo_error = 0;
+
+value int foo_en_main = 1;
+
+host( "working/cond1_go.rl", 69 ) @{
+	
+	func prepare() {
+	}@
+	{
+		cs = cast(int)foo_start;
+	}
+	host( "working/cond1_go.rl", 72 ) @{
+	}
+	
+	func exec(data string) {
+		var p int = 0
+		var pe int = len(data)
+	}@
+	{
+		index s8 _acts;
+		uint _nacts;
+		
+		int _nbreak;
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 49 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 49 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( 48 <= ( deref( data, p )) && ( deref( data, p )) <= 49 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			switch( ( deref( data, p )) ) {
+				case 97: {
+					goto ctr4;
+				}
+				case 98: {
+					int ck = 0;
+					if ( host( "working/cond1_go.rl", 17 ) ={j != 0}= ) ck += 1;
+					if ( 1 <= ck )
+					{		goto ctr5;
+					}
+					goto ctr6;
+					
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			switch( ( deref( data, p )) ) {
+				case 97: {
+					goto ctr7;
+				}
+				case 98: {
+					int ck = 0;
+					if ( host( "working/cond1_go.rl", 16 ) ={i != 0}= ) ck += 1;
+					if ( host( "working/cond1_go.rl", 17 ) ={j != 0}= ) ck += 2;
+					if ( host( "working/cond1_go.rl", 18 ) ={k != 0}= ) ck += 4;
+					if ( ck < 4 ) {
+						if ( ck < 2 ) {
+							if ( 1 <= ck )
+							{				goto ctr8;
+							}
+						} else if ( ck > 2 ) {
+							goto ctr9;
+						} else {
+							goto ctr5;
+						}
+					} else if ( ck > 4 ) {
+						if ( ck < 6 ) {
+							goto ctr11;
+						} else if ( ck > 6 ) {
+							goto ctr13;
+						} else {
+							goto ctr12;
+						}
+					} else {
+						goto ctr10;
+					}
+					goto ctr6;
+					
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			switch( ( deref( data, p )) ) {
+				case 97: {
+					goto ctr7;
+				}
+				case 98: {
+					int ck = 0;
+					if ( host( "working/cond1_go.rl", 17 ) ={j != 0}= ) ck += 1;
+					if ( host( "working/cond1_go.rl", 18 ) ={k != 0}= ) ck += 2;
+					if ( ck < 2 ) {
+						if ( 1 <= ck )
+						{			goto ctr5;
+						}
+					} else if ( ck > 2 ) {
+						goto ctr12;
+					} else {
+						goto ctr10;
+					}
+					goto ctr6;
+					
+				}
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr14;
+			}
+			{
+				goto ctr1;
+			}
+			case 8:
+			if ( ( deref( data, p )) == 10 ) {
+				goto ctr15;
+			}
+			{
+				goto ctr1;
+			}
+			case 15:
+			{
+				goto ctr1;
+			}
+			case 9:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr16;
+			}
+			{
+				goto ctr1;
+			}
+			case 10:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr17;
+			}
+			{
+				goto ctr1;
+			}
+			case 11:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr18;
+			}
+			{
+				goto ctr1;
+			}
+			case 12:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr19;
+			}
+			{
+				goto ctr1;
+			}
+			case 13:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr20;
+			}
+			{
+				goto ctr1;
+			}
+			case 14:
+			if ( ( deref( data, p )) == 99 ) {
+				goto ctr21;
+			}
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto f0;
+		ctr2: cs = 3; goto f1;
+		ctr3: cs = 4; goto f2;
+		ctr4: cs = 5; goto _again;
+		ctr7: cs = 6; goto _again;
+		ctr14: cs = 8; goto f3;
+		ctr16: cs = 8; goto f5;
+		ctr17: cs = 8; goto f6;
+		ctr18: cs = 8; goto f7;
+		ctr19: cs = 8; goto f8;
+		ctr20: cs = 8; goto f9;
+		ctr21: cs = 8; goto f10;
+		ctr15: cs = 15; goto f4;
+		ctr6: cs = 0; goto _again;
+		ctr5: cs = 7; goto _again;
+		ctr10: cs = 9; goto _again;
+		ctr12: cs = 10; goto _again;
+		ctr8: cs = 11; goto _again;
+		ctr9: cs = 12; goto _again;
+		ctr11: cs = 13; goto _again;
+		ctr13: cs = 14; goto _again;
+		
+		f7: _acts = offset( _foo_actions, 1 ); goto execFuncs;
+		f3: _acts = offset( _foo_actions, 3 ); goto execFuncs;
+		f5: _acts = offset( _foo_actions, 5 ); goto execFuncs;
+		f0: _acts = offset( _foo_actions, 7 ); goto execFuncs;
+		f1: _acts = offset( _foo_actions, 9 ); goto execFuncs;
+		f2: _acts = offset( _foo_actions, 11 ); goto execFuncs;
+		f4: _acts = offset( _foo_actions, 13 ); goto execFuncs;
+		f8: _acts = offset( _foo_actions, 15 ); goto execFuncs;
+		f9: _acts = offset( _foo_actions, 18 ); goto execFuncs;
+		f6: _acts = offset( _foo_actions, 21 ); goto execFuncs;
+		f10: _acts = offset( _foo_actions, 24 ); goto execFuncs;
+		
+		execFuncs:
+		_nbreak = 0;
+		_nacts = cast(uint)deref( _foo_actions, _acts );
+		_acts += 1;
+		while ( _nacts > 0 ) {
+			switch ( deref( _foo_actions, _acts ) ) {
+				case 0{
+					host( "working/cond1_go.rl", 19 ) ${fmt.Print( "  one\n" );}$
+				}
+				case 1{
+					host( "working/cond1_go.rl", 20 ) ${fmt.Print( "  two\n" );}$
+				}
+				case 2{
+					host( "working/cond1_go.rl", 21 ) ${fmt.Print( "  three\n" );}$
+				}
+				case 3{
+					host( "working/cond1_go.rl", 23 ) ${if ( ={( deref( data, p ))}= == 48 ) {
+							i = 0;
+							
+						} else {
+							i = 1;
+							
+						}
+					}$
+				}
+				case 4{
+					host( "working/cond1_go.rl", 31 ) ${if ( ={( deref( data, p ))}= == 48 ) {
+							j = 0;
+							
+						} else {
+							j = 1;
+							
+						}
+					}$
+				}
+				case 5{
+					host( "working/cond1_go.rl", 39 ) ${if ( ={( deref( data, p ))}= == 48 ) {
+							k = 0;
+							
+						} else {
+							k = 1;
+							
+						}
+					}$
+				}
+				case 6{
+					host( "working/cond1_go.rl", 48 ) ${${p += 1;  _nbreak = 1; }$
+					}$
+				}
+			}
+			_acts += 1;
+			_nacts -= 1;
+		}
+		
+		if ( _nbreak == 1 )
+		goto _out;
+		goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p += 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/cond1_go.rl", 78 ) @{
+	}
+	func finish() {
+		if cs >= foo_first_final {
+			fmt.Println("ACCEPT")
+		} else {
+			fmt.Println("FAIL")
+		}
+	}
+	var inp []string = []string {
+		"000abc\n",
+		"100abc\n",
+		"010abc\n",
+		"110abc\n",
+		"001abc\n",
+		"101abc\n",
+		"011abc\n",
+		"111abc\n",
+	};
+	
+	func main() {
+		for _, data := range inp {
+			prepare()
+			exec(data)
+			finish()
+		}
+	}
+}@

@@ -1,0 +1,203 @@
+static mut target : i32 = 0;
+static mut last : i32 = 0;
+
+
+
+
+
+static _next2_actions: [i8 ; 15] = [ 0, 1, 0, 1, 1, 1, 2, 1, 3, 1, 4, 1, 5, 0 , 0 ];
+static _next2_trans_keys: [u8 ; 50] = [ 1, 0, 15, 15, 13, 13, 8, 8, 13, 13, 11, 11, 6, 6, 5, 5, 9, 9, 8, 8, 6, 6, 12, 12, 14, 14, 9, 9, 12, 12, 7, 7, 10, 10, 6, 6, 6, 6, 0, 4, 1, 0, 1, 0, 1, 0, 1, 0, 0 , 0 ];
+static _next2_char_class: [i8 ; 113] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 6, 1, 1, 7, 1, 1, 1, 1, 1, 8, 9, 1, 1, 10, 11, 12, 13, 1, 14, 15, 0 , 0 ];
+static _next2_index_offsets: [i8 ; 26] = [ 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 23, 23, 23, 23, 0 , 0 ];
+static _next2_indicies: [i8 ; 25] = [ 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0 , 0 ];
+static _next2_index_defaults: [i8 ; 26] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 0 ];
+static _next2_trans_cond_spaces: [i8 ; 24] = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
+static _next2_cond_targs: [i8 ; 24] = [ 19, 0, 3, 4, 5, 6, 7, 20, 9, 10, 21, 12, 13, 22, 15, 16, 17, 18, 23, 19, 19, 1, 0 , 0 ];
+static _next2_cond_actions: [i8 ; 24] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 3, 0, 0, 0, 0, 5, 7, 9, 11, 0 , 0 ];
+static _next2_nfa_targs: [i8 ; 3] = [ 0, 0 , 0 ];
+static _next2_nfa_offsets: [i8 ; 26] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0 ];
+static _next2_nfa_push_actions: [i8 ; 3] = [ 0, 0 , 0 ];
+static _next2_nfa_pop_trans: [i8 ; 3] = [ 0, 0 , 0 ];
+static next2_start : i32 = 19;
+static next2_first_final : i32 = 19;
+static next2_error : i32 = 0;
+static next2_en_unused : i32 = 2;
+static next2_en_one : i32 = 8;
+static next2_en_two : i32 = 11;
+static next2_en_three : i32 = 14;
+static next2_en_main : i32 = 19;
+unsafe fn m( s: String )
+{
+	let data: &[u8] = s.as_bytes();
+	let mut p:i32 = 0;
+	let mut pe:i32 = s.len() as i32;
+	let mut eof:i32 = s.len() as i32;
+	let mut cs: i32 = 0;
+	let mut buffer = String::new();
+	
+	
+	{
+		cs = ( next2_start ) as i32;
+	}
+	
+	{
+		let mut _trans  = 0;
+		let mut _have  = 0;
+		let mut _cont  = 1;
+		let mut _acts :i32 = 0;
+		let mut _nacts = 0;
+		let mut _keys :i32 = 0;
+		let mut _inds :i32 = 0;
+		while ( _cont == 1  )
+		{
+		
+			if ( cs == 0  ) {
+				_cont = 0;
+				
+			}
+			_have = 0;
+			if ( p == pe  ) {
+				{
+					if ( _have == 0  ) {
+						_cont = 0;
+						
+					}
+				}
+				
+			}
+			if ( _cont == 1  ) {
+				{
+					if ( _have == 0  ) {
+						{
+							_keys = ( (cs<<1)  ) as i32;
+							_inds = ( _next2_index_offsets[(cs) as usize] ) as i32;
+							if ( ( data[(p ) as usize]
+							) <= 120 && ( data[(p ) as usize]
+							) >= 10  ) {
+								{
+									let mut _ic  = ( _next2_char_class[(( ( data[(p ) as usize]
+									)  ) as i32- 10) as usize] ) as i32;
+									if ( _ic <= ( _next2_trans_keys[(_keys+1 ) as usize]
+									) as i32&& _ic >= ( _next2_trans_keys[(_keys ) as usize]
+									) as i32 ) {
+										_trans = ( _next2_indicies[(_inds + ( ( _ic - ( _next2_trans_keys[(_keys ) as usize]
+										) as i32)   ) as i32) as usize]
+										) as u32;
+										
+									}
+									else {
+										_trans = ( _next2_index_defaults[(cs) as usize] ) as u32;
+										
+									}
+								}
+								
+							}
+							else {
+								{
+									_trans = ( _next2_index_defaults[(cs) as usize] ) as u32;
+								}
+								
+								
+							}
+						}
+						
+					}
+					if ( _cont == 1  ) {
+						{
+							cs = ( _next2_cond_targs[(_trans) as usize] ) as i32;
+							if ( _next2_cond_actions[(_trans) as usize]!= 0  ) {
+								{
+									_acts = ( _next2_cond_actions[(_trans) as usize] ) as i32;
+									_nacts = ( _next2_actions[(_acts ) as usize]
+									) as u32;
+									_acts += 1;
+									while ( _nacts > 0  )
+									{
+										match ( _next2_actions[(_acts ) as usize]
+										) {
+											0  => {
+												{print!( "{}", "one\n" );
+													target = 19;
+													{cs = (target);
+													}}
+												
+											}
+											1  => {
+												{print!( "{}", "two\n" );
+													target = 19;
+													{cs = (target);
+													}}
+												
+											}
+											2  => {
+												{print!( "{}", "three\n" );
+													target = 19;
+													{cs = (target);
+													}}
+												
+											}
+											3  => {
+												{target = 8;
+													{cs = (target);
+													}last = 1;
+												}
+												
+											}
+											4  => {
+												{target = 11;
+													{cs = (target);
+													}last = 2;
+												}
+												
+											}
+											5  => {
+												{if ( last == 2 )
+													{
+														target = 14;
+														{cs = (target);
+														}
+													} 
+													last = 3;
+												}
+												
+											}
+											
+											_ => {}
+										}
+										_nacts -= 1;
+										_acts += 1;
+									}
+									
+								}
+								
+								
+							}
+							if ( cs == 0  ) {
+								_cont = 0;
+								
+							}
+							if ( _cont == 1  ) {
+								p += 1;
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+	}
+	if ( cs >= next2_first_final ) {
+		println!( "ACCEPT" );
+	}
+	else {
+		println!( "FAIL" );
+	}
+}
+
+fn main()
+{
+	unsafe { m( "1one3x2two3three\n".to_string() ); }
+}
+

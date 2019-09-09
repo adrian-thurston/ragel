@@ -1,0 +1,148 @@
+#include <stdio.h>
+
+struct LangEl
+{
+	int key;
+	char *name;
+};
+
+struct fsm
+{
+	int cs;
+};
+
+
+
+static const char  _fsm_eof_actions [] = { 0, 0, 0, 2, 0 ,  };
+static const char  _fsm_nfa_targs [] = { 0, 0 ,  };
+static const char  _fsm_nfa_offsets [] = { 0, 0, 0, 0, 0 ,  };
+static const char  _fsm_nfa_push_actions [] = { 0, 0 ,  };
+static const char  _fsm_nfa_pop_trans [] = { 0, 0 ,  };
+static const int  fsm_start  = 1;
+static const int  fsm_first_final  = 3;
+static const int  fsm_error  = 0;
+static const int  fsm_en_main  = 1;
+void fsm_init( struct fsm *fsm )
+{
+
+	{
+		(fsm->cs) = ( int ) fsm_start;
+	}
+}
+
+void fsm_execute( struct fsm *fsm,  struct LangEl *_data, int _len )
+{
+	struct LangEl *p = _data;
+	struct LangEl *pe = _data+_len;
+	struct LangEl *eof = pe;
+	
+	
+	{
+		if ( p == pe  )
+		goto _test_eof;
+		
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		_resume:
+		switch ( (fsm->cs) ) {
+			case 1:
+			if ( (p->key) == 1  )
+			{
+				goto ctr0;
+			}
+			
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			switch ( (p->key) ) {
+				case 2:
+				{
+					goto ctr0;
+				}
+				case 3:
+				{
+					goto ctr2;
+				}
+				
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			{
+				goto ctr1;
+			}
+			
+		}
+		ctr1: (fsm->cs) = 0;
+		goto _again;
+		ctr0: (fsm->cs) = 2;
+		goto f0;
+		ctr2: (fsm->cs) = 3;
+		goto f0;
+		
+		f0:
+		{
+			printf("%s\n", p->name);
+		}
+		
+		goto _again;
+		
+		_again:
+		if ( (fsm->cs) == 0  )
+		goto _out;
+		
+		p+= 1;
+		if ( p != pe  )
+		goto _resume;
+		
+		_test_eof: {}
+		if ( p == eof  )
+		{
+			switch ( _fsm_eof_actions[(fsm->cs)] ) {
+				case 2:
+				{
+					printf("accept\n");
+				}
+				
+				break;
+				
+			}
+		}
+		
+		
+		_out: {}
+	}
+}
+
+int fsm_finish( struct fsm *fsm )
+{
+	if ( fsm->cs == fsm_error )
+	return -1;
+	if ( fsm->cs >= fsm_first_final )
+	return 1;
+	return 0;
+}
+
+int main()
+{
+	static struct fsm fsm;
+	static struct LangEl lel[] = { 
+		{1, "one"}, 
+		{2, "two-a"}, 
+		{2, "two-b"}, 
+		{2, "two-c"}, 
+		{3, "three"}
+	};
+	
+	fsm_init( &fsm );
+	fsm_execute( &fsm, lel, 5 );
+	fsm_finish( &fsm );
+	
+	return 0;
+}
+

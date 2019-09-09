@@ -1,0 +1,185 @@
+using System;
+// Disables lots of warnings that appear in the test suite
+#pragma warning disable 0168, 0169, 0219, 0162, 0414
+namespace Test {
+	class Test
+	{
+		int target;
+		int last;
+		
+		
+		
+		
+		static readonly char  []_next2_trans_keys = { '\u0001', '\u0000', '\u000f', '\u000f', '\u000d', '\u000d', '\u0008', '\u0008', '\u000d', '\u000d', '\u000b', '\u000b', '\u0006', '\u0006', '\u0005', '\u0005', '\u0009', '\u0009', '\u0008', '\u0008', '\u0006', '\u0006', '\u000c', '\u000c', '\u000e', '\u000e', '\u0009', '\u0009', '\u000c', '\u000c', '\u0007', '\u0007', '\u000a', '\u000a', '\u0006', '\u0006', '\u0006', '\u0006', '\u0000', '\u0004', '\u0001', '\u0000', '\u0001', '\u0000', '\u0001', '\u0000', '\u0001', '\u0000', '\u0000',  };
+		static readonly sbyte  []_next2_char_class = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 6, 1, 1, 7, 1, 1, 1, 1, 1, 8, 9, 1, 1, 10, 11, 12, 13, 1, 14, 15, 0,  };
+		static readonly sbyte  []_next2_index_offsets = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 23, 23, 23, 23, 0,  };
+		static readonly sbyte  []_next2_indicies = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0,  };
+		static readonly sbyte  []_next2_index_defaults = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  };
+		static readonly sbyte  []_next2_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
+		static readonly sbyte  []_next2_cond_targs = { 19, 0, 3, 4, 5, 6, 7, 20, 9, 10, 21, 12, 13, 22, 15, 16, 17, 18, 23, 19, 19, 1, 0,  };
+		static readonly sbyte  []_next2_cond_actions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 3, 4, 5, 6, 0,  };
+		static readonly sbyte  []_next2_nfa_targs = { 0, 0,  };
+		static readonly sbyte  []_next2_nfa_offsets = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  };
+		static readonly sbyte  []_next2_nfa_push_actions = { 0, 0,  };
+		static readonly sbyte  []_next2_nfa_pop_trans = { 0, 0,  };
+		static readonly int  next2_start  = 19;
+		static readonly int  next2_first_final  = 19;
+		static readonly int  next2_error  = 0;
+		static readonly int  next2_en_unused  = 2;
+		static readonly int  next2_en_one  = 8;
+		static readonly int  next2_en_two  = 11;
+		static readonly int  next2_en_three  = 14;
+		static readonly int  next2_en_main  = 19;
+		int cs;
+		
+		void init()
+		{
+		
+			{
+				cs = (int)next2_start;
+			}
+		}
+		
+		void exec( char[] data, int len )
+		{
+			int p = 0;
+			int pe = len;
+			int eof = len;
+			string _s;
+			char [] buffer = new char [1024];
+			int blen = 0;
+			
+			{
+				uint _trans = 0;
+				uint _have = 0;
+				uint _cont = 1;
+				int _keys;
+				int _inds;
+				while ( _cont == 1 )
+				{
+				
+					if ( cs == 0 )
+					_cont = 0;
+					
+					_have = 0;
+					if ( p == pe  )
+					{
+						if ( _have == 0 )
+						_cont = 0;
+						
+					}
+					
+					if ( _cont == 1 )
+					{
+						if ( _have == 0 )
+						{
+							_keys = (cs<<1) ;
+							_inds = _next2_index_offsets[cs] ;
+							if ( ( data[p ]) <= 120&& ( data[p ]) >= 10 )
+							{
+								int _ic = (int)_next2_char_class[(int)( data[p ]) - 10];
+								if ( _ic <= (int)_next2_trans_keys[_keys+1]&& _ic >= (int)_next2_trans_keys[_keys ] )
+								_trans = (uint )_next2_indicies[_inds + (int)( _ic - (int)_next2_trans_keys[_keys ])  ];
+								
+								else
+								_trans = (uint )_next2_index_defaults[cs];
+								
+							}
+							
+							else
+							{
+								_trans = (uint )_next2_index_defaults[cs];
+							}
+							
+							
+						}
+						
+						if ( _cont == 1 )
+						{
+							cs = (int)_next2_cond_targs[_trans];
+							switch ( _next2_cond_actions[_trans]  ) {
+								case 1:
+								{Console.Write( "one\n" );target = 19;
+									{cs = (target);
+									}}
+								
+								break;
+								case 2:
+								{Console.Write( "two\n" );target = 19;
+									{cs = (target);
+									}}
+								
+								break;
+								case 3:
+								{Console.Write( "three\n" );target = 19;
+									{cs = (target);
+									}}
+								
+								break;
+								case 4:
+								{target = 8;
+									{cs = (target);
+									}last = 1;
+								}
+								
+								break;
+								case 5:
+								{target = 11;
+									{cs = (target);
+									}last = 2;
+								}
+								
+								break;
+								case 6:
+								{if ( last == 2 )
+									{
+										target = 14;
+										{cs = (target);
+										}
+									} 
+									last = 3;
+								}
+								
+								break;
+								
+							}
+							if ( cs == 0 )
+							_cont = 0;
+							
+							if ( _cont == 1 )
+							p += 1;
+							
+						}
+					}
+					
+				}
+				
+			}
+		}
+		
+		void finish( )
+		{
+			if ( cs >= next2_first_final )
+			Console.WriteLine( "ACCEPT" );
+			else
+			Console.WriteLine( "FAIL" );
+		}
+		
+		static readonly string[] inp = {
+			"1one3x2two3three\n",
+		};
+		
+		
+		static readonly int inplen = 1;
+		
+		public static void Main (string[] args)
+		{
+			Test machine = new Test();
+			for ( int i = 0; i < inplen; i++ ) {
+				machine.init();
+				machine.exec( inp[i].ToCharArray(), inp[i].Length );
+				machine.finish();
+			}
+		}
+	}
+}

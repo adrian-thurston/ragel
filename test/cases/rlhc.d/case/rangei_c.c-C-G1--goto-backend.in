@@ -1,0 +1,179 @@
+host( "working/rangei_c.rl", 1 ) @{/*
+	* @@LANG: c
+	* @@GENERATED: true
+	*/
+	
+	#include <string.h>
+	#include <stdio.h>
+	
+	
+	
+	
+	
+	
+	
+}@
+array s8 _rangei_nfa_targs( 0, 0 ) = { 0, 0 };
+
+array s8 _rangei_nfa_offsets( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+array s8 _rangei_nfa_push_actions( 0, 0 ) = { 0, 0 };
+
+array s8 _rangei_nfa_pop_trans( 0, 0 ) = { 0, 0 };
+
+value int rangei_start = 1;
+value int rangei_first_final = 7;
+value int rangei_error = 0;
+
+value int rangei_en_main = 1;
+
+host( "working/rangei_c.rl", 27 ) @{
+	int cs;
+	int blen;
+	char buffer[1024];
+	
+	void init()
+	{
+	}@
+	{
+		cs = cast(int)rangei_start;
+	}
+	host( "working/rangei_c.rl", 34 ) @{
+	}
+	
+	void exec( char *data, int len )
+	{
+		char *p = data;
+		char *pe = data + len;
+	}@
+	{
+		if ( p == pe )
+		goto _test_eof;
+		if ( cs == 0 )
+		goto _out;
+		_resume:
+		switch ( cs ) {
+			case 1:
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr0;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr0;
+			}
+			{
+				goto ctr1;
+			}
+			case 0:
+			goto _out;
+			case 2:
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr2;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr2;
+			}
+			{
+				goto ctr1;
+			}
+			case 3:
+			if ( ( deref( data, p )) > 93 ) {
+				if ( 97 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr3;
+				}
+			} else if ( ( deref( data, p )) >= 60 ) {
+				goto ctr3;
+			}
+			{
+				goto ctr1;
+			}
+			case 4:
+			if ( ( deref( data, p )) > 90 ) {
+				if ( 94 <= ( deref( data, p )) && ( deref( data, p )) <= 125 ) {
+					goto ctr4;
+				}
+			} else if ( ( deref( data, p )) >= 65 ) {
+				goto ctr4;
+			}
+			{
+				goto ctr1;
+			}
+			case 5:
+			if ( ( deref( data, p )) < 86 ) {
+				if ( 65 <= ( deref( data, p )) && ( deref( data, p )) <= 69 ) {
+					goto ctr5;
+				}
+			} else if ( ( deref( data, p )) > 101 ) {
+				if ( 118 <= ( deref( data, p )) && ( deref( data, p )) <= 122 ) {
+					goto ctr5;
+				}
+			} else {
+				goto ctr5;
+			}
+			{
+				goto ctr1;
+			}
+			case 6:
+			if ( 60 <= ( deref( data, p )) && ( deref( data, p )) <= 125 ) {
+				goto ctr6;
+			}
+			{
+				goto ctr1;
+			}
+			case 7:
+			{
+				goto ctr1;
+			}
+		}
+		
+		ctr1: cs = 0; goto _again;
+		ctr0: cs = 2; goto _again;
+		ctr2: cs = 3; goto _again;
+		ctr3: cs = 4; goto _again;
+		ctr4: cs = 5; goto _again;
+		ctr5: cs = 6; goto _again;
+		ctr6: cs = 7; goto _again;
+		
+		_again:
+		if ( cs == 0 )
+		goto _out;
+		p+= 1;
+		if ( p != pe )
+		goto _resume;
+		_test_eof: {}
+		_out: {}
+	}
+	host( "working/rangei_c.rl", 41 ) @{
+	}
+	
+	void finish( )
+	{
+		if ( cs >= rangei_first_final )
+		printf( "ACCEPT\n" );
+		else
+		printf( "FAIL\n" );
+	}
+	
+	char *inp[] = {
+		"AaBbAa",
+		"Aa`bAa",
+		"AaB@@Aa",
+		"AaBbMa",
+		"AaBbma",
+	};
+	
+	int inplen = 5;
+	
+	int main( )
+	{
+		int i;
+		for ( i = 0; i < inplen; i++ ) {
+			init();
+			exec( inp[i], strlen(inp[i]) );
+			finish();
+		}
+		return 0;
+	}
+	
+}@

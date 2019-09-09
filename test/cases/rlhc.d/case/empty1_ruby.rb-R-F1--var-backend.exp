@@ -1,0 +1,212 @@
+#
+# @LANG: ruby
+# @GENERATED: true
+#
+
+
+
+
+
+
+
+
+class << self
+	attr_accessor :_empty1_trans_keys 
+	private :_empty1_trans_keys, :_empty1_trans_keys=
+end
+self._empty1_trans_keys = [
+1, 0, 1, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_char_class 
+	private :_empty1_char_class, :_empty1_char_class=
+end
+self._empty1_char_class = [
+0 , 
+]
+
+class << self
+	attr_accessor :_empty1_index_offsets 
+	private :_empty1_index_offsets, :_empty1_index_offsets=
+end
+self._empty1_index_offsets = [
+0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_indicies 
+	private :_empty1_indicies, :_empty1_indicies=
+end
+self._empty1_indicies = [
+0 , 
+]
+
+class << self
+	attr_accessor :_empty1_index_defaults 
+	private :_empty1_index_defaults, :_empty1_index_defaults=
+end
+self._empty1_index_defaults = [
+0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_trans_cond_spaces 
+	private :_empty1_trans_cond_spaces, :_empty1_trans_cond_spaces=
+end
+self._empty1_trans_cond_spaces = [
+-1, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_cond_targs 
+	private :_empty1_cond_targs, :_empty1_cond_targs=
+end
+self._empty1_cond_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_cond_actions 
+	private :_empty1_cond_actions, :_empty1_cond_actions=
+end
+self._empty1_cond_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_nfa_targs 
+	private :_empty1_nfa_targs, :_empty1_nfa_targs=
+end
+self._empty1_nfa_targs = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_nfa_offsets 
+	private :_empty1_nfa_offsets, :_empty1_nfa_offsets=
+end
+self._empty1_nfa_offsets = [
+0, 0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_nfa_push_actions 
+	private :_empty1_nfa_push_actions, :_empty1_nfa_push_actions=
+end
+self._empty1_nfa_push_actions = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :_empty1_nfa_pop_trans 
+	private :_empty1_nfa_pop_trans, :_empty1_nfa_pop_trans=
+end
+self._empty1_nfa_pop_trans = [
+0, 0 , 
+]
+
+class << self
+	attr_accessor :empty1_start 
+end
+self.empty1_start  = 1;
+
+class << self
+	attr_accessor :empty1_first_final 
+end
+self.empty1_first_final  = 2;
+
+class << self
+	attr_accessor :empty1_error 
+end
+self.empty1_error  = 0;
+
+class << self
+	attr_accessor :empty1_en_main 
+end
+self.empty1_en_main  = 1;
+
+def run_machine( data )
+	p = 0
+	pe = data.length
+	eof = data.length
+	cs = 0;
+	_m = 
+	_a = 
+	buffer = Array.new
+	blen = 0
+	begin
+		cs = empty1_start;
+		
+	end
+	begin
+		_trans = 0;
+		_have = 0;
+		_cont = 1;
+		while ( _cont == 1  )
+			begin
+				if ( cs == 0  )
+					_cont = 0;
+					
+				end
+				_have = 0;
+				if ( p == pe  )
+					begin
+						if ( _have == 0  )
+							_cont = 0;
+							
+						end
+						
+					end
+					
+				end
+				if ( _cont == 1  )
+					begin
+						if ( _have == 0  )
+							begin
+								_trans = _empty1_index_defaults[cs];
+								
+							end
+							
+						end
+						if ( _cont == 1  )
+							begin
+								cs = _empty1_cond_targs[_trans];
+								if ( cs == 0  )
+									_cont = 0;
+									
+								end
+								if ( _cont == 1  )
+									p += 1;
+									
+								end
+								
+							end
+							
+						end
+						
+					end
+					
+				end
+				
+			end
+			
+		end
+		
+	end
+	if cs >= empty1_first_final
+		puts "ACCEPT"
+		else
+		puts "FAIL"
+	end
+end
+
+inp = [
+"",
+"x",
+]
+
+inplen = 2
+
+inp.each { |str| run_machine(str) }
+

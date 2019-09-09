@@ -1,0 +1,1044 @@
+(*
+* @LANG: ocaml
+*)
+
+(*
+//
+// URL Parser
+// Copyright (c) 2010 J.A. Roberts Tunney
+// MIT License
+//
+// Converted to OCaml by ygrek
+//
+// To compile:
+//
+//	ragel -O url.rl -o url.ml
+//  ragel -O url_authority.rl -o url_authority.ml
+//	ocamlopt -g unix.cmxa url_authority.ml url.ml -o url
+//	./url
+//
+// To show a diagram of your state machine:
+//
+//   ragel -V -G2 -p -o url.dot url.rl
+//   dot -Tpng -o url.png url.dot
+//   chrome url.png
+//
+//   ragel -V -G2 -p -o url_authority.dot url_authority.rl
+//   dot -Tpng -o url_authority.png url_authority.dot
+//   chrome url_authority.png
+//
+// Reference:
+//
+// - http://tools.ietf.org/html/rfc3986
+//
+*)
+
+(*
+// -*-go-*-
+//
+// URL Parser
+// Copyright (c) 2010 J.A. Roberts Tunney
+// MIT License
+//
+*)
+
+
+let _url_authority_actions : int array = [|
+0; 1; 0; 1; 1; 1; 2; 1; 3; 1; 4; 1; 11; 1; 12; 2; 1; 2; 2; 5; 7; 2; 6; 8; 2; 6; 11; 2; 9; 10; 3; 0; 9; 10; 3; 1; 6; 8; 3; 5; 7; 12; 3; 5; 11; 2; 3; 6; 8; 12; 3; 12; 5; 7; 3; 12; 6; 8; 4; 1; 6; 8; 12; 0 ; 
+|]
+let _url_authority_trans_keys : int array = [|
+1; 0; 0; 9; 3; 7; 3; 7; 0; 9; 3; 7; 3; 7; 0; 9; 3; 7; 3; 7; 3; 7; 3; 7; 3; 7; 3; 7; 0; 9; 0; 9; 3; 7; 3; 7; 3; 7; 3; 7; 0; 9; 0; 9; 3; 7; 3; 7; 0; 9; 0; 9; 0; 9; 2; 5; 2; 5; 0; 9; 0; 9; 4; 5; 0; 9; 0; 9; 4; 6; 0 ; 
+|]
+let _url_authority_char_class : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1; 0; 0; 1; 2; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0; 3; 3; 3; 3; 3; 3; 3; 3; 3; 3; 4; 5; 0; 1; 0; 0; 6; 7; 7; 7; 7; 7; 7; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 8; 1; 9; 1; 1; 1; 7; 7; 7; 7; 7; 7; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 1; 0; 0 ; 
+|]
+let _url_authority_index_offsets : int array = [|
+0; 0; 10; 15; 20; 30; 35; 40; 50; 55; 60; 65; 70; 75; 80; 90; 100; 105; 110; 115; 120; 130; 140; 145; 150; 160; 170; 180; 184; 188; 198; 208; 210; 220; 230; 0 ; 
+|]
+let _url_authority_indicies : int array = [|
+1; 0; 2; 0; 1; 1; 3; 0; 4; 1; 5; 1; 1; 1; 5; 6; 1; 1; 1; 6; 1; 7; 8; 7; 1; 1; 9; 7; 1; 1; 10; 1; 1; 1; 10; 11; 1; 1; 1; 11; 1; 3; 12; 3; 1; 1; 3; 3; 13; 1; 14; 1; 1; 1; 14; 15; 1; 1; 1; 15; 16; 1; 1; 1; 16; 17; 1; 1; 1; 17; 18; 1; 1; 1; 18; 19; 1; 1; 1; 19; 1; 20; 21; 20; 20; 1; 20; 20; 1; 1; 1; 22; 23; 22; 22; 1; 22; 22; 1; 24; 25; 1; 1; 1; 25; 26; 1; 1; 1; 26; 27; 1; 1; 1; 27; 28; 1; 1; 1; 28; 1; 29; 30; 29; 29; 1; 20; 29; 1; 1; 1; 31; 32; 31; 31; 1; 22; 31; 1; 33; 34; 1; 1; 1; 34; 35; 1; 1; 1; 35; 1; 36; 37; 36; 38; 39; 40; 36; 1; 1; 1; 41; 42; 43; 1; 44; 1; 41; 1; 1; 1; 45; 46; 45; 47; 39; 45; 45; 1; 1; 48; 49; 1; 44; 50; 51; 1; 52; 1; 53; 54; 53; 53; 53; 53; 53; 1; 1; 1; 19; 55; 19; 19; 19; 19; 19; 1; 1; 56; 57; 1; 7; 58; 59; 1; 52; 9; 7; 1; 1; 1; 3; 12; 3; 47; 39; 3; 3; 13; 1; 60; 57; 61; 0 ; 
+|]
+let _url_authority_index_defaults : int array = [|
+0; 0; 1; 1; 7; 1; 1; 3; 1; 1; 1; 1; 1; 1; 20; 22; 1; 1; 1; 1; 29; 31; 1; 1; 36; 41; 45; 1; 1; 53; 19; 1; 7; 3; 1; 0 ; 
+|]
+let _url_authority_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _url_authority_cond_targs : int array = [|
+24; 0; 2; 26; 20; 3; 24; 4; 5; 7; 6; 4; 8; 14; 9; 26; 11; 28; 13; 30; 15; 16; 15; 16; 31; 17; 15; 19; 32; 21; 22; 21; 22; 34; 23; 21; 24; 2; 25; 29; 33; 4; 18; 32; 29; 26; 8; 27; 10; 28; 10; 28; 29; 30; 12; 12; 27; 29; 18; 32; 25; 7; 0 ; 
+|]
+let _url_authority_cond_actions : int array = [|
+15; 0; 3; 15; 0; 7; 9; 5; 0; 24; 7; 9; 3; 0; 7; 9; 7; 9; 0; 0; 15; 3; 5; 0; 18; 7; 9; 7; 9; 15; 3; 5; 0; 18; 7; 9; 5; 0; 18; 18; 42; 15; 3; 15; 34; 5; 0; 18; 3; 15; 0; 5; 21; 1; 1; 0; 0; 0; 0; 5; 0; 11; 0 ; 
+|]
+let _url_authority_eof_actions : int array = [|
+0; 0; 0; 0; 13; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 50; 58; 38; 58; 46; 30; 27; 13; 54; 38; 13; 0 ; 
+|]
+let _url_authority_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _url_authority_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _url_authority_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _url_authority_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let url_authority_start  : int  = 1
+let url_authority_first_final  : int  = 24
+let url_authority_error  : int  = 0
+let url_authority_en_main  : int  = 1
+(*
+// i parse strings like `alice@pokémon.com`.
+//
+// sounds simple right?  but i also parse stuff like:
+//
+//   bob%20barker:priceisright@[dead:beef::666]:5060;isup-oli=00
+//
+// which in actual reality is:
+//
+// - User: "bob barker"
+// - Pass: "priceisright"
+// - Host: "dead:beef::666"
+// - Port: 5060
+// - Params: "isup-oli=00"
+//
+// which was probably extracted from an absolute url that looked like:
+//
+//   sip:bob%20barker:priceisright@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg
+//
+// which was probably extracted from its address form:
+//
+//   "Bob Barker" <sip:bob%20barker:priceisright@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg>;tag=666
+//
+// who would have thought this could be so hard ._.
+*)
+
+type url = {
+	scheme   : string; (* http, sip, file, etc. (never blank, always lowercase) *)
+	user     : string; (* who is you *)
+	pass     : string; (* for like, logging in *)
+	host     : string; (* IP 4/6 address or hostname (mandatory) *)
+	port     : int;    (* like 80 or 5060 (default 0) *)
+	params   : string; (* stuff after ';' (NOT UNESCAPED, used in sip) *)
+	path     : string; (* stuff starting with '/' *)
+	query    : string; (* stuff after '?' (NOT UNESCAPED) *)
+	fragment : string; (* stuff after '#' *)
+}
+
+let fail fmt = Printf.ksprintf failwith fmt
+
+let unhex c =
+match c with
+| '0'..'9' -> Char.code c - Char.code '0'
+| 'a'..'f' -> Char.code c - Char.code 'a' + 10
+| 'A'..'F' -> Char.code c - Char.code 'A' + 10
+| _ -> fail "unhex %C" c
+
+let parse_authority u data =
+let (cs, p, pe, eof) = (ref 0, ref 0, ref (String.length data), ref (String.length data)) in
+let mark = ref 0 in
+
+(*
+// temporary holding place for user:pass and/or host:port cuz an
+// optional term (user[:pass]) coming before a mandatory term
+// (host[:pass]) would require require backtracking and all that
+// evil nondeterministic stuff which ragel seems to hate.  (for
+// this same reason you're also allowed to use square quotes
+// around the username.)
+*)
+let (b1, b2) = (ref "", ref "") in
+
+(*
+// this buffer is so we can unescape while we roll
+var hex byte
+buf := make([]byte, len(data))
+amt := 0
+*)
+let buf = Buffer.create 10 in
+let hex = ref 0 in
+
+begin
+	cs  := url_authority_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _acts : int ref = ref 0 in
+	let _nacts : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _have.contents= 0  then
+						begin
+							begin
+								let __acts : int ref = ref 0 in
+								let __nacts : int  ref = ref 0 in
+								__acts  := _url_authority_eof_actions.(cs.contents);
+								__nacts  := _url_authority_actions.( __acts.contents );
+								__acts  := __acts.contents + 1;
+								while __nacts.contents> 0  do
+								begin
+									if _url_authority_actions.( __acts.contents ) = 0  then
+									begin
+										begin
+											mark := !p                             
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 1  then
+									begin
+										begin
+											Buffer.reset buf                       
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 5  then
+									begin
+										begin
+											b1 := Buffer.contents buf; Buffer.clear buf 
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 6  then
+									begin
+										begin
+											b2 := Buffer.contents buf; Buffer.clear buf 
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 7  then
+									begin
+										begin
+											u := { !u with host = !b1 }; Buffer.clear buf 
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 8  then
+									begin
+										begin
+											if !b2 <> "" then
+											begin
+												u := { !u with port = int_of_string !b2 };
+												if !u.port > 65535 then fail "bad url authority: %S" data
+											end
+											
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 9  then
+									begin
+										begin
+											u := { !u with params = String.sub data !mark (!p - !mark) }
+											
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 10  then
+									begin
+										begin
+											u := { !u with params = String.sub data !mark (!p - !mark) }
+											(*       return nil *)
+											
+										end;
+										
+									end
+									else if _url_authority_actions.( __acts.contents ) = 12  then
+									begin
+										begin
+											u := { !u with host = !b1 };
+											if !u.host = "" then
+											u := { !u with host = Buffer.contents buf }
+											else
+											begin
+												if Buffer.length buf > 0 then b2 := Buffer.contents buf;
+												if !b2 <> "" then
+												begin
+													u := { !u with port = int_of_string !b2 };
+													if !u.port > 65535 then fail "bad url authority: %S" data
+												end
+											end
+											(* 			return nil *)
+											
+										end;
+										
+									end
+									;
+									__nacts  := __nacts.contents - 1;
+									__acts  := __acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _url_authority_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 127 && ( Char.code data.[p.contents] )>= 0  then
+						begin
+							begin
+								let _ic  : int  ref = ref _url_authority_char_class.(( Char.code data.[p.contents] )- 0) in
+								if _ic.contents<= _url_authority_trans_keys.( _keys.contents+1  )&& _ic.contents>= _url_authority_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _url_authority_indicies.( _inds.contents+ ( _ic.contents- _url_authority_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _url_authority_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _url_authority_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _url_authority_cond_targs.(_trans.contents);
+						if _url_authority_cond_actions.(_trans.contents)!= 0  then
+						begin
+							begin
+								_acts  := _url_authority_cond_actions.(_trans.contents);
+								_nacts  := _url_authority_actions.( _acts.contents );
+								_acts  := _acts.contents + 1;
+								while _nacts.contents> 0  do
+								begin
+									if _url_authority_actions.( _acts.contents ) = 0  then
+									begin
+										begin
+											mark := !p                             
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 1  then
+									begin
+										begin
+											Buffer.reset buf                       
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 2  then
+									begin
+										begin
+											Buffer.add_char buf data.[p.contents]                
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 3  then
+									begin
+										begin
+											hex := unhex data.[p.contents] * 16                   
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 4  then
+									begin
+										begin
+											Buffer.add_char buf (Char.chr (!hex + unhex data.[p.contents])) 
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 5  then
+									begin
+										begin
+											b1 := Buffer.contents buf; Buffer.clear buf 
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 6  then
+									begin
+										begin
+											b2 := Buffer.contents buf; Buffer.clear buf 
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 7  then
+									begin
+										begin
+											u := { !u with host = !b1 }; Buffer.clear buf 
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 8  then
+									begin
+										begin
+											if !b2 <> "" then
+											begin
+												u := { !u with port = int_of_string !b2 };
+												if !u.port > 65535 then fail "bad url authority: %S" data
+											end
+											
+										end;
+										
+									end
+									else if _url_authority_actions.( _acts.contents ) = 11  then
+									begin
+										begin
+											u := { !u with user = !b1; pass = !b2 };
+											b2 := ""
+											
+										end;
+										
+									end
+									;
+									_nacts  := _nacts.contents - 1;
+									_acts  := _acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+(*
+// if cs >= url_authority_first_final {
+// 	return nil
+// }
+*)
+
+(*
+// fmt.Println("error state", cs)
+// fmt.Println(string(data))
+// for i := 0; i < p; i++ {
+// 	fmt.Print(" ")
+// }
+// fmt.Println("^")
+// fmt.Println(url)
+*)
+;;
+
+
+let dummy = {
+	scheme = ""; user = ""; pass = ""; host = ""; port = 0; 
+	params = ""; path = ""; query = ""; fragment = ""; }
+
+let show u =
+Printf.sprintf "%s :// %s : %s @ %s : %d ;%s %s ?%s #%s" u.scheme u.user u.pass u.host u.port
+u.params u.path u.query u.fragment
+
+
+let _url_actions : int array = [|
+0; 1; 0; 1; 1; 1; 2; 1; 3; 1; 4; 1; 5; 1; 6; 1; 7; 1; 8; 1; 9; 1; 10; 2; 0; 9; 2; 1; 2; 2; 1; 3; 2; 1; 10; 3; 7; 1; 2; 0 ; 
+|]
+let _url_trans_keys : int array = [|
+1; 0; 9; 12; 4; 12; 0; 8; 6; 11; 6; 11; 6; 11; 6; 11; 6; 11; 6; 11; 6; 11; 6; 11; 5; 5; 0; 8; 0; 3; 0; 3; 0; 8; 0; 3; 0; 3; 0; 8; 0 ; 
+|]
+let _url_char_class : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 1; 0; 2; 1; 3; 1; 1; 1; 1; 1; 4; 1; 4; 4; 5; 6; 6; 6; 6; 6; 6; 6; 6; 6; 6; 7; 1; 0; 1; 0; 8; 1; 9; 9; 9; 9; 9; 9; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 1; 1; 1; 1; 1; 1; 11; 11; 11; 11; 11; 11; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 12; 1; 1; 1; 1; 0; 0 ; 
+|]
+let _url_index_offsets : int array = [|
+0; 0; 4; 13; 22; 28; 34; 40; 46; 52; 58; 64; 70; 71; 80; 84; 88; 97; 101; 105; 0 ; 
+|]
+let _url_indicies : int array = [|
+0; 0; 2; 2; 3; 1; 3; 4; 1; 5; 5; 3; 3; 1; 6; 1; 7; 6; 8; 6; 6; 1; 9; 1; 1; 9; 1; 9; 10; 1; 1; 10; 1; 10; 11; 1; 1; 11; 1; 11; 12; 1; 1; 12; 1; 12; 13; 1; 1; 13; 1; 13; 14; 1; 1; 14; 1; 14; 15; 1; 1; 15; 1; 15; 16; 1; 1; 16; 1; 16; 17; 1; 12; 18; 19; 12; 20; 12; 12; 21; 1; 22; 1; 23; 1; 24; 1; 25; 1; 26; 27; 28; 26; 26; 26; 26; 29; 1; 30; 31; 32; 1; 16; 33; 34; 1; 6; 35; 7; 6; 36; 6; 6; 37; 0 ; 
+|]
+let _url_index_defaults : int array = [|
+0; 1; 1; 6; 1; 1; 1; 1; 1; 1; 1; 1; 1; 12; 22; 24; 26; 30; 16; 6; 0 ; 
+|]
+let _url_trans_cond_spaces : int array = [|
+-1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; -1; 0 ; 
+|]
+let _url_cond_targs : int array = [|
+2; 0; 2; 2; 3; 2; 13; 6; 12; 5; 15; 7; 13; 9; 16; 11; 18; 19; 14; 6; 16; 17; 15; 4; 15; 4; 16; 14; 8; 17; 18; 14; 10; 14; 10; 14; 16; 17; 0 ; 
+|]
+let _url_cond_actions : int array = [|
+29; 0; 26; 5; 13; 7; 1; 1; 0; 9; 11; 0; 0; 9; 11; 0; 0; 0; 15; 0; 35; 15; 26; 3; 5; 0; 5; 17; 0; 17; 1; 23; 1; 19; 0; 0; 26; 0; 0 ; 
+|]
+let _url_eof_actions : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 15; 32; 21; 17; 23; 19; 0; 0 ; 
+|]
+let _url_nfa_targs : int array = [|
+0; 0 ; 
+|]
+let _url_nfa_offsets : int array = [|
+0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0; 0 ; 
+|]
+let _url_nfa_push_actions : int array = [|
+0; 0 ; 
+|]
+let _url_nfa_pop_trans : int array = [|
+0; 0 ; 
+|]
+let url_start  : int  = 1
+let url_first_final  : int  = 13
+let url_error  : int  = 0
+let url_en_main  : int  = 1
+(*
+// i parse absolute urls and don't suck at it.  i'll parse just about
+// any type of url you can think of and give you a human-friendly data
+// structure.
+//
+// this routine takes no more than a few microseconds, is reentrant,
+// performs in a predictable manner (for security/soft-realtime,)
+// doesn't modify your `data` buffer, and under no circumstances will
+// it panic (i hope!)
+*)
+let url_parse data =
+let (cs, p, pe, eof) = (ref 0, ref 0, ref (String.length data), ref (String.length data)) in
+let mark = ref 0 in
+let u = ref dummy in
+
+(*
+// this buffer is so we can unescape while we roll
+*)
+let buf = Buffer.create 16 in
+let hex = ref 0 in
+
+begin
+	cs  := url_start;
+	
+end;
+begin
+	let _trans  : int  ref = ref 0 in
+	let _have  : int  ref = ref 0 in
+	let _cont  : int  ref = ref 1 in
+	let _acts : int ref = ref 0 in
+	let _nacts : int  ref = ref 0 in
+	let _keys : int ref = ref 0 in
+	let _inds : int ref = ref 0 in
+	while _cont.contents= 1  do
+	begin
+		if cs.contents= 0  then
+		begin
+			_cont  := 0;
+			
+		end
+		;_have  := 0;
+		if p.contents= pe.contents then
+		begin
+			begin
+				if p.contents= eof.contents then
+				begin
+					begin
+						if _have.contents= 0  then
+						begin
+							begin
+								let __acts : int ref = ref 0 in
+								let __nacts : int  ref = ref 0 in
+								__acts  := _url_eof_actions.(cs.contents);
+								__nacts  := _url_actions.( __acts.contents );
+								__acts  := __acts.contents + 1;
+								while __nacts.contents> 0  do
+								begin
+									if _url_actions.( __acts.contents ) = 0  then
+									begin
+										begin
+											mark := !p                             
+										end;
+										
+									end
+									else if _url_actions.( __acts.contents ) = 1  then
+									begin
+										begin
+											Buffer.reset buf                       
+										end;
+										
+									end
+									else if _url_actions.( __acts.contents ) = 7  then
+									begin
+										begin
+											parse_authority u (String.sub data !mark (!p - !mark)) 
+										end;
+										
+									end
+									else if _url_actions.( __acts.contents ) = 8  then
+									begin
+										begin
+											u := { !u with path = Buffer.contents buf } 
+										end;
+										
+									end
+									else if _url_actions.( __acts.contents ) = 9  then
+									begin
+										begin
+											u := { !u with query = String.sub data !mark (!p - !mark) } 
+										end;
+										
+									end
+									else if _url_actions.( __acts.contents ) = 10  then
+									begin
+										begin
+											u := { !u with fragment = Buffer.contents buf } 
+										end;
+										
+									end
+									;
+									__nacts  := __nacts.contents - 1;
+									__acts  := __acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _have.contents= 0  then
+				begin
+					_cont  := 0;
+					
+				end
+				;
+			end;
+			
+		end
+		;if _cont.contents= 1  then
+		begin
+			begin
+				if _have.contents= 0  then
+				begin
+					begin
+						_keys  := ( cs.contents lsl 1 );
+						_inds  := _url_index_offsets.(cs.contents);
+						if ( Char.code data.[p.contents] )<= 127 && ( Char.code data.[p.contents] )>= 0  then
+						begin
+							begin
+								let _ic  : int  ref = ref _url_char_class.(( Char.code data.[p.contents] )- 0) in
+								if _ic.contents<= _url_trans_keys.( _keys.contents+1  )&& _ic.contents>= _url_trans_keys.( _keys.contents ) then
+								begin
+									_trans  := _url_indicies.( _inds.contents+ ( _ic.contents- _url_trans_keys.( _keys.contents ) ) );
+									
+								end
+								else
+								begin
+									_trans  := _url_index_defaults.(cs.contents);
+									
+								end
+								;
+							end;
+							
+						end
+						else
+						begin
+							begin
+								_trans  := _url_index_defaults.(cs.contents);
+								
+							end;
+							
+						end
+						;
+					end;
+					
+				end
+				;if _cont.contents= 1  then
+				begin
+					begin
+						cs  := _url_cond_targs.(_trans.contents);
+						if _url_cond_actions.(_trans.contents)!= 0  then
+						begin
+							begin
+								_acts  := _url_cond_actions.(_trans.contents);
+								_nacts  := _url_actions.( _acts.contents );
+								_acts  := _acts.contents + 1;
+								while _nacts.contents> 0  do
+								begin
+									if _url_actions.( _acts.contents ) = 0  then
+									begin
+										begin
+											mark := !p                             
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 1  then
+									begin
+										begin
+											Buffer.reset buf                       
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 2  then
+									begin
+										begin
+											Buffer.add_char buf data.[p.contents]                 
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 3  then
+									begin
+										begin
+											Buffer.add_char buf (Char.lowercase data.[p.contents])
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 4  then
+									begin
+										begin
+											hex := unhex data.[p.contents] * 16                   
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 5  then
+									begin
+										begin
+											Buffer.add_char buf (Char.chr (!hex + unhex data.[p.contents])) 
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 6  then
+									begin
+										begin
+											u := { !u with scheme = Buffer.contents buf } 
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 7  then
+									begin
+										begin
+											parse_authority u (String.sub data !mark (!p - !mark)) 
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 8  then
+									begin
+										begin
+											u := { !u with path = Buffer.contents buf } 
+										end;
+										
+									end
+									else if _url_actions.( _acts.contents ) = 9  then
+									begin
+										begin
+											u := { !u with query = String.sub data !mark (!p - !mark) } 
+										end;
+										
+									end
+									;
+									_nacts  := _nacts.contents - 1;
+									_acts  := _acts.contents + 1;
+									
+								end;
+								
+								done;
+								
+							end;
+							
+						end
+						;if cs.contents= 0  then
+						begin
+							_cont  := 0;
+							
+						end
+						;if _cont.contents= 1  then
+						begin
+							p  := p.contents + 1;
+							
+						end
+						;
+					end;
+					
+				end
+				;
+			end;
+			
+		end
+		;
+	end;
+	
+	done;
+	
+end;
+if !cs < url_first_final then
+if !p = !pe then
+fail "unexpected eof: %s" data
+else
+fail "error in url at pos %d (%c): %s" !p data.[!p] data
+else
+!u
+
+(* ////////////////////////////////////////////////////////////////////// *)
+
+let tests = [
+"http://user:pass@example.com:80;hello/lol.php?fun#omg",
+{
+	scheme = "http";
+	user = "user";
+	pass = "pass";
+	host = "example.com";
+	port = 80;
+	params = "hello";
+	path = "/lol.php";
+	query = "fun";
+	fragment = "omg";
+};
+
+"a:b",
+{ dummy with
+	scheme = "a";
+	host = "b";
+};
+
+"GoPHeR://@example.com@:;/?#",
+{ dummy with
+	scheme = "gopher";
+	host = "@example.com@";
+	path = "/";
+};
+
+"ldap://[2001:db8::7]/c=GB?objectClass/?one",
+{ dummy with
+	scheme = "ldap";
+	host = "2001:db8::7";
+	path = "/c=GB";
+	query = "objectClass/?one";
+};
+
+"http://user@example.com",
+{ dummy with
+	scheme = "http";
+	user = "user";
+	host = "example.com";
+};
+
+"http://品研发和研发管@☃.com:65000;%20",
+{ dummy with
+	scheme = "http";
+	user = "品研发和研发管";
+	host = "☃.com";
+	port = 65000;
+	params = "%20";
+};
+
+"https://example.com:80",
+{ dummy with
+	scheme = "https";
+	host = "example.com";
+	port = 80;
+};
+
+"file:///etc/passwd",
+{ dummy with
+	scheme = "file";
+	path = "/etc/passwd";
+};
+
+"file:///c:/WINDOWS/clock.avi",
+{ dummy with
+	scheme = "file";
+	path = "/c:/WINDOWS/clock.avi"; (* <-- is this kosher? *)
+};
+
+"file://hostname/path/to/the%20file.txt",
+{ dummy with
+	scheme = "file";
+	host = "hostname";
+	path = "/path/to/the file.txt";
+};
+
+"sip:example.com",
+{ dummy with
+	scheme = "sip";
+	host = "example.com";
+};
+
+"sip:example.com:5060",
+{ dummy with
+	scheme = "sip";
+	host = "example.com";
+	port = 5060;
+};
+
+"mailto:ditto@pokémon.com",
+{ dummy with
+	scheme = "mailto";
+	user = "ditto";
+	host = "pokémon.com";
+};
+
+"sip:[dead:beef::666]:5060",
+{ dummy with
+	scheme = "sip";
+	host = "dead:beef::666";
+	port = 5060;
+};
+
+"tel:+12126660420",
+{ dummy with
+	scheme = "tel";
+	host = "+12126660420";
+};
+
+"sip:bob%20barker:priceisright@[dead:beef::666]:5060;isup-oli=00/palfun.html?haha#omg",
+{
+	scheme = "sip";
+	user = "bob barker";
+	pass = "priceisright";
+	host = "dead:beef::666";
+	port = 5060;
+	params = "isup-oli=00";
+	path = "/palfun.html";
+	query = "haha";
+	fragment = "omg";
+};
+
+"http://www.google.com/search?%68l=en&safe=off&q=omfg&aq=f&aqi=g2g-s1g1g-s1g5&aql=&oq=&gs_rfai=",
+{ dummy with
+	scheme = "http";
+	host = "www.google.com";
+	path = "/search";
+	query = "%68l=en&safe=off&q=omfg&aq=f&aqi=g2g-s1g1g-s1g5&aql=&oq=&gs_rfai=";
+};
+]
+
+(*
+func (test *urlTest) compare(url *URL) (passed bool) {
+if url.Scheme != test.url.Scheme {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) scheme: %#v != %#v\n",
+string(test.s), url.Scheme, test.url.Scheme)
+passed = true
+}
+if url.User != test.url.User {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) user: %#v != %#v\n",
+string(test.s), url.User, test.url.User)
+passed = true
+}
+if url.Pass != test.url.Pass {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) pass: %#v != %#v\n",
+string(test.s), url.Pass, test.url.Pass)
+passed = true
+}
+if url.Host != test.url.Host {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) host: %#v != %#v\n",
+string(test.s), url.Host, test.url.Host)
+passed = true
+}
+if url.Port != test.url.Port {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) port: %#v != %#v\n",
+string(test.s), url.Port, test.url.Port)
+passed = true
+}
+if url.Port != test.url.Port {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) port: %#v != %#v\n",
+string(test.s), url.Port, test.url.Port)
+passed = true
+}
+if url.Params != test.url.Params {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) params: %#v != %#v\n",
+string(test.s), url.Params, test.url.Params)
+passed = true
+}
+if url.Path != test.url.Path {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) path: %#v != %#v\n",
+string(test.s), url.Path, test.url.Path)
+passed = true
+}
+if url.Query != test.url.Query {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) query: %#v != %#v\n",
+string(test.s), url.Query, test.url.Query)
+passed = true
+}
+if url.Fragment != test.url.Fragment {
+fmt.Fprintf(os.Stderr, "FAIL url(%#v) fragment: %#v != %#v\n",
+string(test.s), url.Fragment, test.url.Fragment)
+passed = true
+}
+return !passed
+}
+*)
+
+let bench () = 
+let rounds = 0 in
+let urls = [
+"a:a";
+"http://google.com/";
+"sip:jtunney@lobstertech.com";
+"http://user:pass@example.com:80;hello/lol.php?fun#omg";
+"file:///etc/passwd";
+] in
+List.iter (fun url ->
+for i = 1 to rounds do
+ignore (url_parse url)
+done;
+Printf.printf "BENCH parse %S \n%!" url
+) urls
+
+let test () =
+List.iter (fun (s,res) ->
+let url = url_parse s in
+if url <> res then
+fail "got %S for %S" (show url) (*show res*) s
+) tests
+
+let () =
+test ();
+bench ();
+exit 0
+
