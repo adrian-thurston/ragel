@@ -115,21 +115,13 @@ AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
 #
 COLM='$(top_srcdir)/colm/colm'
 COLM_LD='$(top_srcdir)/colm/libcolm.la'
-COLM_LIBDEP=$COLM_LD
-COLM_BINDEP=$COLM
+COLM_LIBDEP="${COLM_LD}"
+COLM_BINDEP="${COLM}"
 
 AC_SUBST(COLM)
 AC_SUBST(COLM_LD)
 AC_SUBST(COLM_LIBDEP)
 AC_SUBST(COLM_BINDEP)
-
-AC_ARG_WITH(crack,
-	[AC_HELP_STRING([--with-crack], [location of crack install])],
-	[CRACK_BIN="$withval/bin/crack"],
-	[AC_ERROR(["require --with-crack"])]
-)
-
-AC_SUBST(CRACK_BIN)
 
 dnl
 dnl Which installed target to test. Without this option supplied testing is
@@ -197,8 +189,18 @@ AC_SUBST(RAGEL_BIN)
 AC_SUBST(RAGEL_CPPFLAGS)
 AC_SUBST(RAGEL_LDFLAGS)
 AC_SUBST(RAGEL_LM)
+
+AC_ARG_WITH(crack,
+	[AC_HELP_STRING([--with-crack], [location of crack install])],
+	[CRACK_BIN="$withval/bin/crack"],
+	[AC_PATH_PROG([CRACK_BIN], [crack])]
+)
+
+AC_SUBST(CRACK_BIN)
 	
 SED_SUBST=["\
+	-e 's|@CXX@|${CXX}|g' \
+	-e 's|@CC@|${CC}|g' \
 	-e 's|@COLM@|${COLM}|g' \
 	-e 's|@COLM_LD@|${COLM_LD}|g' \
 	-e 's|@COLM_LIBDEP@|${COLM_LIBDEP}|g' \
@@ -222,8 +224,6 @@ SED_SUBST=["\
 	-e 's|@RAGEL_CRACK_BIN@|${RAGEL_CRACK_BIN}|g' \
 	-e 's|@RAGEL_JULIA_BIN@|${RAGEL_JULIA_BIN}|g' \
 	-e 's|@CRACK_BIN@|${CRACK_BIN}|g' \
-	-e 's|@CXX@|${CXX}|g' \
-	-e 's|@CC@|${CC}|g' \
 "]
 
 AC_SUBST(SED_SUBST)
