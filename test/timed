@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default to all .d direcories.
-DIRS=$(find -type d -name '*.d')
+DIRS=$(find -type d -name '*.d' | sort)
 
 CORES=$(awk '/cpu cores/ { print $4; exit }'  /proc/cpuinfo)
 
