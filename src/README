@@ -1,0 +1,6 @@
+The /src directory just holds the config.h header for use by the various
+components. The source code is spread amongst these sub-projects:
+
+aapl   - General Purpose Template Library.
+colm   - Colm Programming Language.
+ragel  - Ragel State Machine Compiler.

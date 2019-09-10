@@ -32,7 +32,6 @@
 
 #include <avltree.h>
 
-#include "config.h"
 #include "defs.h"
 #include "keyops.h"
 

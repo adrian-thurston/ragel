@@ -4,9 +4,6 @@
 /Makefile
 /.*.d
 /colm
-/config.h.in
-/config.h.in~
-/config.h
 /defs.h
 /version.h
 /tags

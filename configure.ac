@@ -35,7 +35,6 @@ AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(unsigned long)
 AC_CHECK_SIZEOF(unsigned long long)
-AC_CONFIG_HEADER([colm/config.h colm/defs.h])
 AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 
 dnl Choose a default for the build_manual var. If the dist file is present in
@@ -129,6 +128,8 @@ AC_SUBST(COLM_LD)
 AC_SUBST(COLM_LIBDEP)
 AC_SUBST(COLM_BINDEP)
 
+CPPFLAGS="${CPPFLAGS} -I$(top_srcdir)/src"
+
 SED_SUBST=["\
 	-e 's|@CRACK_BIN@|${CRACK_BIN}|g' \
 	-e 's|@CXX@|${CXX}|g' \
@@ -136,6 +137,8 @@ SED_SUBST=["\
 "]
 
 AC_SUBST(SED_SUBST)
+
+AC_CONFIG_HEADERS([src/config.h colm/defs.h])
 
 dnl write output files
 AC_OUTPUT([

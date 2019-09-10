@@ -20,9 +20,6 @@
  * SOFTWARE.
  */
 
-#if defined(HAVE_SYS_MMAN_H)
-#include <sys/mman.h>
-#endif
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -32,7 +29,6 @@
 #include <colm/bytecode.h>
 #include <colm/pool.h>
 #include <colm/debug.h>
-#include <colm/config.h>
 #include <colm/struct.h>
 
 #define VM_STACK_SIZE (8192)

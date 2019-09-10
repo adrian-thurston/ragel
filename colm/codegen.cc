@@ -34,7 +34,6 @@ void FsmCodeGen::writeIncludes()
 		"#include <colm/pdarun.h>\n"
 		"#include <colm/debug.h>\n"
 		"#include <colm/bytecode.h>\n"
-		"#include <colm/config.h>\n"
 		"#include <colm/defs.h>\n"
 		"#include <colm/input.h>\n"
 		"#include <colm/tree.h>\n"

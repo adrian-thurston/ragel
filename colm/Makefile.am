@@ -34,7 +34,7 @@ RUNTIME_SRC = \
 	print.c
 
 RUNTIME_HDR = \
-	bytecode.h config.h defs.h debug.h pool.h input.h \
+	bytecode.h defs.h debug.h pool.h input.h \
 	pdarun.h map.h type.h tree.h struct.h program.h colm.h internal.h
 
 lib_LTLIBRARIES = libcolm.la
