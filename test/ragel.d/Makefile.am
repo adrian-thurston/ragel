@@ -21,8 +21,8 @@
 COLM = ../../colm/colm
 RAGEL_LM = ../../ragel
 
-COLM_CPPFLAGS = -I../../colm/include
-COLM_LDFLAGS = -L../../colm
+COLM_xCPPFLAGS = -I../../colm/include
+COLM_xLDFLAGS = -L../../colm
 
 TESTS = gentests
 
@@ -57,10 +57,10 @@ TRANS_DEPS = \
 	trans-ocaml.lm trans-ruby.lm \
 	trans-rust.lm
 
-trans_CPPFLAGS = $(COLM_CPPFLAGS)
+trans_CPPFLAGS = $(COLM_xCPPFLAGS)
 trans_SOURCES = trans.c main.c
 trans_LDADD = -lcolm
-trans_LDFLAGS = $(COLM_LDFLAGS)
+trans_LDFLAGS = $(COLM_xLDFLAGS)
 
 trans.c: trans.lm $(TRANS_DEPS)
 	$(COLM) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<

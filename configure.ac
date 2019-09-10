@@ -110,14 +110,9 @@ dnl AM_CONDITIONAL([BUILD_MANUAL],     [test "x$build_manual" = "xyes"])
 AC_CANONICAL_HOST()
 AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
 
-AC_ARG_WITH(crack,
-	[AC_HELP_STRING([--with-crack], [location of crack install])],
-	[CRACK_BIN="$withval/bin/crack"],
-	[AC_ERROR(["require --with-crack"])]
-)
-
-AC_SUBST(CRACK_BIN)
-
+#
+# For building within the tree.
+#
 COLM='$(top_srcdir)/colm/colm'
 COLM_LD='$(top_srcdir)/colm/libcolm.la'
 COLM_LIBDEP=$COLM_LD
@@ -128,9 +123,104 @@ AC_SUBST(COLM_LD)
 AC_SUBST(COLM_LIBDEP)
 AC_SUBST(COLM_BINDEP)
 
-CPPFLAGS="${CPPFLAGS} -I$(top_srcdir)/src"
+AC_ARG_WITH(crack,
+	[AC_HELP_STRING([--with-crack], [location of crack install])],
+	[CRACK_BIN="$withval/bin/crack"],
+	[AC_ERROR(["require --with-crack"])]
+)
 
+AC_SUBST(CRACK_BIN)
+
+dnl
+dnl Which installed target to test. Without this option supplied testing is
+dnl done against what's in the source tree.
+dnl
+AC_ARG_WITH(subject,
+	[AC_HELP_STRING([--with-subject], [location of install tree test (defaults source tree)])],
+	[
+		AAPL_CPPFLAGS="-I${withval}/include/aapl"
+
+		COLM_BIN="${withval}/bin/colm"
+		COLM_CPPFLAGS="-I${withval}/include"
+		COLM_LDFLAGS="${LDFLAGS} -L${withval}/lib -Wl,-rpath,${withval}/lib"
+
+		RAGEL_BIN="$withval/bin/ragel"
+		RAGEL_CPPFLAGS="-I$withval/include"
+		RAGEL_LDFLAGS="-L$withval/lib -Wl,-rpath,${withval}/lib"
+		RAGEL_LM="${withval}/share"
+
+		RAGEL_C_BIN="$withval/bin/ragel-c"
+		RAGEL_D_BIN="$withval/bin/ragel-d"
+		RAGEL_JAVA_BIN="$withval/bin/ragel-java"
+		RAGEL_RUBY_BIN="$withval/bin/ragel-ruby"
+		RAGEL_CSHARP_BIN="$withval/bin/ragel-csharp"
+		RAGEL_GO_BIN="$withval/bin/ragel-go"
+		RAGEL_OCAML_BIN="$withval/bin/ragel-ocaml"
+		RAGEL_ASM_BIN="$withval/bin/ragel-asm"
+		RAGEL_RUST_BIN="$withval/bin/ragel-rust"
+		RAGEL_CRACK_BIN="$withval/bin/ragel-crack"
+		RAGEL_JULIA_BIN="$withval/bin/ragel-julia"
+	],
+	[
+		AAPL_CPPFLAGS='-I$(abs_top_builddir)/aapl'
+
+		COLM_BIN='$(abs_top_builddir)/colm/colm'
+		COLM_CPPFLAGS='-I$(abs_top_builddir)/colm/include'
+		COLM_LDFLAGS='${LDFLAGS} -L$(abs_top_builddir)/colm/.libs -Wl,-rpath,${abs_top_builddir}/colm/.libs'
+
+		RAGEL_BIN='$(abs_top_builddir)/ragel/ragel'
+		RAGEL_CPPFLAGS='-I$(abs_top_builddir)/ragel/include -I$(abs_top_builddir)/aapl'
+		RAGEL_LDFLAGS='-L$(abs_top_builddir)/ragel/.libs -Wl,-rpath,$(abs_top_builddir)/ragel/.libs'
+		RAGEL_LM='$(abs_top_builddir)/ragel'
+
+		RAGEL_C_BIN='$(abs_top_builddir)/ragel/host-c/ragel-c'
+		RAGEL_D_BIN='$(abs_top_builddir)/ragel/host-d/ragel-d'
+		RAGEL_JAVA_BIN='$(abs_top_builddir)/ragel/host-java/ragel-java'
+		RAGEL_RUBY_BIN='$(abs_top_builddir)/ragel/host-ruby/ragel-ruby'
+		RAGEL_CSHARP_BIN='$(abs_top_builddir)/ragel/host-csharp/ragel-csharp'
+		RAGEL_GO_BIN='$(abs_top_builddir)/ragel/host-go/ragel-go'
+		RAGEL_OCAML_BIN='$(abs_top_builddir)/ragel/host-ocaml/ragel-ocaml'
+		RAGEL_ASM_BIN='$(abs_top_builddir)/ragel/host-asm/ragel-asm'
+		RAGEL_RUST_BIN='$(abs_top_builddir)/ragel/host-rust/ragel-rust'
+		RAGEL_CRACK_BIN='$(abs_top_builddir)/ragel/host-crack/ragel-crack'
+		RAGEL_JULIA_BIN='$(abs_top_builddir)/ragel/host-julia/ragel-julia'
+	]
+)
+
+AC_SUBST(AAPL_CPPFLAGS)
+
+AC_SUBST(COLM_BIN)
+AC_SUBST(COLM_CPPFLAGS)
+AC_SUBST(COLM_LDFLAGS)
+
+AC_SUBST(RAGEL_BIN)
+AC_SUBST(RAGEL_CPPFLAGS)
+AC_SUBST(RAGEL_LDFLAGS)
+AC_SUBST(RAGEL_LM)
+	
 SED_SUBST=["\
+	-e 's|@COLM@|${COLM}|g' \
+	-e 's|@COLM_LD@|${COLM_LD}|g' \
+	-e 's|@COLM_LIBDEP@|${COLM_LIBDEP}|g' \
+	-e 's|@COLM_BINDEP@|${COLM_BINDEP}|g' \
+	-e 's|@COLM_BIN@|${COLM_BIN}|g' \
+	-e 's|@COLM_CPPFLAGS@|${COLM_CPPFLAGS}|g' \
+	-e 's|@COLM_LDFLAGS@|${COLM_LDFLAGS}|g' \
+	-e 's|@RAGEL_BIN@|${RAGEL_BIN}|g' \
+	-e 's|@RAGEL_CPPFLAGS@|${RAGEL_CPPFLAGS}|g' \
+	-e 's|@RAGEL_LDFLAGS@|${RAGEL_LDFLAGS}|g' \
+	-e 's|@RAGEL_LM@|${RAGEL_LM}|g' \
+	-e 's|@RAGEL_C_BIN@|${RAGEL_C_BIN}|g' \
+	-e 's|@RAGEL_D_BIN@|${RAGEL_D_BIN}|g' \
+	-e 's|@RAGEL_JAVA_BIN@|${RAGEL_JAVA_BIN}|g' \
+	-e 's|@RAGEL_RUBY_BIN@|${RAGEL_RUBY_BIN}|g' \
+	-e 's|@RAGEL_CSHARP_BIN@|${RAGEL_CSHARP_BIN}|g' \
+	-e 's|@RAGEL_GO_BIN@|${RAGEL_GO_BIN}|g' \
+	-e 's|@RAGEL_OCAML_BIN@|${RAGEL_OCAML_BIN}|g' \
+	-e 's|@RAGEL_ASM_BIN@|${RAGEL_ASM_BIN}|g' \
+	-e 's|@RAGEL_RUST_BIN@|${RAGEL_RUST_BIN}|g' \
+	-e 's|@RAGEL_CRACK_BIN@|${RAGEL_CRACK_BIN}|g' \
+	-e 's|@RAGEL_JULIA_BIN@|${RAGEL_JULIA_BIN}|g' \
 	-e 's|@CRACK_BIN@|${CRACK_BIN}|g' \
 	-e 's|@CXX@|${CXX}|g' \
 	-e 's|@CC@|${CC}|g' \
