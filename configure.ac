@@ -118,18 +118,18 @@ AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
 #
 # For building within the tree.
 #
-COLM='$(top_srcdir)/colm/colm'
-COLM_LD='$(top_srcdir)/colm/libcolm.la'
-COLM_LIBDEP="${COLM_LD}"
+COLM_BIN='$(top_srcdir)/colm/colm'
+COLM_LA='$(top_srcdir)/colm/libcolm.la'
+COLM_LIBDEP="${COLM_LA}"
 COLM_BINDEP="${COLM}"
 
-SED_SUBST="$SED_SUBST -e 's|@COLM@|${COLM}|g'"
-SED_SUBST="$SED_SUBST -e 's|@COLM_LD@|${COLM_LD}|g'"
+SED_SUBST="$SED_SUBST -e 's|@COLM_BIN@|${COLM_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@COLM_LA@|${COLM_LA}|g'"
 SED_SUBST="$SED_SUBST -e 's|@COLM_LIBDEP@|${COLM_LIBDEP}|g'"
 SED_SUBST="$SED_SUBST -e 's|@COLM_BINDEP@|${COLM_BINDEP}|g'"
 
-AC_SUBST(COLM)
-AC_SUBST(COLM_LD)
+AC_SUBST(COLM_BIN)
+AC_SUBST(COLM_LA)
 AC_SUBST(COLM_LIBDEP)
 AC_SUBST(COLM_BINDEP)
 

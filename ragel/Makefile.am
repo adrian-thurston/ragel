@@ -1,8 +1,8 @@
 SUBDIRS = . host-ruby host-asm host-julia host-ocaml host-c \
 	host-d host-csharp host-go host-java host-rust host-crack host-js
 
-COLM        = @COLM@
-COLM_LD     = @COLM_LD@
+COLM_BIN    = @COLM_BIN@
+COLM_LA     = @COLM_LA@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 KELBT       = @KELBT@
@@ -66,7 +66,7 @@ dist_libragel_la_SOURCES = \
 	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc
 
 libragel_la_LDFLAGS = -no-undefined
-libragel_la_LIBADD = libfsm.la $(COLM_LD)
+libragel_la_LIBADD = libfsm.la $(COLM_LA)
 
 if LINKER_NO_UNDEFINED
 libfsm_la_LDFLAGS += -Wl,--no-undefined
@@ -84,7 +84,7 @@ dist_ragel_SOURCES = \
 nodist_ragel_SOURCES = \
 	parse.c rlreduce.cc
 
-ragel_LDADD = libragel.la libfsm.la $(COLM_LD)
+ragel_LDADD = libragel.la libfsm.la $(COLM_LA)
 ragel_DEPENDENCIES = libragel.la libfsm.la $(COLM_LIBDEP)
 
 BUILT_SOURCES = \

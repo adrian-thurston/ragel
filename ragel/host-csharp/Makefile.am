@@ -1,5 +1,5 @@
-COLM        = @COLM@
-COLM_LD     = @COLM_LD@
+COLM_BIN    = @COLM_BIN@
+COLM_LA     = @COLM_LA@
 COLM_LIBDEP = @COLM_LIBDEP@
 COLM_BINDEP = @COLM_BINDEP@
 
@@ -12,16 +12,16 @@ dist_ragel_csharp_SOURCES = main.cc rlhc.c
 nodist_ragel_csharp_SOURCES = \
 	rlparse.c rlreduce.cc
 
-ragel_csharp_LDADD = ../libragel.la ../libfsm.la $(COLM_LD)
+ragel_csharp_LDADD = ../libragel.la ../libfsm.la $(COLM_LA)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
 EXTRA_DIST = rlparse.lm rlhc.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
-	$(COLM) -I.. -c -b rlparseCSharp -o $@ -m rlreduce.cc $<
+	$(COLM_BIN) -I.. -c -b rlparseCSharp -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: rlparse.c
 
 rlhc.c: rlhc.lm
-	$(COLM) -I.. -c -b rlhcCSharp -o $@ $<
+	$(COLM_BIN) -I.. -c -b rlhcCSharp -o $@ $<
