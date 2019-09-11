@@ -1,8 +1,6 @@
 #!/bin/bash
 
-. ../colm.sh
-
-export LD_LIBRARY_PATH=$SUBJECT_LD_LIBRARY_PATH;
+. ../subject.sh
 
 [ -d working ] || mkdir working
 

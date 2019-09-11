@@ -1,15 +1,9 @@
 SUBDIRS = . aapl.d colm.d ragel.d rlhc.d rlparse.d trans.d
 
-noinst_SCRIPTS = colm.mk colm.sh ragel.mk ragel.sh
+noinst_SCRIPTS = subject.mk subject.sh
 
-colm.mk: colm.mk.in Makefile
+subject.mk: subject.mk.in Makefile
 	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
 
-colm.sh: colm.sh.in Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-ragel.mk: ragel.mk.in Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-ragel.sh: ragel.sh.in Makefile
+subject.sh: subject.sh.in Makefile
 	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)

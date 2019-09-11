@@ -1,13 +1,4 @@
-noinst_SCRIPTS = gentests subject.mk subject.pl subject.sh
+noinst_SCRIPTS = gentests
 
-entests: gentests.sh Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-subject.mk: subject.mk.in Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-subject.pl: subject.pl.in Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-subject.sh: subject.sh.in Makefile
+gentests: gentests.sh Makefile
 	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)

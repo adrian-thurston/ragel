@@ -14,9 +14,4 @@
 
 /Makefile
 /Makefile.in
-/subject.mk
-/subject.pl
-/subject.sh
 /working
-
-/pcre.d

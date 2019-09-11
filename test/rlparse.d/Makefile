@@ -1,8 +1,8 @@
-include ../colm.mk
+include ../subject.mk
 
-COLM = $(SUBJECT_BIN)
-COLM_INC = $(SUBJECT_CPPFLAGS)
-COLM_LIB = $(SUBJECT_LDFLAGS)
+COLM = $(COLM_BIN)
+COLM_INC = $(COLM_CPPFLAGS)
+COLM_LIB = $(COLM_LDFLAGS)
 
 all: rlparse
 

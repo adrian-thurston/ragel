@@ -42,15 +42,11 @@
 WORKING=working
 ERRORS=0
 
-COLM="../../colm/colm"
-CPPFLAGS="-I../../colm/include"
-LDFLAGS="-L../../colm/.libs -Wl,-rpath,../../colm/.libs"
-
 # Make available to to test directories below us that are not part of this
 # repository and cannot source one dir up.
-export SUBJECT_BIN="@COLM_BIN@"
-export SUBJECT_CPPFLAGS="@COLM_CPPFLAGS@"
-export SUBJECT_LDFLAGS="@COLM_LDFLAGS@"
+export COLM_BIN="@COLM_BIN@"
+export COLM_CPPFLAGS="@COLM_CPPFLAGS@"
+export COLM_LDFLAGS="@COLM_LDFLAGS@"
 
 # cd `dirname $0`
 test -d $WORKING || mkdir $WORKING
@@ -217,20 +213,20 @@ function runtests()
 			PARSE=$WORKING/$ROOT.parse
 			IF=$WORKING/$ROOT.if
 
-			echo $COLM $COMP -c -o $PARSE.c -e $IF.h -x $IF.cc $LM >> $SH
+			echo $COLM_BIN $COMP -c -o $PARSE.c -e $IF.h -x $IF.cc $LM >> $SH
 			if ! check_compilation $?; then
 				continue
 			fi
 
-			echo gcc -c $CPPFLAGS $LDFLAGS -o $PARSE.o $PARSE.c >> $SH
-			echo g++ -I. $CPPFLAGS $LDFLAGS -o $WORKING/$ROOT $IF.cc $HOST $PARSE.o -lcolm >> $SH
+			echo gcc -c $COLM_CPPFLAGS $COLM_LDFLAGS -o $PARSE.o $PARSE.c >> $SH
+			echo g++ -I. $COLM_CPPFLAGS $COLM_LDFLAGS -o $WORKING/$ROOT $IF.cc $HOST $PARSE.o -lcolm >> $SH
 
 			if ! check_compilation $?; then
 				continue
 			fi
 		else
 			# Compilation.
-			echo $COLM $COMP $COLM_ADDS $LM '&>' $LOG >> $SH
+			echo $COLM_BIN $COMP $COLM_ADDS $LM '&>' $LOG >> $SH
 			#if ! check_compilation $?; then
 			#	continue
 			#fi
