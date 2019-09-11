@@ -26,7 +26,7 @@ COLM_xLDFLAGS = -L../../colm
 
 TESTS = gentests
 
-noinst_SCRIPTS = gentests subject.mk subject.sh
+noinst_SCRIPTS = gentests
 noinst_PROGRAMS = trans
 
 EXTRA_DIST = \
@@ -66,10 +66,4 @@ trans.c: trans.lm $(TRANS_DEPS)
 	$(COLM) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
 
 gentests: gentests.sh Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-subject.mk: subject.mk.in Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
-
-subject.sh: subject.sh.in Makefile
 	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)

@@ -2,7 +2,7 @@
 #   Copyright 2001, 2002 Adrian Thurston <thurston@cs.queensu.ca>
 #
 
-CPPFLAGS = @AAPL_CPPFLAGS@
+CPPFLAGS = @SUBJ_AAPL_CPPFLAGS@
 
 noinst_PROGRAMS = \
 	stress_avltree stress_avliter stress_avlmel \

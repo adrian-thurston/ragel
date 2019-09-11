@@ -44,9 +44,9 @@ ERRORS=0
 
 # Make available to to test directories below us that are not part of this
 # repository and cannot source one dir up.
-export COLM_BIN="@COLM_BIN@"
-export COLM_CPPFLAGS="@COLM_CPPFLAGS@"
-export COLM_LDFLAGS="@COLM_LDFLAGS@"
+export COLM_BIN="@SUBJ_COLM_BIN@"
+export COLM_CPPFLAGS="@SUBJ_COLM_CPPFLAGS@"
+export COLM_LDFLAGS="@SUBJ_COLM_LDFLAGS@"
 
 # cd `dirname $0`
 test -d $WORKING || mkdir $WORKING

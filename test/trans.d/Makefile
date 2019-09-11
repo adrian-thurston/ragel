@@ -3,9 +3,9 @@ include ../subject.mk
 
 all: trans
 
-COLM = $(COLM_BIN)
-COLM_INC = $(COLM_CPPFLAGS)
-COLM_LIB = $(COLM_LDFLAGS)
+COLM = $(SUBJ_COLM_BIN)
+COLM_INC = $(SUBJ_COLM_CPPFLAGS)
+COLM_LIB = $(SUBJ_COLM_LDFLAGS)
 
 TRANS_DEPS = $(wildcard *-*.lm)
 

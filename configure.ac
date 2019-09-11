@@ -134,90 +134,92 @@ AC_SUBST(COLM_LIBDEP)
 AC_SUBST(COLM_BINDEP)
 
 dnl
+dnl Testing
+dnl
 dnl Which installed target to test. Without this option supplied testing is
-dnl done against what's in the source tree.
+dnl done against what is in the source tree.
 dnl
 AC_ARG_WITH(subject,
 	[AC_HELP_STRING([--with-subject], [location of install tree test (defaults source tree)])],
 	[
-		AAPL_CPPFLAGS="-I${withval}/include/aapl"
+		SUBJ_AAPL_CPPFLAGS="-I${withval}/include/aapl"
 
-		COLM_BIN="${withval}/bin/colm"
-		COLM_CPPFLAGS="-I${withval}/include"
-		COLM_LDFLAGS="${LDFLAGS} -L${withval}/lib -Wl,-rpath,${withval}/lib"
+		SUBJ_COLM_BIN="${withval}/bin/colm"
+		SUBJ_COLM_CPPFLAGS="-I${withval}/include"
+		SUBJ_COLM_LDFLAGS="-L${withval}/lib -Wl,-rpath,${withval}/lib"
 
-		RAGEL_BIN="$withval/bin/ragel"
-		RAGEL_CPPFLAGS="-I$withval/include"
-		RAGEL_LDFLAGS="-L$withval/lib -Wl,-rpath,${withval}/lib"
-		RAGEL_LM="${withval}/share"
+		SUBJ_RAGEL_BIN="$withval/bin/ragel"
+		SUBJ_RAGEL_CPPFLAGS="-I$withval/include"
+		SUBJ_RAGEL_LDFLAGS="-L$withval/lib -Wl,-rpath,${withval}/lib"
+		SUBJ_RAGEL_LM="${withval}/share"
 
-		RAGEL_C_BIN="$withval/bin/ragel-c"
-		RAGEL_D_BIN="$withval/bin/ragel-d"
-		RAGEL_JAVA_BIN="$withval/bin/ragel-java"
-		RAGEL_RUBY_BIN="$withval/bin/ragel-ruby"
-		RAGEL_CSHARP_BIN="$withval/bin/ragel-csharp"
-		RAGEL_GO_BIN="$withval/bin/ragel-go"
-		RAGEL_OCAML_BIN="$withval/bin/ragel-ocaml"
-		RAGEL_ASM_BIN="$withval/bin/ragel-asm"
-		RAGEL_RUST_BIN="$withval/bin/ragel-rust"
-		RAGEL_CRACK_BIN="$withval/bin/ragel-crack"
-		RAGEL_JULIA_BIN="$withval/bin/ragel-julia"
+		SUBJ_RAGEL_C_BIN="$withval/bin/ragel-c"
+		SUBJ_RAGEL_D_BIN="$withval/bin/ragel-d"
+		SUBJ_RAGEL_JAVA_BIN="$withval/bin/ragel-java"
+		SUBJ_RAGEL_RUBY_BIN="$withval/bin/ragel-ruby"
+		SUBJ_RAGEL_CSHARP_BIN="$withval/bin/ragel-csharp"
+		SUBJ_RAGEL_GO_BIN="$withval/bin/ragel-go"
+		SUBJ_RAGEL_OCAML_BIN="$withval/bin/ragel-ocaml"
+		SUBJ_RAGEL_ASM_BIN="$withval/bin/ragel-asm"
+		SUBJ_RAGEL_RUST_BIN="$withval/bin/ragel-rust"
+		SUBJ_RAGEL_CRACK_BIN="$withval/bin/ragel-crack"
+		SUBJ_RAGEL_JULIA_BIN="$withval/bin/ragel-julia"
 	],
 	[
-		AAPL_CPPFLAGS='-I$(abs_top_builddir)/aapl'
+		SUBJ_AAPL_CPPFLAGS='-I$(abs_top_builddir)/aapl'
 
-		COLM_BIN='$(abs_top_builddir)/colm/colm'
-		COLM_CPPFLAGS='-I$(abs_top_builddir)/colm/include'
-		COLM_LDFLAGS='${LDFLAGS} -L$(abs_top_builddir)/colm/.libs -Wl,-rpath,${abs_top_builddir}/colm/.libs'
+		SUBJ_COLM_BIN='$(abs_top_builddir)/colm/colm'
+		SUBJ_COLM_CPPFLAGS='-I$(abs_top_builddir)/colm/include'
+		SUBJ_COLM_LDFLAGS='-L$(abs_top_builddir)/colm/.libs -Wl,-rpath,${abs_top_builddir}/colm/.libs'
 
-		RAGEL_BIN='$(abs_top_builddir)/ragel/ragel'
-		RAGEL_CPPFLAGS='-I$(abs_top_builddir)/ragel/include -I$(abs_top_builddir)/aapl'
-		RAGEL_LDFLAGS='-L$(abs_top_builddir)/ragel/.libs -Wl,-rpath,$(abs_top_builddir)/ragel/.libs'
-		RAGEL_LM='$(abs_top_builddir)/ragel'
+		SUBJ_RAGEL_BIN='$(abs_top_builddir)/ragel/ragel'
+		SUBJ_RAGEL_CPPFLAGS='-I$(abs_top_builddir)/ragel/include -I$(abs_top_builddir)/aapl'
+		SUBJ_RAGEL_LDFLAGS='-L$(abs_top_builddir)/ragel/.libs -Wl,-rpath,$(abs_top_builddir)/ragel/.libs'
+		SUBJ_RAGEL_LM='$(abs_top_builddir)/ragel'
 
-		RAGEL_C_BIN='$(abs_top_builddir)/ragel/host-c/ragel-c'
-		RAGEL_D_BIN='$(abs_top_builddir)/ragel/host-d/ragel-d'
-		RAGEL_JAVA_BIN='$(abs_top_builddir)/ragel/host-java/ragel-java'
-		RAGEL_RUBY_BIN='$(abs_top_builddir)/ragel/host-ruby/ragel-ruby'
-		RAGEL_CSHARP_BIN='$(abs_top_builddir)/ragel/host-csharp/ragel-csharp'
-		RAGEL_GO_BIN='$(abs_top_builddir)/ragel/host-go/ragel-go'
-		RAGEL_OCAML_BIN='$(abs_top_builddir)/ragel/host-ocaml/ragel-ocaml'
-		RAGEL_ASM_BIN='$(abs_top_builddir)/ragel/host-asm/ragel-asm'
-		RAGEL_RUST_BIN='$(abs_top_builddir)/ragel/host-rust/ragel-rust'
-		RAGEL_CRACK_BIN='$(abs_top_builddir)/ragel/host-crack/ragel-crack'
-		RAGEL_JULIA_BIN='$(abs_top_builddir)/ragel/host-julia/ragel-julia'
+		SUBJ_RAGEL_C_BIN='$(abs_top_builddir)/ragel/host-c/ragel-c'
+		SUBJ_RAGEL_D_BIN='$(abs_top_builddir)/ragel/host-d/ragel-d'
+		SUBJ_RAGEL_JAVA_BIN='$(abs_top_builddir)/ragel/host-java/ragel-java'
+		SUBJ_RAGEL_RUBY_BIN='$(abs_top_builddir)/ragel/host-ruby/ragel-ruby'
+		SUBJ_RAGEL_CSHARP_BIN='$(abs_top_builddir)/ragel/host-csharp/ragel-csharp'
+		SUBJ_RAGEL_GO_BIN='$(abs_top_builddir)/ragel/host-go/ragel-go'
+		SUBJ_RAGEL_OCAML_BIN='$(abs_top_builddir)/ragel/host-ocaml/ragel-ocaml'
+		SUBJ_RAGEL_ASM_BIN='$(abs_top_builddir)/ragel/host-asm/ragel-asm'
+		SUBJ_RAGEL_RUST_BIN='$(abs_top_builddir)/ragel/host-rust/ragel-rust'
+		SUBJ_RAGEL_CRACK_BIN='$(abs_top_builddir)/ragel/host-crack/ragel-crack'
+		SUBJ_RAGEL_JULIA_BIN='$(abs_top_builddir)/ragel/host-julia/ragel-julia'
 	]
 )
 
-SED_SUBST="$SED_SUBST -e 's|@COLM_BIN@|${COLM_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@COLM_CPPFLAGS@|${COLM_CPPFLAGS}|g'"
-SED_SUBST="$SED_SUBST -e 's|@COLM_LDFLAGS@|${COLM_LDFLAGS}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_BIN@|${RAGEL_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_CPPFLAGS@|${RAGEL_CPPFLAGS}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_LDFLAGS@|${RAGEL_LDFLAGS}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_LM@|${RAGEL_LM}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_C_BIN@|${RAGEL_C_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_D_BIN@|${RAGEL_D_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_JAVA_BIN@|${RAGEL_JAVA_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_RUBY_BIN@|${RAGEL_RUBY_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_CSHARP_BIN@|${RAGEL_CSHARP_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_GO_BIN@|${RAGEL_GO_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_OCAML_BIN@|${RAGEL_OCAML_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_ASM_BIN@|${RAGEL_ASM_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_RUST_BIN@|${RAGEL_RUST_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_CRACK_BIN@|${RAGEL_CRACK_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@RAGEL_JULIA_BIN@|${RAGEL_JULIA_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_COLM_BIN@|${SUBJ_COLM_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_COLM_CPPFLAGS@|${SUBJ_COLM_CPPFLAGS}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_COLM_LDFLAGS@|${SUBJ_COLM_LDFLAGS}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_BIN@|${SUBJ_RAGEL_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_CPPFLAGS@|${SUBJ_RAGEL_CPPFLAGS}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_LDFLAGS@|${SUBJ_RAGEL_LDFLAGS}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_LM@|${SUBJ_RAGEL_LM}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_C_BIN@|${SUBJ_RAGEL_C_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_D_BIN@|${SUBJ_RAGEL_D_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_JAVA_BIN@|${SUBJ_RAGEL_JAVA_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_RUBY_BIN@|${SUBJ_RAGEL_RUBY_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_CSHARP_BIN@|${SUBJ_RAGEL_CSHARP_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_GO_BIN@|${SUBJ_RAGEL_GO_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_OCAML_BIN@|${SUBJ_RAGEL_OCAML_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_ASM_BIN@|${SUBJ_RAGEL_ASM_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_RUST_BIN@|${SUBJ_RAGEL_RUST_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_CRACK_BIN@|${SUBJ_RAGEL_CRACK_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@SUBJ_RAGEL_JULIA_BIN@|${SUBJ_RAGEL_JULIA_BIN}|g'"
 
-AC_SUBST(AAPL_CPPFLAGS)
+AC_SUBST(SUBJ_AAPL_CPPFLAGS)
 
-AC_SUBST(COLM_BIN)
-AC_SUBST(COLM_CPPFLAGS)
-AC_SUBST(COLM_LDFLAGS)
+AC_SUBST(SUBJ_COLM_BIN)
+AC_SUBST(SUBJ_COLM_CPPFLAGS)
+AC_SUBST(SUBJ_COLM_LDFLAGS)
 
-AC_SUBST(RAGEL_BIN)
-AC_SUBST(RAGEL_CPPFLAGS)
-AC_SUBST(RAGEL_LDFLAGS)
-AC_SUBST(RAGEL_LM)
+AC_SUBST(SUBJ_RAGEL_BIN)
+AC_SUBST(SUBJ_RAGEL_CPPFLAGS)
+AC_SUBST(SUBJ_RAGEL_LDFLAGS)
+AC_SUBST(SUBJ_RAGEL_LM)
 
 dnl
 dnl Installed programs to test in 
