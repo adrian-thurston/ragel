@@ -19,8 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-SUBDIRS = colm ragel doc
+SUBDIRS = colm ragel doc test
 DIST_SUBDIRS = $(SUBDIRS) aapl
 
 dist_doc_DATA = colm.vim
