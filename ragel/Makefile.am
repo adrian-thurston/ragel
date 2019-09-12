@@ -128,7 +128,7 @@ RAGEL_LM = \
 	rlreduce.lm
 
 parse.c: $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM) -c -b rlparseC -o $@ -m rlreduce.cc $<
+	$(COLM_BIN) -c -b rlparseC -o $@ -m rlreduce.cc $<
 
 rlreduce.cc: parse.c
 
