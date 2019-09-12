@@ -1,17 +1,14 @@
-SUPPORTED ON
+                     Colm.Net Suite of Programs
+                     ==========================
+
+This package contains the Colm Programming Language, Ragel State Machine
+Compiler 7.0+, and supporting libraries.
+
+DEPENDENCIES
 ============
 
-Colm is supported on Unix-like systems.
-
-RUN-TIME DEPENDENCIES
-=====================
-
-Colm depends on GCC at runtime. It produces a C program as output, then
-compiles and links it with a runtime library. The compiled program depends on
-the colm library.
-
-BUILD DEPENDENCIES
-==================
+This package has no external dependencies, other than usual autotools and C/C++
+compiler programs.
 
 For the program:
 
@@ -19,7 +16,9 @@ For the program:
 
 For the docucumentation:
 
-    asciidoc
+ * asciidoc
+ * fig2dev
+
 
 BUILDING
 ========
@@ -30,6 +29,13 @@ $ ./autogen
 $ ./configure
 $ make
 $ make install
+
+RUN-TIME DEPENDENCIES
+=====================
+
+The colm program depends on GCC at runtime. It produces a C program as output,
+then compiles and links it with a runtime library. The compiled program depends
+on the colm library.
 
 Notes on RUNNING
 ================
@@ -42,4 +48,4 @@ location (prefix) to construct the flags.
 SYNTAX HIGHLIGHTING
 ===================
 
-There is a vim syntax definition file colm.vim
+There are vim syntax definition files colm.vim and ragel.vim

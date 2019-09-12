@@ -23,6 +23,10 @@ dnl SOFTWARE.
 AC_INIT(colm, 0.13.0.7)
 PUBDATE="May 2019"
 
+RAGEL_VERSION="7.0.0.12"
+RAGEL_PUBDATE="May 2019"
+
+
 AM_INIT_AUTOMAKE([foreign])
 
 : ${CFLAGS="-Wall -g"}
@@ -31,10 +35,12 @@ AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_SUBST(PUBDATE)
-AC_CHECK_SIZEOF(void *)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(unsigned long)
-AC_CHECK_SIZEOF(unsigned long long)
+AC_CHECK_SIZEOF([int])
+AC_CHECK_SIZEOF([long])
+AC_CHECK_SIZEOF([void *])
+AC_CHECK_SIZEOF([long])
+AC_CHECK_SIZEOF([unsigned long])
+AC_CHECK_SIZEOF([unsigned long long])
 AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 
 dnl Choose a default for the build_manual var. If the dist file is present in
@@ -63,6 +69,8 @@ dnl AC_SUBST(BUILD_PARSERS,true)
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
+AC_CHECK_TOOL(AR, ar)
+AC_PROG_RANLIB
 AC_PROG_LIBTOOL
 
 SED_SUBST=["\
@@ -88,6 +96,38 @@ AC_CHECK_PROG([ASCIIDOC], [asciidoc], [asciidoc])
 AC_CHECK_PROG([PYGMENTIZE], [pygmentize], [pygmentize])
 AM_CONDITIONAL([BUILD_MANUAL], [test "x$ASCIIDOC" != x && test "x$PYGMENTIZE" != x])
 
+dnl
+dnl Enable arg to explicitly control the building of the manual
+dnl
+AC_ARG_ENABLE(manual,
+	[  --enable-manual         do we want to build the manual?],
+	[
+		if test "x$enableval" = "xyes"; then
+			build_manual=yes;
+		else
+			build_manual=no;
+		fi
+	],
+)
+
+dnl Checks to carry out if we are building the manual.
+if test "x$build_manual" = "xyes"; then
+	AC_CHECK_PROG(FIG2DEV, fig2dev, fig2dev)
+	if test -z "$FIG2DEV"; then
+		echo
+		echo "error: fig2dev is required to build the manual (maybe use --disable-manual)"
+		echo
+		exit 1
+	fi
+
+	AC_CHECK_PROG(PDFLATEX, pdflatex, pdflatex)
+	if test -z "$PDFLATEX"; then
+		echo
+		echo "error: pdflatex is required to build the manual (maybe use --disable-manual)"
+		echo
+		exit 1
+	fi
+fi
 
 dnl
 dnl Build the program? ( no means just build libfsm )

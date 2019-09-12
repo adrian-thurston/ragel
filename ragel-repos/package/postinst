@@ -1,6 +1,0 @@
-#!/bin/bash
-#
-
-ldconfig
-
-exit 0
