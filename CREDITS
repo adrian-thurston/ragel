@@ -1,8 +1,16 @@
+                     Colm Programming Language -- CREDITS
+                     ====================================
+
+The Colm Programming Language was designed and developed by by myself,
+Adrian Thurston <thurston@colm.net> as an implementation of the ideas developed
+in my PhD thesis. Several others have helped, including Peter Reijnders and
+Wictor Lund. Please also see github contributors list.
+
                      Ragel State Machine Compiler -- CREDITS
                      =======================================
 
-Ragel was designed and written by Adrian Thurston <thurston@colm.net>. Many
-others have helped out along the way.
+Ragel was designed and developed by myself, Adrian Thurston <thurston@colm.net>.
+Many others have helped out along the way.
 
 * Financial support provided by Arbor Networks and Barracuda
   Networks.
@@ -51,3 +59,4 @@ others have helped out along the way.
     Sherlock, Conrad Steenberg, Jan Engelhardt, Kenta Sato, Harald Grossauer,
     Kamil Klimkiewicz, Hesham Wahba, Phil Carmody, Yang Hong
 
+* Please also see the github contributors list.
