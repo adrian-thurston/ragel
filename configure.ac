@@ -280,6 +280,7 @@ AC_OUTPUT([
 	test/colm.d/Makefile
 	test/ragel.d/Makefile
 	doc/Makefile
+	doc/colm/Makefile
 ])
 
 echo "configuration of colm complete"
