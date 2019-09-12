@@ -32,6 +32,9 @@ EXTRA_DIST = ragel-guide.txt \
 	bmrange.fig conds2.fig exconcat.fig exor.fig exstar.fig lines1.fig \
 	opstar.fig
 
+ragel.1: ragel.1.in
+	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
+
 if BUILD_MANUAL
 
 doc_DATA = ragel-guide.html
