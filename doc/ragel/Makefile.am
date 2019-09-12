@@ -33,7 +33,7 @@ EXTRA_DIST = ragel-guide.txt \
 	opstar.fig
 
 ragel.1: ragel.1.in
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
+	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
 
 if BUILD_MANUAL
 

@@ -66,4 +66,4 @@ trans.c: trans.lm $(TRANS_DEPS)
 	$(COLM) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
 
 gentests: gentests.sh Makefile
-	@$(top_srcdir)/test/sedsubst $< $@ -w,+x $(SED_SUBST)
+	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
