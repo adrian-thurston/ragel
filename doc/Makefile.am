@@ -1,1 +1,1 @@
-SUBDIRS = colm
+SUBDIRS = colm ragel

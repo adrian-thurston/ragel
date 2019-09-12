@@ -20,7 +20,7 @@
 
 
 # Get the version info.
-include ../version.mk
+include ../../aapl-repos/version.mk
 
 PREFIX = ../../aapl
 
@@ -34,7 +34,7 @@ all: Doxyfile
 %: %.cpp
 	g++ -I../aapl -o $@ $<
 
-Doxyfile: Doxyfile.in ../version.mk
+Doxyfile: Doxyfile.in ../../aapl-repos/version.mk
 	sed 's/@VERSION@/$(VERSION)/' Doxyfile.in > Doxyfile
 
 clean:
