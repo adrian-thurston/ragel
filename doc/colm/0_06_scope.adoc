@@ -1,8 +1,8 @@
 Scope
 =====
 
-We saw in the previous paragraph that functions can be used, and that they can have parameter.
-This forces us to clarify 'scope'.
+We saw in the previous paragraph that functions can be used, and that they can have parameters.
+This enforces us to clarify 'scope'.
 
 [source,chapel]
 ./scope.lm

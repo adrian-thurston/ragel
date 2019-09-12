@@ -41,5 +41,5 @@ Colm's development started by https://twitter.com/ehdtee[Adrian Thurston] during
 === When not to use Colm
 
 Colm is meant to create executables or object files that can be linked in other programs. 
-This make is ideal for tasks like high performance transformations, but not very convienient for throwaway-oneliners that are common with tools like 'sed' or 'awk'.
+This make is ideal for tasks like high performance transformations, but not very convenient for throwaway-oneliners that are common with tools like 'sed' or 'awk'.
 

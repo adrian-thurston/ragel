@@ -2,7 +2,7 @@ List, Map, Struct and alias
 ===========================
 
 Next to the basic types, there are the normal things that we can expect from scripting languages.
-As colm is static and strong typed, it is very convienient to use alias as well.
+As colm is static and strong typed, it is very convenient to use alias as well.
 
 An example is probably much clearer then 1000 loc.
 
