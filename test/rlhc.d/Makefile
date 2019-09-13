@@ -26,3 +26,5 @@ rlhc: rlhc.lm $(RLHC_DEP)
 
 clean:
 	rm -f *.o
+
+install:

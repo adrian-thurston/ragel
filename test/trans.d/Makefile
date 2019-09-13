@@ -28,3 +28,5 @@ trans.c: trans.lm $(TRANS_DEPS)
 
 clean:
 	rm -f *.o
+
+install:

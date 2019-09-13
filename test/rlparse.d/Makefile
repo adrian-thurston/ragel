@@ -35,3 +35,5 @@ rlparse: $(OBJ)
 
 clean:
 	rm -f *.o
+
+install:
