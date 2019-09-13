@@ -156,24 +156,6 @@ dnl AM_CONDITIONAL([BUILD_MANUAL],     [test "x$build_manual" = "xyes"])
 AC_CANONICAL_HOST()
 AM_CONDITIONAL([LINKER_NO_UNDEFINED], [test "x$host_os" = "xlinux-gnu"])
 
-#
-# For building within the tree.
-#
-COLM_BIN='$(top_srcdir)/colm/colm'
-COLM_LA='$(top_srcdir)/colm/libcolm.la'
-COLM_LIBDEP="${COLM_LA}"
-COLM_BINDEP="${COLM}"
-
-SED_SUBST="$SED_SUBST -e 's|@COLM_BIN@|${COLM_BIN}|g'"
-SED_SUBST="$SED_SUBST -e 's|@COLM_LA@|${COLM_LA}|g'"
-SED_SUBST="$SED_SUBST -e 's|@COLM_LIBDEP@|${COLM_LIBDEP}|g'"
-SED_SUBST="$SED_SUBST -e 's|@COLM_BINDEP@|${COLM_BINDEP}|g'"
-
-AC_SUBST(COLM_BIN)
-AC_SUBST(COLM_LA)
-AC_SUBST(COLM_LIBDEP)
-AC_SUBST(COLM_BINDEP)
-
 dnl
 dnl Testing
 dnl

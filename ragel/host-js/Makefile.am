@@ -1,7 +1,7 @@
-COLM_BIN    = @COLM_BIN@
-COLM_LA     = @COLM_LA@
-COLM_LIBDEP = @COLM_LIBDEP@
-COLM_BINDEP = @COLM_BINDEP@
+COLM_BIN    = ../../colm/colm
+COLM_LA     = ../../colm/libcolm.la
+COLM_LIBDEP = $(COLM_LA)
+COLM_BINDEP = $(COLM_BIN)
 
 bin_PROGRAMS = ragel-js
 

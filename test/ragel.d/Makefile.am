@@ -18,7 +18,7 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-COLM = ../../colm/colm
+COLM_BIN = ../../colm/colm
 RAGEL_LM = ../../ragel
 
 COLM_xCPPFLAGS = -I../../colm/include
@@ -63,7 +63,7 @@ trans_LDADD = -lcolm
 trans_LDFLAGS = $(COLM_xLDFLAGS)
 
 trans.c: trans.lm $(TRANS_DEPS)
-	$(COLM) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
+	$(COLM_BIN) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
 
 gentests: gentests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)

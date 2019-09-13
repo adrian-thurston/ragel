@@ -1,10 +1,10 @@
 SUBDIRS = . host-ruby host-asm host-julia host-ocaml host-c \
 	host-d host-csharp host-go host-java host-rust host-crack host-js
 
-COLM_BIN    = @COLM_BIN@
-COLM_LA     = @COLM_LA@
-COLM_LIBDEP = @COLM_LIBDEP@
-COLM_BINDEP = @COLM_BINDEP@
+COLM_BIN    = ../colm/colm
+COLM_LA     = ../colm/libcolm.la
+COLM_LIBDEP = $(COLM_LA)
+COLM_BINDEP = $(COLM_BIN)
 KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
