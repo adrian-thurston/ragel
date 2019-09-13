@@ -1,7 +1,7 @@
 Def
 ===
 
-The 'def' is where colm realy shines.
+The 'def' is where colm really shines.
 A 'def' is somewhere between a struct and a regular expression.
 Again one example is much more clearer.
 

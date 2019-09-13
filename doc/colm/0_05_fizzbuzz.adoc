@@ -35,7 +35,7 @@ hello 9 4
 
 == Real FizzBuzz
 
-The fizzbuzz test is often used to check is someone has programming skils.
+The fizzbuzz test is often used to check if someone has programming skills.
 It is the next logical step to 'hello world'.
 
 [source,chapel]
@@ -46,11 +46,11 @@ include::code/fizzbuzz.lm[]
 
 It appears that there is no modulo operator ('%').
 Therefor we'll resort to a function.
-Writing a function seems rather straight forward
+Writing a function seems rather straight forward.
 
 Please note:
 * that '&&' is working.
-* The return type is needed, but if 'nil' is retuned by default.
+* The return type is needed, but if 'nil' is returned by default.
 
 [source,bash]
 ----

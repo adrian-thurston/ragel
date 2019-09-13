@@ -1,7 +1,7 @@
 Scope
 =====
 
-We saw in the previous paragraph that functions can be used, and that they can have parameter.
+We saw in the previous paragraph that functions can be used, and that they can have parameters.
 This forces us to clarify 'scope'.
 
 [source,chapel]

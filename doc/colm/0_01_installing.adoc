@@ -33,9 +33,9 @@ It works!
 When we look a little bit closer we see that colm:
 
 * is able to be build as a static and/or shared libray.
-* is licenced under GPL 2
-* is equiped with a vim syntax highlighting file
-* is using the aapl (LGPL 2.1 licenced) library from Adrian Thurston (just like ragel does).
+* is licenced under MIT
+* is equipped with a vim syntax highlighting file
+* is using the aapl (MIT licenced) library from Adrian Thurston (just like ragel does).
 * There is one file in the repository that stands out: 'colm.lm'
-  In the Ragel repository there are also serveral '.lm' files. And it's syntax looks like the colm language that is presented in the thesis.
+  In the Ragel repository there are also several '.lm' files. And it's syntax looks like the colm language that is presented in the thesis.
 
