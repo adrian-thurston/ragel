@@ -44,15 +44,6 @@ AC_CHECK_SIZEOF([unsigned long])
 AC_CHECK_SIZEOF([unsigned long long])
 AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 
-dnl Choose a default for the build_manual var. If the dist file is present in
-dnl the root then default to no, otherwise go for it.
-AC_CHECK_FILES( [$srcdir/DIST], 
-	[. $srcdir/DIST;], 
-	[build_manual=yes; ] )
-
-dnl Set to true if the manual should be built.
-AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
-
 AC_CHECK_SIZEOF([long])
 
 dnl Generic dependency specification.
@@ -97,6 +88,12 @@ AC_CHECK_PROG([ASCIIDOC], [asciidoc], [asciidoc])
 AC_CHECK_PROG([PYGMENTIZE], [pygmentize], [pygmentize])
 AM_CONDITIONAL([BUILD_MANUAL], [test "x$ASCIIDOC" != x && test "x$PYGMENTIZE" != x])
 
+dnl Choose a default for the build_manual var. If the dist file is present in
+dnl the root then default to no, otherwise go for it.
+AC_CHECK_FILES( [$srcdir/DIST], 
+	[. $srcdir/DIST;], 
+	[build_manual=yes; ] )
+
 dnl
 dnl Enable arg to explicitly control the building of the manual
 dnl
@@ -129,6 +126,9 @@ if test "x$build_manual" = "xyes"; then
 		exit 1
 	fi
 fi
+
+dnl Set to true if the manual should be built.
+AM_CONDITIONAL(BUILD_MANUAL, [test "x$build_manual" = "xyes"])
 
 dnl
 dnl Build the program? ( no means just build libfsm )
