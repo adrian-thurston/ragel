@@ -37,7 +37,7 @@ ragel.1: ragel.1.in
 
 if BUILD_MANUAL
 
-doc_DATA = ragel-guide.html
+doc_DATA = ragel-guide.html ragel-guide.pdf
 
 .fig.png:
 	fig2dev -L png -S 4 $< $@
