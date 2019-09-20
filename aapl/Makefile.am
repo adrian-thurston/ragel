@@ -1,7 +1,9 @@
-noinst_HEADERS = \
-	avlbasic.h avlcommon.h avlibasic.h avlikeyless.h avlimap.h \
-	avlimel.h avlimelkey.h avliset.h avlitree.h avlkeyless.h avlmap.h \
-	avlmel.h avlmelkey.h avlset.h avltree.h bstcommon.h bstmap.h bstset.h \
-	bsttable.h bubblesort.h compare.h dlcommon.h dlist.h dlistmel.h \
-	dlistval.h insertsort.h mergesort.h quicksort.h resize.h sbstmap.h \
-	sbstset.h sbsttable.h svector.h table.h vector.h
+aaplincludedir = $(includedir)/aapl
+
+aaplinclude_HEADERS = \
+	avlbasic.h avlimel.h avlmap.h bstcommon.h compare.h insertsort.h \
+	sbstset.h avlcommon.h avlimelkey.h avlmel.h bstmap.h dlcommon.h \
+	mergesort.h sbsttable.h avlibasic.h avliset.h avlmelkey.h bstset.h \
+	dlist.h quicksort.h svector.h avlikeyless.h avlitree.h avlset.h \
+	bsttable.h dlistmel.h resize.h table.h avlimap.h avlkeyless.h avltree.h \
+	bubblesort.h dlistval.h sbstmap.h vector.h astring.h buffer.h rope.h
