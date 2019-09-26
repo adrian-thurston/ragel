@@ -425,7 +425,7 @@ void runOutputProgram()
 	if ( verbose )
 		cout << "running output: '" << binaryFn << "'" << endl;
 
-	execl(binaryFn, binaryFn, 0);
+	execl( binaryFn, binaryFn, NULL );
 	/* We shall never return here! */
 }
 
