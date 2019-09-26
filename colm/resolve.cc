@@ -114,7 +114,7 @@ UniqueType *TypeRef::resolveTypeLiteral( Compiler *pd )
 		nspace = nspace->parentNamespace;
 	}
 
-	error(loc) << "unknown type " << typeName << " in typeof expression" << endp;
+	error(loc) << "unknown type " << pdaLiteral->data << " in typeof expression" << endp;
 	return 0;
 }
 
