@@ -7,7 +7,7 @@ lex
 	literal `[ `] `:
 	literal `->
 	literal `< `>
-	literal `?
+	literal `? `==
 
 	token id /[A-Za-z_] [A-Za-z_0-9]*/
 	token string /'"' ( [^\"] | '\\' any )* '"'/
@@ -15,6 +15,9 @@ lex
 
 	ignore /'//' [^\n]* '\n'/
 	ignore /[ \t\n]+/
+
+
+	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
 end
 
 #
@@ -119,6 +122,10 @@ def mut_factor
 |	[`& factor]
 |	[`mut factor]
 
+#
+# Expression
+#
+
 def expansion_tail
 	[expansion_tail `. mut_factor]
 |	[]
@@ -126,9 +133,26 @@ def expansion_tail
 def expansion_list
 	[mut_factor expansion_tail]
 
+def oper_list
+	[oper_list `== expansion_list]
+|	[expansion_list]
+
+
+def compound_op
+	[`+=] | [`-=] | [`*=] | [`/=] | [`%=]
+|	[`&=] | [`|=] | [`^=] | [`<<=] | [`>>=]
+
+def assignment_expression
+	[oper_list `= assignment_expression]
+|	[oper_list]
+
+# Evaluates right to left. 
+def compound_expression
+	[assignment_expression compound_op compound_expression]
+|	[assignment_expression]
+
 def expr
-	[expansion_list]
-|	[expansion_list `?]
+	[compound_expression `? ?]
 
 def expr_stmt
 	[expr]
@@ -179,7 +203,6 @@ def decl
 def stmt
 	[expr_stmt]
 |	[let_stmt]
-|	[assignment_stmt]
 
 def ctrl_flow
 	[if_stmt]
@@ -193,6 +216,16 @@ parse P: program [stdin]
 
 if P {
 	print [ P ]
+
+	for CE: compound_expression in P {
+		if match CE [assignment_expression compound_op compound_expression]
+			print "compound expression: [CE]
+	}
+
+	for AE: assignment_expression in P {
+		if match AE [oper_list `= assignment_expression]
+			print "assignment expression: [AE]
+	}
 }
 else {
 	send stderr "failed to parse input [error]
