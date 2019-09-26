@@ -139,15 +139,18 @@ def assignment_stmt
 # list of statement types
 #
 
+def semi_seq
+	[`; +]
+
 def stmt_plus
-	[stmt `; stmt_plus]
+	[stmt semi_seq stmt_plus]
 |	[ctrl_flow stmt_plus]
 |	[stmt]
 |	[ctrl_flow]
 
 def stmt_list
 	[stmt_plus]
-|	[stmt_plus `;]
+|	[stmt_plus semi_seq]
 |	[]
 
 def if_stmt
