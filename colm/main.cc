@@ -26,6 +26,7 @@
 #include <strings.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <iostream>
@@ -85,6 +86,7 @@ bool generateGraphviz = false;
 bool verbose = false;
 bool logging = false;
 bool branchPointInfo = false;
+bool run = false;
 bool addUniqueEmptyProductions = false;
 bool gblLibrary = false;
 long gblActiveRealm = 0;
@@ -182,11 +184,12 @@ void usage()
 "   -x <file>            write C++ export code to <file>\n"
 "   -m <file>            write C++ commit code to <file>\n"
 "   -a <file>            additional code file to include in output program\n"
-"   -E N=V               set a string value availabe in the program\n"
+"   -E N=V               set a string value available in the program\n"
 "   -I <path>            additional include path for the compiler\n"
 "   -i                   activate branchpoint information\n"
 "   -L <path>            additional library path for the linker\n"
 "   -l                   activate logging\n"
+"   -r                   run output program and replace process\n"
 "   -c                   compile only (don't produce binary)\n"
 "   -V                   print dot format (graphiz)\n"
 "   -d                   print verbose debug information\n"
@@ -406,13 +409,24 @@ void openCommit( )
 	}
 }
 
-void compileOutputCommand( const char *command )
+int compileOutputCommand( const char *command )
 {
 	if ( verbose )
 		cout << "compiling with: '" << command << "'" << endl;
 	int res = system( command );
 	if ( res != 0 )
 		error() << "there was a problem compiling the output" << endl;
+
+	return res;
+}
+
+void runOutputProgram()
+{
+	if ( verbose )
+		cout << "running output: '" << binaryFn << "'" << endl;
+
+	execl(binaryFn, binaryFn, 0);
+	/* We shall never return here! */
 }
 
 void compileOutput( const char *argv0, const bool inSource, char *srcLocation )
@@ -486,7 +500,8 @@ void compileOutput( const char *argv0, const bool inSource, char *srcLocation )
 	}
 	strcat( command, " -lcolm" );
 
-	compileOutputCommand( command );
+	if( !compileOutputCommand( command ) && run )
+		runOutputProgram();
 
 	delete[] command;
 }
@@ -530,7 +545,7 @@ bool inSourceTree( const char *argv0, char *&location )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:L:vdlio:S:M:vHh?-:sVa:m:b:E:", argc, argv );
+	ParamCheck pc( "cD:e:x:I:L:vdliro:S:M:vHh?-:sVa:m:b:E:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -554,6 +569,9 @@ void processArgs( int argc, const char **argv )
 				break;
 			case 'i':
 				branchPointInfo = true;
+				break;
+			case 'r':
+				run = true;
 				break;
 			case 'o':
 				/* Output. */
