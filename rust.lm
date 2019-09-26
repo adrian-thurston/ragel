@@ -1,0 +1,197 @@
+lex
+	literal `fn `use `let `mut `if `struct `for `in
+
+	literal `&mut `&
+	
+	literal `; `:: `( `) `{ `} `. `! `, `=
+	literal `[ `] `:
+	literal `->
+	literal `< `>
+	literal `?
+
+	token id /[A-Za-z_] [A-Za-z_0-9]*/
+	token string /'"' ( [^\"] | '\\' any )* '"'/
+	token number /[0-9]+/
+
+	ignore /'//' [^\n]* '\n'/
+	ignore /[ \t\n]+/
+end
+
+#
+# Use statments
+#
+
+def use_stmt
+	[`use qual_id `;]
+
+#
+# Function declaration
+#
+
+def opt_return
+	[]
+|	[ `-> type]
+
+def fn_stmt
+	[`fn id `( field_list `) opt_return `{ stmt_list `} ]
+
+def qual_tail
+	[qual_tail `:: id]
+|	[]
+
+def qual_id
+	[id qual_tail]
+
+def opt_type_params
+	[`< type_list `>]
+|	[]
+
+def type_id
+	[id opt_type_params]
+
+def type_qual_tail
+	[type_qual_tail `:: type_id]
+|	[]
+
+def type_qual_id
+	[type_id type_qual_tail]
+
+def type
+	[type_qual_id]
+|	[`& type_qual_id]
+|	[`&mut type_qual_id]
+|	[`( `)]
+
+def type_list
+	[type_list `, type]
+|	[type]
+
+def opt_mut
+	[`mut]
+|	[]
+
+def opt_type
+	[`: type]
+|	[]
+
+def let_rvalue
+	[expr]
+|	[`{ stmt_list `}]
+
+def let_stmt
+	[`let opt_mut id opt_type `= let_rvalue]
+
+def opt_macro
+	[`!]
+|	[]
+
+def expr_tail
+	[expr_tail `, expr]
+|	[]
+
+def expr_list
+	[expr expr_tail]
+|	[]
+
+def _construct
+	[id `: expr]
+
+def cons_plus
+	[cons_plus `, _construct]
+|	[_construct]
+
+def cons_list
+	[cons_plus]
+|	[]
+
+def factor
+	[qual_id]
+|	[qual_id opt_macro `( expr_list `)]
+|	[string]
+|	[number]
+|	[ `[ number `; number `]]
+|	[id `{ cons_list `}]
+|	[`( `)]
+
+def mut_factor
+	[factor]
+|	[`&mut factor]
+|	[`& factor]
+|	[`mut factor]
+
+def expansion_tail
+	[expansion_tail `. mut_factor]
+|	[]
+
+def expansion_list
+	[mut_factor expansion_tail]
+
+def expr
+	[expansion_list]
+|	[expansion_list `?]
+
+def expr_stmt
+	[expr]
+
+def assignment_stmt
+	[expr `= expr]
+#
+# list of statement types
+#
+
+def stmt_plus
+	[stmt `; stmt_plus]
+|	[ctrl_flow stmt_plus]
+|	[stmt]
+|	[ctrl_flow]
+
+def stmt_list
+	[stmt_plus]
+|	[stmt_plus `;]
+|	[]
+
+def if_stmt
+	[`if `let expr `= expr `{ stmt_list `} ]
+|	[`if expr `{ stmt_list `} ]
+
+def field
+	[id `: type]
+
+def field_plus
+	[field_plus `, field]
+|	[field]
+
+def field_list
+	[field_plus]
+|	[]
+
+def struct_def
+	[`struct id `{ field_list `}]
+
+def decl
+	[fn_stmt]
+|	[struct_def]
+|	[use_stmt]
+
+def stmt
+	[expr_stmt]
+|	[let_stmt]
+|	[assignment_stmt]
+
+def ctrl_flow
+	[if_stmt]
+|	[`{ stmt_list `}]
+|	[`for id `in expr `{ stmt_list `}]
+
+def program
+	[decl*]
+
+parse P: program [stdin]
+
+if P {
+	print [ P ]
+}
+else {
+	send stderr "failed to parse input [error]
+	exit(1)
+}
