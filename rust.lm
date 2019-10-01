@@ -1,0 +1,323 @@
+lex
+	literal `fn `use `let `mut `if `struct `for `in
+
+	literal `; `:: `( `) `{ `} `. `,
+	literal `[ `] `:
+	literal `->
+	literal `< `>
+	literal `?
+
+	literal `- `+ `/ `* `% `! `&mut
+
+	literal `^ `| `&
+
+	literal `>> `<<
+	literal `== `!= `>= `<=
+	literal `|| `&&
+	literal `.. `..=
+	literal `=
+	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
+
+	token id /[A-Za-z_] [A-Za-z_0-9]*/
+	token string /'"' ( [^\"] | '\\' any )* '"'/
+	token number /[0-9]+/
+
+	ignore /'//' [^\n]* '\n'/
+	ignore /[ \t\n]+/
+end
+
+#
+# Use statments
+#
+
+def use_stmt
+	[`use qual_id `;]
+
+#
+# Function declaration
+#
+
+def opt_return
+	[]
+|	[ `-> type]
+
+def fn_stmt
+	[`fn id `( field_list `) opt_return `{ stmt_list `} ]
+
+def qual_tail
+	[qual_tail `:: id]
+|	[]
+
+def qual_id
+	[id qual_tail]
+
+def opt_type_params
+	[`< type_list `>]
+|	[]
+
+def type_id
+	[id opt_type_params]
+
+def type_qual_tail
+	[type_qual_tail `:: type_id]
+|	[]
+
+def type_qual_id
+	[type_id type_qual_tail]
+
+def type
+	[type_qual_id]
+|	[`& type_qual_id]
+|	[`&mut type_qual_id]
+|	[`( `)]
+
+def type_list
+	[type_list `, type]
+|	[type]
+
+def opt_mut
+	[`mut]
+|	[]
+
+def opt_type
+	[`: type]
+|	[]
+
+def let_rvalue
+	[expr]
+|	[`{ stmt_list `}]
+
+def let_stmt
+	[`let opt_mut id opt_type `= let_rvalue]
+
+def expr_tail
+	[expr_tail `, expr]
+|	[]
+
+def expr_list
+	[expr expr_tail]
+|	[]
+
+def _construct
+	[id `: expr]
+
+def cons_plus
+	[cons_plus `, _construct]
+|	[_construct]
+
+def cons_list
+	[cons_plus]
+|	[]
+
+
+#
+# Expression
+#
+
+# Doesn't really belong in expressions. Macros are a whole pass before. Here
+# for now.
+def opt_macro
+	[`!]
+|	[]
+
+def paths
+	[qual_id]
+|	[string]
+|	[number]
+|	[id `{ cons_list `}]
+|	[ `[ number `; number `]]
+|	[`( `)]
+
+def func_index
+	[func_index `. qual_id `( expr_list `)]
+|	[func_index `. id]
+|	[func_index opt_macro `( expr_list `)]
+|	[func_index opt_macro `[ expr_list `]]
+|	[paths]
+
+def question
+	[question `?]
+|	[func_index]
+
+def unary
+	[question]
+|	[`- unary]
+|	[`* unary]
+|	[`! unary]
+|	[`& unary]
+|	[`&mut unary]
+|	[`mut unary]
+
+def as
+	[unary]
+
+def mult
+	[mult `* as]
+|	[mult `/ as]
+|	[mult `% as]
+|	[as]
+
+def add_sub
+	[add_sub `- mult]
+|	[add_sub `+ mult]
+|	[mult]
+
+def shift
+	[shift `>> add_sub]
+|	[shift `<< add_sub]
+|	[add_sub]
+
+def bitwise_and
+	[bitwise_and `& shift]
+|	[shift]
+
+def bitwise_xor
+	[bitwise_and `^ shift]
+|	[bitwise_and]
+
+def bitwise_or
+	[bitwise_and `| shift]
+|	[bitwise_xor]
+
+def comp_op
+	[`==] |	[`!=]
+|	[`>]  |	[`<]
+|	[`>=] |	[`<=]
+
+def comparison
+	[comparison comp_op bitwise_or]
+|	[bitwise_or]
+
+def lazy_conjunction
+	[lazy_conjunction `&& comparison]
+|	[comparison]
+
+def lazy_disjunction
+	[lazy_disjunction `|| lazy_conjunction]
+|	[lazy_conjunction]
+
+def range_expression
+	[range_expression `..  lazy_disjunction]
+|	[lazy_disjunction `..]
+|	[`.. lazy_disjunction]
+|	[`..]
+|	[range_expression `..= lazy_disjunction]
+|	[`..= lazy_disjunction]
+|	[lazy_disjunction]
+
+# Evaluates right to left.
+def assignment_expression
+	[range_expression `= assignment_expression]
+|	[range_expression]
+
+def compound_op
+	[`+=] | [`-=] | [`*=] | [`/=] | [`%=]
+|	[`&=] | [`|=] | [`^=] | [`<<=] | [`>>=]
+
+# Evaluates right to left. 
+def compound_expression
+	[assignment_expression compound_op compound_expression]
+|	[assignment_expression]
+
+def expr
+	[compound_expression `? ?]
+
+def expr_stmt
+	[expr]
+
+def assignment_stmt
+	[expr `= expr]
+#
+# list of statement types
+#
+
+def semi_seq
+	[`; +]
+
+def stmt_plus
+	[stmt semi_seq stmt_plus]
+|	[ctrl_flow stmt_plus]
+|	[stmt]
+|	[ctrl_flow]
+
+def stmt_list
+	[stmt_plus]
+|	[stmt_plus semi_seq]
+|	[]
+
+def if_stmt
+	[`if `let expr `= expr `{ stmt_list `} ]
+|	[`if expr `{ stmt_list `} ]
+
+def field
+	[id `: type]
+
+def field_plus
+	[field_plus `, field]
+|	[field]
+
+def field_list
+	[field_plus]
+|	[]
+
+def struct_def
+	[`struct id `{ field_list `}]
+
+def decl
+	[fn_stmt]
+|	[struct_def]
+|	[use_stmt]
+
+def stmt
+	[expr_stmt]
+|	[let_stmt]
+
+def ctrl_flow
+	[if_stmt]
+|	[`{ stmt_list `}]
+|	[`for id `in expr `{ stmt_list `}]
+
+def program
+	[decl*]
+
+parse P: program [stdin]
+
+if P {
+	print [ P ]
+
+	for FN: fn_stmt in P {
+		for CE: compound_expression in FN {
+			if match CE [assignment_expression compound_op compound_expression]
+				print "compound expression: [CE]
+		}
+
+		for AE: assignment_expression in FN {
+			if match AE [range_expression `= assignment_expression]
+				print "assignment expression: [AE]
+		}
+
+		for RE: range_expression in FN {
+			if !match RE [lazy_disjunction]
+				print "range expression: [RE]
+		}
+
+		for LD: lazy_disjunction in FN {
+			if !match LD [lazy_conjunction]
+				print "lazy disjunction: [LD]
+		}
+
+		for LC: lazy_conjunction in FN {
+			if !match LC [comparison]
+				print "lazy conjunction: [LC]
+		}
+
+		for C: comparison in FN {
+			if !match C [bitwise_or]
+				print "comparison: [C]
+		}
+	}
+}
+else {
+	send stderr "failed to parse input [error]
+	exit(1)
+}
