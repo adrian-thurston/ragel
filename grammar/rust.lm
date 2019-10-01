@@ -1,5 +1,7 @@
 lex
 	literal `fn `use `let `mut `if `struct `for `in
+	literal `true `false
+	literal `ref
 
 	literal `; `:: `( `) `{ `} `. `,
 	literal `[ `] `:
@@ -18,6 +20,9 @@ lex
 	literal `=
 	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
 
+	literal `_
+
+
 	token id /[A-Za-z_] [A-Za-z_0-9]*/
 	token string /'"' ( [^\"] | '\\' any )* '"'/
 	token number /[0-9]+/
@@ -32,6 +37,36 @@ end
 
 def use_stmt
 	[`use qual_id `;]
+
+#
+# Patterns
+#
+
+def literal_pattern
+	[`true]
+|	[`false]
+|	[string]
+|	[number]
+
+def identifier_pattern
+	[opt_ref opt_mut id]
+
+def pattern_tail
+	[pattern_tail `, pattern]
+|	[]
+
+def pattern
+	[literal_pattern]
+|	[identifier_pattern]
+|	[`_]
+|	[paths `( pattern pattern_tail `)]
+
+def match_arms_pattern_tail
+	[match_arms_pattern_tail `| pattern]
+|	[]
+
+def match_arms_pattern
+	[pattern match_arms_pattern_tail]
 
 #
 # Function declaration
@@ -79,6 +114,10 @@ def opt_mut
 	[`mut]
 |	[]
 
+def opt_ref
+	[`ref]
+|	[]
+
 def opt_type
 	[`: type]
 |	[]
@@ -88,7 +127,7 @@ def let_rvalue
 |	[`{ stmt_list `}]
 
 def let_stmt
-	[`let opt_mut id opt_type `= let_rvalue]
+	[`let pattern opt_type `= let_rvalue]
 
 def expr_tail
 	[expr_tail `, expr]
@@ -127,6 +166,8 @@ def paths
 |	[id `{ cons_list `}]
 |	[ `[ number `; number `]]
 |	[`( `)]
+|	[`true]
+|	[`false]
 
 def func_index
 	[func_index `. qual_id `( expr_list `)]
@@ -246,7 +287,7 @@ def stmt_list
 |	[]
 
 def if_stmt
-	[`if `let expr `= expr `{ stmt_list `} ]
+	[`if `let match_arms_pattern `= expr `{ stmt_list `} ]
 |	[`if expr `{ stmt_list `} ]
 
 def field
