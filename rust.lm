@@ -1,13 +1,22 @@
 lex
 	literal `fn `use `let `mut `if `struct `for `in
 
-	literal `&mut `&
-	
-	literal `; `:: `( `) `{ `} `. `! `, `=
+	literal `; `:: `( `) `{ `} `. `,
 	literal `[ `] `:
 	literal `->
 	literal `< `>
-	literal `? `==
+	literal `?
+
+	literal `- `+ `/ `* `% `! `&mut
+
+	literal `^ `| `&
+
+	literal `>> `<<
+	literal `== `!= `>= `<=
+	literal `|| `&&
+	literal `.. `..=
+	literal `=
+	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
 
 	token id /[A-Za-z_] [A-Za-z_0-9]*/
 	token string /'"' ( [^\"] | '\\' any )* '"'/
@@ -15,9 +24,6 @@ lex
 
 	ignore /'//' [^\n]* '\n'/
 	ignore /[ \t\n]+/
-
-
-	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
 end
 
 #
@@ -84,10 +90,6 @@ def let_rvalue
 def let_stmt
 	[`let opt_mut id opt_type `= let_rvalue]
 
-def opt_macro
-	[`!]
-|	[]
-
 def expr_tail
 	[expr_tail `, expr]
 |	[]
@@ -107,44 +109,110 @@ def cons_list
 	[cons_plus]
 |	[]
 
-def factor
-	[qual_id]
-|	[qual_id opt_macro `( expr_list `)]
-|	[string]
-|	[number]
-|	[ `[ number `; number `]]
-|	[id `{ cons_list `}]
-|	[`( `)]
-
-def mut_factor
-	[factor]
-|	[`&mut factor]
-|	[`& factor]
-|	[`mut factor]
 
 #
 # Expression
 #
 
-def expansion_tail
-	[expansion_tail `. mut_factor]
+# Doesn't really belong in expressions. Macros are a whole pass before. Here
+# for now.
+def opt_macro
+	[`!]
 |	[]
 
-def expansion_list
-	[mut_factor expansion_tail]
+def paths
+	[qual_id]
+|	[string]
+|	[number]
+|	[id `{ cons_list `}]
+|	[ `[ number `; number `]]
+|	[`( `)]
 
-def oper_list
-	[oper_list `== expansion_list]
-|	[expansion_list]
+def func_index
+	[func_index `. qual_id `( expr_list `)]
+|	[func_index `. id]
+|	[func_index opt_macro `( expr_list `)]
+|	[func_index opt_macro `[ expr_list `]]
+|	[paths]
 
+def question
+	[question `?]
+|	[func_index]
+
+def unary
+	[question]
+|	[`- unary]
+|	[`* unary]
+|	[`! unary]
+|	[`& unary]
+|	[`&mut unary]
+|	[`mut unary]
+
+def as
+	[unary]
+
+def mult
+	[mult `* as]
+|	[mult `/ as]
+|	[mult `% as]
+|	[as]
+
+def add_sub
+	[add_sub `- mult]
+|	[add_sub `+ mult]
+|	[mult]
+
+def shift
+	[shift `>> add_sub]
+|	[shift `<< add_sub]
+|	[add_sub]
+
+def bitwise_and
+	[bitwise_and `& shift]
+|	[shift]
+
+def bitwise_xor
+	[bitwise_and `^ shift]
+|	[bitwise_and]
+
+def bitwise_or
+	[bitwise_and `| shift]
+|	[bitwise_xor]
+
+def comp_op
+	[`==] |	[`!=]
+|	[`>]  |	[`<]
+|	[`>=] |	[`<=]
+
+def comparison
+	[comparison comp_op bitwise_or]
+|	[bitwise_or]
+
+def lazy_conjunction
+	[lazy_conjunction `&& comparison]
+|	[comparison]
+
+def lazy_disjunction
+	[lazy_disjunction `|| lazy_conjunction]
+|	[lazy_conjunction]
+
+def range_expression
+	[range_expression `..  lazy_disjunction]
+|	[lazy_disjunction `..]
+|	[`.. lazy_disjunction]
+|	[`..]
+|	[range_expression `..= lazy_disjunction]
+|	[`..= lazy_disjunction]
+|	[lazy_disjunction]
+
+# Evaluates right to left.
+def assignment_expression
+	[range_expression `= assignment_expression]
+|	[range_expression]
 
 def compound_op
 	[`+=] | [`-=] | [`*=] | [`/=] | [`%=]
 |	[`&=] | [`|=] | [`^=] | [`<<=] | [`>>=]
-
-def assignment_expression
-	[oper_list `= assignment_expression]
-|	[oper_list]
 
 # Evaluates right to left. 
 def compound_expression
@@ -217,14 +285,36 @@ parse P: program [stdin]
 if P {
 	print [ P ]
 
-	for CE: compound_expression in P {
-		if match CE [assignment_expression compound_op compound_expression]
-			print "compound expression: [CE]
-	}
+	for FN: fn_stmt in P {
+		for CE: compound_expression in FN {
+			if match CE [assignment_expression compound_op compound_expression]
+				print "compound expression: [CE]
+		}
 
-	for AE: assignment_expression in P {
-		if match AE [oper_list `= assignment_expression]
-			print "assignment expression: [AE]
+		for AE: assignment_expression in FN {
+			if match AE [range_expression `= assignment_expression]
+				print "assignment expression: [AE]
+		}
+
+		for RE: range_expression in FN {
+			if !match RE [lazy_disjunction]
+				print "range expression: [RE]
+		}
+
+		for LD: lazy_disjunction in FN {
+			if !match LD [lazy_conjunction]
+				print "lazy disjunction: [LD]
+		}
+
+		for LC: lazy_conjunction in FN {
+			if !match LC [comparison]
+				print "lazy conjunction: [LC]
+		}
+
+		for C: comparison in FN {
+			if !match C [bitwise_or]
+				print "comparison: [C]
+		}
 	}
 }
 else {
