@@ -75,15 +75,15 @@ def range_pattern
 #
 
 def match_expression
-	[`match expr `{ match_arms? `}]
+	[`match expression `{ match_arms? `}]
 
 def match_arms_last
-	[match_arm `=> block_expr `, ?]
-|	[match_arm `=> expr `, ?]
+	[match_arm `=> block_expression `, ?]
+|	[match_arm `=> expression `, ?]
 
 def match_arms_first_case
-	[match_arm `=> block_expr `, ?]
-|	[match_arm `=> expr `,]
+	[match_arm `=> block_expression `, ?]
+|	[match_arm `=> expression `,]
 
 def match_arms_first_list
 	[match_arms_first_list match_arms_first_case]
@@ -107,9 +107,8 @@ def match_arm_patterns
 	[opt_bar pattern match_arms_pattern_tail]
 
 def opt_match_arm_guard
-	[`if expr]
+	[`if expression]
 |	[]
-
 
 #
 # Function declaration
@@ -120,7 +119,7 @@ def opt_return
 |	[ `-> type]
 
 def fn_stmt
-	[`fn id `( field_list `) opt_return `{ stmt_list `} ]
+	[`fn id `( field_list `) opt_return block_expression]
 
 def qual_tail
 	[qual_tail `:: id]
@@ -166,25 +165,25 @@ def opt_type
 |	[]
 
 def block_expr
-	[`{ stmt_list `}]
+	[`{ statements `}]
 
 def let_rvalue
-	[expr]
-|	[`{ stmt_list `}]
+	[expression]
+|	[`{ statements `}]
 
 def let_stmt
 	[`let pattern opt_type `= let_rvalue]
 
 def expr_tail
-	[expr_tail `, expr]
+	[expr_tail `, expression]
 |	[]
 
 def expr_list
-	[expr expr_tail]
+	[expression expr_tail]
 |	[]
 
 def _construct
-	[id `: expr]
+	[id `: expression]
 
 def cons_plus
 	[cons_plus `, _construct]
@@ -306,42 +305,52 @@ def compound_expression
 	[assignment_expression compound_op compound_expression]
 |	[assignment_expression]
 
-def expr_without_bloack
+def expr_without_block
 	[compound_expression `? ?]
 
 def expr_with_block
 	[match_expression]
 
-def expr
-	[expr_without_bloack]
-|	[expr_with_block]
+def expression
+	[expression_without_block]
+|	[expression_with_block]
 
-def expr_stmt
-	[expr]
-
-def assignment_stmt
-	[expr `= expr]
 #
-# list of statement types
+# Statements
 #
 
-def semi_seq
-	[`; +]
+def block_expression
+	[`{ statements? `}]
 
-def stmt_plus
-	[stmt semi_seq stmt_plus]
-|	[ctrl_flow stmt_plus]
-|	[stmt]
-|	[ctrl_flow]
+def let_statement
+	[`let pattern opt_type `= let_rvalue `;]
 
-def stmt_list
-	[stmt_plus]
-|	[stmt_plus semi_seq]
-|	[]
+def expression_without_block
+	[compound_expression `? ?]
+
+def expression_with_block
+	[block_expression]
+|	[`for id `in expression block_expression]
+|	[if_stmt]
+|	[match_expression]
+
+def expression_statement
+	[expression_without_block `;]
+|	[expression_with_block]
+
+def statement
+	[`;]
+|	[let_statement]
+|	[expression_statement]
+
+def statements
+	[statement+]
+|	[statement+ expression_without_block]
+|	[expression_without_block]
 
 def if_stmt
-	[`if `let match_arm_patterns `= expr `{ stmt_list `} ]
-|	[`if expr `{ stmt_list `} ]
+	[`if expression block_expression]
+|	[`if `let match_arm_patterns `= expression block_expression]
 
 def field
 	[id `: type]
@@ -362,16 +371,6 @@ def decl
 |	[struct_def]
 |	[use_stmt]
 
-def stmt
-	[expr_stmt]
-|	[let_stmt]
-
-def ctrl_flow
-	[if_stmt]
-|	[`{ stmt_list `}]
-|	[`for id `in expr `{ stmt_list `}]
-|	[expr_with_block]
-
 def program
 	[decl*]
 
@@ -381,34 +380,44 @@ if P {
 	print [ P ]
 
 	for FN: fn_stmt in P {
+		print "function: [FN.id]
+
 		for CE: compound_expression in FN {
 			if match CE [assignment_expression compound_op compound_expression]
-				print "compound expression: [CE]
+				print "  compound expression: [CE]
 		}
 
 		for AE: assignment_expression in FN {
 			if match AE [range_expression `= assignment_expression]
-				print "assignment expression: [AE]
+				print "  assignment expression: [AE]
 		}
 
 		for RE: range_expression in FN {
 			if !match RE [lazy_disjunction]
-				print "range expression: [RE]
+				print "  range expression: [RE]
 		}
 
 		for LD: lazy_disjunction in FN {
 			if !match LD [lazy_conjunction]
-				print "lazy disjunction: [LD]
+				print "  lazy disjunction: [LD]
 		}
 
 		for LC: lazy_conjunction in FN {
 			if !match LC [comparison]
-				print "lazy conjunction: [LC]
+				print "  lazy conjunction: [LC]
 		}
 
 		for C: comparison in FN {
 			if !match C [bitwise_or]
-				print "comparison: [C]
+				print "  comparison: [C]
+		}
+
+		for P: pattern in FN {
+			print "  pattern: [P]
+		}
+
+		for MA: match_arm in FN {
+			print "  match_arm: [MA]
 		}
 	}
 }
