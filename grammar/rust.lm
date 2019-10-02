@@ -1,11 +1,11 @@
 lex
 	literal `fn `use `let `mut `if `struct `for `in
 	literal `true `false
-	literal `ref
+	literal `ref `match
 
 	literal `; `:: `( `) `{ `} `. `,
 	literal `[ `] `:
-	literal `->
+	literal `-> `=>
 	literal `< `>
 	literal `?
 
@@ -16,12 +16,11 @@ lex
 	literal `>> `<<
 	literal `== `!= `>= `<=
 	literal `|| `&&
-	literal `.. `..=
+	literal `.. `..= `...
 	literal `=
 	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
 
 	literal `_
-
 
 	token id /[A-Za-z_] [A-Za-z_0-9]*/
 	token string /'"' ( [^\"] | '\\' any )* '"'/
@@ -60,13 +59,57 @@ def pattern
 |	[identifier_pattern]
 |	[`_]
 |	[paths `( pattern pattern_tail `)]
+|	[range_pattern]
+
+# Range Pattern
+
+def range_pattern_bound
+	[literal_pattern]
+
+def range_pattern
+	[range_pattern_bound `..= range_pattern_bound]
+|	[range_pattern_bound `... range_pattern_bound]
+
+#
+# Match Expressions.
+#
+
+def match_expression
+	[`match expr `{ match_arms? `}]
+
+def match_arms_last
+	[match_arm `=> block_expr `, ?]
+|	[match_arm `=> expr `, ?]
+
+def match_arms_first_case
+	[match_arm `=> block_expr `, ?]
+|	[match_arm `=> expr `,]
+
+def match_arms_first_list
+	[match_arms_first_list match_arms_first_case]
+|	[]
+
+def match_arms
+	[match_arms_first_list match_arms_last]
+
+def match_arm
+	[match_arm_patterns opt_match_arm_guard]
 
 def match_arms_pattern_tail
 	[match_arms_pattern_tail `| pattern]
 |	[]
 
-def match_arms_pattern
-	[pattern match_arms_pattern_tail]
+def opt_bar
+	[`|]
+|	[]
+
+def match_arm_patterns
+	[opt_bar pattern match_arms_pattern_tail]
+
+def opt_match_arm_guard
+	[`if expr]
+|	[]
+
 
 #
 # Function declaration
@@ -121,6 +164,9 @@ def opt_ref
 def opt_type
 	[`: type]
 |	[]
+
+def block_expr
+	[`{ stmt_list `}]
 
 def let_rvalue
 	[expr]
@@ -260,8 +306,15 @@ def compound_expression
 	[assignment_expression compound_op compound_expression]
 |	[assignment_expression]
 
-def expr
+def expr_without_bloack
 	[compound_expression `? ?]
+
+def expr_with_block
+	[match_expression]
+
+def expr
+	[expr_without_bloack]
+|	[expr_with_block]
 
 def expr_stmt
 	[expr]
@@ -287,7 +340,7 @@ def stmt_list
 |	[]
 
 def if_stmt
-	[`if `let match_arms_pattern `= expr `{ stmt_list `} ]
+	[`if `let match_arm_patterns `= expr `{ stmt_list `} ]
 |	[`if expr `{ stmt_list `} ]
 
 def field
@@ -317,6 +370,7 @@ def ctrl_flow
 	[if_stmt]
 |	[`{ stmt_list `}]
 |	[`for id `in expr `{ stmt_list `}]
+|	[expr_with_block]
 
 def program
 	[decl*]
