@@ -166,7 +166,8 @@ def opt_lifetime
 def type
 	[type_path]
 |	[`& opt_lifetime type_path]
-|	[`&mut opt_lifetime type_path]
+|	[`&mut type_path]
+|	[`& lifetime `mut type_path]
 |	[`( `)]
 
 def type_list
@@ -513,7 +514,7 @@ if P {
 		}
 
 		for CL: cons_list in FN {
-			print "  construct list: [CL]
+			print "  construct list: [^CL]
 		}
 	}
 }
