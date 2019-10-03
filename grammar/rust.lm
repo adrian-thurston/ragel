@@ -23,7 +23,9 @@ lex
 	literal `_
 
 	token id /[A-Za-z_] [A-Za-z_0-9]*/
-	token string /'"' ( [^\"] | '\\' any )* '"'/
+	token string / '"' ( [^\"] | '\\' any )* '"' /
+	token char / "'" ( [^\'] | '\\' any ) "'" /
+	token lifetime /"'" id/
 	token number /[0-9]+/
 
 	ignore /'//' [^\n]* '\n'/
@@ -34,7 +36,7 @@ end
 # Use statments
 #
 
-def use_stmt
+def use_declaration
 	[`use qual_id `;]
 
 #
@@ -44,6 +46,7 @@ def use_stmt
 def literal_pattern
 	[`true]
 |	[`false]
+|	[char]
 |	[string]
 |	[number]
 
@@ -111,6 +114,24 @@ def opt_match_arm_guard
 |	[]
 
 #
+# Generic Args
+#
+
+def lifetime_tail
+	[lifetime_tail `, lifetime]
+|	[]
+
+def lifetime_list
+	[lifetime lifetime_tail]
+
+def opt_type_params
+	[`< lifetime_list `>]
+|	[`< type_list `>]
+|	[`< lifetime_list `, type_list `>]
+|	[]
+
+
+#
 # Function declaration
 #
 
@@ -118,8 +139,8 @@ def opt_return
 	[]
 |	[ `-> type]
 
-def fn_stmt
-	[`fn id `( field_list `) opt_return block_expression]
+def function
+	[`fn id opt_generics `( field_list `) opt_return block_expression]
 
 def qual_tail
 	[qual_tail `:: id]
@@ -128,24 +149,24 @@ def qual_tail
 def qual_id
 	[id qual_tail]
 
-def opt_type_params
-	[`< type_list `>]
-|	[]
-
 def type_id
 	[id opt_type_params]
 
-def type_qual_tail
-	[type_qual_tail `:: type_id]
+def type_path_tail
+	[type_path_tail `:: type_id]
 |	[]
 
-def type_qual_id
-	[type_id type_qual_tail]
+def type_path
+	[type_id type_path_tail]
+
+def opt_lifetime
+	[lifetime]
+|	[]
 
 def type
-	[type_qual_id]
-|	[`& type_qual_id]
-|	[`&mut type_qual_id]
+	[type_path]
+|	[`& opt_lifetime type_path]
+|	[`&mut opt_lifetime type_path]
 |	[`( `)]
 
 def type_list
@@ -206,6 +227,7 @@ def opt_macro
 
 def paths
 	[qual_id]
+|	[char]
 |	[string]
 |	[number]
 |	[id `{ cons_list `}]
@@ -217,6 +239,7 @@ def paths
 def func_index
 	[func_index `. qual_id `( expr_list `)]
 |	[func_index `. id]
+|	[func_index `. number]
 |	[func_index opt_macro `( expr_list `)]
 |	[func_index opt_macro `[ expr_list `]]
 |	[paths]
@@ -363,23 +386,92 @@ def field_list
 	[field_plus]
 |	[]
 
-def struct_def
-	[`struct id `{ field_list `}]
+#
+# Lifetime Params
+#
 
-def decl
-	[fn_stmt]
-|	[struct_def]
-|	[use_stmt]
+def lifetime_param
+	[lifetime]
+
+def lifetime_param_tail
+	[lifetime_param_tail `, lifetime_param]
+|	[]
+
+def lifetime_param_list
+	[lifetime_param lifetime_param_tail]
+
+#
+# Type Params
+#
+
+def opt_eq_type
+	[`= type]
+|	[]
+
+def type_param
+	[id opt_eq_type]
+
+def type_param_tail
+	[type_param_tail `, type_param]
+|	[]
+
+def type_param_list
+	[type_param type_param_tail]
+
+#
+# Generics
+#
+
+def generic_params
+	[lifetime_param_list `, type_param_list]
+|	[lifetime_param_list]
+|	[type_param_list]
+|	[]
+
+def opt_generics
+	[`< generic_params `>]
+|	[]
+
+#
+# Tuple List
+#
+
+def tuple_field_tail
+	[tuple_field_tail `, type]
+|	[]
+
+def tuple_field_list
+	[type tuple_field_tail]
+|	[]
+
+#
+# Structure
+#
+
+
+def structure
+	[`struct id opt_generics `{ field_list `}]
+|	[`struct id opt_generics `;]
+|	[`struct id opt_generics `( tuple_field_list `) `; ]
+
+#
+# All Items.
+#
+
+def item
+	[function]
+|	[structure]
+|	[use_declaration]
 
 def program
-	[decl*]
+	[item*]
 
 parse P: program [stdin]
 
 if P {
 	print [ P ]
 
-	for FN: fn_stmt in P {
+	for FN: function in P {
 		print "function: [FN.id]
 
 		for CE: compound_expression in FN {
@@ -418,6 +510,10 @@ if P {
 
 		for MA: match_arm in FN {
 			print "  match_arm: [MA]
+		}
+
+		for CL: cons_list in FN {
+			print "  construct list: [CL]
 		}
 	}
 }
