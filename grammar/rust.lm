@@ -1,5 +1,5 @@
 lex
-	literal `fn `use `let `mut `if `struct `for `in
+	literal `fn `use `let `mut `if `else `struct `for `in
 	literal `true `false
 	literal `ref `match
 
@@ -22,14 +22,15 @@ lex
 
 	literal `_
 
-	token id /[A-Za-z_] [A-Za-z_0-9]*/
-	token string / '"' ( [^\"] | '\\' any )* '"' /
-	token char / "'" ( [^\'] | '\\' any ) "'" /
-	token lifetime /"'" id/
-	token number /[0-9]+/
+	token id       / [A-Za-z_] [A-Za-z_0-9]* /
+	token string   / '"' ( [^\"] | '\\' any )* '"' /
+	token char     / "'" ( [^\'] | '\\' any )  "'" /
+	token lifetime / "'" id /
+	token number   / [0-9]+ /
+	token float    / [0-9]+ '.' [0-9]+ /
 
-	ignore /'//' [^\n]* '\n'/
-	ignore /[ \t\n]+/
+	ignore / "//" [^\n]* '\n' /
+	ignore / [ \t\n]+ /
 end
 
 #
@@ -49,6 +50,7 @@ def literal_pattern
 |	[char]
 |	[string]
 |	[number]
+|	[float]
 
 def identifier_pattern
 	[opt_ref opt_mut id]
@@ -231,6 +233,7 @@ def paths
 |	[char]
 |	[string]
 |	[number]
+|	[float]
 |	[id `{ cons_list `}]
 |	[ `[ number `; number `]]
 |	[`( `)]
@@ -355,7 +358,8 @@ def expression_without_block
 def expression_with_block
 	[block_expression]
 |	[`for id `in expression block_expression]
-|	[if_stmt]
+|	[if_expression]
+|	[if_let_expression]
 |	[match_expression]
 
 def expression_statement
@@ -372,9 +376,17 @@ def statements
 |	[statement+ expression_without_block]
 |	[expression_without_block]
 
-def if_stmt
-	[`if expression block_expression]
-|	[`if `let match_arm_patterns `= expression block_expression]
+def if_expression
+	[`if expression block_expression opt_else_expression]
+
+def opt_else_expression
+	[`else block_expression]
+|	[`else if_expression]
+|	[`else if_let_expression]
+|	[]
+
+def if_let_expression
+	[`if `let match_arm_patterns `= expression block_expression]
 
 def field
 	[id `: type]
@@ -515,6 +527,11 @@ if P {
 
 		for CL: cons_list in FN {
 			print "  construct list: [^CL]
+		}
+
+		for M: mult in FN {
+			if !match M [as]
+				print "  mult: [^M]
 		}
 	}
 }
