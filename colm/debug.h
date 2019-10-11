@@ -28,6 +28,7 @@ extern "C" {
 #endif
 
 #include "colm.h"
+#include "config.h"
 
 void fatal( const char *fmt, ... );
 

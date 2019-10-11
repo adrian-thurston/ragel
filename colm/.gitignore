@@ -5,6 +5,7 @@
 /.*.d
 /colm
 /defs.h
+/config.h
 /version.h
 /tags
 /.deps

@@ -34,7 +34,7 @@ RUNTIME_SRC = \
 	print.c
 
 RUNTIME_HDR = \
-	bytecode.h defs.h debug.h pool.h input.h \
+	config.h bytecode.h defs.h debug.h pool.h input.h \
 	pdarun.h map.h type.h tree.h struct.h program.h colm.h internal.h
 
 lib_LTLIBRARIES = libcolm.la
@@ -122,6 +122,9 @@ include/colm:
 version.h: Makefile
 	echo '#define VERSION "$(PACKAGE_VERSION)"' > version.h
 	echo '#define PUBDATE "$(PUBDATE)"' >> version.h
+
+config.h: ../src/config.h
+	cp ../src/config.h ./
 
 CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = colm.lm
