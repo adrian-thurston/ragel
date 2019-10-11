@@ -1,0 +1,517 @@
+# Demonstrates a bug in the scanner as of Oct 11, 2019. The // comments are
+# preventing / from scanning properly. Action is not embedded and text ends up
+# on the front of thet next token.
+lex
+	literal `fn `use `let `mut `if `else `struct `for `in
+	literal `true `false
+	literal `ref `match
+
+	literal `; `:: `( `) `{ `} `. `,
+	literal `[ `] `:
+	literal `-> `=>
+	literal `< `>
+	literal `?
+
+	literal `- `+ `/ `* `% `! `&mut
+
+	literal `^ `| `&
+
+	literal `>> `<<
+	literal `== `!= `>= `<=
+	literal `|| `&&
+	literal `.. `..= `...
+	literal `=
+	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
+
+	literal `_
+
+	token id       / [A-Za-z_] [A-Za-z_0-9]* /
+	token string   / '"' ( [^\"] | '\\' any )* '"' /
+	token char     / "'" ( [^\'] | '\\' any )  "'" /
+	token lifetime / "'" id /
+	token number   / [0-9]+ /
+	token float    / [0-9]+ '.' [0-9]+ /
+
+	ignore / "//" [^\n]* '\n' /
+	ignore / [ \t\n]+ /
+end
+
+#
+# Use statments
+#
+
+def use_declaration
+	[`use qual_id `;]
+
+#
+# Patterns
+#
+
+def literal_pattern
+	[`true]
+|	[`false]
+|	[char]
+|	[string]
+|	[number]
+|	[float]
+
+def identifier_pattern
+	[opt_ref opt_mut id]
+
+def pattern_tail
+	[pattern_tail `, pattern]
+|	[]
+
+def pattern
+	[literal_pattern]
+|	[identifier_pattern]
+|	[`_]
+|	[paths `( pattern pattern_tail `)]
+|	[range_pattern]
+
+# Range Pattern
+
+def range_pattern_bound
+	[literal_pattern]
+
+def range_pattern
+	[range_pattern_bound `..= range_pattern_bound]
+|	[range_pattern_bound `... range_pattern_bound]
+
+#
+# Match Expressions.
+#
+
+def match_expression
+	[`match expression `{ match_arms? `}]
+
+def match_arms_last
+	[match_arm `=> block_expression `, ?]
+|	[match_arm `=> expression `, ?]
+
+def match_arms_first_case
+	[match_arm `=> block_expression `, ?]
+|	[match_arm `=> expression `,]
+
+def match_arms_first_list
+	[match_arms_first_list match_arms_first_case]
+|	[]
+
+def match_arms
+	[match_arms_first_list match_arms_last]
+
+def match_arm
+	[match_arm_patterns opt_match_arm_guard]
+
+def match_arms_pattern_tail
+	[match_arms_pattern_tail `| pattern]
+|	[]
+
+def opt_bar
+	[`|]
+|	[]
+
+def match_arm_patterns
+	[opt_bar pattern match_arms_pattern_tail]
+
+def opt_match_arm_guard
+	[`if expression]
+|	[]
+
+#
+# Generic Args
+#
+
+def lifetime_tail
+	[lifetime_tail `, lifetime]
+|	[]
+
+def lifetime_list
+	[lifetime lifetime_tail]
+
+def opt_type_params
+	[`< lifetime_list `>]
+|	[`< type_list `>]
+|	[`< lifetime_list `, type_list `>]
+|	[]
+
+
+#
+# Function declaration
+#
+
+def opt_return
+	[]
+|	[ `-> type]
+
+def function
+	[`fn id opt_generics `( field_list `) opt_return block_expression]
+
+def qual_tail
+	[qual_tail `:: id]
+|	[]
+
+def qual_id
+	[id qual_tail]
+
+def type_id
+	[id opt_type_params]
+
+def type_path_tail
+	[type_path_tail `:: type_id]
+|	[]
+
+def type_path
+	[type_id type_path_tail]
+
+def opt_lifetime
+	[lifetime]
+|	[]
+
+def type
+	[type_path]
+|	[`& opt_lifetime type_path]
+|	[`&mut type_path]
+|	[`& lifetime `mut type_path]
+|	[`( `)]
+
+def type_list
+	[type_list `, type]
+|	[type]
+
+def opt_mut
+	[`mut]
+|	[]
+
+def opt_ref
+	[`ref]
+|	[]
+
+def opt_type
+	[`: type]
+|	[]
+
+def block_expr
+	[`{ statements `}]
+
+def let_rvalue
+	[expression]
+|	[`{ statements `}]
+
+def let_stmt
+	[`let pattern opt_type `= let_rvalue]
+
+def expr_tail
+	[expr_tail `, expression]
+|	[]
+
+def expr_list
+	[expression expr_tail]
+|	[]
+
+def _construct
+	[id `: expression]
+
+def cons_plus
+	[cons_plus `, _construct]
+|	[_construct]
+
+def cons_list
+	[cons_plus]
+|	[]
+
+
+#
+# Expression
+#
+
+# Doesn't really belong in expressions. Macros are a whole pass before. Here
+# for now.
+def opt_macro
+	[`!]
+|	[]
+
+def paths
+	[qual_id]
+|	[char]
+|	[string]
+|	[number]
+|	[float]
+|	[id `{ cons_list `}]
+|	[ `[ number `; number `]]
+|	[`( `)]
+|	[`true]
+|	[`false]
+
+def func_index
+	[func_index `. qual_id `( expr_list `)]
+|	[func_index `. id]
+|	[func_index `. number]
+|	[func_index opt_macro `( expr_list `)]
+|	[func_index opt_macro `[ expr_list `]]
+|	[paths]
+
+def question
+	[question `?]
+|	[func_index]
+
+def unary
+	[question]
+|	[`- unary]
+|	[`* unary]
+|	[`! unary]
+|	[`& unary]
+|	[`&mut unary]
+|	[`mut unary]
+
+def as
+	[unary]
+
+def mult
+	[mult `* as]
+|	[mult `/ as]
+|	[mult `% as]
+|	[as]
+
+def add_sub
+	[add_sub `- mult]
+|	[add_sub `+ mult]
+|	[mult]
+
+def shift
+	[shift `>> add_sub]
+|	[shift `<< add_sub]
+|	[add_sub]
+
+def bitwise_and
+	[bitwise_and `& shift]
+|	[shift]
+
+def bitwise_xor
+	[bitwise_and `^ shift]
+|	[bitwise_and]
+
+def bitwise_or
+	[bitwise_and `| shift]
+|	[bitwise_xor]
+
+def comp_op
+	[`==] |	[`!=]
+|	[`>]  |	[`<]
+|	[`>=] |	[`<=]
+
+def comparison
+	[comparison comp_op bitwise_or]
+|	[bitwise_or]
+
+def lazy_conjunction
+	[lazy_conjunction `&& comparison]
+|	[comparison]
+
+def lazy_disjunction
+	[lazy_disjunction `|| lazy_conjunction]
+|	[lazy_conjunction]
+
+def range_expression
+	[range_expression `..  lazy_disjunction]
+|	[lazy_disjunction `..]
+|	[`.. lazy_disjunction]
+|	[`..]
+|	[range_expression `..= lazy_disjunction]
+|	[`..= lazy_disjunction]
+|	[lazy_disjunction]
+
+# Evaluates right to left.
+def assignment_expression
+	[range_expression `= assignment_expression]
+|	[range_expression]
+
+def compound_op
+	[`+=] | [`-=] | [`*=] | [`/=] | [`%=]
+|	[`&=] | [`|=] | [`^=] | [`<<=] | [`>>=]
+
+# Evaluates right to left. 
+def compound_expression
+	[assignment_expression compound_op compound_expression]
+|	[assignment_expression]
+
+def expr_without_block
+	[compound_expression `? ?]
+
+def expr_with_block
+	[match_expression]
+
+def expression
+	[expression_without_block]
+|	[expression_with_block]
+
+#
+# Statements
+#
+
+def block_expression
+	[`{ statements? `}]
+
+def let_statement
+	[`let pattern opt_type `= let_rvalue `;]
+
+def expression_without_block
+	[compound_expression `? ?]
+
+def expression_with_block
+	[block_expression]
+|	[`for id `in expression block_expression]
+|	[if_expression]
+|	[if_let_expression]
+|	[match_expression]
+
+def expression_statement
+	[expression_without_block `;]
+|	[expression_with_block]
+
+def statement
+	[`;]
+|	[let_statement]
+|	[expression_statement]
+
+def statements
+	[statement+]
+|	[statement+ expression_without_block]
+|	[expression_without_block]
+
+def if_expression
+	[`if expression block_expression opt_else_expression]
+
+def opt_else_expression
+	[`else block_expression]
+|	[`else if_expression]
+|	[`else if_let_expression]
+|	[]
+
+def if_let_expression
+	[`if `let match_arm_patterns `= expression block_expression]
+
+def field
+	[id `: type]
+
+def field_plus
+	[field_plus `, field]
+|	[field]
+
+def field_list
+	[field_plus]
+|	[]
+
+#
+# Lifetime Params
+#
+
+def lifetime_param
+	[lifetime]
+
+def lifetime_param_tail
+	[lifetime_param_tail `, lifetime_param]
+|	[]
+
+def lifetime_param_list
+	[lifetime_param lifetime_param_tail]
+
+#
+# Type Params
+#
+
+def opt_eq_type
+	[`= type]
+|	[]
+
+def type_param
+	[id opt_eq_type]
+
+def type_param_tail
+	[type_param_tail `, type_param]
+|	[]
+
+def type_param_list
+	[type_param type_param_tail]
+
+#
+# Generics
+#
+
+def generic_params
+	[lifetime_param_list `, type_param_list]
+|	[lifetime_param_list]
+|	[type_param_list]
+|	[]
+
+def opt_generics
+	[`< generic_params `>]
+|	[]
+
+#
+# Tuple List
+#
+
+def tuple_field_tail
+	[tuple_field_tail `, type]
+|	[]
+
+def tuple_field_list
+	[type tuple_field_tail]
+|	[]
+
+#
+# Structure
+#
+
+
+def structure
+	[`struct id opt_generics `{ field_list `}]
+|	[`struct id opt_generics `;]
+|	[`struct id opt_generics `( tuple_field_list `) `; ]
+
+#
+# All Items.
+#
+
+def item
+	[function]
+|	[structure]
+|	[use_declaration]
+
+def program
+	[item*]
+
+parse P: program [stdin]
+
+if P {
+	print [ P ]
+}
+else {
+	print "scan failure
+}
+
+##### IN #####
+use std::io;
+
+fn _div() {
+	let a = 1.0 / 2.0;
+	println!("a: {}");
+}
+
+fn main()
+{
+	_div();
+}
+##### EXP #####
+use std::io;
+
+fn _div() {
+	let a = 1.0 / 2.0;
+	println!("a: {}");
+}
+
+fn main()
+{
+	_div();
+}
