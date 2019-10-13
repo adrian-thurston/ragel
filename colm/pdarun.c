@@ -1981,6 +1981,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			if ( pda_run->pre_region >= 0 ) {
 				pda_run->pre_region = -1;
 				pda_run->fsm_cs = pda_run->next_cs;
+				pda_run->toklen = 0;
 				continue;
 			}
 		}
