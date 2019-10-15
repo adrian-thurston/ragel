@@ -760,7 +760,7 @@ struct LoadColm
 		precedenceStmt( predType, predDeclList );
 	}
 
-	StmtList *walkInclude( include Include )
+	StmtList *walkInclude( _include Include )
 	{
 		String lit = "";
 		_repeat_sq_cons_data sqConsDataList = Include.SqConsDataList();
@@ -2666,7 +2666,7 @@ struct LoadColm
 			walkPrecedenceDef( rootItem.precedence_def() );
 			break;
 		case root_item::Include: {
-			StmtList *includeList = walkInclude( rootItem.include() );
+			StmtList *includeList = walkInclude( rootItem._include() );
 			if ( includeList )
 				stmtList->append( *includeList );
 			break;
@@ -2741,7 +2741,7 @@ struct LoadColm
 			walkPrecedenceDef( item.precedence_def() );
 			break;
 		case namespace_item::Include: {
-			StmtList *includeList = walkInclude( item.include() );
+			StmtList *includeList = walkInclude( item._include() );
 			stmtList->append( *includeList );
 			break;
 		}
