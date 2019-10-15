@@ -631,8 +631,9 @@ void ConsInit::optProdElName()
 
 void ConsInit::optNi()
 {
-	ProdEl *prodEl1 = prodRefName( "Ni", "NI" );
-	Production *prod1 = production( prodEl1 );
+	ProdEl *prodEl1 = prodRefLit( "'-'" );
+	ProdEl *prodEl2 = prodRefName( "Ni", "NI" );
+	Production *prod1 = production( prodEl1, prodEl2 );
 
 	Production *prod2 = production();
 
@@ -858,6 +859,7 @@ void ConsInit::go( long activeRealm )
 	keyword( "')'" );
 	keyword( "'..'" );
 	keyword( "'^'" );
+	keyword( "'-'" );
 
 	popRegionSet();
 

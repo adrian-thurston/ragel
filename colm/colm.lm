@@ -85,9 +85,9 @@ lex
 	token backtick_lit
 		/ '`' . ^( ' ' | '\n' | '\t' | ']' )+ | '`]' /
 
-	token DQ / '\"' / ni
-	token SQ / '\'' / ni
-	token TILDE / '~' / ni
+	token DQ / '\"' / - ni
+	token SQ / '\'' / - ni
+	token TILDE / '~' / - ni
 
 	token SQOPEN /'['/
 	token SQCLOSE /']'/
@@ -178,8 +178,8 @@ lex
 	token LEX_PLUS /'+'/
 	token LEX_CARET /'^'/
 	token LEX_DOTDOT /'..'/
-	token LEX_SQOPEN_POS /'['/ ni
-	token LEX_SQOPEN_NEG /'[^'/ ni
+	token LEX_SQOPEN_POS /'['/ - ni
+	token LEX_SQOPEN_NEG /'[^'/ - ni
 	token LEX_FSLASH /'/'/
 
 	token LEX_DASHDASH /'--'/
