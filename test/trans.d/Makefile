@@ -1,5 +1,5 @@
 
-include ../subject.mk
+-include ../subject.mk
 
 all: trans
 
