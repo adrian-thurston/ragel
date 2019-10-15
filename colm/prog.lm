@@ -1,0 +1,13 @@
+include 'colm.lm'
+
+export ColmTree: start
+export ColmError: str
+
+A: str = argv->pop()
+F: stream = open( A, 'r' )
+parse P: start [ F ]
+
+ColmTree = P
+ColmError = error
+
+

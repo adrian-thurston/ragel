@@ -25,7 +25,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/aapl -Iinclude
 AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = colm
-noinst_PROGRAMS = bootstrap0 bootstrap1
 
 RUNTIME_SRC = \
 	map.c pdarun.c list.c input.c stream.c debug.c \
@@ -38,7 +37,6 @@ RUNTIME_HDR = \
 	pdarun.h map.h type.h tree.h struct.h program.h colm.h internal.h
 
 lib_LTLIBRARIES = libcolm.la
-
 noinst_LIBRARIES = libprog.a
 
 libcolm_la_SOURCES = $(RUNTIME_SRC)
@@ -69,18 +67,6 @@ libprog_a_SOURCES = \
 
 libprog_a_CXXFLAGS = $(common_CFLAGS)
 
-bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
-bootstrap0_SOURCES = consinit.cc consinit.h main.cc
-bootstrap0_LDADD = libprog.a libcolm.la
-
-bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
-bootstrap1_CFLAGS = $(common_CFLAGS)
-bootstrap1_SOURCES = \
-	loadinit.h loadinit.cc main.cc
-nodist_bootstrap1_SOURCES = \
-	gen/if1.h gen/if1.cc gen/parse1.c
-bootstrap1_LDADD = libprog.a libcolm.la
-
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = \
@@ -92,6 +78,32 @@ colm_LDADD = libprog.a libcolm.la
 colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
+
+if EXTERNAL_COLM
+
+gen/parse2.c: $(EXTERNAL_COLM)/bin/colm prog.lm
+	mkdir -p gen
+	$(EXTERNAL_COLM)/bin/colm -c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc prog.lm
+
+gen/if2.h: gen/parse2.c
+gen/if2.cc: gen/parse2.c
+
+gen/colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+colm-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+
+else
+
+noinst_PROGRAMS = bootstrap0 bootstrap1
+
+bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
+bootstrap0_SOURCES = consinit.cc consinit.h main.cc
+bootstrap0_LDADD = libprog.a libcolm.la
+
+bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
+bootstrap1_CFLAGS = $(common_CFLAGS)
+bootstrap1_SOURCES = loadinit.h loadinit.cc main.cc
+nodist_bootstrap1_SOURCES = gen/if1.h gen/if1.cc gen/parse1.c
+bootstrap1_LDADD = libprog.a libcolm.la
 
 gen/parse1.c: bootstrap0$(EXEEXT)
 	mkdir -p gen
@@ -112,6 +124,8 @@ bootstrap1-loadinit.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
 
 gen/colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
 colm-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+
+endif
 
 BUILT_SOURCES = version.h include/colm
 

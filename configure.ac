@@ -275,12 +275,22 @@ SED_SUBST="$SED_SUBST -e 's|@CRACK_BIN@|${CRACK_BIN}|g'"
 
 AC_SUBST(CRACK_BIN)
 	
+dnl Generic dependency specification.
+AC_ARG_WITH(colm,
+	[AC_HELP_STRING([--with-colm], [colm install to build bootstrap programs])],
+	[EXTERNAL_COLM="$withval"],
+	[]
+)
+
+AM_CONDITIONAL([EXTERNAL_COLM], [test "x$EXTERNAL_COLM" != x])
+AC_SUBST(EXTERNAL_COLM)
+
+dnl
+dnl Wrap up.
+dnl
 
 AC_SUBST(SED_SUBST)
-
 AC_CONFIG_HEADERS([src/config.h colm/defs.h])
-
-dnl write output files
 AC_OUTPUT([
 	Makefile
 	aapl/Makefile
