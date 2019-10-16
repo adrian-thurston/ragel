@@ -366,7 +366,7 @@ function run_options()
 	[ -n "$additional_cflags" ] && flags="$flags $additional_cflags"
 
 	# If we have no compiler for the source program then skip it.
-	[ -z "$compiler" ] && continue
+	[ -z "$compiler" ] && return
 
 	# Make sure that we are interested in the host language.
 	echo "$langflags" | grep -qe $lang_opt || return
@@ -384,7 +384,6 @@ function run_translate()
 {
 	test_case=$1
 
-
 	# Recompute the root.
 	root=`basename $test_case`
 	root=${root%.rl};
@@ -392,13 +391,13 @@ function run_translate()
 	# Check if we should ignore the test case
 	enabled=`sed '/@ENABLED:/s/^.*: *//p;d' $test_case`
     if [ -n "$enabled" ] || [ "$enabled" = true ]; then
-        continue;
+        return;
     fi
 
 	# If the generated flag is given make sure that the test case is generated.
 	is_generated=`sed '/@GENERATED:/s/^.*: *//p;d' $test_case`
 	if [ "$is_generated" = true ] && [ "$allow_generated" != true ]; then
-		continue;
+		return;
 	fi
 
 	# Override the test case file name.
@@ -426,7 +425,7 @@ function run_translate()
 	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
 	if [ -z "$lang" ]; then
 		echo "$test_case: language unset"; >&2
-		continue
+		return
 	fi
 
 	cases=""
