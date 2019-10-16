@@ -38,7 +38,7 @@ void execAction( struct pda_run *pdaRun, GenAction *genAction )
 			pdaRun->act = item->longestMatchPart->longestMatchId;
 			break;
 		case InlineItem::LmSetTokEnd:
-			pdaRun->tokend = pdaRun->toklen + ( pdaRun->p - pdaRun->start ) + 1;
+			pdaRun->tokend = pdaRun->tokpref + ( pdaRun->p - pdaRun->start ) + 1;
 			break;
 		case InlineItem::LmInitTokStart:
 			assert(false);
@@ -52,7 +52,6 @@ void execAction( struct pda_run *pdaRun, GenAction *genAction )
 		case InlineItem::LmSwitch:
 			/* If the switch handles error then we also forced the error state. It
 			 * will exist. */
-			pdaRun->toklen = pdaRun->tokend;
 			if ( item->tokenRegion->lmSwitchHandlesError && pdaRun->act == 0 ) {
 				pdaRun->fsm_cs = pdaRun->fsm_tables->error_state;
 			}
@@ -65,22 +64,23 @@ void execAction( struct pda_run *pdaRun, GenAction *genAction )
 				}
 			}
 			pdaRun->return_result = true;
-			pdaRun->skip_toklen = true;
+			pdaRun->skip_tokpref = true;
 			break;
 		case InlineItem::LmOnLast:
 			pdaRun->p += 1;
+			pdaRun->tokend = pdaRun->tokpref + ( pdaRun->p - pdaRun->start );
 			pdaRun->matched_token = item->longestMatchPart->tokenDef->tdLangEl->id;
 			pdaRun->return_result = true;
 			break;
 		case InlineItem::LmOnNext:
+			pdaRun->tokend = pdaRun->tokpref + ( pdaRun->p - pdaRun->start );
 			pdaRun->matched_token = item->longestMatchPart->tokenDef->tdLangEl->id;
 			pdaRun->return_result = true;
 			break;
 		case InlineItem::LmOnLagBehind:
-			pdaRun->toklen = pdaRun->tokend;
 			pdaRun->matched_token = item->longestMatchPart->tokenDef->tdLangEl->id;
 			pdaRun->return_result = true;
-			pdaRun->skip_toklen = true;
+			pdaRun->skip_tokpref = true;
 			break;
 		}
 	}
@@ -170,14 +170,14 @@ _match:
 		goto _again;
 
 	pdaRun->return_result = false;
-	pdaRun->skip_toklen = false;
+	pdaRun->skip_tokpref = false;
 	_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->transActionsWI[_trans];
 	_nacts = (unsigned int) *_acts++;
 	while ( _nacts-- > 0 )
 		execAction( pdaRun, pdaRun->fsm_tables->action_switch[*_acts++] );
 	if ( pdaRun->return_result ) {
-		if ( pdaRun->skip_toklen )
-			goto skip_toklen;
+		if ( pdaRun->skip_tokpref )
+			goto skip_tokpref;
 		goto final;
 	}
 
@@ -195,7 +195,7 @@ _again:
 out:
 	if ( pdaRun->scan_eof ) {
 		pdaRun->return_result = false;
-		pdaRun->skip_toklen = false;
+		pdaRun->skip_tokpref = false;
 		_acts = pdaRun->fsm_tables->actions + pdaRun->fsm_tables->eof_actions[pdaRun->fsm_cs];
 		_nacts = (unsigned int) *_acts++;
 
@@ -205,8 +205,8 @@ out:
 		while ( _nacts-- > 0 )
 			execAction( pdaRun, pdaRun->fsm_tables->action_switch[*_acts++] );
 		if ( pdaRun->return_result ) {
-			if ( pdaRun->skip_toklen )
-				goto skip_toklen;
+			if ( pdaRun->skip_tokpref )
+				goto skip_tokpref;
 			goto final;
 		}
 	}
@@ -214,7 +214,7 @@ out:
 final:
 
 	if ( pdaRun->p != 0 )
-		pdaRun->toklen += pdaRun->p - pdaRun->start;
-skip_toklen:
+		pdaRun->tokpref += pdaRun->p - pdaRun->start;
+skip_tokpref:
 	{}
 }

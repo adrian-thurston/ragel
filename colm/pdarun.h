@@ -271,12 +271,12 @@ struct pda_run
 	char *start;
 	char *tokstart;
 	long tokend;
-	long toklen;
+	long tokpref;
 	char *p, *pe;
 	char scan_eof;
 
 	char return_result;
-	char skip_toklen;
+	char skip_tokpref;
 	char eof_term_recvd;
 
 	char *mark[MARK_SLOTS];

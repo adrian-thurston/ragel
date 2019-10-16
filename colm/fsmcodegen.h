@@ -108,7 +108,7 @@ protected:
 	string TOKSTART() { return ACCESS() + "tokstart"; }
 	string TOKEND() { return ACCESS() + "tokend"; }
 	string BLOCK_START() { return ACCESS() + "start"; }
-	string TOKLEN() { return ACCESS() + "toklen"; }
+	string TOKPREF() { return ACCESS() + "tokpref"; }
 	string ACT() { return ACCESS() + "act"; }
 	string MATCHED_TOKEN() { return ACCESS() + "matched_token"; }
 
@@ -131,6 +131,7 @@ protected:
 	void INIT_ACT( ostream &ret, InlineItem *item );
 	void SET_TOKSTART( ostream &ret, InlineItem *item );
 	void SET_TOKEND( ostream &ret, InlineItem *item );
+	void SET_TOKEND_0( ostream &ret, InlineItem *item );
 	void GET_TOKEND( ostream &ret, InlineItem *item );
 	void SUB_ACTION( ostream &ret, InlineItem *item, int targState, bool inFinish );
 	void LM_ON_LAST( ostream &ret, InlineItem *item );
@@ -161,7 +162,7 @@ public:
 	bool dataPrefix;
 	bool writeFirstFinal;
 	bool writeErr;
-	bool skipTokenLabelNeeded;
+	bool skipTokprefLabelNeeded;
 
 	std::ostream &TO_STATE_ACTION_SWITCH();
 	std::ostream &FROM_STATE_ACTION_SWITCH();

@@ -69,7 +69,7 @@ static void init_fsm_run( program_t *prg, struct pda_run *pda_run )
 	pda_run->consume_buf = 0;
 
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 	pda_run->scan_eof = 0;
 
 	pda_run->pre_region = -1;
@@ -121,7 +121,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		run_buf->length += length;
 
 		pda_run->p = pda_run->pe = 0;
-		pda_run->toklen = 0;
+		pda_run->tokpref = 0;
 
 		head_t *tokdata = colm_string_alloc_pointer( prg, dest, length );
 		tokdata->location = loc;
@@ -233,7 +233,7 @@ static void reset_token( struct pda_run *pda_run )
 	 * must first backup over it. */
 	if ( pda_run->tokstart != 0 ) {
 		pda_run->p = pda_run->pe = 0;
-		pda_run->toklen = 0;
+		pda_run->tokpref = 0;
 		pda_run->scan_eof = 0;
 	}
 }
@@ -725,7 +725,7 @@ static void handle_error( program_t *prg, tree_t **sp, struct pda_run *pda_run )
 static head_t *extract_match( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct input_impl *is )
 {
-	long length = pda_run->toklen;
+	long length = pda_run->tokend;
 
 	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
 
@@ -745,7 +745,7 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 	run_buf->length += length;
 
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 	pda_run->tokstart = 0;
 
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
@@ -760,14 +760,14 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 static head_t *extract_no_d( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct input_impl *is )
 {
-	long length = pda_run->toklen;
+	long length = pda_run->tokend;
 
 	/* Just a consume, no data allocate. */
 	location_t *location = location_allocate( prg );
 	is->funcs->consume_data( prg, is, length, location );
 
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 	pda_run->tokstart = 0;
 
 	head_t *head = colm_string_alloc_pointer( prg, 0, 0 );
@@ -782,7 +782,7 @@ static head_t *extract_no_d( program_t *prg, tree_t **sp,
 static head_t *extract_no_l( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct input_impl *is )
 {
-	long length = pda_run->toklen;
+	long length = pda_run->tokend;
 
 	//debug( prg, REALM_PARSE, "extracting token of length: %ld\n", length );
 
@@ -805,7 +805,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 	run_buf->length += length;
 
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 	pda_run->tokstart = 0;
 
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
@@ -821,7 +821,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 static head_t *consume_match( program_t *prg, tree_t **sp,
 		struct pda_run *pda_run, struct input_impl *is )
 {
-	long length = pda_run->toklen;
+	long length = pda_run->tokend;
 
 	/* No data or location returned. We just consume the data. */
 	location_t dummy_loc;
@@ -829,7 +829,7 @@ static head_t *consume_match( program_t *prg, tree_t **sp,
 	is->funcs->consume_data( prg, is, length, &dummy_loc );
 
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 	pda_run->tokstart = 0;
 
 	debug( prg, REALM_PARSE, "location byte: %d\n", dummy_loc.byte );
@@ -840,7 +840,7 @@ static head_t *consume_match( program_t *prg, tree_t **sp,
 
 static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct input_impl *is )
 {
-	long length = pda_run->toklen;
+	long length = pda_run->tokend;
 
 	struct run_buf *run_buf = pda_run->consume_buf;
 	if ( run_buf == 0 || length > ( FSM_BUFSIZE - run_buf->length ) ) {
@@ -854,7 +854,7 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct input
 	is->funcs->get_data( prg, is, dest, length );
 
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 
 	head_t *head = colm_string_alloc_pointer( prg, dest, length );
 
@@ -1032,7 +1032,7 @@ static void send_eof( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 static void new_token( program_t *prg, struct pda_run *pda_run )
 {
 	pda_run->p = pda_run->pe = 0;
-	pda_run->toklen = 0;
+	pda_run->tokpref = 0;
 	pda_run->scan_eof = 0;
 
 	/* Init the scanner vars. */
@@ -1095,8 +1095,8 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_im
 	while ( true ) {
 		char *pd = 0;
 		int len = 0;
-		int toklen = pda_run->toklen;
-		int type = is->funcs->get_parse_block( prg, is, &toklen, &pd, &len );
+		int tokpref = pda_run->tokpref;
+		int type = is->funcs->get_parse_block( prg, is, &tokpref, &pd, &len );
 
 		switch ( type ) {
 			case INPUT_DATA:
@@ -1167,7 +1167,7 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_im
 			/* Check for a default token in the region. If one is there
 			 * then send it and continue with the processing loop. */
 			if ( prg->rtd->region_info[pda_run->region].default_token >= 0 ) {
-				pda_run->toklen = 0;
+				pda_run->tokpref = 0;
 				return prg->rtd->region_info[pda_run->region].default_token;
 			}
 
@@ -1981,7 +1981,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			if ( pda_run->pre_region >= 0 ) {
 				pda_run->pre_region = -1;
 				pda_run->fsm_cs = pda_run->next_cs;
-				pda_run->toklen = 0;
+				pda_run->tokpref = 0;
 				continue;
 			}
 		}
@@ -2087,7 +2087,7 @@ long colm_parse_loop( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			 * data is pulled from the inputStream. */
 
 			pda_run->p = pda_run->pe = 0;
-			pda_run->toklen = 0;
+			pda_run->tokpref = 0;
 			pda_run->scan_eof = 0;
 
 			pda_run->fi = &prg->rtd->frame_info[prg->rtd->lel_info[pda_run->token_id].frame_id];

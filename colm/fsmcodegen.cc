@@ -46,7 +46,7 @@ FsmCodeGen::FsmCodeGen( ostream &out,
 	dataPrefix(true),
 	writeFirstFinal(true),
 	writeErr(true),
-	skipTokenLabelNeeded(false)
+	skipTokprefLabelNeeded(false)
 {
 }
 
@@ -144,8 +144,15 @@ void FsmCodeGen::SET_ACT( ostream &ret, InlineItem *item )
 void FsmCodeGen::SET_TOKEND( ostream &ret, InlineItem *item )
 {
 	/* The tokend action sets tokend. */
-	ret << "{ " << TOKEND() << " = " << TOKLEN() << " + ( " << P() << " - " << BLOCK_START() << " ) + 1; }";
+	ret << "{ " << TOKEND() << " = " << TOKPREF() << " + ( " << P() << " - " << BLOCK_START() << " ) + 1; }";
 }
+
+void FsmCodeGen::SET_TOKEND_0( ostream &ret, InlineItem *item )
+{
+	/* The tokend action sets tokend. */
+	ret << "{ " << TOKEND() << " = " << TOKPREF() << " + ( " << P() << " - " << BLOCK_START() << " ); }";
+}
+
 void FsmCodeGen::INIT_TOKSTART( ostream &ret, InlineItem *item )
 {
 	ret << TOKSTART() << " = 0;";
@@ -170,7 +177,6 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 		int targState, int inFinish )
 {
 	ret << 
-		"	" << TOKLEN() << " = " << TOKEND() << ";\n"
 		"	switch( " << ACT() << " ) {\n";
 
 	/* If the switch handles error then we also forced the error state. It
@@ -192,9 +198,9 @@ void FsmCodeGen::LM_SWITCH( ostream &ret, InlineItem *item,
 	ret << 
 		"	}\n"
 		"\t"
-		"	goto skip_toklen;\n";
+		"	goto skip_tokpref;\n";
 
-	skipTokenLabelNeeded = true;
+	skipTokprefLabelNeeded = true;
 }
 
 void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
@@ -202,6 +208,7 @@ void FsmCodeGen::LM_ON_LAST( ostream &ret, InlineItem *item )
 	assert( item->longestMatchPart->tokenDef->tdLangEl != 0 );
 
 	ret << "	" << P() << " += 1;\n";
+	SET_TOKEND_0( ret, 0 );
 	EMIT_TOKEN( ret, item->longestMatchPart->tokenDef->tdLangEl );
 	ret << "	goto out;\n";
 }
@@ -210,6 +217,7 @@ void FsmCodeGen::LM_ON_NEXT( ostream &ret, InlineItem *item )
 {
 	assert( item->longestMatchPart->tokenDef->tdLangEl != 0 );
 
+	SET_TOKEND_0( ret, 0 );
 	EMIT_TOKEN( ret, item->longestMatchPart->tokenDef->tdLangEl );
 	ret << "	goto out;\n";
 }
@@ -218,11 +226,10 @@ void FsmCodeGen::LM_ON_LAG_BEHIND( ostream &ret, InlineItem *item )
 {
 	assert( item->longestMatchPart->tokenDef->tdLangEl != 0 );
 
-	ret << "	" << TOKLEN() << " = " << TOKEND() << ";\n";
 	EMIT_TOKEN( ret, item->longestMatchPart->tokenDef->tdLangEl );
-	ret << "	goto skip_toklen;\n";
+	ret << "	goto skip_tokpref;\n";
 
-	skipTokenLabelNeeded = true;
+	skipTokprefLabelNeeded = true;
 }
 
 
@@ -877,11 +884,11 @@ void FsmCodeGen::writeExec()
 	out <<
 		"out:\n"
 		"	if ( " << P() << " != 0 )\n"
-		"		" << TOKLEN() << " += " << P() << " - " << BLOCK_START() << ";\n";
+		"		" << TOKPREF() << " += " << P() << " - " << BLOCK_START() << ";\n";
 
-	if ( skipTokenLabelNeeded ) {
+	if ( skipTokprefLabelNeeded ) {
 		out << 
-			"skip_toklen:\n"
+			"skip_tokpref:\n"
 			"	{}\n";
 	}
 	
