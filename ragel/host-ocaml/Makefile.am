@@ -26,7 +26,7 @@ rlreduce.cc: rlparse.c
 rlhc$(EXEEXT): rlhc.lm
 	$(COLM_BIN) -I.. -o $@ $<
 
-rlhc.c: rlhc.lm
+rlhc.c: rlhc.lm ../ril.lm $(COLM_BINDEP)
 	$(COLM_BIN) -I.. -c -b rlhcOCaml -o $@ $<
 
 

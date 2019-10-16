@@ -62,7 +62,7 @@ trans_SOURCES = trans.c main.c
 trans_LDADD = -lcolm
 trans_LDFLAGS = $(COLM_xLDFLAGS)
 
-trans.c: trans.lm $(TRANS_DEPS)
+trans.c: trans.lm $(TRANS_DEPS) $(COLM_BIN)
 	$(COLM_BIN) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
 
 gentests: gentests.sh Makefile

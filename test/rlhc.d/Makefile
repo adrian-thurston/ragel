@@ -21,7 +21,7 @@ RLHC_DEP = \
 	rlhc-julia.lm \
 	rlhc-js.lm
 
-rlhc: rlhc.lm $(RLHC_DEP)
+rlhc: rlhc.lm $(RLHC_DEP) $(COLM)
 	$(COLM) -b rlhc_object -o $@ $<
 
 clean:

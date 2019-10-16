@@ -23,5 +23,5 @@ rlparse.c: rlparse.lm $(COLM_BINDEP)
 
 rlreduce.cc: rlparse.c
 
-rlhc.c: rlhc.lm
+rlhc.c: rlhc.lm ../ril.lm $(COLM_BINDEP)
 	$(COLM_BIN) -I.. -c -b rlhcD -o $@ $<

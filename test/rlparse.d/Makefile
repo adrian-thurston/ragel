@@ -21,7 +21,7 @@ if.h: parse.c
 if.cc: parse.c
 commit.cc: parse.c
 
-parse.c: rlparse.lm reducer.lm $(RAGEL_LM)
+parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM)
 	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
 
 %.o: %.c

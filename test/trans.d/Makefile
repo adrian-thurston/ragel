@@ -23,7 +23,7 @@ main.o: main.c
 trans.o: trans.c
 	gcc -c $(COLM_INC) -o $@ $<
 
-trans.c: trans.lm $(TRANS_DEPS) 
+trans.c: trans.lm $(TRANS_DEPS) $(COLM)
 	$(COLM) -b trans_object -c -o $@ $<
 
 clean:
