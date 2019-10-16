@@ -21,16 +21,25 @@ elif [ $# != 0 ]; then
 	DIRS=$(find "$@" -type d -name '*.d')
 fi
 
+GENTEST_LOG=`mktemp /tmp/gentest.XXXXXX`
+
 for D in $DIRS; do
 	cd $D
-	echo ------- $D
-	./gentests $ARGS | xargs -n1 -P$CORES bash
+	echo ---- in $D
+	./gentests $ARGS 2>> $GENTEST_LOG | xargs -n1 -P$CORES bash
 	WORKING="$WORKING $D/working"
 	cd $OLDPWD
 done
 
-echo ----  cases   ------
+echo ---- cases
 find $WORKING -name '*.sh' -not -size 0 | wc -l
 
-echo ---- failures ------
+echo ---- failures
 find $WORKING -name '*.diff' -not -size 0 | wc -l
+
+if [ -s $GENTEST_LOG ]; then
+	echo ---- errors
+	cat $GENTEST_LOG
+fi
+
+rm $GENTEST_LOG

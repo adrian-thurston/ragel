@@ -42,6 +42,7 @@ trap sig_exit SIGTERM
 
 wk=working
 test -d $wk || mkdir $wk
+echo $wk/* | xargs rm -Rf
 
 while getopts "gcnmleT:F:W:G:P:CDJRAZOUKY-:" opt; do
 	case $opt in
@@ -78,6 +79,9 @@ while getopts "gcnmleT:F:W:G:P:CDJRAZOUKY-:" opt; do
 					exit 1
 				;;
 			esac
+		;;
+		?)
+			exit 1;
 		;;
 	esac
 done
@@ -380,6 +384,7 @@ function run_translate()
 {
 	test_case=$1
 
+
 	# Recompute the root.
 	root=`basename $test_case`
 	root=${root%.rl};
@@ -405,7 +410,7 @@ function run_translate()
 	# If the test case has a directory by the same name, copy it into the
 	# working direcotory.
 	if [ -d $root ]; then
-		cp -a $root working/
+		cp -a $root $wk/
 	fi
 
 	expected_out=$wk/$root.exp;
@@ -421,7 +426,7 @@ function run_translate()
 	lang=`sed '/@LANG:/s/^.*: *//p;d' $test_case`
 	if [ -z "$lang" ]; then
 		echo "$test_case: language unset"; >&2
-		exit 1;
+		continue
 	fi
 
 	cases=""
@@ -472,10 +477,21 @@ function run_translate()
 
 go()
 {
+	# Before we generate and test cases verify that all files exist. It is nice
+	# to catch this early.
+	for test_case; do
+		if ! [ -f $test_case ]; then
+			echo "$test_case: could not find file" >&2
+			missing_file=true
+			
+		fi
+	done
+
+	[ "$missing_file" = true ] && exit 1;
+
 	for test_case; do
 		run_translate $test_case
 	done
 }
 
-echo working/* | xargs rm -Rf
 go "$@"
