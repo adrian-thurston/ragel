@@ -1,7 +1,7 @@
 lex
 	literal `fn `use `let `mut `if `else `struct `for `in
 	literal `true `false
-	literal `ref `match
+	literal `ref `match `as `impl
 
 	literal `; `:: `( `) `{ `} `. `,
 	literal `[ `] `:
@@ -37,8 +37,34 @@ end
 # Use statments
 #
 
+def sp_tail
+	[sp_tail `:: id]
+|	[]
+
+def simple_path
+	[id sp_tail]
+
+def use_list_tail
+	[use_list_tail `, use_tree]
+|	[]
+
+def use_path_opt
+	[simple_path `::]
+|	[`::]
+|	[]
+
+def use_as_opt
+	[`as id]
+|	[`as `_]
+|	[]
+
+def use_tree
+	[use_path_opt `*]
+|	[use_path_opt `{ use_tree use_list_tail `}]
+|	[simple_path use_as_opt]
+
 def use_declaration
-	[`use qual_id `;]
+	[`use use_tree `;]
 
 #
 # Patterns
@@ -468,13 +494,31 @@ def structure
 |	[`struct id opt_generics `( tuple_field_list `) `; ]
 
 #
+# Implementation
+#
+
+def inherent_impl_item
+	[function]
+
+def inherent_impl
+	[`impl opt_generics type `{ inherent_impl_item* `}]
+
+def trait_impl
+	[]
+
+def implementation
+	[inherent_impl]
+#|	[trait_impl]
+
+#
 # All Items.
 #
 
 def item
-	[function]
-|	[structure]
-|	[use_declaration]
+	[function] commit
+|	[structure] commit
+|	[implementation] commit
+|	[use_declaration] commit
 
 def program
 	[item*]
