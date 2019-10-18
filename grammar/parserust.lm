@@ -1,0 +1,73 @@
+include 'rust.lm'
+
+parse P: program [stdin]
+
+if P {
+	for FN: function in P {
+		print "function: [FN.id]
+
+		for CE: compound_expression in FN {
+			if match CE [assignment_expression compound_op compound_expression]
+				print "  compound expression: [CE]
+		}
+
+		for AE: assignment_expression in FN {
+			if match AE [range_expression `= assignment_expression]
+				print "  assignment expression: [AE]
+		}
+
+		for RE: range_expression in FN {
+			if !match RE [lazy_disjunction]
+				print "  range expression: [RE]
+		}
+
+		for LD: lazy_disjunction in FN {
+			if !match LD [lazy_conjunction]
+				print "  lazy disjunction: [LD]
+		}
+
+		for LC: lazy_conjunction in FN {
+			if !match LC [comparison]
+				print "  lazy conjunction: [LC]
+		}
+
+		for C: comparison in FN {
+			if !match C [bitwise_or]
+				print "  comparison: [C]
+		}
+
+		for P: pattern in FN {
+			print "  pattern: [P]
+		}
+
+		for MA: match_arm in FN {
+			print "  match_arm: [MA]
+		}
+
+		for CL: cons_list in FN {
+			print "  construct list: [^CL]
+		}
+
+		for M: mult in FN {
+			if !match M [as]
+				print "  mult: [^M]
+		}
+
+		for TP: tuple_pattern in FN {
+			print "  tuple pattern: [TP]
+		}
+
+		for TP: grouped_pattern in FN {
+			print "  grouped pattern: [TP]
+		}
+	}
+
+	for M: method in P {
+		print "method: [M.id]
+	}
+}
+else {
+	send stderr "failed to parse input [error]
+	exit(1)
+}
+

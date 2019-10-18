@@ -1,9 +1,11 @@
 lex
-	literal `fn `use `let `mut `if `else `struct `for `in
+	literal `fn `use `let `mut `if `else `struct
+	literal `loop `while `for `in
 	literal `true `false
 	literal `ref `match `as `impl
+	literal `crate `self `return
 
-	literal `; `:: `( `) `{ `} `. `,
+	literal `; `:: `( `) `{ `} `. `, `@
 	literal `[ `] `:
 	literal `-> `=>
 	literal `< `>
@@ -80,19 +82,10 @@ def literal_pattern
 
 def identifier_pattern
 	[opt_ref opt_mut id]
+|	[opt_ref opt_mut id `@ pattern]
 
-def pattern_tail
-	[pattern_tail `, pattern]
-|	[]
-
-def pattern
-	[literal_pattern]
-|	[identifier_pattern]
-|	[`_]
-|	[paths `( pattern pattern_tail `)]
-|	[range_pattern]
-
-# Range Pattern
+def wildcard_pattern
+	[`_]
 
 def range_pattern_bound
 	[literal_pattern]
@@ -100,6 +93,82 @@ def range_pattern_bound
 def range_pattern
 	[range_pattern_bound `..= range_pattern_bound]
 |	[range_pattern_bound `... range_pattern_bound]
+
+def reference_pattern
+	[`& opt_mut pattern]
+|	[`&& opt_mut pattern]
+
+#
+# struct pattern
+#
+def struct_pattern_field
+	[number `: pattern]
+|	[id `: pattern]
+|	[opt_ref opt_mut id]
+
+def struct_pattern_fields
+	[struct_pattern_fields `, struct_pattern_field]
+|	[struct_pattern_field]
+
+def struct_pattern_et_cetera
+	[`..]
+
+def struct_pattern_elements
+	[struct_pattern_fields]
+|	[struct_pattern_fields `, ]
+|	[struct_pattern_fields `, struct_pattern_et_cetera]
+|	[struct_pattern_et_cetera]
+
+def opt_struct_pattern_elements
+	[struct_pattern_elements]
+|	[]
+
+def struct_pattern
+	[path_in_expression `{ opt_struct_pattern_elements `}]
+
+def opt_comma
+	[`,]
+|	[]
+
+def tuple_struct_item
+	[pattern]
+|	[`..]
+
+def tuple_struct_items
+	[tuple_struct_items `, tuple_struct_item]
+|	[tuple_struct_item]
+
+def tuple_struct_pattern
+	[path_in_expression `( tuple_struct_items opt_comma `)]
+
+def tuple_pattern_item
+	[pattern]
+|	[`..]
+
+def tuple_pattern_items
+	[tuple_pattern_items `, tuple_pattern_item]
+|	[tuple_pattern_item]
+
+def tuple_pattern
+	[`( tuple_pattern_item `, `)]
+|	[`( tuple_pattern_item `, tuple_pattern_items opt_comma `)]
+
+def grouped_pattern
+	[`( pattern `)]
+
+def pattern
+	[literal_pattern]
+|	[identifier_pattern]
+|	[wildcard_pattern]
+|	[range_pattern]
+|	[reference_pattern]
+|	[struct_pattern]
+|	[tuple_struct_pattern]
+|	[tuple_pattern]
+|	[grouped_pattern]
+
+# Range Pattern
+
 
 #
 # Match Expressions.
@@ -142,6 +211,13 @@ def opt_match_arm_guard
 |	[]
 
 #
+# Return expressions
+#
+def return_expression
+	[`return]
+|	[`return expression]
+
+#
 # Generic Args
 #
 
@@ -170,6 +246,27 @@ def opt_return
 def function
 	[`fn id opt_generics `( field_list `) opt_return block_expression]
 
+#
+# Method declaration
+#
+
+def self_param
+	[opt_mut `self]
+|	[`& opt_mut `self]
+|	[`& lifetime opt_mut `self]
+|	[opt_mut `self `: type]
+
+def opt_field_list
+	[`, field_list]
+|	[]
+
+def method
+	[`fn id opt_generics `( self_param opt_field_list `) opt_return block_expression]
+
+#
+# Types
+#
+
 def qual_tail
 	[qual_tail `:: id]
 |	[]
@@ -186,6 +283,8 @@ def type_path_tail
 
 def type_path
 	[type_id type_path_tail]
+|	[`[ type `; expression `]]
+|	[`[ type `]]
 
 def opt_lifetime
 	[lifetime]
@@ -248,6 +347,30 @@ def cons_list
 # Expression
 #
 
+def path_ident_segment
+	[id]
+|	[`self]
+|	[`crate]
+
+def path_expr_segment
+	[path_ident_segment]
+#|	[path_ident_segment `:: generic_args]
+
+def pie_tail
+	[pie_tail `:: path_expr_segment]
+|	[]
+
+def opt_path_sep
+	[`::]
+|	[]
+
+def path_in_expression
+	[opt_path_sep path_expr_segment pie_tail]
+
+def path_expression
+	[path_in_expression]
+#|	[qualified_path_in_expression]
+
 # Doesn't really belong in expressions. Macros are a whole pass before. Here
 # for now.
 def opt_macro
@@ -255,7 +378,7 @@ def opt_macro
 |	[]
 
 def paths
-	[qual_id]
+	[path_expression]
 |	[char]
 |	[string]
 |	[number]
@@ -265,6 +388,7 @@ def paths
 |	[`( `)]
 |	[`true]
 |	[`false]
+|	[`( expression `)]
 
 def func_index
 	[func_index `. qual_id `( expr_list `)]
@@ -358,12 +482,6 @@ def compound_expression
 	[assignment_expression compound_op compound_expression]
 |	[assignment_expression]
 
-def expr_without_block
-	[compound_expression `? ?]
-
-def expr_with_block
-	[match_expression]
-
 def expression
 	[expression_without_block]
 |	[expression_with_block]
@@ -380,10 +498,11 @@ def let_statement
 
 def expression_without_block
 	[compound_expression `? ?]
+|	[return_expression]
 
 def expression_with_block
 	[block_expression]
-|	[`for id `in expression block_expression]
+|	[loop_expression]
 |	[if_expression]
 |	[if_let_expression]
 |	[match_expression]
@@ -401,6 +520,12 @@ def statements
 	[statement+]
 |	[statement+ expression_without_block]
 |	[expression_without_block]
+
+def loop_expression
+	[`loop block_expression]
+|	[`while expression block_expression]
+|	[`while `let match_arm_patterns `= expression block_expression]
+|	[`for pattern `in expression block_expression]
 
 def if_expression
 	[`if expression block_expression opt_else_expression]
@@ -499,6 +624,7 @@ def structure
 
 def inherent_impl_item
 	[function]
+|	[method]
 
 def inherent_impl
 	[`impl opt_generics type `{ inherent_impl_item* `}]
@@ -523,63 +649,3 @@ def item
 def program
 	[item*]
 
-parse P: program [stdin]
-
-if P {
-	print [ P ]
-
-	for FN: function in P {
-		print "function: [FN.id]
-
-		for CE: compound_expression in FN {
-			if match CE [assignment_expression compound_op compound_expression]
-				print "  compound expression: [CE]
-		}
-
-		for AE: assignment_expression in FN {
-			if match AE [range_expression `= assignment_expression]
-				print "  assignment expression: [AE]
-		}
-
-		for RE: range_expression in FN {
-			if !match RE [lazy_disjunction]
-				print "  range expression: [RE]
-		}
-
-		for LD: lazy_disjunction in FN {
-			if !match LD [lazy_conjunction]
-				print "  lazy disjunction: [LD]
-		}
-
-		for LC: lazy_conjunction in FN {
-			if !match LC [comparison]
-				print "  lazy conjunction: [LC]
-		}
-
-		for C: comparison in FN {
-			if !match C [bitwise_or]
-				print "  comparison: [C]
-		}
-
-		for P: pattern in FN {
-			print "  pattern: [P]
-		}
-
-		for MA: match_arm in FN {
-			print "  match_arm: [MA]
-		}
-
-		for CL: cons_list in FN {
-			print "  construct list: [^CL]
-		}
-
-		for M: mult in FN {
-			if !match M [as]
-				print "  mult: [^M]
-		}
-	}
-}
-else {
-	send stderr "failed to parse input [error]
-	exit(1)
-}

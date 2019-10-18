@@ -1,2 +1,2 @@
-rust: rust.lm
-	../colm/colm rust.lm
+rust: rust.lm parserust.lm
+	../colm/colm parserust.lm
