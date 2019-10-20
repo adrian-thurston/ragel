@@ -3,7 +3,8 @@ lex
 	literal `loop `while `for `in
 	literal `true `false
 	literal `ref `match `as `impl
-	literal `crate `self `return
+	literal `crate `self `return `type
+	literal `pub `const `unsafe
 
 	literal `; `:: `( `) `{ `} `. `, `@
 	literal `[ `] `:
@@ -12,6 +13,8 @@ lex
 	literal `?
 
 	literal `- `+ `/ `* `% `! `&mut
+
+	literal `#
 
 	literal `^ `| `&
 
@@ -28,12 +31,86 @@ lex
 	token string   / '"' ( [^\"] | '\\' any )* '"' /
 	token char     / "'" ( [^\'] | '\\' any )  "'" /
 	token lifetime / "'" id /
-	token number   / [0-9]+ /
+	token number   / [0-9] [_0-9]* /
 	token float    / [0-9]+ '.' [0-9]+ /
 
 	ignore / "//" [^\n]* '\n' /
+	ignore / "/*" any* :>> "*/" /
 	ignore / [ \t\n]+ /
 end
+
+namespace attr
+	lex
+		token id       / [A-Za-z_] [A-Za-z_0-9]* /
+		token string   / '"' ( [^\"] | '\\' any )* '"' /
+		token char     / "'" ( [^\'] | '\\' any )  "'" /
+		token lifetime / "'" id /
+		token number   / [0-9]+ /
+		token float    / [0-9]+ '.' [0-9]+ /
+
+		literal `[ `]
+
+		ignore / "//" [^\n]* '\n' /
+		ignore / "/*" any* :>> "*/" /
+		ignore / [ \t\n]+ /
+
+		token sym      / any /
+	end
+
+	def item
+		[id]
+	|	[string]
+	|	[char]
+	|	[lifetime]
+	|	[number]
+	|	[float]
+	|	[sym]
+	|	[_list]
+
+	def _list
+		[ `[ item* `] ]
+end
+
+def attribute
+	[`# `! attr::_list]
+|	[`# attr::_list]
+
+namespace macro
+	lex
+		token id       / [A-Za-z_] [A-Za-z_0-9]* /
+		token string   / '"' ( [^\"] | '\\' any )* '"' /
+		token char     / "'" ( [^\'] | '\\' any )  "'" /
+		token lifetime / "'" id /
+		token number   / [0-9]+ /
+		token float    / [0-9]+ '.' [0-9]+ /
+
+		literal `( `) `[ `] `{ `} `;
+
+		ignore / "//" [^\n]* '\n' /
+		ignore / "/*" any* :>> "*/" /
+		ignore / [ \t\n]+ /
+
+		token sym      / any /
+	end
+
+	def item
+		[id]
+	|	[string]
+	|	[char]
+	|	[lifetime]
+	|	[number]
+	|	[float]
+	|	[sym]
+	|	[_list]
+
+	def _list
+		[ `( item* `) `; ]
+	|	[ `[ item* `] `; ]
+	|	[ `{ item* `} ]
+end
+
+def macro_invocation
+	[simple_path `! macro::_list]
 
 #
 # Use statments
@@ -156,6 +233,18 @@ def tuple_pattern
 def grouped_pattern
 	[`( pattern `)]
 
+def pattern_list
+	[pattern_list `, pattern]
+|	[pattern]
+
+def slice_pattern
+	[`[ pattern `, `]]
+|	[`[ pattern `, pattern_list opt_comma `]]
+
+def path_pattern
+	[path_in_expression]
+|	[qualified_path_in_expression]
+
 def pattern
 	[literal_pattern]
 |	[identifier_pattern]
@@ -166,6 +255,8 @@ def pattern
 |	[tuple_struct_pattern]
 |	[tuple_pattern]
 |	[grouped_pattern]
+|	[slice_pattern]
+|	[path_pattern]
 
 # Range Pattern
 
@@ -243,8 +334,24 @@ def opt_return
 	[]
 |	[ `-> type]
 
+def function_qualifiers
+	[`const]
+|	[`const `unsafe]
+|	[`unsafe]
+|	[]
+
+def function_param
+	[pattern `: type]
+
+def func_param_tail
+	[func_param_tail `, function_param]
+|	[]
+
+def function_parameters
+	[function_param func_param_tail opt_comma]
+
 def function
-	[`fn id opt_generics `( field_list `) opt_return block_expression]
+	[function_qualifiers `fn id opt_generics `( function_parameters `) opt_return block_expression]
 
 #
 # Method declaration
@@ -281,20 +388,38 @@ def type_path_tail
 	[type_path_tail `:: type_id]
 |	[]
 
+def opt_sep
+	[`::]
+|	[]
+
 def type_path
-	[type_id type_path_tail]
-|	[`[ type `; expression `]]
-|	[`[ type `]]
+	[opt_sep type_id type_path_tail]
 
 def opt_lifetime
 	[lifetime]
 |	[]
 
+def array_type
+	[`[ type `; expression `]]
+
+def slice_type
+	[`[ type `]]
+
+def raw_pointer_type
+	[`* `mut type_no_bounds]
+|	[`* `const type_no_bounds]
+
 def type
+	[type_no_bounds]
+
+def type_no_bounds
 	[type_path]
-|	[`& opt_lifetime type_path]
-|	[`&mut type_path]
-|	[`& lifetime `mut type_path]
+|	[array_type]
+|	[slice_type]
+|	[raw_pointer_type]
+|	[`& opt_lifetime type]
+|	[`&mut type]
+|	[`& lifetime `mut type]
 |	[`( `)]
 
 def type_list
@@ -339,7 +464,7 @@ def cons_plus
 |	[_construct]
 
 def cons_list
-	[cons_plus]
+	[cons_plus opt_comma]
 |	[]
 
 
@@ -367,9 +492,20 @@ def opt_path_sep
 def path_in_expression
 	[opt_path_sep path_expr_segment pie_tail]
 
+def qualified_path_in_expression
+	[`< type `>]
+
 def path_expression
 	[path_in_expression]
-#|	[qualified_path_in_expression]
+|	[qualified_path_in_expression]
+
+def tuple_expression
+	[`( expression `, `)]
+|	[`( expression `, expr_list opt_comma `)]
+
+def array_expression
+	[`[ expr_list opt_comma `]]
+|	[ `[ number `; number `]]
 
 # Doesn't really belong in expressions. Macros are a whole pass before. Here
 # for now.
@@ -384,11 +520,12 @@ def paths
 |	[number]
 |	[float]
 |	[id `{ cons_list `}]
-|	[ `[ number `; number `]]
 |	[`( `)]
 |	[`true]
 |	[`false]
 |	[`( expression `)]
+|	[tuple_expression]
+|	[array_expression]
 
 def func_index
 	[func_index `. qual_id `( expr_list `)]
@@ -413,6 +550,7 @@ def unary
 
 def as
 	[unary]
+|	[unary `as type_no_bounds]
 
 def mult
 	[mult `* as]
@@ -435,11 +573,11 @@ def bitwise_and
 |	[shift]
 
 def bitwise_xor
-	[bitwise_and `^ shift]
+	[bitwise_xor `^ bitwise_and]
 |	[bitwise_and]
 
 def bitwise_or
-	[bitwise_and `| shift]
+	[bitwise_or `| bitwise_xor]
 |	[bitwise_xor]
 
 def comp_op
@@ -515,6 +653,7 @@ def statement
 	[`;]
 |	[let_statement]
 |	[expression_statement]
+|	[use_declaration]
 
 def statements
 	[statement+]
@@ -597,6 +736,12 @@ def opt_generics
 |	[]
 
 #
+# Where clause
+#
+def opt_where_clause
+	[]
+
+#
 # Tuple List
 #
 
@@ -611,7 +756,6 @@ def tuple_field_list
 #
 # Structure
 #
-
 
 def structure
 	[`struct id opt_generics `{ field_list `}]
@@ -636,15 +780,32 @@ def implementation
 	[inherent_impl]
 #|	[trait_impl]
 
+def type_alias
+	[`type id opt_generics opt_where_clause `= type `;]
+
+def visibiltiy
+	[`pub]
+
+def const_item
+	[`const id `: type `= expression `;]
+|	[`const `_ `: type `= expression `;]
+
 #
 # All Items.
 #
 
 def item
-	[function] commit
+	[`pub ? vis_item]
+
+def vis_item
+	[attribute] commit
+|	[macro_invocation] commit
+|	[function] commit
 |	[structure] commit
 |	[implementation] commit
 |	[use_declaration] commit
+|	[type_alias] commit
+|	[const_item] commit
 
 def program
 	[item*]
