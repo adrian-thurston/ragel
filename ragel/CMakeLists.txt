@@ -1,25 +1,20 @@
-# Check type size
-include(CheckTypeSize)
-check_type_size("int" SIZEOF_INT)
-check_type_size("long" SIZEOF_LONG)
+# Package name
+set(_PACKAGE_NAME ragel)
 
-# Check system headers
-include(CheckIncludeFile)
-check_include_file(sys/wait.h HAVE_SYS_WAIT_H)
-
-# Prepare settings
-string(TOLOWER ${PROJECT_NAME} _PACKAGE_NAME)
-if("${CMAKE_BUILD_TYPE}" MATCHES "[Dd][Ee][Bb]")
-	set(DEBUG 1)
-endif()
-set(VERSION "${PROJECT_VERSION}")
-set(PUBDATE "${PROJECT_PUBDATE}")
-
-set(common_COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}")
+# Read project configuration from ../configure.ac file
+file(STRINGS ../configure.ac _PROJECT_CONFIGS
+	REGEX "(RAGEL_VERSION=)|(RAGEL_PUBDATE=)")
+foreach(_PROJECT_CONFIG ${_PROJECT_CONFIGS})
+	if(_PROJECT_CONFIG MATCHES "RAGEL_VERSION=\"([^\"]+)")
+		string(STRIP ${CMAKE_MATCH_1} RAGEL_VERSION)
+	endif()
+	if(_PROJECT_CONFIG MATCHES "RAGEL_PUBDATE=\"([^\"]+)")
+		string(STRIP ${CMAKE_MATCH_1} RAGEL_PUBDATE)
+	endif()
+endforeach()
 
 ## Generate headers
 configure_file(version.h.cmake.in version.h @ONLY)
-configure_file(config.h.cmake.in config.h @ONLY)
 configure_file(ragel-config.cmake.in
 	"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake" @ONLY)
 
@@ -56,6 +51,7 @@ add_library(libfsm
 target_include_directories(libfsm
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../src>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../aapl>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
@@ -74,7 +70,9 @@ target_link_libraries(libragel colm::libcolm)
 target_include_directories(libragel
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/..>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../aapl>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
@@ -136,7 +134,7 @@ if(${PROJECT_NAME}_MAKE_INSTALL)
 	include(CMakePackageConfigHelpers)
 	write_basic_package_version_file(
 		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"
-		VERSION ${${PROJECT_NAME}_VERSION}
+		VERSION ${RAGEL_VERSION}
 		COMPATIBILITY AnyNewerVersion)
 	install(FILES
 		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake"

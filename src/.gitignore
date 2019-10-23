@@ -2,3 +2,9 @@
 /config.h.in
 /stamp-h1
 /stamp-h2
+
+/Makefile
+
+/CMakeFiles
+/cmake_install.cmake
+/install_manifest.txt

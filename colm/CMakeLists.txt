@@ -1,48 +1,18 @@
-# Check type size
-include(CheckTypeSize)
-check_type_size("long" SIZEOF_LONG)
-check_type_size("unsigned long" SIZEOF_UNSIGNED_LONG)
-check_type_size("unsigned long long" SIZEOF_UNSIGNED_LONG_LONG)
-check_type_size("void *" SIZEOF_VOID_P)
-
-# Check system headers
-include(CheckIncludeFile)
-check_include_file(sys/mman.h HAVE_SYS_MMAN_H)
-check_include_file(sys/wait.h HAVE_SYS_WAIT_H)
-check_include_file(unistd.h HAVE_UNISTD_H)
-
-# Prepare settings
-string(TOLOWER ${PROJECT_NAME} _PACKAGE_NAME)
-if("${CMAKE_BUILD_TYPE}" MATCHES "[Dd][Ee][Bb]")
-	set(DEBUG 1)
-endif()
-set(VERSION "${PROJECT_VERSION}")
-set(PUBDATE "${PROJECT_PUBDATE}")
-
-set(common_COMPILE_DEFINITIONS PREFIX="${CMAKE_INSTALL_PREFIX}")
+# Package name
+set(_PACKAGE_NAME colm)
 
 # Generate headers
 configure_file(version.h.cmake.in version.h @ONLY)
-configure_file(config.h.cmake.in config.h @ONLY)
 configure_file(defs.h.cmake.in defs.h @ONLY)
 configure_file(colm-config.cmake.in
-	"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake" @ONLY)
+"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake" @ONLY)
 
 # Runtime headers
 set(RUNTIME_HDR
 	bytecode.h debug.h pool.h input.h
 	pdarun.h map.h type.h tree.h struct.h program.h colm.h internal.h)
 
-# Buildtime headers stub
-foreach(_hdr ${RUNTIME_HDR} rtvector.h)
-	file(GENERATE
-		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/include/colm/${_hdr}"
-		CONTENT "#include \"${CMAKE_CURRENT_LIST_DIR}/${_hdr}\"\n")
-endforeach()
-foreach(_hdr config.h defs.h)
-	file(GENERATE
-		OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/include/colm/${_hdr}"
-		CONTENT "#include \"../../${_hdr}\"\n")
+foreach(_hdr defs.h)
 	list(APPEND RUNTIME_HDR "${CMAKE_CURRENT_BINARY_DIR}/${_hdr}")
 endforeach()
 
@@ -60,7 +30,8 @@ add_library(libcolm
 target_include_directories(libcolm
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../src>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 set_target_properties(libcolm PROPERTIES
@@ -84,9 +55,10 @@ add_library(libprog
 target_include_directories(libprog
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/..>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../aapl>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>)
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>)
 
 set_target_properties(libprog PROPERTIES
 	OUTPUT_NAME prog)

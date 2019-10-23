@@ -37,3 +37,6 @@
 /format.c
 /awkemu.c
 /.deps
+
+/CMakeFiles
+/cmake_install.cmake
