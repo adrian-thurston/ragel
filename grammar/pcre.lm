@@ -1,0 +1,583 @@
+global Backrefs: int = 0
+
+lex
+	token pre_equals /'='/
+end
+
+token alpha_char
+	/ [a-zA-Z] /
+
+token digit_char
+	/ [0-9] /
+
+rl alpha_nums
+	/ (alpha_char | '_' ) (alpha_char | '_' | digit_char)* /
+
+rl alpha_numeric
+	/ 'a'..'z' | 'A'..'Z' | '0'..'9' /
+
+rl alpha_numerics
+	/ alpha_numeric+ /
+
+rl hex_digit
+	/ '0'..'9' | 'a'..'f' | 'A'..'F' /
+
+literal `| `^
+literal `. `? `+ `*
+literal `{ `}
+
+# It is important that these all go into the same lexical region, so we get a
+# longest-match with no backtracking among these lexical options. Probably need
+# to separate mainline regex from character class regex lexical, but for now
+# they are the same regions.
+lex
+	literal `[
+	token cc_open_caret /"[^"/
+	token cc_open_caret_close /"[^]"/
+	token cc_open_close /"[]"/
+end
+
+literal `] 
+literal `( `)
+literal `< `>
+literal `, `: `- `_ `= `!
+literal `# `& `$
+
+token NL
+	/ '\r' ? '\n' /
+
+token number
+	/[0-9]+/
+
+# With greedy (default) or lazy (?), we are always attempting all matches. But
+# possessive (+) prunes paths, so it must force the pattern to become a
+# prefilter.
+def quantifier_type
+	[`+]
+|	[`?]
+|	[]
+
+def general_repetition
+	[`{ number `} ]
+|	[`{ number comma `} ]
+|	[`{ number comma number `} ]
+
+def quantifier
+	[`? quantifier_type] :Question
+|	[`* quantifier_type] :Star
+|	[`+ quantifier_type] :Plus
+|	[general_repetition quantifier_type] :General
+|	[] :Base
+
+token sr_R /'R'/
+token sr_P /'P'/
+
+def subroutine_reference
+	[`( `? sr_R `)]
+|	[`( `? number `)]
+|	[`( `? `+ number `)]
+|	[`( `? `- number `)]
+|	[`( `? `& name `)]
+|	[`( `? sr_P `> name `)]
+|	[br_g `< name `>]
+|	[br_g `< number `>]
+|	[br_g `< `+ number `>]
+|	[br_g `< `- number `>]
+|	[br_g single_quote name single_quote ]
+|	[br_g single_quote number single_quote]
+|	[br_g single_quote `+ number single_quote]
+|	[br_g single_quote `- number single_quote]
+
+token ns_open /'[[:'/
+
+lex
+	token ns_caret /'^'/
+	token ns_word  /alpha_numerics/
+	token ns_close /':]]'/
+end
+
+def posix_named_set
+	[ns_open ns_caret? ns_word ns_close]
+
+token reset_start_match
+	/ '\\K' /
+
+def shared_atom
+	[decimal_digit]               :DecimalDigit
+|	[not_decimal_digit]           :NotDecimalDigit
+|	[horizontal_white_space]      :HorizonalWhiteSpace
+|	[not_horizontal_white_space]  :NotHorizontalWhiteSpace
+|	[not_new_line]                :NotNewLine
+|	[new_line_sequence]           :NewLineSequence
+|	[white_space]                 :WhiteSpace
+|	[not_white_space]             :NotWhiteSpace
+|	[vertical_white_space]        :VerticalWhiteSpace
+|	[not_vertical_white_space]    :NotVerticalWhiteSpace
+|	[word_char]                   :WordChar
+|	[not_word_char]               :NotWordChar
+|	[posix_named_set]             :PosixNamedSet
+|	[char_with_property]          :CharWithProperty
+|	[char_without_property]       :CharWithoutProperty
+|	[control_char]                :ControlChar
+
+def shared_literal
+	[octal]                       :Octal
+|	[alpha_char]                  :AlphaChar
+|	[digit_char]                  :DigitChar
+|	[bell_char]                   :BellChar
+|	[escape_char]                 :EscapeChar
+|	[form_feed]                   :FormFeed
+|	[new_line]                    :NewLine
+|	[carriage_ret]                :CarriageRet
+|	[tab]                         :Tab
+|	[hex_char_fixed]              :HexCharFixed
+|	[hex_char_var]                :HexCharVar
+|	[quoted]                      :Quoted
+|	[block_quoted]                :BlockQuoted
+|	[open_brace]                  :OpenBrace
+|	[close_brace]                 :CloseBrace
+|	[comma]                       :Comma
+|	[hyphen]                      :Hypen
+|	[less_than]                   :LessThan
+|	[greater_than]                :GreaterThan
+|	[single_quote]                :SingleQuote
+|	[underscore]                  :Underscore
+|	[colon]                       :Colon
+|	[hash]                        :Hash
+|	[equals]                      :Equals
+|	[exclamation]                 :Excalmation
+|	[ampersand]                   :Ampersand
+|	[other_char_printable]        :OtherCharPrintable
+|	[other_char_non_printable]    :OhterCharNonPrintable
+
+token name
+	/ alpha_nums /
+
+token bell_char    / '\\a' /
+token escape_char  / '\\e' /
+token form_feed    / '\\f' /
+token new_line     / '\\n' /
+token carriage_ret / '\\r' /
+token tab          / '\\t' /
+token control_char
+	/ '\\c' ( 0x00 .. 0x7c ) /
+
+token underscore_alpha_numerics
+	/ ('_' | alpha_numeric)+ /
+
+rl non_alpha_numeric
+	/ ^alpha_numeric /
+
+token quoted
+	/'\\' non_alpha_numeric/
+
+token bs_Q
+	/'\\Q'/
+
+lex
+	# String of non-backslash chars. Or a single backslash.
+	token block_data / ( [^\\]+ ) | '\\' /
+	token block_end /'\\E'/
+end
+
+token block_quoted
+	/bs_Q block_data* block_end/
+
+def hyphen        [ `- ]
+def less_than     [ `< ]
+def greater_than  [ `> ]
+def underscore    [ `_ ]
+def colon         [ `: ]
+def equals        [ `= ]
+def exclamation   [ `! ]
+def ampersand     [ `& ]
+def hash          [ `# ]
+def dollar        [ `$ ]
+
+token single_quote
+	/ "'" /
+
+token other_char_printable
+	/ ' ' | '~' | ';' | '@' | '%' | '`' | '"' | '/' /
+
+token other_char_non_printable
+	/ ^( 0 .. 127 ) /
+
+token P / 'P' /
+
+def capture_form
+	[`? `< name `>  regex] :NamedPerl
+|	[`? single_quote name single_quote regex] :NamedQuoted
+|	[`? P `< name `> regex] :NamedPython
+|	[regex] :Unamed
+	
+def capture
+	# This ID is for the ragel implementation. We use the nfa repetition
+	# operator, which needs an id. 
+	[`( capture_form `)] :Capture
+	{
+		Backrefs = Backrefs + 1
+	}
+
+def option_spec
+	[Add: option_flags `-  Remove: option_flags]
+|	[Add: option_flags]
+|	[`- Remove: option_flags]
+
+def non_capture
+	[`( `? `: regex `)]
+|	[`( `? option_spec `: regex `)]
+|	[`( `? `| regex `)]
+|	[`( `? `> regex `)]
+
+token non_close_parens
+	/ [^)]+ /
+
+def comment
+	[ `( `? `# non_close_parens? `) ]
+
+def option
+	[`( `? option_spec `)]
+|	[`( `* no_start_opt  `)]
+|	[`( `* utf8 `)]
+|	[`( `* utf16 `)]
+|	[`( `* ucp `)]
+
+def option_flags
+	[option_flag+]
+
+token option_flag / 'i' | 'J' | 'm' | 's' | 'U' | 'x' /
+
+token no_start_opt / 'NO_START_OPT' /
+token utf8  / 'UTF8' /
+token utf16 / 'UTF16' /
+token ucp   / 'UCP' /
+
+def look_ahead
+	[`( `? `= regex `)]
+|	[`( `? `! regex `)]
+
+def look_behind
+	[`( `? `< `= regex `)]
+|	[`( `? `< `! regex `)]
+
+def look_around
+	[look_ahead]
+|	[look_behind]
+
+token br_g / '\\g' /
+token br_k / '\\k' /
+
+token maybe_backref / '\\' [1-9] [0-9]* /
+
+lex
+	token maybe_octal /
+	   '\\' (
+			[1-3] [0-7] [0-7] |
+			[1-7] [0-7]
+	   )
+	/
+
+	token def_octal /
+		'\\' (
+			[0] [0-7] [0-7] |
+			[0] [0-7] |
+			[0]
+		)
+	/
+end
+
+token else_digits / '\\' [0-9]+ /
+
+bool is_backref( Num: str )
+{
+	Num = suffix( Num, 1 )
+	Ref: int = atoi( Num )
+	if ( Ref < 8 || Ref <= Backrefs )
+		return true
+	return false
+}
+
+# Simple disambig between octals and backrefs. Reject octals that can be a
+# backref, as determined by counting the number of captures.
+def octal
+	[maybe_octal] :Maybe
+	{
+		if ( is_backref( $lhs.maybe_octal ) )
+			reject
+	}
+|	[def_octal] :Def
+
+def backref
+	[maybe_backref]
+	{
+		if ( !is_backref( $lhs.maybe_backref ) )
+			reject
+	}
+|	[br_g number]
+|	[br_g `{ number `}]
+|	[br_g `{ `- number `}]
+|	[br_k `< name `>]
+|	[br_k single_quote name single_quote]
+|	[br_g `{ name `}]
+|	[br_k `{ name `}]
+|	[`( `? P `= name `)]
+
+def literal_digits
+	[else_digits]
+
+def cond_ref
+	[number]
+|	[`+ number]
+|	[`- number]
+|	[`< name `>]
+|	[single_quote name single_quote]
+|	[cond_ref_R number]
+|	[cond_ref_R]
+|	[cond_ref_R `& name]
+|	[cond_ref_DEFINE]
+|	[cond_ref_assert]
+|	[name]
+
+token cond_ref_DEFINE   / 'DEFINE' /
+token cond_ref_assert   / 'assert' /
+token cond_ref_R        / 'R' /
+
+def cond_false
+	[`| regex ]
+
+def conditional
+	[`( `? `( cond_ref `) regex cond_false? `)]
+
+token btc_accept      / 'ACCEPT' /
+token btc_fail        / 'F' ( 'AIL' )? /
+token btc_mark_name   /  ('MARK')? ':NAME' /
+token btc_commit      / 'COMMIT' /
+token btc_prune       / 'PRUNE' /
+token btc_prune_name  / 'PRUNE:NAME)' /
+token btc_skip        / 'SKIP' /
+token btc_skip_name   / 'SKIP:NAME' /
+token btc_then        / 'THEN' /
+token btc_then_name   / 'THEN:NAME' /
+
+def btc_type
+	[btc_accept]
+|	[btc_fail]
+|	[btc_mark_name]
+|	[btc_commit]
+|	[btc_prune]
+|	[btc_prune_name]
+|	[btc_skip]
+|	[btc_skip_name]
+|	[btc_then]
+|	[btc_then_name]
+
+def backtrack_control
+	[ `( `* btc_type `) ]
+
+token nlc_cr           / 'CR' /
+token nlc_lf           / 'LF' /
+token nlc_crlf         / 'CRLF' /
+token nlc_anycrlf      / 'ANYCRLF' /
+token nlc_any          / 'ANY' /
+token nlc_bsr_anycrlf  / 'BSR_ANYCRLF' /
+token nlc_bsr_unicodo  / 'BSR_UNICODE' /
+
+def nlc_type
+	[nlc_cr]
+|	[nlc_lf]
+|	[nlc_crlf]
+|	[nlc_anycrlf]
+|	[nlc_any]
+|	[nlc_bsr_anycrlf]
+|	[nlc_bsr_unicodo]
+
+def newline_convention
+	[ `( `* nlc_type `) ]
+
+token callout_C / 'C' /
+
+def callout
+	[ `( `? callout_C `) ]
+|	[ `( `? callout_C number `) ]
+
+def char_class_start [ `[ ]
+def char_class_end   [ `] ]
+def dot              [ `. ]
+def caret            [ `^ ]
+def question_mark    [ `? ]
+def plus             [ `+ ]
+def star             [ `* ]
+def open_brace       [ `{ ]
+def close_brace      [ `} ]
+def comma            [ `, ]
+def pipe             [ `| ]
+def open_paren       [ `( ]
+def close_paren      [ `) ]
+
+lex 
+	token hex_char_fixed
+		/ '\\x' hex_digit hex_digit /
+
+	token hex_char_var
+		/ '\\x' '{' hex_digit hex_digit hex_digit+ '}' /
+end
+
+#
+# Anchors
+#
+
+token word_boundary       / '\\b' /
+token non_word_boundary   / '\\B' /
+
+token sos_A
+	/ '\\A' /
+
+def start_of_subject
+	[`^]
+|	[sos_A]
+
+token eos_z / '\\z' /
+token eos_Z / '\\Z' /
+
+def end_of_subject
+	[`$]
+|	[eos_Z]
+|	[eos_z]
+
+token first_matching_pos
+	/ '\\G' /
+
+def anchor
+	[word_boundary]
+|	[non_word_boundary]
+|	[start_of_subject]
+|	[end_of_subject]
+|	[first_matching_pos]
+
+#
+# Character classes
+#
+
+def cc_atom_list
+	[cc_atom cc_atom*]
+
+def character_class
+	[`[ cc_atom_list `]]
+|	[cc_open_caret       cc_atom_list `]]
+|	[cc_open_caret_close cc_atom* `]]
+|	[cc_open_close       cc_atom* `]]
+|	[cc_open_caret_close hyphen cc_atom_end_range cc_atom* `]]
+|	[cc_open_close       hyphen cc_atom_end_range cc_atom* `]]
+ 
+def cc_atom_end_range
+	[cc_atom]
+
+def cc_atom
+	[cc_literal hyphen cc_literal]
+|	[shared_atom]
+|	[cc_literal]
+|	[octal]
+
+def cc_literal
+	[shared_literal]
+|	[dot]
+|	[char_class_start]
+|	[caret]
+|	[question_mark]
+|	[plus]
+|	[star]
+|	[word_boundary]
+|	[non_word_boundary]
+|	[dollar]
+|	[pipe]
+|	[open_paren]
+|	[close_paren]
+
+token decimal_digit              / '\\d' /
+token not_decimal_digit          / '\\D' /
+token horizontal_white_space     / '\\h' /
+token not_horizontal_white_space / '\\H' /
+token not_new_line               / '\\N' /
+token new_line_sequence          / '\\R' /
+token white_space                / '\\s' /
+token not_white_space            / '\\S' /
+token vertical_white_space       / '\\v' /
+token not_vertical_white_space   / '\\V' /
+token word_char                  / '\\w' /
+token not_word_char              / '\\W' /
+
+token one_data_unit              / '\\C' /
+token extended_unicode_char      / '\\X' /
+
+token with_property_open         / '\\p' /
+token without_property_open      / '\\P' /
+
+def char_with_property
+	[with_property_open `{ underscore_alpha_numerics `}]
+def char_without_property
+	[without_property_open `{ underscore_alpha_numerics `}]
+
+def atom
+	[shared_atom]           :SharedAtom
+|	[shared_literal]        :SharedLiteral
+|	[char_class_end]        :CharClassEnd
+|	[dot]                   :Dot
+|	[character_class]       :CharacterClass
+|	[capture]               :Capture
+|	[non_capture]           :NonCapture
+|	[anchor]                :Anchor
+|	[look_around]           :LookAround
+|	[option]                :Option
+|	[newline_convention]    :NewlineConvention
+|	[callout]               :Callout
+|	[reset_start_match]     :ResetStartMatch
+|	[one_data_unit]         :OneDataUnit
+|	[extended_unicode_char] :ExtendedUnicodeChar
+|	[backtrack_control]     :BacktrackControl
+|	[backref]               :Backref
+|	[literal_digits]        :LiteralDigits
+|	[subroutine_reference]  :SubroutineReference
+|	[conditional]           :Conditional
+|	[comment]               :Comment
+
+def element
+	[atom quantifier] :Atom
+
+def term
+	[element term] :Element
+|	[] :Base
+
+def expr
+	[expr `| term] :Union
+|	[term] :Base
+
+def regex
+	[expr] :Expr
+
+def init
+	[]
+	{
+		Backrefs = 0
+	}
+
+token unparseable /[^\n]*/
+
+def line
+	[init regex NL] :Regex commit
+|	[unparseable NL] :Unparseable commit
+
+def file
+	[line*]
+
+
+parse F: file [stdin]
+
+if !F
+	print "parse error: [error]
+else {
+	for U: unparseable in F
+		print "unparseable: [U]
+	for B: backref in F
+		print "backref: [B]
+}

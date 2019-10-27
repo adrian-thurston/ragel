@@ -2,3 +2,5 @@
 /rust
 /pcre.c
 /pcre
+/pcre-colm.c
+/pcre-colm
