@@ -4,3 +4,5 @@
 /pcre
 /pcre-colm.c
 /pcre-colm
+/dns.cc
+/dns

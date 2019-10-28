@@ -1,4 +1,4 @@
-all: rust pcre pcre-colm
+all: rust pcre pcre-colm dns
 
 RAGEL = ../ragel/ragel
 COLM = ../colm/colm
@@ -12,3 +12,7 @@ pcre: pcre.rl $(RAGEL)
 
 pcre-colm: pcre.lm
 	$(COLM) -o pcre-colm pcre.lm
+
+dns: dns.rl
+	$(RAGEL) -G2 -o dns.cc dns.rl
+	g++ -g -Wall -o dns dns.cc -lpcap
