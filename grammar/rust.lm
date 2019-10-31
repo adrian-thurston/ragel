@@ -6,7 +6,7 @@ lex
 	literal `self `return `type
 	literal `pub `const `unsafe `mod
 	literal `crate `$crate `super `macro_rules
-	literal `where `extern `dyn
+	literal `where `extern `dyn `trait `enum
 
 	literal `; `:: `( `) `{ `} `. `, `@
 	literal `[ `] `:
@@ -156,8 +156,6 @@ def macro_rules_def
 
 def macro_rules_definition
 	[`macro_rules `! id macro_rules_def]
-
-
 
 #
 # Use statments
@@ -529,9 +527,6 @@ def let_rvalue
 	[expression]
 |	[`{ statements `}]
 
-def let_stmt
-	[`let pattern opt_type `= let_rvalue]
-
 def expr_tail
 	[expr_tail `, expression]
 |	[]
@@ -613,7 +608,7 @@ def tuple_expression
 
 def array_expression
 	[`[ expr_list opt_comma `]]
-|	[ `[ number `; number `]]
+|	[`[ expression `; expression `]]
 
 def closure_parameters
 	[closure_parameters `, closure_param]
@@ -624,8 +619,8 @@ def closure_param
 |	[pattern `: type]
 
 def closure_expression_param_forms
-	[`||]
-|	[`| closure_parameters opt_comma `|]
+	[`| closure_parameters opt_comma `|]
+|	[`||]
 
 def closure_expression
 	[closure_expression_param_forms expression]
@@ -757,6 +752,7 @@ def block_expression
 
 def let_statement
 	[`let pattern opt_type `= let_rvalue `;]
+|	[`let pattern opt_type `;]
 
 def expression_without_block
 	[compound_expression `? ?]
@@ -775,6 +771,7 @@ def expression_statement
 
 def statement
 	[`;]
+|	[item] commit
 |	[let_statement] commit
 |	[expression_statement] commit
 |	[use_declaration] commit
@@ -949,15 +946,80 @@ def tuple_field_list
 #
 
 def structure
-	[`struct id opt_generics `{ field_list opt_comma `}]
-|	[`struct id opt_generics `;]
-|	[`struct id opt_generics `( tuple_field_list `) `; ]
+	[`struct id opt_generics opt_where_clause `{ field_list opt_comma `}]
+|	[`struct id opt_generics opt_where_clause `;]
+|	[`struct id opt_generics opt_where_clause `( tuple_field_list `) `; ]
 
 #
 # Union
 #
 def union
 	[`union id opt_generics opt_where_clause `{ field_list opt_comma `}]
+
+#
+# Trait
+#
+
+def opt_type_param_bounds_opt
+	[`: type_param_bounds?]
+|	[]
+
+def trait
+	[
+		`trait id opt_generics opt_type_param_bounds_opt opt_where_clause
+		`{
+			trait_item*
+		`}
+	]
+
+def trait_item
+	[trait_func]
+|	[trait_method]
+|	[trait_const]
+|	[trait_type]
+|	[macro_invocation_semi]
+
+def trait_func
+	[trait_func_decl `;]
+|	[trait_func_decl block_expression]
+
+def trait_method
+	[trait_method_decl `;]
+|	[trait_method_decl block_expression]
+
+def trait_func_decl
+	[function_qualifiers `fn id opt_generics
+	`( trait_function_parameters `) opt_return opt_where_clause]
+
+def trait_method_decl
+	[function_qualifiers `fn id opt_generics
+	`( self_param trait_method_parameters `) opt_return opt_where_clause]
+
+def trait_function_parameters
+	[trait_param_list `,]
+|	[trait_param_list ]
+|	[] 
+
+def trait_method_parameters
+	[`, trait_param_list `,]
+|	[`, trait_param_list ]
+|	[`,] 
+|	[] 
+
+def trait_param_list
+	[trait_param_list `, trait_function_param]
+|	[trait_function_param]
+
+def trait_function_param
+	[pattern `: type]
+|	[type]
+
+def trait_const
+	[`const id `: type `;]
+|	[`const id `: type `= expression `;]
+
+def trait_type
+	[`type id opt_type_param_bounds_opt `;]
 
 #
 # Implementation
@@ -968,14 +1030,20 @@ def inherent_impl_item
 |	[visibility? method] commit
 
 def inherent_impl
-	[`impl opt_generics type `{ inherent_impl_item* `}]
+	[`impl opt_generics type opt_where_clause `{ inherent_impl_item* `}]
 
 def trait_impl_item
-	[visibility? function]
+	[visibility? type_alias]
+|	[visibility? constant_item]
+|	[visibility? function]
 |	[visibility? method]
 
+def constant_item
+	[`const id `: type `= expression `;]
+|	[`const `_ `: type `= expression `;]
+
 def trait_impl
-	[`impl opt_generics `! ? type_path `for type `{ trait_impl_item* `}]
+	[`unsafe ? `impl opt_generics `! ? type_path `for type opt_where_clause `{ trait_impl_item* `}]
 
 def implementation
 	[inherent_impl]
@@ -1002,12 +1070,34 @@ def as_clause
 def extern_crate
 	[`extern `crate crate_ref as_clause? `;]
 
+def enum
+	[`enum id opt_generics opt_where_clause `{ enum_items? opt_comma `}]
+
+def enum_items
+	[enum_items `, enum_item]
+|	[enum_item]
+
+def enum_item
+	[id enum_item_tuple]
+|	[id enum_item_struct]
+|	[id enum_item_discriminant]
+|	[id]
+
+def enum_item_tuple
+	[`( tuple_field_list? `)]
+
+def enum_item_struct
+	[`{ field_list opt_comma `}]
+
+def enum_item_discriminant
+	[`= expression]
+
 #
 # All Items.
 #
 
 def item
-	[`pub ? vis_item] commit
+	[visibility? vis_item] commit
 |	[macro_invocation_semi] commit
 |	[macro_rules_definition] commit
 
@@ -1016,12 +1106,14 @@ def vis_item
 |	[function] commit
 |	[structure] commit
 |	[union] commit
+|	[trait] commit
 |	[implementation] commit
 |	[use_declaration] commit
 |	[type_alias] commit
 |	[const_item] commit
 |	[module] commit
 |	[extern_crate] commit
+|	[enum] commit
 
 def program
 	[item*]
