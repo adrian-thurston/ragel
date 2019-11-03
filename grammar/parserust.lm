@@ -60,6 +60,10 @@ if P {
 		for TP: grouped_pattern in FN {
 			print "  grouped pattern: [TP]
 		}
+
+		for CP: closure_param in FN {
+			print "  closure param: [CP]
+		}
 	}
 
 	for M: method in P {

@@ -6,7 +6,8 @@ lex
 	literal `self `return `type
 	literal `pub `const `unsafe `mod
 	literal `crate `$crate `super `macro_rules
-	literal `where `extern `dyn `trait `enum
+	literal `where `extern `dyn `trait `enum `static
+	literal `continue `break
 
 	literal `; `:: `( `) `{ `} `. `, `@
 	literal `[ `] `:
@@ -34,7 +35,12 @@ lex
 	token char     / 'b'? "'" ( [^\'] | '\\' any )  "'" /
 	token lifetime / "'" id /
 	token number   /
-		[0-9] [_0-9]* ( ( 'u' | 'i' ) [a-z0-9]+ )?
+		(
+			[0-9] [_0-9]* |
+			'0x' [_a-fA-F0-9]+ |
+			'0b' [_0-1]+ 
+		)
+		( ( 'u' | 'i' ) [a-z0-9]+ )?
 	/
 	token float    / [0-9]+ '.' [0-9]+ /
 
@@ -192,7 +198,7 @@ def use_as_opt
 
 def use_tree
 	[use_path_opt `*]
-|	[use_path_opt `{ use_tree use_list_tail `}]
+|	[use_path_opt `{ use_tree use_list_tail opt_comma `}]
 |	[simple_path use_as_opt]
 
 def use_declaration
@@ -280,7 +286,8 @@ def tuple_pattern_items
 |	[tuple_pattern_item]
 
 def tuple_pattern
-	[`( tuple_pattern_item `, `)]
+	[`( `)]
+|	[`( tuple_pattern_item `, `)]
 |	[`( tuple_pattern_item `, tuple_pattern_items opt_comma `)]
 
 def grouped_pattern
@@ -358,8 +365,24 @@ def opt_match_arm_guard
 # Return expressions
 #
 def return_expression
-	[`return]
-|	[`return expression]
+	[`return expression]
+|	[`return]
+
+#
+# Break expression
+#
+def break_expression
+	[`break expression]
+|	[`break lifetime expression]
+|	[`break lifetime]
+|	[`break]
+
+#
+# Continue expression
+#
+def continue_expression
+	[`continue lifetime]
+|	[`continue]
 
 #
 # Generic Args
@@ -492,12 +515,29 @@ def tuple_type
 def trait_object_type
 	[`dyn ? type_param_bounds]
 
+def impl_trait_type
+	[`impl type_param_bounds]
+
+def impl_trait_type_one_bound
+	[`impl trait_bound]
+
+def qualified_path_type
+	[`< type `as type_path `>]
+|	[`< type `>]
+
+def type_path_segment_list
+	[]
+
+def qualified_path_in_type
+	[qualified_path_type type_path_tail]
+
 def type
 	[type_no_bounds]
 |	[trait_object_type]
 
 def type_no_bounds
-	[type_path]
+	[impl_trait_type_one_bound]
+|	[type_path]
 |	[array_type]
 |	[slice_type]
 |	[raw_pointer_type]
@@ -506,6 +546,8 @@ def type_no_bounds
 |	[`& lifetime `mut type]
 |	[tuple_type]
 |	[`_]
+|	[`!]
+|	[qualified_path_in_type]
 
 def type_list
 	[type_list `, type]
@@ -727,7 +769,7 @@ def range_expression
 
 # Evaluates right to left.
 def assignment_expression
-	[range_expression `= assignment_expression]
+	[range_expression `= expression]
 |	[range_expression]
 
 def compound_op
@@ -757,6 +799,8 @@ def let_statement
 def expression_without_block
 	[compound_expression `? ?]
 |	[return_expression]
+|	[break_expression]
+|	[continue_expression]
 
 def expression_with_block
 	[block_expression]
@@ -771,22 +815,25 @@ def expression_statement
 
 def statement
 	[`;]
-|	[item] commit
-|	[let_statement] commit
-|	[expression_statement] commit
-|	[use_declaration] commit
-|	[macro_invocation_semi] commit
+|	[item]
+|	[let_statement]
+|	[expression_statement]
+|	[use_declaration]
+|	[macro_invocation_semi]
 
 def statements
 	[statement+]
 |	[statement+ expression_without_block]
 |	[expression_without_block]
 
+def loop_label
+	[lifetime `:]
+
 def loop_expression
-	[`loop block_expression]
-|	[`while expression block_expression]
-|	[`while `let match_arm_patterns `= expression block_expression]
-|	[`for pattern `in expression block_expression]
+	[loop_label? `loop block_expression]
+|	[loop_label? `while expression block_expression]
+|	[loop_label? `while `let match_arm_patterns `= expression block_expression]
+|	[loop_label? `for pattern `in expression block_expression]
 
 def if_expression
 	[`if expression block_expression opt_else_expression]
@@ -825,23 +872,23 @@ def field_list
 # Lifetime Params
 #
 
-def lifetime_param
-	[lifetime]
+def colon_lifetime_bounds
+	[`: lifetime_bounds]
 
-def lifetime_param_tail
-	[lifetime_param_tail `, lifetime_param]
-|	[]
+def lifetime_param
+	[lifetime colon_lifetime_bounds?]
 
 def lifetime_param_list
-	[lifetime_param lifetime_param_tail]
+	[lifetime_param_list `, lifetime_param ]
+|	[lifetime_param]
 
 #
 # Type param bounds
 #
 
 def trait_bound
-	[type_path]
-|	[`( type_path `)]
+	[`? ? for_lifetimes? type_path]
+|	[`( `? ? for_lifetimes? type_path `)]
 
 def type_param_bound
 	[lifetime]
@@ -933,22 +980,30 @@ def opt_where_clause
 # Tuple List
 #
 
-def tuple_field_tail
-	[tuple_field_tail `, type]
-|	[]
+def tuple_field
+	[visibility? type]
 
 def tuple_field_list
-	[type tuple_field_tail]
-|	[]
+	[tuple_field_list `, tuple_field]
+|	[tuple_field]
+
+def tuple_fields
+	[tuple_field_list opt_comma]
 
 #
 # Structure
 #
 
-def structure
+def struct_struct
 	[`struct id opt_generics opt_where_clause `{ field_list opt_comma `}]
 |	[`struct id opt_generics opt_where_clause `;]
-|	[`struct id opt_generics opt_where_clause `( tuple_field_list `) `; ]
+
+def tuple_struct
+	[`struct id opt_generics `( tuple_fields? `) opt_where_clause `; ]
+
+def structure
+	[struct_struct]
+|	[tuple_struct]
 
 #
 # Union
@@ -973,11 +1028,11 @@ def trait
 	]
 
 def trait_item
-	[trait_func]
-|	[trait_method]
-|	[trait_const]
-|	[trait_type]
-|	[macro_invocation_semi]
+	[attribute* trait_func]
+|	[attribute* trait_method]
+|	[attribute* trait_const]
+|	[attribute* trait_type]
+|	[attribute* macro_invocation_semi]
 
 def trait_func
 	[trait_func_decl `;]
@@ -1026,17 +1081,17 @@ def trait_type
 #
 
 def inherent_impl_item
-	[visibility? function] commit
-|	[visibility? method] commit
+	[attribute* visibility? function] commit
+|	[attribute* visibility? method] commit
 
 def inherent_impl
 	[`impl opt_generics type opt_where_clause `{ inherent_impl_item* `}]
 
 def trait_impl_item
-	[visibility? type_alias]
-|	[visibility? constant_item]
-|	[visibility? function]
-|	[visibility? method]
+	[attribute* visibility? type_alias]
+|	[attribute* visibility? constant_item]
+|	[attribute* visibility? function]
+|	[attribute* visibility? method]
 
 def constant_item
 	[`const id `: type `= expression `;]
@@ -1084,13 +1139,16 @@ def enum_item
 |	[id]
 
 def enum_item_tuple
-	[`( tuple_field_list? `)]
+	[`( tuple_fields? `)]
 
 def enum_item_struct
 	[`{ field_list opt_comma `}]
 
 def enum_item_discriminant
 	[`= expression]
+
+def static_item
+	[`static opt_mut? id `: type `= expression `;]
 
 #
 # All Items.
@@ -1111,6 +1169,7 @@ def vis_item
 |	[use_declaration] commit
 |	[type_alias] commit
 |	[const_item] commit
+|	[static_item] commit
 |	[module] commit
 |	[extern_crate] commit
 |	[enum] commit
