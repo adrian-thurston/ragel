@@ -1,5 +1,5 @@
 lex
-	literal `fn `use `let `mut `if `else `struct `union
+	literal `fn `use `let `mut `if `else `struct
 	literal `loop `while `for `in
 	literal `true `false
 	literal `ref `match `as `impl
@@ -43,6 +43,14 @@ lex
 		( ( 'u' | 'i' ) [a-z0-9]+ )?
 	/
 	token float    / [0-9]+ '.' [0-9]+ /
+
+	token raw_string /
+		'r"'      ( any* :>> '"'      ) |
+		'r#"'     ( any* :>> '"#'     ) |
+		'r##"'    ( any* :>> '"##'    ) |
+		'r###"'   ( any* :>> '"###'   ) |
+		'r####"'  ( any* :>> '"####'  ) |
+		'r#####"' ( any* :>> '"#####' ) /
 
 	ignore / "//" [^\n]* '\n' /
 	ignore / "/*" any* :>> "*/" /
@@ -213,8 +221,9 @@ def literal_pattern
 |	[`false]
 |	[char]
 |	[string]
-|	[number]
-|	[float]
+|	[raw_string]
+|	[`- ? number]
+|	[`- ? float]
 
 def identifier_pattern
 	[opt_ref opt_mut id]
@@ -297,9 +306,15 @@ def pattern_list
 	[pattern_list `, pattern]
 |	[pattern]
 
+#
+# Grammar doesnt seem to support empty slice patterns, but found some code
+# allowing it.
+#
 def slice_pattern
-	[`[ pattern `, `]]
-|	[`[ pattern `, pattern_list opt_comma `]]
+	[`[ pattern `, pattern_list opt_comma `]]
+|	[`[ pattern `, `]]
+|	[`[ pattern `]]
+|	[`[ `]]
 
 def path_pattern
 	[path_in_expression]
@@ -531,6 +546,42 @@ def type_path_segment_list
 def qualified_path_in_type
 	[qualified_path_type type_path_tail]
 
+#
+# Bare Function Type
+#
+
+def bare_function_return_type
+	[`-> type_no_bounds]
+
+def function_parameters_maybe_named_variadic
+	[maybe_named_function_parameters]
+|	[maybe_named_function_parameters_variadic]
+
+def maybe_named_param_tail
+	[maybe_named_param_tail `, maybe_named_param]
+|	[]
+
+def maybe_named_function_parameters
+	[maybe_named_param maybe_named_param_tail `, ?]
+
+def maybe_named_param
+	[id `: type]
+|	[`_ `: type]
+|	[type]
+
+def maybe_named_function_parameters_variadic
+	[maybe_named_param maybe_named_param_tail `, `...]
+
+def bare_function_type
+	[
+		for_lifetimes? function_qualifiers `fn
+		`( function_parameters_maybe_named_variadic? `) bare_function_return_type?
+	]
+
+#
+# Type
+#
+
 def type
 	[type_no_bounds]
 |	[trait_object_type]
@@ -548,6 +599,7 @@ def type_no_bounds
 |	[`_]
 |	[`!]
 |	[qualified_path_in_type]
+|	[bare_function_type]
 
 def type_list
 	[type_list `, type]
@@ -578,8 +630,8 @@ def expr_list
 |	[]
 
 def _construct
-	[id]
-|	[id `: expression]
+	[attribute* id]
+|	[attribute* id `: expression]
 
 def cons_plus
 	[cons_plus `, _construct]
@@ -598,6 +650,7 @@ def path_ident_segment
 	[id]
 |	[`self]
 |	[`crate]
+|	[`super]
 
 def path_expr_segment
 	[path_ident_segment]
@@ -672,6 +725,7 @@ def paths
 	[path_expression]
 |	[char]
 |	[string]
+|	[raw_string]
 |	[number]
 |	[float]
 |	[path_in_expression `{ cons_list `}]
@@ -686,6 +740,9 @@ def paths
 |	[macro_invocation]
 |	[closure_expression]
 |	[block_expression]
+|	[match_expression]
+|	[if_expression]
+|	[if_let_expression]
 
 
 def func_index
@@ -710,8 +767,8 @@ def unary
 |	[`mut unary]
 
 def as
-	[unary]
-|	[unary `as type_no_bounds]
+	[as `as type_no_bounds]
+|	[unary]
 
 def mult
 	[mult `* as]
@@ -981,7 +1038,7 @@ def opt_where_clause
 #
 
 def tuple_field
-	[visibility? type]
+	[attribute* visibility? type]
 
 def tuple_field_list
 	[tuple_field_list `, tuple_field]
@@ -994,8 +1051,18 @@ def tuple_fields
 # Structure
 #
 
+def struct_field
+	[attribute* visibility? id `: type]
+
+def struct_field_list
+	[struct_field_list `, struct_field]
+|	[struct_field]
+
+def struct_fields
+	[struct_field_list opt_comma]
+
 def struct_struct
-	[`struct id opt_generics opt_where_clause `{ field_list opt_comma `}]
+	[`struct id opt_generics opt_where_clause `{ struct_fields? `}]
 |	[`struct id opt_generics opt_where_clause `;]
 
 def tuple_struct
@@ -1009,7 +1076,11 @@ def structure
 # Union
 #
 def union
-	[`union id opt_generics opt_where_clause `{ field_list opt_comma `}]
+	[Union: id id opt_generics opt_where_clause `{ struct_fields? `}]
+	{
+		if $lhs.Union != "union"
+			reject
+	}
 
 #
 # Trait
@@ -1133,10 +1204,10 @@ def enum_items
 |	[enum_item]
 
 def enum_item
-	[id enum_item_tuple]
-|	[id enum_item_struct]
-|	[id enum_item_discriminant]
-|	[id]
+	[attribute* id enum_item_tuple]
+|	[attribute* id enum_item_struct]
+|	[attribute* id enum_item_discriminant]
+|	[attribute* id]
 
 def enum_item_tuple
 	[`( tuple_fields? `)]
@@ -1149,6 +1220,40 @@ def enum_item_discriminant
 
 def static_item
 	[`static opt_mut? id `: type `= expression `;]
+
+def abi
+	[string]
+|	[raw_string]
+
+def external_static_item
+	[`static `mut ? id `: type `;]
+
+def function_return_type
+	[`-> type]
+
+def external_function_item
+	[`fn id opt_generics `( named_function_parameters? `) function_return_type? opt_where_clause `;]
+
+def named_function_param
+	[id `: type]
+|	[`_ `: type]
+
+def named_function_parameters
+	[named_function_parameter_list `, `...]
+|	[named_function_parameter_list `,]
+|	[named_function_parameter_list ]
+
+def named_function_parameter_list
+	[named_function_parameter_list `, named_function_param]
+|	[named_function_param]
+
+def external_item
+	[attribute* visibility? external_static_item]
+|	[attribute* visibility? external_function_item]
+
+def extern_block
+	[`extern abi? `{ external_item `}]
+
 
 #
 # All Items.
@@ -1172,6 +1277,7 @@ def vis_item
 |	[static_item] commit
 |	[module] commit
 |	[extern_crate] commit
+|	[extern_block] commit
 |	[enum] commit
 
 def program
