@@ -7,7 +7,7 @@ lex
 	literal `pub `const `unsafe `mod
 	literal `crate `$crate `super `macro_rules
 	literal `where `extern `dyn `trait `enum `static
-	literal `continue `break
+	literal `continue `break `move
 
 	literal `; `:: `( `) `{ `} `. `, `@
 	literal `[ `] `:
@@ -38,11 +38,16 @@ lex
 		(
 			[0-9] [_0-9]* |
 			'0x' [_a-fA-F0-9]+ |
-			'0b' [_0-1]+ 
+			'0b' [_0-1]+ |
+			'0o' [_0-7]+
 		)
 		( ( 'u' | 'i' ) [a-z0-9]+ )?
 	/
-	token float    / [0-9]+ '.' [0-9]+ /
+
+	token float/
+		[0-9]+ '.' [0-9]+
+		( 'f32' | 'f64' )?
+	/
 
 	token raw_string /
 		'r"'      ( any* :>> '"'      ) |
@@ -584,6 +589,7 @@ def bare_function_type
 
 def type
 	[type_no_bounds]
+|	[impl_trait_type]
 |	[trait_object_type]
 
 def type_no_bounds
@@ -691,7 +697,7 @@ def path_in_expression
 	[opt_path_sep path_expr_segment pie_tail]
 
 def qualified_path_in_expression
-	[`< type `>]
+	[qualified_path_type type_path_tail]
 
 def path_expression
 	[path_in_expression]
@@ -718,8 +724,8 @@ def closure_expression_param_forms
 |	[`||]
 
 def closure_expression
-	[closure_expression_param_forms expression]
-|	[closure_expression_param_forms `-> type_no_bounds block_expression]
+	[`move ? closure_expression_param_forms expression]
+|	[`move ? closure_expression_param_forms `-> type_no_bounds block_expression]
 
 def paths
 	[path_expression]
@@ -915,7 +921,7 @@ def visibility
 |	[`pub `( `in simple_path `)]
 
 def field
-	[visibility? id `: type]
+	[attribute* visibility? id `: type]
 
 def field_plus
 	[field_plus `, field]
@@ -1252,7 +1258,7 @@ def external_item
 |	[attribute* visibility? external_function_item]
 
 def extern_block
-	[`extern abi? `{ external_item `}]
+	[`extern abi? `{ external_item* `}]
 
 
 #
