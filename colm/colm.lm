@@ -82,8 +82,11 @@ lex
 	token number
 		/ ( '0' .. '9' ) + /
 
-	token backtick_lit
-		/ '`' . ^( ' ' | '\n' | '\t' | ']' )+ | '`]' /
+	token backtick_lit / 
+		'`' . ^( ' ' | '\n' | '\t' | ']' | '?' )+ |
+		'`]' |
+		'`?'
+	/
 
 	token DQ / '\"' / - ni
 	token SQ / '\'' / - ni
