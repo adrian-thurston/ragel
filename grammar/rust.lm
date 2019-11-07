@@ -1,34 +1,21 @@
 lex
-	literal `fn `use `let `mut `if `else `struct
-	literal `loop `while `for `in
-	literal `true `false
-	literal `ref `match `as `impl
-	literal `self `return `type
-	literal `pub `const `unsafe `mod
-	literal `crate `$crate `super `macro_rules
-	literal `where `extern `dyn `trait `enum `static
-	literal `continue `break `move
+	literal `as `break `const `continue `crate
+	literal `$crate `dyn `else `enum `extern
+	literal `false `fn `for `if `impl `in `let
+	literal `loop `macro_rules `match `mod `move
+	literal `mut `pub `ref `return `self `static
+	literal `struct `super `trait `true `type
+	literal `unsafe `use `where `while
 
-	literal `; `:: `( `) `{ `} `. `, `@
-	literal `[ `] `:
-	literal `-> `=>
-	literal `< `>
-	literal `?
+	literal `; `: `:: `( `) `{ `} `[ `] `< `>
+	literal `. `, `@ `-> `=> `?
+	literal `- `+ `/ `* `% `! `^ `| `&
 
-	literal `- `+ `/ `* `% `!
-
-	literal `#
-
-	literal `^ `| `&
-
-	literal `<<
-	literal `== `!= `>= `<=
-	literal `|| `&&
+	literal `<< `== `!= `>= `<= `|| `&&
 	literal `.. `..= `...
-	literal `=
-	literal `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
+	literal `= `+= `-= `*= `/= `%= `&= `|= `^= `<<= `>>=
 
-	literal `_
+	literal `# `_
 
 	token id       / [A-Za-z_] [A-Za-z_0-9]* /
 	token string   / 'b'? '"' ( [^\"] | '\\' any )* '"' /
@@ -161,12 +148,8 @@ def macro_rules_tail
 	[macro_rules_tail `; macro_rule]
 |	[]
 
-def opt_semi
-	[`;]
-|	[]
-
 def macro_rules
-	[macro_rule macro_rules_tail opt_semi]
+	[macro_rule macro_rules_tail `;?]
 
 def macro_rules_def
 	[`( macro_rules `) `;]
@@ -211,7 +194,7 @@ def use_as_opt
 
 def use_tree
 	[use_path_opt `*]
-|	[use_path_opt `{ use_tree use_list_tail opt_comma `}]
+|	[use_path_opt `{ use_tree use_list_tail `,? `}]
 |	[simple_path use_as_opt]
 
 def use_declaration
@@ -231,8 +214,8 @@ def literal_pattern
 |	[`- ? float]
 
 def identifier_pattern
-	[opt_ref opt_mut id]
-|	[opt_ref opt_mut id `@ pattern]
+	[`ref? `mut? id]
+|	[`ref? `mut? id `@ pattern]
 
 def wildcard_pattern
 	[`_]
@@ -245,8 +228,8 @@ def range_pattern
 |	[range_pattern_bound `... range_pattern_bound]
 
 def reference_pattern
-	[`& opt_mut pattern]
-|	[`&& opt_mut pattern]
+	[`& `mut? pattern]
+|	[`&& `mut? pattern]
 
 #
 # struct pattern
@@ -254,7 +237,7 @@ def reference_pattern
 def struct_pattern_field
 	[number `: pattern]
 |	[id `: pattern]
-|	[opt_ref opt_mut id]
+|	[`ref? `mut? id]
 
 def struct_pattern_fields
 	[struct_pattern_fields `, struct_pattern_field]
@@ -276,10 +259,6 @@ def opt_struct_pattern_elements
 def struct_pattern
 	[path_in_expression `{ opt_struct_pattern_elements `}]
 
-def opt_comma
-	[`,]
-|	[]
-
 def tuple_struct_item
 	[pattern]
 |	[`..]
@@ -289,7 +268,7 @@ def tuple_struct_items
 |	[tuple_struct_item]
 
 def tuple_struct_pattern
-	[path_in_expression `( tuple_struct_items opt_comma `)]
+	[path_in_expression `( tuple_struct_items `,? `)]
 
 def tuple_pattern_item
 	[pattern]
@@ -302,7 +281,7 @@ def tuple_pattern_items
 def tuple_pattern
 	[`( `)]
 |	[`( tuple_pattern_item `, `)]
-|	[`( tuple_pattern_item `, tuple_pattern_items opt_comma `)]
+|	[`( tuple_pattern_item `, tuple_pattern_items `,? `)]
 
 def grouped_pattern
 	[`( pattern `)]
@@ -316,7 +295,7 @@ def pattern_list
 # allowing it.
 #
 def slice_pattern
-	[`[ pattern `, pattern_list opt_comma `]]
+	[`[ pattern `, pattern_list `,? `]]
 |	[`[ pattern `, `]]
 |	[`[ pattern `]]
 |	[`[ `]]
@@ -349,11 +328,11 @@ def match_expression
 	[`match expression `{ match_arms? `}]
 
 def match_arms_last
-	[match_arm `=> block_expression `, ?]
-|	[match_arm `=> expression `, ?]
+	[match_arm `=> block_expression `,?]
+|	[match_arm `=> expression `,?]
 
 def match_arms_first_case
-	[match_arm `=> block_expression `, ?]
+	[match_arm `=> block_expression `,?]
 |	[match_arm `=> expression `,]
 
 def match_arms_first_list
@@ -370,12 +349,8 @@ def match_arms_pattern_tail
 	[match_arms_pattern_tail `| pattern]
 |	[]
 
-def opt_bar
-	[`|]
-|	[]
-
 def match_arm_patterns
-	[opt_bar pattern match_arms_pattern_tail]
+	[`|? pattern match_arms_pattern_tail]
 
 def opt_match_arm_guard
 	[`if expression]
@@ -416,9 +391,9 @@ def lifetime_list
 	[lifetime lifetime_tail]
 
 def opt_type_params
-	[`< lifetime_list opt_comma `>]
-|	[`< type_list opt_comma `>]
-|	[`< lifetime_list `, type_list opt_comma `>]
+	[`< lifetime_list `,? `>]
+|	[`< type_list `,? `>]
+|	[`< lifetime_list `, type_list `,? `>]
 |	[]
 
 
@@ -444,7 +419,7 @@ def func_param_tail
 |	[]
 
 def function_parameters
-	[function_param func_param_tail opt_comma]
+	[function_param func_param_tail `,?]
 
 def function
 	[
@@ -457,10 +432,10 @@ def function
 #
 
 def self_param
-	[opt_mut `self]
-|	[`& opt_mut `self]
-|	[`& lifetime opt_mut `self]
-|	[opt_mut `self `: type]
+	[`mut? `self]
+|	[`& `mut? `self]
+|	[`& lifetime `mut? `self]
+|	[`mut? `self `: type]
 
 def opt_method_params
 	[`, function_parameters]
@@ -500,7 +475,7 @@ def opt_arrow_type
 |	[]
 
 def type_path_fn_inputs
-	[type_list opt_comma]
+	[type_list `,?]
 
 def type_path_tail
 	[type_path_tail `:: type_path_segment]
@@ -530,7 +505,7 @@ def raw_pointer_type
 def tuple_type
 	[`( `)]
 |	[`( type `, `)]
-|	[`( type `, type_list opt_comma `)]
+|	[`( type `, type_list `,? `)]
 
 def trait_object_type
 	[`dyn ? type_param_bounds]
@@ -567,7 +542,7 @@ def maybe_named_param_tail
 |	[]
 
 def maybe_named_function_parameters
-	[maybe_named_param maybe_named_param_tail `, ?]
+	[maybe_named_param maybe_named_param_tail `,?]
 
 def maybe_named_param
 	[id `: type]
@@ -611,14 +586,6 @@ def type_list
 	[type_list `, type]
 |	[type]
 
-def opt_mut
-	[`mut]
-|	[]
-
-def opt_ref
-	[`ref]
-|	[]
-
 def opt_type
 	[`: type]
 |	[]
@@ -644,7 +611,7 @@ def cons_plus
 |	[_construct]
 
 def cons_list
-	[cons_plus opt_comma]
+	[cons_plus `,?]
 |	[]
 
 
@@ -664,13 +631,13 @@ def path_expr_segment
 
 def generic_args
 	[`< `>]
-|	[`< generic_args_lifetimes opt_comma `>]
-|	[`< generic_args_types opt_comma `>]
-|	[`< generic_args_bindings opt_comma `>]
-|	[`< generic_args_types `, generic_args_bindings opt_comma `>]
-|	[`< generic_args_lifetimes `, generic_args_types opt_comma `>]
-|	[`< generic_args_lifetimes `, generic_args_bindings opt_comma `>]
-|	[`< generic_args_lifetimes `, generic_args_types `, generic_args_bindings opt_comma `>]
+|	[`< generic_args_lifetimes `,? `>]
+|	[`< generic_args_types `,? `>]
+|	[`< generic_args_bindings `,? `>]
+|	[`< generic_args_types `, generic_args_bindings `,? `>]
+|	[`< generic_args_lifetimes `, generic_args_types `,? `>]
+|	[`< generic_args_lifetimes `, generic_args_bindings `,? `>]
+|	[`< generic_args_lifetimes `, generic_args_types `, generic_args_bindings `,? `>]
 
 def generic_args_lifetimes
 	[lifetime_list]
@@ -705,10 +672,10 @@ def path_expression
 
 def tuple_expression
 	[`( expression `, `)]
-|	[`( expression `, expr_list opt_comma `)]
+|	[`( expression `, expr_list `,? `)]
 
 def array_expression
-	[`[ expr_list opt_comma `]]
+	[`[ expr_list `,? `]]
 |	[`[ expression `; expression `]]
 
 def closure_parameters
@@ -720,7 +687,7 @@ def closure_param
 |	[pattern `: type]
 
 def closure_expression_param_forms
-	[`| closure_parameters opt_comma `|]
+	[`| closure_parameters `,? `|]
 |	[`||]
 
 def closure_expression
@@ -752,11 +719,11 @@ def paths
 
 
 def func_index
-	[func_index `. path_expr_segment `( expr_list opt_comma `)]
+	[func_index `. path_expr_segment `( expr_list `,? `)]
 |	[func_index `. id]
 |	[func_index `. number]
-|	[func_index `( expr_list opt_comma `)]
-|	[func_index `[ expr_list opt_comma `]]
+|	[func_index `( expr_list `,? `)]
+|	[func_index `[ expr_list `,? `]]
 |	[func_index `?]
 |	[paths]
 
@@ -957,15 +924,11 @@ def type_param_bound
 	[lifetime]
 |	[trait_bound]
 
-def opt_plus
-	[`+]
-|	[]
-
 def tpb_tail
 	[`+ type_param_bound]
 
 def type_param_bounds
-	[type_param_bound tpb_tail* opt_plus]
+	[type_param_bound tpb_tail* `+?]
 
 #
 # Type Params
@@ -1008,7 +971,7 @@ def opt_generics
 #
 
 def lifetime_params
-	[lifetime_param_list? opt_comma]
+	[lifetime_param_list? `,?]
 
 def for_lifetimes
 	[`for `< lifetime_params `>]
@@ -1018,7 +981,7 @@ def lifetime_bounds_list
 |	[lifetime]
 
 def lifetime_bounds
-	[lifetime_bounds_list? opt_plus]
+	[lifetime_bounds_list? `+?]
 
 def lifetime_where_clause_item
 	[lifetime `: lifetime_bounds]
@@ -1035,7 +998,7 @@ def where_clause_item_list
 |	[where_clause_item]
 
 def opt_where_clause
-	[`where where_clause_item_list opt_comma ]
+	[`where where_clause_item_list `,? ]
 |	[]
 
 
@@ -1051,7 +1014,7 @@ def tuple_field_list
 |	[tuple_field]
 
 def tuple_fields
-	[tuple_field_list opt_comma]
+	[tuple_field_list `,?]
 
 #
 # Structure
@@ -1065,7 +1028,7 @@ def struct_field_list
 |	[struct_field]
 
 def struct_fields
-	[struct_field_list opt_comma]
+	[struct_field_list `,?]
 
 def struct_struct
 	[`struct id opt_generics opt_where_clause `{ struct_fields? `}]
@@ -1203,7 +1166,7 @@ def extern_crate
 	[`extern `crate crate_ref as_clause? `;]
 
 def enum
-	[`enum id opt_generics opt_where_clause `{ enum_items? opt_comma `}]
+	[`enum id opt_generics opt_where_clause `{ enum_items? `,? `}]
 
 def enum_items
 	[enum_items `, enum_item]
@@ -1219,13 +1182,13 @@ def enum_item_tuple
 	[`( tuple_fields? `)]
 
 def enum_item_struct
-	[`{ field_list opt_comma `}]
+	[`{ field_list `,? `}]
 
 def enum_item_discriminant
 	[`= expression]
 
 def static_item
-	[`static opt_mut? id `: type `= expression `;]
+	[`static `mut? id `: type `= expression `;]
 
 def abi
 	[string]

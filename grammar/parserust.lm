@@ -69,6 +69,10 @@ if P {
 	for M: method in P {
 		print "method: [M.id]
 	}
+
+	for MR: macro_rule in P {
+		print "  macro matcher: [MR.macro_matcher]
+	}
 }
 else {
 	send stderr "failed to parse input [error]
