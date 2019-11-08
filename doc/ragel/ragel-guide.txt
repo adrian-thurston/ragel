@@ -540,8 +540,10 @@ is signed. Integers used for specifying priorities may be positive or negative.
 * The pattern `0x[0-9A-Fa-f]+` denotes an integer in hexadecimal
 format.
 
-* The keywords are +access+, +action+, +alphtype+,
-+getkey+, +write+, +machine+ and +include+.
+* The keywords are
++access+, +action+, +alphtype+, +eof+, +err+, +export+, +from+, +getkey+,
++inwhen+, +lerr+, +machine+, +nfapostpop+, +nfaprepush+, +outwhen+, +postpop+,
++prepush+, +to+, +variable+, +when+ and +write+.
 
 * The pattern +[a-zA-Z_][a-zA-Z_0-9]*+ denotes an identifier.
 
