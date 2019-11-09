@@ -133,7 +133,7 @@ void Goto::SINGLE_SWITCH( RedStateAp *state )
 		/* Write out single keys in a switch if there is more than one. */
 		out << "switch( " << GET_KEY() << " ) {\n";
 
-		/* Write out the single indicies. */
+		/* Write out the single indices. */
 		for ( int j = 0; j < numSingles; j++ ) {
 			out << "case " << KEY(data[j].lowKey) << ": {\n";
 			TRANS_GOTO(data[j].value) << "\n";

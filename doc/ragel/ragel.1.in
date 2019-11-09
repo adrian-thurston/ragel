@@ -158,7 +158,7 @@ The host language is JavaScript.
 (C/D/Java/Ruby/C#) Generate a table driven FSM. This is the default code style.
 The table driven
 FSM represents the state machine as static data. There are tables of states,
-transitions, indicies and actions. The current state is stored in a variable.
+transitions, indices and actions. The current state is stored in a variable.
 The execution is a loop that looks that given the current state and current
 character to process looks up the transition to take using a binary search,
 executes any actions and moves to the target state. In general, the table

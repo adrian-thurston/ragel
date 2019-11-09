@@ -66,7 +66,7 @@ struct Tables
 		transKeys(        "trans_keys",          *this ),
 		charClass(        "char_class",          *this ),
 		flatIndexOffset(  "index_offsets",       *this ),
-		indicies(         "indicies",            *this ),
+		indices(          "indices",             *this ),
 		indexDefaults(    "index_defaults",      *this ),
 		transCondSpaces(  "trans_cond_spaces",   *this ),
 		transOffsets(     "trans_offsets",       *this ),
@@ -123,7 +123,7 @@ struct Tables
 	TableArray transKeys;
 	TableArray charClass;
 	TableArray flatIndexOffset;
-	TableArray indicies;
+	TableArray indices;
 	TableArray indexDefaults;
 	TableArray transCondSpaces;
 	TableArray transOffsets;

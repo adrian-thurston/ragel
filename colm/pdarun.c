@@ -1372,7 +1372,7 @@ static long stack_top_target( program_t *prg, struct pda_run *pda_run )
 		unsigned shift = pda_run->stack_top->id - 
 				pda_run->pda_tables->keys[pda_run->stack_top->state<<1];
 		unsigned offset = pda_run->pda_tables->offsets[pda_run->stack_top->state] + shift;
-		int index = pda_run->pda_tables->indicies[offset];
+		int index = pda_run->pda_tables->indices[offset];
 		state = pda_run->pda_tables->targs[index];
 	}
 	return state;
@@ -1439,7 +1439,7 @@ again:
 		goto parse_error;
 	}
 
-	pos = pda_run->pda_tables->indicies[ind_pos];
+	pos = pda_run->pda_tables->indices[ind_pos];
 	if ( pos < 0 ) {
 		debug( prg, REALM_PARSE, "parse error, no transition 3\n" );
 		push_bt_point( prg, pda_run );

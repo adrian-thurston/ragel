@@ -51,7 +51,7 @@ struct PdaCodeGen
 	String PARSER() { return "parser_"; }
 
 	String startState() { return PARSER() + "startState"; }
-	String indicies() { return PARSER() + "indicies"; }
+	String indices() { return PARSER() + "indices"; }
 	String owners() { return PARSER() + "owners"; }
 	String keys() { return PARSER() + "keys"; }
 	String offsets() { return PARSER() + "offsets"; }

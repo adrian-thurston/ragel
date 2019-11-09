@@ -456,7 +456,7 @@ void FsmCodeGen::emitSingleSwitch( RedState *state )
 		/* Write out single keys in a switch if there is more than one. */
 		out << "\tswitch( " << GET_WIDE_KEY(state) << " ) {\n";
 
-		/* Write out the single indicies. */
+		/* Write out the single indices. */
 		for ( int j = 0; j < numSingles; j++ ) {
 			out << "\t\tcase " << KEY(data[j].lowKey) << ": ";
 			TRANS_GOTO(data[j].value, 0) << "\n";

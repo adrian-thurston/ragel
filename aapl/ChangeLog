@@ -380,7 +380,7 @@ Aapl 2.4.0 -- May 3, 2002
   and will make large integer alphabets feasible.
  -The conversion from FsmGraph to FsmMachine is now moved into a class called 
   FsmBuild.
- -FsmMachine no longer stores transition indicies as a linear chunk. Now
+ -FsmMachine no longer stores transition indices as a linear chunk. Now
   stores key, index pairs. This will facilitate using FsmMachine with very
   large alphabets because large index tables will not be allocated.  when there
   is great variation in transition keys.

@@ -173,7 +173,7 @@ void Switch::SINGLE_SWITCH( RedStateAp *st )
 		/* Write out single keys in a switch if there is more than one. */
 		out << "\tswitch( " << GET_KEY() << " ) {\n";
 
-		/* Write out the single indicies. */
+		/* Write out the single indices. */
 		for ( int j = 0; j < numSingles; j++ ) {
 			out << CASE( KEY(data[j].lowKey) ) << " {\n";
 			TRANS_GOTO(transBase + j, data[j].value) << "\n";
@@ -286,7 +286,7 @@ void Switch::tableDataPass()
 	taSingleLens();
 	taRangeLens();
 	taIndexOffsets();
-	taIndicies();
+	taIndices();
 
 	taTransCondSpacesWi();
 	taTransOffsetsWi();
@@ -569,25 +569,25 @@ void Switch::taKeys()
 	transKeys.finish();
 }
 
-void Switch::taIndicies()
+void Switch::taIndices()
 {
-	indicies.start();
+	indices.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ )
-			indicies.value( stel->value->id );
+			indices.value( stel->value->id );
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ )
-			indicies.value( rtel->value->id );
+			indices.value( rtel->value->id );
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 )
-			indicies.value( st->defTrans->id );
+			indices.value( st->defTrans->id );
 	}
 
-	indicies.finish();
+	indices.finish();
 }
 
 void Switch::taTransCondSpaces()

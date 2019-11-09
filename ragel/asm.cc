@@ -872,7 +872,7 @@ void AsmCodeGen::emitSingleIfElseIf( RedStateAp *state )
 	int numSingles = state->outSingle.length();
 	RedTransEl *data = state->outSingle.data;
 
-	/* Write out the single indicies. */
+	/* Write out the single indices. */
 	for ( int j = 0; j < numSingles; j++ ) {
 		out <<
 			"	cmpb	" << KEY( data[j].lowKey ) << ", %r10b\n"

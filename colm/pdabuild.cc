@@ -2006,12 +2006,12 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	}
 
 
-	/* Allocate indicies and owners. */
-	pdaTables->num_indicies = count;
-	pdaTables->indicies = new int[count];
+	/* Allocate indices and owners. */
+	pdaTables->num_indices = count;
+	pdaTables->indices = new int[count];
 	pdaTables->owners = new int[count];
 	for ( long i = 0; i < count; i++ ) {
-		pdaTables->indicies[i] = -1;
+		pdaTables->indices[i] = -1;
 		pdaTables->owners[i] = -1;
 	}
 
@@ -2020,7 +2020,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	pdaTables->offsets = new unsigned int[numStates];
 	pdaTables->num_states = numStates;
 
-	/* Place transitions into indicies/owners */
+	/* Place transitions into indices/owners */
 	PdaState **states = new PdaState*[numStates];
 	long ds = 0;
 	for ( PdaStateList::Iter state = pdaGraph->stateList; state.lte(); state++ )
@@ -2039,7 +2039,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 		pdaTables->offsets[state->stateNum] = indOff;
 
 		for ( TransMap::Iter trans = state->transMap; trans.lte(); trans++ ) {
-			pdaTables->indicies[indOff] = trans->value->actionSetEl->key.id;
+			pdaTables->indices[indOff] = trans->value->actionSetEl->key.id;
 			pdaTables->owners[indOff] = state->stateNum;
 			indOff++;
 
@@ -2054,7 +2054,7 @@ struct pda_tables *Compiler::makePdaTables( PdaGraph *pdaGraph )
 	}
 
 	/* We allocated the max, but cmpression gives us less. */
-	pdaTables->num_indicies = indLen;
+	pdaTables->num_indices = indLen;
 	delete[] states;
 	
 

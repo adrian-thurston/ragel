@@ -175,7 +175,7 @@ void TabGoto::writeExec()
 	DECLARE( UINT(), cond, " = 0" );
 	DECLARE( INDEX( ALPH_TYPE() ), keys );
 	DECLARE( INDEX( ARR_TYPE( actions ) ), acts );
-	DECLARE( INDEX( ARR_TYPE( indicies ) ), inds );
+	DECLARE( INDEX( ARR_TYPE( indices ) ), inds );
 	DECLARE( UINT(), nacts );
 	DECLARE( INT(), pop_test );
 	DECLARE( INT(), new_recs );

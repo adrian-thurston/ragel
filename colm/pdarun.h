@@ -215,7 +215,7 @@ typedef struct _CaptureAttr
 struct pda_tables
 {
 	/* Parser table data. */
-	int *indicies;
+	int *indices;
 	int *owners;
 	int *keys;
 	unsigned int *offsets;
@@ -227,7 +227,7 @@ struct pda_tables
 	int *token_regions;
 	int *token_pre_regions;
 
-	int num_indicies;
+	int num_indices;
 	int num_keys;
 	int num_states;
 	int num_targs;

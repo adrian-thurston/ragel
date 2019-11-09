@@ -37,7 +37,7 @@ void FlatGoto::LOCATE_TRANS()
 
 		out <<
 			"	" << keys << " = " << OFFSET( ARR_REF( transKeys ), "(" + vCS() + "<<1)" ) << ";\n"
-			"	" << inds << " = " << OFFSET( ARR_REF( indicies ),
+			"	" << inds << " = " << OFFSET( ARR_REF( indices ),
 					ARR_REF( flatIndexOffset ) + "[" + vCS() + "]" ) << ";\n"
 			"\n";
 
@@ -61,7 +61,7 @@ void FlatGoto::LOCATE_TRANS()
 							" - " << lowKey << "];\n"
 			"		if ( " << ic << " <= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
 						"" << ic << " >= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
-			"			" << trans << " = " << CAST(UINT()) << DEREF( ARR_REF( indicies ),
+			"			" << trans << " = " << CAST(UINT()) << DEREF( ARR_REF( indices ),
 								string(inds) + " + " + CAST("int") + "( " + string(ic) + " - " + CAST("int") +
 								DEREF( ARR_REF( transKeys ), string(keys) + "" ) + " ) " ) << "; \n"
 			"		else\n"

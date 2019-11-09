@@ -110,7 +110,7 @@ void GotoLoop::NFA_POP_TEST( RedNfaTarg *targ )
 
 std::ostream &GotoLoop::EXEC_FUNCS()
 {
-	/* Make labels that set acts and jump to execFuncs. Loop func indicies. */
+	/* Make labels that set acts and jump to execFuncs. Loop func indices. */
 	for ( GenActionTableMap::Iter redAct = redFsm->actionMap; redAct.lte(); redAct++ ) {
 		if ( redAct->numTransRefs > 0 ) {
 			out << "	f" << redAct->actListId << ": " <<

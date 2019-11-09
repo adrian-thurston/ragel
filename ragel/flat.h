@@ -58,7 +58,7 @@ protected:
 	void taCharClass();
 	void taActions();
 	void taFlatIndexOffset();
-	void taIndicies();
+	void taIndices();
 	void taIndexDefaults();
 	void taTransCondSpaces();
 	void taTransOffsets();
@@ -76,7 +76,7 @@ protected:
 
 	void setKeyType();
 
-	std::ostream &INDICIES();
+	std::ostream &INDICES();
 	std::ostream &TRANS_COND_SPACES();
 	std::ostream &TRANS_OFFSETS();
 	std::ostream &TRANS_LENGTHS();

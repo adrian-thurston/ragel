@@ -65,7 +65,7 @@ void Flat::tableDataPass()
 	taCharClass();
 	taFlatIndexOffset();
 
-	taIndicies();
+	taIndices();
 	taIndexDefaults();
 	taTransCondSpaces();
 
@@ -99,7 +99,7 @@ void Flat::writeData()
 	taCharClass();
 	taFlatIndexOffset();
 
-	taIndicies();
+	taIndices();
 	taIndexDefaults();
 	taTransCondSpaces();
 	if ( red->condSpaceList.length() > 0 )
@@ -324,19 +324,19 @@ void Flat::taKeys()
 	transKeys.finish();
 }
 
-void Flat::taIndicies()
+void Flat::taIndices()
 {
-	indicies.start();
+	indices.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		if ( st->transList != 0 ) {
 			long long span = st->high - st->low + 1;
 			for ( long long pos = 0; pos < span; pos++ )
-				indicies.value( st->transList[pos]->id );
+				indices.value( st->transList[pos]->id );
 		}
 	}
 
-	indicies.finish();
+	indices.finish();
 }
 
 void Flat::taIndexDefaults()

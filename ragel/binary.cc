@@ -69,7 +69,7 @@ void Binary::tableDataPass()
 	taSingleLens();
 	taRangeLens();
 	taIndexOffsets();
-	taIndicies();
+	taIndices();
 
 	taTransCondSpacesWi();
 	taTransOffsetsWi();
@@ -352,25 +352,25 @@ void Binary::taKeys()
 	transKeys.finish();
 }
 
-void Binary::taIndicies()
+void Binary::taIndices()
 {
-	indicies.start();
+	indices.start();
 
 	for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
 		/* Walk the singles. */
 		for ( RedTransList::Iter stel = st->outSingle; stel.lte(); stel++ )
-			indicies.value( stel->value->id );
+			indices.value( stel->value->id );
 
 		/* Walk the ranges. */
 		for ( RedTransList::Iter rtel = st->outRange; rtel.lte(); rtel++ )
-			indicies.value( rtel->value->id );
+			indices.value( rtel->value->id );
 
 		/* The state's default index goes next. */
 		if ( st->defTrans != 0 )
-			indicies.value( st->defTrans->id );
+			indices.value( st->defTrans->id );
 	}
 
-	indicies.finish();
+	indices.finish();
 }
 
 void Binary::taTransCondSpaces()

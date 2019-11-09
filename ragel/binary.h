@@ -53,7 +53,7 @@ protected:
 
 	std::ostream &COND_KEYS_v1();
 	std::ostream &COND_SPACES_v1();
-	std::ostream &INDICIES();
+	std::ostream &INDICES();
 	std::ostream &INDEX_OFFSETS();
 	std::ostream &SINGLE_LENS();
 	std::ostream &RANGE_LENS();
@@ -64,7 +64,7 @@ protected:
 	void taSingleLens();
 	void taRangeLens();
 	void taIndexOffsets();
-	void taIndicies();
+	void taIndices();
 	void taTransCondSpacesWi();
 	void taTransOffsetsWi();
 	void taTransLengthsWi();

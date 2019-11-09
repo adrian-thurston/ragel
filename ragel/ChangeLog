@@ -173,7 +173,7 @@ Ragel 6.2 - May 9, 2008
 =======================
  -Bug fix: The lm_switch actions needs to set p from tokend when there is no
   user action.
- -Bug fix: when not using indicies we can't use a transitions's id to identify
+ -Bug fix: when not using indices we can't use a transitions's id to identify
   the eof transition to take. Instead add the transition to the end of the
   transition list and store its position in a new var called pos. The pos var
   is then used as the index.
@@ -1065,7 +1065,7 @@ Ragel 3.6 - Jul 10, 2004
  -When resolving names, return a set of values so that a reference in an
   action block that is embedded more than once won't report distinct entry
   points that are actually the same.
- -Implemented flat tables. Stores a linear array of indicies into the
+ -Implemented flat tables. Stores a linear array of indices into the
   transition array and only a low and high key value. Faster than binary
   searching for keys but not usable for large alphabets.
  -Fixed bug in deleting of transitions leftover from converstion from bst to
@@ -1619,7 +1619,7 @@ Ragel 1.1.0 - Apr 15, 2002
  -Default operator (if two machines are side by side with no operator
   between them) is concatenation. First showed up in 1.0.4.
  -The fsm machine no longer auotmatically builds the flat table for
-  transition indicies. Instead it keeps the key,ptr pair. In tabcodegen
+  transition indices. Instead it keeps the key,ptr pair. In tabcodegen
   the flat table is produced. This way very large alphabets with sparse
   transitions will not consume large amounts of mem. This is also in prep
   for fsm graph getting a default transition.
@@ -1687,12 +1687,12 @@ Ragel 1.0.2 - Jan 30, 2002
   end.
  -If high/low index are at the limits, output a define in their place,
   not the high/low values themselves so as not to cause compiler warnings.
- -If the resulting machines don't have any indicies or functions, then
+ -If the resulting machines don't have any indices or functions, then
   omit the empty unrefereced static arrays so as not to cause compiler
   warnings about unused static vars.
- -Fixed variable sized indicies support. The header cannot have any
+ -Fixed variable sized indices support. The header cannot have any
   reference to INDEX_TYPE as that info is not known at the time the header
-  data is written. Forces us to use a void * for pointers to indicies. In
+  data is written. Forces us to use a void * for pointers to indices. In
   the c++ versions we are forced to make much of the data non-member
   static data in the code portion for the same reason.
 

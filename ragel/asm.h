@@ -112,7 +112,7 @@ protected:
 	string C() { return "_" + DATA_PREFIX() + "cond_spaces"; }
 	string CK() { return "_" + DATA_PREFIX() + "cond_keys"; }
 	string K() { return "_" + DATA_PREFIX() + "trans_keys"; }
-	string I() { return "_" + DATA_PREFIX() + "indicies"; }
+	string I() { return "_" + DATA_PREFIX() + "indices"; }
 	string CO() { return "_" + DATA_PREFIX() + "cond_offsets"; }
 	string KO() { return "_" + DATA_PREFIX() + "key_offsets"; }
 	string IO() { return "_" + DATA_PREFIX() + "index_offsets"; }

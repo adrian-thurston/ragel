@@ -535,11 +535,11 @@ void PdaCodeGen::writeParserData( long id, struct pda_tables *tables )
 {
 	String prefix = "pid_" + String(0, "%ld", id) + "_";
 
-	out << "static int " << prefix << indicies() << "[] = {\n\t";
-	for ( int i = 0; i < tables->num_indicies; i++ ) {
-		out << tables->indicies[i];
+	out << "static int " << prefix << indices() << "[] = {\n\t";
+	for ( int i = 0; i < tables->num_indices; i++ ) {
+		out << tables->indices[i];
 
-		if ( i < tables->num_indicies-1 ) {
+		if ( i < tables->num_indices-1 ) {
 			out << ", ";
 			if ( (i+1) % 8 == 0 )
 				out << "\n\t";
@@ -548,10 +548,10 @@ void PdaCodeGen::writeParserData( long id, struct pda_tables *tables )
 	out << "\n};\n\n";
 
 	out << "static int " << prefix << owners() << "[] = {\n\t";
-	for ( int i = 0; i < tables->num_indicies; i++ ) {
+	for ( int i = 0; i < tables->num_indices; i++ ) {
 		out << tables->owners[i];
 
-		if ( i < tables->num_indicies-1 ) {
+		if ( i < tables->num_indices-1 ) {
 			out << ", ";
 			if ( (i+1) % 8 == 0 )
 				out << "\n\t";
@@ -670,7 +670,7 @@ void PdaCodeGen::writeParserData( long id, struct pda_tables *tables )
 	out << 
 		"static struct pda_tables " << prefix << "pdaTables =\n"
 		"{\n"
-		"	" << prefix << indicies() << ",\n"
+		"	" << prefix << indices() << ",\n"
 		"	" << prefix << owners() << ",\n"
 		"	" << prefix << keys() << ",\n"
 		"	" << prefix << offsets() << ",\n"
@@ -683,7 +683,7 @@ void PdaCodeGen::writeParserData( long id, struct pda_tables *tables )
 		"	" << prefix << tokenRegions() << ",\n"
 		"	" << prefix << tokenPreRegions() << ",\n"
 		"\n"
-		"	" << tables->num_indicies << ",\n"
+		"	" << tables->num_indices << ",\n"
 		"	" << tables->num_keys << ",\n"
 		"	" << tables->num_states << ",\n"
 		"	" << tables->num_targs << ",\n"
