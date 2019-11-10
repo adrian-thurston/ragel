@@ -25,6 +25,8 @@ namespace rust_out
 
 		literal `{ `}
 
+		token lifetime / "'" id /
+
 		token string /
 				'"' ( [^"\\] | '\\' any ) * '"' |
 				"'" ( [^'\\] | '\\' any ) * "'"
@@ -40,6 +42,7 @@ namespace rust_out
 	|	[number]
 	|	[symbol]
 	|	[string]
+	|	[lifetime]
 	|	[`{ _IN_ item* _EX_ `} ]
 
 	def rust_out

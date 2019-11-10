@@ -10,6 +10,8 @@
 	};
 }%%
 
+fn some_fn() -> &'static str { "foo" }
+
 %% write data;
 
 fn m( s: String )
