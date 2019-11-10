@@ -31,7 +31,7 @@ syntax region rlTypeRegion matchgroup=regionDelimiter start="/" end="/"
 	\ contains=@rlTypes
 
 syntax region cflTypeRegion matchgroup=regionDelimiter start="\[" end="\]"
-	\ contains=cflTypeRegion,patRegion,otLit,typeKeywords,varCapture,qual
+	\ contains=cflTypeRegion,patRegion,otLit,Type,Keyword,varCapture,qual
 syntax region patRegion matchgroup=String start="\"" end="\"" end="\n"
 	\ contains=char,cflTypeRegion
 
@@ -56,23 +56,22 @@ syntax match tlNumber "true"
 syntax match tlNumber "false"
 
 syntax keyword Type
-	\ commit include literal iter
+	\ int str bool any ref ptr void list_el map_el
+	\ commit literal iter
 	\ namespace lex reducefirst global include export
-	\ construct cons parse parse_tree parse_stop reduce 
-	\ match require send send_tree
 	\ preeof left right nonassoc prec context struct alias
 	\ end eos print nonterm
-
-syntax keyword typeKeywords
-	\ int str bool any ref ptr void list_el map_el
+	\ construct cons parse parse_tree parse_stop reduce
+	\ match require send send_tree eos
 
 syntax keyword Keyword
 	\ reject else elsif return yield for while if
-	\ typeid in break 
-	\ new deref ni cast switch case default
+	\ typeid break 
+	\ deref ni switch case default
+	\ in new cast 
 
 syntax match tokenName "[a-zA-Z_][a-zA-Z_0-9]*" contained
-syntax match varCapture "[a-zA-Z_][a-zA-Z_0-9]*:" 
+syntax match varCapture "[a-zA-Z_][a-zA-Z_0-9]*:"
 syntax match qual "[a-zA-Z_][a-zA-Z_0-9]*::" 
 
 syntax region defTypes matchgroup=defKeywords
@@ -137,7 +136,6 @@ hi link rlNumber Number
 hi link rlLiteral String
 hi link defKeywords Type
 hi link redBlock Type
-hi link typeKeywords Type
 hi link regionDelimiter Type
 hi link char String
 hi link tokenName Function
