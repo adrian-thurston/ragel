@@ -39,6 +39,11 @@ struct value
 	struct value *next;
 };
 
+enum ValueType
+{
+	Dot = 256,
+};
+
 struct quantifier
 {
 	
@@ -280,9 +285,60 @@ int *grow_ragel_stack( int *size, int *stack )
 
 	quant_forms = '_';
 
+	alpha_char = [a-zA-Z];
+	digit_char = [0-9];
+
+	open_paren    = '(';
+	close_paren   = ')';
+
+	char_class_start = '[';
+	char_class_end   = ']';
+
+	ampersand     = '&';
+	colon         = ':';
+	comma         = ',';
+	dollar        = '$';
+	dot           = '.';
+	equals        = '=';
+	exclamation   = '!';
+	greater_than  = '>';
+	hash          = '#';
+	hyphen        = '-';
+	less_than     = '<';
+	pipe          = '|';
+	single_quote  = "'";
+	underscore    = '_';
+
+	other_char_printable =
+		' ' | '~' | ';' | '@' | '%' | '`' | '"' | '/';
+
+	other_char_non_printable = ^( 0 .. 127 );
+
+	capture_non_capture =
+		'(' @{ fcall paren_open; };
+
+	literal_sym =
+		comma | hyphen | less_than |
+		greater_than | single_quote | underscore | colon |
+		hash | equals | exclamation | ampersand;
+
+	action append_char {
+		append_element_value( s_term, *p );
+	}
+
+	literal = (
+		alpha_char               |
+		digit_char               |
+		literal_sym              |
+		other_char_printable     |
+		other_char_non_printable 
+	) @append_char;
+
 	atom =
-		[a-z] @{ append_element_value( s_term, *p ); } |
-		'(' @{ fcall paren_open; }
+		literal |
+		char_class_end  @append_char |
+		dot             @{ append_element_value( s_term, Dot ); } |
+		open_paren      @{ fcall open_paren_forms; }
 	;
 
 	non_greedy = '_';
@@ -303,7 +359,7 @@ int *grow_ragel_stack( int *size, int *stack )
 	#
 	regex = expr;
 
-	paren_open :=
+	open_paren_forms :=
 		# Look at the first few charcters to see what the form is. What we
 		# handle here:
 		#  (re)    capturing parens
