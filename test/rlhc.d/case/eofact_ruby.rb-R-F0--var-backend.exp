@@ -43,10 +43,10 @@ self._eofact_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_eofact_indicies 
-	private :_eofact_indicies, :_eofact_indicies=
+	attr_accessor :_eofact_indices 
+	private :_eofact_indices, :_eofact_indices=
 end
-self._eofact_indicies = [
+self._eofact_indices = [
 0, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0 , 
 ]
 
@@ -252,7 +252,7 @@ def run_machine( data )
 								begin
 									_ic = _eofact_char_class[( data[p ].ord) - 10];
 									if ( _ic <= _eofact_trans_keys[_keys+1 ]&& _ic >= _eofact_trans_keys[_keys ] )
-										_trans = _eofact_indicies[_inds + ( _ic - _eofact_trans_keys[_keys ])  ];
+										_trans = _eofact_indices[_inds + ( _ic - _eofact_trans_keys[_keys ])  ];
 										
 										else
 										_trans = _eofact_index_defaults[cs];

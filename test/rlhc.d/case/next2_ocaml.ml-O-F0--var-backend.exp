@@ -23,7 +23,7 @@ let _next2_char_class : int array = [|
 let _next2_index_offsets : int array = [|
 0; 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 23; 23; 23; 23; 0 ; 
 |]
-let _next2_indicies : int array = [|
+let _next2_indices : int array = [|
 0; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 0; 1; 19; 20; 21; 0 ; 
 |]
 let _next2_index_defaults : int array = [|
@@ -110,7 +110,7 @@ begin
 								let _ic  : int  ref = ref _next2_char_class.(( Char.code data.[p.contents] )- 10) in
 								if _ic.contents<= _next2_trans_keys.( _keys.contents+1  )&& _ic.contents>= _next2_trans_keys.( _keys.contents ) then
 								begin
-									_trans  := _next2_indicies.( _inds.contents+ ( _ic.contents- _next2_trans_keys.( _keys.contents ) ) );
+									_trans  := _next2_indices.( _inds.contents+ ( _ic.contents- _next2_trans_keys.( _keys.contents ) ) );
 									
 								end
 								else

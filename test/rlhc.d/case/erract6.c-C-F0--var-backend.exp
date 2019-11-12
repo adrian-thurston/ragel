@@ -11,7 +11,7 @@ struct errintrans
 static const char  _errintrans_trans_keys [] = { 1, 0, 0, 2, 0, 2, 0 ,  };
 static const char  _errintrans_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ,  };
 static const char  _errintrans_index_offsets [] = { 0, 0, 3, 0 ,  };
-static const char  _errintrans_indicies [] = { 1, 0, 2, 1, 0, 2, 0 ,  };
+static const char  _errintrans_indices [] = { 1, 0, 2, 1, 0, 2, 0 ,  };
 static const char  _errintrans_index_defaults [] = { 0, 0, 0, 0 ,  };
 static const char  _errintrans_trans_cond_spaces [] = { -1, -1, -1, 0 ,  };
 static const char  _errintrans_cond_targs [] = { 1, 2, 0, 0 ,  };
@@ -63,7 +63,7 @@ void errintrans_execute( struct errintrans *fsm, const char *_data, int _len )
 				if ( _have == 0  )
 				{
 					_keys = _errintrans_trans_keys + ((fsm->cs)<<1);
-					_inds = _errintrans_indicies + _errintrans_index_offsets[(fsm->cs)];
+					_inds = _errintrans_indices + _errintrans_index_offsets[(fsm->cs)];
 					if ( ((*( p  ))
 					)<= 57 && ((*( p  ))
 					)>= 10  )

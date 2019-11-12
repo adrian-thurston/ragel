@@ -13,7 +13,7 @@ array s8 _erract9_char_class( 0, 3 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _erract9_index_offsets( 0, 5 ) = { 0, 0, 1, 2, 3, 4, 5, 0 };
 
-array s8 _erract9_indicies( 0, 5 ) = { 1, 2, 3, 4, 5, 0 };
+array s8 _erract9_indices( 0, 5 ) = { 1, 2, 3, 4, 5, 0 };
 
 array s8 _erract9_index_defaults( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
@@ -83,13 +83,13 @@ host( "working/erract9.rl", 25 ) @{
 		if ( _cont == 1 ) {
 			if ( _have == 0 ) {
 				_keys = offset( _erract9_trans_keys, (cs<<1) );
-				_inds = offset( _erract9_indicies, _erract9_index_offsets[cs] );
+				_inds = offset( _erract9_indices, _erract9_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 104 && ( deref( data, p )) >= 88 )
 				{
 					int _ic = cast(int)_erract9_char_class[cast(int)( deref( data, p )) - 88];
 					if ( _ic <= cast(int)deref( _erract9_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _erract9_trans_keys, _keys ) )
-					_trans = cast(uint)deref( _erract9_indicies, _inds + cast(int)( _ic - cast(int)deref( _erract9_trans_keys, _keys ) )  ); 
+					_trans = cast(uint)deref( _erract9_indices, _inds + cast(int)( _ic - cast(int)deref( _erract9_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(uint)_erract9_index_defaults[cs];
 				}

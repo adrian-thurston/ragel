@@ -33,10 +33,10 @@ self._next2_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_next2_indicies 
-	private :_next2_indicies, :_next2_indicies=
+	attr_accessor :_next2_indices 
+	private :_next2_indices, :_next2_indices=
 end
-self._next2_indicies = [
+self._next2_indices = [
 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0 , 
 ]
 
@@ -192,7 +192,7 @@ def run_machine( data )
 									begin
 										_ic = _next2_char_class[( data[p ].ord) - 10];
 										if ( _ic <= _next2_trans_keys[_keys+1 ]&& _ic >= _next2_trans_keys[_keys ] )
-											_trans = _next2_indicies[_inds + ( _ic - _next2_trans_keys[_keys ])  ];
+											_trans = _next2_indices[_inds + ( _ic - _next2_trans_keys[_keys ])  ];
 											
 											else
 											_trans = _next2_index_defaults[cs];

@@ -22,7 +22,7 @@ array s8 _test_char_class( 0, 7 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _test_index_offsets( 0, 15 ) = { 0, 0, 4, 7, 15, 15, 0 };
 
-array s8 _test_indicies( 0, 6 ) = { 0, 1, 1, 2, 3, 1, 4, 5, 1, 1, 1, 6, 6, 6, 6, 2, 4, 6, 0 };
+array s8 _test_indices( 0, 6 ) = { 0, 1, 1, 2, 3, 1, 4, 5, 1, 1, 1, 6, 6, 6, 6, 2, 4, 6, 0 };
 
 array s8 _test_index_defaults( 0, 7 ) = { 0, 1, 1, 1, 7, 1, 0 };
 
@@ -73,13 +73,13 @@ host( "working/export1.rl", 26 ) @{
 			goto _out;
 			label _resume {
 				_keys = offset( _test_trans_keys, (cs<<1) );
-				_inds = offset( _test_indicies, _test_index_offsets[cs] );
+				_inds = offset( _test_indices, _test_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_test_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _test_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _test_trans_keys, _keys ) )
-					_trans = cast(int)deref( _test_indicies, _inds + cast(int)( _ic - cast(int)deref( _test_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _test_indices, _inds + cast(int)( _ic - cast(int)deref( _test_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_test_index_defaults[cs];
 				}

@@ -25,7 +25,7 @@ array s8 _builtin_char_class( 0, 9 ) = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 
 
 array s8 _builtin_index_offsets( 0, 0 ) = { 0, 0 };
 
-array s8 _builtin_indicies( 0, 9 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+array s8 _builtin_indices( 0, 9 ) = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
 
 array s8 _builtin_index_defaults( 0, 10 ) = { 10, 0 };
 
@@ -77,13 +77,13 @@ host( "working/builtin.rl", 41 ) @{
 			goto _test_eof;
 			label _resume {
 				_keys = offset( _builtin_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
-				_inds = offset( _builtin_indicies, _builtin_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_inds = offset( _builtin_indices, _builtin_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
 				
 				if ( ( deref( data, p )) <= 255 )
 				{
 					int _ic = cast(int)_builtin_char_class[cast(int)( deref( data, p )) - 0];
 					if ( _ic <= cast(int)deref( _builtin_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _builtin_trans_keys, _keys ) )
-					_trans = cast(int)deref( _builtin_indicies, _inds + cast(int)( _ic - cast(int)deref( _builtin_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _builtin_indices, _inds + cast(int)( _ic - cast(int)deref( _builtin_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_builtin_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
 				}

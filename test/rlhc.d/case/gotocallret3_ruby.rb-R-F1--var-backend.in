@@ -15,7 +15,7 @@ array s8 _gotocallret_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 
 array s8 _gotocallret_index_offsets( 0, 12 ) = { 0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0 };
 
-array s8 _gotocallret_indicies( 0, 10 ) = { 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 };
+array s8 _gotocallret_indices( 0, 10 ) = { 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 };
 
 array s8 _gotocallret_index_defaults( 0, 11 ) = { 0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0 };
 
@@ -101,13 +101,13 @@ host( "working/gotocallret3_ruby.rl", 72 ) @{
 		if ( _cont == 1 ) {
 			if ( _have == 0 ) {
 				_keys = offset( _gotocallret_trans_keys, (cs<<1) );
-				_inds = offset( _gotocallret_indicies, _gotocallret_index_offsets[cs] );
+				_inds = offset( _gotocallret_indices, _gotocallret_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_gotocallret_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _gotocallret_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _gotocallret_trans_keys, _keys ) )
-					_trans = cast(uint)deref( _gotocallret_indicies, _inds + cast(int)( _ic - cast(int)deref( _gotocallret_trans_keys, _keys ) )  ); 
+					_trans = cast(uint)deref( _gotocallret_indices, _inds + cast(int)( _ic - cast(int)deref( _gotocallret_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(uint)_gotocallret_index_defaults[cs];
 				}

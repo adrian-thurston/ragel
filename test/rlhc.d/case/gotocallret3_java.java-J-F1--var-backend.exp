@@ -11,7 +11,7 @@ class gotocallret3_java
 	private static char  _gotocallret_trans_keys [] = { 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 5, 3, 3, 3, 5, 1, 0, 4, 5, 3, 3, 0,  };
 	private static byte  _gotocallret_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0 ,  };
 	private static byte  _gotocallret_index_offsets [] = { 0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0 ,  };
-	private static byte  _gotocallret_indicies [] = { 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 ,  };
+	private static byte  _gotocallret_indices [] = { 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 ,  };
 	private static byte  _gotocallret_index_defaults [] = { 0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0 ,  };
 	private static byte  _gotocallret_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 	private static byte  _gotocallret_cond_targs [] = { 0, 2, 7, 4, 8, 4, 8, 0, 9, 10, 1, 0, 0 ,  };
@@ -127,7 +127,7 @@ class gotocallret3_java
 						{
 							int _ic = (int)_gotocallret_char_class[(int)( data[p ]) - 10];
 							if ( _ic <= (int)_gotocallret_trans_keys[_keys+1 ]&& _ic >= (int)_gotocallret_trans_keys[_keys ] )
-							_trans = (int )_gotocallret_indicies[_inds + (int)( _ic - (int)_gotocallret_trans_keys[_keys ])  ];
+							_trans = (int )_gotocallret_indices[_inds + (int)( _ic - (int)_gotocallret_trans_keys[_keys ])  ];
 							
 							else
 							_trans = (int )_gotocallret_index_defaults[cs];

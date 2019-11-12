@@ -17,7 +17,7 @@ array s8 _recdescent_char_class( 0, 5 ) = { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _recdescent_index_offsets( 0, 13 ) = { 0, 0, 1, 7, 13, 0 };
 
-array s8 _recdescent_indicies( 0, 12 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9, 10, 6, 1, 11, 12, 9, 10, 0 };
+array s8 _recdescent_indices( 0, 12 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 1, 7, 8, 9, 10, 6, 1, 11, 12, 9, 10, 0 };
 
 array s8 _recdescent_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 0 };
 
@@ -102,13 +102,13 @@ host( "working/recdescent4.rl", 73 ) @{
 			if ( _cont == 1 ) {
 				if ( _have == 0 ) {
 					_keys = offset( _recdescent_trans_keys, (cs<<1) );
-					_inds = offset( _recdescent_indicies, _recdescent_index_offsets[cs] );
+					_inds = offset( _recdescent_indices, _recdescent_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 125 && ( deref( data, p )) >= 9 )
 					{
 						int _ic = cast(int)_recdescent_char_class[cast(int)( deref( data, p )) - 9];
 						if ( _ic <= cast(int)deref( _recdescent_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _recdescent_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _recdescent_indicies, _inds + cast(int)( _ic - cast(int)deref( _recdescent_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _recdescent_indices, _inds + cast(int)( _ic - cast(int)deref( _recdescent_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_recdescent_index_defaults[cs];
 					}

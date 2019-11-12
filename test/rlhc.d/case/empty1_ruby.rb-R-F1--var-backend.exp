@@ -35,10 +35,10 @@ self._empty1_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_empty1_indicies 
-	private :_empty1_indicies, :_empty1_indicies=
+	attr_accessor :_empty1_indices 
+	private :_empty1_indices, :_empty1_indices=
 end
-self._empty1_indicies = [
+self._empty1_indices = [
 0 , 
 ]
 

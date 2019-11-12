@@ -22,7 +22,7 @@ array s8 _test_char_class( 0, 13 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 
 array s8 _test_index_offsets( 0, 27 ) = { 0, 0, 4, 7, 8, 9, 10, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 24, 25, 26, 27, 27, 27, 27, 27, 0 };
 
-array s8 _test_indicies( 0, 21 ) = { 0, 0, 1, 2, 3, 0, 0, 4, 5, 6, 7, 1, 1, 8, 9, 10, 11, 12, 13, 13, 14, 15, 16, 17, 19, 20, 21, 0 };
+array s8 _test_indices( 0, 21 ) = { 0, 0, 1, 2, 3, 0, 0, 4, 5, 6, 7, 1, 1, 8, 9, 10, 11, 12, 13, 13, 14, 15, 16, 17, 19, 20, 21, 0 };
 
 array s8 _test_index_defaults( 0, 22 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 18, 1, 1, 1, 22, 1, 1, 1, 1, 0 };
 
@@ -79,13 +79,13 @@ host( "working/call1.rl", 43 ) @{
 			goto _out;
 			label _resume {
 				_keys = offset( _test_trans_keys, (host( "-", 1 ) @{fsm->}@ -> cs<<1) );
-				_inds = offset( _test_indicies, _test_index_offsets[host( "-", 1 ) @{fsm->}@ -> cs] );
+				_inds = offset( _test_indices, _test_index_offsets[host( "-", 1 ) @{fsm->}@ -> cs] );
 				
 				if ( ( deref( data, p )) <= 118 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_test_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _test_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _test_trans_keys, _keys ) )
-					_trans = cast(int)deref( _test_indicies, _inds + cast(int)( _ic - cast(int)deref( _test_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _test_indices, _inds + cast(int)( _ic - cast(int)deref( _test_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_test_index_defaults[host( "-", 1 ) @{fsm->}@ -> cs];
 				}

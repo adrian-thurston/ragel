@@ -23,7 +23,7 @@ array s8 _scanner_char_class( 0, 1 ) = { 0, 1, 0 };
 
 array s8 _scanner_index_offsets( 0, 2 ) = { 0, 0, 2, 0 };
 
-array s8 _scanner_indicies( 0, 2 ) = { 0, 2, 0 };
+array s8 _scanner_indices( 0, 2 ) = { 0, 2, 0 };
 
 array s8 _scanner_index_defaults( 0, 4 ) = { 0, 1, 4, 0 };
 
@@ -116,13 +116,13 @@ host( "working/scan3_rust.rl", 31 ) @{
 					}
 					
 					_keys = offset( _scanner_trans_keys, (cs<<1) );
-					_inds = offset( _scanner_indicies, _scanner_index_offsets[cs] );
+					_inds = offset( _scanner_indices, _scanner_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 98 && ( deref( data, p )) >= 97 )
 					{
 						int _ic = cast(int)_scanner_char_class[cast(int)( deref( data, p )) - 97];
 						if ( _ic <= cast(int)deref( _scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _scanner_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _scanner_indices, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_scanner_index_defaults[cs];
 					}

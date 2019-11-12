@@ -19,7 +19,7 @@ array s8 _atoi_char_class( 0, 4 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _atoi_index_offsets( 0, 9 ) = { 0, 0, 3, 4, 9, 0 };
 
-array s8 _atoi_indicies( 0, 5 ) = { 0, 2, 3, 4, 5, 1, 1, 1, 4, 0 };
+array s8 _atoi_indices( 0, 5 ) = { 0, 2, 3, 4, 5, 1, 1, 1, 4, 0 };
 
 array s8 _atoi_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 0 };
 
@@ -82,13 +82,13 @@ host( "working/atoi1_rust.rl", 43 ) @{
 			if ( _cont == 1 ) {
 				if ( _have == 0 ) {
 					_keys = offset( _atoi_trans_keys, (cs<<1) );
-					_inds = offset( _atoi_indicies, _atoi_index_offsets[cs] );
+					_inds = offset( _atoi_indices, _atoi_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
 					{
 						int _ic = cast(int)_atoi_char_class[cast(int)( deref( data, p )) - 10];
 						if ( _ic <= cast(int)deref( _atoi_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _atoi_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _atoi_indicies, _inds + cast(int)( _ic - cast(int)deref( _atoi_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _atoi_indices, _inds + cast(int)( _ic - cast(int)deref( _atoi_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_atoi_index_defaults[cs];
 					}

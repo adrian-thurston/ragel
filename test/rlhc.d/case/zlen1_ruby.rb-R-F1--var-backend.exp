@@ -35,10 +35,10 @@ self._zlen1_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_zlen1_indicies 
-	private :_zlen1_indicies, :_zlen1_indicies=
+	attr_accessor :_zlen1_indices 
+	private :_zlen1_indices, :_zlen1_indices=
 end
-self._zlen1_indicies = [
+self._zlen1_indices = [
 0 , 
 ]
 

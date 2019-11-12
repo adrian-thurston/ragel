@@ -11,7 +11,7 @@ struct forder
 static const char  _forder_trans_keys [] = { 1, 0, 0, 3, 2, 2, 0, 3, 0, 3, 0, 2, 0, 3, 0, 3, 0, 3, 0, 2, 0, 2, 1, 0, 0 ,  };
 static const char  _forder_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 ,  };
 static const char  _forder_index_offsets [] = { 0, 0, 4, 5, 9, 13, 16, 20, 24, 28, 31, 34, 0 ,  };
-static const char  _forder_indicies [] = { 0, 1, 2, 3, 4, 5, 1, 6, 7, 8, 1, 9, 10, 8, 1, 9, 8, 1, 9, 11, 8, 1, 9, 12, 13, 1, 14, 15, 8, 1, 16, 13, 1, 14, 0 ,  };
+static const char  _forder_indices [] = { 0, 1, 2, 3, 4, 5, 1, 6, 7, 8, 1, 9, 10, 8, 1, 9, 8, 1, 9, 11, 8, 1, 9, 12, 13, 1, 14, 15, 8, 1, 16, 13, 1, 14, 0 ,  };
 static const char  _forder_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
 static const char  _forder_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 static const char  _forder_cond_targs [] = { 11, 0, 2, 6, 3, 11, 2, 4, 11, 5, 4, 7, 8, 11, 9, 6, 10, 0 ,  };
@@ -50,7 +50,7 @@ void forder_execute( struct forder *fsm, const char *_data, int _len )
 		
 		_resume :
 		_keys = _forder_trans_keys + ((fsm->cs)<<1);
-		_inds = _forder_indicies + _forder_index_offsets[(fsm->cs)];
+		_inds = _forder_indices + _forder_index_offsets[(fsm->cs)];
 		if ( ((*( p  ))
 		)<= 98 && ((*( p  ))
 		)>= 10  )

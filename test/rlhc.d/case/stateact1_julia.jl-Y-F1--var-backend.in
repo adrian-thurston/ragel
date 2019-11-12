@@ -17,7 +17,7 @@ array s8 _state_act_char_class( 0, 3 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 array s8 _state_act_index_offsets( 0, 4 ) = { 0, 0, 1, 2, 3, 4, 0 };
 
-array s8 _state_act_indicies( 0, 3 ) = { 0, 2, 3, 3, 3, 0 };
+array s8 _state_act_indices( 0, 3 ) = { 0, 2, 3, 3, 3, 0 };
 
 array s8 _state_act_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 0 };
 
@@ -96,13 +96,13 @@ host( "working/stateact1_julia.rl", 53 ) @{
 				}
 				
 				_keys = offset( _state_act_trans_keys, (cs<<1) );
-				_inds = offset( _state_act_indicies, _state_act_index_offsets[cs] );
+				_inds = offset( _state_act_indices, _state_act_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 105 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_state_act_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _state_act_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _state_act_trans_keys, _keys ) )
-					_trans = cast(uint)deref( _state_act_indicies, _inds + cast(int)( _ic - cast(int)deref( _state_act_trans_keys, _keys ) )  ); 
+					_trans = cast(uint)deref( _state_act_indices, _inds + cast(int)( _ic - cast(int)deref( _state_act_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(uint)_state_act_index_defaults[cs];
 				}

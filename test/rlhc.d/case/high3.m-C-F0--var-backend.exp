@@ -35,7 +35,7 @@ static const char  _Fsm_actions [] = { 0, 1, 0, 0 ,  };
 static const unsigned char  _Fsm_trans_keys [] = { 1u, 0u, 2u, 2u, 0u, 0u, 1u, 0u, 0u,  };
 static const char  _Fsm_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 ,  };
 static const char  _Fsm_index_offsets [] = { 0, 0, 1, 2, 0 ,  };
-static const char  _Fsm_indicies [] = { 0, 2, 0 ,  };
+static const char  _Fsm_indices [] = { 0, 2, 0 ,  };
 static const char  _Fsm_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
 static const char  _Fsm_trans_cond_spaces [] = { -1, -1, -1, 0 ,  };
 static const char  _Fsm_cond_targs [] = { 2, 0, 3, 0 ,  };
@@ -89,7 +89,7 @@ static const int  Fsm_en_main  = 1;
 				if ( _have == 0  )
 				{
 					_keys = _Fsm_trans_keys + (cs<<1);
-					_inds = _Fsm_indicies + _Fsm_index_offsets[cs];
+					_inds = _Fsm_indices + _Fsm_index_offsets[cs];
 					if ( ((*( p  ))
 					)<= 232 && ((*( p  ))
 					)>= 10  )

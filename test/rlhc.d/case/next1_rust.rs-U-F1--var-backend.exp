@@ -7,7 +7,7 @@ static mut target : i32 = 0;
 static _next1_trans_keys: [u8 ; 38] = [ 1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0 , 0 ];
 static _next1_char_class: [i8 ; 112] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 , 0 ];
 static _next1_index_offsets: [i8 ; 20] = [ 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 , 0 ];
-static _next1_indicies: [i8 ; 18] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 , 0 ];
+static _next1_indices: [i8 ; 18] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 , 0 ];
 static _next1_index_defaults: [i8 ; 20] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , 0 ];
 static _next1_trans_cond_spaces: [i8 ; 18] = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
 static _next1_cond_targs: [i8 ; 18] = [ 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 , 0 ];
@@ -75,7 +75,7 @@ unsafe fn m( s: String )
 									if ( _ic <= ( _next1_trans_keys[(_keys+1 ) as usize]
 									) as i32&& _ic >= ( _next1_trans_keys[(_keys ) as usize]
 									) as i32 ) {
-										_trans = ( _next1_indicies[(_inds + ( ( _ic - ( _next1_trans_keys[(_keys ) as usize]
+										_trans = ( _next1_indices[(_inds + ( ( _ic - ( _next1_trans_keys[(_keys ) as usize]
 										) as i32)   ) as i32) as usize]
 										) as u32;
 										

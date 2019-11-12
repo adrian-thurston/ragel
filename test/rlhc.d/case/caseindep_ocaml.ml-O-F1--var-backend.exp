@@ -19,7 +19,7 @@ let _indep_char_class : int array = [|
 let _indep_index_offsets : int array = [|
 0; 0; 2; 3; 4; 5; 6; 7; 8; 13; 18; 23; 28; 33; 0 ; 
 |]
-let _indep_indicies : int array = [|
+let _indep_indices : int array = [|
 0; 2; 3; 4; 5; 6; 7; 8; 9; 1; 1; 1; 9; 10; 1; 1; 1; 10; 11; 1; 1; 1; 11; 12; 1; 1; 1; 12; 7; 1; 1; 1; 7; 0 ; 
 |]
 let _indep_index_defaults : int array = [|
@@ -100,7 +100,7 @@ begin
 								let _ic  : int  ref = ref _indep_char_class.(( Char.code data.[p.contents] )- 10) in
 								if _ic.contents<= _indep_trans_keys.( _keys.contents+1  )&& _ic.contents>= _indep_trans_keys.( _keys.contents ) then
 								begin
-									_trans  := _indep_indicies.( _inds.contents+ ( _ic.contents- _indep_trans_keys.( _keys.contents ) ) );
+									_trans  := _indep_indices.( _inds.contents+ ( _ic.contents- _indep_trans_keys.( _keys.contents ) ) );
 									
 								end
 								else

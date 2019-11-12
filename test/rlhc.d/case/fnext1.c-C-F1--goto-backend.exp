@@ -14,7 +14,7 @@ int act;
 static const char  _fnext_trans_keys [] = { 1, 0, 3, 3, 2, 2, 4, 4, 4, 4, 0, 0, 1, 0, 1, 0, 1, 0, 5, 5, 1, 0, 0 ,  };
 static const char  _fnext_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 1, 1, 1, 4, 1, 1, 5, 0 ,  };
 static const char  _fnext_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 6, 0 ,  };
-static const char  _fnext_indicies [] = { 0, 2, 3, 4, 5, 6, 0 ,  };
+static const char  _fnext_indices [] = { 0, 2, 3, 4, 5, 6, 0 ,  };
 static const char  _fnext_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
 static const char  _fnext_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 static const char  _fnext_cond_targs [] = { 6, 0, 7, 4, 8, 10, 9, 0 ,  };
@@ -76,7 +76,7 @@ void exec( char *data, int len )
 				
 			}
 			_keys = _fnext_trans_keys + (cs<<1);
-			_inds = _fnext_indicies + _fnext_index_offsets[cs];
+			_inds = _fnext_indices + _fnext_index_offsets[cs];
 			if ( ((*( p  ))
 			)<= 111 && ((*( p  ))
 			)>= 10  )

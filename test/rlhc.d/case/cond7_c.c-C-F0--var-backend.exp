@@ -12,7 +12,7 @@ static const char  _foo_actions [] = { 0, 1, 0, 1, 1, 0 ,  };
 static const char  _foo_trans_keys [] = { 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 ,  };
 static const char  _foo_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ,  };
 static const char  _foo_index_offsets [] = { 0, 0, 1, 2, 5, 0 ,  };
-static const char  _foo_indicies [] = { 0, 2, 3, 1, 4, 0 ,  };
+static const char  _foo_indices [] = { 0, 2, 3, 1, 4, 0 ,  };
 static const char  _foo_index_defaults [] = { 0, 1, 1, 1, 1, 0 ,  };
 static const char  _foo_trans_cond_spaces [] = { -1, -1, 0, 0, 0, 0 ,  };
 static const char  _foo_trans_offsets [] = { 0, 1, 2, 4, 6, 0 ,  };
@@ -72,7 +72,7 @@ void exec( char *data, int len )
 				if ( _have == 0  )
 				{
 					_keys = _foo_trans_keys + (cs<<1);
-					_inds = _foo_indicies + _foo_index_offsets[cs];
+					_inds = _foo_indices + _foo_index_offsets[cs];
 					if ( ((*( p  ))
 					)<= 57 && ((*( p  ))
 					)>= 10  )

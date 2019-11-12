@@ -13,7 +13,7 @@ static _scanner_actions: [i8 ; 32] = [ 0, 1, 2, 1, 3, 1, 6, 1, 7, 1, 8, 1, 9, 1,
 static _scanner_trans_keys: [u8 ; 24] = [ 1, 0, 2, 9, 4, 4, 10, 10, 10, 10, 10, 10, 2, 9, 0, 9, 7, 7, 9, 9, 2, 9, 0 , 0 ];
 static _scanner_char_class: [i8 ; 113] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 3, 4, 5, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 0 , 0 ];
 static _scanner_index_offsets: [i8 ; 13] = [ 0, 0, 8, 9, 10, 11, 12, 20, 30, 31, 32, 0 , 0 ];
-static _scanner_indicies: [i8 ; 42] = [ 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0 , 0 ];
+static _scanner_indices: [i8 ; 42] = [ 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0 , 0 ];
 static _scanner_index_defaults: [i8 ; 13] = [ 0, 0, 4, 5, 5, 5, 4, 4, 16, 17, 0, 0 , 0 ];
 static _scanner_trans_cond_spaces: [i8 ; 21] = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
 static _scanner_cond_targs: [i8 ; 21] = [ 7, 7, 1, 9, 0, 7, 4, 5, 7, 10, 10, 7, 7, 8, 2, 6, 7, 7, 3, 0 , 0 ];
@@ -125,7 +125,7 @@ unsafe fn m( s: String )
 									if ( _ic <= ( _scanner_trans_keys[(_keys+1 ) as usize]
 									) as i32&& _ic >= ( _scanner_trans_keys[(_keys ) as usize]
 									) as i32 ) {
-										_trans = ( _scanner_indicies[(_inds + ( ( _ic - ( _scanner_trans_keys[(_keys ) as usize]
+										_trans = ( _scanner_indices[(_inds + ( ( _ic - ( _scanner_trans_keys[(_keys ) as usize]
 										) as i32)   ) as i32) as usize]
 										) as u32;
 										

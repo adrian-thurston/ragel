@@ -1,7 +1,7 @@
 static _any1_trans_keys: [u8 ; 8] = [ 1, 0, 1, 0, 1, 0, 0 , 0 ];
 static _any1_char_class: [i8 ; 2] = [ 0 , 0 ];
 static _any1_index_offsets: [i8 ; 5] = [ 0, 0, 0, 0 , 0 ];
-static _any1_indicies: [i8 ; 2] = [ 0 , 0 ];
+static _any1_indices: [i8 ; 2] = [ 0 , 0 ];
 static _any1_index_defaults: [i8 ; 5] = [ 0, 0, 1, 0 , 0 ];
 static _any1_trans_cond_spaces: [i8 ; 4] = [ -1, -1, 0 , 0 ];
 static _any1_cond_targs: [i8 ; 4] = [ 2, 0, 0 , 0 ];

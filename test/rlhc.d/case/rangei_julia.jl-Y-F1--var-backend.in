@@ -16,7 +16,7 @@ array s8 _rangei_char_class( 0, 5 ) = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2
 
 array s8 _rangei_index_offsets( 0, 23 ) = { 0, 0, 2, 4, 8, 13, 17, 23, 0 };
 
-array s8 _rangei_indicies( 0, 6 ) = { 0, 0, 2, 2, 3, 3, 3, 3, 4, 4, 1, 4, 4, 5, 1, 5, 5, 6, 6, 6, 6, 6, 6, 0 };
+array s8 _rangei_indices( 0, 6 ) = { 0, 0, 2, 2, 3, 3, 3, 3, 4, 4, 1, 4, 4, 5, 1, 5, 5, 6, 6, 6, 6, 6, 6, 0 };
 
 array s8 _rangei_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 0 };
 
@@ -73,13 +73,13 @@ host( "working/rangei_julia.rl", 33 ) @{
 		if ( _cont == 1 ) {
 			if ( _have == 0 ) {
 				_keys = offset( _rangei_trans_keys, (cs<<1) );
-				_inds = offset( _rangei_indicies, _rangei_index_offsets[cs] );
+				_inds = offset( _rangei_indices, _rangei_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 125 && ( deref( data, p )) >= 60 )
 				{
 					int _ic = cast(int)_rangei_char_class[cast(int)( deref( data, p )) - 60];
 					if ( _ic <= cast(int)deref( _rangei_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _rangei_trans_keys, _keys ) )
-					_trans = cast(uint)deref( _rangei_indicies, _inds + cast(int)( _ic - cast(int)deref( _rangei_trans_keys, _keys ) )  ); 
+					_trans = cast(uint)deref( _rangei_indices, _inds + cast(int)( _ic - cast(int)deref( _rangei_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(uint)_rangei_index_defaults[cs];
 				}

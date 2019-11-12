@@ -23,7 +23,7 @@ array s8 _errintrans_char_class( 0, 2 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _errintrans_index_offsets( 0, 3 ) = { 0, 0, 3, 0 };
 
-array s8 _errintrans_indicies( 0, 2 ) = { 1, 0, 2, 1, 0, 2, 0 };
+array s8 _errintrans_indices( 0, 2 ) = { 1, 0, 2, 1, 0, 2, 0 };
 
 array s8 _errintrans_index_defaults( 0, 0 ) = { 0, 0, 0, 0 };
 
@@ -75,13 +75,13 @@ host( "working/erract6.rl", 27 ) @{
 			goto _out;
 			label _resume {
 				_keys = offset( _errintrans_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
-				_inds = offset( _errintrans_indicies, _errintrans_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_inds = offset( _errintrans_indices, _errintrans_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
 				
 				if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_errintrans_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _errintrans_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _errintrans_trans_keys, _keys ) )
-					_trans = cast(int)deref( _errintrans_indicies, _inds + cast(int)( _ic - cast(int)deref( _errintrans_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _errintrans_indices, _inds + cast(int)( _ic - cast(int)deref( _errintrans_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_errintrans_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
 				}

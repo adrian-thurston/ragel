@@ -6,7 +6,7 @@
 static const char  _foo_trans_keys [] = { 1, 0, 3, 3, 2, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0 ,  };
 static const char  _foo_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 0 ,  };
 static const char  _foo_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 0 ,  };
-static const char  _foo_indicies [] = { 1, 2, 3, 4, 5, 0 ,  };
+static const char  _foo_indices [] = { 1, 2, 3, 4, 5, 0 ,  };
 static const char  _foo_index_defaults [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
 static const char  _foo_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, 0 ,  };
 static const char  _foo_cond_targs [] = { 0, 2, 3, 4, 5, 6, 0 ,  };
@@ -43,7 +43,7 @@ int main()
 		
 		_resume :
 		_keys = _foo_trans_keys + (cs<<1);
-		_inds = _foo_indicies + _foo_index_offsets[cs];
+		_inds = _foo_indices + _foo_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 104 && ((*( p  ))
 		)>= 88  )

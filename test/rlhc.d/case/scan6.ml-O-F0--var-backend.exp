@@ -24,7 +24,7 @@ let _scanner_char_class : int array = [|
 let _scanner_index_offsets : int array = [|
 0; 3; 5; 0 ; 
 |]
-let _scanner_indicies : int array = [|
+let _scanner_indices : int array = [|
 1; 1; 2; 4; 5; 1; 1; 2; 0 ; 
 |]
 let _scanner_index_defaults : int array = [|
@@ -166,7 +166,7 @@ begin
 								let _ic  : int  ref = ref _scanner_char_class.(( Char.code data.[p.contents] )- 97) in
 								if _ic.contents<= _scanner_trans_keys.( _keys.contents+1  )&& _ic.contents>= _scanner_trans_keys.( _keys.contents ) then
 								begin
-									_trans  := _scanner_indicies.( _inds.contents+ ( _ic.contents- _scanner_trans_keys.( _keys.contents ) ) );
+									_trans  := _scanner_indices.( _inds.contents+ ( _ic.contents- _scanner_trans_keys.( _keys.contents ) ) );
 									
 								end
 								else

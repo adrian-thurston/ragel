@@ -14,7 +14,7 @@ namespace Test {
 		static readonly char  []_foo_trans_keys = { '\u0001', '\u0000', '\u0002', '\u0002', '\u0002', '\u0002', '\u0000', '\u0002', '\u0001', '\u0000', '\u0000',  };
 		static readonly sbyte  []_foo_char_class = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0,  };
 		static readonly sbyte  []_foo_index_offsets = { 0, 0, 1, 2, 5, 0,  };
-		static readonly sbyte  []_foo_indicies = { 0, 2, 3, 1, 4, 0,  };
+		static readonly sbyte  []_foo_indices = { 0, 2, 3, 1, 4, 0,  };
 		static readonly sbyte  []_foo_index_defaults = { 0, 1, 1, 1, 1, 0,  };
 		static readonly sbyte  []_foo_trans_cond_spaces = { -1, -1, 0, 0, 0, 0,  };
 		static readonly sbyte  []_foo_trans_offsets = { 0, 1, 2, 4, 6, 0,  };
@@ -68,7 +68,7 @@ namespace Test {
 				{
 					int _ic = (int)_foo_char_class[(int)( data[p ]) - 10];
 					if ( _ic <= (int)_foo_trans_keys[_keys+1]&& _ic >= (int)_foo_trans_keys[_keys ] )
-					_trans = (int)_foo_indicies[_inds + (int)( _ic - (int)_foo_trans_keys[_keys ])  ];
+					_trans = (int)_foo_indices[_inds + (int)( _ic - (int)_foo_trans_keys[_keys ])  ];
 					
 					else
 					_trans = (int)_foo_index_defaults[cs];

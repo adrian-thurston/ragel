@@ -6,7 +6,7 @@ class erract8
 	private static char  _erract8_trans_keys [] = { 1, 0, 3, 3, 2, 2, 0, 0, 0, 0, 0, 0, 1, 0, 0,  };
 	private static byte  _erract8_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 3, 0 ,  };
 	private static byte  _erract8_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 0 ,  };
-	private static byte  _erract8_indicies [] = { 1, 2, 3, 4, 5, 0 ,  };
+	private static byte  _erract8_indices [] = { 1, 2, 3, 4, 5, 0 ,  };
 	private static byte  _erract8_index_defaults [] = { 0, 0, 0, 0, 0, 0, 0, 0 ,  };
 	private static byte  _erract8_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, 0 ,  };
 	private static byte  _erract8_cond_targs [] = { 0, 2, 3, 4, 5, 6, 0 ,  };
@@ -62,7 +62,7 @@ class erract8
 					{
 						int _ic = (int)_erract8_char_class[(int)( data[p ]) - 88];
 						if ( _ic <= (int)_erract8_trans_keys[_keys+1 ]&& _ic >= (int)_erract8_trans_keys[_keys ] )
-						_trans = (int)_erract8_indicies[_inds + (int)( _ic - (int)_erract8_trans_keys[_keys ])  ];
+						_trans = (int)_erract8_indices[_inds + (int)( _ic - (int)_erract8_trans_keys[_keys ])  ];
 						
 						else
 						_trans = (int)_erract8_index_defaults[cs];

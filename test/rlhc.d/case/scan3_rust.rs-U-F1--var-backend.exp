@@ -12,7 +12,7 @@ static mut token : i32 = 0;
 static _scanner_trans_keys: [u8 ; 8] = [ 1, 0, 0, 1, 1, 0, 0 , 0 ];
 static _scanner_char_class: [i8 ; 4] = [ 0, 1, 0 , 0 ];
 static _scanner_index_offsets: [i8 ; 5] = [ 0, 0, 2, 0 , 0 ];
-static _scanner_indicies: [i8 ; 4] = [ 0, 2, 0 , 0 ];
+static _scanner_indices: [i8 ; 4] = [ 0, 2, 0 , 0 ];
 static _scanner_index_defaults: [i8 ; 5] = [ 0, 1, 4, 0 , 0 ];
 static _scanner_trans_cond_spaces: [i8 ; 7] = [ -1, -1, -1, -1, -1, 0 , 0 ];
 static _scanner_cond_targs: [i8 ; 7] = [ 2, 0, 2, 1, 2, 0 , 0 ];
@@ -110,7 +110,7 @@ unsafe fn m( s: String )
 									if ( _ic <= ( _scanner_trans_keys[(_keys+1 ) as usize]
 									) as i32&& _ic >= ( _scanner_trans_keys[(_keys ) as usize]
 									) as i32 ) {
-										_trans = ( _scanner_indicies[(_inds + ( ( _ic - ( _scanner_trans_keys[(_keys ) as usize]
+										_trans = ( _scanner_indices[(_inds + ( ( _ic - ( _scanner_trans_keys[(_keys ) as usize]
 										) as i32)   ) as i32) as usize]
 										) as u32;
 										

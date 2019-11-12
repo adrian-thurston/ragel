@@ -15,7 +15,7 @@ host( "working/erract8.rl", 1 ) @{/*
 	
 	array s8 _erract8_index_offsets( 0, 5 ) = { 0, 0, 1, 2, 3, 4, 5, 0 };
 	
-	array s8 _erract8_indicies( 0, 5 ) = { 1, 2, 3, 4, 5, 0 };
+	array s8 _erract8_indices( 0, 5 ) = { 1, 2, 3, 4, 5, 0 };
 	
 	array s8 _erract8_index_defaults( 0, 0 ) = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	
@@ -71,13 +71,13 @@ host( "working/erract8.rl", 1 ) @{/*
 				goto _out;
 				label _resume {
 					_keys = offset( _erract8_trans_keys, (cs<<1) );
-					_inds = offset( _erract8_indicies, _erract8_index_offsets[cs] );
+					_inds = offset( _erract8_indices, _erract8_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 104 && ( deref( data, p )) >= 88 )
 					{
 						int _ic = cast(int)_erract8_char_class[cast(int)( deref( data, p )) - 88];
 						if ( _ic <= cast(int)deref( _erract8_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _erract8_trans_keys, _keys ) )
-						_trans = cast(int)deref( _erract8_indicies, _inds + cast(int)( _ic - cast(int)deref( _erract8_trans_keys, _keys ) )  ); 
+						_trans = cast(int)deref( _erract8_indices, _inds + cast(int)( _ic - cast(int)deref( _erract8_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(int)_erract8_index_defaults[cs];
 					}

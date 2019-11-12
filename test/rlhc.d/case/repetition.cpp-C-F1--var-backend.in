@@ -29,7 +29,7 @@ array s8 _Rep_char_class( 0, 6 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 array s8 _Rep_index_offsets( 0, 73 ) = { 0, 0, 2, 3, 8, 9, 13, 14, 15, 22, 29, 36, 37, 38, 39, 40, 41, 47, 52, 57, 62, 67, 68, 69, 70, 71, 72, 73, 0 };
 
-array s8 _Rep_indicies( 0, 30 ) = { 0, 2, 3, 3, 1, 4, 1, 5, 6, 7, 1, 1, 8, 9, 10, 11, 1, 1, 1, 1, 1, 12, 11, 1, 1, 1, 1, 1, 13, 11, 1, 1, 1, 1, 1, 14, 11, 15, 16, 17, 18, 19, 1, 1, 1, 1, 18, 20, 1, 1, 1, 21, 20, 1, 1, 1, 22, 20, 1, 1, 1, 23, 20, 1, 1, 1, 24, 20, 25, 26, 27, 28, 29, 30, 0 };
+array s8 _Rep_indices( 0, 30 ) = { 0, 2, 3, 3, 1, 4, 1, 5, 6, 7, 1, 1, 8, 9, 10, 11, 1, 1, 1, 1, 1, 12, 11, 1, 1, 1, 1, 1, 13, 11, 1, 1, 1, 1, 1, 14, 11, 15, 16, 17, 18, 19, 1, 1, 1, 1, 18, 20, 1, 1, 1, 21, 20, 1, 1, 1, 22, 20, 1, 1, 1, 23, 20, 1, 1, 1, 24, 20, 25, 26, 27, 28, 29, 30, 0 };
 
 array s8 _Rep_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
@@ -89,13 +89,13 @@ host( "working/repetition.rl", 43 ) @{
 			if ( _cont == 1 ) {
 				if ( _have == 0 ) {
 					_keys = offset( _Rep_trans_keys, (cs<<1) );
-					_inds = offset( _Rep_indicies, _Rep_index_offsets[cs] );
+					_inds = offset( _Rep_indices, _Rep_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 100 && ( deref( data, p )) >= 10 )
 					{
 						int _ic = cast(int)_Rep_char_class[cast(int)( deref( data, p )) - 10];
 						if ( _ic <= cast(int)deref( _Rep_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _Rep_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _Rep_indicies, _inds + cast(int)( _ic - cast(int)deref( _Rep_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _Rep_indices, _inds + cast(int)( _ic - cast(int)deref( _Rep_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_Rep_index_defaults[cs];
 					}

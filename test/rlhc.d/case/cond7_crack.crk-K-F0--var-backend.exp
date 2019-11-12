@@ -12,7 +12,7 @@ const array[int16 ] _foo_actions = [ 0, 1, 0, 1, 1, 0 ,  ];
 const array[byte ] _foo_trans_keys = [ 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0,  ];
 const array[int16 ] _foo_char_class = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ,  ];
 const array[int16 ] _foo_index_offsets = [ 0, 0, 1, 2, 5, 0 ,  ];
-const array[int16 ] _foo_indicies = [ 0, 2, 3, 1, 4, 0 ,  ];
+const array[int16 ] _foo_indices = [ 0, 2, 3, 1, 4, 0 ,  ];
 const array[int16 ] _foo_index_defaults = [ 0, 1, 1, 1, 1, 0 ,  ];
 const array[int16 ] _foo_trans_cond_spaces = [ -1, -1, 0, 0, 0, 0 ,  ];
 const array[int16 ] _foo_trans_offsets = [ 0, 1, 2, 4, 6, 0 ,  ];
@@ -72,7 +72,7 @@ void m( String s )
 					{
 						int _ic = int ( _foo_char_class[int ( (data[p ]) )- 10] );
 						if ( _ic <= int ( _foo_trans_keys[_keys+1 ] )&& _ic >= int ( _foo_trans_keys[_keys ] ) )
-						_trans = uint32  ( _foo_indicies[_inds + int ( (_ic - int ( _foo_trans_keys[_keys ] )) )] );
+						_trans = uint32  ( _foo_indices[_inds + int ( (_ic - int ( _foo_trans_keys[_keys ] )) )] );
 						
 						else
 						_trans = uint32  ( _foo_index_defaults[cs] );

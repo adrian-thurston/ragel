@@ -8,7 +8,7 @@ using std::endl;
 static const char  _foo_trans_keys [] = { 1, 0, 2, 2, 0, 2, 1, 0, 0 ,  };
 static const char  _foo_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 ,  };
 static const char  _foo_index_offsets [] = { 0, 0, 1, 4, 0 ,  };
-static const char  _foo_indicies [] = { 0, 2, 1, 0, 0 ,  };
+static const char  _foo_indices [] = { 0, 2, 1, 0, 0 ,  };
 static const char  _foo_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
 static const char  _foo_trans_cond_spaces [] = { 1, -1, 0, 0 ,  };
 static const char  _foo_trans_offsets [] = { 0, 2, 3, 0 ,  };
@@ -59,7 +59,7 @@ void test( int min, int max, const char *str )
 			
 		}
 		_keys = _foo_trans_keys + (cs<<1);
-		_inds = _foo_indicies + _foo_index_offsets[cs];
+		_inds = _foo_indices + _foo_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 46 && ((*( p  ))
 		)>= 0  )

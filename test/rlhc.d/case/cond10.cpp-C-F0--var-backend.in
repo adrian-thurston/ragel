@@ -22,7 +22,7 @@ array s8 _foo_char_class( 0, 10 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _foo_index_offsets( 0, 42 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 20, 31, 42, 0 };
 
-array s8 _foo_indicies( 0, 16 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 10, 12, 10, 10, 12, 12, 12, 12, 12, 13, 10, 10, 14, 10, 10, 14, 14, 14, 14, 14, 15, 10, 10, 16, 10, 10, 16, 16, 16, 16, 16, 0 };
+array s8 _foo_indices( 0, 16 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 10, 12, 10, 10, 12, 12, 12, 12, 12, 13, 10, 10, 14, 10, 10, 14, 14, 14, 14, 14, 15, 10, 10, 16, 10, 10, 16, 16, 16, 16, 16, 0 };
 
 array s8 _foo_index_defaults( 0, 10 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 10, 10, 1, 0 };
 
@@ -104,13 +104,13 @@ host( "working/cond10.rl", 55 ) @{
 					}
 					
 					_keys = offset( _foo_trans_keys, (cs<<1) );
-					_inds = offset( _foo_indicies, _foo_index_offsets[cs] );
+					_inds = offset( _foo_indices, _foo_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 32 )
 					{
 						int _ic = cast(int)_foo_char_class[cast(int)( deref( data, p )) - 32];
 						if ( _ic <= cast(int)deref( _foo_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _foo_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _foo_indicies, _inds + cast(int)( _ic - cast(int)deref( _foo_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _foo_indices, _inds + cast(int)( _ic - cast(int)deref( _foo_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_foo_index_defaults[cs];
 					}

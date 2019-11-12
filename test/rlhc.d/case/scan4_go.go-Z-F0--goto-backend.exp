@@ -17,7 +17,7 @@ var _scanner_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 1, 5, 1, 6, 1, 7, 2, 2
 var _scanner_trans_keys [] byte  = [] byte  { 0, 2, 0, 1, 0, 2, 0 }
 var _scanner_char_class [] int8  = [] int8  { 0, 1, 2, 0  }
 var _scanner_index_offsets [] int8  = [] int8  { 0, 3, 5, 0  }
-var _scanner_indicies [] int8  = [] int8  { 1, 1, 2, 4, 5, 1, 1, 2, 0  }
+var _scanner_indices [] int8  = [] int8  { 1, 1, 2, 4, 5, 1, 1, 2, 0  }
 var _scanner_index_defaults [] int8  = [] int8  { 0, 3, 0, 0  }
 var _scanner_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, -1, -1, 0  }
 var _scanner_cond_targs [] int8  = [] int8  { 1, 0, 1, 1, 2, 2, 0  }
@@ -86,7 +86,7 @@ func exec(data string) {
 				var  _ic  int   = int(_scanner_char_class[int(( data[p ]) )- 97])
 				switch {
 					case _ic <= int(_scanner_trans_keys[_keys+1 ])&& _ic >= int(_scanner_trans_keys[_keys ]):
-					_trans = int(_scanner_indicies[_inds + int(( _ic - int(_scanner_trans_keys[_keys ]))  )]);
+					_trans = int(_scanner_indices[_inds + int(( _ic - int(_scanner_trans_keys[_keys ]))  )]);
 					
 					default:
 					_trans = int(_scanner_index_defaults[cs]);

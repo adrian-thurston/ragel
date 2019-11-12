@@ -41,10 +41,10 @@ self._foo_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_foo_indicies 
-	private :_foo_indicies, :_foo_indicies=
+	attr_accessor :_foo_indices 
+	private :_foo_indices, :_foo_indices=
 end
-self._foo_indicies = [
+self._foo_indices = [
 0, 2, 3, 1, 4, 0 , 
 ]
 
@@ -194,7 +194,7 @@ def run_machine( data )
 									begin
 										_ic = _foo_char_class[( data[p ].ord) - 10];
 										if ( _ic <= _foo_trans_keys[_keys+1 ]&& _ic >= _foo_trans_keys[_keys ] )
-											_trans = _foo_indicies[_inds + ( _ic - _foo_trans_keys[_keys ])  ];
+											_trans = _foo_indices[_inds + ( _ic - _foo_trans_keys[_keys ])  ];
 											
 											else
 											_trans = _foo_index_defaults[cs];

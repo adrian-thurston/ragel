@@ -20,7 +20,7 @@ let _zlen1_char_class : int array = [|
 let _zlen1_index_offsets : int array = [|
 0; 0; 0 ; 
 |]
-let _zlen1_indicies : int array = [|
+let _zlen1_indices : int array = [|
 0 ; 
 |]
 let _zlen1_index_defaults : int array = [|

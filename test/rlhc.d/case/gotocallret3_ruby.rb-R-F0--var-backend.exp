@@ -41,10 +41,10 @@ self._gotocallret_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_gotocallret_indicies 
-	private :_gotocallret_indicies, :_gotocallret_indicies=
+	attr_accessor :_gotocallret_indices 
+	private :_gotocallret_indices, :_gotocallret_indices=
 end
-self._gotocallret_indicies = [
+self._gotocallret_indices = [
 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 , 
 ]
 
@@ -279,7 +279,7 @@ def run_machine( data )
 								begin
 									_ic = _gotocallret_char_class[( data[p ].ord) - 10];
 									if ( _ic <= _gotocallret_trans_keys[_keys+1 ]&& _ic >= _gotocallret_trans_keys[_keys ] )
-										_trans = _gotocallret_indicies[_inds + ( _ic - _gotocallret_trans_keys[_keys ])  ];
+										_trans = _gotocallret_indices[_inds + ( _ic - _gotocallret_trans_keys[_keys ])  ];
 										
 										else
 										_trans = _gotocallret_index_defaults[cs];

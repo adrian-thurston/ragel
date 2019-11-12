@@ -22,7 +22,7 @@ host( "working/zlen1_cs.rl", 1 ) @{/*
 		
 		array s8 _zlen1_index_offsets( 0, 0 ) = { 0, 0, 0 };
 		
-		array s8 _zlen1_indicies( 0, 0 ) = { 0 };
+		array s8 _zlen1_indices( 0, 0 ) = { 0 };
 		
 		array s8 _zlen1_index_defaults( 0, 0 ) = { 0, 0, 0 };
 		

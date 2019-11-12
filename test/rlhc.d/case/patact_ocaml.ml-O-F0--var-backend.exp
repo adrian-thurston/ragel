@@ -28,7 +28,7 @@ let _patact_char_class : int array = [|
 let _patact_index_offsets : int array = [|
 0; 0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 28; 32; 36; 46; 58; 60; 65; 77; 81; 85; 95; 0 ; 
 |]
-let _patact_indicies : int array = [|
+let _patact_indices : int array = [|
 1; 2; 3; 4; 6; 7; 8; 9; 11; 12; 13; 14; 16; 17; 18; 19; 20; 21; 20; 22; 23; 24; 25; 26; 26; 26; 26; 26; 27; 0; 23; 23; 27; 28; 23; 29; 31; 30; 30; 30; 30; 26; 26; 26; 26; 26; 32; 21; 32; 21; 33; 33; 21; 34; 34; 34; 34; 34; 33; 33; 34; 34; 34; 34; 34; 37; 21; 37; 38; 39; 40; 21; 41; 41; 41; 41; 41; 42; 10; 39; 39; 42; 43; 39; 44; 46; 45; 45; 45; 45; 41; 41; 41; 41; 41; 47; 0 ; 
 |]
 let _patact_index_defaults : int array = [|
@@ -173,7 +173,7 @@ begin
 								let _ic  : int  ref = ref _patact_char_class.(( Char.code data.[p.contents] )- 10) in
 								if _ic.contents<= _patact_trans_keys.( _keys.contents+1  )&& _ic.contents>= _patact_trans_keys.( _keys.contents ) then
 								begin
-									_trans  := _patact_indicies.( _inds.contents+ ( _ic.contents- _patact_trans_keys.( _keys.contents ) ) );
+									_trans  := _patact_indices.( _inds.contents+ ( _ic.contents- _patact_trans_keys.( _keys.contents ) ) );
 									
 								end
 								else

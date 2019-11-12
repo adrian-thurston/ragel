@@ -33,10 +33,10 @@ self._curs1_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_curs1_indicies 
-	private :_curs1_indicies, :_curs1_indicies=
+	attr_accessor :_curs1_indices 
+	private :_curs1_indices, :_curs1_indices=
 end
-self._curs1_indicies = [
+self._curs1_indices = [
 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 , 
 ]
 
@@ -188,7 +188,7 @@ def run_machine( data )
 									begin
 										_ic = _curs1_char_class[( data[p ].ord) - 10];
 										if ( _ic <= _curs1_trans_keys[_keys+1 ]&& _ic >= _curs1_trans_keys[_keys ] )
-											_trans = _curs1_indicies[_inds + ( _ic - _curs1_trans_keys[_keys ])  ];
+											_trans = _curs1_indices[_inds + ( _ic - _curs1_trans_keys[_keys ])  ];
 											
 											else
 											_trans = _curs1_index_defaults[cs];

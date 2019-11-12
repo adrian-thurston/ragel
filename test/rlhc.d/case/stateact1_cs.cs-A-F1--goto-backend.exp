@@ -13,7 +13,7 @@ namespace Test {
 		static readonly char  []_state_act_trans_keys = { '\u0001', '\u0000', '\u0003', '\u0003', '\u0000', '\u0000', '\u0002', '\u0002', '\u0002', '\u0002', '\u0002', '\u0002', '\u0000',  };
 		static readonly sbyte  []_state_act_char_class = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0,  };
 		static readonly sbyte  []_state_act_index_offsets = { 0, 0, 1, 2, 3, 4, 0,  };
-		static readonly sbyte  []_state_act_indicies = { 0, 2, 3, 3, 3, 0,  };
+		static readonly sbyte  []_state_act_indices = { 0, 2, 3, 3, 3, 0,  };
 		static readonly sbyte  []_state_act_index_defaults = { 0, 1, 1, 1, 1, 1, 0,  };
 		static readonly sbyte  []_state_act_trans_cond_spaces = { -1, -1, -1, -1, 0,  };
 		static readonly sbyte  []_state_act_cond_targs = { 2, 0, 5, 1, 0,  };
@@ -81,7 +81,7 @@ namespace Test {
 				{
 					int _ic = (int)_state_act_char_class[(int)( data[p ]) - 10];
 					if ( _ic <= (int)_state_act_trans_keys[_keys+1]&& _ic >= (int)_state_act_trans_keys[_keys ] )
-					_trans = (int)_state_act_indicies[_inds + (int)( _ic - (int)_state_act_trans_keys[_keys ])  ];
+					_trans = (int)_state_act_indices[_inds + (int)( _ic - (int)_state_act_trans_keys[_keys ])  ];
 					
 					else
 					_trans = (int)_state_act_index_defaults[cs];

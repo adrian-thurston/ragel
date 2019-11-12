@@ -13,7 +13,7 @@ int token ;
 static const char  _scanner_trans_keys [] = { 1, 0, 0, 1, 1, 0, 0 ,  };
 static const char  _scanner_char_class [] = { 0, 1, 0 ,  };
 static const char  _scanner_index_offsets [] = { 0, 0, 2, 0 ,  };
-static const char  _scanner_indicies [] = { 0, 2, 0 ,  };
+static const char  _scanner_indices [] = { 0, 2, 0 ,  };
 static const char  _scanner_index_defaults [] = { 0, 1, 4, 0 ,  };
 static const char  _scanner_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0 ,  };
 static const char  _scanner_cond_targs [] = { 2, 0, 2, 1, 2, 0 ,  };
@@ -75,7 +75,7 @@ void exec( char *data, int len )
 			
 		}
 		_keys = _scanner_trans_keys + (cs<<1);
-		_inds = _scanner_indicies + _scanner_index_offsets[cs];
+		_inds = _scanner_indices + _scanner_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 98 && ((*( p  ))
 		)>= 97  )

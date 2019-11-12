@@ -11,7 +11,7 @@ struct range
 static const char  _range_trans_keys [] = { 1, 0, 2, 2, 0, 0, 1, 0, 0 ,  };
 static const char  _range_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 ,  };
 static const char  _range_index_offsets [] = { 0, 0, 1, 2, 0 ,  };
-static const char  _range_indicies [] = { 0, 2, 0 ,  };
+static const char  _range_indices [] = { 0, 2, 0 ,  };
 static const char  _range_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
 static const char  _range_trans_cond_spaces [] = { -1, -1, -1, 0 ,  };
 static const char  _range_cond_targs [] = { 2, 0, 3, 0 ,  };
@@ -63,7 +63,7 @@ void range_execute( struct range *fsm, const char *_data, int _len )
 				if ( _have == 0  )
 				{
 					_keys = _range_trans_keys + ((fsm->cs)<<1);
-					_inds = _range_indicies + _range_index_offsets[(fsm->cs)];
+					_inds = _range_indices + _range_index_offsets[(fsm->cs)];
 					if ( ((*( p  ))
 					)<= 122 && ((*( p  ))
 					)>= 10  )

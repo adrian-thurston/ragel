@@ -41,7 +41,7 @@ long q_2;
 static const unsigned char  _match_any_trans_keys [] = { 1u, 0u, 1u, 0u, 2u, 2u, 1u, 0u, 1u, 0u, 0u, 0u, 1u, 0u, 2u, 2u, 1u, 0u, 0u, 0u, 1u, 0u, 1u, 0u, 0u,  };
 static const char  _match_any_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0 ,  };
 static const char  _match_any_index_offsets [] = { 0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 4, 4, 0 ,  };
-static const char  _match_any_indicies [] = { 1, 2, 3, 4, 0 ,  };
+static const char  _match_any_indices [] = { 1, 2, 3, 4, 0 ,  };
 static const char  _match_any_index_defaults [] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0 ,  };
 static const char  _match_any_trans_cond_spaces [] = { -1, -1, -1, -1, -1, 0, 0 ,  };
 static const char  _match_any_trans_offsets [] = { 0, 1, 2, 3, 4, 5, 0 ,  };
@@ -112,7 +112,7 @@ int test( const char *data )
 		}
 		
 		_keys = _match_any_trans_keys + (cs<<1);
-		_inds = _match_any_indicies + _match_any_index_offsets[cs];
+		_inds = _match_any_indices + _match_any_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 97 && ((*( p  ))
 		)>= 32  )

@@ -1,7 +1,7 @@
 const _any1_trans_keys = UInt8[1, 0, 1, 0, 1, 0, 0 , ]
 const _any1_char_class = Int8[0 , ]
 const _any1_index_offsets = Int8[0, 0, 0, 0 , ]
-const _any1_indicies = Int8[0 , ]
+const _any1_indices = Int8[0 , ]
 const _any1_index_defaults = Int8[0, 0, 1, 0 , ]
 const _any1_trans_cond_spaces = Int8[-1, -1, 0 , ]
 const _any1_cond_targs = Int8[2, 0, 0 , ]

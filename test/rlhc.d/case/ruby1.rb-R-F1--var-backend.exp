@@ -39,10 +39,10 @@ self._ruby1_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_ruby1_indicies 
-	private :_ruby1_indicies, :_ruby1_indicies=
+	attr_accessor :_ruby1_indices 
+	private :_ruby1_indices, :_ruby1_indices=
 end
-self._ruby1_indicies = [
+self._ruby1_indices = [
 0, 2, 0, 3, 1, 2, 0 , 
 ]
 
@@ -176,7 +176,7 @@ def run_machine( data )
 									begin
 										_ic = _ruby1_char_class[( data[p ].ord) - 10];
 										if ( _ic <= _ruby1_trans_keys[_keys+1 ]&& _ic >= _ruby1_trans_keys[_keys ] )
-											_trans = _ruby1_indicies[_inds + ( _ic - _ruby1_trans_keys[_keys ])  ];
+											_trans = _ruby1_indices[_inds + ( _ic - _ruby1_trans_keys[_keys ])  ];
 											
 											else
 											_trans = _ruby1_index_defaults[cs];

@@ -21,7 +21,7 @@ array s8 _erract_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 array s8 _erract_index_offsets( 0, 24 ) = { 0, 4, 5, 8, 13, 18, 24, 0 };
 
-array s8 _erract_indicies( 0, 9 ) = { 1, 0, 0, 2, 4, 1, 0, 5, 1, 0, 0, 0, 6, 1, 0, 0, 0, 7, 1, 0, 0, 0, 0, 8, 9, 0 };
+array s8 _erract_indices( 0, 9 ) = { 1, 0, 0, 2, 4, 1, 0, 5, 1, 0, 0, 0, 6, 1, 0, 0, 0, 7, 1, 0, 0, 0, 0, 8, 9, 0 };
 
 array s8 _erract_index_defaults( 0, 3 ) = { 0, 3, 0, 0, 0, 0, 0, 0 };
 
@@ -76,13 +76,13 @@ host( "working/erract3.rl", 26 ) @{
 			goto _test_eof;
 			label _resume {
 				_keys = offset( _erract_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
-				_inds = offset( _erract_indicies, _erract_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_inds = offset( _erract_indices, _erract_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
 				
 				if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_erract_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _erract_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _erract_trans_keys, _keys ) )
-					_trans = cast(int)deref( _erract_indicies, _inds + cast(int)( _ic - cast(int)deref( _erract_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _erract_indices, _inds + cast(int)( _ic - cast(int)deref( _erract_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_erract_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
 				}

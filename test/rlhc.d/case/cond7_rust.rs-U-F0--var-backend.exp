@@ -9,7 +9,7 @@ static _foo_actions: [i8 ; 7] = [ 0, 1, 0, 1, 1, 0 , 0 ];
 static _foo_trans_keys: [u8 ; 12] = [ 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 , 0 ];
 static _foo_char_class: [i8 ; 50] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 , 0 ];
 static _foo_index_offsets: [i8 ; 7] = [ 0, 0, 1, 2, 5, 0 , 0 ];
-static _foo_indicies: [i8 ; 7] = [ 0, 2, 3, 1, 4, 0 , 0 ];
+static _foo_indices: [i8 ; 7] = [ 0, 2, 3, 1, 4, 0 , 0 ];
 static _foo_index_defaults: [i8 ; 7] = [ 0, 1, 1, 1, 1, 0 , 0 ];
 static _foo_trans_cond_spaces: [i8 ; 7] = [ -1, -1, 0, 0, 0, 0 , 0 ];
 static _foo_trans_offsets: [i8 ; 7] = [ 0, 1, 2, 4, 6, 0 , 0 ];
@@ -79,7 +79,7 @@ unsafe fn m( s: String )
 									if ( _ic <= ( _foo_trans_keys[(_keys+1 ) as usize]
 									) as i32&& _ic >= ( _foo_trans_keys[(_keys ) as usize]
 									) as i32 ) {
-										_trans = ( _foo_indicies[(_inds + ( ( _ic - ( _foo_trans_keys[(_keys ) as usize]
+										_trans = ( _foo_indices[(_inds + ( ( _ic - ( _foo_trans_keys[(_keys ) as usize]
 										) as i32)   ) as i32) as usize]
 										) as u32;
 										

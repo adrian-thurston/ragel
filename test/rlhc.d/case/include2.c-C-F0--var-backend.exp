@@ -9,7 +9,7 @@ static const char  _include_test_1_actions [] = { 0, 1, 0, 1, 4, 1, 7, 1, 9, 2, 
 static const char  _include_test_1_trans_keys [] = { 1, 0, 2, 2, 3, 3, 2, 2, 3, 3, 2, 2, 3, 3, 0, 0, 1, 0, 0 ,  };
 static const char  _include_test_1_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 ,  };
 static const char  _include_test_1_index_offsets [] = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 0 ,  };
-static const char  _include_test_1_indicies [] = { 0, 2, 3, 4, 5, 6, 7, 0 ,  };
+static const char  _include_test_1_indices [] = { 0, 2, 3, 4, 5, 6, 7, 0 ,  };
 static const char  _include_test_1_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
 static const char  _include_test_1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 static const char  _include_test_1_cond_targs [] = { 2, 0, 3, 4, 5, 6, 7, 8, 0 ,  };
@@ -50,7 +50,7 @@ void test( char *p )
 				if ( _have == 0  )
 				{
 					_keys = _include_test_1_trans_keys + (cs<<1);
-					_inds = _include_test_1_indicies + _include_test_1_index_offsets[cs];
+					_inds = _include_test_1_indices + _include_test_1_index_offsets[cs];
 					if ( ((*( p  ))
 					)<= 98 && ((*( p  ))
 					)>= 0  )

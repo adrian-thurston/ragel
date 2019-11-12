@@ -1,7 +1,7 @@
 const _curs1_trans_keys = UInt8[1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0 , ]
 const _curs1_char_class = Int8[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 , ]
 const _curs1_index_offsets = Int8[0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 , ]
-const _curs1_indicies = Int8[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 , ]
+const _curs1_indices = Int8[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 , ]
 const _curs1_index_defaults = Int8[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 , ]
 const _curs1_trans_cond_spaces = Int8[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , ]
 const _curs1_cond_targs = Int8[14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 , ]
@@ -53,7 +53,7 @@ function m( data::AbstractString )
 				if (data[1+(p )])<= 119 && (data[1+(p )])>= 10 
 					_ic = convert(Int, _curs1_char_class[1+(convert(Int, (data[1+(p )]) )- 10)] );
 					if _ic <= convert(Int, _curs1_trans_keys[1+(_keys+1 )] )&& _ic >= convert(Int, _curs1_trans_keys[1+(_keys )] )
-						_trans = convert(UInt, _curs1_indicies[1+(_inds + convert(Int, (_ic - convert(Int, _curs1_trans_keys[1+(_keys )] )) ))] )
+						_trans = convert(UInt, _curs1_indices[1+(_inds + convert(Int, (_ic - convert(Int, _curs1_trans_keys[1+(_keys )] )) ))] )
 						
 					else
 						_trans = convert(UInt, _curs1_index_defaults[1+(cs)] )

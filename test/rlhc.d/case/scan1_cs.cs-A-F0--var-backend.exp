@@ -16,7 +16,7 @@ namespace Test {
 		static readonly char  []_scanner_trans_keys = { '\u0001', '\u0000', '\u0002', '\u0009', '\u0004', '\u0004', '\u000a', '\u000a', '\u000a', '\u000a', '\u000a', '\u000a', '\u0002', '\u0009', '\u0000', '\u0009', '\u0007', '\u0007', '\u0009', '\u0009', '\u0002', '\u0009', '\u0000',  };
 		static readonly sbyte  []_scanner_char_class = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 3, 4, 5, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 8, 9, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 0,  };
 		static readonly sbyte  []_scanner_index_offsets = { 0, 0, 8, 9, 10, 11, 12, 20, 30, 31, 32, 0,  };
-		static readonly sbyte  []_scanner_indicies = { 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0,  };
+		static readonly sbyte  []_scanner_indices = { 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0,  };
 		static readonly sbyte  []_scanner_index_defaults = { 0, 0, 4, 5, 5, 5, 4, 4, 16, 17, 0, 0,  };
 		static readonly sbyte  []_scanner_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
 		static readonly sbyte  []_scanner_cond_targs = { 7, 7, 1, 9, 0, 7, 4, 5, 7, 10, 10, 7, 7, 8, 2, 6, 7, 7, 3, 0,  };
@@ -119,7 +119,7 @@ namespace Test {
 							{
 								int _ic = (int)_scanner_char_class[(int)( data[p ]) - 10];
 								if ( _ic <= (int)_scanner_trans_keys[_keys+1]&& _ic >= (int)_scanner_trans_keys[_keys ] )
-								_trans = (uint )_scanner_indicies[_inds + (int)( _ic - (int)_scanner_trans_keys[_keys ])  ];
+								_trans = (uint )_scanner_indices[_inds + (int)( _ic - (int)_scanner_trans_keys[_keys ])  ];
 								
 								else
 								_trans = (uint )_scanner_index_defaults[cs];
