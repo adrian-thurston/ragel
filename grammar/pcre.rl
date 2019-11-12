@@ -227,6 +227,18 @@ void reverse_term_list( struct term **pphead )
 	REVERSE_LIST( struct term, pphead );
 }
 
+int is_back_ref( int num, int num_closed_captures )
+{
+	if ( num < 8 || num <= num_closed_captures )
+		return 1;
+	return 0;
+}
+
+void append_back_ref( struct term *term, int number )
+{
+	struct element *el = new_element( element_back_ref_type, NULL, NULL );
+	LIST_APPEND( &term->element_list, el );
+}
 
 /* Provides initial ragel call state stack. */
 int *init_ragel_stack( int *size )
@@ -399,10 +411,76 @@ void apply_possessive( struct term *term )
 		other_char_non_printable 
 	) @append_char;
 
+	#
+	# Octals and backrefs. There is an ambiguity between these two, therefore
+	# the grammar handles them together.
+	#
+
+	action init_octal
+		{ octal = 0; }
+
+	action octal_digit
+		{ octal = octal * 8 + ( *p - '0' ); }
+
+	backref_num = [1-9] [0-9]*;
+
+	octal_num = 
+			[0-3] [0-7] [0-7] |
+			[0-7] [0-7] |
+			[0];
+
+	action octal { append_element_value( s_term, octal ); }
+
+	action octal_or_backref
+	{
+		if ( is_back_ref( number, closed_captures ) )
+			append_back_ref( s_term, number );
+		else
+			append_element_value( s_term, octal );
+	}
+
+	action backref
+	{
+		if ( number > closed_captures ) {
+			printf( "invalid backref: \\%d\n", number );
+			fbreak;
+		}
+			
+		append_back_ref( s_term, number );
+	}
+
+	# Certainly octal. All octals, with possibly backrefs removed.
+	def_octal =
+		'\\' @init_octal
+		( octal_num - backref_num ) $octal_digit;
+	
+	# All cases that can be either octal or backref and we need to inspect the
+	# backref number to decide. Use the intersection of the two numbers as the
+	# pattern.
+	octal_or_backref =
+		'\\' @init_octal @init_number
+		( octal_num & backref_num ) $octal_digit $decimal_digit;
+
+	# Definitely backref. The backref pattern excluding anything with a prefix
+	# that could be octal.
+	def_backref =
+		'\\' @init_number
+		( backref_num - ( octal_num any* ) ) $decimal_digit;
+
+	octal =
+		def_octal %octal |
+		octal_or_backref %octal_or_backref;
+
+	backref =
+		def_backref       %backref |
+		octal_or_backref  %octal_or_backref;
+
 	atom =
 		literal |
 		char_class_end  @append_char |
 		dot             @{ append_element_value( s_term, dot ); } |
+		octal |
+		backref |
 		open_paren      @{ fcall open_paren_forms; }
 	;
 
@@ -489,6 +567,7 @@ int pcre_parse( struct pattern **result_pattern, char *line, int len )
 	int result = 1;
 
 	int number = 0;
+	int octal = 0;
 	int quant_min, quant_max;
 
 	struct pattern *s_pattern = 0;
