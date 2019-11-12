@@ -9,6 +9,11 @@
 		*pphead = element; \
 	}
 
+#define LIST_REMOVE( pphead ) \
+	{ \
+		*pphead = (*pphead)->next; \
+	}
+
 #define STACK_PUSH( pphead, element ) \
 	{ \
 		element->parent = *pphead; \
@@ -39,14 +44,24 @@ struct value
 	struct value *next;
 };
 
-enum ValueType
+enum value_type
 {
-	Dot = 256,
+	dot = 256,
+};
+
+#define QUANTIFIER_INF -1
+
+enum quantifer_type
+{
+	quant_greedy = 1,
+	quant_lazy,
+	quant_possessive,
 };
 
 struct quantifier
 {
-	
+	int min, max;
+	enum quantifer_type type;
 };
 
 enum element_type
@@ -122,6 +137,14 @@ struct look_around
 
 	struct look_around *next;
 };
+
+struct quantifier *new_quantifier()
+{
+	struct quantifier *quant = malloc( sizeof( struct value ) );
+	memset( quant, 0, sizeof(struct quantifier) );
+	quant->type = quant_greedy;
+	return quant;
+}
 
 struct value *new_value( int v )
 {
@@ -224,6 +247,39 @@ int *grow_ragel_stack( int *size, int *stack )
 	return new_stack;
 }
 
+void apply_quantifier( struct term *term, int min, int max )
+{
+	struct element *el = term->element_list;
+
+	/* We may need to remove the last value from the element's value list. */
+	if ( el->type == element_value_type && el->value_list != NULL && el->value_list->next != NULL ) {
+		/* Take the value off and add it to an element of its own. */
+		struct value *last = el->value_list;
+		LIST_REMOVE( &el->value_list );
+
+		el = new_element( element_value_type, NULL, NULL );
+
+		LIST_APPEND( &el->value_list, last );
+		LIST_APPEND( &term->element_list, el );
+	}
+
+	el->quantifier = new_quantifier();
+	el->quantifier->min = min;
+	el->quantifier->max = max;
+}
+
+void apply_lazy( struct term *term )
+{
+	struct element *el = term->element_list;
+	el->quantifier->type = quant_lazy;
+}
+
+void apply_possessive( struct term *term )
+{
+	struct element *el = term->element_list;
+	el->quantifier->type = quant_possessive;
+}
+
 %%{
 	machine PCRE;
 
@@ -276,14 +332,20 @@ int *grow_ragel_stack( int *size, int *stack )
 		STACK_POP( &s_regex );
 	}
 
+	action init_number
+		{ number = 0; }
+
+	action decimal_digit
+		{ number = number * 10 + ( *p - '0' ); }
+
+	number = [0-9]+ >init_number $decimal_digit;
+
 	action options_only { fret; }
 
 	options = (
 			'c' # case-sensitive matching
 		|	'i' # case-insensitive matching
 	)*;
-
-	quant_forms = '_';
 
 	alpha_char = [a-zA-Z];
 	digit_char = [0-9];
@@ -293,6 +355,9 @@ int *grow_ragel_stack( int *size, int *stack )
 
 	char_class_start = '[';
 	char_class_end   = ']';
+
+	open_curly = '{';
+	close_curly = '}';
 
 	ampersand     = '&';
 	colon         = ':';
@@ -337,11 +402,31 @@ int *grow_ragel_stack( int *size, int *stack )
 	atom =
 		literal |
 		char_class_end  @append_char |
-		dot             @{ append_element_value( s_term, Dot ); } |
+		dot             @{ append_element_value( s_term, dot ); } |
 		open_paren      @{ fcall open_paren_forms; }
 	;
 
-	non_greedy = '_';
+	non_greedy = 
+		'?' @{ apply_lazy( s_term ); } |
+		'+' @{ apply_possessive( s_term ); };
+
+	quant_min = number %{ quant_min = number; };
+	quant_max = number %{ quant_max = number; };
+		
+	action quant_zero_plus { apply_quantifier( s_term, 0, QUANTIFIER_INF ); }
+	action quant_one_plus  { apply_quantifier( s_term, 1, QUANTIFIER_INF ); }
+	action quant_optional  { apply_quantifier( s_term, 0, 1 ); }
+	action quant_exact     { apply_quantifier( s_term, quant_min, quant_min ); }
+	action quant_min       { apply_quantifier( s_term, quant_min, QUANTIFIER_INF ); }
+	action quant_min_max   { apply_quantifier( s_term, quant_min, quant_max ); }
+
+	quant_forms = 
+		'*' @quant_zero_plus |
+		'+' @quant_one_plus  |
+		'?' @quant_optional  |
+		open_curly quant_min close_curly               @quant_exact |
+		open_curly quant_min ',' close_curly           @quant_min |
+		open_curly quant_min ',' quant_max close_curly @quant_min_max;
 
 	quantifier = quant_forms non_greedy?;
 
@@ -402,6 +487,9 @@ int pcre_parse( struct pattern **result_pattern, char *line, int len )
 	char *p, *pe;
 	int success = 0;
 	int result = 1;
+
+	int number = 0;
+	int quant_min, quant_max;
 
 	struct pattern *s_pattern = 0;
 	struct regex *s_regex = 0;
@@ -480,19 +568,36 @@ void print_element( int indent, struct element *el )
 				printf( " . " );
 			value = value->next;
 		}
-		printf("\n");
 	}
 	else if ( el->type == element_regex_type ) {
-		printf("\n");
 		if ( el->regex != 0 )
-			print_regex( indent + 1, el->regex );
+			print_regex( indent, el->regex );
 	}
 	else if ( el->type == element_look_around_type )
-		printf( "lookaround\n" );
+		printf( "lookaround" );
 	else if ( el->type == element_char_class_type )
-		printf( "cc\n" );
+		printf( "cc" );
 	else if ( el->type == element_back_ref_type )
-		printf( "backref\n" );
+		printf( "backref" );
+
+	if ( el->quantifier != NULL ) {
+		printf( " {%d,", el->quantifier->min );
+
+		if ( el->quantifier->max == QUANTIFIER_INF )
+			printf( "inf" );
+		else
+			printf( "%d", el->quantifier->max );
+
+		printf( "}" );
+
+		if ( el->quantifier->type == quant_lazy )
+			printf( "?" );
+		else if ( el->quantifier->type == quant_possessive )
+			printf( "+" );
+
+	}
+
+	printf("\n");
 }
 
 void print_term( int indent, struct term *term )
@@ -508,20 +613,22 @@ void print_term( int indent, struct term *term )
 
 void print_regex( int indent, struct regex *regex )
 {
-	print_indent( indent );
-	printf( "reg:\n" );
+	printf( "reg: (\n" );
 
 	struct term *term = regex->term_list;
 	while ( term != NULL ) {
 		print_term( indent + 1, term );
 		term = term->next;
 	}
+	print_indent( indent );
+	printf( ")" );
 }
 
 void print_pattern( int indent, struct pattern *pat )
 {
-	printf( "pat:\n" );
-	print_regex( indent + 1, pat->regex );
+	printf( "pat: " );
+	print_regex( indent, pat->regex );
+	printf( "\n" );
 }
 
 char linebuf[2048];
