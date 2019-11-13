@@ -1,7 +1,7 @@
 const _foo_trans_keys = UInt8[1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 , ]
 const _foo_char_class = Int8[0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0 , ]
 const _foo_index_offsets = Int8[0, 0, 1, 2, 5, 0 , ]
-const _foo_indicies = Int8[0, 2, 3, 1, 4, 0 , ]
+const _foo_indices = Int8[0, 2, 3, 1, 4, 0 , ]
 const _foo_index_defaults = Int8[0, 1, 1, 1, 1, 0 , ]
 const _foo_trans_cond_spaces = Int8[-1, -1, 0, 0, 0, 0 , ]
 const _foo_trans_offsets = Int8[0, 1, 2, 4, 6, 0 , ]
@@ -53,7 +53,7 @@ function m( data::AbstractString )
 				if (data[1+(p )])<= 57 && (data[1+(p )])>= 10 
 					_ic = convert(Int, _foo_char_class[1+(convert(Int, (data[1+(p )]) )- 10)] );
 					if _ic <= convert(Int, _foo_trans_keys[1+(_keys+1 )] )&& _ic >= convert(Int, _foo_trans_keys[1+(_keys )] )
-						_trans = convert(UInt, _foo_indicies[1+(_inds + convert(Int, (_ic - convert(Int, _foo_trans_keys[1+(_keys )] )) ))] )
+						_trans = convert(UInt, _foo_indices[1+(_inds + convert(Int, (_ic - convert(Int, _foo_trans_keys[1+(_keys )] )) ))] )
 						
 					else
 						_trans = convert(UInt, _foo_index_defaults[1+(cs)] )

@@ -20,7 +20,7 @@ let _empty1_char_class : int array = [|
 let _empty1_index_offsets : int array = [|
 0; 0; 0 ; 
 |]
-let _empty1_indicies : int array = [|
+let _empty1_indices : int array = [|
 0 ; 
 |]
 let _empty1_index_defaults : int array = [|

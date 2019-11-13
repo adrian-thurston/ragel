@@ -21,7 +21,7 @@ let _gotocallret_char_class : int array = [|
 let _gotocallret_index_offsets : int array = [|
 0; 0; 1; 2; 3; 4; 6; 7; 10; 10; 12; 0 ; 
 |]
-let _gotocallret_indicies : int array = [|
+let _gotocallret_indices : int array = [|
 1; 2; 4; 6; 8; 8; 9; 10; 0; 10; 8; 8; 9; 0 ; 
 |]
 let _gotocallret_index_defaults : int array = [|
@@ -164,7 +164,7 @@ begin
 								let _ic  : int  ref = ref _gotocallret_char_class.(( Char.code data.[p.contents] )- 10) in
 								if _ic.contents<= _gotocallret_trans_keys.( _keys.contents+1  )&& _ic.contents>= _gotocallret_trans_keys.( _keys.contents ) then
 								begin
-									_trans  := _gotocallret_indicies.( _inds.contents+ ( _ic.contents- _gotocallret_trans_keys.( _keys.contents ) ) );
+									_trans  := _gotocallret_indices.( _inds.contents+ ( _ic.contents- _gotocallret_trans_keys.( _keys.contents ) ) );
 									
 								end
 								else

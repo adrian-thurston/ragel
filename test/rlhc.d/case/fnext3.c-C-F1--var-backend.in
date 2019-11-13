@@ -24,7 +24,7 @@ array s8 _fnext_char_class( 0, 5 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 
 array s8 _fnext_index_offsets( 0, 6 ) = { 0, 0, 1, 2, 3, 4, 5, 5, 5, 5, 6, 0 };
 
-array s8 _fnext_indicies( 0, 6 ) = { 0, 2, 3, 4, 5, 6, 0 };
+array s8 _fnext_indices( 0, 6 ) = { 0, 2, 3, 4, 5, 6, 0 };
 
 array s8 _fnext_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
@@ -101,13 +101,13 @@ host( "working/fnext3.rl", 30 ) @{
 						}
 						
 						_keys = offset( _fnext_trans_keys, (cs<<1) );
-						_inds = offset( _fnext_indicies, _fnext_index_offsets[cs] );
+						_inds = offset( _fnext_indices, _fnext_index_offsets[cs] );
 						
 						if ( ( deref( data, p )) <= 111 && ( deref( data, p )) >= 10 )
 						{
 							int _ic = cast(int)_fnext_char_class[cast(int)( deref( data, p )) - 10];
 							if ( _ic <= cast(int)deref( _fnext_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _fnext_trans_keys, _keys ) )
-							_trans = cast(uint)deref( _fnext_indicies, _inds + cast(int)( _ic - cast(int)deref( _fnext_trans_keys, _keys ) )  ); 
+							_trans = cast(uint)deref( _fnext_indices, _inds + cast(int)( _ic - cast(int)deref( _fnext_trans_keys, _keys ) )  ); 
 							else
 							_trans = cast(uint)_fnext_index_defaults[cs];
 						}

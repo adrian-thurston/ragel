@@ -20,7 +20,7 @@ host( "working/empty1_java.rl", 1 ) @{/*
 	
 	array s8 _empty1_index_offsets( 0, 0 ) = { 0, 0, 0 };
 	
-	array s8 _empty1_indicies( 0, 0 ) = { 0 };
+	array s8 _empty1_indices( 0, 0 ) = { 0 };
 	
 	array s8 _empty1_index_defaults( 0, 0 ) = { 0, 0, 0 };
 	

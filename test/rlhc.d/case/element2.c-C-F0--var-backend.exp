@@ -17,7 +17,7 @@ static const char  _fsm_actions [] = { 0, 1, 0, 1, 1, 0 ,  };
 static const int  _fsm_trans_keys [] = { 1, 0, 0, 0, 1, 2, 1, 0, 0 ,  };
 static const char  _fsm_char_class [] = { 0, 1, 2, 0 ,  };
 static const char  _fsm_index_offsets [] = { 0, 0, 1, 3, 0 ,  };
-static const char  _fsm_indicies [] = { 0, 0, 2, 0 ,  };
+static const char  _fsm_indices [] = { 0, 0, 2, 0 ,  };
 static const char  _fsm_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
 static const char  _fsm_trans_cond_spaces [] = { -1, -1, -1, 0 ,  };
 static const char  _fsm_cond_targs [] = { 2, 0, 3, 0 ,  };
@@ -104,7 +104,7 @@ void fsm_execute( struct fsm *fsm,  struct LangEl *_data, int _len )
 				if ( _have == 0  )
 				{
 					_keys = _fsm_trans_keys + ((fsm->cs)<<1);
-					_inds = _fsm_indicies + _fsm_index_offsets[(fsm->cs)];
+					_inds = _fsm_indices + _fsm_index_offsets[(fsm->cs)];
 					if ( (p->key) <= 3 && (p->key) >= 1  )
 					{
 						int _ic = ( int ) _fsm_char_class[( int ) (p->key) - 1];

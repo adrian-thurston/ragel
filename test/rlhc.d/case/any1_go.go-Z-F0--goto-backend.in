@@ -23,7 +23,7 @@ array s8 _any1_char_class( 0, 0 ) = { 0 };
 
 array s8 _any1_index_offsets( 0, 0 ) = { 0, 0, 0, 0 };
 
-array s8 _any1_indicies( 0, 0 ) = { 0 };
+array s8 _any1_indices( 0, 0 ) = { 0 };
 
 array s8 _any1_index_defaults( 0, 1 ) = { 0, 0, 1, 0 };
 

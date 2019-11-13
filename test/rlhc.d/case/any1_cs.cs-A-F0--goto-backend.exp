@@ -13,7 +13,7 @@ namespace Test {
 		static readonly char  []_any1_trans_keys = { '\u0001', '\u0000', '\u0001', '\u0000', '\u0001', '\u0000', '\u0000',  };
 		static readonly sbyte  []_any1_char_class = { 0,  };
 		static readonly sbyte  []_any1_index_offsets = { 0, 0, 0, 0,  };
-		static readonly sbyte  []_any1_indicies = { 0,  };
+		static readonly sbyte  []_any1_indices = { 0,  };
 		static readonly sbyte  []_any1_index_defaults = { 0, 0, 1, 0,  };
 		static readonly sbyte  []_any1_trans_cond_spaces = { -1, -1, 0,  };
 		static readonly sbyte  []_any1_cond_targs = { 2, 0, 0,  };

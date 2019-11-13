@@ -22,7 +22,7 @@ array s8 _scanner_char_class( 0, 2 ) = { 0, 1, 2, 0 };
 
 array s8 _scanner_index_offsets( 0, 5 ) = { 0, 3, 5, 0 };
 
-array s8 _scanner_indicies( 0, 5 ) = { 1, 1, 2, 4, 5, 1, 1, 2, 0 };
+array s8 _scanner_indices( 0, 5 ) = { 1, 1, 2, 4, 5, 1, 1, 2, 0 };
 
 array s8 _scanner_index_defaults( 0, 3 ) = { 0, 3, 0, 0 };
 
@@ -111,13 +111,13 @@ host( "working/scan4_ocaml.rl", 40 ) @{
 				}
 				
 				_keys = offset( _scanner_trans_keys, (cs<<1) );
-				_inds = offset( _scanner_indicies, _scanner_index_offsets[cs] );
+				_inds = offset( _scanner_indices, _scanner_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 99 && ( deref( data, p )) >= 97 )
 				{
 					int _ic = cast(int)_scanner_char_class[cast(int)( deref( data, p )) - 97];
 					if ( _ic <= cast(int)deref( _scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _scanner_trans_keys, _keys ) )
-					_trans = cast(uint)deref( _scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
+					_trans = cast(uint)deref( _scanner_indices, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(uint)_scanner_index_defaults[cs];
 				}

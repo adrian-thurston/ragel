@@ -48,7 +48,7 @@ array s8 _ErrAct_char_class( 0, 4 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 array s8 _ErrAct_index_offsets( 0, 15 ) = { 0, 0, 3, 4, 9, 10, 15, 0 };
 
-array s8 _ErrAct_indicies( 0, 7 ) = { 1, 0, 2, 2, 5, 4, 4, 6, 2, 7, 5, 3, 3, 3, 7, 0 };
+array s8 _ErrAct_indices( 0, 7 ) = { 1, 0, 2, 2, 5, 4, 4, 6, 2, 7, 5, 3, 3, 3, 7, 0 };
 
 array s8 _ErrAct_index_defaults( 0, 8 ) = { 0, 0, 3, 4, 3, 3, 8, 0 };
 
@@ -138,13 +138,13 @@ host( "working/erract5.rl", 60 ) @{
 			if ( _cont == 1 ) {
 				if ( _have == 0 ) {
 					_keys = offset( _ErrAct_trans_keys, (cs<<1) );
-					_inds = offset( _ErrAct_indicies, _ErrAct_index_offsets[cs] );
+					_inds = offset( _ErrAct_indices, _ErrAct_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 57 && ( deref( data, p )) >= 10 )
 					{
 						int _ic = cast(int)_ErrAct_char_class[cast(int)( deref( data, p )) - 10];
 						if ( _ic <= cast(int)deref( _ErrAct_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _ErrAct_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _ErrAct_indicies, _inds + cast(int)( _ic - cast(int)deref( _ErrAct_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _ErrAct_indices, _inds + cast(int)( _ic - cast(int)deref( _ErrAct_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_ErrAct_index_defaults[cs];
 					}

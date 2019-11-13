@@ -29,7 +29,7 @@ array s8 _patact_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _patact_index_offsets( 0, 95 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 28, 32, 36, 46, 58, 60, 65, 77, 81, 85, 95, 0 };
 
-array s8 _patact_indicies( 0, 47 ) = { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0 };
+array s8 _patact_indices( 0, 47 ) = { 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 20, 22, 23, 24, 25, 26, 26, 26, 26, 26, 27, 0, 23, 23, 27, 28, 23, 29, 31, 30, 30, 30, 30, 26, 26, 26, 26, 26, 32, 21, 32, 21, 33, 33, 21, 34, 34, 34, 34, 34, 33, 33, 34, 34, 34, 34, 34, 37, 21, 37, 38, 39, 40, 21, 41, 41, 41, 41, 41, 42, 10, 39, 39, 42, 43, 39, 44, 46, 45, 45, 45, 45, 41, 41, 41, 41, 41, 47, 0 };
 
 array s8 _patact_index_defaults( 0, 45 ) = { 0, 0, 0, 0, 0, 5, 5, 5, 5, 10, 10, 10, 10, 15, 15, 15, 15, 21, 0, 28, 30, 21, 35, 36, 21, 10, 43, 45, 21, 0 };
 
@@ -125,13 +125,13 @@ host( "working/patact_crack.rl", 75 ) @{
 					}
 					
 					_keys = offset( _patact_trans_keys, (cs<<1) );
-					_inds = offset( _patact_indicies, _patact_index_offsets[cs] );
+					_inds = offset( _patact_indices, _patact_index_offsets[cs] );
 					
 					if ( ( deref( data, p )) <= 122 && ( deref( data, p )) >= 10 )
 					{
 						int _ic = cast(int)_patact_char_class[cast(int)( deref( data, p )) - 10];
 						if ( _ic <= cast(int)deref( _patact_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _patact_trans_keys, _keys ) )
-						_trans = cast(uint)deref( _patact_indicies, _inds + cast(int)( _ic - cast(int)deref( _patact_trans_keys, _keys ) )  ); 
+						_trans = cast(uint)deref( _patact_indices, _inds + cast(int)( _ic - cast(int)deref( _patact_trans_keys, _keys ) )  ); 
 						else
 						_trans = cast(uint)_patact_index_defaults[cs];
 					}

@@ -2,7 +2,7 @@ const _scanner_actions = Int8[0, 1, 0, 1, 1, 1, 6, 2, 2, 3, 2, 2, 4, 2, 2, 5, 0 
 const _scanner_trans_keys = UInt8[1, 0, 0, 1, 1, 0, 0 , ]
 const _scanner_char_class = Int8[0, 1, 0 , ]
 const _scanner_index_offsets = Int8[0, 0, 2, 0 , ]
-const _scanner_indicies = Int8[0, 2, 0 , ]
+const _scanner_indices = Int8[0, 2, 0 , ]
 const _scanner_index_defaults = Int8[0, 1, 4, 0 , ]
 const _scanner_trans_cond_spaces = Int8[-1, -1, -1, -1, -1, 0 , ]
 const _scanner_cond_targs = Int8[2, 0, 2, 1, 2, 0 , ]
@@ -87,7 +87,7 @@ function m( data::AbstractString )
 				if (data[1+(p )])<= 98 && (data[1+(p )])>= 97 
 					_ic = convert(Int, _scanner_char_class[1+(convert(Int, (data[1+(p )]) )- 97)] );
 					if _ic <= convert(Int, _scanner_trans_keys[1+(_keys+1 )] )&& _ic >= convert(Int, _scanner_trans_keys[1+(_keys )] )
-						_trans = convert(UInt, _scanner_indicies[1+(_inds + convert(Int, (_ic - convert(Int, _scanner_trans_keys[1+(_keys )] )) ))] )
+						_trans = convert(UInt, _scanner_indices[1+(_inds + convert(Int, (_ic - convert(Int, _scanner_trans_keys[1+(_keys )] )) ))] )
 						
 					else
 						_trans = convert(UInt, _scanner_index_defaults[1+(cs)] )

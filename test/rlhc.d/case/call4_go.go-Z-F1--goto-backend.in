@@ -24,7 +24,7 @@ array s8 _call4_char_class( 0, 11 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 array s8 _call4_index_offsets( 0, 16 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 16, 16, 0 };
 
-array s8 _call4_indicies( 0, 15 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 };
+array s8 _call4_indices( 0, 15 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 1, 14, 15, 0 };
 
 array s8 _call4_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 
@@ -77,13 +77,13 @@ host( "working/call4_go.rl", 43 ) @{
 			goto _out;
 			label _resume {
 				_keys = offset( _call4_trans_keys, (cs<<1) );
-				_inds = offset( _call4_indicies, _call4_index_offsets[cs] );
+				_inds = offset( _call4_indices, _call4_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 119 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_call4_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _call4_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _call4_trans_keys, _keys ) )
-					_trans = cast(int)deref( _call4_indicies, _inds + cast(int)( _ic - cast(int)deref( _call4_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _call4_indices, _inds + cast(int)( _ic - cast(int)deref( _call4_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_call4_index_defaults[cs];
 				}

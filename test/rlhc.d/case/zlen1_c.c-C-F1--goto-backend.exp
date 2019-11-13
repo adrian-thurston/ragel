@@ -11,7 +11,7 @@
 static const char  _zlen1_trans_keys [] = { 1, 0, 1, 0, 0 ,  };
 static const char  _zlen1_char_class [] = { 0 ,  };
 static const char  _zlen1_index_offsets [] = { 0, 0, 0 ,  };
-static const char  _zlen1_indicies [] = { 0 ,  };
+static const char  _zlen1_indices [] = { 0 ,  };
 static const char  _zlen1_index_defaults [] = { 0, 0, 0 ,  };
 static const char  _zlen1_trans_cond_spaces [] = { -1, 0 ,  };
 static const char  _zlen1_cond_targs [] = { 0, 0 ,  };

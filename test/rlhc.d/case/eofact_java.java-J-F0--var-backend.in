@@ -22,7 +22,7 @@ host( "working/eofact_java.rl", 1 ) @{/*
 	
 	array s8 _eofact_index_offsets( 0, 14 ) = { 0, 0, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 0 };
 	
-	array s8 _eofact_indicies( 0, 11 ) = { 0, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0 };
+	array s8 _eofact_indices( 0, 11 ) = { 0, 1, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0 };
 	
 	array s8 _eofact_index_defaults( 0, 1 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 };
 	
@@ -121,13 +121,13 @@ host( "working/eofact_java.rl", 1 ) @{/*
 				if ( _cont == 1 ) {
 					if ( _have == 0 ) {
 						_keys = offset( _eofact_trans_keys, (cs<<1) );
-						_inds = offset( _eofact_indicies, _eofact_index_offsets[cs] );
+						_inds = offset( _eofact_indices, _eofact_index_offsets[cs] );
 						
 						if ( ( deref( data, p )) <= 116 && ( deref( data, p )) >= 10 )
 						{
 							int _ic = cast(int)_eofact_char_class[cast(int)( deref( data, p )) - 10];
 							if ( _ic <= cast(int)deref( _eofact_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _eofact_trans_keys, _keys ) )
-							_trans = cast(uint)deref( _eofact_indicies, _inds + cast(int)( _ic - cast(int)deref( _eofact_trans_keys, _keys ) )  ); 
+							_trans = cast(uint)deref( _eofact_indices, _inds + cast(int)( _ic - cast(int)deref( _eofact_trans_keys, _keys ) )  ); 
 							else
 							_trans = cast(uint)_eofact_index_defaults[cs];
 						}

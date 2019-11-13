@@ -41,10 +41,10 @@ self._state_chart_index_offsets = [
 ]
 
 class << self
-	attr_accessor :_state_chart_indicies 
-	private :_state_chart_indicies, :_state_chart_indicies=
+	attr_accessor :_state_chart_indices 
+	private :_state_chart_indices, :_state_chart_indices=
 end
-self._state_chart_indicies = [
+self._state_chart_indices = [
 0, 2, 1, 1, 1, 0, 3, 4, 5, 0 , 
 ]
 
@@ -185,7 +185,7 @@ def run_machine( data )
 									begin
 										_ic = _state_chart_char_class[( data[p ].ord) - 10];
 										if ( _ic <= _state_chart_trans_keys[_keys+1 ]&& _ic >= _state_chart_trans_keys[_keys ] )
-											_trans = _state_chart_indicies[_inds + ( _ic - _state_chart_trans_keys[_keys ])  ];
+											_trans = _state_chart_indices[_inds + ( _ic - _state_chart_trans_keys[_keys ])  ];
 											
 											else
 											_trans = _state_chart_index_defaults[cs];

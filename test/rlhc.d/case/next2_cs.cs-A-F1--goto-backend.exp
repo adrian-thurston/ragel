@@ -13,7 +13,7 @@ namespace Test {
 		static readonly char  []_next2_trans_keys = { '\u0001', '\u0000', '\u000f', '\u000f', '\u000d', '\u000d', '\u0008', '\u0008', '\u000d', '\u000d', '\u000b', '\u000b', '\u0006', '\u0006', '\u0005', '\u0005', '\u0009', '\u0009', '\u0008', '\u0008', '\u0006', '\u0006', '\u000c', '\u000c', '\u000e', '\u000e', '\u0009', '\u0009', '\u000c', '\u000c', '\u0007', '\u0007', '\u000a', '\u000a', '\u0006', '\u0006', '\u0006', '\u0006', '\u0000', '\u0004', '\u0001', '\u0000', '\u0001', '\u0000', '\u0001', '\u0000', '\u0001', '\u0000', '\u0000',  };
 		static readonly sbyte  []_next2_char_class = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 6, 1, 1, 7, 1, 1, 1, 1, 1, 8, 9, 1, 1, 10, 11, 12, 13, 1, 14, 15, 0,  };
 		static readonly sbyte  []_next2_index_offsets = { 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 23, 23, 23, 23, 0,  };
-		static readonly sbyte  []_next2_indicies = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0,  };
+		static readonly sbyte  []_next2_indices = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 0, 1, 19, 20, 21, 0,  };
 		static readonly sbyte  []_next2_index_defaults = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,  };
 		static readonly sbyte  []_next2_trans_cond_spaces = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,  };
 		static readonly sbyte  []_next2_cond_targs = { 19, 0, 3, 4, 5, 6, 7, 20, 9, 10, 21, 12, 13, 22, 15, 16, 17, 18, 23, 19, 19, 1, 0,  };
@@ -66,7 +66,7 @@ namespace Test {
 				{
 					int _ic = (int)_next2_char_class[(int)( data[p ]) - 10];
 					if ( _ic <= (int)_next2_trans_keys[_keys+1]&& _ic >= (int)_next2_trans_keys[_keys ] )
-					_trans = (int)_next2_indicies[_inds + (int)( _ic - (int)_next2_trans_keys[_keys ])  ];
+					_trans = (int)_next2_indices[_inds + (int)( _ic - (int)_next2_trans_keys[_keys ])  ];
 					
 					else
 					_trans = (int)_next2_index_defaults[cs];

@@ -10,7 +10,7 @@ int target ;
 static const char  _goto1_trans_keys [] = { 1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0 ,  };
 static const char  _goto1_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 ,  };
 static const char  _goto1_index_offsets [] = { 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 ,  };
-static const char  _goto1_indicies [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  };
+static const char  _goto1_indices [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  };
 static const char  _goto1_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
 static const char  _goto1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 static const char  _goto1_cond_targs [] = { 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 ,  };
@@ -55,7 +55,7 @@ void exec( char *data, int len )
 		
 		_resume :
 		_keys = _goto1_trans_keys + (cs<<1);
-		_inds = _goto1_indicies + _goto1_index_offsets[cs];
+		_inds = _goto1_indices + _goto1_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 119 && ((*( p  ))
 		)>= 10  )

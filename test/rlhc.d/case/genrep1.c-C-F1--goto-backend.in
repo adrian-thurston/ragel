@@ -32,7 +32,7 @@ array s8 _genrep_char_class( 0, 7 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 
 array s8 _genrep_index_offsets( 0, 12 ) = { 0, 0, 1, 2, 3, 4, 5, 6, 6, 7, 7, 7, 8, 9, 10, 11, 12, 12, 0 };
 
-array s8 _genrep_indicies( 0, 12 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0 };
+array s8 _genrep_indices( 0, 12 ) = { 0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 0 };
 
 array s8 _genrep_index_defaults( 0, 13 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 1, 0 };
 
@@ -108,13 +108,13 @@ host( "working/genrep1.rl", 71 ) @{
 					}
 				}
 				_keys = offset( _genrep_trans_keys, (cs<<1) );
-				_inds = offset( _genrep_indicies, _genrep_index_offsets[cs] );
+				_inds = offset( _genrep_indices, _genrep_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 116 && ( deref( data, p )) >= 32 )
 				{
 					int _ic = cast(int)_genrep_char_class[cast(int)( deref( data, p )) - 32];
 					if ( _ic <= cast(int)deref( _genrep_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _genrep_trans_keys, _keys ) )
-					_trans = cast(int)deref( _genrep_indicies, _inds + cast(int)( _ic - cast(int)deref( _genrep_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _genrep_indices, _inds + cast(int)( _ic - cast(int)deref( _genrep_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_genrep_index_defaults[cs];
 				}

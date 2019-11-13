@@ -15,7 +15,7 @@ var _state_act_actions [] int8  = [] int8  { 0, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 2,
 var _state_act_trans_keys [] byte  = [] byte  { 1, 0, 3, 3, 0, 0, 2, 2, 2, 2, 2, 2, 0 }
 var _state_act_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0  }
 var _state_act_index_offsets [] int8  = [] int8  { 0, 0, 1, 2, 3, 4, 0  }
-var _state_act_indicies [] int8  = [] int8  { 0, 2, 3, 3, 3, 0  }
+var _state_act_indices [] int8  = [] int8  { 0, 2, 3, 3, 3, 0  }
 var _state_act_index_defaults [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 0  }
 var _state_act_trans_cond_spaces [] int8  = [] int8  { -1, -1, -1, -1, 0  }
 var _state_act_cond_targs [] int8  = [] int8  { 2, 0, 5, 1, 0  }
@@ -105,7 +105,7 @@ func exec(data string) {
 										var  _ic  int   = int(_state_act_char_class[int(( data[p ]) )- 10])
 										switch {
 											case _ic <= int(_state_act_trans_keys[_keys+1 ])&& _ic >= int(_state_act_trans_keys[_keys ]):
-											_trans = uint(_state_act_indicies[_inds + int(( _ic - int(_state_act_trans_keys[_keys ]))  )]);
+											_trans = uint(_state_act_indices[_inds + int(( _ic - int(_state_act_trans_keys[_keys ]))  )]);
 											
 											default:
 											_trans = uint(_state_act_index_defaults[cs]);

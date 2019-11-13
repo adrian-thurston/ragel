@@ -368,7 +368,7 @@ int _perf_dummy = 0;
 		"static int \n" |
 		"_f[] = {\n" |
 		"#endif\n" |
-		"/* The array of indicies into the transition array. */\n" |
+		"/* The array of indices into the transition array. */\n" |
 		"#if \n" |
 		"static \n" |
 		"_i[] = {\n" |
@@ -595,7 +595,7 @@ int _perf_dummy = 0;
 		"#define s \n" |
 		"#define i \n" |
 		"#define t \n" |
-		"/* The array of indicies into the transition array. */\n" |
+		"/* The array of indices into the transition array. */\n" |
 		"#if \n" |
 		"static \n" |
 		"_i[] = {\n" |

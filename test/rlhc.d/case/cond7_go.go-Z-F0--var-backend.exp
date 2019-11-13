@@ -15,7 +15,7 @@ var _foo_actions [] int8  = [] int8  { 0, 1, 0, 1, 1, 0  }
 var _foo_trans_keys [] byte  = [] byte  { 1, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0 }
 var _foo_char_class [] int8  = [] int8  { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0  }
 var _foo_index_offsets [] int8  = [] int8  { 0, 0, 1, 2, 5, 0  }
-var _foo_indicies [] int8  = [] int8  { 0, 2, 3, 1, 4, 0  }
+var _foo_indices [] int8  = [] int8  { 0, 2, 3, 1, 4, 0  }
 var _foo_index_defaults [] int8  = [] int8  { 0, 1, 1, 1, 1, 0  }
 var _foo_trans_cond_spaces [] int8  = [] int8  { -1, -1, 0, 0, 0, 0  }
 var _foo_trans_offsets [] int8  = [] int8  { 0, 1, 2, 4, 6, 0  }
@@ -79,7 +79,7 @@ func exec(data string) {
 										var  _ic  int   = int(_foo_char_class[int(( data[p ]) )- 10])
 										switch {
 											case _ic <= int(_foo_trans_keys[_keys+1 ])&& _ic >= int(_foo_trans_keys[_keys ]):
-											_trans = uint(_foo_indicies[_inds + int(( _ic - int(_foo_trans_keys[_keys ]))  )]);
+											_trans = uint(_foo_indices[_inds + int(( _ic - int(_foo_trans_keys[_keys ]))  )]);
 											
 											default:
 											_trans = uint(_foo_index_defaults[cs]);

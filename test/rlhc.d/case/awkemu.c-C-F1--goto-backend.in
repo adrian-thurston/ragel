@@ -45,7 +45,7 @@ array s8 _awkemu_char_class( 0, 2 ) = { 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 
 array s8 _awkemu_index_offsets( 0, 4 ) = { 0, 2, 4, 0 };
 
-array s8 _awkemu_indicies( 0, 7 ) = { 1, 2, 3, 4, 6, 7, 0 };
+array s8 _awkemu_indices( 0, 7 ) = { 1, 2, 3, 4, 6, 7, 0 };
 
 array s8 _awkemu_index_defaults( 0, 5 ) = { 0, 0, 5, 0 };
 
@@ -94,13 +94,13 @@ host( "working/awkemu.rl", 101 ) @{
 			goto _test_eof;
 			label _resume {
 				_keys = offset( _awkemu_trans_keys, (host( "-", 1 ) ={ fsm->cs}=<<1) );
-				_inds = offset( _awkemu_indicies, _awkemu_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
+				_inds = offset( _awkemu_indices, _awkemu_index_offsets[host( "-", 1 ) ={ fsm->cs}=] );
 				
 				if ( ( deref( data, p )) <= 32 && ( deref( data, p )) >= 9 )
 				{
 					int _ic = cast(int)_awkemu_char_class[cast(int)( deref( data, p )) - 9];
 					if ( _ic <= cast(int)deref( _awkemu_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _awkemu_trans_keys, _keys ) )
-					_trans = cast(int)deref( _awkemu_indicies, _inds + cast(int)( _ic - cast(int)deref( _awkemu_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _awkemu_indices, _inds + cast(int)( _ic - cast(int)deref( _awkemu_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_awkemu_index_defaults[host( "-", 1 ) ={ fsm->cs}=];
 				}

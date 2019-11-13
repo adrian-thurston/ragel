@@ -15,7 +15,7 @@ array s8 _scanner_char_class( 0, 10 ) = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 
 array s8 _scanner_index_offsets( 0, 32 ) = { 0, 0, 8, 9, 10, 11, 12, 20, 30, 31, 32, 0 };
 
-array s8 _scanner_indicies( 0, 18 ) = { 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0 };
+array s8 _scanner_indices( 0, 18 ) = { 1, 2, 2, 2, 0, 0, 0, 2, 3, 6, 7, 8, 1, 2, 9, 10, 4, 4, 4, 2, 11, 4, 4, 2, 2, 2, 12, 13, 14, 15, 13, 18, 1, 2, 2, 2, 0, 0, 0, 2, 0 };
 
 array s8 _scanner_index_defaults( 0, 17 ) = { 0, 0, 4, 5, 5, 5, 4, 4, 16, 17, 0, 0 };
 
@@ -103,13 +103,13 @@ host( "working/scan1_ruby.rl", 76 ) @{
 				}
 				
 				_keys = offset( _scanner_trans_keys, (cs<<1) );
-				_inds = offset( _scanner_indicies, _scanner_index_offsets[cs] );
+				_inds = offset( _scanner_indices, _scanner_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 120 && ( deref( data, p )) >= 10 )
 				{
 					int _ic = cast(int)_scanner_char_class[cast(int)( deref( data, p )) - 10];
 					if ( _ic <= cast(int)deref( _scanner_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _scanner_trans_keys, _keys ) )
-					_trans = cast(uint)deref( _scanner_indicies, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
+					_trans = cast(uint)deref( _scanner_indices, _inds + cast(int)( _ic - cast(int)deref( _scanner_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(uint)_scanner_index_defaults[cs];
 				}

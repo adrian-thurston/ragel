@@ -11,7 +11,7 @@ struct min
 static const char  _min_trans_keys [] = { 1, 0, 2, 2, 0, 2, 1, 0, 0 ,  };
 static const char  _min_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 0 ,  };
 static const char  _min_index_offsets [] = { 0, 0, 1, 4, 0 ,  };
-static const char  _min_indicies [] = { 0, 2, 1, 3, 0 ,  };
+static const char  _min_indices [] = { 0, 2, 1, 3, 0 ,  };
 static const char  _min_index_defaults [] = { 0, 1, 1, 1, 0 ,  };
 static const char  _min_trans_cond_spaces [] = { -1, -1, -1, -1, 0 ,  };
 static const char  _min_cond_targs [] = { 2, 0, 3, 2, 0 ,  };
@@ -50,7 +50,7 @@ void min_execute( struct min *fsm, const char *_data, int _len )
 		
 		_resume :
 		_keys = _min_trans_keys + ((fsm->cs)<<1);
-		_inds = _min_indicies + _min_index_offsets[(fsm->cs)];
+		_inds = _min_indices + _min_index_offsets[(fsm->cs)];
 		if ( ((*( p  ))
 		)<= 98 && ((*( p  ))
 		)>= 10  )

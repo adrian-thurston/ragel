@@ -9,7 +9,7 @@ class goto1_java
 	private static char  _goto1_trans_keys [] = { 1, 0, 0, 3, 10, 10, 6, 6, 10, 10, 8, 8, 5, 5, 4, 4, 7, 7, 6, 6, 5, 5, 9, 9, 11, 11, 7, 7, 1, 0, 1, 0, 1, 0, 1, 0, 0,  };
 	private static byte  _goto1_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 1, 8, 9, 10, 1, 11, 0 ,  };
 	private static byte  _goto1_index_offsets [] = { 0, 0, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 16, 16, 16, 0 ,  };
-	private static byte  _goto1_indicies [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  };
+	private static byte  _goto1_indices [] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0 ,  };
 	private static byte  _goto1_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
 	private static byte  _goto1_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 	private static byte  _goto1_cond_targs [] = { 14, 0, 14, 14, 3, 4, 5, 6, 7, 15, 9, 10, 16, 12, 13, 17, 0 ,  };
@@ -72,7 +72,7 @@ class goto1_java
 					{
 						int _ic = (int)_goto1_char_class[(int)( data[p ]) - 10];
 						if ( _ic <= (int)_goto1_trans_keys[_keys+1 ]&& _ic >= (int)_goto1_trans_keys[_keys ] )
-						_trans = (int)_goto1_indicies[_inds + (int)( _ic - (int)_goto1_trans_keys[_keys ])  ];
+						_trans = (int)_goto1_indices[_inds + (int)( _ic - (int)_goto1_trans_keys[_keys ])  ];
 						
 						else
 						_trans = (int)_goto1_index_defaults[cs];

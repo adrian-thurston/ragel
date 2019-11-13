@@ -55,7 +55,7 @@ array s8 _Concurrent_char_class( 0, 5 ) = { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 
 
 array s8 _Concurrent_index_offsets( 0, 89 ) = { 0, 5, 10, 16, 22, 27, 32, 36, 40, 46, 52, 56, 61, 66, 72, 78, 84, 89, 0 };
 
-array s8 _Concurrent_indicies( 0, 54 ) = { 1, 0, 2, 0, 3, 5, 4, 6, 4, 7, 9, 8, 10, 8, 11, 12, 14, 13, 15, 13, 16, 17, 19, 18, 20, 18, 21, 5, 4, 6, 22, 7, 23, 22, 24, 25, 27, 26, 28, 29, 31, 30, 32, 33, 30, 34, 36, 35, 37, 38, 35, 39, 41, 40, 42, 43, 23, 22, 24, 25, 44, 46, 45, 47, 45, 48, 31, 30, 32, 33, 49, 34, 51, 50, 52, 50, 53, 54, 9, 8, 10, 30, 11, 12, 9, 8, 8, 8, 11, 31, 30, 30, 33, 0 };
+array s8 _Concurrent_indices( 0, 54 ) = { 1, 0, 2, 0, 3, 5, 4, 6, 4, 7, 9, 8, 10, 8, 11, 12, 14, 13, 15, 13, 16, 17, 19, 18, 20, 18, 21, 5, 4, 6, 22, 7, 23, 22, 24, 25, 27, 26, 28, 29, 31, 30, 32, 33, 30, 34, 36, 35, 37, 38, 35, 39, 41, 40, 42, 43, 23, 22, 24, 25, 44, 46, 45, 47, 45, 48, 31, 30, 32, 33, 49, 34, 51, 50, 52, 50, 53, 54, 9, 8, 10, 30, 11, 12, 9, 8, 8, 8, 11, 31, 30, 30, 33, 0 };
 
 array s8 _Concurrent_index_defaults( 0, 50 ) = { 0, 4, 8, 13, 18, 4, 22, 26, 30, 35, 40, 22, 45, 30, 50, 8, 8, 30, 0 };
 
@@ -109,13 +109,13 @@ host( "working/union.rl", 100 ) @{
 			goto _test_eof;
 			label _resume {
 				_keys = offset( _Concurrent_trans_keys, (cs<<1) );
-				_inds = offset( _Concurrent_indicies, _Concurrent_index_offsets[cs] );
+				_inds = offset( _Concurrent_indices, _Concurrent_index_offsets[cs] );
 				
 				if ( ( deref( data, p )) <= 92 && ( deref( data, p )) >= 9 )
 				{
 					int _ic = cast(int)_Concurrent_char_class[cast(int)( deref( data, p )) - 9];
 					if ( _ic <= cast(int)deref( _Concurrent_trans_keys, _keys+1 ) && _ic >= cast(int)deref( _Concurrent_trans_keys, _keys ) )
-					_trans = cast(int)deref( _Concurrent_indicies, _inds + cast(int)( _ic - cast(int)deref( _Concurrent_trans_keys, _keys ) )  ); 
+					_trans = cast(int)deref( _Concurrent_indices, _inds + cast(int)( _ic - cast(int)deref( _Concurrent_trans_keys, _keys ) )  ); 
 					else
 					_trans = cast(int)_Concurrent_index_defaults[cs];
 				}

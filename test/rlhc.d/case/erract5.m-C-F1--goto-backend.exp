@@ -34,7 +34,7 @@
 static const char  _ErrAct_trans_keys [] = { 1, 0, 2, 4, 4, 4, 0, 4, 4, 4, 0, 4, 1, 0, 0 ,  };
 static const char  _ErrAct_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 3, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0 ,  };
 static const char  _ErrAct_index_offsets [] = { 0, 0, 3, 4, 9, 10, 15, 0 ,  };
-static const char  _ErrAct_indicies [] = { 1, 0, 2, 2, 5, 4, 4, 6, 2, 7, 5, 3, 3, 3, 7, 0 ,  };
+static const char  _ErrAct_indices [] = { 1, 0, 2, 2, 5, 4, 4, 6, 2, 7, 5, 3, 3, 3, 7, 0 ,  };
 static const char  _ErrAct_index_defaults [] = { 0, 0, 3, 4, 3, 3, 8, 0 ,  };
 static const char  _ErrAct_trans_cond_spaces [] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 ,  };
 static const char  _ErrAct_cond_targs [] = { 0, 2, 3, 0, 0, 6, 4, 5, 0, 0 ,  };
@@ -75,7 +75,7 @@ static const int  ErrAct_en_main  = 1;
 		
 		_resume :
 		_keys = _ErrAct_trans_keys + (cs<<1);
-		_inds = _ErrAct_indicies + _ErrAct_index_offsets[cs];
+		_inds = _ErrAct_indices + _ErrAct_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 57 && ((*( p  ))
 		)>= 10  )

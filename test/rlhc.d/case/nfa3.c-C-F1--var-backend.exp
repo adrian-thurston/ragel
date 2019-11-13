@@ -26,7 +26,7 @@ struct nfa_bp_rec
 static const char  _atoi_trans_keys [] = { 1, 0, 3, 3, 1, 0, 0, 0, 1, 0, 1, 0, 2, 2, 1, 0, 0 ,  };
 static const char  _atoi_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 0 ,  };
 static const char  _atoi_index_offsets [] = { 0, 0, 1, 1, 2, 2, 2, 3, 0 ,  };
-static const char  _atoi_indicies [] = { 0, 2, 3, 0 ,  };
+static const char  _atoi_indices [] = { 0, 2, 3, 0 ,  };
 static const char  _atoi_index_defaults [] = { 0, 1, 1, 1, 1, 1, 1, 1, 0 ,  };
 static const char  _atoi_trans_cond_spaces [] = { -1, -1, -1, -1, 0 ,  };
 static const char  _atoi_trans_offsets [] = { 0, 1, 2, 3, 0 ,  };
@@ -118,7 +118,7 @@ int test( const char *p, bool a, bool b )
 						}
 						
 						_keys = _atoi_trans_keys + (cs<<1);
-						_inds = _atoi_indicies + _atoi_index_offsets[cs];
+						_inds = _atoi_indices + _atoi_index_offsets[cs];
 						if ( ((*( p  ))
 						)<= 97 && ((*( p  ))
 						)>= 46  )

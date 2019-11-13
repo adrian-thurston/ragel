@@ -9,7 +9,7 @@ static mut stack : [ i32 ; 32] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 static _gotocallret_trans_keys: [u8 ; 24] = [ 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 4, 5, 3, 3, 3, 5, 1, 0, 4, 5, 3, 3, 0 , 0 ];
 static _gotocallret_char_class: [i8 ; 115] = [ 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0 , 0 ];
 static _gotocallret_index_offsets: [i8 ; 13] = [ 0, 0, 1, 2, 3, 4, 6, 7, 10, 10, 12, 0 , 0 ];
-static _gotocallret_indicies: [i8 ; 15] = [ 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 , 0 ];
+static _gotocallret_indices: [i8 ; 15] = [ 1, 2, 4, 6, 8, 8, 9, 10, 0, 10, 8, 8, 9, 0 , 0 ];
 static _gotocallret_index_defaults: [i8 ; 13] = [ 0, 0, 0, 3, 5, 7, 7, 0, 11, 7, 7, 0 , 0 ];
 static _gotocallret_trans_cond_spaces: [i8 ; 14] = [ -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0 , 0 ];
 static _gotocallret_cond_targs: [i8 ; 14] = [ 0, 2, 7, 4, 8, 4, 8, 0, 9, 10, 1, 0, 0 , 0 ];
@@ -112,7 +112,7 @@ unsafe fn m( s: String )
 									if ( _ic <= ( _gotocallret_trans_keys[(_keys+1 ) as usize]
 									) as i32&& _ic >= ( _gotocallret_trans_keys[(_keys ) as usize]
 									) as i32 ) {
-										_trans = ( _gotocallret_indicies[(_inds + ( ( _ic - ( _gotocallret_trans_keys[(_keys ) as usize]
+										_trans = ( _gotocallret_indices[(_inds + ( ( _ic - ( _gotocallret_trans_keys[(_keys ) as usize]
 										) as i32)   ) as i32) as usize]
 										) as u32;
 										

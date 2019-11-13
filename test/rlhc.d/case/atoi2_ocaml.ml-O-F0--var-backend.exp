@@ -23,7 +23,7 @@ let _state_chart_char_class : int array = [|
 let _state_chart_index_offsets : int array = [|
 0; 0; 1; 6; 0 ; 
 |]
-let _state_chart_indicies : int array = [|
+let _state_chart_indices : int array = [|
 0; 2; 1; 1; 1; 0; 3; 4; 5; 0 ; 
 |]
 let _state_chart_index_defaults : int array = [|
@@ -108,7 +108,7 @@ begin
 								let _ic  : int  ref = ref _state_chart_char_class.(( Char.code data.[p.contents] )- 10) in
 								if _ic.contents<= _state_chart_trans_keys.( _keys.contents+1  )&& _ic.contents>= _state_chart_trans_keys.( _keys.contents ) then
 								begin
-									_trans  := _state_chart_indicies.( _inds.contents+ ( _ic.contents- _state_chart_trans_keys.( _keys.contents ) ) );
+									_trans  := _state_chart_indices.( _inds.contents+ ( _ic.contents- _state_chart_trans_keys.( _keys.contents ) ) );
 									
 								end
 								else

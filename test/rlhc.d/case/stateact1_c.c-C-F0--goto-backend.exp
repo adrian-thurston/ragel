@@ -12,7 +12,7 @@ static const char  _state_act_actions [] = { 0, 1, 2, 1, 3, 1, 4, 1, 5, 1, 6, 2,
 static const char  _state_act_trans_keys [] = { 1, 0, 3, 3, 0, 0, 2, 2, 2, 2, 2, 2, 0 ,  };
 static const char  _state_act_char_class [] = { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 0 ,  };
 static const char  _state_act_index_offsets [] = { 0, 0, 1, 2, 3, 4, 0 ,  };
-static const char  _state_act_indicies [] = { 0, 2, 3, 3, 3, 0 ,  };
+static const char  _state_act_indices [] = { 0, 2, 3, 3, 3, 0 ,  };
 static const char  _state_act_index_defaults [] = { 0, 1, 1, 1, 1, 1, 0 ,  };
 static const char  _state_act_trans_cond_spaces [] = { -1, -1, -1, -1, 0 ,  };
 static const char  _state_act_cond_targs [] = { 2, 0, 5, 1, 0 ,  };
@@ -95,7 +95,7 @@ void exec( char *data, int len )
 		
 		
 		_keys = _state_act_trans_keys + (cs<<1);
-		_inds = _state_act_indicies + _state_act_index_offsets[cs];
+		_inds = _state_act_indices + _state_act_index_offsets[cs];
 		if ( ((*( p  ))
 		)<= 105 && ((*( p  ))
 		)>= 10  )
