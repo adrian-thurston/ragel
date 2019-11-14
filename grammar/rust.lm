@@ -850,9 +850,13 @@ def statement
 |	[use_declaration]
 |	[macro_invocation_semi]
 
+def statement_list
+	[statement_list statement]
+|	[statement]
+
 def statements
-	[statement+]
-|	[statement+ expression_without_block]
+	[statement_list]
+|	[statement_list expression_without_block]
 |	[expression_without_block]
 
 def loop_label
