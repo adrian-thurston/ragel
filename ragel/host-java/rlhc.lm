@@ -478,6 +478,9 @@ namespace java_gen
 	{
 		Parser = new parser<java_out::java_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		JO: java_out::java_out = Parser->finish()

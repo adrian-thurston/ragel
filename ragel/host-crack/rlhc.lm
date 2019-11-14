@@ -510,6 +510,9 @@ namespace crack_gen
 	{
 		Parser = new parser<crack_out::crack_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		CO: crack_out::crack_out = Parser->finish()

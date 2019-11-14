@@ -502,6 +502,9 @@ void ruby_trans( Output: stream, Start: start )
 {
 	Parser = new parser<ruby_out::ruby_out>()
 
+	if ( Start.opt_bom.bom )
+		send Output [Start.opt_bom.bom]
+
 	stmt_list( Start._repeat_stmt )
 
 	RO: ruby_out::ruby_out = Parser->finish()

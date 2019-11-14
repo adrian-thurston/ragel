@@ -436,6 +436,9 @@ namespace c_gen
 	{
 		_ = new parser<c_out::c_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		CO: c_out::c_out = _->finish()

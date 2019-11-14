@@ -219,6 +219,10 @@ void InputData::verifyWritesHaveData()
 
 void InputData::writeOutput( InputItem *ii )
 {
+	/* If it is the first input item then check if we need to write the BOM. */
+	if ( ii->prev == 0 && utf8BomPresent )
+		*outStream << (uchar)0xEF << (uchar)0xBB << (uchar) 0xBF;
+
 	switch ( ii->type ) {
 		case InputItem::Write: {
 			CodeGenData *cgd = ii->pd->cgd;
@@ -249,12 +253,6 @@ void InputData::writeOutput( InputItem *ii )
 			break;
 		}
 	}
-}
-
-void InputData::writeOutput()
-{
-	for ( InputItemList::Iter ii = inputItems; ii.lte(); ii++ )
-		writeOutput( ii );
 }
 
 void InputData::closeOutput()

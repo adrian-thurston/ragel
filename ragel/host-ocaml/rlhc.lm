@@ -582,6 +582,9 @@ namespace ml_gen
 	{
 		Parser = new parser<ocaml_out::ocaml_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		MO: ocaml_out::ocaml_out = Parser->finish()

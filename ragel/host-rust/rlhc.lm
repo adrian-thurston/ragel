@@ -496,6 +496,9 @@ namespace rust_gen
 	{
 		Parser = new parser<rust_out::rust_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		CO: rust_out::rust_out = Parser->finish()

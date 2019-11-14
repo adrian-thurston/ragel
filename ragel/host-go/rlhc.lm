@@ -380,6 +380,9 @@ namespace go_gen
 		Input: _input = _->gets()
 		Input->auto_trim(true)
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		GO: out_go::out_go = _->finish()

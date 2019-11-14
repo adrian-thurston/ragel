@@ -478,6 +478,9 @@ namespace js_gen
 		send Parser
 			"'use strict';
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		CO: js_out::js_out = Parser->finish()

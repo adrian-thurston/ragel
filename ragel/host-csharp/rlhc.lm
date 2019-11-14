@@ -454,6 +454,9 @@ namespace csharp_gen
 	{
 		Parser = new parser<csharp_out::csharp_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		CSO: csharp_out::csharp_out = Parser->finish()

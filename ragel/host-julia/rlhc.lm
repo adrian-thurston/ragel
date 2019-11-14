@@ -535,6 +535,9 @@ namespace julia_gen
 	{
 		Parser = new parser<julia_out::julia_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		CO: julia_out::julia_out = Parser->finish()

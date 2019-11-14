@@ -1,4 +1,9 @@
 reduction TopLevel
+	host::opt_bom :Bom
+	{
+		id->utf8BomPresent = true;
+	}
+
 	# def machine_name
 	#	[`machine word `;] :MachineName
 	ragel::machine_name :MachineName

@@ -485,6 +485,9 @@ namespace d_gen
 	{
 		Parser = new parser<d_out::d_out>()
 
+		if ( Start.opt_bom.bom )
+			send Output [Start.opt_bom.bom]
+
 		stmt_list( Start._repeat_stmt )
 
 		DO: d_out::d_out = Parser->finish()

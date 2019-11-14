@@ -893,6 +893,12 @@ namespace path
 end
 
 namespace host
+	token bom / 0xEF 0xBB 0xBF /
+
+	def opt_bom
+		[bom] :Bom
+	|	[]
+
 	def section
 		[`%%{ ragel::opt_machine_name ragel::ign_want ragel::statement* ragel::`}%%] :MultiLine
 	|	[`%%{ ragel::opt_machine_name ragel::ign_ignore consume::tok* consume::`}%%] :Consume
@@ -900,7 +906,7 @@ namespace host
 end
 
 def start
-	[SectionList: host::section*]
+	[host::opt_bom SectionList: host::section*]
 
 list<str> makeIncludePathChecks( CurFileName: str, IncFileName: str )
 {

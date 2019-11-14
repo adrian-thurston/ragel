@@ -208,7 +208,8 @@ struct InputData
 		histogram(0),
 		input(0),
 		forceVar(false),
-		noFork(false)
+		noFork(false),
+		utf8BomPresent(false)
 	{}
 
 	~InputData();
@@ -299,6 +300,9 @@ struct InputData
 
 	bool forceVar;
 	bool noFork;
+
+	/* Did the input file have a byte order mark? */
+	bool utf8BomPresent;
 
 	void verifyWriteHasData( InputItem *ii );
 	void verifyWritesHaveData();
