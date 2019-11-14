@@ -719,8 +719,7 @@ def paths
 
 
 def func_index
-	[func_index `. path_expr_segment `( expr_list `,? `)]
-|	[func_index `. id]
+	[func_index `. path_expr_segment]
 |	[func_index `. number]
 |	[func_index `( expr_list `,? `)]
 |	[func_index `[ expr_list `,? `]]
