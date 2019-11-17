@@ -37,6 +37,9 @@
 		} \
 	}
 
+#define MAX_VERB 40
+#define QUANTIFIER_INF -1
+
 struct value
 {
 	int v;
@@ -48,8 +51,6 @@ enum value_type
 {
 	dot = 256,
 };
-
-#define QUANTIFIER_INF -1
 
 enum quantifer_type
 {
@@ -70,7 +71,8 @@ enum element_type
 	element_regex_type,
 	element_look_around_type,
 	element_char_class_type,
-	element_back_ref_type
+	element_backref_type,
+	element_verb_type,
 };
 
 struct element
@@ -80,6 +82,8 @@ struct element
 	struct look_around *look_around;
 	struct quantifier *quantifier;
 	struct value *value_list;
+	struct backref *backref;
+	struct verb *verb;
 
 	struct element *next;
 };
@@ -99,6 +103,9 @@ enum regex_type
 	regex_look_around
 };
 
+#define REGEX_ATOMIC_GROUP   0x01
+#define REGEX_CAPTURE_RESET  0x02
+
 struct regex
 {
 	struct term *term_list;
@@ -107,6 +114,8 @@ struct regex
 	int capture;
 	int node_id;
 	int options;
+
+	int flags;
 
 	struct regex *next;
 	struct regex *parent;
@@ -136,6 +145,18 @@ struct look_around
 	int node_id;
 
 	struct look_around *next;
+};
+
+struct backref
+{
+	int number;
+};
+
+struct verb
+{
+	char *name;
+	char *value;
+	int number;
 };
 
 struct quantifier *new_quantifier()
@@ -197,6 +218,25 @@ struct pattern *new_pattern( struct regex *regex, int is_look_around )
 	return pattern;
 }
 
+struct backref *new_backref( int number )
+{
+	struct backref *backref = malloc( sizeof( struct backref ) );
+	memset( backref, 0, sizeof(struct backref) );
+	backref->number = number;
+	return backref;
+}
+
+struct verb *new_verb( char *d, int len )
+{
+	struct verb *verb = malloc( sizeof( struct verb ) );
+	verb->name = malloc( len + 1 );
+	memcpy( verb->name, d, len );
+	verb->name[len] = 0;
+	verb->value = 0;
+	verb->number = -1;
+	return verb;
+}
+
 void append_element_value( struct term *term, int value )
 {
 	struct element *el = term->element_list;
@@ -227,16 +267,17 @@ void reverse_term_list( struct term **pphead )
 	REVERSE_LIST( struct term, pphead );
 }
 
-int is_back_ref( int num, int num_closed_captures )
+int is_backref( int num, int num_closed_captures )
 {
 	if ( num < 8 || num <= num_closed_captures )
 		return 1;
 	return 0;
 }
 
-void append_back_ref( struct term *term, int number )
+void append_backref( struct term *term, int number )
 {
-	struct element *el = new_element( element_back_ref_type, NULL, NULL );
+	struct element *el = new_element( element_backref_type, NULL, NULL );
+	el->backref = new_backref( number );
 	LIST_APPEND( &term->element_list, el );
 }
 
@@ -344,6 +385,9 @@ void apply_possessive( struct term *term )
 		STACK_POP( &s_regex );
 	}
 
+	#
+	# Numbers
+	#
 	action init_number
 		{ number = 0; }
 
@@ -351,6 +395,37 @@ void apply_possessive( struct term *term )
 		{ number = number * 10 + ( *p - '0' ); }
 
 	number = [0-9]+ >init_number $decimal_digit;
+
+	#
+	# Verbs
+	#
+	verb = ( [a-zA-Z_] [a-zA-Z_0-9]* ) >{ verb_len = 0; } ${
+		if ( verb_len < MAX_VERB ) {
+			verb[verb_len++] = *p;
+		}
+	};
+
+	action append_verb {
+		struct element *el = new_element( element_verb_type, NULL, NULL );
+		cur_verb = el->verb = new_verb( verb, verb_len );
+
+		LIST_APPEND( &s_term->element_list, el );
+	}
+
+	action verb_value
+	{
+		cur_verb->value = malloc( verb_len + 1 );
+		memcpy( cur_verb->value, verb, verb_len );
+		cur_verb->value[verb_len] = 0;
+	}
+
+	action verb_number
+	{
+		cur_verb->number = number;
+	}
+
+	verb_forms =
+			verb %append_verb ( ':' verb %verb_value | '=' number %verb_number )?;
 
 	action options_only { fret; }
 
@@ -433,8 +508,8 @@ void apply_possessive( struct term *term )
 
 	action octal_or_backref
 	{
-		if ( is_back_ref( number, closed_captures ) )
-			append_back_ref( s_term, number );
+		if ( is_backref( number, closed_captures ) )
+			append_backref( s_term, number );
 		else
 			append_element_value( s_term, octal );
 	}
@@ -446,7 +521,7 @@ void apply_possessive( struct term *term )
 			fbreak;
 		}
 			
-		append_back_ref( s_term, number );
+		append_backref( s_term, number );
 	}
 
 	# Certainly octal. All octals, with possibly backrefs removed.
@@ -522,6 +597,7 @@ void apply_possessive( struct term *term )
 	#
 	regex = expr;
 
+
 	open_paren_forms :=
 		# Look at the first few charcters to see what the form is. What we
 		# handle here:
@@ -533,7 +609,18 @@ void apply_possessive( struct term *term )
 		#  (?<!re) negative lookbehind
 		(
 			# Non-capture. 
-			'?' options  ( ')' @options_only | ':' @enter_regex ) |
+			'?' options (
+				')' @options_only |
+				':' @enter_regex
+			) |
+
+			# Atomic group.
+			'?>' @enter_regex
+				@{ s_regex->flags |= REGEX_ATOMIC_GROUP; } |
+
+			# Capture number reset on branch.
+			'?|' @enter_regex
+				@{ s_regex->flags |= REGEX_CAPTURE_RESET; } |
 
 			# Lookaround
 			(
@@ -542,12 +629,17 @@ void apply_possessive( struct term *term )
 				'?<=' @{ lat = lat_pos_behind; } @enter_lookaround |
 				'?<!' @{ lat = lat_neg_behind; } @enter_lookaround
 			) |
+
+			# Verbs
+			'*' verb_forms ')' @{fret;} |
+
 			# Catpuring.
-			^'?' @enter_regex @{
+			^( '?' | '*' ) @enter_regex @{
 				s_regex->type = regex_capture;
 				s_regex->capture = next_capture++;
 				fhold;
 			}
+
 		)
 		regex ')' @leave_term @leave_regex @{ fret; };
 
@@ -570,9 +662,9 @@ int pcre_parse( struct pattern **result_pattern, char *line, int len )
 	int octal = 0;
 	int quant_min, quant_max;
 
-	struct pattern *s_pattern = 0;
-	struct regex *s_regex = 0;
-	struct term *s_term = 0;
+	struct pattern *s_pattern = NULL;
+	struct regex *s_regex = NULL;
+	struct term *s_term = NULL;
 
 	/* Collect into this. */
 	struct regex *root_regex = new_regex( regex_non_capture, 0 );
@@ -584,6 +676,10 @@ int pcre_parse( struct pattern **result_pattern, char *line, int len )
 	int next_capture = 1;
 
 	enum look_around_type lat;
+
+	int verb_len;
+	char verb[MAX_VERB];
+	struct verb *cur_verb;
 
 	stack = init_ragel_stack( &stack_size );
 
@@ -652,12 +748,29 @@ void print_element( int indent, struct element *el )
 		if ( el->regex != 0 )
 			print_regex( indent, el->regex );
 	}
-	else if ( el->type == element_look_around_type )
-		printf( "lookaround" );
+	else if ( el->type == element_look_around_type ) {
+		printf( "lookaround " );
+		switch ( el->look_around->type ) {
+			case lat_pos_ahead: printf( "=" ); break;
+			case lat_neg_ahead: printf( "!" ); break;
+			case lat_pos_behind: printf( "<=" ); break;
+			case lat_neg_behind: printf( "<!" ); break;
+		}
+		printf( " " );
+		print_regex( indent, el->look_around->pattern->regex );
+	}
 	else if ( el->type == element_char_class_type )
 		printf( "cc" );
-	else if ( el->type == element_back_ref_type )
-		printf( "backref" );
+	else if ( el->type == element_backref_type )
+		printf( "backref(%d)", el->backref->number );
+	else if ( el->type == element_verb_type ) {
+		printf( "verb(%s", el->verb->name );
+		if ( el->verb->value != NULL )
+			printf( ":%s", el->verb->value );
+		else if ( el->verb->number >= 0 )
+			printf( "=%d", el->verb->number );
+		printf( ")" );
+	}
 
 	if ( el->quantifier != NULL ) {
 		printf( " {%d,", el->quantifier->min );
@@ -692,7 +805,14 @@ void print_term( int indent, struct term *term )
 
 void print_regex( int indent, struct regex *regex )
 {
-	printf( "reg: (\n" );
+	printf( "reg: " );
+	if ( regex->type == regex_capture )
+		printf( "cap(%d) ", regex->capture );
+	if ( regex->flags & REGEX_ATOMIC_GROUP )
+		printf( "atomic_group " );
+	if ( regex->flags & REGEX_CAPTURE_RESET )
+		printf( "capture_reset " );
+	printf( "(\n" );
 
 	struct term *term = regex->term_list;
 	while ( term != NULL ) {
