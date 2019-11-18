@@ -203,7 +203,7 @@ void usage()
 /* Print version information. */
 void version()
 {
-	cout << "Colm version " VERSION << " " PUBDATE << endl <<
+	cout << "Colm version " COLM_VERSION << " " COLM_PUBDATE << endl <<
 			"Copyright (c) 2007-2019 by Adrian D. Thurston" << endl;
 }
 
