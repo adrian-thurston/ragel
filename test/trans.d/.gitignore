@@ -2,3 +2,7 @@
 /trans.c
 /*.o
 /working
+/.deps
+/.libs
+/Makefile
+/Makefile.in

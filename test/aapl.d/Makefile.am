@@ -4,6 +4,8 @@
 
 CPPFLAGS = @SUBJ_AAPL_CPPFLAGS@
 
+EXTRA_DIST = avlverify.h util.h gentests.sh
+
 noinst_PROGRAMS = \
 	stress_avltree stress_avliter stress_avlmel \
 	stress_avlmelkey stress_avlitree stress_avlmap \

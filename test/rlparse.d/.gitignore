@@ -7,3 +7,7 @@
 /working
 /rlparse
 /commit.cc
+/Makefile.in
+/Makefile
+/.deps
+/.libs

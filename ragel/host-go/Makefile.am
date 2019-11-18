@@ -18,7 +18,7 @@ ragel_go_LDADD = ../libragel.la ../libfsm.la $(COLM_LA)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
-EXTRA_DIST = rlparse.lm rlhc.lm
+EXTRA_DIST = rlparse.lm rlhc.lm out-go.lm
 
 rlparse.c: rlparse.lm $(COLM_BINDEP)
 	$(COLM_BIN) -I.. -c -b rlparseGo -o $@ -m rlreduce.cc $<

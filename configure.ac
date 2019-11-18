@@ -316,6 +316,9 @@ AC_OUTPUT([
 	test/aapl.d/Makefile
 	test/colm.d/Makefile
 	test/ragel.d/Makefile
+	test/rlhc.d/Makefile
+	test/rlparse.d/Makefile
+	test/trans.d/Makefile
 	doc/Makefile
 	doc/colm/Makefile
 	doc/ragel/Makefile

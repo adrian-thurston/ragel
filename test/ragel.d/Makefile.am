@@ -30,13 +30,18 @@ noinst_SCRIPTS = gentests
 noinst_PROGRAMS = trans
 
 EXTRA_DIST = \
-	trans.lm trans-c.lm trans-asm.lm gentests.sh \
+	trans.lm \
+	trans-asm.lm     trans-d.lm      trans-ocaml.lm \
+	trans-c.lm       trans-go.lm     trans-ruby.lm \
+	trans-crack.lm   trans-java.lm   trans-rust.lm \
+	trans-csharp.lm  trans-julia.lm \
+	gentests.sh \
 	atoi1.rl clang2.rl cond7.rl element3.rl erract8.rl forder3.rl java1.rl \
 	range.rl scan3.rl xml.rl atoi2.rl clang3.rl cppscan1.rl eofact.rl \
 	erract9.rl gotocallret1.rl java2.rl recdescent1.rl scan4.rl atoi3.rl \
 	clang4.rl cppscan2.rl erract1.rl export1.rl gotocallret2.rl keller1.rl \
 	recdescent2.rl stateact1.rl awkemu.rl cond1.rl cppscan3.rl erract2.rl \
-	export2.rl high1.rl lmgoto.rl recdescent3.rl statechart1.rl builtin.rl \
+	export2.rl high1.rl lmgoto.rl statechart1.rl builtin.rl \
 	cond2.rl cppscan4.rl erract3.rl export3.rl high2.rl mailbox1.rl \
 	repetition.rl strings1.rl call1.rl cond3.rl cppscan5.rl erract4.rl \
 	export4.rl high3.rl mailbox2.rl rlscan.rl strings2.rl call2.rl cond4.rl \
@@ -44,7 +49,8 @@ EXTRA_DIST = \
 	tokstart1.rl call3.rl cond5.rl element1.rl erract6.rl forder1.rl \
 	include1.rl minimize1.rl scan1.rl union.rl clang1.rl cond6.rl \
 	element2.rl erract7.rl forder2.rl include2.rl patact.rl scan2.rl \
-	xmlcommon.rl cppscan1.h eofact.h mailbox1.h strings2.h
+	xmlcommon.rl cppscan1.h eofact.h mailbox1.h strings2.h recdescent4.rl \
+	recdescent5.rl buffer.h
 
 CLEANFILES = working
 
