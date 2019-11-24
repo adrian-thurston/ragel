@@ -132,7 +132,7 @@ namespace ragel
 
 		literal `@ `> `< `% `$
 		literal `from `to `eof `lerr `err
-		literal `when `inwhen `outwhen `>? `$? `%? 
+		literal `when `inwhen `outwhen
 
 		literal `:= `= `; `.. `::
 
@@ -252,8 +252,7 @@ namespace ragel
 		[`@] :Finish | [`>] :Enter | [`%] :Leave | [`$] :All
 
 	def aug_cond
-		[`>?] :Start1 | [`$?] :All1 | [`%?] :Leave1
-	|	[`> `when] :Start2 | [`$ `when] :All2 | [`% `when] :Leave2
+		[`> `when] :Start2 | [`$ `when] :All2 | [`% `when] :Leave2
 	|	[`inwhen] :Start3 | [`when] :All3 | [`outwhen] :Leave3
 
 	def aug_to_state
