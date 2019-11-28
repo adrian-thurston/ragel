@@ -1368,7 +1368,7 @@ test:
 	movq	%rax, %rdi
 	call	exec
 	movl	cs(%rip), %edx
-	movl	$5429, %eax
+	movl	strs_first_final, %eax
 	cmpl	%eax, %edx
 	jl	.L27938
 	movl	$.LC0, %edi

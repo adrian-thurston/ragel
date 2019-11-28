@@ -50,7 +50,7 @@ EXTRA_DIST = \
 	include1.rl minimize1.rl scan1.rl union.rl clang1.rl cond6.rl \
 	element2.rl erract7.rl forder2.rl include2.rl patact.rl scan2.rl \
 	xmlcommon.rl cppscan1.h eofact.h mailbox1.h strings2.h recdescent4.rl \
-	recdescent5.rl buffer.h
+	recdescent5.rl buffer.h strings3.rl
 
 CLEANFILES = working
 
