@@ -67,6 +67,8 @@ void prepareLitString( String &result, bool &caseInsensitive,
 	}
 	else {
 		end = srcString.data + srcString.length();
+		if ( srcString.length() > 2 && *(end-1) == '`' )
+			end -= 1;
 	}
 
 	char *dest = result.data;
