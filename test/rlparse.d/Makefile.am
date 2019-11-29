@@ -1,3 +1,4 @@
+COLM_BIN = ../../colm/colm
 COLM_xCPPFLAGS = -I../../colm/include
 COLM_xLDFLAGS = -L../../colm
 
@@ -32,8 +33,8 @@ EXTRA_DIST = \
 
 BUILT_SOURCES = parse.c if.h if.cc commit.cc
 
-parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM)
-	$(COLM) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
+parse.c: rlparse.lm reducer.lm $(RAGEL_LM) $(COLM_BIN)
+	$(COLM_BIN) -c -b rlparse_object -o $@ -e if.h -x if.cc -m commit.cc $<
 
 if.h: parse.c
 if.cc: parse.c
