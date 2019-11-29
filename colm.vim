@@ -74,7 +74,7 @@ syntax match qual "[a-zA-Z_][a-zA-Z_0-9]*::"
 
 syntax region defTypes matchgroup=defKeywords
 	\ start="\<rl\>" start="\<def\>" start="\<token\>" start="\<ignore\>"
-	\ matchgroup=Function end="[a-zA-Z_][a-zA-Z0-9_]*" end="/"me=e-1
+	\ matchgroup=Function end="[a-zA-Z_][a-zA-Z0-9_]*" end="/"me=e-1 end="`"me=e-1
 
 syntax region redTypes matchgroup=redBlock
 	\ start="\<reduction\>" 

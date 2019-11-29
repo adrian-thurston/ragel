@@ -321,8 +321,12 @@ def struct_key
 def struct_def
 	[struct_key id ItemList: struct_item* END]
 
+def literal_keyword
+	[LITERAL]
+|	[TOKEN]
+
 def literal_def
-	[LITERAL literal_list]
+	[literal_keyword literal_list]
 
 def literal_list
 	[literal_list literal_item] :Item
