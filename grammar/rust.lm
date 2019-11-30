@@ -37,7 +37,14 @@ lex
 	rl float_suffix
 		/ ( 'f32' | 'f64' )? /
 
-	# Not implemented: DEC_LITERAL . (not immediately followed by ., _ or an identifier)
+	# Handles: DEC_LITERAL . (not immediately followed by ., _ or an identifier)
+	token hanging_float
+		/ [0-9]+ '.' [^0-9._a-zA-Z] /
+		{
+			Float: str = input->pull( match_length - 1 )
+			input->push( make_token( typeid<float>, Float )  )
+		}
+
 	token float/
 		[0-9]+ float_exponent |
 		[0-9]+ '.' [0-9]+ float_exponent? |
