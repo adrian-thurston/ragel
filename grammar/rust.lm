@@ -50,18 +50,51 @@ lex
 		[0-9]+ '.' [0-9]+ float_exponent? |
 		[0-9]+ ( '.' [0-9]+ )? float_exponent? float_suffix
 	/
-
-	token raw_string /
-		'r"'      ( any* :>> '"'      ) |
-		'r#"'     ( any* :>> '"#'     ) |
-		'r##"'    ( any* :>> '"##'    ) |
-		'r###"'   ( any* :>> '"###'   ) |
-		'r####"'  ( any* :>> '"####'  ) |
-		'r#####"' ( any* :>> '"#####' ) /
+	
+	# Raw open. Rest handled in a its own lexical region.
+	token raw_open / 'r' '#' * '"' /
+	{
+		# Stash the length (not including r) for comparison against potential
+		# close strings.
+		RawOpenLength = match_length - 1
+		RawOpen: str = input->pull( match_length )
+		input->push( make_token( typeid<raw_open>, RawOpen )  )
+	}
 
 	ignore / "//" [^\n]* '\n' /
 	ignore / "/*" any* :>> "*/" /
 	ignore / [ \t\n]+ /
+end
+
+# Raw strings.
+def raw_string
+	[raw_open raw_content* raw_close]
+
+global RawOpenLength: int = 0
+
+# Lexical region dedicated to raw strings. Attempts to close by matching
+# candidates and then testing the length.
+lex 
+	token raw_close / '"' '#'* /
+	{
+		# Check the length. We use >= to match the close because rust is lazy
+		# in matching it. If it is longer we just chop it. Probably will result
+		# in a parse error.
+		if match_length >= RawOpenLength {
+			# Chop it by using RawOpenLength in the pull from input.
+			Candidate: str = input->pull( RawOpenLength )
+			input->push( make_token( typeid<raw_close>, Candidate )  )
+		}
+		else {
+			# Otherwise just send it as raw content.
+			Candidate: str = input->pull( match_length )
+			input->push( make_token( typeid<raw_content>, Candidate )  )
+		}
+	}
+
+	# Content, send out strings not containing # or ". Or single such chars
+	# that are not part of a sequence that is first matched by close candidate.
+	token raw_content / [^"#]+ | any /
 end
 
 namespace attr
