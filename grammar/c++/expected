@@ -1,0 +1,74 @@
+***** NAMSPACES *****
+<root_namespace> {
+  A {
+    B
+  }
+  B {
+    Find
+  }
+  C {
+    D
+  }
+  C
+  C
+  C
+  C {
+    j
+  }
+  C
+  C
+  C
+  C {
+    D
+    I
+    i
+  }
+  C {
+    find
+  }
+  C {
+    D
+    g
+  }
+  C {
+    D
+    f
+  }
+  D
+  E
+  E
+  T
+  Y {
+    Z
+    f
+    t
+  }
+  a
+  b
+  b
+  c
+  c
+  d
+  e
+  f
+  f
+  f
+  i
+  i
+  Int
+  ns1 {
+    sub1 {
+      A
+    }
+    sub2 {
+      B
+    }
+  }
+  ns2 {
+    C
+    i
+  }
+  function
+}
+***** UNKNOWN DECLARATORS *****
+C
