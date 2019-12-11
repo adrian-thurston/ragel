@@ -1,0 +1,11 @@
+include 'go.lm'
+
+parse P: program [stdin]
+
+if !P {
+	send stderr "parse error: [error]
+	exit(1)
+}
+else {
+	print [P]
+}

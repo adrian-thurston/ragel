@@ -1,0 +1,23 @@
+include 'utf8.lm'
+
+token BOM / 0xEF 0xBB 0xBF /
+
+lex
+	rl newline / 0x0A /
+
+	rl valid_utf8 /
+		0x00 .. 0x7F |
+		0xC0 .. 0xDF any |
+		0xE0 .. 0xEF any any |
+		0xF0 .. 0xF7 any any any
+	/
+
+	rl unicode_char / valid_utf8 - 0x0A /
+
+	token id / unicode_letter unicode_letter* /
+
+	ignore /[ \t\n\r]+/
+end
+
+def program
+	[BOM? id*]
