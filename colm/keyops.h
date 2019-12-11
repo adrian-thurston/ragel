@@ -35,6 +35,7 @@ enum MarkType
 
 typedef unsigned long long Size;
 
+/* This key struct does not implement unsigned. */
 struct Key
 {
 private:
@@ -57,12 +58,8 @@ public:
 	Key( const Key &key ) : key(key.key) {}
 	Key( long key ) : key(key) {}
 
-	/* Returns the value used to represent the key. This value must be
-	 * interpreted based on signedness. */
 	long getVal() const { return key; };
 
-	/* Returns the key casted to a long long. This form of the key does not
-	 * require and signedness interpretation. */
 	long long getLongLong() const;
 
 	bool isUpper() const { return ( 'A' <= key && key <= 'Z' ); }

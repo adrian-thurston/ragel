@@ -1228,16 +1228,37 @@ FsmGraph *Range::walk( Compiler *pd )
 	delete lowerFsm;
 	delete upperFsm;
 
+	bool span0 = false;
+	if ( rangeCrossesZero && lowKey >= 0 && highKey < 0 )
+		span0 = true;
+
 	/* Validate the range. */
-	if ( lowKey > highKey ) {
+	if ( !span0 && lowKey > highKey ) {
 		/* Recover by setting upper to lower; */
 		error(lowerLit->loc) << "lower end of range is greater then upper end" << endl;
 		highKey = lowKey;
 	}
 
 	/* Return the range now that it is validated. */
-	FsmGraph *retFsm = new FsmGraph();
-	retFsm->rangeFsm( lowKey, highKey );
+	FsmGraph *retFsm = 0;
+	if ( span0 ) {
+		FsmGraph *first = new FsmGraph();
+		FsmGraph *second = new FsmGraph();
+		Key k128 = 127;
+		Key kn127 = -128;
+		first->rangeFsm( lowKey, k128 );
+		second->rangeFsm( kn127, highKey );
+
+		first->unionOp( second );
+		first->minimizePartition2();
+		retFsm = first;
+	}
+	else {
+		/* Usual case. */
+		retFsm = new FsmGraph();
+		retFsm->rangeFsm( lowKey, highKey );
+	}
+
 	return retFsm;
 }
 

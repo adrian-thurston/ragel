@@ -67,6 +67,7 @@ extern bool gblLibrary;
 extern long gblActiveRealm;
 extern char machineMain[];
 extern const char *exportHeaderFn;
+extern bool rangeCrossesZero;
 
 struct colm_location;
 
