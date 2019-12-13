@@ -71,6 +71,8 @@ colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
+BUILT_SOURCES = include/colm
+
 if EXTERNAL_COLM
 
 #
@@ -90,7 +92,7 @@ BUILD_PARSE_3_WITH = $(builddir)/bootstrap2$(EXEEXT)
 # using limited features. No code is supported. 
 #
 bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
-bootstrap0_SOURCES = consinit.cc consinit.h main.cc
+bootstrap0_SOURCES = consinit.cc consinit.h main.cc version.h
 bootstrap0_LDADD = libprog.a libcolm.la
 
 #
@@ -99,21 +101,27 @@ bootstrap0_LDADD = libprog.a libcolm.la
 # the colm syntax/semantics that is implemented in colm itself.
 #
 
-gen/parse1.c: bootstrap0$(EXEEXT)
-	mkdir -p gen
-	$(builddir)/bootstrap0 -c -o gen/parse1.c -e gen/if1.h -x gen/if1.cc
+tar/bootstrap1.tar: bootstrap0$(EXEEXT)
+	mkdir -p tar gen
+	$(builddir)/bootstrap0 -c -o tar/parse1.c -e tar/if1.h -x tar/if1.cc
+	tar -C tar -cf tar/bootstrap1.tar parse1.c if1.h if1.cc
 
-gen/if1.h: gen/parse1.c
-gen/if1.cc: gen/parse1.c
+gen/parse1.c: tar/bootstrap1.tar
+	tar -C gen -xmf $< parse1.c
 
-gen/bootstrap1-if1.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
-bootstrap1-loadinit.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+gen/if1.h: tar/bootstrap1.tar
+	tar -C gen -xmf $< if1.h
+
+gen/if1.cc: tar/bootstrap1.tar
+	tar -C gen -xmf $< if1.cc
 
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
 bootstrap1_CFLAGS = $(common_CFLAGS)
 bootstrap1_SOURCES = loadinit.h loadinit.cc main.cc
 nodist_bootstrap1_SOURCES = gen/if1.h gen/if1.cc gen/parse1.c
 bootstrap1_LDADD = libprog.a libcolm.la
+
+BUILT_SOURCES += gen/parse1.c gen/if1.h gen/if1.cc
 
 #
 # Bootstrap2: The input program is specified using the colm grammar used in
@@ -122,15 +130,21 @@ bootstrap1_LDADD = libprog.a libcolm.la
 # and thus generates the sources used in the colm binary.
 #
 
-gen/parse2.c: bootstrap1$(EXEEXT) colm.lm
-	mkdir -p gen
-	$(builddir)/bootstrap1 -c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
+tar/bootstrap2.tar: bootstrap1$(EXEEXT) colm.lm
+	mkdir -p tar gen
+	$(builddir)/bootstrap1 -c -o tar/parse2.c -e tar/if2.h -x tar/if2.cc colm.lm
+	tar -C tar -cf tar/bootstrap2.tar parse2.c if2.h if2.cc
 
-gen/if2.h: gen/parse2.c
-gen/if2.cc: gen/parse2.c
+gen/parse2.c: tar/bootstrap2.tar
+	tar -C gen -xmf $< parse2.c
 
-gen/bootstrap2-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
-bootstrap2-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+gen/if2.h: tar/bootstrap2.tar
+	tar -C gen -xmf $< if2.h
+
+gen/if2.cc: tar/bootstrap2.tar
+	tar -C gen -xmf $< if2.cc
+
+BUILT_SOURCES += gen/parse2.c gen/if2.h gen/if2.cc
 
 bootstrap2_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 bootstrap2_CFLAGS = $(common_CFLAGS)
@@ -140,16 +154,21 @@ bootstrap2_LDADD = libprog.a libcolm.la
 
 endif
 
-gen/parse3.c: $(BUILD_PARSE_3_WITH) prog.lm
+tar/bootstrap3.tar: $(BUILD_PARSE_3_WITH) prog.lm
 	mkdir -p gen
-	$(BUILD_PARSE_3_WITH) -c -o gen/parse3.c -e gen/if3.h -x gen/if3.cc prog.lm
+	$(BUILD_PARSE_3_WITH) -c -o tar/parse3.c -e tar/if3.h -x tar/if3.cc prog.lm
+	tar -C tar -cf tar/bootstrap3.tar parse3.c if3.h if3.cc
 
-gen/if3.h: gen/parse3.c
-gen/if3.cc: gen/parse3.c
+gen/parse3.c: tar/bootstrap3.tar
+	tar -C gen -xmf $< parse3.c
 
-gen/colm-if3.$(OBJEXT): gen/if3.h gen/if3.cc gen/parse3.c
-colm-loadcolm.$(OBJEXT): gen/if3.h gen/if3.cc gen/parse3.c
+gen/if3.h: tar/bootstrap3.tar
+	tar -C gen -xmf $< if3.h
 
+gen/if3.cc: tar/bootstrap3.tar
+	tar -C gen -xmf $< if3.cc
+
+BUILT_SOURCES += gen/parse3.c gen/if3.h gen/if3.cc
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
@@ -157,7 +176,7 @@ colm_SOURCES = loadcolm.h loadcolm.cc main.cc
 nodist_colm_SOURCES = gen/if3.h gen/if3.cc gen/parse3.c
 colm_LDADD = libprog.a libcolm.la
 
-BUILT_SOURCES = version.h include/colm
+BUILT_SOURCES += version.h include/colm
 
 include/colm:
 	mkdir -p include

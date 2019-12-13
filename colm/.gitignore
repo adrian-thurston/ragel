@@ -17,6 +17,7 @@
 
 /bootstrap[012]
 /gen
+/tar
 /include
 
 /libprog.a
