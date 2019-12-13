@@ -8,4 +8,14 @@ if !P {
 }
 else {
 	print [P]
+
+	for IL: int_lit in P {
+		print "int_lit: [^IL]-
+	}
+	for RL: rune_lit in P {
+		print "rune_lit: [^RL]-
+	}
+	for SL: string_lit in P {
+		print "string_lit: [^SL]-
+	}
 }

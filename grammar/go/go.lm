@@ -3,6 +3,9 @@ include 'utf8.lm'
 token BOM / 0xEF 0xBB 0xBF /
 
 lex
+	#
+	# Definitions.
+	#
 	rl newline / 0x0A /
 
 	rl valid_utf8 /
@@ -12,12 +15,180 @@ lex
 		0xF0 .. 0xF7 any any any
 	/
 
-	rl unicode_char / valid_utf8 - 0x0A /
+	rl unicode_char  / valid_utf8 - 0x0A /
 
-	token id / unicode_letter unicode_letter* /
+	rl letter        / unicode_letter | '_' /
+	rl binary_digit  / '0' | '1' /
+	rl octal_digit   / '0' .. '7' /
+	rl decimal_digit / '0' .. '9' /
+	rl hex_digit     / '0' .. '9' | 'A' .. 'F' | 'a' .. 'f' /
 
+	#
+	# Tokens
+	#
+
+	literal
+		`+    `&     `+=    `&=     `&&    `==    `!=    `(    `)
+		`-    `|     `-=    `|=     `||    `<     `<=    `[    `]
+		`*    `^     `*=    `^=     `<-    `>     `>=    `{    `}
+		`/    `<<    `/=    `<<=    `++    `=     `:=    `,    #;
+		`%    `>>    `%=    `>>=    `--    `!     `...   `.    `:
+			  `&^           `&^=
+
+	token SEMI /';'/
+
+	literal
+		`break        `default      `func         `interface    `select
+		`case         `defer        `go           `map          `struct
+		`chan         `else         `goto         `package      `switch
+		`const        `fallthrough  `if           `range        `type
+		`continue     `for          `import       `return       `var
+
+	token id
+		/ letter ( letter | unicode_digit )* /
+
+	#
+	# Non-float numbers
+	#
+	
+	rl binary_digits  / binary_digit ( '_'? binary_digit )* /
+	rl octal_digits   / octal_digit ( '_'? octal_digit )* /
+	rl decimal_digits / decimal_digit ( '_'? decimal_digit )* /
+	rl hex_digits     / hex_digit ( '_'? hex_digit )* /
+
+	token binary_lit     / '0' ( 'b' | 'B' ) '_'? binary_digits /
+	token octal_lit      / '0' ( 'o' | 'O' )? '_'? octal_digits /
+	token decimal_lit    / '0' | ( '1' .. '9' ) ( '_'? decimal_digits )? /
+	token hex_lit        / '0' ( 'x' | 'X' ) '_'? hex_digits /
+
+	rl int_lit
+		/ decimal_lit | binary_lit | octal_lit | hex_lit /
+
+	def int_lit
+		[decimal_lit] | [binary_lit] | [octal_lit] | [hex_lit]
+
+	rl decimal_exponent  / ( 'e' | 'E' ) ( '+' | '-' )? decimal_digits /
+
+	#
+	# Floats
+	#
+	token decimal_float_lit /
+		decimal_digits '.' decimal_digits? decimal_exponent? |
+		decimal_digits decimal_exponent |
+		'.' decimal_digits decimal_exponent? /
+
+	rl hex_mantissa
+		/ '_'? hex_digits '.' hex_digits? | '_'? hex_digits | '.' hex_digits /
+	rl hex_exponent
+		/ ( 'p' | 'P' ) ( '+' | '-' )? decimal_digits /
+
+	token hex_float_lit
+		/ '0' ( 'x' | 'X' ) hex_mantissa hex_exponent /
+
+	rl float_lit
+		/ decimal_float_lit | hex_float_lit /
+
+	def float_lit
+		[decimal_float_lit] | [hex_float_lit]
+	
+	#
+	# Imaginary
+	#
+	token imaginary_lit / 
+		( decimal_digits | int_lit | float_lit ) 'i' /
+	
+	#
+	# Rune literals
+	#
+
+
+	rl escaped_char
+		/ '\\' ( 'a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | "'" | '"' ) /
+
+	rl octal_byte_value / '\\' octal_digit octal_digit octal_digit /
+	rl hex_byte_value   / '\\' 'x' hex_digit hex_digit /
+	rl little_u_value   / '\\' 'u' hex_digit hex_digit hex_digit hex_digit /
+	rl big_u_value      / '\\' 'U' hex_digit hex_digit hex_digit hex_digit
+							   hex_digit hex_digit hex_digit hex_digit /
+
+	rl byte_value       / octal_byte_value | hex_byte_value /
+	rl unicode_value    / unicode_char | little_u_value | big_u_value | escaped_char /
+
+	token rune_lit / "'" ( unicode_value | byte_value ) "'" /
+
+	#
+	# String literals
+	#
+	rl raw_string_lit         / "`" ( ( unicode_char | newline ) - '`' )* "`" /
+	rl interpreted_string_lit / '"' ( ( unicode_value | byte_value ) - '"' )* '"' /
+	token string_lit          / raw_string_lit | interpreted_string_lit /
+
+	#
+	# Comments
+	#
+	rl line_comment
+		/ '//' [^\n]* '\n' /
+	
+	rl general_comment
+		/ '/*' any* :> '*/'/
+
+	rl pre_insert_semi /
+		( id -
+			'break'     - 'default'     - 'func'      - 'interface' - 'select'
+			'case'      - 'defer'       - 'go'        - 'map'       - 'struct'
+			'chan'      - 'else'        - 'goto'      - 'package'   - 'switch'
+			'const'     - 'fallthrough' - 'if'        - 'range'     - 'type'
+			'continue'  - 'for'         - 'import'    - 'return'    - 'var' ) |
+		int_lit |
+		float_lit |
+		imaginary_lit |
+		rune_lit |
+		string_lit
+	/
+
+	#
+	# Semi-colons
+	#
+	token insert_semi /
+		pre_insert_semi
+		( [ \t]+ | general_comment )*
+		( '/*' [^\n]* | line_comment | '\n'  )
+	/
+	{
+		parse BA: break_apart::break_apart[match_text]
+
+		Prefix: str = input->pull( BA.pre_semi.data.length )
+		input->push( make_token( typeid<SEMI>, ';' ) )
+		input->push( Prefix )
+	}
+
+	ignore /line_comment/
+	ignore /general_comment/
 	ignore /[ \t\n\r]+/
 end
 
+namespace break_apart
+	lex
+		token pre_semi / pre_insert_semi /
+		ignore /line_comment/
+		ignore /'/*' any*/
+		ignore /[ \t\n\r]+/
+	end
+
+	def break_apart
+		[pre_semi]
+end
+
+def item
+	[id]
+|	[int_lit]
+|	[float_lit]
+|	[imaginary_lit]
+|	[rune_lit]
+|	[string_lit]
+
+def stmt
+	[item+ SEMI]
+
 def program
-	[BOM? id*]
+	[BOM? stmt*]

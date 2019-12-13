@@ -1,13 +1,10 @@
 COLM = ../../colm/colm
 RAGEL = ../../ragel/ragel
 
-all: go insert-semi
+all: go
 
 go: go.lm parsego.lm utf8.lm $(COLM)
 	$(COLM) -o go parsego.lm
-
-insert-semi: insert-semi.lm
-	$(COLM) $<
 
 utf8.lm: Makefile utf8pat.rb UnicodeData.txt
 	echo 'rl unicode_letter /' >utf8.lm
