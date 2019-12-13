@@ -67,43 +67,37 @@ libprog_a_SOURCES = \
 
 libprog_a_CXXFLAGS = $(common_CFLAGS)
 
-colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
-colm_CFLAGS = $(common_CFLAGS)
-colm_SOURCES = \
-	loadcolm.h loadcolm.cc main.cc
-nodist_colm_SOURCES = \
-	gen/if2.h gen/if2.cc gen/parse2.c
-colm_LDADD = libprog.a libcolm.la
-
 colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
 if EXTERNAL_COLM
 
-gen/parse2.c: $(EXTERNAL_COLM)/bin/colm prog.lm
-	mkdir -p gen
-	$(EXTERNAL_COLM)/bin/colm -c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc prog.lm
-
-gen/if2.h: gen/parse2.c
-gen/if2.cc: gen/parse2.c
-
-gen/colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
-colm-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+#
+# Generate the parser using a single run with an external colm program.
+#
+BUILD_PARSE_3_WITH = $(EXTERNAL_COLM)/bin/colm$(EXEEXT)
 
 else
 
-noinst_PROGRAMS = bootstrap0 bootstrap1
+noinst_PROGRAMS = bootstrap0 bootstrap1 bootstrap2
 
+BUILD_PARSE_3_WITH = $(builddir)/bootstrap2$(EXEEXT)
+
+#
+# Bootstrap0: The input program for bootstrap0 is construced using internal
+# data structure constructors. It produces a program that can parse a grammar
+# using limited features. No code is supported. 
+#
 bootstrap0_CXXFLAGS = $(common_CFLAGS) -DCONS_INIT
 bootstrap0_SOURCES = consinit.cc consinit.h main.cc
 bootstrap0_LDADD = libprog.a libcolm.la
 
-bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
-bootstrap1_CFLAGS = $(common_CFLAGS)
-bootstrap1_SOURCES = loadinit.h loadinit.cc main.cc
-nodist_bootstrap1_SOURCES = gen/if1.h gen/if1.cc gen/parse1.c
-bootstrap1_LDADD = libprog.a libcolm.la
+#
+# Bootstrap1: The input program is specified using a stripped down colm syntax.
+# It produces a program that can parse most colm syntax, with the exception of
+# the colm syntax/semantics that is implemented in colm itself.
+#
 
 gen/parse1.c: bootstrap0$(EXEEXT)
 	mkdir -p gen
@@ -112,6 +106,22 @@ gen/parse1.c: bootstrap0$(EXEEXT)
 gen/if1.h: gen/parse1.c
 gen/if1.cc: gen/parse1.c
 
+gen/bootstrap1-if1.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+bootstrap1-loadinit.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+
+bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
+bootstrap1_CFLAGS = $(common_CFLAGS)
+bootstrap1_SOURCES = loadinit.h loadinit.cc main.cc
+nodist_bootstrap1_SOURCES = gen/if1.h gen/if1.cc gen/parse1.c
+bootstrap1_LDADD = libprog.a libcolm.la
+
+#
+# Bootstrap2: The input program is specified using the colm grammar used in
+# bootstrap1, plus some rewrite rules that implement the final parts of
+# syntax/semantics. It produces a program that can parse full colm programs,
+# and thus generates the sources used in the colm binary.
+#
+
 gen/parse2.c: bootstrap1$(EXEEXT) colm.lm
 	mkdir -p gen
 	$(builddir)/bootstrap1 -c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
@@ -119,13 +129,33 @@ gen/parse2.c: bootstrap1$(EXEEXT) colm.lm
 gen/if2.h: gen/parse2.c
 gen/if2.cc: gen/parse2.c
 
-gen/bootstrap1-if1.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
-bootstrap1-loadinit.$(OBJEXT): gen/if1.h gen/if1.cc gen/parse1.c
+gen/bootstrap2-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+bootstrap2-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
 
-gen/colm-if2.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
-colm-loadcolm.$(OBJEXT): gen/if2.h gen/if2.cc gen/parse2.c
+bootstrap2_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
+bootstrap2_CFLAGS = $(common_CFLAGS)
+bootstrap2_SOURCES = loadcolm.h loadcolm.cc main.cc
+nodist_bootstrap2_SOURCES = gen/if2.h gen/if2.cc gen/parse2.c
+bootstrap2_LDADD = libprog.a libcolm.la
 
 endif
+
+gen/parse3.c: $(BUILD_PARSE_3_WITH) prog.lm
+	mkdir -p gen
+	$(BUILD_PARSE_3_WITH) -c -o gen/parse3.c -e gen/if3.h -x gen/if3.cc prog.lm
+
+gen/if3.h: gen/parse3.c
+gen/if3.cc: gen/parse3.c
+
+gen/colm-if3.$(OBJEXT): gen/if3.h gen/if3.cc gen/parse3.c
+colm-loadcolm.$(OBJEXT): gen/if3.h gen/if3.cc gen/parse3.c
+
+
+colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
+colm_CFLAGS = $(common_CFLAGS)
+colm_SOURCES = loadcolm.h loadcolm.cc main.cc
+nodist_colm_SOURCES = gen/if3.h gen/if3.cc gen/parse3.c
+colm_LDADD = libprog.a libcolm.la
 
 BUILT_SOURCES = version.h include/colm
 

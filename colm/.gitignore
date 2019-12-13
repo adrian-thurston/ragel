@@ -15,8 +15,7 @@
 /stamp-h1
 /stamp-h2
 
-/bootstrap0
-/bootstrap1
+/bootstrap[012]
 /gen
 /include
 
