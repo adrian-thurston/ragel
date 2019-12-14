@@ -7,5 +7,71 @@ A: str = argv->pop()
 F: stream = open( A, 'r' )
 parse P: start [ F ]
 
+def new_roots
+	[new_roots root_item]
+|	[]
+
+prod_list cons_prod( SLA: prod_sublist )
+{
+	if match SLA [Left: prod_sublist BAR prod_el_list]
+		return cons prod_list[ cons_prod(Left) ' | [ ' SLA.prod_el_list ' ] ' ]
+	else
+		return cons prod_list[ '[ ' SLA.prod_el_list ' ]' ]
+}
+
+void rewrite( P: ref<start> )
+{
+	Modified: bool = false
+	cons Additional: new_roots []
+
+	for PE: prod_el in P {
+		if match PE
+				[OptName: opt_prod_el_name POPEN PS: prod_sublist PCLOSE OptRep: opt_repeat]
+		{
+			PE = cons prod_el
+				[OptName "_sublist_" OptRep]
+
+			cons Def: cfl_def
+				"def _sublist_ [cons_prod(PS)]"
+
+			Additional = cons new_roots
+				[Additional Def]
+		}
+		else if match PE
+				[OptName: opt_prod_el_name Qual: region_qual Id: id "<*"]
+		{
+			parse LeftRepId: id "_lrep_[Id]"
+			PE = cons prod_el [OptName Qual LeftRepId]
+
+			cons Def: cfl_def "def [LeftRepId] \[[LeftRepId] [Id]\] | \[\]
+
+			Additional = cons new_roots [Additional Def]
+		}
+		else if match PE
+				[OptName: opt_prod_el_name Qual: region_qual Id: id "<+"]
+		{
+			parse LeftRepId: id "_lrep_[Id]"
+
+			PE = cons prod_el [OptName Qual LeftRepId]
+
+			cons Def: cfl_def "def [LeftRepId] \[[LeftRepId] [Id]\] | \[[Id]\]
+
+			Additional = cons new_roots [Additional Def]
+		}
+	}
+
+	while  ( Additional.root_item ) {
+		P = cons start [Additional.root_item P.RootItemList]
+		Additional = Additional._new_roots
+		Modified = true
+	}
+	return Modified
+}
+
+if P {
+	while ( rewrite( P ) ) {}
+	#rewrite( P )
+}
+
 ColmTree = P
 ColmError = error

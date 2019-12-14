@@ -472,9 +472,14 @@ def opt_id
 def ignore_def
 	[IGNORE opt_id LEX_FSLASH opt_lex_expr LEX_FSLASH]
 
+def prod_sublist
+	[prod_sublist BAR prod_el_list]
+|	[prod_el_list]
+
 def prod_el
 	[opt_prod_el_name region_qual id opt_repeat] :Id
 |	[opt_prod_el_name region_qual backtick_lit opt_repeat] :Lit
+|	[opt_prod_el_name POPEN prod_sublist PCLOSE opt_repeat ] :SubList
 
 def opt_prod_el_name
 	[id COLON] :Name
@@ -666,6 +671,8 @@ def opt_repeat
 	[STAR] :Star
 |	[PLUS] :Plus
 |	[QUESTION] :Question
+|	[LT STAR] :LeftStar
+|	[LT PLUS] :LeftPlus
 |	[]
 
 def opt_capture

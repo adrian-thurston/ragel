@@ -459,7 +459,7 @@ int repl_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, 
 
 		/* Okay to go up to the front of the buffer. */
 		if ( length > avail ) {
-			ss->cons_item= ss->cons_item->prev;
+			ss->cons_item = ss->cons_item->prev;
 			ss->offset = ss->cons_item->data.length();
 			length -= avail;
 		}

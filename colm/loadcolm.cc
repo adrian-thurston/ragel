@@ -844,6 +844,11 @@ struct LoadColm
 		case opt_repeat::Question:
 			repeatType = RepeatOpt;
 			break;
+		case opt_repeat::LeftStar:
+		case opt_repeat::LeftPlus:
+			error( OptRepeat.loc() ) << "<* and <+ are implemented as a "
+					"colm transformation, they are not accepted at this stage" << endp;
+			break;
 		}
 		return repeatType;
 	}
@@ -972,10 +977,10 @@ struct LoadColm
 		}
 
 		RepeatType repeatType = walkOptRepeat( El.opt_repeat() );
-		NamespaceQual *nspaceQual = walkRegionQual( El.region_qual() );
-
 		switch ( El.prodName() ) {
 		case prod_el::Id: {
+			NamespaceQual *nspaceQual = walkRegionQual( El.region_qual() );
+
 			String typeName = El.id().data();
 			ProdEl *prodEl = prodElName( El.id().loc(), typeName,
 					nspaceQual, captureField, repeatType, false );
@@ -983,11 +988,17 @@ struct LoadColm
 			break;
 		}
 		case prod_el::Lit: {
+			NamespaceQual *nspaceQual = walkRegionQual( El.region_qual() );
+
 			String lit = El.backtick_lit().data();
 			ProdEl *prodEl = prodElLiteral( El.backtick_lit().loc(), lit,
 					nspaceQual, captureField, repeatType, false );
 			appendProdEl( list, prodEl );
 			break;
+		}
+		case prod_el::SubList: {
+			error( El.POPEN().loc() ) << "production sublist is implemented as a "
+					"colm transformation, it is not accepted at this stage" << endp;
 		}}
 	}
 
