@@ -87,7 +87,7 @@ noinst_PROGRAMS = bootstrap0 bootstrap1 bootstrap2
 BUILD_PARSE_3_WITH = $(builddir)/bootstrap2$(EXEEXT)
 
 #
-# Bootstrap0: The input program for bootstrap0 is construced using internal
+# bootstrap0: The input program for bootstrap0 is construced using internal
 # data structure constructors. It produces a program that can parse a grammar
 # using limited features. No code is supported. 
 #
@@ -96,7 +96,7 @@ bootstrap0_SOURCES = consinit.cc consinit.h main.cc version.h
 bootstrap0_LDADD = libprog.a libcolm.la
 
 #
-# Bootstrap1: The input program is specified using a stripped down colm syntax.
+# bootstrap1: The input program is specified using a stripped down colm syntax.
 # It produces a program that can parse most colm syntax, with the exception of
 # the colm syntax/semantics that is implemented in colm itself.
 #
@@ -130,7 +130,7 @@ nodist_bootstrap1_SOURCES = gen/if1.h gen/if1.cc gen/parse1.c
 bootstrap1_LDADD = libprog.a libcolm.la
 
 #
-# Bootstrap2: The input program is specified using the colm grammar used in
+# bootstrap2: The input program is specified using the colm grammar used in
 # bootstrap1, plus some rewrite rules that implement the final parts of
 # syntax/semantics. It produces a program that can parse full colm programs,
 # and thus generates the sources used in the colm binary.
@@ -150,13 +150,12 @@ gen/if2.h: tar/bootstrap2.tar
 gen/if2.cc: tar/bootstrap2.tar
 	tar -C gen -xmf $< if2.cc
 
-
 BUILT_SOURCES += gen/parse2.c gen/if2.h gen/if2.cc
-loadcolm.cc: gen/if2.h
+loadboot2.cc: gen/if2.h
 
 bootstrap2_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 bootstrap2_CFLAGS = $(common_CFLAGS)
-bootstrap2_SOURCES = loadcolm.h loadcolm.cc main.cc version.h
+bootstrap2_SOURCES = main.cc loadboot2.cc loadfinal.h version.h
 nodist_bootstrap2_SOURCES = gen/if2.h gen/if2.cc gen/parse2.c
 bootstrap2_LDADD = libprog.a libcolm.la
 
@@ -177,11 +176,11 @@ gen/if3.cc: tar/bootstrap3.tar
 	tar -C gen -xmf $< if3.cc
 
 BUILT_SOURCES += gen/parse3.c gen/if3.h gen/if3.cc
-#loadcolm.cc: gen/if3.h
+loadcolm.cc: gen/if3.h
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
-colm_SOURCES = loadcolm.h loadcolm.cc main.cc version.h
+colm_SOURCES = main.cc loadcolm.cc loadfinal.h version.h
 nodist_colm_SOURCES = gen/if3.h gen/if3.cc gen/parse3.c
 colm_LDADD = libprog.a libcolm.la
 
@@ -197,4 +196,4 @@ config.h: ../src/config.h
 	cp ../src/config.h ./
 
 CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = colm.lm
+EXTRA_DIST = prog.lm colm.lm loadfinal.cc

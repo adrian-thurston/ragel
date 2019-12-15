@@ -41,7 +41,7 @@
 #elif defined(LOAD_INIT)
 #include "loadinit.h"
 #else
-#include "loadcolm.h"
+#include "loadfinal.h"
 #endif
 
 using std::istream;
