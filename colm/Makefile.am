@@ -71,7 +71,7 @@ colmincdir = $(includedir)/colm
 
 colminc_HEADERS = $(RUNTIME_HDR)
 
-BUILT_SOURCES = include/colm
+BUILT_SOURCES = version.h include/colm
 
 if EXTERNAL_COLM
 
@@ -115,13 +115,19 @@ gen/if1.h: tar/bootstrap1.tar
 gen/if1.cc: tar/bootstrap1.tar
 	tar -C gen -xmf $< if1.cc
 
+# Listing if1.h in BUILT_SOURCES isn't sufficient because it depends on the
+# building of bootstrap0. Automake wants to put all built sources into a list
+# of files built before ANYTHING else (which includes bootstrap0). Not sure if
+# it is rejected by automake or make. But in any case, it doesn't work. Fixed
+# with the following additional dependency.
+BUILT_SOURCES += gen/parse1.c gen/if1.h gen/if1.cc
+loadinit.cc: gen/if1.h
+
 bootstrap1_CXXFLAGS = $(common_CFLAGS) -DLOAD_INIT
 bootstrap1_CFLAGS = $(common_CFLAGS)
-bootstrap1_SOURCES = loadinit.h loadinit.cc main.cc
+bootstrap1_SOURCES = loadinit.h loadinit.cc main.cc version.h
 nodist_bootstrap1_SOURCES = gen/if1.h gen/if1.cc gen/parse1.c
 bootstrap1_LDADD = libprog.a libcolm.la
-
-BUILT_SOURCES += gen/parse1.c gen/if1.h gen/if1.cc
 
 #
 # Bootstrap2: The input program is specified using the colm grammar used in
@@ -144,11 +150,13 @@ gen/if2.h: tar/bootstrap2.tar
 gen/if2.cc: tar/bootstrap2.tar
 	tar -C gen -xmf $< if2.cc
 
+
 BUILT_SOURCES += gen/parse2.c gen/if2.h gen/if2.cc
+loadcolm.cc: gen/if2.h
 
 bootstrap2_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 bootstrap2_CFLAGS = $(common_CFLAGS)
-bootstrap2_SOURCES = loadcolm.h loadcolm.cc main.cc
+bootstrap2_SOURCES = loadcolm.h loadcolm.cc main.cc version.h
 nodist_bootstrap2_SOURCES = gen/if2.h gen/if2.cc gen/parse2.c
 bootstrap2_LDADD = libprog.a libcolm.la
 
@@ -169,14 +177,13 @@ gen/if3.cc: tar/bootstrap3.tar
 	tar -C gen -xmf $< if3.cc
 
 BUILT_SOURCES += gen/parse3.c gen/if3.h gen/if3.cc
+#loadcolm.cc: gen/if3.h
 
 colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
-colm_SOURCES = loadcolm.h loadcolm.cc main.cc
+colm_SOURCES = loadcolm.h loadcolm.cc main.cc version.h
 nodist_colm_SOURCES = gen/if3.h gen/if3.cc gen/parse3.c
 colm_LDADD = libprog.a libcolm.la
-
-BUILT_SOURCES += version.h include/colm
 
 include/colm:
 	mkdir -p include
