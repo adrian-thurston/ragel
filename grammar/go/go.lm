@@ -101,7 +101,6 @@ lex
 	# Rune literals
 	#
 
-
 	rl escaped_char
 		/ '\\' ( 'a' | 'b' | 'f' | 'n' | 'r' | 't' | 'v' | '\\' | "'" | '"' ) /
 

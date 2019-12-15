@@ -6,7 +6,7 @@ all: go
 go: go.lm parsego.lm utf8.lm $(COLM)
 	$(COLM) -o go parsego.lm
 
-utf8.lm: Makefile utf8pat.rb UnicodeData.txt
+utf8: UnicodeData.txt
 	echo 'rl unicode_letter /' >utf8.lm
 	ruby utf8pat.rb 'L[ultmo]' 1 UnicodeData.txt >> utf8.lm
 	echo '/' >>utf8.lm
