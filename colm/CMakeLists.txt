@@ -1,6 +1,18 @@
 # Package name
 set(_PACKAGE_NAME colm)
 
+# Read project configuration from ../configure.ac file
+file(STRINGS ../configure.ac _PROJECT_CONFIGS
+	REGEX "(COLM_VERSION=)|(COLM_PUBDATE=)")
+foreach(_PROJECT_CONFIG ${_PROJECT_CONFIGS})
+	if(_PROJECT_CONFIG MATCHES "COLM_VERSION=\"([^\"]+)")
+		string(STRIP ${CMAKE_MATCH_1} COLM_VERSION)
+	endif()
+	if(_PROJECT_CONFIG MATCHES "COLM_PUBDATE=\"([^\"]+)")
+		string(STRIP ${CMAKE_MATCH_1} COLM_PUBDATE)
+	endif()
+endforeach()
+
 # Generate headers
 configure_file(version.h.cmake.in version.h @ONLY)
 configure_file(defs.h.cmake.in defs.h @ONLY)
@@ -29,6 +41,7 @@ add_library(libcolm
 
 target_include_directories(libcolm
 	PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/..>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../src>
@@ -97,7 +110,7 @@ target_link_libraries(bootstrap1 libprog libcolm)
 set_property(TARGET bootstrap1 APPEND PROPERTY
 	COMPILE_DEFINITIONS LOAD_INIT ${common_COMPILE_DEFINITIONS})
 
-# colm
+# bootstrap2
 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/parse2.c"
 	"${CMAKE_CURRENT_BINARY_DIR}/gen/if2.h"
@@ -106,10 +119,29 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/parse2.c"
 	ARGS -c -o parse2.c -e if2.h -x if2.cc "${CMAKE_CURRENT_LIST_DIR}/colm.lm"
 	WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gen")
 
-add_executable(colm
-	loadcolm.h loadcolm.cc main.cc
+add_executable(bootstrap2
+	main.cc loadboot2.cc loadfinal.h version.h
 	"${CMAKE_CURRENT_BINARY_DIR}/gen/parse2.c"
 	"${CMAKE_CURRENT_BINARY_DIR}/gen/if2.cc")
+
+target_link_libraries(bootstrap2 libprog libcolm)
+
+set_property(TARGET bootstrap2 APPEND PROPERTY
+	COMPILE_DEFINITIONS LOAD_COLM ${common_COMPILE_DEFINITIONS})
+
+# colm
+
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/gen/parse3.c"
+	"${CMAKE_CURRENT_BINARY_DIR}/gen/if3.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/gen/if3.cc"
+	COMMAND bootstrap2
+	ARGS -I "${CMAKE_CURRENT_LIST_DIR}" -c -o parse3.c -e if3.h -x if3.cc "${CMAKE_CURRENT_LIST_DIR}/prog.lm"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/gen")
+
+add_executable(colm
+	main.cc loadcolm.cc loadfinal.h version.h
+	"${CMAKE_CURRENT_BINARY_DIR}/gen/parse3.c"
+	"${CMAKE_CURRENT_BINARY_DIR}/gen/if3.cc")
 
 target_link_libraries(colm libprog libcolm)
 
@@ -138,7 +170,7 @@ if(${PROJECT_NAME}_MAKE_INSTALL)
 	include(CMakePackageConfigHelpers)
 	write_basic_package_version_file(
 		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config-version.cmake"
-		VERSION ${PROJECT_VERSION}
+		VERSION ${COLM_VERSION}
 		COMPATIBILITY AnyNewerVersion)
 	install(FILES
 		"${PROJECT_BINARY_DIR}/${_PACKAGE_NAME}-config.cmake"
