@@ -12,7 +12,7 @@ jobs:
     - name: autogen
       run: ./autogen.sh
     - name: configure
-      run: ./configure
+      run: ./configure --disable-manual
     - name: make
       run: make
     - name: test
