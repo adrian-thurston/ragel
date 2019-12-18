@@ -261,6 +261,20 @@ AC_PATH_PROG([OCAML_BIN], [ocaml])
 AC_PATH_PROG([RUST_BIN], [rustc])
 AC_PATH_PROG([JULIA_BIN], [julia])
 
+echo -n "checking if julia is able to run programs ... "
+
+if test "x$JULIA_BIN" != x; then
+	echo 'println( "can run julia programs" );' > conftest.jl
+	if sh -c "$JULIA_BIN conftest.jl" >>config.log 2>&1; then
+		echo "yes"
+	else
+		echo "FAILED to run julia program" >> config.log
+		echo "no"
+		JULIA_BIN=""
+	fi
+	rm -f conftest.jl
+fi
+
 SED_SUBST="$SED_SUBST -e 's|@D_BIN@|${D_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@JAVAC_BIN@|${JAVAC_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@RUBY_BIN@|${RUBY_BIN}|g'"
