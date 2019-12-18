@@ -31,15 +31,34 @@ for D in $DIRS; do
 	cd $OLDPWD
 done
 
-echo ---- cases
-find $WORKING -name '*.sh' -not -size 0 | wc -l
+CASES=`find $WORKING -name '*.sh' -not -size 0 | wc -l`
+FAILURES=`find $WORKING -name '*.diff' -not -size 0 | wc -l`
 
+echo ---- cases
+echo $CASES
 echo ---- failures
-find $WORKING -name '*.diff' -not -size 0 | wc -l
+echo $FAILURES
+
+INTERNAL_ERRORS=""
 
 if [ -s $GENTEST_LOG ]; then
-	echo ---- errors
+	echo ---- internal errors
 	cat $GENTEST_LOG
 fi
 
-rm $GENTEST_LOG
+if test -s $GENTEST_LOG; then
+	INTERNAL_ERRORS="yes"
+fi
+
+rm -f $GENTEST_LOG
+
+#
+# Exit with 1 if runtests experienced some internal error. Exit with 2 if a
+# test failed. Otherwise 0.
+#
+
+if [ "$INTERNAL_ERRORS" = yes ]; then
+	exit 1;
+elif [ "$FAILURES" != "0" ]; then
+	exit 2
+fi
