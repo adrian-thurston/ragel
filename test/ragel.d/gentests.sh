@@ -107,6 +107,11 @@ ocaml_compiler="@OCAML_BIN@"
 rust_compiler="@RUST_BIN@"
 crack_interpreter="@CRACK_BIN@"
 julia_interpreter="@JULIA_BIN@"
+gnustep_config="@GNUSTEP_CONFIG@"
+
+if [ -z "$gnustep_config" ]; then
+	objc_compiler=""
+fi
 
 function test_error
 {
@@ -183,7 +188,11 @@ function lang_opts()
 			interpreted=false
 			compiler=$objc_compiler
 			host_ragel=$RAGEL_BIN
-			flags="`gnustep-config --objc-flags`"
+			if [ -z "$gnustep_config" ]; then
+				flags=""
+			else
+				flags="`$gnustep_config --objc-flags`"
+			fi
 			libs="-lobjc -lgnustep-base"
 			prohibit_flags=""
 		;;

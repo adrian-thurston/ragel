@@ -260,6 +260,7 @@ AC_PATH_PROG([GO_BIN], [go])
 AC_PATH_PROG([OCAML_BIN], [ocaml])
 AC_PATH_PROG([RUST_BIN], [rustc])
 AC_PATH_PROG([JULIA_BIN], [julia])
+AC_PATH_PROG([GNUSTEP_CONFIG], [gnustep-config])
 
 echo -n "checking if julia is able to run programs ... "
 
@@ -283,6 +284,7 @@ SED_SUBST="$SED_SUBST -e 's|@GO_BIN@|${GO_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@OCAML_BIN@|${OCAML_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@RUST_BIN@|${RUST_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@JULIA_BIN@|${JULIA_BIN}|g'"
+SED_SUBST="$SED_SUBST -e 's|@GNUSTEP_CONFIG@|${GNUSTEP_CONFIG}|g'"
 
 AC_ARG_WITH(crack,
 	[AC_HELP_STRING([--with-crack], [location of crack install])],
