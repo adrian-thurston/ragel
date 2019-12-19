@@ -108,6 +108,7 @@ rust_compiler="@RUST_BIN@"
 crack_interpreter="@CRACK_BIN@"
 julia_interpreter="@JULIA_BIN@"
 gnustep_config="@GNUSTEP_CONFIG@"
+assembler="@ASM_BIN@"
 
 if [ -z "$gnustep_config" ]; then
 	objc_compiler=""
@@ -260,7 +261,7 @@ function lang_opts()
 			lang_opt="--asm"
 			code_suffix=s
 			interpreted=false
-			compiler="gcc"
+			compiler="$assembler"
 			host_ragel=$RAGEL_ASM_BIN
 			flags=""
 			libs=""

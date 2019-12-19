@@ -262,18 +262,57 @@ AC_PATH_PROG([RUST_BIN], [rustc])
 AC_PATH_PROG([JULIA_BIN], [julia])
 AC_PATH_PROG([GNUSTEP_CONFIG], [gnustep-config])
 
+dnl
+dnl Julia requires a large virtual address space. On systems where this is
+dnl limited by ulimit, julia will fail to run.
+dnl
+
 if test "x$JULIA_BIN" != x; then
-	echo -n "checking if julia is able to run programs ... "
 	echo 'println( "can run julia programs" );' > conftest.jl
+	echo -n "checking if julia is able to run programs ... "
 	if sh -c "$JULIA_BIN conftest.jl" >>config.log 2>&1; then
 		echo "yes"
 	else
-		echo "FAILED to run julia program" >> config.log
 		echo "no"
 		JULIA_BIN=""
 	fi
 	rm -f conftest.jl
 fi
+
+dnl
+dnl The ASM tests have been based off of sources that are non-relocatable
+dnl These won't assemble on some systems (with the right architecture). Check
+dnl our specific flavour of ASM now so we can avoid some test failures.
+dnl
+
+ASM_BIN=$CC
+
+cat <<\EOF > conftest.s
+.section .rodata
+.L_works:
+.string "works"
+
+.text
+.globl	main
+main:
+	pushq	%rbp
+	movq	%rsp, %rbp
+	pushq	%rdi
+	movq	$.L_works, %rdi
+	call	puts
+	popq	%rdi
+	mov	$0, %rax
+	ret
+EOF
+
+echo -n "checking if ragel ASM tests will build ... "
+if sh -c "$ASM_BIN -o conftest.bin conftest.s" >>config.log 2>&1; then
+	echo "yes"
+else
+	echo "no"
+	ASM_BIN=""
+fi
+rm -f conftest.s
 
 SED_SUBST="$SED_SUBST -e 's|@D_BIN@|${D_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@JAVAC_BIN@|${JAVAC_BIN}|g'"
@@ -284,6 +323,7 @@ SED_SUBST="$SED_SUBST -e 's|@OCAML_BIN@|${OCAML_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@RUST_BIN@|${RUST_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@JULIA_BIN@|${JULIA_BIN}|g'"
 SED_SUBST="$SED_SUBST -e 's|@GNUSTEP_CONFIG@|${GNUSTEP_CONFIG}|g'"
+SED_SUBST="$SED_SUBST -e 's|@ASM_BIN@|${ASM_BIN}|g'"
 
 AC_ARG_WITH(crack,
 	[AC_HELP_STRING([--with-crack], [location of crack install])],
