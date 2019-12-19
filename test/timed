@@ -34,6 +34,8 @@ done
 CASES=`find $WORKING -name '*.sh' -not -size 0 | wc -l`
 FAILURES=`find $WORKING -name '*.diff' -not -size 0 | wc -l`
 
+find $WORKING -name '*.diff' -not -size 0
+
 echo ---- cases
 echo $CASES
 echo ---- failures

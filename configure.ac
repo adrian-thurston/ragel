@@ -262,9 +262,8 @@ AC_PATH_PROG([RUST_BIN], [rustc])
 AC_PATH_PROG([JULIA_BIN], [julia])
 AC_PATH_PROG([GNUSTEP_CONFIG], [gnustep-config])
 
-echo -n "checking if julia is able to run programs ... "
-
 if test "x$JULIA_BIN" != x; then
+	echo -n "checking if julia is able to run programs ... "
 	echo 'println( "can run julia programs" );' > conftest.jl
 	if sh -c "$JULIA_BIN conftest.jl" >>config.log 2>&1; then
 		echo "yes"
