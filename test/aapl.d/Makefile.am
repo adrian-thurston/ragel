@@ -4,8 +4,6 @@
 
 CPPFLAGS = @SUBJ_AAPL_CPPFLAGS@
 
-EXTRA_DIST = avlverify.h util.h gentests.sh
-
 noinst_PROGRAMS = \
 	stress_avltree stress_avliter stress_avlmel \
 	stress_avlmelkey stress_avlitree stress_avlmap \
@@ -61,6 +59,7 @@ test_string_SOURCES = test_string.cpp util.cpp
 test_rope_SOURCES = test_rope.cpp util.cpp
 
 EXTRA_DIST = \
+	avlverify.h util.h gentests.sh \
 	test_allavl.exp test_allsort.exp test_avlikeyless.exp test_avliter.exp \
 	test_avlkeyless.exp test_bstmap.exp test_bstset.exp test_bsttable.exp \
 	test_bubblesort.exp test_compare.exp test_dlistval.exp test_doublelist.exp \
