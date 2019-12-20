@@ -60,6 +60,14 @@ test_compare_SOURCES = test_compare.cpp util.cpp
 test_string_SOURCES = test_string.cpp util.cpp
 test_rope_SOURCES = test_rope.cpp util.cpp
 
+EXTRA_DIST = \
+	test_allavl.exp test_allsort.exp test_avlikeyless.exp test_avliter.exp \
+	test_avlkeyless.exp test_bstmap.exp test_bstset.exp test_bsttable.exp \
+	test_bubblesort.exp test_compare.exp test_dlistval.exp test_doublelist.exp \
+	test_insertsort.exp test_mergesort.exp test_quicksort.exp test_rope.exp \
+	test_sbstmap.exp test_sbstset.exp test_sbsttable.exp test_string.exp \
+	test_svector.exp test_vector.exp 
+
 gentests: gentests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
 
