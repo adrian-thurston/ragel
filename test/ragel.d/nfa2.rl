@@ -1,6 +1,6 @@
 #
 # @LANG: asm
-# @FILTER: sort
+# @FILTER: LC_ALL=C sort
 #
 
 %%{
@@ -283,14 +283,14 @@ nfa_len:
 	.section	.note.GNU-stack,"",@progbits
 
 ##### OUTPUT #####
-1
-1002000000002
-12
 -12321
-2123
-222222
 -99
 -> FAIL
 -> FAIL
 -> FAIL
+1
+1002000000002
+12
+2123
+222222
 saw 80808080

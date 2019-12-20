@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @FILTER: sort
+ * @FILTER: LC_ALL=C sort
  */
 
 #include <string.h>
@@ -125,12 +125,7 @@ int main( )
 
 
 
-1
-1002000000002
-12
 -12321
-2123
-222222
 -99
 -> fail
 -> fail
@@ -142,4 +137,9 @@ int main( )
 -> fail
 -> fail
 -> fail
+1
+1002000000002
+12
+2123
+222222
 saw 80808080

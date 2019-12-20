@@ -142,8 +142,11 @@ int testBstTable3()
 {
 	BstMap<KeyStruct, int, KeyStructCompare > tbl;
 
-	cout << "ins res = " << ( tbl.insert(KeyStruct(0), 1) != 0 ) << endl;
-	cout << "ins res = " << ( tbl.insert(KeyStruct(1), 1) != 0 ) << endl;
+	BstMapEl<KeyStruct, int> *res1 = tbl.insert(KeyStruct(0), 1);
+	BstMapEl<KeyStruct, int> *res2 = tbl.insert(KeyStruct(1), 1);
+
+	cout << "ins res = " << ( res1 != 0 ) << endl;
+	cout << "ins res = " << ( res2 != 0 ) << endl;
 	return 0;
 }
 
