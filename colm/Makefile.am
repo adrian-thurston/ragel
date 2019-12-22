@@ -162,7 +162,7 @@ bootstrap2_LDADD = libprog.a libcolm.la
 endif
 
 tar/bootstrap3.tar: $(BUILD_PARSE_3_WITH) prog.lm colm.lm
-	mkdir -p gen
+	mkdir -p tar gen
 	$(BUILD_PARSE_3_WITH) -c -o tar/parse3.c -e tar/if3.h -x tar/if3.cc prog.lm
 	tar -C tar -cf tar/bootstrap3.tar parse3.c if3.h if3.cc
 

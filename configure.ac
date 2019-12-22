@@ -334,10 +334,15 @@ SED_SUBST="$SED_SUBST -e 's|@CRACK_BIN@|${CRACK_BIN}|g'"
 
 AC_SUBST(CRACK_BIN)
 	
-dnl Generic dependency specification.
+dnl Skip bootstrap and build using an existing version of colm. Allows us to
+dnl break colm without breaking the build of colm.
 AC_ARG_WITH(colm,
-	[AC_HELP_STRING([--with-colm], [colm install to build bootstrap programs])],
-	[EXTERNAL_COLM="$withval"],
+	[AC_HELP_STRING([--with-colm], [prefix of colm install to build with, instead of bootstrapping])],
+	[
+		EXTERNAL_COLM="$withval"
+		AC_CHECK_FILES(["$EXTERNAL_COLM/bin/colm"], [],
+			[AC_ERROR(["could not find $EXTERNAL_COLM/bin/colm"])])
+	],
 	[]
 )
 
