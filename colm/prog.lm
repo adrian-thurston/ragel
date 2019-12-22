@@ -37,16 +37,16 @@ void rewrite( P: ref<start> )
 			Additional = cons new_roots
 				[Additional Def]
 		}
-		else if match PE
-				[OptName: opt_prod_el_name Qual: region_qual Id: id "<*"]
-		{
-			parse LeftRepId: id "_lrep_[Id]"
-			PE = cons prod_el [OptName Qual LeftRepId]
-
-			cons Def: cfl_def "def [LeftRepId] \[[LeftRepId] [Id]\] | \[\]
-
-			Additional = cons new_roots [Additional Def]
-		}
+#		else if match PE
+#				[OptName: opt_prod_el_name Qual: region_qual Id: id "<*"]
+#		{
+#			parse LeftRepId: id "_lrep_[Id]"
+#			PE = cons prod_el [OptName Qual LeftRepId]
+#
+#			cons Def: cfl_def "def [LeftRepId] \[[LeftRepId] [Id]\] | \[\]
+#
+#			Additional = cons new_roots [Additional Def]
+#		}
 		else if match PE
 				[OptName: opt_prod_el_name Qual: region_qual Id: id "<+"]
 		{
@@ -61,7 +61,7 @@ void rewrite( P: ref<start> )
 	}
 
 	while  ( Additional.root_item ) {
-		P = cons start [Additional.root_item P.RootItemList]
+		P = cons start [P.RootItemList Additional.root_item]
 		Additional = Additional._new_roots
 		Modified = true
 	}

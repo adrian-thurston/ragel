@@ -60,6 +60,7 @@ void Compiler::generateExports()
 		"\n"
 		"#include <colm/colm.h>\n"
 		"#include <string>\n"
+		"#include <vector>\n"
 		"\n";
 	
 	out << 
@@ -112,11 +113,22 @@ void Compiler::generateExports()
 
 		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
 			out << "	" << lel->fullName <<
-					"( colm_program *prg ) : __prg(prg), __tree(returnVal(prg)) {}\n";
+					"( colm_program *prg ) : __prg(prg), __tree(returnVal(prg)) {\n";
+			out << "    }\n";
 		}
 
 		out << "	" << lel->fullName <<
-				"( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {}\n";
+				"( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {\n";
+
+		if ( lel->isRepeat && lel->leftRecursive ) {
+			out << 
+				"	while ( ! colm_repeat_end( __tree ) ) {\n"
+				"		stack.push_back( colm_get_left_repeat_val( __tree ) );\n"
+				"		__tree = colm_get_left_repeat_next( __tree );\n"
+				"	}\n";
+		}
+
+		out << "}\n";
 
 		if ( lel->objectDef != 0 ) {
 			FieldList &fieldList = lel->objectDef->fieldList;
@@ -148,11 +160,19 @@ void Compiler::generateExports()
 					"{ return (enum prod_name)__tree->prod_num; }\n";
 		}
 		
-
 		if ( lel->isRepeat ) {
-			out << "	" << "int end() { return colm_repeat_end( __tree ); }\n";
-			out << "	" << lel->refName << " next();\n";
-			out << "	" << lel->repeatOf->refName << " value();\n";
+			if ( lel->leftRecursive ) {
+				out << "	" << "std::vector<colm_tree*> stack;\n";
+				out << "	" << "int end() { return stack.size() == 0; }\n";
+				out << "	" << lel->refName << " next() { stack.pop_back(); return *this; }\n";
+				out << "	" << lel->repeatOf->refName << " value() { return " <<
+						lel->repeatOf->refName << "( __prg, stack[stack.size()-1] ); }\n";
+			}
+			else {
+				out << "        " << "int end() { return colm_repeat_end( __tree ); }\n";
+				out << "        " << lel->refName << " next();\n";
+				out << "        " << lel->repeatOf->refName << " value();\n";
+			}
 		}
 
 		if ( lel->isList ) {
@@ -160,7 +180,6 @@ void Compiler::generateExports()
 			out << "	" << lel->refName << " next();\n";
 			out << "	" << lel->repeatOf->refName << " value();\n";
 		}
-
 
 		out << "};";
 		closeNameSpace( out, lel->nspace );
@@ -242,8 +261,8 @@ void Compiler::generateExportsImpl()
 			}
 		}
 
-		if ( lel->isRepeat ) {
-			out << lel->refName << " " << lel->declName << "::" << " next"
+		if ( lel->isRepeat && !lel->leftRecursive ) {
+			out << lel->refName << " " << lel->declName << "::" << "next"
 				"() { return " << lel->refName << 
 				"( __prg, colm_get_repeat_next( __tree ) ); }\n";
 
@@ -253,7 +272,7 @@ void Compiler::generateExportsImpl()
 		}
 
 		if ( lel->isList ) {
-			out << lel->refName << " " << lel->declName << "::" << " next"
+			out << lel->refName << " " << lel->declName << "::" << "next"
 				"() { return " << lel->refName << 
 				"( __prg, colm_get_repeat_next( __tree ) ); }\n";
 

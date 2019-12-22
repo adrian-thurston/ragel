@@ -281,6 +281,9 @@ struct LangEl : public DListEl<LangEl>
 	bool parseStop;
 	bool isEOF;
 
+	/* For a list or a repeat. Defaults to right recursive. */
+	bool leftRecursive;
+
 	LangEl *repeatOf;
 
 	/* Productions from the language element if it is a non-terminal. */
@@ -739,7 +742,7 @@ struct Compiler
 	void printFirstSets();
 
 	LangEl *makeRepeatProd( const InputLoc &loc, Namespace *nspace,
-			const String &repeatName, UniqueType *ut );
+			const String &repeatName, UniqueType *ut, bool left );
 	LangEl *makeListProd( const InputLoc &loc, Namespace *nspace,
 			const String &listName, UniqueType *ut );
 	LangEl *makeOptProd( const InputLoc &loc, Namespace *nspace,

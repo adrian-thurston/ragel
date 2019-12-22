@@ -206,7 +206,7 @@ lex
 end
 
 def start
-	[RootItemList: root_item*]
+	[RootItemList: root_item<*]
 
 def root_item
 	[rl_def] :Rl commit
@@ -231,7 +231,7 @@ def root_item
 |	[reduction_def] :Reduction commit
 
 def _include
-	[INCLUDE SQ SqConsDataList: sq_cons_data* sq_lit_term]
+	[INCLUDE SQ SqConsDataList: sq_cons_data<* sq_lit_term]
 
 def precedence_def
 	[pred_type pred_token_list]
@@ -319,7 +319,7 @@ def struct_key
 	[STRUCT] | [CONTEXT]
 
 def struct_def
-	[struct_key id ItemList: struct_item* END]
+	[struct_key id ItemList: struct_item<* END]
 
 def literal_keyword
 	[LITERAL]
@@ -344,7 +344,7 @@ def no_ignore_right
 |	[]
 
 def reduction_def
-	[REDUCTION id ItemList: reduction_item* END]
+	[REDUCTION id ItemList: reduction_item<* END]
 
 lex
 	token RED_OPEN / '{' /
@@ -382,10 +382,10 @@ lex
 end
 
 def red_nonterm
-	[type_ref RED_OPEN HostItems: host_item* RED_CLOSE]
+	[type_ref RED_OPEN HostItems: host_item<* RED_CLOSE]
 
 def red_action
-	[type_ref COLON id RED_OPEN HostItems: host_item* RED_CLOSE]
+	[type_ref COLON id RED_OPEN HostItems: host_item<* RED_CLOSE]
 
 def host_item
 	[red_id]
@@ -400,14 +400,14 @@ def host_item
 |	[RED_RHS_NREF]
 |	[RED_TREE_NREF]
 |	[RED_RHS_NLOC]
-|	[RED_OPEN HostItems: host_item* RED_CLOSE]
+|	[RED_OPEN HostItems: host_item<* RED_CLOSE]
 
 def reduction_item
 	[red_nonterm] :NonTerm commit
 |	[red_action] :Action commit
 
 def namespace_def
-	[NAMESPACE id ItemList: namespace_item* END]
+	[NAMESPACE id ItemList: namespace_item<* END]
 
 def namespace_item
 	[rl_def] :Rl commit
@@ -437,12 +437,12 @@ def opt_reduce_first
 
 def cfl_def
 	[DEF id 
-		VarDefList: var_def* 
+		VarDefList: var_def<* 
 		opt_reduce_first
 		prod_list]
 
 def region_def
-	[LEX RootItemList: root_item* END]
+	[LEX RootItemList: root_item<* END]
 
 def rl_def
 	[RL id LEX_FSLASH lex_expr LEX_FSLASH]
@@ -452,7 +452,7 @@ def opt_lex_expr
 |	[]
 
 def token_def
-	[TOKEN id VarDefList: var_def*
+	[TOKEN id VarDefList: var_def<*
 		no_ignore_left
 		LEX_FSLASH opt_lex_expr LEX_FSLASH
 		no_ignore_right
@@ -583,7 +583,7 @@ def opt_require_stmt
 |	[] :Base
 
 def lang_stmt_list
-	[StmtList: statement* opt_require_stmt]
+	[StmtList: statement<* opt_require_stmt]
 
 def opt_def_init
 	[EQUALS code_expr] :Init
@@ -680,7 +680,7 @@ def opt_capture
 |	[]
 
 def opt_field_init
-	[POPEN FieldInitList: field_init* PCLOSE] :Init
+	[POPEN FieldInitList: field_init<* PCLOSE] :Init
 |	[] :Base
 
 def field_init
@@ -698,7 +698,7 @@ def stmt_or_factor
 |	[MAKE_TOKEN POPEN call_arg_list PCLOSE] :MakeToken
 |	[CONS opt_capture type_ref opt_field_init constructor] :Cons
 |	[MATCH var_ref pattern] :Match
-|	[NEW opt_capture type_ref POPEN FieldInitList: field_init* PCLOSE] :New
+|	[NEW opt_capture type_ref POPEN FieldInitList: field_init<* PCLOSE] :New
 
 #
 # Pattern
@@ -724,19 +724,19 @@ def pattern_el_lel
 
 def pattern_el
 	[opt_label pattern_el_lel] :PatternEl
-|	[DQ LitpatElList: litpat_el* dq_lit_term] :Dq
-|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+|	[DQ LitpatElList: litpat_el<* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
 
 def litpat_el
 	[lit_dq_data] :ConsData
-|	[LIT_SQOPEN PatternElList: pattern_el* LIT_SQCLOSE] :SubList
+|	[LIT_SQOPEN PatternElList: pattern_el<* LIT_SQCLOSE] :SubList
 
 def pattern_top_el
-	[DQ LitpatElList: litpat_el* dq_lit_term] :Dq
-|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+	[DQ LitpatElList: litpat_el<* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN PatternElList: pattern_el* SQCLOSE] :SubList
+|	[SQOPEN PatternElList: pattern_el<* SQCLOSE] :SubList
 
 def pattern_list
 	[pattern_top_el] :Base
@@ -755,20 +755,20 @@ def E4 []
 
 def cons_el
 	[E1 region_qual backtick_lit] :Lit
-|	[E1 DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
-|	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+|	[E1 DQ LitConsElList: lit_cons_el<* dq_lit_term] :Dq
+|	[E1 SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[E2 code_expr] :CodeExpr
 
 def lit_cons_el
 	[lit_dq_data] :ConsData
-|	[LIT_SQOPEN ConsElList: cons_el* LIT_SQCLOSE] :SubList
+|	[LIT_SQOPEN ConsElList: cons_el<* LIT_SQCLOSE] :SubList
 
 def cons_top_el
-	[DQ LitConsElList: lit_cons_el* dq_lit_term] :Dq
-|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+	[DQ LitConsElList: lit_cons_el<* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN ConsElList: cons_el* SQCLOSE] :SubList
+|	[SQOPEN ConsElList: cons_el<* SQCLOSE] :SubList
 
 def cons_list
 	[cons_top_el] :Base
@@ -781,20 +781,20 @@ def constructor
 #
 
 def accum_el
-	[E1 DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
-|	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+	[E1 DQ LitAccumElList: lit_accum_el<* dq_lit_term] :Dq
+|	[E1 SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[E2 code_expr] :CodeExpr
 
 def lit_accum_el
 	[lit_dq_data] :ConsData
-|	[LIT_SQOPEN AccumElList: accum_el* LIT_SQCLOSE] :SubList
+|	[LIT_SQOPEN AccumElList: accum_el<* LIT_SQCLOSE] :SubList
 
 def accum_top_el
-	[DQ LitAccumElList: lit_accum_el* dq_lit_term] :Dq
-|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+	[DQ LitAccumElList: lit_accum_el<* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN AccumElList: accum_el* SQCLOSE] :SubList
+|	[SQOPEN AccumElList: accum_el<* SQCLOSE] :SubList
 
 def accum_list
 	[accum_top_el accum_list] :List
@@ -808,20 +808,20 @@ def accumulate
 #
 
 def string_el
-	[E1 DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
-|	[E1 SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+	[E1 DQ LitStringElList: lit_string_el<* dq_lit_term] :Dq
+|	[E1 SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[E1 TILDE opt_tilde_data TILDE_NL] :Tilde
 |	[E2 code_expr] :CodeExpr
 
 def lit_string_el
 	[lit_dq_data] :ConsData
-|	[LIT_SQOPEN StringElList: string_el* LIT_SQCLOSE] :SubList
+|	[LIT_SQOPEN StringElList: string_el<* LIT_SQCLOSE] :SubList
 
 def string_top_el
-	[DQ LitStringElList: lit_string_el* dq_lit_term] :Dq
-|	[SQ SqConsDataList: sq_cons_data* sq_lit_term] :Sq
+	[DQ LitStringElList: lit_string_el<* dq_lit_term] :Dq
+|	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN StringElList: string_el* SQCLOSE] :SubList
+|	[SQOPEN StringElList: string_el<* SQCLOSE] :SubList
 
 def string_list
 	[string_top_el] :Base

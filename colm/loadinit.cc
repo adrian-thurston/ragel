@@ -62,6 +62,8 @@ void LoadInit::walkProdElList( String defName, ProdElList *list, prod_el_list &p
 		RepeatType repeatType = RepeatNone;
 		if ( El.OptRepeat().Star() != 0 )
 			repeatType = RepeatRepeat;
+		if ( El.OptRepeat().LeftStar() != 0 )
+			repeatType = RepeatLeft;
 
 		ProdEl *prodEl = prodElName( internal, typeName,
 				NamespaceQual::cons( curNspace() ),

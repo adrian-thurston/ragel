@@ -95,6 +95,8 @@ struct colm_tree *colm_get_attr( struct colm_tree *tree, long pos );
 struct colm_tree *colm_get_global( struct colm_program *prg, long pos );
 struct colm_tree *colm_get_repeat_next( struct colm_tree *tree );
 struct colm_tree *colm_get_repeat_val( struct colm_tree *tree );
+struct colm_tree *colm_get_left_repeat_next( struct colm_tree *tree );
+struct colm_tree *colm_get_left_repeat_val( struct colm_tree *tree );
 struct colm_location *colm_find_location( struct colm_program *prg, struct colm_tree *tree );
 
 /* Debug realms. To turn on, pass to colm_set_debug before invocation. */

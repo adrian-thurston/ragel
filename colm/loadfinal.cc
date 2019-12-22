@@ -849,6 +849,8 @@ struct LoadColm
 			repeatType = RepeatOpt;
 			break;
 		case opt_repeat::LeftStar:
+			repeatType = RepeatLeft;
+			break;
 		case opt_repeat::LeftPlus:
 			error( OptRepeat.loc() ) << "<* and <+ are implemented as a "
 					"colm transformation, they are not accepted at this stage" << endp;

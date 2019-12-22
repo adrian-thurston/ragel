@@ -760,10 +760,11 @@ FsmGraph *Compiler::makeScanner()
 }
 
 LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
-		const String &repeatName, UniqueType *ut )
+		const String &repeatName, UniqueType *ut, bool left )
 {
 	LangEl *prodName = addLangEl( this, nspace, repeatName, LangEl::NonTerm );
 	prodName->isRepeat = true;
+	prodName->leftRecursive = left;
 
 	ProdElList *prodElList1 = new ProdElList;
 
@@ -777,8 +778,14 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType,
 			InputLoc(), 0, false, typeRef2, 0 );
 
-	prodElList1->append( factor1 );
-	prodElList1->append( factor2 );
+	if ( left ) {
+		prodElList1->append( factor2 );
+		prodElList1->append( factor1 );
+	}
+	else {
+		prodElList1->append( factor1 );
+		prodElList1->append( factor2 );
+	}
 
 	Production *newDef1 = Production::cons( InputLoc(),
 			prodName, prodElList1, String(), false, 0,
@@ -815,8 +822,8 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef2, 0 );
 
 	ProdElList *prodElList1 = new ProdElList;
-	prodElList1->append( factor1 );
 	prodElList1->append( factor2 );
+	prodElList1->append( factor1 );
 
 	Production *newDef1 = Production::cons( loc,
 			prodName, prodElList1, String(), false, 0,

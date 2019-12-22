@@ -361,11 +361,18 @@ void TypeRef::resolveRepeat( Compiler *pd )
 		LangEl *declLangEl = 0;
 	
 		switch ( repeatType ) {
+			case RepeatLeft: {
+				/* If the factor is a repeat, create the repeat element and link the
+				 * factor to it. */
+				String repeatName( 128, "_repeat_%s", typeName.data );
+				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, uniqueType, true );
+				break;
+			}
 			case RepeatRepeat: {
 				/* If the factor is a repeat, create the repeat element and link the
 				 * factor to it. */
 				String repeatName( 128, "_repeat_%s", typeName.data );
-				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, uniqueType );
+				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, uniqueType, false );
 				break;
 			}
 			case RepeatList: {

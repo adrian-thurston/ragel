@@ -99,6 +99,7 @@ LangEl::LangEl( Namespace *nspace, const String &name, Type type )
 	isRepeat(false),
 	isList(false),
 	isOpt(false),
+	leftRecursive(false),
 	parseStop(false),
 	isEOF(false),
 	repeatOf(0),

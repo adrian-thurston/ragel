@@ -347,7 +347,7 @@ ProdEl *ConsInit::prodRefNameRepeat( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons( curNspace() ), 0,
-			RepeatRepeat, false );
+			RepeatLeft, false );
 	return prodEl;
 }
 
@@ -357,7 +357,7 @@ ProdEl *ConsInit::prodRefNameRepeat( const String &capture, const String &name )
 			ObjectField::RhsNameType, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons( curNspace() ), captureField,
-			RepeatRepeat, false );
+			RepeatLeft, false );
 	return prodEl;
 }
 
@@ -645,9 +645,12 @@ void ConsInit::optRepeat()
 	ProdEl *prodEl1 = prodRefName( "Star", "STAR" );
 	Production *prod1 = production( prodEl1 );
 
-	Production *prod2 = production();
+	ProdEl *prodEl2 = prodRefName( "LeftStar", "LEFT_STAR" );
+	Production *prod2 = production( prodEl2 );
 
-	definition( "opt_prod_repeat",  prod1, prod2 );
+	Production *prod3 = production();
+
+	definition( "opt_prod_repeat",  prod1, prod2, prod3 );
 }
 
 void ConsInit::prodEl()
@@ -848,6 +851,7 @@ void ConsInit::go( long activeRealm )
 
 	keyword( "STAR", "'*'");
 	keyword( "PLUS", "'+'");
+	keyword( "LEFT_STAR", "'<*'");
 	keyword( "'['" );
 	keyword( "']'" );
 	keyword( "'|'" );

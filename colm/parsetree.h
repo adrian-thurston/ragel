@@ -2110,7 +2110,8 @@ enum RepeatType {
 	RepeatNone = 1,
 	RepeatRepeat,
 	RepeatList,
-	RepeatOpt
+	RepeatOpt,
+	RepeatLeft,
 };
 
 /*

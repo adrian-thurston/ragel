@@ -118,6 +118,30 @@ tree_t *colm_get_repeat_val( tree_t *tree )
 	return kid->tree;
 }
 
+tree_t *colm_get_left_repeat_next( tree_t *tree )
+{
+	kid_t *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+
+	return kid->tree;
+}
+
+tree_t *colm_get_left_repeat_val( tree_t *tree )
+{
+	kid_t *kid = tree->child;
+
+	if ( tree->flags & AF_LEFT_IGNORE )
+		kid = kid->next;
+	if ( tree->flags & AF_RIGHT_IGNORE )
+		kid = kid->next;
+	
+	return kid->next->tree;
+}
+
 int colm_repeat_end( tree_t *tree )
 {
 	kid_t *kid = tree->child;
