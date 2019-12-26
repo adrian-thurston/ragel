@@ -394,14 +394,15 @@ void LoadInit::go( long activeRealm )
 
 	/* Walk the list of items. */
 	_repeat_item ItemList = Start.ItemList();
-	while ( !ItemList.end() ) {
+	RepeatIter<_repeat_item, item> itemIter( ItemList );
+	while ( !itemIter.end() ) {
 
-		item Item = ItemList.value();
+		item Item = itemIter.value();
 		if ( Item.DefId() != 0 )
 			walkDefinition( Item );
 		else if ( Item.TokenList() != 0 )
 			walkLexRegion( Item );
-		ItemList = ItemList.next();
+		itemIter.next();
 	}
 
 	pd->streamFileNames.append( colm_extract_fns( program ) );

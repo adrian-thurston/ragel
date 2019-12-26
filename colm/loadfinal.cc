@@ -76,7 +76,6 @@ String unescape( const String &s )
 	return out;
 }
 
-
 struct LoadColm
 :
 	public BaseParser
@@ -313,15 +312,16 @@ struct LoadColm
 	StmtList *walkLangStmtList( lang_stmt_list langStmtList )
 	{
 		StmtList *retList = new StmtList;
-		_repeat_statement stmtList = langStmtList.StmtList();
 
-		/* Walk the list of items. */
-		while ( !stmtList.end() ) {
-			statement Statement = stmtList.value();
+		/* Walk the list of statements. */
+		RepeatIter<_repeat_statement, statement> ri( langStmtList.StmtList() );
+
+		while ( !ri.end() ) {
+			statement Statement = ri.value();
 			LangStmt *stmt = walkStatement( Statement );
 			if ( stmt != 0 )
 				retList->append( stmt );
-			stmtList = stmtList.next();
+			ri.next();
 		}
 
 		require_pattern require = langStmtList.opt_require_stmt().require_pattern();
@@ -385,11 +385,13 @@ struct LoadColm
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
 				String(), pd->nextObjectId++ ); 
 
-		while ( !varDefList.end() ) {
-			ObjectField *varDef = walkVarDef( varDefList.value(),
+		RepeatIter<_repeat_var_def, var_def> varDefIter( varDefList );
+
+		while ( !varDefIter.end() ) {
+			ObjectField *varDef = walkVarDef( varDefIter.value(),
 					ObjectField::UserFieldType );
 			objVarDef( objectDef, varDef );
-			varDefList = varDefList.next();
+			varDefIter.next();
 		}
 
 		return objectDef;
@@ -531,14 +533,17 @@ struct LoadColm
 	PatternItemList *walkPatSqConsDataList( _repeat_sq_cons_data sqConsDataList, CONS_SQ_NL Nl )
 	{
 		PatternItemList *list = new PatternItemList;
-		while ( !sqConsDataList.end() ) {
-			String consData = unescape( sqConsDataList.value().text().c_str() );
+
+		RepeatIter<_repeat_sq_cons_data, sq_cons_data> sqConsDataIter( sqConsDataList );
+
+		while ( !sqConsDataIter.end() ) {
+			String consData = unescape( sqConsDataIter.value().text().c_str() );
 			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
-					sqConsDataList.value().loc(), consData );
+					sqConsDataIter.value().loc(), consData );
 			PatternItemList *tail = PatternItemList::cons( patternItem );
 			list = patListConcat( list, tail );
 
-			sqConsDataList = sqConsDataList.next();
+			sqConsDataIter.next();
 		}
 
 		if ( Nl != 0 ) {
@@ -555,14 +560,17 @@ struct LoadColm
 	ConsItemList *walkConsSqConsDataList( _repeat_sq_cons_data sqConsDataList, CONS_SQ_NL Nl )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !sqConsDataList.end() ) {
-			String consData = unescape( sqConsDataList.value().text().c_str() );
+
+		RepeatIter<_repeat_sq_cons_data, sq_cons_data> sqConsDataIter( sqConsDataList );
+
+		while ( !sqConsDataIter.end() ) {
+			String consData = unescape( sqConsDataIter.value().text().c_str() );
 			ConsItem *consItem = ConsItem::cons(
-					sqConsDataList.value().loc(), ConsItem::InputText, consData );
+					sqConsDataIter.value().loc(), ConsItem::InputText, consData );
 			ConsItemList *tail = ConsItemList::cons( consItem );
 			list = consListConcat( list, tail );
 
-			sqConsDataList = sqConsDataList.next();
+			sqConsDataIter.next();
 		}
 
 		if ( Nl != 0 ) {
@@ -580,10 +588,13 @@ struct LoadColm
 			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
-		while ( !litpatElList.end() ) {
-			PatternItemList *tail = walkLitpatEl( litpatElList.value(), patternVarRef );
+
+		RepeatIter<_repeat_litpat_el, litpat_el> litpatElIter( litpatElList );
+
+		while ( !litpatElIter.end() ) {
+			PatternItemList *tail = walkLitpatEl( litpatElIter.value(), patternVarRef );
 			list = patListConcat( list, tail );
-			litpatElList = litpatElList.next();
+			litpatElIter.next();
 		}
 
 		if ( Nl != 0 ) {
@@ -601,10 +612,13 @@ struct LoadColm
 			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
-		while ( !patternElList.end() ) {
-			PatternItemList *tail = walkPatternEl( patternElList.value(), patternVarRef );
+
+		RepeatIter<_repeat_pattern_el, pattern_el> patternElIter( patternElList );
+
+		while ( !patternElIter.end() ) {
+			PatternItemList *tail = walkPatternEl( patternElIter.value(), patternVarRef );
 			list = patListConcat( list, tail );
-			patternElList = patternElList.next();
+			patternElIter.next();
 		}
 		return list;
 	}
@@ -768,10 +782,13 @@ struct LoadColm
 	{
 		String lit = "";
 		_repeat_sq_cons_data sqConsDataList = Include.SqConsDataList();
-		while ( !sqConsDataList.end() ) {
-			colm_data *data = sqConsDataList.value().data();
+
+		RepeatIter<_repeat_sq_cons_data, sq_cons_data> sqConsDataIter( sqConsDataList );
+
+		while ( !sqConsDataIter.end() ) {
+			colm_data *data = sqConsDataIter.value().data();
 			lit.append( data->data, data->length );
-			sqConsDataList = sqConsDataList.next();
+			sqConsDataIter.next();
 		}
 
 		String file = unescape( lit );
@@ -1447,10 +1464,13 @@ struct LoadColm
 			LIT_DQ_NL Nl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !litConsElList.end() ) {
-			ConsItemList *extension = walkLitConsEl( litConsElList.value(), consTypeRef );
+
+		RepeatIter<_repeat_lit_cons_el, lit_cons_el> litConsElIter( litConsElList );
+
+		while ( !litConsElIter.end() ) {
+			ConsItemList *extension = walkLitConsEl( litConsElIter.value(), consTypeRef );
 			list = consListConcat( list, extension );
-			litConsElList = litConsElList.next();
+			litConsElIter.next();
 		}
 
 		if ( Nl != 0 ) {
@@ -1505,10 +1525,13 @@ struct LoadColm
 	ConsItemList *walkConsElList( _repeat_cons_el consElList, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !consElList.end() ) {
-			ConsItemList *extension = walkConsEl( consElList.value(), consTypeRef );
+
+		RepeatIter<_repeat_cons_el, cons_el> consElIter( consElList );
+
+		while ( !consElIter.end() ) {
+			ConsItemList *extension = walkConsEl( consElIter.value(), consTypeRef );
 			list = consListConcat( list, extension );
-			consElList = consElList.next();
+			consElIter.next();
 		}
 		return list;
 	}
@@ -1577,10 +1600,13 @@ struct LoadColm
 	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList, LIT_DQ_NL Nl )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !litStringElList.end() ) {
-			ConsItemList *extension = walkLitStringEl( litStringElList.value() );
+
+		RepeatIter<_repeat_lit_string_el, lit_string_el> litStringElIter( litStringElList );
+
+		while ( !litStringElIter.end() ) {
+			ConsItemList *extension = walkLitStringEl( litStringElIter.value() );
 			list = consListConcat( list, extension );
-			litStringElList = litStringElList.next();
+			litStringElIter.next();
 		}
 
 		if ( Nl != 0 ) {
@@ -1630,10 +1656,13 @@ struct LoadColm
 	ConsItemList *walkStringElList( _repeat_string_el stringElList )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !stringElList.end() ) {
-			ConsItemList *extension = walkStringEl( stringElList.value() );
+
+		RepeatIter<_repeat_string_el, string_el> stringElIter( stringElList );
+
+		while ( !stringElIter.end() ) {
+			ConsItemList *extension = walkStringEl( stringElIter.value() );
 			list = consListConcat( list, extension );
-			stringElList = stringElList.next();
+			stringElIter.next();
 		}
 		return list;
 	}
@@ -1703,10 +1732,13 @@ struct LoadColm
 	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList, LIT_DQ_NL Nl )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !litAccumElList.end() ) {
-			ConsItemList *extension = walkLitAccumEl( litAccumElList.value() );
+
+		RepeatIter<_repeat_lit_accum_el, lit_accum_el> litAccumElIter( litAccumElList );
+
+		while ( !litAccumElIter.end() ) {
+			ConsItemList *extension = walkLitAccumEl( litAccumElIter.value() );
 			list = consListConcat( list, extension );
-			litAccumElList = litAccumElList.next();
+			litAccumElIter.next();
 		}
 
 		if ( Nl != 0 ) {
@@ -1756,10 +1788,13 @@ struct LoadColm
 	ConsItemList *walkAccumElList( _repeat_accum_el accumElList )
 	{
 		ConsItemList *list = new ConsItemList;
-		while ( !accumElList.end() ) {
-			ConsItemList *extension = walkAccumEl( accumElList.value() );
+
+		RepeatIter<_repeat_accum_el, accum_el> accumElIter( accumElList );
+
+		while ( !accumElIter.end() ) {
+			ConsItemList *extension = walkAccumEl( accumElIter.value() );
 			list = consListConcat( list, extension );
-			accumElList = accumElList.next();
+			accumElIter.next();
 		}
 		return list;
 	}
@@ -1821,9 +1856,12 @@ struct LoadColm
 	FieldInitVect *walkFieldInit( _repeat_field_init fieldInitList )
 	{
 		FieldInitVect *list = new FieldInitVect;
-		while ( !fieldInitList.end() ) {
-			walkFieldInit( list, fieldInitList.value() );
-			fieldInitList = fieldInitList.next();
+
+		RepeatIter<_repeat_field_init, field_init> fieldInitIter( fieldInitList );
+
+		while ( !fieldInitIter.end() ) {
+			walkFieldInit( list, fieldInitIter.value() );
+			fieldInitIter.next();
 		}
 		return list;
 	}
@@ -2478,9 +2516,12 @@ struct LoadColm
 		structHead( structDef.id().loc(), curNspace(), name, ObjectDef::StructType );
 
 		_repeat_struct_item structItemList = structDef.ItemList();
-		while ( !structItemList.end() ) {
-			walkStructItem( structItemList.value() );
-			structItemList = structItemList.next();
+
+		RepeatIter<_repeat_struct_item, struct_item> structItemIter( structItemList );
+
+		while ( !structItemIter.end() ) {
+			walkStructItem( structItemIter.value() );
+			structItemIter.next();
 		}
 
 		structStack.pop();
@@ -2567,9 +2608,11 @@ struct LoadColm
 
 	void walkRedItemList( _repeat_host_item itemList, ReduceTextItemList &list )
 	{
-		while ( !itemList.end() ) {
-			walkRedItem( itemList.value(), list );
-			itemList = itemList.next();
+		RepeatIter<_repeat_host_item, host_item> itemIter( itemList );
+
+		while ( !itemIter.end() ) {
+			walkRedItem( itemIter.value(), list );
+			itemIter.next();
 		}
 	}
 
@@ -2616,9 +2659,11 @@ struct LoadColm
 
 	void walkReductionList( _repeat_reduction_item itemList )
 	{
-		while ( !itemList.end() ) {
-			walkReductionItem( itemList.value() );
-			itemList = itemList.next();
+		RepeatIter<_repeat_reduction_item, reduction_item> itemIter( itemList );
+
+		while ( !itemIter.end() ) {
+			walkReductionItem( itemIter.value() );
+			itemIter.next();
 		}
 	}
 
@@ -2810,9 +2855,10 @@ struct LoadColm
 	void walkNamespaceItemList( _repeat_namespace_item itemList, StmtList *stmtList )
 	{
 		/* Walk the list of items. */
-		while ( !itemList.end() ) {
-			walkNamespaceItem( itemList.value(), stmtList );
-			itemList = itemList.next();
+		RepeatIter<_repeat_namespace_item, namespace_item> itemIter( itemList );
+		while ( !itemIter.end() ) {
+			walkNamespaceItem( itemIter.value(), stmtList );
+			itemIter.next();
 		}
 	}
 
@@ -2821,9 +2867,10 @@ struct LoadColm
 		StmtList *stmtList = new StmtList;
 
 		/* Walk the list of items. */
-		while ( !rootItemList.end() ) {
-			walkRootItem( rootItemList.value(), stmtList );
-			rootItemList = rootItemList.next();
+		RepeatIter<_repeat_root_item, root_item> rootItemIter( rootItemList );
+		while ( !rootItemIter.end() ) {
+			walkRootItem( rootItemIter.value(), stmtList );
+			rootItemIter.next();
 		}
 		return stmtList;
 	}

@@ -34,7 +34,8 @@ RUNTIME_SRC = \
 
 RUNTIME_HDR = \
 	config.h bytecode.h defs.h debug.h pool.h input.h \
-	pdarun.h map.h type.h tree.h struct.h program.h colm.h internal.h
+	pdarun.h map.h type.h tree.h struct.h program.h colm.h \
+	internal.h colmex.h
 
 lib_LTLIBRARIES = libcolm.la
 noinst_LIBRARIES = libprog.a

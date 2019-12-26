@@ -318,9 +318,11 @@ struct LoadRagel
 	InlineList *loadInlineBlock( InlineList *inlineList, ruby_inline::inline_block RubyInlineBlock )
 	{
 		ruby_inline::_repeat_block_item BlockItemList = RubyInlineBlock._repeat_block_item();
-		while ( !BlockItemList.end() ) {
-			loadBlockItem( inlineList, BlockItemList.value() );
-			BlockItemList = BlockItemList.next();
+
+		RepeatIter<ruby_inline::_repeat_block_item, ruby_inline::block_item> BlockItemIter( BlockItemList );
+		while ( !BlockItemIter.end() ) {
+			loadBlockItem( inlineList, BlockItemIter.value() );
+			BlockItemIter.next();
 		}
 		return inlineList;
 	}
@@ -362,10 +364,11 @@ struct LoadRagel
 	{
 		InlineList *inlineList = new InlineList;
 		ruby_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
-		while ( !ExprItemList.end() ) {
-			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+		RepeatIter<ruby_inline::_repeat_expr_item, ruby_inline::expr_item> ExprItemIter( ExprItemList );
+		while ( !ExprItemIter.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemIter.value() );
 			inlineList->append( inlineItem );
-			ExprItemList = ExprItemList.next();
+			ExprItemIter.next();
 		}
 		return inlineList;
 	}
@@ -529,9 +532,11 @@ struct LoadRagel
 	InlineList *loadInlineBlock( InlineList *inlineList, ocaml_inline::inline_block OCamlInlineBlock )
 	{
 		ocaml_inline::_repeat_block_item BlockItemList = OCamlInlineBlock._repeat_block_item();
-		while ( !BlockItemList.end() ) {
-			loadBlockItem( inlineList, BlockItemList.value() );
-			BlockItemList = BlockItemList.next();
+
+		RepeatIter<ocaml_inline::_repeat_block_item, ocaml_inline::block_item> BlockItemIter( BlockItemList );
+		while ( !BlockItemIter.end() ) {
+			loadBlockItem( inlineList, BlockItemIter.value() );
+			BlockItemIter.next();
 		}
 		return inlineList;
 	}
@@ -573,10 +578,12 @@ struct LoadRagel
 	{
 		InlineList *inlineList = new InlineList;
 		ocaml_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
-		while ( !ExprItemList.end() ) {
-			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+
+		RepeatIter<ocaml_inline::_repeat_expr_item, ocaml_inline::expr_item> ExprItemIter( ExprItemList );
+		while ( !ExprItemIter.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemIter.value() );
 			inlineList->append( inlineItem );
-			ExprItemList = ExprItemList.next();
+			ExprItemIter.next();
 		}
 		return inlineList;
 	}
@@ -740,9 +747,11 @@ struct LoadRagel
 	InlineList *loadInlineBlock( InlineList *inlineList, crack_inline::inline_block CrackInlineBlock )
 	{
 		crack_inline::_repeat_block_item BlockItemList = CrackInlineBlock._repeat_block_item();
-		while ( !BlockItemList.end() ) {
-			loadBlockItem( inlineList, BlockItemList.value() );
-			BlockItemList = BlockItemList.next();
+
+		RepeatIter<crack_inline::_repeat_block_item, crack_inline::block_item> BlockItemIter( BlockItemList );
+		while ( !BlockItemIter.end() ) {
+			loadBlockItem( inlineList, BlockItemIter.value() );
+			BlockItemIter.next();
 		}
 		return inlineList;
 	}
@@ -784,10 +793,12 @@ struct LoadRagel
 	{
 		InlineList *inlineList = new InlineList;
 		crack_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
-		while ( !ExprItemList.end() ) {
-			InlineItem *inlineItem = loadExprItem( ExprItemList.value() );
+
+		RepeatIter<crack_inline::_repeat_expr_item, crack_inline::expr_item> ExprItemIter( ExprItemList );
+		while ( !ExprItemIter.end() ) {
+			InlineItem *inlineItem = loadExprItem( ExprItemIter.value() );
 			inlineList->append( inlineItem );
-			ExprItemList = ExprItemList.next();
+			ExprItemIter.next();
 		}
 		return inlineList;
 	}
@@ -2287,9 +2298,10 @@ struct LoadRagel
 
 		inputItem->writeArgs.push_back( Cmd.text() );
 
-		while ( !WordList.end() ) {
-			inputItem->writeArgs.push_back( WordList.value().text() );
-			WordList = WordList.next();
+		RepeatIter<ragel::_repeat_write_arg, ragel::write_arg> WordIter( WordList );
+		while ( !WordIter.end() ) {
+			inputItem->writeArgs.push_back( WordIter.value().text() );
+			WordIter.next();
 		}
 
 		id.inputItems.append( inputItem );
@@ -2460,9 +2472,10 @@ struct LoadRagel
 	
 	void loadImportList( _repeat_import ImportList )
 	{
-		while ( !ImportList.end() ) {
-			loadImport( ImportList.value() );
-			ImportList = ImportList.next();
+		RepeatIter<_repeat_import, import> ImportIter( ImportList );
+		while ( !ImportIter.end() ) {
+			loadImport( ImportIter.value() );
+			ImportIter.next();
 		}
 	}
 
@@ -2588,11 +2601,13 @@ struct LoadRagel
 		}
 
 		ragel::_repeat_statement StmtList = RagelStart._repeat_statement();
-		while ( !StmtList.end() ) {
-			bool stop = loadStatement( StmtList.value() );
+
+		RepeatIter<ragel::_repeat_statement, ragel::statement> StmtIter( StmtList );
+		while ( !StmtIter.end() ) {
+			bool stop = loadStatement( StmtIter.value() );
 			if ( stop )
 				break;
-			StmtList = StmtList.next();
+			StmtIter.next();
 		}
 	}
 
@@ -2691,26 +2706,29 @@ struct LoadRagel
 
 		c_host::_repeat_section SectionList = Start.SectionList();
 		if ( SectionList ) {
-			while ( !SectionList.end() ) {
-				loadSection( SectionList.value(), targetMachine, searchMachine );
-				SectionList = SectionList.next();
+			RepeatIter<c_host::_repeat_section, c_host::section> SectionIter( SectionList );
+			while ( !SectionIter.end() ) {
+				loadSection( SectionIter.value(), targetMachine, searchMachine );
+				SectionIter.next();
 			}
 		}
 		else if ( Start.RSectionList() ) {
 			ruby_host::_repeat_section RSectionList = Start.RSectionList();
 			if ( RSectionList ) {
-				while ( !RSectionList.end() ) {
-					loadSection( RSectionList.value(), targetMachine, searchMachine );
-					RSectionList = RSectionList.next();
+				RepeatIter<ruby_host::_repeat_section, ruby_host::section> RSectionIter( RSectionList );
+				while ( !RSectionIter.end() ) {
+					loadSection( RSectionIter.value(), targetMachine, searchMachine );
+					RSectionIter.next();
 				}
 			}
 		}
 		else {
 			ocaml_host::_repeat_section OSectionList = Start.OSectionList();
 			if ( OSectionList ) {
-				while ( !OSectionList.end() ) {
-					loadSection( OSectionList.value(), targetMachine, searchMachine );
-					OSectionList = OSectionList.next();
+				RepeatIter<ocaml_host::_repeat_section, ocaml_host::section> OSectionIter( OSectionList );
+				while ( !OSectionIter.end() ) {
+					loadSection( OSectionIter.value(), targetMachine, searchMachine );
+					OSectionIter.next();
 				}
 			}
 		}

@@ -248,8 +248,9 @@ void TopLevel::loadImport( std::string fileName )
 		return;
 	}
 
-	while ( !ImportList.end() ) {
-		import Import = ImportList.value();
+	RepeatIter<_repeat_import, import> ImportIter( ImportList );
+	while ( !ImportIter.end() ) {
+		import Import = ImportIter.value();
 
 		InputLoc loc = Import.loc();
 		string name = Import.Name().text();
@@ -292,7 +293,7 @@ void TopLevel::loadImport( std::string fileName )
 		tryMachineDef( loc, name, machineDef, false );
 		machineDef->join->loc = loc;
 
-		ImportList = ImportList.next();
+		ImportIter.next();
 	}
 
 	id->streamFileNames.append( colm_extract_fns( program ) );
