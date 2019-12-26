@@ -334,12 +334,23 @@ SED_SUBST="$SED_SUBST -e 's|@CRACK_BIN@|${CRACK_BIN}|g'"
 
 AC_SUBST(CRACK_BIN)
 	
-dnl Skip bootstrap and build using an existing version of colm. Allows us to
+dnl Skip bootstrap process and build using an existing version of colm. Allows us to
 dnl break colm without breaking the build of colm.
+dnl 
+dnl WARNING: DO NOT USE FOR PRODUCTION BUILD
+dnl
+dnl Only use this when you need to in order to get colm to build. Using an external
+dnl colm program (and library) has the consequence that parsing of patterns and
+dnl constructors in colm programs will also use this external library, since there
+dnl can only be one set of colm functions linked. It's not possible to use the
+dnl external parser for parsing the colm program, then use the internal parser for
+dnl the patterns.
 AC_ARG_WITH(colm,
 	[AC_HELP_STRING([--with-colm], [prefix of colm install to build with, instead of bootstrapping])],
 	[
 		EXTERNAL_COLM="$withval"
+		EXTERNAL_INC="-I$withval/include"
+		EXTERNAL_LIBS="-L$withval/lib"
 		AC_CHECK_FILES(["$EXTERNAL_COLM/bin/colm"], [],
 			[AC_ERROR(["could not find $EXTERNAL_COLM/bin/colm"])])
 	],
@@ -348,6 +359,8 @@ AC_ARG_WITH(colm,
 
 AM_CONDITIONAL([EXTERNAL_COLM], [test "x$EXTERNAL_COLM" != x])
 AC_SUBST(EXTERNAL_COLM)
+AC_SUBST(EXTERNAL_INC)
+AC_SUBST(EXTERNAL_LIBS)
 
 dnl
 dnl Wrap up.

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-AM_CPPFLAGS = -I$(top_srcdir)/aapl -Iinclude
+AM_CPPFLAGS = -I$(top_srcdir)/aapl
 
 AUTOMAKE_OPTIONS = subdir-objects
 
@@ -49,8 +49,7 @@ endif
 
 common_CFLAGS = \
 	-Wall \
-	-DPREFIX='"$(prefix)"' \
-	-Iinclude
+	-DPREFIX='"$(prefix)"'
 
 libprog_a_SOURCES = \
 	buffer.h bytecode.h colm.h debug.h dotgen.h fsmcodegen.h fsmgraph.h \
@@ -80,12 +79,16 @@ if EXTERNAL_COLM
 # Generate the parser using a single run with an external colm program.
 #
 BUILD_PARSE_3_WITH = $(EXTERNAL_COLM)/bin/colm$(EXEEXT)
+AM_CPPFLAGS += $(EXTERNAL_INC)
+AM_LDFLAGS = $(EXTERNAL_LIBS)
 
 else
 
 noinst_PROGRAMS = bootstrap0 bootstrap1 bootstrap2
 
 BUILD_PARSE_3_WITH = $(builddir)/bootstrap2$(EXEEXT)
+AM_CPPFLAGS += -Iinclude
+AM_LDFLAGS = -L.
 
 #
 # bootstrap0: The input program for bootstrap0 is construced using internal
@@ -183,7 +186,7 @@ colm_CXXFLAGS = $(common_CFLAGS) -DLOAD_COLM
 colm_CFLAGS = $(common_CFLAGS)
 colm_SOURCES = main.cc loadcolm.cc loadfinal.h version.h
 nodist_colm_SOURCES = gen/if3.h gen/if3.cc gen/parse3.c
-colm_LDADD = libprog.a libcolm.la
+colm_LDADD = libprog.a -lcolm
 
 include/colm:
 	mkdir -p include
