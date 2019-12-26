@@ -280,6 +280,12 @@ if test "x$JULIA_BIN" != x; then
 fi
 
 dnl
+dnl Disable julia tests until we can sort out how to adapt to the changes to
+dnl the language that are in more recent distros.
+dnl
+JULIA_BIN=""
+
+dnl
 dnl The ASM tests have been based off of sources that are non-relocatable
 dnl These won't assemble on some systems (with the right architecture). Check
 dnl our specific flavour of ASM now so we can avoid some test failures.
