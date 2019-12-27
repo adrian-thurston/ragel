@@ -263,6 +263,24 @@ AC_PATH_PROG([JULIA_BIN], [julia])
 AC_PATH_PROG([GNUSTEP_CONFIG], [gnustep-config])
 
 dnl
+dnl Java test cases are now requring a large virtual address space. On systems
+dnl where this is limited by ulimit, java will fail to run.
+dnl
+
+if test "x$JAVAC_BIN" != x; then
+	echo 'class conftest { public static void main( String[] args ) { } }' > conftest.java
+	echo -n "checking if javac is able to compile programs ... "
+	if sh -c "$JAVAC_BIN conftest.java" >>config.log 2>&1; then
+		echo "yes"
+	else
+		echo "no"
+		JAVAC_BIN=""
+	fi
+	rm -f conftest.java conftest.class
+fi
+
+
+dnl
 dnl Julia requires a large virtual address space. On systems where this is
 dnl limited by ulimit, julia will fail to run.
 dnl
