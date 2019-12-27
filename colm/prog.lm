@@ -7,6 +7,13 @@ A: str = argv->pop()
 F: stream = open( A, 'r' )
 parse P: start [ F ]
 
+alias prod_map map<prod_list, id>
+alias unique_prod map_el<prod_list, id>
+
+global PM: prod_map = new prod_map()
+global NextId: int = 1
+global Modified: bool = false
+
 prod_list cons_prod( SLA: prod_sublist )
 {
 	if match SLA [Left: prod_sublist BAR prod_el_list]
@@ -14,13 +21,6 @@ prod_list cons_prod( SLA: prod_sublist )
 	else
 		return cons prod_list[ '[ ' SLA.prod_el_list ' ]' ]
 }
-
-alias prod_map map<prod_list, id>
-alias unique_prod map_el<prod_list, id>
-
-global PM: prod_map = new prod_map()
-global NextId: int = 1
-global Modified: bool = false
 
 cfl_def rewrite_cfl_def( CflDef: ref<cfl_def> )
 {
@@ -78,7 +78,6 @@ void rewrite( P: ref<start> )
 
 if P {
 	while ( rewrite( P ) ) {}
-	#print "final:\n[P]
 }
 
 ColmTree = P

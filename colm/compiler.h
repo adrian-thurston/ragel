@@ -744,7 +744,7 @@ struct Compiler
 	LangEl *makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 			const String &repeatName, UniqueType *ut, bool left );
 	LangEl *makeListProd( const InputLoc &loc, Namespace *nspace,
-			const String &listName, UniqueType *ut );
+			const String &listName, UniqueType *ut, bool left );
 	LangEl *makeOptProd( const InputLoc &loc, Namespace *nspace,
 			const String &optName, UniqueType *ut );
 	void resolveProdEl( ProdEl *prodEl );

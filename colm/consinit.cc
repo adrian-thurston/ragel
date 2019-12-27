@@ -343,21 +343,21 @@ ProdEl *ConsInit::prodRefName( const String &capture, const String &name )
 	return prodEl;
 }
 
-ProdEl *ConsInit::prodRefNameRepeat( const String &name )
+ProdEl *ConsInit::prodRefNameLeftRepeat( const String &name )
 {
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons( curNspace() ), 0,
-			RepeatLeft, false );
+			RepeatLeftRepeat, false );
 	return prodEl;
 }
 
-ProdEl *ConsInit::prodRefNameRepeat( const String &capture, const String &name )
+ProdEl *ConsInit::prodRefNameLeftRepeat( const String &capture, const String &name )
 {
 	ObjectField *captureField = ObjectField::cons( internal,
 			ObjectField::RhsNameType, 0, capture );
 	ProdEl *prodEl = prodElName( internal, name,
 			NamespaceQual::cons( curNspace() ), captureField,
-			RepeatLeft, false );
+			RepeatLeftRepeat, false );
 	return prodEl;
 }
 
@@ -763,7 +763,7 @@ void ConsInit::item()
 
 void ConsInit::startProd()
 {
-	ProdEl *prodEl1 = prodRefNameRepeat( "ItemList", "item" );
+	ProdEl *prodEl1 = prodRefNameLeftRepeat( "ItemList", "item" );
 	Production *prod1 = production( prodEl1 );
 
 	definition( "start",  prod1 );

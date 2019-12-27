@@ -380,7 +380,7 @@ struct LoadColm
 		return name;
 	}
 
-	ObjectDef *walkVarDefList( _repeat_var_def varDefList )
+	ObjectDef *walkVarDefList( _lrepeat_var_def varDefList )
 	{
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
 				String(), pd->nextObjectId++ ); 
@@ -530,7 +530,7 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkPatSqConsDataList( _repeat_sq_cons_data sqConsDataList, CONS_SQ_NL Nl )
+	PatternItemList *walkPatSqConsDataList( _lrepeat_sq_cons_data sqConsDataList, CONS_SQ_NL Nl )
 	{
 		PatternItemList *list = new PatternItemList;
 
@@ -557,7 +557,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkConsSqConsDataList( _repeat_sq_cons_data sqConsDataList, CONS_SQ_NL Nl )
+	ConsItemList *walkConsSqConsDataList( _lrepeat_sq_cons_data sqConsDataList, CONS_SQ_NL Nl )
 	{
 		ConsItemList *list = new ConsItemList;
 
@@ -584,7 +584,7 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkLitpatElList( _repeat_litpat_el litpatElList, LIT_DQ_NL Nl,
+	PatternItemList *walkLitpatElList( _lrepeat_litpat_el litpatElList, LIT_DQ_NL Nl,
 			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
@@ -608,7 +608,7 @@ struct LoadColm
 		return list;
 	}
 
-	PatternItemList *walkPatternElList( _repeat_pattern_el patternElList,
+	PatternItemList *walkPatternElList( _lrepeat_pattern_el patternElList,
 			LangVarRef *patternVarRef )
 	{
 		PatternItemList *list = new PatternItemList;
@@ -781,7 +781,7 @@ struct LoadColm
 	StmtList *walkInclude( _include Include )
 	{
 		String lit = "";
-		_repeat_sq_cons_data sqConsDataList = Include.SqConsDataList();
+		_lrepeat_sq_cons_data sqConsDataList = Include.SqConsDataList();
 
 		RepeatIter<sq_cons_data> sqConsDataIter( sqConsDataList );
 
@@ -866,11 +866,10 @@ struct LoadColm
 			repeatType = RepeatOpt;
 			break;
 		case opt_repeat::LeftStar:
-			repeatType = RepeatLeft;
+			repeatType = RepeatLeftRepeat;
 			break;
 		case opt_repeat::LeftPlus:
-			error( OptRepeat.loc() ) << "<* and <+ are implemented as a "
-					"colm transformation, they are not accepted at this stage" << endp;
+			repeatType = RepeatLeftList;
 			break;
 		}
 		return repeatType;
@@ -988,8 +987,12 @@ struct LoadColm
 				opt_repeat::prod_name orpn = El.opt_repeat().prodName();
 				if ( orpn == opt_repeat::Star )
 					fieldName = "_repeat_" + fieldName;
+				else if ( orpn == opt_repeat::LeftStar )
+					fieldName = "_lrepeat_" + fieldName;
 				else if ( orpn == opt_repeat::Plus )
 					fieldName = "_list_" + fieldName;
+				else if ( orpn == opt_repeat::LeftPlus )
+					fieldName = "_llist_" + fieldName;
 				else if ( orpn == opt_repeat::Question )
 					fieldName = "_opt_" + fieldName;
 				else if ( strcmp( fieldName, defName ) == 0 )
@@ -1460,7 +1463,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkLitConsElList( _repeat_lit_cons_el litConsElList,
+	ConsItemList *walkLitConsElList( _lrepeat_lit_cons_el litConsElList,
 			LIT_DQ_NL Nl, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
@@ -1522,7 +1525,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkConsElList( _repeat_cons_el consElList, TypeRef *consTypeRef )
+	ConsItemList *walkConsElList( _lrepeat_cons_el consElList, TypeRef *consTypeRef )
 	{
 		ConsItemList *list = new ConsItemList;
 
@@ -1597,7 +1600,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkLitStringElList( _repeat_lit_string_el litStringElList, LIT_DQ_NL Nl )
+	ConsItemList *walkLitStringElList( _lrepeat_lit_string_el litStringElList, LIT_DQ_NL Nl )
 	{
 		ConsItemList *list = new ConsItemList;
 
@@ -1653,7 +1656,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkStringElList( _repeat_string_el stringElList )
+	ConsItemList *walkStringElList( _lrepeat_string_el stringElList )
 	{
 		ConsItemList *list = new ConsItemList;
 
@@ -1729,7 +1732,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkLitAccumElList( _repeat_lit_accum_el litAccumElList, LIT_DQ_NL Nl )
+	ConsItemList *walkLitAccumElList( _lrepeat_lit_accum_el litAccumElList, LIT_DQ_NL Nl )
 	{
 		ConsItemList *list = new ConsItemList;
 
@@ -1785,7 +1788,7 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkAccumElList( _repeat_accum_el accumElList )
+	ConsItemList *walkAccumElList( _lrepeat_accum_el accumElList )
 	{
 		ConsItemList *list = new ConsItemList;
 
@@ -1853,7 +1856,7 @@ struct LoadColm
 		list->append( init );
 	}
 
-	FieldInitVect *walkFieldInit( _repeat_field_init fieldInitList )
+	FieldInitVect *walkFieldInit( _lrepeat_field_init fieldInitList )
 	{
 		FieldInitVect *list = new FieldInitVect;
 
@@ -2515,7 +2518,7 @@ struct LoadColm
 		String name = structDef.id().data();
 		structHead( structDef.id().loc(), curNspace(), name, ObjectDef::StructType );
 
-		_repeat_struct_item structItemList = structDef.ItemList();
+		_lrepeat_struct_item structItemList = structDef.ItemList();
 
 		RepeatIter<struct_item> structItemIter( structItemList );
 
@@ -2606,7 +2609,7 @@ struct LoadColm
 		}
 	}
 
-	void walkRedItemList( _repeat_host_item itemList, ReduceTextItemList &list )
+	void walkRedItemList( _lrepeat_host_item itemList, ReduceTextItemList &list )
 	{
 		RepeatIter<host_item> itemIter( itemList );
 
@@ -2657,7 +2660,7 @@ struct LoadColm
 		}
 	}
 
-	void walkReductionList( _repeat_reduction_item itemList )
+	void walkReductionList( _lrepeat_reduction_item itemList )
 	{
 		RepeatIter<reduction_item> itemIter( itemList );
 
@@ -2852,7 +2855,7 @@ struct LoadColm
 		walkLiteralList( literalDef.literal_list() );
 	}
 
-	void walkNamespaceItemList( _repeat_namespace_item itemList, StmtList *stmtList )
+	void walkNamespaceItemList( _lrepeat_namespace_item itemList, StmtList *stmtList )
 	{
 		/* Walk the list of items. */
 		RepeatIter<namespace_item> itemIter( itemList );
@@ -2862,7 +2865,7 @@ struct LoadColm
 		}
 	}
 
-	StmtList *walkRootItemList( _repeat_root_item rootItemList )
+	StmtList *walkRootItemList( _lrepeat_root_item rootItemList )
 	{
 		StmtList *stmtList = new StmtList;
 

@@ -63,7 +63,7 @@ void LoadInit::walkProdElList( String defName, ProdElList *list, prod_el_list &p
 		if ( El.OptRepeat().Star() != 0 )
 			repeatType = RepeatRepeat;
 		if ( El.OptRepeat().LeftStar() != 0 )
-			repeatType = RepeatLeft;
+			repeatType = RepeatLeftRepeat;
 
 		ProdEl *prodEl = prodElName( internal, typeName,
 				NamespaceQual::cons( curNspace() ),
@@ -393,7 +393,7 @@ void LoadInit::go( long activeRealm )
 	}
 
 	/* Walk the list of items. */
-	_repeat_item ItemList = Start.ItemList();
+	_lrepeat_item ItemList = Start.ItemList();
 	RepeatIter<item> itemIter( ItemList );
 	while ( !itemIter.end() ) {
 

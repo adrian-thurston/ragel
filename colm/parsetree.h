@@ -2111,7 +2111,8 @@ enum RepeatType {
 	RepeatRepeat,
 	RepeatList,
 	RepeatOpt,
-	RepeatLeft,
+	RepeatLeftRepeat,
+	RepeatLeftList,
 };
 
 /*

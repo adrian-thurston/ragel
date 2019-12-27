@@ -808,10 +808,11 @@ LangEl *Compiler::makeRepeatProd( const InputLoc &loc, Namespace *nspace,
 }
 
 LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
-		const String &listName, UniqueType *ut )
+		const String &listName, UniqueType *ut, bool left )
 {
 	LangEl *prodName = addLangEl( this, nspace, listName, LangEl::NonTerm );
 	prodName->isList = true;
+	prodName->leftRecursive = left;
 
 	/* Build the first production of the list. */
 	TypeRef *typeRef1 = TypeRef::cons( loc, ut );
@@ -822,8 +823,14 @@ LangEl *Compiler::makeListProd( const InputLoc &loc, Namespace *nspace,
 	ProdEl *factor2 = new ProdEl( ProdEl::ReferenceType, loc, 0, false, typeRef2, 0 );
 
 	ProdElList *prodElList1 = new ProdElList;
-	prodElList1->append( factor2 );
-	prodElList1->append( factor1 );
+	if ( left ) {
+		prodElList1->append( factor2 );
+		prodElList1->append( factor1 );
+	}
+	else {
+		prodElList1->append( factor1 );
+		prodElList1->append( factor2 );
+	}
 
 	Production *newDef1 = Production::cons( loc,
 			prodName, prodElList1, String(), false, 0,

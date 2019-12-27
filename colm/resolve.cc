@@ -361,13 +361,6 @@ void TypeRef::resolveRepeat( Compiler *pd )
 		LangEl *declLangEl = 0;
 	
 		switch ( repeatType ) {
-			case RepeatLeft: {
-				/* If the factor is a repeat, create the repeat element and link the
-				 * factor to it. */
-				String repeatName( 128, "_repeat_%s", typeName.data );
-				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, uniqueType, true );
-				break;
-			}
 			case RepeatRepeat: {
 				/* If the factor is a repeat, create the repeat element and link the
 				 * factor to it. */
@@ -375,11 +368,25 @@ void TypeRef::resolveRepeat( Compiler *pd )
 				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, uniqueType, false );
 				break;
 			}
+			case RepeatLeftRepeat: {
+				/* If the factor is a repeat, create the repeat element and link the
+				 * factor to it. */
+				String repeatName( 128, "_lrepeat_%s", typeName.data );
+				declLangEl = pd->makeRepeatProd( loc, nspace, repeatName, uniqueType, true );
+				break;
+			}
 			case RepeatList: {
 				/* If the factor is a repeat, create the repeat element and link the
 				 * factor to it. */
 				String listName( 128, "_list_%s", typeName.data );
-				declLangEl = pd->makeListProd( loc, nspace, listName, uniqueType );
+				declLangEl = pd->makeListProd( loc, nspace, listName, uniqueType, false );
+				break;
+			}
+			case RepeatLeftList: {
+				/* If the factor is a repeat, create the repeat element and link the
+				 * factor to it. */
+				String repeatName( 128, "_llist_%s", typeName.data );
+				declLangEl = pd->makeListProd( loc, nspace, repeatName, uniqueType, true );
 				break;
 			}
 			case RepeatOpt: {
@@ -389,7 +396,6 @@ void TypeRef::resolveRepeat( Compiler *pd )
 				declLangEl = pd->makeOptProd( loc, nspace, optName, uniqueType );
 				break;
 			}
-
 			case RepeatNone:
 				break;
 		}

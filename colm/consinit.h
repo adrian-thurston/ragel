@@ -41,8 +41,8 @@ struct ConsInit
 
 	ProdEl *prodRefName( const String &name );
 	ProdEl *prodRefName( const String &capture, const String &name );
-	ProdEl *prodRefNameRepeat( const String &name );
-	ProdEl *prodRefNameRepeat( const String &capture, const String &name );
+	ProdEl *prodRefNameLeftRepeat( const String &name );
+	ProdEl *prodRefNameLeftRepeat( const String &capture, const String &name );
 	ProdEl *prodRefLit( const String &lit );
 
 	Production *production();
