@@ -8,13 +8,45 @@
 #include <string>
 #include <vector>
 
+inline void appendString( colm_print_args *args, const char *data, int length )
+{
+	std::string *str = (std::string*)args->arg;
+	*str += std::string( data, length );
+}
+
+inline std::string printTreeStr( colm_program *prg, colm_tree *tree, bool trim )
+{
+	std::string str;
+	struct indent_impl indent = { -1, 0 };
+	colm_print_args printArgs = { &str, 1, 0, trim, &indent, &appendString, 
+			&colm_print_null, &colm_print_term_tree, &colm_print_null };
+	colm_print_tree_args( prg, colm_vm_root(prg), &printArgs, tree );
+	return str;
+}
+
+struct ExportTree
+{
+	ExportTree( colm_program *prg, colm_tree *tree )
+		: __prg(prg), __tree(tree) {}
+
+	std::string text() { return printTreeStr( __prg, __tree, true ); }
+	colm_location *loc() { return colm_find_location( __prg, __tree ); }
+	std::string text_notrim() { return printTreeStr( __prg, __tree, false ); }
+	std::string text_ws() { return printTreeStr( __prg, __tree, false ); }
+	colm_data *data() { return __tree->tokdata; }
+	operator colm_tree *() { return __tree; }
+
+	colm_program *__prg;
+	colm_tree *__tree;
+};
+
 /* Non-recursive tree iterator. Runs an in-order traversal and when it finds a
  * search target it yields it and then resumes searching the next child. It
  * does not go into what it finds. This iterator can be used to search lists,
  * regardless if they are left-recursive or right-recursive. */
-template <class RootType, class SearchType> struct RepeatIter
+template <class SearchType> struct RepeatIter
 {
-	RepeatIter( const RootType &root )
+	RepeatIter( const ExportTree &root )
 	:
 		prg(root.__prg),
 		search_id(SearchType::ID)

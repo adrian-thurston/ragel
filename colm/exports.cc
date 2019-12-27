@@ -64,26 +64,6 @@ void Compiler::generateExports()
 		"#include <string>\n"
 		"\n";
 	
-	out << 
-		"inline void appendString( colm_print_args *args, const char *data, int length )\n"
-		"{\n"
-		"	std::string *str = (std::string*)args->arg;\n"
-		"	*str += std::string( data, length );\n"
-		"}\n"
-		"\n";
-
-	out << 
-		"inline std::string printTreeStr( colm_program *prg, colm_tree *tree, bool trim )\n"
-		"{\n"
-		"	std::string str;\n"
-		"	struct indent_impl indent = { -1, 0 };\n"
-		"	colm_print_args printArgs = { &str, 1, 0, trim, &indent, &appendString, \n"
-		"			&colm_print_null, &colm_print_term_tree, &colm_print_null };\n"
-		"	colm_print_tree_args( prg, colm_vm_root(prg), &printArgs, tree );\n"
-		"	return str;\n"
-		"}\n"
-		"\n";
-
 	/* Declare. */
 	for ( LelList::Iter lel = langEls; lel.lte(); lel++ ) {
 		if ( lel->isEOF )
@@ -102,25 +82,18 @@ void Compiler::generateExports()
 
 		openNameSpace( out, lel->nspace );
 		out << "struct " << lel->fullName << "\n";
+		out << "	: public ExportTree\n";
 		out << "{\n";
 		out << "	static const int ID = " << lel->id << ";\n";
-		out << "	std::string text() { return printTreeStr( __prg, __tree, true ); }\n";
-		out << "	colm_location *loc() { return colm_find_location( __prg, __tree ); }\n";
-		out << "	std::string text_notrim() { return printTreeStr( __prg, __tree, false ); }\n";
-		out << "	std::string text_ws() { return printTreeStr( __prg, __tree, false ); }\n";
-		out << "	colm_data *data() { return __tree->tokdata; }\n";
-		out << "	operator colm_tree *() { return __tree; }\n";
-		out << "	colm_program *__prg;\n";
-		out << "	colm_tree *__tree;\n";
 
 		if ( mainReturnUT != 0 && mainReturnUT->langEl == lel ) {
 			out << "	" << lel->fullName <<
-					"( colm_program *prg ) : __prg(prg), __tree(returnVal(prg)) {\n";
+					"( colm_program *prg ) : ExportTree( prg, returnVal(prg) ) {\n";
 			out << "    }\n";
 		}
 
 		out << "	" << lel->fullName <<
-				"( colm_program *prg, colm_tree *tree ) : __prg(prg), __tree(tree) {\n";
+				"( colm_program *prg, colm_tree *tree ) : ExportTree( prg, tree ) {\n";
 
 		out << "}\n";
 

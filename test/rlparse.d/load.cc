@@ -319,7 +319,7 @@ struct LoadRagel
 	{
 		ruby_inline::_repeat_block_item BlockItemList = RubyInlineBlock._repeat_block_item();
 
-		RepeatIter<ruby_inline::_repeat_block_item, ruby_inline::block_item> BlockItemIter( BlockItemList );
+		RepeatIter<ruby_inline::block_item> BlockItemIter( BlockItemList );
 		while ( !BlockItemIter.end() ) {
 			loadBlockItem( inlineList, BlockItemIter.value() );
 			BlockItemIter.next();
@@ -364,7 +364,7 @@ struct LoadRagel
 	{
 		InlineList *inlineList = new InlineList;
 		ruby_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
-		RepeatIter<ruby_inline::_repeat_expr_item, ruby_inline::expr_item> ExprItemIter( ExprItemList );
+		RepeatIter<ruby_inline::expr_item> ExprItemIter( ExprItemList );
 		while ( !ExprItemIter.end() ) {
 			InlineItem *inlineItem = loadExprItem( ExprItemIter.value() );
 			inlineList->append( inlineItem );
@@ -533,7 +533,7 @@ struct LoadRagel
 	{
 		ocaml_inline::_repeat_block_item BlockItemList = OCamlInlineBlock._repeat_block_item();
 
-		RepeatIter<ocaml_inline::_repeat_block_item, ocaml_inline::block_item> BlockItemIter( BlockItemList );
+		RepeatIter<ocaml_inline::block_item> BlockItemIter( BlockItemList );
 		while ( !BlockItemIter.end() ) {
 			loadBlockItem( inlineList, BlockItemIter.value() );
 			BlockItemIter.next();
@@ -579,7 +579,7 @@ struct LoadRagel
 		InlineList *inlineList = new InlineList;
 		ocaml_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
 
-		RepeatIter<ocaml_inline::_repeat_expr_item, ocaml_inline::expr_item> ExprItemIter( ExprItemList );
+		RepeatIter<ocaml_inline::expr_item> ExprItemIter( ExprItemList );
 		while ( !ExprItemIter.end() ) {
 			InlineItem *inlineItem = loadExprItem( ExprItemIter.value() );
 			inlineList->append( inlineItem );
@@ -748,7 +748,7 @@ struct LoadRagel
 	{
 		crack_inline::_repeat_block_item BlockItemList = CrackInlineBlock._repeat_block_item();
 
-		RepeatIter<crack_inline::_repeat_block_item, crack_inline::block_item> BlockItemIter( BlockItemList );
+		RepeatIter<crack_inline::block_item> BlockItemIter( BlockItemList );
 		while ( !BlockItemIter.end() ) {
 			loadBlockItem( inlineList, BlockItemIter.value() );
 			BlockItemIter.next();
@@ -794,7 +794,7 @@ struct LoadRagel
 		InlineList *inlineList = new InlineList;
 		crack_inline::_repeat_expr_item ExprItemList = InlineExpr._repeat_expr_item();
 
-		RepeatIter<crack_inline::_repeat_expr_item, crack_inline::expr_item> ExprItemIter( ExprItemList );
+		RepeatIter<crack_inline::expr_item> ExprItemIter( ExprItemList );
 		while ( !ExprItemIter.end() ) {
 			InlineItem *inlineItem = loadExprItem( ExprItemIter.value() );
 			inlineList->append( inlineItem );
@@ -2298,7 +2298,7 @@ struct LoadRagel
 
 		inputItem->writeArgs.push_back( Cmd.text() );
 
-		RepeatIter<ragel::_repeat_write_arg, ragel::write_arg> WordIter( WordList );
+		RepeatIter<ragel::write_arg> WordIter( WordList );
 		while ( !WordIter.end() ) {
 			inputItem->writeArgs.push_back( WordIter.value().text() );
 			WordIter.next();
@@ -2472,7 +2472,7 @@ struct LoadRagel
 	
 	void loadImportList( _repeat_import ImportList )
 	{
-		RepeatIter<_repeat_import, import> ImportIter( ImportList );
+		RepeatIter<import> ImportIter( ImportList );
 		while ( !ImportIter.end() ) {
 			loadImport( ImportIter.value() );
 			ImportIter.next();
@@ -2602,7 +2602,7 @@ struct LoadRagel
 
 		ragel::_repeat_statement StmtList = RagelStart._repeat_statement();
 
-		RepeatIter<ragel::_repeat_statement, ragel::statement> StmtIter( StmtList );
+		RepeatIter<ragel::statement> StmtIter( StmtList );
 		while ( !StmtIter.end() ) {
 			bool stop = loadStatement( StmtIter.value() );
 			if ( stop )
@@ -2706,7 +2706,7 @@ struct LoadRagel
 
 		c_host::_repeat_section SectionList = Start.SectionList();
 		if ( SectionList ) {
-			RepeatIter<c_host::_repeat_section, c_host::section> SectionIter( SectionList );
+			RepeatIter<c_host::section> SectionIter( SectionList );
 			while ( !SectionIter.end() ) {
 				loadSection( SectionIter.value(), targetMachine, searchMachine );
 				SectionIter.next();
@@ -2715,7 +2715,7 @@ struct LoadRagel
 		else if ( Start.RSectionList() ) {
 			ruby_host::_repeat_section RSectionList = Start.RSectionList();
 			if ( RSectionList ) {
-				RepeatIter<ruby_host::_repeat_section, ruby_host::section> RSectionIter( RSectionList );
+				RepeatIter<ruby_host::section> RSectionIter( RSectionList );
 				while ( !RSectionIter.end() ) {
 					loadSection( RSectionIter.value(), targetMachine, searchMachine );
 					RSectionIter.next();
@@ -2725,7 +2725,7 @@ struct LoadRagel
 		else {
 			ocaml_host::_repeat_section OSectionList = Start.OSectionList();
 			if ( OSectionList ) {
-				RepeatIter<ocaml_host::_repeat_section, ocaml_host::section> OSectionIter( OSectionList );
+				RepeatIter<ocaml_host::section> OSectionIter( OSectionList );
 				while ( !OSectionIter.end() ) {
 					loadSection( OSectionIter.value(), targetMachine, searchMachine );
 					OSectionIter.next();

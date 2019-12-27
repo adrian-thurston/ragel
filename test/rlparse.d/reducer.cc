@@ -248,7 +248,7 @@ void TopLevel::loadImport( std::string fileName )
 		return;
 	}
 
-	RepeatIter<_repeat_import, import> ImportIter( ImportList );
+	RepeatIter<import> ImportIter( ImportList );
 	while ( !ImportIter.end() ) {
 		import Import = ImportIter.value();
 

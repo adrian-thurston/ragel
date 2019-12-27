@@ -394,7 +394,7 @@ void LoadInit::go( long activeRealm )
 
 	/* Walk the list of items. */
 	_repeat_item ItemList = Start.ItemList();
-	RepeatIter<_repeat_item, item> itemIter( ItemList );
+	RepeatIter<item> itemIter( ItemList );
 	while ( !itemIter.end() ) {
 
 		item Item = itemIter.value();

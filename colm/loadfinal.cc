@@ -314,7 +314,7 @@ struct LoadColm
 		StmtList *retList = new StmtList;
 
 		/* Walk the list of statements. */
-		RepeatIter<_repeat_statement, statement> ri( langStmtList.StmtList() );
+		RepeatIter<statement> ri( langStmtList.StmtList() );
 
 		while ( !ri.end() ) {
 			statement Statement = ri.value();
@@ -385,7 +385,7 @@ struct LoadColm
 		ObjectDef *objectDef = ObjectDef::cons( ObjectDef::UserType,
 				String(), pd->nextObjectId++ ); 
 
-		RepeatIter<_repeat_var_def, var_def> varDefIter( varDefList );
+		RepeatIter<var_def> varDefIter( varDefList );
 
 		while ( !varDefIter.end() ) {
 			ObjectField *varDef = walkVarDef( varDefIter.value(),
@@ -534,7 +534,7 @@ struct LoadColm
 	{
 		PatternItemList *list = new PatternItemList;
 
-		RepeatIter<_repeat_sq_cons_data, sq_cons_data> sqConsDataIter( sqConsDataList );
+		RepeatIter<sq_cons_data> sqConsDataIter( sqConsDataList );
 
 		while ( !sqConsDataIter.end() ) {
 			String consData = unescape( sqConsDataIter.value().text().c_str() );
@@ -561,7 +561,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_sq_cons_data, sq_cons_data> sqConsDataIter( sqConsDataList );
+		RepeatIter<sq_cons_data> sqConsDataIter( sqConsDataList );
 
 		while ( !sqConsDataIter.end() ) {
 			String consData = unescape( sqConsDataIter.value().text().c_str() );
@@ -589,7 +589,7 @@ struct LoadColm
 	{
 		PatternItemList *list = new PatternItemList;
 
-		RepeatIter<_repeat_litpat_el, litpat_el> litpatElIter( litpatElList );
+		RepeatIter<litpat_el> litpatElIter( litpatElList );
 
 		while ( !litpatElIter.end() ) {
 			PatternItemList *tail = walkLitpatEl( litpatElIter.value(), patternVarRef );
@@ -613,7 +613,7 @@ struct LoadColm
 	{
 		PatternItemList *list = new PatternItemList;
 
-		RepeatIter<_repeat_pattern_el, pattern_el> patternElIter( patternElList );
+		RepeatIter<pattern_el> patternElIter( patternElList );
 
 		while ( !patternElIter.end() ) {
 			PatternItemList *tail = walkPatternEl( patternElIter.value(), patternVarRef );
@@ -783,7 +783,7 @@ struct LoadColm
 		String lit = "";
 		_repeat_sq_cons_data sqConsDataList = Include.SqConsDataList();
 
-		RepeatIter<_repeat_sq_cons_data, sq_cons_data> sqConsDataIter( sqConsDataList );
+		RepeatIter<sq_cons_data> sqConsDataIter( sqConsDataList );
 
 		while ( !sqConsDataIter.end() ) {
 			colm_data *data = sqConsDataIter.value().data();
@@ -1465,7 +1465,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_lit_cons_el, lit_cons_el> litConsElIter( litConsElList );
+		RepeatIter<lit_cons_el> litConsElIter( litConsElList );
 
 		while ( !litConsElIter.end() ) {
 			ConsItemList *extension = walkLitConsEl( litConsElIter.value(), consTypeRef );
@@ -1526,7 +1526,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_cons_el, cons_el> consElIter( consElList );
+		RepeatIter<cons_el> consElIter( consElList );
 
 		while ( !consElIter.end() ) {
 			ConsItemList *extension = walkConsEl( consElIter.value(), consTypeRef );
@@ -1601,7 +1601,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_lit_string_el, lit_string_el> litStringElIter( litStringElList );
+		RepeatIter<lit_string_el> litStringElIter( litStringElList );
 
 		while ( !litStringElIter.end() ) {
 			ConsItemList *extension = walkLitStringEl( litStringElIter.value() );
@@ -1657,7 +1657,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_string_el, string_el> stringElIter( stringElList );
+		RepeatIter<string_el> stringElIter( stringElList );
 
 		while ( !stringElIter.end() ) {
 			ConsItemList *extension = walkStringEl( stringElIter.value() );
@@ -1733,7 +1733,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_lit_accum_el, lit_accum_el> litAccumElIter( litAccumElList );
+		RepeatIter<lit_accum_el> litAccumElIter( litAccumElList );
 
 		while ( !litAccumElIter.end() ) {
 			ConsItemList *extension = walkLitAccumEl( litAccumElIter.value() );
@@ -1789,7 +1789,7 @@ struct LoadColm
 	{
 		ConsItemList *list = new ConsItemList;
 
-		RepeatIter<_repeat_accum_el, accum_el> accumElIter( accumElList );
+		RepeatIter<accum_el> accumElIter( accumElList );
 
 		while ( !accumElIter.end() ) {
 			ConsItemList *extension = walkAccumEl( accumElIter.value() );
@@ -1857,7 +1857,7 @@ struct LoadColm
 	{
 		FieldInitVect *list = new FieldInitVect;
 
-		RepeatIter<_repeat_field_init, field_init> fieldInitIter( fieldInitList );
+		RepeatIter<field_init> fieldInitIter( fieldInitList );
 
 		while ( !fieldInitIter.end() ) {
 			walkFieldInit( list, fieldInitIter.value() );
@@ -2517,7 +2517,7 @@ struct LoadColm
 
 		_repeat_struct_item structItemList = structDef.ItemList();
 
-		RepeatIter<_repeat_struct_item, struct_item> structItemIter( structItemList );
+		RepeatIter<struct_item> structItemIter( structItemList );
 
 		while ( !structItemIter.end() ) {
 			walkStructItem( structItemIter.value() );
@@ -2608,7 +2608,7 @@ struct LoadColm
 
 	void walkRedItemList( _repeat_host_item itemList, ReduceTextItemList &list )
 	{
-		RepeatIter<_repeat_host_item, host_item> itemIter( itemList );
+		RepeatIter<host_item> itemIter( itemList );
 
 		while ( !itemIter.end() ) {
 			walkRedItem( itemIter.value(), list );
@@ -2659,7 +2659,7 @@ struct LoadColm
 
 	void walkReductionList( _repeat_reduction_item itemList )
 	{
-		RepeatIter<_repeat_reduction_item, reduction_item> itemIter( itemList );
+		RepeatIter<reduction_item> itemIter( itemList );
 
 		while ( !itemIter.end() ) {
 			walkReductionItem( itemIter.value() );
@@ -2855,7 +2855,7 @@ struct LoadColm
 	void walkNamespaceItemList( _repeat_namespace_item itemList, StmtList *stmtList )
 	{
 		/* Walk the list of items. */
-		RepeatIter<_repeat_namespace_item, namespace_item> itemIter( itemList );
+		RepeatIter<namespace_item> itemIter( itemList );
 		while ( !itemIter.end() ) {
 			walkNamespaceItem( itemIter.value(), stmtList );
 			itemIter.next();
@@ -2867,7 +2867,7 @@ struct LoadColm
 		StmtList *stmtList = new StmtList;
 
 		/* Walk the list of items. */
-		RepeatIter<_repeat_root_item, root_item> rootItemIter( rootItemList );
+		RepeatIter<root_item> rootItemIter( rootItemList );
 		while ( !rootItemIter.end() ) {
 			walkRootItem( rootItemIter.value(), stmtList );
 			rootItemIter.next();
