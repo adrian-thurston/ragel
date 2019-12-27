@@ -695,6 +695,30 @@ void ConsInit::optProdName()
 	definition( "opt_prod_name",  prod1, prod2 );
 }
 
+void ConsInit::prodVarDef()
+{
+	ProdEl *prodEl1 = prodRefName( "Name", "id" );
+	ProdEl *prodEl2 = prodRefLit( "':'" );
+	ProdEl *prodEl3 = prodRefName( "Type", "id" );
+	Production *prod1 = production( prodEl1, prodEl2, prodEl3 );
+
+	definition( "prod_var_def", prod1 );
+}
+
+/* The prod var list we provide in a basic form, just "id: id." We won't make
+ * use of them in bootstrap0 or bootstrap1, They are ignored in the loader for
+ * bootstrap1. We want to use them in bootstrap2 during the rewrite stage. */
+void ConsInit::prodVarList()
+{
+	ProdEl *prodEl1 = prodRefName( "VarDefList", "prod_var_list" );
+	ProdEl *prodEl2 = prodRefName( "VarDef", "prod_var_def" );
+	Production *prod1 = production( prodEl1, prodEl2 );
+
+	Production *prod2 = production();
+
+	definition( "prod_var_list",  prod1, prod2 );
+}
+
 void ConsInit::prod()
 {
 	ProdEl *prodEl1 = prodRefLit( "'['" );
@@ -724,9 +748,10 @@ Production *ConsInit::prodProd()
 {
 	ProdEl *prodEl1 = prodRefLit( "'def'" );
 	ProdEl *prodEl2 = prodRefName( "DefId", "id" );
-	ProdEl *prodEl3 = prodRefName( "ProdList", "prod_list" );
+	ProdEl *prodEl3 = prodRefName( "ProdVarList", "prod_var_list" );
+	ProdEl *prodEl4 = prodRefName( "ProdList", "prod_list" );
 
-	return production( prodEl1, prodEl2, prodEl3 );
+	return production( prodEl1, prodEl2, prodEl3, prodEl4 );
 }
 
 void ConsInit::item()
@@ -880,6 +905,8 @@ void ConsInit::go( long activeRealm )
 	prodElList();
 	optCommit();
 	optProdName();
+	prodVarDef();
+	prodVarList();
 	prod();
 	prodList();
 	ignore();

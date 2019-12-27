@@ -93,7 +93,10 @@ struct ConsInit
 	void optProdElName();
 	void prodEl();
 	void prodElList();
+	void varDefList();
 	void item();
+	void prodVarDef();
+	void prodVarList();
 	void prodList();
 	void optProdName();
 	void prod();
