@@ -7,10 +7,6 @@ A: str = argv->pop()
 F: stream = open( A, 'r' )
 parse P: start [ F ]
 
-def new_roots
-	[new_roots root_item]
-|	[]
-
 prod_list cons_prod( SLA: prod_sublist )
 {
 	if match SLA [Left: prod_sublist BAR prod_el_list]
@@ -19,58 +15,70 @@ prod_list cons_prod( SLA: prod_sublist )
 		return cons prod_list[ '[ ' SLA.prod_el_list ' ]' ]
 }
 
+alias prod_map map<prod_list, id>
+alias unique_prod map_el<prod_list, id>
+
+global PM: prod_map = new prod_map()
+global NextId: int = 1
+global Modified: bool = false
+
+cfl_def rewrite_cfl_def( CflDef: ref<cfl_def> )
+{
+	NewDef: cfl_def
+	for PE: prod_el in CflDef {
+		if match PE [
+			OptName: opt_prod_el_name POPEN PS: prod_sublist PCLOSE OptRep: opt_repeat]
+		{
+			PL: prod_list = cons_prod(PS)
+
+			Name: id = PM->find( PL )
+			if ( !Name ) {
+				Name = parse id
+					"_sublist_[sprintf("%d", NextId)]"
+				NextId = NextId + 1
+
+				PM->insert( PL, Name )
+
+				NewDef = cons cfl_def
+					"def [Name] [PL]"
+			}
+
+			PE = cons prod_el
+				[OptName Name OptRep " "]
+
+			Modified = true
+		}
+	}
+	return NewDef
+}
+
 void rewrite( P: ref<start> )
 {
-	Modified: bool = false
-	cons Additional: new_roots []
+	Modified = false
+	
+	for RIL: root_item<* in P {
+		require RIL [Head: root_item<* CflDef: cfl_def]
 
-	for PE: prod_el in P {
-		if match PE
-				[OptName: opt_prod_el_name POPEN PS: prod_sublist PCLOSE OptRep: opt_repeat]
-		{
-			PE = cons prod_el
-				[OptName "_sublist_" OptRep]
+		NewDef: cfl_def
 
-			cons Def: cfl_def
-				"def _sublist_ [cons_prod(PS)]"
+		NewDef = rewrite_cfl_def( CflDef )
 
-			Additional = cons new_roots
-				[Additional Def]
+		if NewDef {
+			RIL = cons root_item<* [Head NewDef "\n\n" CflDef]
+			Modified = true
 		}
-#		else if match PE
-#				[OptName: opt_prod_el_name Qual: region_qual Id: id "<*"]
-#		{
-#			parse LeftRepId: id "_lrep_[Id]"
-#			PE = cons prod_el [OptName Qual LeftRepId]
-#
-#			cons Def: cfl_def "def [LeftRepId] \[[LeftRepId] [Id]\] | \[\]
-#
-#			Additional = cons new_roots [Additional Def]
-#		}
-		else if match PE
-				[OptName: opt_prod_el_name Qual: region_qual Id: id "<+"]
-		{
-			parse LeftRepId: id "_lrep_[Id]"
-
-			PE = cons prod_el [OptName Qual LeftRepId]
-
-			cons Def: cfl_def "def [LeftRepId] \[[LeftRepId] [Id]\] | \[[Id]\]
-
-			Additional = cons new_roots [Additional Def]
+		else {
+			RIL = cons root_item<* [Head CflDef]
 		}
+
 	}
 
-	while  ( Additional.root_item ) {
-		P = cons start [P.RootItemList Additional.root_item]
-		Additional = Additional._new_roots
-		Modified = true
-	}
 	return Modified
 }
 
 if P {
 	while ( rewrite( P ) ) {}
-	#rewrite( P )
+	#print "final:\n[P]
 }
 
 ColmTree = P
