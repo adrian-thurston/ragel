@@ -340,7 +340,6 @@ UniqueType *TypeRef::resolveTypeParser( Compiler *pd )
  * End object based list/map
  */
 
-
 UniqueType *TypeRef::resolveTypeRef( Compiler *pd )
 {
 	typeRef1->resolveType( pd );

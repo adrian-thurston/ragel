@@ -47,6 +47,10 @@ cfl_def rewrite_cfl_def( CflDef: ref<cfl_def> )
 				[OptName Name OptRep " "]
 
 			Modified = true
+
+			# Currently can return only one item.
+			if ( NewDef )
+				break
 		}
 	}
 	return NewDef
