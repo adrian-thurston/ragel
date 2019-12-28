@@ -44,7 +44,7 @@ int stack[32];
 
 	# Choose which to machine to call into based on the command.
 	action comm_arg {
-		if ( comm >= 'a' ) {
+		if ( comm >= 97 ) {
 			fcall alp_comm;
 		} else {
 			fcall dig_comm;

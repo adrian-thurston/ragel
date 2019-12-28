@@ -175,7 +175,7 @@ int print_stmt( Stmt: indep::print_stmt )
 	case [`print_token `;]
 	{
 		send Out
-			"print( data\[(ts+1) : (te)\] );
+			"print( String( data\[(ts+1) : (te)\] ) );
 	}
 	case [`print_off `;]
 	{
@@ -193,7 +193,7 @@ void buf_stmt( BufStmt: indep::buf_stmt )
 	}
 	case [`buf_append `( `) `;] {
 		send Out
-			"	buffer = buffer * AbstractString(Char\[fc\]);
+			"	buffer = buffer * String(Char\[fc\]);
 	}
 }
 
@@ -284,7 +284,8 @@ void julia( Output: stream )
 		"
 		"%% write data;
 		"
-		"function m( data::AbstractString )
+		"function m( data_string::AbstractString )
+		"	data = Vector{UInt8}( data_string )
 		"	p = 0
 		"	pe = length(data)
 		"	eof = length(data)
@@ -292,8 +293,8 @@ void julia( Output: stream )
 		"	buffer = \"\"
 		"	nfa_len = 0
 		"	nfa_count = 0
-		"	nfa_bp_state = Array{Int, 1}(20)
-		"	nfa_bp_p = Array{Int, 1}(20)
+		"	nfa_bp_state = Array{Int, 1}(undef, 20)
+		"	nfa_bp_p = Array{Int, 1}(undef, 20)
 
 	Init: indep::stmt* = RagelTree.Init
 	for Stmt: indep::stmt in Init {

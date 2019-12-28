@@ -264,13 +264,6 @@ if test "x$D_BIN" = x; then
 fi
 
 AC_PATH_PROG([JAVAC_BIN], [javac])
-AC_PATH_PROG([RUBY_BIN], [ruby])
-AC_PATH_PROG([CSHARP_BIN], [mcs])
-AC_PATH_PROG([GO_BIN], [go])
-AC_PATH_PROG([OCAML_BIN], [ocaml])
-AC_PATH_PROG([RUST_BIN], [rustc])
-AC_PATH_PROG([JULIA_BIN], [julia])
-AC_PATH_PROG([GNUSTEP_CONFIG], [gnustep-config])
 
 dnl
 dnl Java test cases are now requring a large virtual address space. On systems
@@ -289,6 +282,12 @@ if test "x$JAVAC_BIN" != x; then
 	rm -f conftest.java conftest.class
 fi
 
+AC_PATH_PROG([RUBY_BIN], [ruby])
+AC_PATH_PROG([CSHARP_BIN], [mcs])
+AC_PATH_PROG([GO_BIN], [go])
+AC_PATH_PROG([OCAML_BIN], [ocaml])
+AC_PATH_PROG([RUST_BIN], [rustc])
+AC_PATH_PROG([JULIA_BIN], [julia])
 
 dnl
 dnl Julia requires a large virtual address space. On systems where this is
@@ -307,11 +306,26 @@ if test "x$JULIA_BIN" != x; then
 	rm -f conftest.jl
 fi
 
-dnl
-dnl Disable julia tests until we can sort out how to adapt to the changes to
-dnl the language that are in more recent distros.
-dnl
-JULIA_BIN=""
+dnl We can run julia, now make sure we have 1.0
+if test "x$JULIA_BIN" != x; then
+	echo -n "checking if julia is version 1.0 or later ... "
+
+	dnl We assume the form "julia version X.X.X"
+	dnl   1. everything before the version number.
+	dnl   2. Remove trailing version.
+	dnl   3. Verify it is plain number greater than 1.
+	dnl Any failure comes out as empty string. Note the sed command is wrapped
+	dnl in [] so autotools do not interpret anything in it.
+	JULIA1="`$JULIA_BIN -v | sed ['s/[A-Za-z ]\+//g; s/\.[0-9\.]*//; /^[1-9][0-9]*/!d;']`"
+	if test "x$JULIA1" != x; then
+		echo "yes"
+	else
+		JULIA_BIN=""
+		echo "no"
+	fi
+fi
+
+AC_PATH_PROG([GNUSTEP_CONFIG], [gnustep-config])
 
 dnl
 dnl The ASM tests have been based off of sources that are non-relocatable

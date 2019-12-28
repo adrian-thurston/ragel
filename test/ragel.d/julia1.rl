@@ -10,7 +10,8 @@
 
 %% write data;
 
-function test( data::AbstractString )
+function test( data_string::AbstractString )
+	data = Vector{UInt8}( data_string )
 	p = 0
 	pe = length(data)
 	eof = length(data)
