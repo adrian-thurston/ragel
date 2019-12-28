@@ -736,13 +736,14 @@ def pattern_top_el
 	[DQ LitpatElList: litpat_el<* dq_lit_term] :Dq
 |	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN PatternElList: pattern_el<* SQCLOSE] :SubList
 
 def pattern_list
-	[pattern_top_el] :Base
+	[pattern_top_el pattern_list] :List
+|	[pattern_top_el] :Base
 
 def pattern
-	[pattern_list]
+	[pattern_list] :TopList
+|	[SQOPEN PatternElList: pattern_el<* SQCLOSE] :SubList
 
 #
 # Constructor List
@@ -768,13 +769,14 @@ def cons_top_el
 	[DQ LitConsElList: lit_cons_el<* dq_lit_term] :Dq
 |	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN ConsElList: cons_el<* SQCLOSE] :SubList
 
 def cons_list
-	[cons_top_el] :Base
+	[cons_top_el cons_list] :List
+|	[cons_top_el] :Base
 
 def constructor
-	[cons_list]
+	[cons_list] :TopList
+|	[SQOPEN ConsElList: cons_el<* SQCLOSE] :SubList
 
 #
 # Accumulate
@@ -821,13 +823,14 @@ def string_top_el
 	[DQ LitStringElList: lit_string_el<* dq_lit_term] :Dq
 |	[SQ SqConsDataList: sq_cons_data<* sq_lit_term] :Sq
 |	[TILDE opt_tilde_data TILDE_NL] :Tilde
-|	[SQOPEN StringElList: string_el<* SQCLOSE] :SubList
 
 def string_list
-	[string_top_el] :Base
+	[string_top_el string_list] :List
+|	[string_top_el] :Base
 
 def string
-	[string_list]
+	[string_list] :TopList
+|	[SQOPEN StringElList: string_el<* SQCLOSE] :SubList
 
 #
 # Variable References
