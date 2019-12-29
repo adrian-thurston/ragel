@@ -127,10 +127,10 @@ std::ostream &GotoLoop::EXEC_FUNCS()
 		out << nbreak << " = 0;\n";
 
 	out <<
-		"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+		"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << ";\n"
 		"	" << acts << " += 1;\n"
 		"	while ( " << nacts << " > 0 ) {\n"
-		"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
+		"		switch ( " << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << " ) {\n";
 		ACTION_SWITCH() << 
 		"		}\n"
 		"		" << acts << " += 1;\n"
@@ -154,10 +154,10 @@ void GotoLoop::NFA_FROM_STATE_ACTION_EXEC()
 	if ( redFsm->anyFromStateActions() ) {
 		out <<
 			"	" << acts << " = " << OFFSET( ARR_REF( actions ), ARR_REF( fromStateActions ) + "[nfa_bp[nfa_len].state]" ) << ";\n"
-			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << ";\n"
+			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << ";\n"
 			"	" << acts << " += 1;\n"
 			"	while ( " << nacts << " > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		" << nacts << " -= 1;\n"
@@ -173,9 +173,9 @@ void GotoLoop::FROM_STATE_ACTIONS()
 		out <<
 			"	" << acts << " = " << OFFSET( ARR_REF( actions ),
 					ARR_REF( fromStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << "; " << acts << " += 1;\n"
+			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << "; " << acts << " += 1;\n"
 			"	while ( " << nacts << " > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << " ) {\n";
 			FROM_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		" << acts << " += 1;\n"
@@ -191,9 +191,9 @@ void GotoLoop::TO_STATE_ACTIONS()
 		out <<
 			"	" << acts << " = " << OFFSET( ARR_REF( actions ),
 					ARR_REF( toStateActions ) + "[" + vCS() + "]" ) << ";\n"
-			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << "; " << acts << " += 1;\n"
+			"	" << nacts << " = " << CAST( UINT() ) << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << "; " << acts << " += 1;\n"
 			"	while ( " << nacts << " > 0 ) {\n"
-			"		switch ( " << DEREF( ARR_REF( actions ), "" + string(acts) + "" ) << " ) {\n";
+			"		switch ( " << DEREF( ARR_REF( actions ), "" + acts.to_str_and_reference() + "" ) << " ) {\n";
 			TO_STATE_ACTION_SWITCH() <<
 			"		}\n"
 			"		" << acts << " += 1;\n"

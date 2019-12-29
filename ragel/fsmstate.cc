@@ -331,32 +331,33 @@ int InitPartitionCompare::compare( const StateAp *state1, const StateAp *state2 
 		return compareRes;
 
 	/* Use a pair iterator to test the transition pairs. */
-	RangePairIter< PiList<TransAp> >
+        typedef RangePairIter< PiList<TransAp> > RangePairIterPiListTransAp;
+	RangePairIterPiListTransAp
 		outPair( ctx, state1->outList, state2->outList );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangePairIter<TransAp>::RangeInS1:
+		case RangePairIterPiListTransAp::RangeInS1:
 			compareRes = FsmAp::compareTransDataPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangePairIter<TransAp>::RangeInS2:
+		case RangePairIterPiListTransAp::RangeInS2:
 			compareRes = FsmAp::compareTransDataPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangePairIter<TransAp>::RangeOverlap:
+		case RangePairIterPiListTransAp::RangeOverlap:
 			compareRes = FsmAp::compareTransDataPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangePairIter<TransAp>::BreakS1:
-		case RangePairIter<TransAp>::BreakS2:
+		case RangePairIterPiListTransAp::BreakS1:
+		case RangePairIterPiListTransAp::BreakS2:
 			break;
 		}
 	}
@@ -370,31 +371,32 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	int compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-	RangePairIter< PiList<TransAp> > outPair( ctx, state1->outList, state2->outList );
+        typedef RangePairIter< PiList<TransAp> > RangePairIterPiListTransAp;
+	RangePairIterPiListTransAp outPair( ctx, state1->outList, state2->outList );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
 
-		case RangePairIter<TransAp>::RangeInS1:
+		case RangePairIterPiListTransAp::RangeInS1:
 			compareRes = FsmAp::compareTransPartPtr( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangePairIter<TransAp>::RangeInS2:
+		case RangePairIterPiListTransAp::RangeInS2:
 			compareRes = FsmAp::compareTransPartPtr( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangePairIter<TransAp>::RangeOverlap:
+		case RangePairIterPiListTransAp::RangeOverlap:
 			compareRes = FsmAp::compareTransPartPtr( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 
-		case RangePairIter<TransAp>::BreakS1:
-		case RangePairIter<TransAp>::BreakS2:
+		case RangePairIterPiListTransAp::BreakS1:
+		case RangePairIterPiListTransAp::BreakS2:
 			break;
 		}
 	}
@@ -464,26 +466,27 @@ int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 	}
 	else { 
 		/* Use a pair iterator to get the transition pairs. */
-		ValPairIter< PiList<CondAp> > outPair( trans1->tcap()->condList,
+                typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
+		ValPairIterPiListCondAp outPair( trans1->tcap()->condList,
 				trans2->tcap()->condList );
 		for ( ; !outPair.end(); outPair++ ) {
 			switch ( outPair.userState ) {
 
-			case ValPairIter<CondAp>::RangeInS1: {
+			case ValPairIterPiListCondAp::RangeInS1: {
 				int compareRes = FsmAp::compareCondPartPtr<CondAp>( outPair.s1Tel.trans, 0 );
 				if ( compareRes != 0 )
 					return compareRes;
 				break;
 			}
 
-			case ValPairIter<CondAp>::RangeInS2: {
+			case ValPairIterPiListCondAp::RangeInS2: {
 				int compareRes = FsmAp::compareCondPartPtr<CondAp>( 0, outPair.s2Tel.trans );
 				if ( compareRes != 0 )
 					return compareRes;
 				break;
 			}
 
-			case ValPairIter<CondAp>::RangeOverlap: {
+			case ValPairIterPiListCondAp::RangeOverlap: {
 				int compareRes = FsmAp::compareCondPartPtr<CondAp>( 
 						outPair.s1Tel.trans, outPair.s2Tel.trans );
 				if ( compareRes != 0 )

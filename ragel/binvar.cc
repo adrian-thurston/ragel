@@ -92,7 +92,7 @@ void BinVar::LOCATE_COND()
 		std::stringstream success, error;
 
 		out <<
-			"	" << ckeys << " = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[" + string(trans) + "]" ) << ";\n"
+			"	" << ckeys << " = " << OFFSET( ARR_REF( condKeys ), ARR_REF( transOffsets ) + "[" + trans.to_str_and_reference() + "]" ) << ";\n"
 			"	" << klen << " = " << CAST( "int" ) << ARR_REF( transLengths ) << "[" << trans << "];\n"
 			"	" << cond << " = " << CAST( UINT() ) << ARR_REF( transOffsets ) << "[" << trans << "];\n"
 			"\n";
@@ -101,7 +101,7 @@ void BinVar::LOCATE_COND()
 			"	" << cpc << " = 0;\n";
 		
 		if ( red->condSpaceList.length() > 0 )
-			COND_EXEC( ARR_REF( transCondSpaces ) + "[" + string(trans) + "]" );
+			COND_EXEC( ARR_REF( transCondSpaces ) + "[" + trans.to_str_and_reference() + "]" );
 		
 		success <<
 			cond << " += " << CAST( UINT() ) << "(_mid - " << ckeys << ");\n";

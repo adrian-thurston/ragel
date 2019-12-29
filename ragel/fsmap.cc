@@ -141,7 +141,7 @@ void FsmAp::startFsmPrior( int ordering, PriorDesc *prior )
 
 	/* Start fsm priorities are a special case that may require
 	 * minimization afterwards. */
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 }
 
 /* Set the priority of all transitions in a graph. Walks all transition lists
@@ -263,7 +263,7 @@ void FsmAp::startFsmAction( int ordering, Action *action )
 		}
 	}
 
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 }
 
 /* Set functions to execute on all transitions. Walks the out lists of all
@@ -545,7 +545,7 @@ void FsmAp::startErrorAction( int ordering, Action *action, int transferPoint )
 	/* Add the actions. */
 	startState->errActionTable.setAction( ordering, action, transferPoint );
 
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 }
 
 /* Set error actions in all states where there is a transition out. */
@@ -600,7 +600,7 @@ void FsmAp::startEOFAction( int ordering, Action *action )
 	/* Add the actions. */
 	startState->eofActionTable.setAction( ordering, action );
 
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 }
 
 /* Set EOF actions in all states where there is a transition out. */
@@ -657,7 +657,7 @@ void FsmAp::startToStateAction( int ordering, Action *action )
 
 	startState->toStateActionTable.setAction( ordering, action );
 
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 }
 
 /* Set to state actions in all states. */
@@ -713,7 +713,7 @@ void FsmAp::startFromStateAction( int ordering, Action *action )
 
 	startState->fromStateActionTable.setAction( ordering, action );
 
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 }
 
 void FsmAp::allFromStateAction( int ordering, Action *action )
@@ -947,22 +947,23 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
 
 int FsmAp::compareCondListBitElim( const CondList &condList1, const CondList &condList2 )
 {
-	ValPairIter< PiList<CondAp> > outPair( condList1, condList2 );
+        typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
+	ValPairIterPiListCondAp outPair( condList1, condList2 );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
-		case ValPairIter<CondAp>::RangeInS1: {
+		case ValPairIterPiListCondAp::RangeInS1: {
 			int compareRes = FsmAp::compareCondBitElimPtr<CondAp>( outPair.s1Tel.trans, 0 );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
-		case ValPairIter<CondAp>::RangeInS2: {
+		case ValPairIterPiListCondAp::RangeInS2: {
 			int compareRes = FsmAp::compareCondBitElimPtr<CondAp>( 0, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
 				return compareRes;
 			break;
 		}
-		case ValPairIter<CondAp>::RangeOverlap: {
+		case ValPairIterPiListCondAp::RangeOverlap: {
 			int compareRes = FsmAp::compareCondBitElimPtr<CondAp>( 
 					outPair.s1Tel.trans, outPair.s2Tel.trans );
 			if ( compareRes != 0 )
@@ -991,23 +992,24 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 			return compareRes;
 	}
 	else {
-		ValPairIter< PiList<CondAp> > outPair( trans1->tcap()->condList,
+                typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
+		ValPairIterPiListCondAp outPair( trans1->tcap()->condList,
 				trans2->tcap()->condList );
 		for ( ; !outPair.end(); outPair++ ) {
 			switch ( outPair.userState ) {
-			case ValPairIter<CondAp>::RangeInS1: {
+			case ValPairIterPiListCondAp::RangeInS1: {
 				int compareRes = FsmAp::compareCondDataPtr<CondAp>( outPair.s1Tel.trans, 0 );
 				if ( compareRes != 0 )
 					return compareRes;
 				break;
 			}
-			case ValPairIter<CondAp>::RangeInS2: {
+			case ValPairIterPiListCondAp::RangeInS2: {
 				int compareRes = FsmAp::compareCondDataPtr<CondAp>( 0, outPair.s2Tel.trans );
 				if ( compareRes != 0 )
 					return compareRes;
 				break;
 			}
-			case ValPairIter<CondAp>::RangeOverlap: {
+			case ValPairIterPiListCondAp::RangeOverlap: {
 				int compareRes = FsmAp::compareCondDataPtr<CondAp>( 
 						outPair.s1Tel.trans, outPair.s2Tel.trans );
 				if ( compareRes != 0 )
@@ -1175,7 +1177,7 @@ FsmRes FsmAp::startFsmCondition( Action *condAction, bool sense )
 		}
 	}
 
-	afterOpMinimize( this );
+	afterOpMinimize( true );
 
 	return FsmRes( FsmRes::Fsm(), this );
 }

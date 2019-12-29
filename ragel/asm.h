@@ -50,7 +50,7 @@ struct GenInlineList;
 struct RedAction;
 struct LongestMatch;
 struct LongestMatchPart;
-struct AsmCodeGen;
+class AsmCodeGen;
 struct RedTransAp;
 struct RedStateAp;
 struct GenStateCond;

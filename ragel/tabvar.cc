@@ -217,7 +217,7 @@ void TabVar::writeExec()
 		out << "	" << ps << " = " << vCS() << ";\n";
 
 	string condVar =
-			red->condSpaceList.length() != 0 ? string(cond) : string(trans);
+			red->condSpaceList.length() != 0 ? cond.to_str_and_reference() : trans.to_str_and_reference();
 
 	out <<
 		"	" << vCS() << " = " << CAST(INT()) << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";

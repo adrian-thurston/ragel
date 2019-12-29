@@ -745,12 +745,13 @@ void RedFsmAp::characterClass( EquivList &equiv )
 		}
 
 		/* Merge with whole-machine equiv classes. */
-		for ( RangePairIter< PiList<EquivClass>, PiVector<RedTransEl> >
+                typedef RangePairIter< PiList<EquivClass>, PiVector<RedTransEl> > RangePairIterPiListEquivClassPiVectorRedTransEl;
+		for ( RangePairIterPiListEquivClassPiVectorRedTransEl
 				pair( fsmCtx, equiv, st->outRange ); !pair.end(); pair++ )
 		{
 			switch ( pair.userState ) {
 
-			case RangePairIter<EquivClass>::RangeOverlap: {
+			case RangePairIterPiListEquivClassPiVectorRedTransEl::RangeOverlap: {
 				/* Look up the char for s2. */
 				EquivAllocEl *s2El = uniqTrans.find( pair.s2Tel.trans->value );
 
@@ -767,7 +768,7 @@ void RedFsmAp::characterClass( EquivList &equiv )
 				break;
 			}
 
-			case RangePairIter<EquivClass>::RangeInS1: {
+			case RangePairIterPiListEquivClassPiVectorRedTransEl::RangeInS1: {
 				EquivClass *equivClass = new EquivClass(
 						pair.s1Tel.lowKey, pair.s1Tel.highKey,
 						pair.s1Tel.trans->value );
@@ -775,7 +776,7 @@ void RedFsmAp::characterClass( EquivList &equiv )
 				break;
 			}
 
-			case RangePairIter<EquivClass>::RangeInS2: {
+			case RangePairIterPiListEquivClassPiVectorRedTransEl::RangeInS2: {
 				/* Look up the char for s2. */
 				EquivAllocEl *s2El = uniqTrans.find( pair.s2Tel.trans->value );
 
@@ -786,8 +787,8 @@ void RedFsmAp::characterClass( EquivList &equiv )
 				break;
 			}
 
-			case RangePairIter<EquivClass>::BreakS1:
-			case RangePairIter<EquivClass>::BreakS2:
+			case RangePairIterPiListEquivClassPiVectorRedTransEl::BreakS1:
+			case RangePairIterPiListEquivClassPiVectorRedTransEl::BreakS2:
 				break;
 			}
 		}

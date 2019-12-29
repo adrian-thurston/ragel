@@ -59,11 +59,11 @@ void FlatBreak::LOCATE_TRANS()
 		out <<
 			"       " << ic << " = " << CAST("int") << ARR_REF( charClass ) << "[" << CAST("int") << GET_KEY() <<
 							" - " << lowKey << "];\n"
-			"		if ( " << ic << " <= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "+1" ) << " && " <<
-						"" << ic << " >= " << CAST("int") << DEREF( ARR_REF( transKeys ), string(keys) + "" ) << " )\n"
+			"		if ( " << ic << " <= " << CAST("int") << DEREF( ARR_REF( transKeys ), keys.to_str_and_reference() + "+1" ) << " && " <<
+						"" << ic << " >= " << CAST("int") << DEREF( ARR_REF( transKeys ), keys.to_str_and_reference() + "" ) << " )\n"
 			"			" << trans << " = " << CAST(UINT()) << DEREF( ARR_REF( indices ),
-								string(inds) + " + " + CAST("int") + "( " + string(ic) + " - " + CAST("int") +
-								DEREF( ARR_REF( transKeys ), string(keys) + "" ) + " ) " ) << "; \n"
+								inds.to_str_and_reference() + " + " + CAST("int") + "( " + ic.to_str_and_reference() + " - " + CAST("int") +
+								DEREF( ARR_REF( transKeys ), keys.to_str_and_reference() + "" ) + " ) " ) << "; \n"
 			"		else\n"
 			"			" << trans << " = " << CAST(UINT()) << ARR_REF( indexDefaults ) <<
 								"[" << vCS() << "]" << ";\n";

@@ -1679,7 +1679,7 @@ struct LoadColm
 					stringTopEl.dq_lit_term().LIT_DQ_NL() );
 			break;
 		}
-		case string_el::Sq: {
+		case string_top_el::Sq: {
 			list = walkConsSqConsDataList( stringTopEl.SqConsDataList(),
 					stringTopEl.sq_lit_term().CONS_SQ_NL() );
 			break;
@@ -2709,7 +2709,7 @@ struct LoadColm
 		case root_item::Function:
 			walkFunctionDef( rootItem.function_def() );
 			break;
-		case struct_item::InHost:
+		case root_item::InHost:
 			walkInHostDef( rootItem.in_host_def() );
 			break;
 		case root_item::Iter:
@@ -2766,7 +2766,7 @@ struct LoadColm
 		case namespace_item::Token:
 			walkTokenDef( item.token_def() );
 			break;
-		case root_item::IgnoreCollector:
+		case namespace_item::IgnoreCollector:
 			walkIgnoreCollector( item.ic_def() );
 			break;
 		case namespace_item::Ignore:
@@ -2790,7 +2790,7 @@ struct LoadColm
 		case namespace_item::Function:
 			walkFunctionDef( item.function_def() );
 			break;
-		case struct_item::InHost:
+		case namespace_item::InHost:
 			walkInHostDef( item.in_host_def() );
 			break;
 		case namespace_item::Iter:

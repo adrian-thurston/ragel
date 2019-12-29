@@ -21,7 +21,7 @@
  */
 
 #ifndef RAGEL_SWITCHVAR_H
-#define RAGEL_BINVAR_H
+#define RAGEL_SWITCHVAR_H
 
 #include "switch.h"
 #include "actloop.h"

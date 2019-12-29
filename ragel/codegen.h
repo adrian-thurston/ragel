@@ -58,7 +58,7 @@ struct Variable
 {
 	Variable( const char *name ) : name(name), isReferenced(false) {}
 
-	operator const std::string() { isReferenced = true; return name; }
+	const std::string to_str_and_reference() { isReferenced = true; return name; }
 	void reference() { isReferenced = true; }
 
 	const char *name;
@@ -81,7 +81,7 @@ std::ostream &operator<<( std::ostream &out, Variable &v );
 
 struct TableArray;
 typedef Vector<TableArray*> ArrayVector;
-struct CodeGen;
+class CodeGen;
 
 struct TableArray
 {
@@ -90,7 +90,7 @@ struct TableArray
 		AnalyzePass,
 		GeneratePass
 	};
-		
+
 	TableArray( const char *name, CodeGen &codeGen );
 
 	void start();
@@ -167,7 +167,7 @@ public:
 	virtual void statsSummary();
 
 protected:
-	friend class TableArray;
+	friend TableArray;
 	typedef Vector<TableArray*> ArrayVector;
 	ArrayVector arrayVector;
 
@@ -233,7 +233,7 @@ protected:
 	void INLINE_BLOCK( ostream &ret, GenInlineExpr *inlineExpr );
 	void INLINE_PLAIN( ostream &ret, GenInlineExpr *inlineExpr );
 
-	void INLINE_LIST( ostream &ret, GenInlineList *inlineList, 
+	void INLINE_LIST( ostream &ret, GenInlineList *inlineList,
 			int targState, bool inFinish, bool csForced );
 	virtual void GOTO( ostream &ret, int gotoDest, bool inFinish ) = 0;
 	virtual void CALL( ostream &ret, int callDest, int targState, bool inFinish ) = 0;
@@ -241,9 +241,9 @@ protected:
 	virtual void NEXT( ostream &ret, int nextDest, bool inFinish ) = 0;
 	virtual void GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
 	virtual void NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish ) = 0;
-	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
+	virtual void CALL_EXPR( ostream &ret, GenInlineItem *ilItem,
 			int targState, bool inFinish ) = 0;
-	virtual void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem, 
+	virtual void NCALL_EXPR( ostream &ret, GenInlineItem *ilItem,
 			int targState, bool inFinish ) = 0;
 	virtual void RET( ostream &ret, bool inFinish ) = 0;
 	virtual void NRET( ostream &ret, bool inFinish ) = 0;
@@ -252,7 +252,7 @@ protected:
 	virtual void CURS( ostream &ret, bool inFinish ) = 0;
 	virtual void TARGS( ostream &ret, bool inFinish, int targState ) = 0;
 	void EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
-	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState, 
+	void LM_SWITCH( ostream &ret, GenInlineItem *item, int targState,
 			int inFinish, bool csForced );
 	void LM_EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish );
 	void SET_ACT( ostream &ret, GenInlineItem *item );
@@ -285,14 +285,14 @@ protected:
 
 	string OPEN_HOST_EXPR( string fileName, int line )
 	{
-		return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={"; 
+		return backend == Direct ? "(" : "host( \"" + fileName + "\", " + STR(line) + " ) ={";
 	}
 
 	string CLOSE_HOST_EXPR()
 		{ return backend == Direct ? ")" : "}="; }
 
 	string OPEN_HOST_BLOCK( string fileName, int line )
-	{ 
+	{
 		if ( backend == Direct ) {
 			std::stringstream ss;
 			ss << "{\n" ;
@@ -335,7 +335,7 @@ protected:
 
 	string CLOSE_GEN_PLAIN()
 		{ return backend == Direct ? "" : "}@"; }
-	
+
 	string INT()
 		{ return "int"; }
 
@@ -394,7 +394,7 @@ protected:
 		else
 			return "deref( " + arr + ", " + off + " )";
 	}
-	
+
 	string CASE( string val )
 	{
 		if ( backend == Direct )
