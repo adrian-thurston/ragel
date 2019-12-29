@@ -57,11 +57,10 @@ TIP: It turns out that print is also a function that can have multiple arguments
 [source,chapel]
 .hello_world_ext.lm
 ----
-print( 'hello ', "world" "\r\n" )
+print( 'hello ', "world\r\n" )
 ----
 
 We also notice that:
 * the quotes can be single and double
-* there is no need for a concat operator
 * the whitespace is not significant
 * the newlines '\n' appear to be '\r\n'

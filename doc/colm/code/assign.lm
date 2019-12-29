@@ -1,13 +1,15 @@
-lex start
+lex
 	token id / ('a' .. 'z' | 'A' .. 'Z' ) + /
-	token value / ( 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' )+ /
+	token number / ( '0' .. '9' )+ /
 	literal `= `;
-	ignore / [ \t\n] /
+	ignore / [ \t\n]+ /
 end
 
-def assignment
-	[ id `=  value `;]
+def value
+	[id] | [number]
 
+def assignment
+	[id `= value `;]
 	
 def assignment_list
 	[assignment assignment_list]
@@ -16,7 +18,12 @@ def assignment_list
 
 parse Simple: assignment_list[ stdin ]
 
-for I:assignment in Simple {
-	print( I.id, "->", I.value, "\n" )
+if ( ! Simple ) {
+	print( "[error]\n" )
+	exit( 1 ) 
 }
-
+else {
+	for I:assignment in Simple {
+		print( $I.id, "->", $I.value, "\n" )
+	}
+}
