@@ -217,8 +217,25 @@ int pat_consume_data( struct colm_program *prg, struct input_impl_ct *ss, int le
 
 int pat_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const char *data, int length )
 {
-	ss->offset -= length;
-	return length;
+	int origLen = length;
+	while ( true ) {
+		int avail = ss->offset;
+
+		/* Okay to go up to the front of the buffer. */
+		if ( length > avail ) {
+			ss->pat_item = ss->pat_item == 0 ?
+				ss->pattern->list->tail :
+				ss->pat_item->prev;
+			ss->offset = ss->pat_item->data.length();
+			length -= avail;
+		}
+		else {
+			ss->offset -= length;
+			break;
+		}
+	}
+
+	return origLen;
 }
 
 LangEl *pat_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss, long *bindId,
@@ -459,7 +476,9 @@ int repl_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, 
 
 		/* Okay to go up to the front of the buffer. */
 		if ( length > avail ) {
-			ss->cons_item = ss->cons_item->prev;
+			ss->cons_item = ss->cons_item == 0 ?
+				ss->constructor->list->tail :
+				ss->cons_item->prev;
 			ss->offset = ss->cons_item->data.length();
 			length -= avail;
 		}

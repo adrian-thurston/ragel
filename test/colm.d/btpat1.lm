@@ -1,0 +1,44 @@
+lex
+	token DEF / 'def' /
+	token id / ( 'a' .. 'z' ) + /
+	token SQOPEN /'['/
+	token SQCLOSE /']'/
+	token COLON /':'/
+	token FOIL /'!'/
+	ignore / ( '\n' | ' ' )+ /
+end
+
+def opt_prod_el_name
+	[id COLON]
+|	[]
+
+def prod_el
+	[opt_prod_el_name id]
+
+def prod
+	[SQOPEN prod_el SQCLOSE]
+
+def E []
+
+def item	
+	[DEF] | [id] | [SQOPEN] | [SQCLOSE] | [COLON]
+
+def cfl_def
+	[E item* FOIL]
+|	[DEF id prod]
+
+parse Id: id
+	[stdin]
+
+cons Def: cfl_def
+	"def x \[[Id]\]"
+
+match Def
+	"def x \[[id]\]
+
+print [xml(Def) "\n"]
+
+##### IN #####
+y
+##### EXP ####
+<cfl_def><DEF>def</DEF><id>x</id><prod><SQOPEN>[</SQOPEN><prod_el><opt_prod_el_name></opt_prod_el_name><id>y</id></prod_el><SQCLOSE>]</SQCLOSE></prod></cfl_def>
