@@ -227,9 +227,7 @@ function runtests()
 		else
 			# Compilation.
 			echo $COLM_BIN $COMP $COLM_ADDS $LM '&>' $LOG >> $SH
-			#if ! check_compilation $?; then
-			#	continue
-			#fi
+			echo "if [ \$? != 0 ]; then echo \"COMPILATION FAILED (see $LOG)\" >> $DIFF; fi" >> $SH
 		fi
 
 		Nth=0
@@ -240,9 +238,15 @@ function runtests()
 
 			section EXP $Nth $TST $EXP
 
-			# Stop when we have no Nth expected output.
+			# Stop when we have no Nth expected output, unless, there were no
+			# expected outputs at all. In that case we continue to run with an
+			# empty expected output.
 			if [ '!' -f $EXP ]; then
-				break;
+				if [ $Nth == 0 ]; then
+					echo -n > $EXP
+				else
+					break;
+				fi
 			fi
 
 			section ARGS $Nth $TST $ARGS
@@ -276,7 +280,7 @@ function runtests()
 			EOF
 
 			# Diff of output
-			echo diff -u $EXP $OUT '>' $DIFF >> $SH
+			echo diff -u $EXP $OUT '>>' $DIFF >> $SH
 			#if [ $? != 0 ]; then
 			#	echo "FAILED: output differs from expected output"
 			#	ERRORS=$(( ERRORS + 1 ))
