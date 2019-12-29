@@ -491,7 +491,7 @@ FsmRes NfaUnion::walk( ParseData *pd )
 		FsmRes res = (*term)->walk( pd );
 		if ( !res.success() ) {
 			/* Delete previos. */
-			for ( int m = 0; m < numMachines; )
+			for ( int m = 0; m < numMachines; ++m)
 				delete machines[m];
 			delete[] machines;
 			return res;
