@@ -947,7 +947,7 @@ int FsmAp::comparePrior( const PriorTable &priorTable1, const PriorTable &priorT
 
 int FsmAp::compareCondListBitElim( const CondList &condList1, const CondList &condList2 )
 {
-        typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
+	typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
 	ValPairIterPiListCondAp outPair( condList1, condList2 );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
@@ -992,7 +992,7 @@ int FsmAp::compareTransData( TransAp *trans1, TransAp *trans2 )
 			return compareRes;
 	}
 	else {
-                typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
+		typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
 		ValPairIterPiListCondAp outPair( trans1->tcap()->condList,
 				trans2->tcap()->condList );
 		for ( ; !outPair.end(); outPair++ ) {

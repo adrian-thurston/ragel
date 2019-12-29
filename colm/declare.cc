@@ -253,8 +253,8 @@ void Compiler::declareReVars()
 LangEl *declareLangEl( Compiler *pd, Namespace *nspace,
 		const String &data, LangEl::Type type )
 {
-    /* If the id is already in the dict, it will be placed in last found. If
-     * it is not there then it will be inserted and last found will be set to it. */
+	/* If the id is already in the dict, it will be placed in last found. If
+	 * it is not there then it will be inserted and last found will be set to it. */
 	TypeMapEl *inDict = nspace->typeMap.find( data );
 	if ( inDict != 0 )
 		error() << "language element '" << data << "' already defined as something else" << endp;
@@ -301,8 +301,8 @@ LangEl *addLangEl( Compiler *pd, Namespace *inNspace,
 void declareTypeAlias( Compiler *pd, Namespace *nspace,
 		const String &data, TypeRef *typeRef )
 {
-    /* If the id is already in the dict, it will be placed in last found. If
-     * it is not there then it will be inserted and last found will be set to it. */
+	/* If the id is already in the dict, it will be placed in last found. If
+	 * it is not there then it will be inserted and last found will be set to it. */
 	TypeMapEl *inDict = nspace->typeMap.find( data );
 	if ( inDict != 0 )
 		error() << "alias '" << data << "' already defined as something else" << endp;

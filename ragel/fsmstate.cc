@@ -331,7 +331,7 @@ int InitPartitionCompare::compare( const StateAp *state1, const StateAp *state2 
 		return compareRes;
 
 	/* Use a pair iterator to test the transition pairs. */
-        typedef RangePairIter< PiList<TransAp> > RangePairIterPiListTransAp;
+	typedef RangePairIter< PiList<TransAp> > RangePairIterPiListTransAp;
 	RangePairIterPiListTransAp
 		outPair( ctx, state1->outList, state2->outList );
 	for ( ; !outPair.end(); outPair++ ) {
@@ -371,7 +371,7 @@ int PartitionCompare::compare( const StateAp *state1, const StateAp *state2 )
 	int compareRes;
 
 	/* Use a pair iterator to get the transition pairs. */
-        typedef RangePairIter< PiList<TransAp> > RangePairIterPiListTransAp;
+	typedef RangePairIter< PiList<TransAp> > RangePairIterPiListTransAp;
 	RangePairIterPiListTransAp outPair( ctx, state1->outList, state2->outList );
 	for ( ; !outPair.end(); outPair++ ) {
 		switch ( outPair.userState ) {
@@ -466,7 +466,7 @@ int FsmAp::comparePart( TransAp *trans1, TransAp *trans2 )
 	}
 	else { 
 		/* Use a pair iterator to get the transition pairs. */
-                typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
+		typedef ValPairIter< PiList<CondAp> > ValPairIterPiListCondAp;
 		ValPairIterPiListCondAp outPair( trans1->tcap()->condList,
 				trans2->tcap()->condList );
 		for ( ; !outPair.end(); outPair++ ) {
