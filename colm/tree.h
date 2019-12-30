@@ -258,6 +258,7 @@ colm_value_t colm_get_pointer_val( tree_t *pointer );
 tree_t *colm_tree_get_field( tree_t *tree, word_t field );
 tree_t *get_field_split( struct colm_program *prg, tree_t *tree, word_t field );
 tree_t *get_rhs_el( struct colm_program *prg, tree_t *lhs, long position );
+void set_rhs_el( program_t *prg, tree_t *lhs, long position, tree_t *value );
 kid_t *get_rhs_el_kid( struct colm_program *prg, tree_t *lhs, long position );
 parse_tree_t *get_rhs_parse_tree( struct colm_program *prg,
 		parse_tree_t *lhs, long position );

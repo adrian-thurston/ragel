@@ -1131,6 +1131,17 @@ tree_t *get_rhs_el( program_t *prg, tree_t *lhs, long position )
 	return pos->tree;
 }
 
+void set_rhs_el( program_t *prg, tree_t *lhs, long position, tree_t *value )
+{
+	kid_t *pos = tree_child( prg, lhs );
+	while ( position > 0 ) {
+		pos = pos->next;
+		position -= 1;
+	}
+	pos->tree = value;
+}
+
+
 kid_t *get_rhs_el_kid( program_t *prg, tree_t *lhs, long position )
 {
 	kid_t *pos = tree_child( prg, lhs );

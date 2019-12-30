@@ -1558,6 +1558,47 @@ again:
 			vm_push_tree( val );
 			break;
 		}
+		case IN_GET_RHS_VAL_WC:
+			fatal( "UNIMPLEMENTED INSRUCTION: IN_GET_RHS_VAL_WC\n" );
+			break;
+		case IN_GET_RHS_VAL_WV:
+			fatal( "UNIMPLEMENTED INSRUCTION: IN_GET_RHS_VAL_WV\n" );
+			break;
+		case IN_GET_RHS_VAL_BKT:
+			fatal( "UNIMPLEMENTED INSRUCTION: IN_GET_RHS_VAL_BKT\n" );
+			break;
+
+		case IN_SET_RHS_VAL_WC:
+			debug( prg, REALM_BYTECODE, "IN_SET_RHS_VAL_WC\n" );
+			int i, done = 0;
+			uchar len;
+
+			tree_t *obj = vm_pop_tree();
+			tree_t *val = vm_pop_tree();
+			colm_tree_downref( prg, sp, obj );
+
+			read_byte( len );
+			for ( i = 0; i < len; i++ ) {
+				uchar prod_num, child_num;
+				read_byte( prod_num );
+				read_byte( child_num );
+				if ( !done && obj->prod_num == prod_num ) {
+					tree_t *prev = get_rhs_el( prg, obj, child_num );
+					colm_tree_downref( prg, sp, prev );
+					set_rhs_el( prg, obj, child_num, val );
+					done = 1;
+				}
+			}
+
+			//colm_tree_upref( prg, val );
+			//vm_push_tree( val );
+			break;
+		case IN_SET_RHS_VAL_WV:
+			fatal( "UNIMPLEMENTED INSRUCTION: IN_SET_RHS_VAL_WV\n" );
+			break;
+		case IN_SET_RHS_VAL_BKT:
+			fatal( "UNIMPLEMENTED INSRUCTION: IN_SET_RHS_VAL_BKT\n" );
+			break;
 		case IN_POP_TREE: {
 			debug( prg, REALM_BYTECODE, "IN_POP_TREE\n" );
 

@@ -760,6 +760,14 @@ void LangVarRef::setField( Compiler *pd, CodeVect &code,
 	/* Maybe write out an offset. */
 	if ( el->useOffset() )
 		code.appendHalf( el->offset );
+	else if ( el->isRhsGet() ) {
+		/* Need to place the array computing the val. */
+		code.append( el->rhsVal.length() );
+		for ( Vector<RhsVal>::Iter rg = el->rhsVal; rg.lte(); rg++ ) {
+			code.append( rg->prodEl->production->prodNum );
+			code.append( rg->prodEl->pos );
+		}
+	}
 }
 
 
