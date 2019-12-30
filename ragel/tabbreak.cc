@@ -29,7 +29,7 @@ std::string TabBreak::BREAK( GotoLabel &label )
 	string ret = "break";
 	if ( loopLabels ) {
 		ret += " ";
-		ret += label;
+		ret += label.ref();
 	}
 	return ret;
 }
@@ -39,7 +39,7 @@ std::string TabBreak::CONTINUE( GotoLabel &label )
 	string ret = "continue";
 	if ( loopLabels ) {
 		ret += " ";
-		ret += label;
+		ret += label.ref();
 	}
 	return ret;
 }
@@ -273,7 +273,7 @@ void TabBreak::writeExec()
 		out << "	" << ps << " = " << vCS() << ";\n";
 
 	string condVar =
-			red->condSpaceList.length() != 0 ? cond.to_str_and_reference() : trans.to_str_and_reference();
+			red->condSpaceList.length() != 0 ? cond.ref() : trans.ref();
 
 	out <<
 		"	" << vCS() << " = " << CAST(INT()) << ARR_REF( condTargs ) << "[" << condVar << "];\n\n";

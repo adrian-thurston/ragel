@@ -58,8 +58,7 @@ struct Variable
 {
 	Variable( const char *name ) : name(name), isReferenced(false) {}
 
-	const std::string to_str_and_reference() { isReferenced = true; return name; }
-	void reference() { isReferenced = true; }
+	const std::string ref() { isReferenced = true; return name; }
 
 	const char *name;
 	bool isReferenced;
@@ -69,8 +68,7 @@ struct GotoLabel
 {
 	GotoLabel( const char *name ) : name(name), isReferenced(false) {}
 
-	operator std::string() { isReferenced = true; return name; }
-	void reference() { isReferenced = true; }
+	const std::string ref() { isReferenced = true; return name; }
 
 	const char *name;
 	bool isReferenced;
