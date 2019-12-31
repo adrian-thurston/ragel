@@ -1278,8 +1278,9 @@ struct FsmAp
 
 	void outTransCopy( MergeData &md, StateAp *dest, TransAp *srcList );
 
-	void doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1 );
+	void pruneExpansions( ExpansionList &expList );
 	void doExpand( MergeData &md, StateAp *destState, ExpansionList &expList1 );
+	void doRemove( MergeData &md, StateAp *destState, ExpansionList &expList1 );
 	void findCondExpInTrans( ExpansionList &expansionList, StateAp *state, 
 			Key lowKey, Key highKey, CondSpace *fromCondSpace, CondSpace *toCondSpace,
 			long destVals, LongVect &toValsList );

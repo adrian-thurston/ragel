@@ -1058,6 +1058,21 @@ void FsmAp::findCondExpansions( ExpansionList &expansionList,
 	}
 }
 
+void FsmAp::pruneExpansions( ExpansionList &expList )
+{
+	for ( Expansion *exp = expList.head; exp != 0; ) {
+		if ( exp->fromCondSpace == exp->toCondSpace ) {
+			Expansion *next = exp->next;
+			expList.detach( exp );
+			delete next;
+			exp = next;
+		}
+		else {
+			exp = exp->next;
+		}
+	}
+}
+
 void FsmAp::doExpand( MergeData &md, StateAp *destState, ExpansionList &expList1 )
 {
 	for ( ExpansionList::Iter exp = expList1; exp.lte(); exp++ ) {
@@ -1217,6 +1232,9 @@ void FsmAp::mergeStates( MergeData &md, StateAp *destState, StateAp *srcState )
 	mergeStateConds( destState, srcState );
 	
 	outTransCopy( md, destState, srcState->outList.head );
+
+	pruneExpansions( expList1 );
+	pruneExpansions( expList2 );
 
 	doExpand( md, destState, expList1 );
 	doExpand( md, destState, expList2 );
@@ -1380,7 +1398,6 @@ void FsmAp::findEmbedExpansions( ExpansionList &expansionList,
 void FsmAp::embedCondition( StateAp *state, Action *condAction, bool sense )
 {
 	MergeData md;
-	ExpansionList expList;
 
 	/* Turn on misfit accounting to possibly catch the old start state. */
 	setMisfitAccounting( true );
@@ -1401,6 +1418,9 @@ void FsmAp::embedCondition( MergeData &md, StateAp *state, Action *condAction, b
 	ExpansionList expList;
 
 	findEmbedExpansions( expList, state, condAction, sense );
+
+	pruneExpansions( expList );
+
 	doExpand( md, state, expList );
 	doRemove( md, state, expList );
 	expList.empty();
