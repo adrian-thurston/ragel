@@ -6,13 +6,14 @@
 
 set -ex
 
+VERSION=`sed -n '/^[ \t]*AC_INIT\>/{ s/.*, *//; s/ *).*//; p }' configure.ac`
+
+rm -Rf colm-suite-${VERSION}.tar.{gz,bz2} colm-suite-${VERSION}
+
 make dist
+tar -zxvf colm-suite-${VERSION}.tar.gz
 
-rm -Rf colm-suite-1.0.1
-
-tar -zxvf colm-suite-1.0.1.tar.gz
-
-cd colm-suite-1.0.1
+cd colm-suite-${VERSION}
 
 ./configure --prefix=/tmp/colm-suite \
 	--with-crack=/home/thurston/pkgs/crack --enable-manual --enable-debug

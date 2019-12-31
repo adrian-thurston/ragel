@@ -28,5 +28,5 @@
 /install_manifest.txt
 /*.user
 
-colm-suite-*.*.*
-colm-suite-*.*.*.tar.{gz,bz2}
+colm-suite-*.tar.{gz,bz2}
+colm-suite-*
