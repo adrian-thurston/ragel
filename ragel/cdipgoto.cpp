@@ -337,7 +337,7 @@ std::ostream &IpGotoCodeGen::FINISH_CASES()
 
 			/* Write each action in the eof action list. */
 			for ( GenActionTable::Iter item = act->key; item.lte(); item++ )
-				ACTION( out, item->value, STATE_ERR_STATE, true, false );
+				ACTION( out, item->value, STATE_ERR_STATE, true, true );
 			out << "\tbreak;\n";
 		}
 	}
