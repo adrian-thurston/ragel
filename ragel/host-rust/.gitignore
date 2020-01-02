@@ -5,6 +5,7 @@
 /ragel-rust
 /ragel-rust.exe
 /rlhc.c
+/rlparse.pack
 /rlparse.c
 /rlreduce.cc
 

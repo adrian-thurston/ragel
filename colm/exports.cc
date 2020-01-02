@@ -165,8 +165,13 @@ void Compiler::generateExportsImpl()
 {
 	ostream &out = *outStream;
 
+	char *headerFn = strdup( exportHeaderFn );
+	char *suffix = strstr( headerFn, ".pack" );
+	if ( suffix != 0 && strcmp( suffix, ".pack" ) == 0 )
+		*suffix = 0;
+
 	if ( exportHeaderFn != 0 )  {
-		out << "#include \"" << exportHeaderFn << "\"\n";
+		out << "#include \"" << headerFn << "\"\n";
 	}
 
 	out << "#include <colm/tree.h>\n";

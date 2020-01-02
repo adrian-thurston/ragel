@@ -1,7 +1,8 @@
 COLM_BIN    = ../../colm/colm
+COLM_PACK   = ../../colm/colm-pack
 COLM_LA     = ../../colm/libcolm.la
 COLM_LIBDEP = $(COLM_LA)
-COLM_BINDEP = $(COLM_BIN)
+COLM_BINDEP = $(COLM_BIN) $(COLM_PACK)
 
 bin_PROGRAMS = ragel-rust
 
@@ -18,10 +19,15 @@ BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
 EXTRA_DIST = rlparse.lm rlhc.lm
 
-rlparse.c: rlparse.lm $(COLM_BINDEP)
-	$(COLM_BIN) -I.. -c -b rlparseRust -o $@ -m rlreduce.cc $<
+rlparse.pack: rlparse.lm $(COLM_BINDEP)
+	$(COLM_PACK) colm -p rlparse.pack \
+		-I.. -c -b rlparseRust -o rlparse.c -m rlreduce.cc $<
 
-rlreduce.cc: rlparse.c
+rlparse.c: rlparse.pack
+	$(COLM_PACK) unpack -o $@ $<
+
+rlreduce.cc: rlparse.pack
+	$(COLM_PACK) unpack -o $@ $<
 
 rlhc.c: rlhc.lm ../ril.lm $(COLM_BINDEP)
 	$(COLM_BIN) -I.. -c -b rlhcRust -o $@ $<

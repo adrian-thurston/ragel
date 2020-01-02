@@ -4,8 +4,10 @@
 /.libs
 /ragel-asm
 /ragel-asm.exe
+/rlparse.pack
 /rlparse.c
 /rlreduce.cc
 
 /CMakeFiles
 /cmake_install.cmake
+

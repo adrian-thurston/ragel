@@ -5,8 +5,10 @@
 /ragel-c
 /ragel-c.exe
 /rlhc.c
+/rlparse.pack
 /rlparse.c
 /rlreduce.cc
+/rlparse.pack
 
 /CMakeFiles
 /cmake_install.cmake

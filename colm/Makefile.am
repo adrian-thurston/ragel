@@ -25,6 +25,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/aapl
 AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = colm
+bin_SCRIPTS = colm-pack
 
 RUNTIME_SRC = \
 	map.c pdarun.c list.c input.c stream.c debug.c \
@@ -73,6 +74,9 @@ colminc_HEADERS = $(RUNTIME_HDR)
 
 BUILT_SOURCES = version.h include/colm
 
+gen:
+	mkdir -p gen
+
 if EXTERNAL_COLM
 
 #
@@ -105,19 +109,18 @@ bootstrap0_LDADD = libprog.a libcolm.la
 # the colm syntax/semantics that is implemented in colm itself.
 #
 
-tar/bootstrap1.tar: bootstrap0$(EXEEXT)
-	mkdir -p tar gen
-	$(builddir)/bootstrap0 -c -o tar/parse1.c -e tar/if1.h -x tar/if1.cc
-	tar -C tar -cf tar/bootstrap1.tar parse1.c if1.h if1.cc
+gen/bootstrap1.pack: colm-pack gen bootstrap0$(EXEEXT)
+	$(builddir)/colm-pack bootstrap0 -p $@ \
+		-c -o gen/parse1.c -e gen/if1.h -x gen/if1.cc
 
-gen/parse1.c: tar/bootstrap1.tar
-	tar -C gen -xmf $< parse1.c
+gen/parse1.c: gen/bootstrap1.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
-gen/if1.h: tar/bootstrap1.tar
-	tar -C gen -xmf $< if1.h
+gen/if1.h: gen/bootstrap1.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
-gen/if1.cc: tar/bootstrap1.tar
-	tar -C gen -xmf $< if1.cc
+gen/if1.cc: gen/bootstrap1.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
 # Listing if1.h in BUILT_SOURCES isn't sufficient because it depends on the
 # building of bootstrap0. Automake wants to put all built sources into a list
@@ -140,19 +143,18 @@ bootstrap1_LDADD = libprog.a libcolm.la
 # and thus generates the sources used in the colm binary.
 #
 
-tar/bootstrap2.tar: bootstrap1$(EXEEXT) colm.lm
-	mkdir -p tar gen
-	$(builddir)/bootstrap1 -c -o tar/parse2.c -e tar/if2.h -x tar/if2.cc colm.lm
-	tar -C tar -cf tar/bootstrap2.tar parse2.c if2.h if2.cc
+gen/bootstrap2.pack: colm-pack gen bootstrap1$(EXEEXT) colm.lm
+	$(builddir)/colm-pack bootstrap1 -p $@ \
+		-c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
 
-gen/parse2.c: tar/bootstrap2.tar
-	tar -C gen -xmf $< parse2.c
+gen/parse2.c: gen/bootstrap2.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
-gen/if2.h: tar/bootstrap2.tar
-	tar -C gen -xmf $< if2.h
+gen/if2.h: gen/bootstrap2.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
-gen/if2.cc: tar/bootstrap2.tar
-	tar -C gen -xmf $< if2.cc
+gen/if2.cc: gen/bootstrap2.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
 BUILT_SOURCES += gen/parse2.c gen/if2.h gen/if2.cc
 loadboot2.cc: gen/if2.h
@@ -165,19 +167,18 @@ bootstrap2_LDADD = libprog.a libcolm.la
 
 endif
 
-tar/bootstrap3.tar: $(BUILD_PARSE_3_WITH) prog.lm colm.lm
-	mkdir -p tar gen
-	$(BUILD_PARSE_3_WITH) -c -o tar/parse3.c -e tar/if3.h -x tar/if3.cc prog.lm
-	tar -C tar -cf tar/bootstrap3.tar parse3.c if3.h if3.cc
+gen/bootstrap3.pack: colm-pack gen $(BUILD_PARSE_3_WITH) prog.lm colm.lm 
+	$(builddir)/colm-pack $(BUILD_PARSE_3_WITH) -p $@ \
+		-c -o gen/parse3.c -e gen/if3.h -x gen/if3.cc prog.lm
 
-gen/parse3.c: tar/bootstrap3.tar
-	tar -C gen -xmf $< parse3.c
+gen/parse3.c: gen/bootstrap3.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
-gen/if3.h: tar/bootstrap3.tar
-	tar -C gen -xmf $< if3.h
+gen/if3.h: gen/bootstrap3.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
-gen/if3.cc: tar/bootstrap3.tar
-	tar -C gen -xmf $< if3.cc
+gen/if3.cc: gen/bootstrap3.pack
+	$(builddir)/colm-pack unpack -o $@ $<
 
 BUILT_SOURCES += gen/parse3.c gen/if3.h gen/if3.cc
 loadcolm.cc: gen/if3.h
@@ -201,3 +202,6 @@ config.h: ../src/config.h
 
 CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = prog.lm colm.lm loadfinal.cc
+
+colm-pack: colm-pack.sh
+	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)

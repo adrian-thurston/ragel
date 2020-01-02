@@ -4,6 +4,7 @@
 /.libs
 /ragel-ruby
 /ragel-ruby.exe
+/rlparse.pack
 /rlparse.c
 /rlreduce.cc
 /rlhc.c

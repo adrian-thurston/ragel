@@ -5,6 +5,7 @@
 /ragel-d
 /ragel-d.exe
 /rlhc.c
+/rlparse.pack
 /rlparse.c
 /rlreduce.cc
 
