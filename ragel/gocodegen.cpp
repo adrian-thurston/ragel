@@ -334,7 +334,15 @@ string GoCodeGen::WIDE_KEY( RedStateAp *state, Key key )
 	}
 }
 
+void GoCodeGen::EOF_CHECK( ostream &ret )
+{
+	ret << 
+		"	if " << P() << " == " << PE() << "{\n"
+		"		goto _test_eof;\n"
+		"	}\n";
 
+	testEofUsed = true;
+}
 
 void GoCodeGen::EXEC( ostream &ret, GenInlineItem *item, int targState, int inFinish )
 {

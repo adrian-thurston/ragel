@@ -28,16 +28,82 @@ using std::endl;
 
 void GoTablishCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-    ret << vCS() << " = " << gotoDest << endl <<
-            "goto _again" << endl;
+    ret << vCS() << " = " << gotoDest << endl;
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << "goto _again" << endl;
 }
 
 void GoTablishCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
 {
     ret << vCS() << " = (";
     INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-    ret << ")" << endl << "goto _again" << endl;
+    ret << ")" << endl;
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+	ret << "goto _again" << endl;
 }
+
+void GoTablishCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
+{
+    if ( prePushExpr != 0 ) {
+        ret << "{ ";
+        INLINE_LIST( ret, prePushExpr, 0, false, false );
+    }
+
+    ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++; " <<
+            vCS() << " = " << callDest << ";\n";
+	
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+	
+	ret << "goto _again" << endl;
+
+    if ( prePushExpr != 0 )
+        ret << " }";
+}
+
+void GoTablishCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
+{
+    if ( prePushExpr != 0 ) {
+        ret << "{";
+        INLINE_LIST( ret, prePushExpr, 0, false, false );
+    }
+
+    ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++; " << vCS() << " = (";
+    INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
+    ret << ");\n";
+	
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+	
+	ret << "goto _again" << endl;
+
+    if ( prePushExpr != 0 )
+        ret << "}";
+}
+
+void GoTablishCodeGen::RET( ostream &ret, bool inFinish )
+{
+    ret << TOP() << "--; " << vCS() << " = " << STACK() << "[" <<
+            TOP() << "]" << endl;
+
+    if ( postPopExpr != 0 ) {
+        ret << "{ ";
+        INLINE_LIST( ret, postPopExpr, 0, false, false );
+        ret << " }" << endl;
+    }
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret );
+
+    ret << "goto _again" << endl;
+}
+
 
 void GoTablishCodeGen::CURS( ostream &ret, bool inFinish )
 {
@@ -59,49 +125,6 @@ void GoTablishCodeGen::NEXT_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFi
     ret << vCS() << " = (";
     INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
     ret << ")" << endl;
-}
-
-void GoTablishCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
-{
-    if ( prePushExpr != 0 ) {
-        ret << "{ ";
-        INLINE_LIST( ret, prePushExpr, 0, false, false );
-    }
-
-    ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++; " <<
-            vCS() << " = " << callDest << "; " << "goto _again" << endl;
-
-    if ( prePushExpr != 0 )
-        ret << " }";
-}
-
-void GoTablishCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targState, bool inFinish )
-{
-    if ( prePushExpr != 0 ) {
-        ret << "{";
-        INLINE_LIST( ret, prePushExpr, 0, false, false );
-    }
-
-    ret << STACK() << "[" << TOP() << "] = " << vCS() << "; " << TOP() << "++; " << vCS() << " = (";
-    INLINE_LIST( ret, ilItem->children, targState, inFinish, false );
-    ret << "); " << "goto _again" << endl;
-
-    if ( prePushExpr != 0 )
-        ret << "}";
-}
-
-void GoTablishCodeGen::RET( ostream &ret, bool inFinish )
-{
-    ret << TOP() << "--; " << vCS() << " = " << STACK() << "[" <<
-            TOP() << "]" << endl;
-
-    if ( postPopExpr != 0 ) {
-        ret << "{ ";
-        INLINE_LIST( ret, postPopExpr, 0, false, false );
-        ret << " }" << endl;
-    }
-
-    ret << "goto _again" << endl;
 }
 
 void GoTablishCodeGen::BREAK( ostream &ret, int targState, bool csForced )

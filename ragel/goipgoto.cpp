@@ -31,14 +31,42 @@ using std::endl;
 
 bool GoIpGotoCodeGen::useAgainLabel()
 {
-	return 	redFsm->anyRegActionRets() ||
-			redFsm->anyRegActionByValControl() ||
+	return 	redFsm->anyActionRets() ||
+			redFsm->anyActionByValControl() ||
 			redFsm->anyRegNextStmt();
+}
+
+void GoIpGotoCodeGen::EOF_CHECK( ostream &ret, int gotoDest )
+{
+	ret << 
+		"       if " << P() << " == " << PE() << " {\n"
+		"               goto _test_eof" << gotoDest << ";\n"
+		"		}\n";
+
+	testEofUsed = true;
 }
 
 void GoIpGotoCodeGen::GOTO( ostream &ret, int gotoDest, bool inFinish )
 {
-	ret << "{" << "goto st" << gotoDest << " }";
+	ret << "{\n";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret, gotoDest );
+
+	ret << "goto st" << gotoDest << "\n";
+	ret << "}";
+}
+
+void GoIpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
+{
+	ret << "{" << vCS() << " = (";
+	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
+	ret << ");\n";
+
+	if ( inFinish && !noEnd )
+		GoCodeGen::EOF_CHECK( ret );
+
+	ret << "goto _again }";
 }
 
 void GoIpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFinish )
@@ -49,7 +77,12 @@ void GoIpGotoCodeGen::CALL( ostream &ret, int callDest, int targState, bool inFi
 	}
 
 	ret << "{" << STACK() << "[" << TOP() << "] = " << targState <<
-			"; " << TOP() << "++; " << "goto st" << callDest << " }";
+			"; " << TOP() << "++;\n";
+
+	if ( inFinish && !noEnd )
+		EOF_CHECK( ret, callDest );
+
+	ret << "goto st" << callDest << "}\n";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -62,9 +95,17 @@ void GoIpGotoCodeGen::CALL_EXPR( ostream &ret, GenInlineItem *ilItem, int targSt
 		INLINE_LIST( ret, prePushExpr, 0, false, false );
 	}
 
-	ret << "{" << STACK() << "[" << TOP() << "] = " << targState << "; " << TOP() << "++; " << vCS() << " = (";
+	ret << "{" << STACK() << "[" << TOP() << "] = " << targState <<
+			"; " << TOP() << "++;\n";
+		
+	ret << vCS() << " = (";
 	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << "goto _again }";
+	ret << ");\n";
+
+	if ( inFinish && !noEnd )
+		GoCodeGen::EOF_CHECK( ret );
+
+	ret << "goto _again }";
 
 	if ( prePushExpr != 0 )
 		ret << "}";
@@ -80,14 +121,10 @@ void GoIpGotoCodeGen::RET( ostream &ret, bool inFinish )
 		ret << "}";
 	}
 
-	ret << endl << "goto _again }";
-}
+	if ( inFinish && !noEnd )
+		GoCodeGen::EOF_CHECK( ret );
 
-void GoIpGotoCodeGen::GOTO_EXPR( ostream &ret, GenInlineItem *ilItem, bool inFinish )
-{
-	ret << "{" << vCS() << " = (";
-	INLINE_LIST( ret, ilItem->children, 0, inFinish, false );
-	ret << "); " << "goto _again }";
+	ret << endl << "goto _again }";
 }
 
 void GoIpGotoCodeGen::NEXT( ostream &ret, int nextDest, bool inFinish )
@@ -379,6 +416,13 @@ void GoIpGotoCodeGen::setLabelsNeeded()
 					/* Get the action and walk it's tree. */
 					setLabelsNeeded( act->value->inlineList );
 				}
+			}
+		}
+
+		for ( RedStateList::Iter st = redFsm->stateList; st.lte(); st++ ) {
+			if ( st->eofAction != 0 ) {
+				for ( GenActionTable::Iter item = st->eofAction->key; item.lte(); item++ )
+					setLabelsNeeded( item->value->inlineList );
 			}
 		}
 	}

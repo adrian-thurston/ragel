@@ -60,6 +60,7 @@ public:
 
 protected:
 	bool useAgainLabel();
+	void EOF_CHECK( ostream &ret, int gotoDest );
 
 	/* Called from GotoCodeGen::STATE_GOTOS just before writing the gotos for
 	 * each state. */
