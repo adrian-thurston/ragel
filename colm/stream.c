@@ -207,7 +207,8 @@ void undo_position_data( struct stream_impl_data *is, const char *data, long len
  * Interface
  */
 
-static void data_transfer_loc( struct colm_program *prg, location_t *loc, struct stream_impl_data *ss )
+static void data_transfer_loc( struct colm_program *prg, location_t *loc,
+		struct stream_impl_data *ss )
 {
 	loc->name = ss->name;
 	loc->line = ss->line;
@@ -219,7 +220,8 @@ static void data_transfer_loc( struct colm_program *prg, location_t *loc, struct
  * Data inputs: files, strings, etc.
  */
 
-static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss, char *dest, int length )
+static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
+		char *dest, int length )
 {
 	int copied = 0;
 
@@ -229,7 +231,8 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			struct run_buf *run_buf = new_run_buf( 0 );
-			int received = ss->funcs->get_data_source( prg, (struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
+			int received = ss->funcs->get_data_source( prg,
+					(struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
 				free( run_buf );
 				break;
@@ -276,7 +279,8 @@ static struct stream_impl *data_split_consumed( program_t *prg, struct stream_im
 	return split_off;
 }
 
-int data_append_data( struct colm_program *prg, struct stream_impl_data *sid, const char *data, int length )
+int data_append_data( struct colm_program *prg, struct stream_impl_data *sid,
+		const char *data, int length )
 {
 	struct run_buf *tail = sid->queue.tail;
 	if ( tail == 0 || length > (FSM_BUFSIZE - tail->length) ) {
@@ -409,7 +413,8 @@ static void data_print_tree( struct colm_program *prg, tree_t **sp,
 		colm_print_tree_collect( prg, sp, si->collect, tree, trim );
 }
 
-static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss, int *pskip, char **pdp, int *copied )
+static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss,
+		int *pskip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -420,7 +425,8 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 		if ( buf == 0 ) {
 			/* Got through the in-mem buffers without copying anything. */
 			struct run_buf *run_buf = new_run_buf( 0 );
-			int received = ss->funcs->get_data_source( prg, (struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
+			int received = ss->funcs->get_data_source( prg,
+					(struct stream_impl*)ss, run_buf->data, FSM_BUFSIZE );
 			if ( received == 0 ) {
 				free( run_buf );
 				ret = INPUT_EOD;
@@ -470,7 +476,8 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 	return ret;
 }
 
-static int data_consume_data( struct colm_program *prg, struct stream_impl_data *sid, int length, location_t *loc )
+static int data_consume_data( struct colm_program *prg, struct stream_impl_data *sid,
+		int length, location_t *loc )
 {
 	int consumed = 0;
 	int remaining = length;
@@ -515,7 +522,8 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 	return consumed;
 }
 
-static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_data *sid, const char *data, int length )
+static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_data *sid,
+		const char *data, int length )
 {
 	const char *end = data + length;
 	int amount = length;
@@ -548,7 +556,8 @@ static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_
 	}
 
 	debug( prg, REALM_INPUT, "data_undo_consume_data: stream %p "
-			"undid consume %d of %d bytes, consumed now %d, \n", sid, amount, length, sid->consumed );
+			"undid consume %d of %d bytes, consumed now %d, \n",
+			sid, amount, length, sid->consumed );
 
 #ifdef DEBUG
 	dump_contents( prg, sid );
@@ -561,7 +570,8 @@ static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_
  * File Inputs
  */
 
-static int file_get_data_source( struct colm_program *prg, struct stream_impl_data *si, char *dest, int length )
+static int file_get_data_source( struct colm_program *prg, struct stream_impl_data *si,
+		char *dest, int length )
 {
 	return fread( dest, 1, length, si->file );
 }
@@ -570,7 +580,8 @@ static int file_get_data_source( struct colm_program *prg, struct stream_impl_da
  * Text inputs
  */
 
-static int accum_get_data_source( struct colm_program *prg, struct stream_impl_data *si, char *dest, int want )
+static int accum_get_data_source( struct colm_program *prg, struct stream_impl_data *si,
+		char *dest, int want )
 {
 	long avail = si->dlen - si->offset;
 	long take = avail < want ? avail : want;
@@ -655,7 +666,8 @@ static void si_data_init( struct stream_impl_data *is, char *name )
 
 struct stream_impl *colm_impl_new_accum( char *name )
 {
-	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
+	struct stream_impl_data *si = (struct stream_impl_data*)
+			malloc(sizeof(struct stream_impl_data));
 	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
@@ -664,7 +676,8 @@ struct stream_impl *colm_impl_new_accum( char *name )
 
 static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 {
-	struct stream_impl_data *ss = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
+	struct stream_impl_data *ss = (struct stream_impl_data*)
+			malloc(sizeof(struct stream_impl_data));
 	si_data_init( ss, name );
 	ss->funcs = (struct stream_funcs*)&file_funcs;
 	ss->file = file;
@@ -673,7 +686,8 @@ static struct stream_impl *colm_impl_new_file( char *name, FILE *file )
 
 static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 {
-	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
+	struct stream_impl_data *si = (struct stream_impl_data*)
+			malloc(sizeof(struct stream_impl_data));
 	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&file_funcs;
 	si->file = fdopen( fd, ( fd == 0 ) ? "r" : "w" );
@@ -682,7 +696,8 @@ static struct stream_impl *colm_impl_new_fd( char *name, long fd )
 
 struct stream_impl *colm_impl_consumed( char *name, int len )
 {
-	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
+	struct stream_impl_data *si = (struct stream_impl_data*)
+			malloc(sizeof(struct stream_impl_data));
 	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
@@ -697,7 +712,8 @@ struct stream_impl *colm_impl_consumed( char *name, int len )
 
 struct stream_impl *colm_impl_new_text( char *name, const char *data, int len )
 {
-	struct stream_impl_data *si = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
+	struct stream_impl_data *si = (struct stream_impl_data*)
+			malloc(sizeof(struct stream_impl_data));
 	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
@@ -712,7 +728,8 @@ struct stream_impl *colm_impl_new_text( char *name, const char *data, int len )
 
 struct stream_impl *colm_impl_new_collect( char *name )
 {
-	struct stream_impl_data *ss = (struct stream_impl_data*)malloc(sizeof(struct stream_impl_data));
+	struct stream_impl_data *ss = (struct stream_impl_data*)
+			malloc(sizeof(struct stream_impl_data));
 	si_data_init( ss, name );
 	ss->funcs = (struct stream_funcs*)&accum_funcs;
 	ss->collect = (struct colm_str_collect*) malloc( sizeof( struct colm_str_collect ) );

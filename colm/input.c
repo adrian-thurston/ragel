@@ -77,7 +77,8 @@ static struct seq_buf *new_seq_buf()
 	return rb;
 }
 
-static void input_transfer_loc( struct colm_program *prg, location_t *loc, struct input_impl_seq *ss )
+static void input_transfer_loc( struct colm_program *prg, location_t *loc,
+		struct input_impl_seq *ss )
 {
 }
 
@@ -93,7 +94,8 @@ static void colm_input_destroy( program_t *prg, tree_t **sp, struct_t *s )
 	si->funcs->destructor( prg, sp, si );
 }
 
-static void input_stream_stash_head( struct colm_program *prg, struct input_impl_seq *si, struct seq_buf *seq_buf )
+static void input_stream_stash_head( struct colm_program *prg,
+		struct input_impl_seq *si, struct seq_buf *seq_buf )
 {
 	debug( prg, REALM_INPUT, "stash_head: stream %p buf %p\n", si, seq_buf );
 	seq_buf->next = si->stash;
@@ -237,18 +239,21 @@ static void input_destructor( program_t *prg, tree_t **sp, struct input_impl_seq
 	free( si );
 }
 
-static int input_get_option( struct colm_program *prg, struct input_impl_seq *ii, int option )
+static int input_get_option( struct colm_program *prg, struct input_impl_seq *ii,
+		int option )
 {
 	return ii->auto_trim;
 }
 
-static void input_set_option( struct colm_program *prg, struct input_impl_seq *ii, int option, int value )
+static void input_set_option( struct colm_program *prg, struct input_impl_seq *ii,
+		int option, int value )
 {
 	ii->auto_trim = value ? 1 : 0;
 }
 
 
-static int input_get_parse_block( struct colm_program *prg, struct input_impl_seq *is, int *pskip, char **pdp, int *copied )
+static int input_get_parse_block( struct colm_program *prg, struct input_impl_seq *is,
+		int *pskip, char **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -292,7 +297,8 @@ static int input_get_parse_block( struct colm_program *prg, struct input_impl_se
 	switch ( ret ) {
 		case INPUT_DATA:
 			if ( *pdp != 0 ) {
-				debug( prg, REALM_INPUT, "get parse block: DATA: %d %.*s\n", *copied, (int)(*copied), *pdp );
+				debug( prg, REALM_INPUT, "get parse block: DATA: %d %.*s\n",
+						*copied, (int)(*copied), *pdp );
 			}
 			else {
 				debug( prg, REALM_INPUT, "get parse block: DATA: %d\n", *copied );
@@ -319,7 +325,8 @@ static int input_get_parse_block( struct colm_program *prg, struct input_impl_se
 	return ret;
 }
 
-static int input_get_data( struct colm_program *prg, struct input_impl_seq *is, char *dest, int length )
+static int input_get_data( struct colm_program *prg, struct input_impl_seq *is,
+		char *dest, int length )
 {
 	int copied = 0;
 
@@ -364,7 +371,8 @@ static int input_get_data( struct colm_program *prg, struct input_impl_seq *is, 
  * Consume
  */
 
-static int input_consume_data( struct colm_program *prg, struct input_impl_seq *si, int length, location_t *loc )
+static int input_consume_data( struct colm_program *prg, struct input_impl_seq *si,
+		int length, location_t *loc )
 {
 	debug( prg, REALM_INPUT, "input_consume_data: stream %p consuming %d bytes\n", si, length );
 
@@ -405,7 +413,8 @@ static int input_consume_data( struct colm_program *prg, struct input_impl_seq *
 	return consumed;
 }
 
-static int input_undo_consume_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, int length )
+static int input_undo_consume_data( struct colm_program *prg, struct input_impl_seq *si,
+		const char *data, int length )
 {
 	/* When we push back data we need to move backwards through the block of
 	 * text. The source stream type will */
@@ -445,7 +454,8 @@ static tree_t *input_consume_tree( struct colm_program *prg, struct input_impl_s
 		input_stream_stash_head( prg, si, seq_buf );
 	}
 
-	assert( si->queue.head != 0 && ( si->queue.head->type == SB_TOKEN || si->queue.head->type == SB_IGNORE ) );
+	assert( si->queue.head != 0 && ( si->queue.head->type == SB_TOKEN ||
+			si->queue.head->type == SB_IGNORE ) );
 
 	{
 		struct seq_buf *seq_buf = input_stream_seq_pop_head( si );
@@ -459,9 +469,11 @@ static tree_t *input_consume_tree( struct colm_program *prg, struct input_impl_s
 }
 
 
-static void input_undo_consume_tree( struct colm_program *prg, struct input_impl_seq *si, tree_t *tree, int ignore )
+static void input_undo_consume_tree( struct colm_program *prg, struct input_impl_seq *si,
+		tree_t *tree, int ignore )
 {
-	debug( prg, REALM_INPUT, "input_undo_consume_tree: stream %p undo consume tree %p\n", si, tree );
+	debug( prg, REALM_INPUT, "input_undo_consume_tree: stream %p undo "
+			"consume tree %p\n", si, tree );
 
 	while ( true ) {
 		debug( prg, REALM_INPUT, "  stream %p consume: clearing source type\n", si );
@@ -479,7 +491,8 @@ static void input_undo_consume_tree( struct colm_program *prg, struct input_impl
 /*
  * Prepend
  */
-static void input_prepend_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
+static void input_prepend_data( struct colm_program *prg, struct input_impl_seq *si,
+		const char *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_prepend_data: stream %p prepend data length %d\n", si, length );
 
@@ -497,7 +510,8 @@ static void input_prepend_data( struct colm_program *prg, struct input_impl_seq 
 
 static int input_undo_prepend_data( struct colm_program *prg, struct input_impl_seq *si, int length )
 {
-	debug( prg, REALM_INPUT, "input_undo_prepend_data: stream %p undo append data length %d\n", si, length );
+	debug( prg, REALM_INPUT, "input_undo_prepend_data: stream %p undo "
+			"append data length %d\n", si, length );
 
 	struct seq_buf *seq_buf = input_stream_seq_pop_head( si );
 	free( seq_buf );
@@ -505,7 +519,8 @@ static int input_undo_prepend_data( struct colm_program *prg, struct input_impl_
 	return 0;
 }
 
-static void input_prepend_tree( struct colm_program *prg, struct input_impl_seq *si, tree_t *tree, int ignore )
+static void input_prepend_tree( struct colm_program *prg, struct input_impl_seq *si,
+		tree_t *tree, int ignore )
 {
 	debug( prg, REALM_INPUT, "input_prepend_tree: stream %p prepend tree %p\n", si, tree );
 
@@ -538,7 +553,8 @@ static tree_t *input_undo_prepend_tree( struct colm_program *prg, struct input_i
 }
 
 
-static void input_prepend_stream( struct colm_program *prg, struct input_impl_seq *si, struct colm_stream *stream )
+static void input_prepend_stream( struct colm_program *prg, struct input_impl_seq *si,
+		struct colm_stream *stream )
 {
 	maybe_split( prg, si );
 
@@ -560,7 +576,8 @@ static tree_t *input_undo_prepend_stream( struct colm_program *prg, struct input
 	return 0;
 }
 
-static void input_append_data( struct colm_program *prg, struct input_impl_seq *si, const char *data, long length )
+static void input_append_data( struct colm_program *prg, struct input_impl_seq *si,
+		const char *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_append_data: stream %p append data length %d\n", si, length );
 
@@ -638,7 +655,8 @@ static tree_t *input_undo_append_tree( struct colm_program *prg, struct input_im
 	return tree;
 }
 
-static void input_append_stream( struct colm_program *prg, struct input_impl_seq *si, struct colm_stream *stream )
+static void input_append_stream( struct colm_program *prg, struct input_impl_seq *si,
+		struct colm_stream *stream )
 {
 	debug( prg, REALM_INPUT, "input_append_stream: stream %p append stream %p\n", si, stream );
 
