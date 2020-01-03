@@ -48,7 +48,9 @@ else
 
 	$COLM $ARGS "$@"
 	EXIT_STATUS=$?
-	tar --transform 's/.pack$//' -cf "$pack_file" $PACKS
+	if [ $EXIT_STATUS = 0 ]; then
+		tar --transform 's/.pack$//' -cf "$pack_file" $PACKS
+	fi
 	rm -f $PACKS
 fi
 
