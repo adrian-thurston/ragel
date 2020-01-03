@@ -74,9 +74,6 @@ colminc_HEADERS = $(RUNTIME_HDR)
 
 BUILT_SOURCES = version.h include/colm
 
-gen:
-	mkdir -p gen
-
 if EXTERNAL_COLM
 
 #
@@ -109,7 +106,8 @@ bootstrap0_LDADD = libprog.a libcolm.la
 # the colm syntax/semantics that is implemented in colm itself.
 #
 
-gen/bootstrap1.pack: colm-pack gen bootstrap0$(EXEEXT)
+gen/bootstrap1.pack: colm-pack bootstrap0$(EXEEXT)
+	mkdir -p gen
 	$(builddir)/colm-pack bootstrap0 -p $@ \
 		-c -o gen/parse1.c -e gen/if1.h -x gen/if1.cc
 
@@ -143,7 +141,8 @@ bootstrap1_LDADD = libprog.a libcolm.la
 # and thus generates the sources used in the colm binary.
 #
 
-gen/bootstrap2.pack: colm-pack gen bootstrap1$(EXEEXT) colm.lm
+gen/bootstrap2.pack: colm-pack bootstrap1$(EXEEXT) colm.lm
+	mkdir -p gen
 	$(builddir)/colm-pack bootstrap1 -p $@ \
 		-c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
 
@@ -167,7 +166,8 @@ bootstrap2_LDADD = libprog.a libcolm.la
 
 endif
 
-gen/bootstrap3.pack: colm-pack gen $(BUILD_PARSE_3_WITH) prog.lm colm.lm 
+gen/bootstrap3.pack: colm-pack $(BUILD_PARSE_3_WITH) prog.lm colm.lm 
+	mkdir -p gen
 	$(builddir)/colm-pack $(BUILD_PARSE_3_WITH) -p $@ \
 		-c -o gen/parse3.c -e gen/if3.h -x gen/if3.cc prog.lm
 
@@ -201,7 +201,7 @@ config.h: ../src/config.h
 	cp ../src/config.h ./
 
 CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = prog.lm colm.lm loadfinal.cc
+EXTRA_DIST = prog.lm colm.lm loadfinal.cc colm-pack.sh
 
 colm-pack: colm-pack.sh
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)
