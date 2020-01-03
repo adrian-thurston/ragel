@@ -645,28 +645,29 @@ struct LoadColm
 					patternTopEl.opt_tilde_data().loc(), patternData );
 			list = PatternItemList::cons( patternItem );
 			break;
-		}
-		case pattern_top_el::SubList: {
-			list = walkPatternElList( patternTopEl.PatternElList(), patternVarRef );
-			break;
 		}}
 		return list;
 	}
 
 	PatternItemList *walkPatternList( pattern_list patternList, LangVarRef *patternVarRef )
 	{
-		PatternItemList *list = 0;
-		switch ( patternList.prodName() ) {
-		case pattern_list::Base: {
-			list = walkPattternTopEl( patternList.pattern_top_el(), patternVarRef );
-			break;
-		}}
-		return list;
+		PatternItemList *ret = new PatternItemList;
+		RepeatIter<pattern_top_el> patternTopElIter ( patternList );
+		while ( !patternTopElIter.end() ) {
+			PatternItemList *list = walkPattternTopEl( patternTopElIter.value(), patternVarRef );
+			ret->append( *list );
+			delete list;
+			patternTopElIter.next();
+		}
+		return ret;
 	}
 
 	PatternItemList *walkPattern( pattern Pattern, LangVarRef *patternVarRef )
 	{
-		return walkPatternList( Pattern.pattern_list(), patternVarRef );
+		if ( Pattern.prodName() == pattern::TopList )
+			return walkPatternList( Pattern.pattern_list(), patternVarRef );
+		else
+			return walkPatternElList( Pattern.PatternElList(), patternVarRef );
 	}
 
 	LangExpr *walkOptDefInit( opt_def_init optDefInit )
@@ -1560,22 +1561,29 @@ struct LoadColm
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 			break;
-		}
-		case cons_top_el::SubList: {
-			list = walkConsElList( consTopEl.ConsElList(), consTypeRef );
-			break;
 		}}
 		return list;
 	}
 
 	ConsItemList *walkConsList( cons_list consList, TypeRef *consTypeRef )
 	{
-		return walkConsTopEl( consList.cons_top_el(), consTypeRef );
+		ConsItemList *ret = new ConsItemList;
+		RepeatIter<cons_top_el> consTopElIter ( consList );
+		while ( !consTopElIter.end() ) {
+			ConsItemList *list = walkConsTopEl( consTopElIter.value(), consTypeRef );
+			ret->append( *list );
+			delete list;
+			consTopElIter.next();
+		}
+		return ret;
 	}
 
 	ConsItemList *walkConstructor( constructor Constructor, TypeRef *consTypeRef )
 	{
-		return walkConsList( Constructor.cons_list(), consTypeRef );
+		if ( Constructor.prodName() == constructor::TopList )
+			return walkConsList( Constructor.cons_list(), consTypeRef );
+		else
+			return walkConsElList( Constructor.ConsElList(), consTypeRef );
 	}
 
 	/*
@@ -1691,23 +1699,29 @@ struct LoadColm
 					ConsItem::InputText, consData );
 			list = ConsItemList::cons( consItem );
 			break;
-		}
-		case string_top_el::SubList: {
-			list = walkStringElList( stringTopEl.StringElList() );
-			break;
 		}}
 		return list;
 	}
 
 	ConsItemList *walkStringList( string_list stringList )
 	{
-		return walkStringTopEl( stringList.string_top_el() );
+		ConsItemList *ret = new ConsItemList;
+		RepeatIter<string_top_el> stringTopElIter( stringList );
+		while ( !stringTopElIter.end() ) {
+			ConsItemList *list = walkStringTopEl( stringTopElIter.value() );
+			ret->append( *list );
+			delete list;
+			stringTopElIter.next();
+		}
+		return ret;
 	}
 
 	ConsItemList *walkString( string String )
 	{
-		ConsItemList *list = walkStringList( String.string_list() );
-		return list;
+		if ( String.prodName() == string::TopList )
+			return walkStringList( String.string_list() );
+		else
+			return walkStringElList( String.StringElList() );
 	}
 
 	/*
