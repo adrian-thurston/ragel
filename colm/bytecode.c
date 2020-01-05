@@ -56,12 +56,12 @@
 #if SIZEOF_LONG == 4
 
 	#define read_type( type, i ) do { \
-		word_t w; \
-		w = ((word_t) *instr++); \
-		w |= ((word_t) *instr++) << 8; \
-		w |= ((word_t) *instr++) << 16; \
-		w |= ((word_t) *instr++) << 24; \
-		i = (type) w; \
+		word_t _w; \
+		_w = ((word_t) *instr++); \
+		_w |= ((word_t) *instr++) << 8; \
+		_w |= ((word_t) *instr++) << 16; \
+		_w |= ((word_t) *instr++) << 24; \
+		i = (type) _w; \
 	} while(0)
 
 	#define read_type_p( Type, i, p ) do { \
