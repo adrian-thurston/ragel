@@ -187,7 +187,9 @@ void TableArray::stringGenerate( long long value )
 	char c; 
 	short h;
 	int i;
+#if SIZEOF_INT != SIZEOF_LONG
 	long l;
+#endif
 	unsigned char *p = 0;
 	int n = 0;
 	switch ( width ) {
