@@ -103,7 +103,7 @@ protected:
 	void NFA_POP_TEST( RedNfaTarg *targ );
 	virtual void NFA_FROM_STATE_ACTION_EXEC();
 
-	void NFA_PUSH( RedStateAp *state );
+	void NFA_PUSH_ST( RedStateAp *state );
 
 	void tableDataPass();
 

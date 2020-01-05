@@ -26,30 +26,12 @@
 #include <iostream>
 #include "gendata.h"
 
-class GraphvizDotGenOrig : public CodeGenData
-{
-public:
-	GraphvizDotGenOrig( const CodeGenArgs &args ) 
-			: CodeGenData(args) { }
-
-	/* Print an fsm to out stream. */
-	void writeTransList( RedStateAp *state );
-	void writeDotFile( );
-
-	virtual void writeStatement( InputLoc &, int, std::string * );
-
-private:
-	/* Writing labels and actions. */
-	std::ostream &ONCHAR( Key lowKey, Key highKey );
-	std::ostream &TRANS_ACTION( RedStateAp *fromState, RedTransAp *trans );
-	std::ostream &ACTION( RedAction *action );
-	std::ostream &KEY( Key key );
-};
 
 class GraphvizDotGen : public RedBase
 {
 public:
-	GraphvizDotGen( FsmGbl *id, FsmCtx *fsmCtx, FsmAp *fsm, std::string fsmName, int machineId, std::ostream &out )
+	GraphvizDotGen( FsmGbl *id, FsmCtx *fsmCtx, FsmAp *fsm,
+			std::string fsmName, int machineId, std::ostream &out )
 	:
 		RedBase(id, fsmCtx, fsm, fsmName, machineId),
 		out(out)

@@ -396,7 +396,7 @@ std::ostream &IpGoto::STATE_GOTO_CASES()
 	return out;
 }
 
-void IpGoto::NFA_PUSH( RedStateAp *state )
+void IpGoto::NFA_PUSH_ST( RedStateAp *state )
 {
 	std::stringstream ss;
 	ss << state->id;
@@ -516,7 +516,7 @@ std::ostream &IpGoto::STATE_GOTOS()
 			}
 
 			
-			NFA_PUSH( st );
+			NFA_PUSH_ST( st );
 
 			if ( st->fromStateAction != 0 ) {
 				/* Write every action in the list. */
