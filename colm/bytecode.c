@@ -4899,11 +4899,16 @@ again:
 				break;
 			}
 			case FN_MAP_INSERT_BKT: {
+				#ifdef DEBUG
 				uchar inserted;
-
 				consume_half(); //( genId );
 				read_byte( inserted );
 				consume_word(); //( wmapEl );
+				#else
+				consume_half(); //( genId );
+				consume_byte(); // inserted
+				consume_word(); //( wmapEl );
+				#endif
 
 				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_BKT %d\n",
 						(int)inserted );
@@ -4911,12 +4916,17 @@ again:
 			}
 			case FN_VMAP_INSERT_BKT: {
 				short gen_id;
-				uchar inserted;
-				//word_t wmap_el;
 
+				#ifdef DEBUG
+				uchar inserted;
 				read_half( gen_id );
 				read_byte( inserted );
 				consume_word(); //read_word( wmap_el );
+				#else
+				read_half( gen_id );
+				consume_byte();
+				consume_word(); //read_word( wmap_el );
+				#endif
 
 				//map_el_t *map_el = (map_el_t*)wmap_el;
 
