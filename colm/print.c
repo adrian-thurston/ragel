@@ -430,11 +430,9 @@ void colm_print_tree_args( program_t *prg, tree_t **sp,
 		kid_t kid, term;
 		term.tree = &term_tree;
 		term.next = 0;
-		term.flags = 0;
 
 		kid.tree = tree;
 		kid.next = &term;
-		kid.flags = 0;
 
 		print_kid( prg, sp, print_args, &kid );
 	}

@@ -67,19 +67,23 @@ typedef struct colm_data
 	struct colm_location *location;
 } head_t;
 
+/* Kid: used to implement a list of child trees. Kids are never shared. The
+ * trees they point to may be shared. This struct is also used on the stack by
+ * pushing two words and taking a pointer. We use it to take references to
+ * trees. Do not modify this struct. */
 typedef struct colm_kid
 {
-	/* The tree needs to be first since pointers to kids are used to reference
-	 * trees on the stack. A pointer to the word that is a tree_t* is cast to
-	 * a kid_t*. */
 	struct colm_tree *tree;
 	struct colm_kid *next;
-	unsigned char flags;
 } kid_t;
 
+/* Reference chains. Allocated on the stack. The chain goes up the list of kids
+ * to the root of the reference and tells us which trees we need to split so
+ * they are not shared before we can modify a node in a tree. Do not change
+ * this struct. */
 typedef struct colm_ref
 {
-	kid_t *kid;
+	struct colm_kid *kid;
 	struct colm_ref *next;
 } ref_t;
 
