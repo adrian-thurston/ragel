@@ -90,7 +90,6 @@ bool run = false;
 bool addUniqueEmptyProductions = false;
 bool gblLibrary = false;
 long gblActiveRealm = 0;
-bool rangeCrossesZero = false;
 
 ArgsVector includePaths;
 ArgsVector libraryPaths;
@@ -555,15 +554,12 @@ bool inSourceTree( const char *argv0, char *&location )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "RcD:e:x:I:L:vdliro:S:M:vHh?-:sVa:m:b:E:", argc, argv );
+	ParamCheck pc( "cD:e:x:I:L:vdliro:S:M:vHh?-:sVa:m:b:E:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
 		case ParamCheck::match:
 			switch ( pc.parameter ) {
-			case 'R':
-				rangeCrossesZero = true;
-				break;
 			case 'I':
 				includePaths.append( pc.parameterArg );
 				break;
