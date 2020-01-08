@@ -45,6 +45,7 @@ struct indent_impl
 extern struct colm_sections colm_object;
 
 typedef unsigned long colm_value_t;
+typedef unsigned char colm_alph_t;
 
 struct colm_tree
 {
@@ -98,6 +99,9 @@ struct colm_tree *colm_get_repeat_val( struct colm_tree *tree );
 struct colm_tree *colm_get_left_repeat_next( struct colm_tree *tree );
 struct colm_tree *colm_get_left_repeat_val( struct colm_tree *tree );
 struct colm_location *colm_find_location( struct colm_program *prg, struct colm_tree *tree );
+
+static inline const colm_alph_t *colm_alph_from_cstr( const char *cstr ) { return (const colm_alph_t*)cstr; }
+static inline const char *colm_cstr_from_alph( const colm_alph_t *alph ) { return (const char*)alph; }
 
 /* Debug realms. To turn on, pass to colm_set_debug before invocation. */
 #define COLM_DBG_BYTECODE    0x00000001

@@ -89,6 +89,7 @@ struct HostType
 {
 	const char *data1;
 	const char *data2;
+	bool isSigned;
 	long long minVal;
 	long long maxVal;
 	unsigned int size;
@@ -98,8 +99,7 @@ struct HostLang
 {
 	HostType *hostTypes;
 	int numHostTypes;
-	HostType *defaultAlphType;
-	bool explicitUnsigned;
+	int defaultHostType;
 };
 
 extern HostLang *hostLang;
@@ -113,9 +113,9 @@ struct KeyOps
 	KeyOps() : alphType(0) {}
 
 	Key minKey, maxKey;
-	HostType *alphType;
+	const HostType *alphType;
 
-	void setAlphType( HostType *alphType )
+	void setAlphType( const HostType *alphType )
 	{
 		this->alphType = alphType;
 		minKey = (long) alphType->minVal;

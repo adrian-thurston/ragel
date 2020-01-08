@@ -166,7 +166,7 @@ struct run_buf *new_run_buf( int sz )
 }
 
 /* Keep the position up to date after consuming text. */
-void update_position_data( struct stream_impl_data *is, const char *data, long length )
+void update_position_data( struct stream_impl_data *is, const alph_t *data, long length )
 {
 	int i;
 	for ( i = 0; i < length; i++ ) {
@@ -184,7 +184,7 @@ void update_position_data( struct stream_impl_data *is, const char *data, long l
 }
 
 /* Keep the position up to date after sending back text. */
-void undo_position_data( struct stream_impl_data *is, const char *data, long length )
+void undo_position_data( struct stream_impl_data *is, const alph_t *data, long length )
 {
 	/* FIXME: this needs to fetch the position information from the parsed
 	 * token and restore based on that.. */
@@ -221,7 +221,7 @@ static void data_transfer_loc( struct colm_program *prg, location_t *loc,
  */
 
 static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
-		char *dest, int length )
+		alph_t *dest, int length )
 {
 	int copied = 0;
 
@@ -249,7 +249,7 @@ static int data_get_data( struct colm_program *prg, struct stream_impl_data *ss,
 		/* Anything available in the current buffer. */
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
-			char *src = &buf->data[buf->offset];
+			alph_t *src = &buf->data[buf->offset];
 
 			int slen = avail < length ? avail : length;
 			memcpy( dest+copied, src, slen ) ;
@@ -280,7 +280,7 @@ static struct stream_impl *data_split_consumed( program_t *prg, struct stream_im
 }
 
 int data_append_data( struct colm_program *prg, struct stream_impl_data *sid,
-		const char *data, int length )
+		const alph_t *data, int length )
 {
 	struct run_buf *tail = sid->queue.tail;
 	if ( tail == 0 || length > (FSM_BUFSIZE - tail->length) ) {
@@ -414,7 +414,7 @@ static void data_print_tree( struct colm_program *prg, tree_t **sp,
 }
 
 static int data_get_parse_block( struct colm_program *prg, struct stream_impl_data *ss,
-		int *pskip, char **pdp, int *copied )
+		int *pskip, alph_t **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -448,7 +448,7 @@ static int data_get_parse_block( struct colm_program *prg, struct stream_impl_da
 		/* Anything available in the current buffer. */
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
-			char *src = &buf->data[buf->offset];
+			alph_t *src = &buf->data[buf->offset];
 
 			/* Need to skip? */
 			if ( *pskip > 0 && *pskip >= avail ) {
@@ -523,9 +523,9 @@ static int data_consume_data( struct colm_program *prg, struct stream_impl_data 
 }
 
 static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_data *sid,
-		const char *data, int length )
+		const alph_t *data, int length )
 {
-	const char *end = data + length;
+	const alph_t *end = data + length;
 	int amount = length;
 	if ( amount > sid->consumed )
 		amount = sid->consumed;
@@ -571,7 +571,7 @@ static int data_undo_consume_data( struct colm_program *prg, struct stream_impl_
  */
 
 static int file_get_data_source( struct colm_program *prg, struct stream_impl_data *si,
-		char *dest, int length )
+		alph_t *dest, int length )
 {
 	return fread( dest, 1, length, si->file );
 }
@@ -581,7 +581,7 @@ static int file_get_data_source( struct colm_program *prg, struct stream_impl_da
  */
 
 static int accum_get_data_source( struct colm_program *prg, struct stream_impl_data *si,
-		char *dest, int want )
+		alph_t *dest, int want )
 {
 	long avail = si->dlen - si->offset;
 	long take = avail < want ? avail : want;
@@ -710,14 +710,14 @@ struct stream_impl *colm_impl_consumed( char *name, int len )
 	return (struct stream_impl*)si;
 }
 
-struct stream_impl *colm_impl_new_text( char *name, const char *data, int len )
+struct stream_impl *colm_impl_new_text( char *name, const alph_t *data, int len )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)
 			malloc(sizeof(struct stream_impl_data));
 	si_data_init( si, name );
 	si->funcs = (struct stream_funcs*)&accum_funcs;
 
-	char *buf = (char*)malloc( len );
+	alph_t *buf = (alph_t*)malloc( len );
 	memcpy( buf, data, len );
 
 	si->data = buf;
@@ -778,7 +778,7 @@ stream_t *colm_stream_open_file( program_t *prg, tree_t *name, tree_t *mode )
 	}
 	
 	/* Need to make a C-string (null terminated). */
-	char *file_name = (char*)malloc(string_length(head_name)+1);
+	char *file_name = malloc(string_length(head_name)+1);
 	memcpy( file_name, string_data(head_name), string_length(head_name) );
 	file_name[string_length(head_name)] = 0;
 

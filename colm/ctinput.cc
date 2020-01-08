@@ -88,7 +88,7 @@ struct input_impl *colm_impl_new_pat( char *name, Pattern *pattern )
 }
 
 int pat_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss, int *pskip,
-		char **pdp, int *copied )
+		alph_t **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -107,7 +107,7 @@ int pat_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss, int
 
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
-			char *src = &buf->data[offset];
+			alph_t *src = (alph_t*)&buf->data[offset];
 			int slen = avail;
 
 			/* Need to skip? */
@@ -136,7 +136,7 @@ int pat_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss, int
 }
 
 
-int pat_get_data( struct colm_program *prg, struct input_impl_ct *ss, char *dest, int length )
+int pat_get_data( struct colm_program *prg, struct input_impl_ct *ss, alph_t *dest, int length )
 { 
 	int copied = 0;
 
@@ -215,7 +215,7 @@ int pat_consume_data( struct colm_program *prg, struct input_impl_ct *ss, int le
 	return consumed;
 }
 
-int pat_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const char *data, int length )
+int pat_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const alph_t *data, int length )
 {
 	int origLen = length;
 	while ( true ) {
@@ -239,7 +239,7 @@ int pat_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, c
 }
 
 LangEl *pat_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss, long *bindId,
-		char **data, long *length )
+		alph_t **data, long *length )
 { 
 	LangEl *klangEl = ss->pat_item->prodEl->langEl;
 	*bindId = ss->pat_item->bindId;
@@ -310,7 +310,8 @@ struct input_impl *colm_impl_new_cons( char *name, Constructor *constructor )
 	return (struct input_impl*)ss;
 }
 
-LangEl *repl_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss, long *bindId, char **data, long *length )
+LangEl *repl_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss,
+		long *bindId, alph_t **data, long *length )
 { 
 	LangEl *klangEl = ss->cons_item->type == ConsItem::ExprType ? 
 			ss->cons_item->langEl : ss->cons_item->prodEl->langEl;
@@ -326,7 +327,7 @@ LangEl *repl_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss
 					ss->cons_item->prodEl->typeRef->pdaLiteral->data,
 					ss->cons_item->prodEl->typeRef->pdaLiteral->loc );
 
-			*data = ss->cons_item->data;
+			*data = (alph_t*)ss->cons_item->data.data;
 			*length = ss->cons_item->data.length();
 		}
 	}
@@ -337,7 +338,7 @@ LangEl *repl_consume_lang_el( struct colm_program *prg, struct input_impl_ct *ss
 }
 
 int repl_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss,
-		int *pskip, char **pdp, int *copied )
+		int *pskip, alph_t **pdp, int *copied )
 { 
 	*copied = 0;
 
@@ -356,7 +357,7 @@ int repl_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss,
 
 		if ( avail > 0 ) {
 			/* The source data from the current buffer. */
-			char *src = &buf->data[offset];
+			alph_t *src = (alph_t*)&buf->data[offset];
 			int slen = avail;
 
 			/* Need to skip? */
@@ -384,7 +385,7 @@ int repl_get_parse_block( struct colm_program *prg, struct input_impl_ct *ss,
 	return INPUT_DATA;
 }
 
-int repl_get_data( struct colm_program *prg, struct input_impl_ct *ss, char *dest, int length )
+int repl_get_data( struct colm_program *prg, struct input_impl_ct *ss, alph_t *dest, int length )
 { 
 	int copied = 0;
 
@@ -468,7 +469,7 @@ int repl_consume_data( struct colm_program *prg, struct input_impl_ct *ss, int l
 	return consumed;
 }
 
-int repl_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const char *data, int length )
+int repl_undo_consume_data( struct colm_program *prg, struct input_impl_ct *ss, const alph_t *data, int length )
 {
 	int origLen = length;
 	while ( true ) {
@@ -527,7 +528,7 @@ extern "C" void internalSendNamedLangEl( program_t *prg, tree_t **sp,
 {
 	/* All three set by consumeLangEl. */
 	long bindId;
-	char *data;
+	alph_t *data;
 	long length;
 
 	LangEl *klangEl = is->funcs->consume_lang_el( prg, is, &bindId, &data, &length );
@@ -537,7 +538,7 @@ extern "C" void internalSendNamedLangEl( program_t *prg, tree_t **sp,
 	/* Copy the token data. */
 	head_t *tokdata = 0;
 	if ( data != 0 )
-		tokdata = string_alloc_full( prg, data, length );
+		tokdata = string_alloc_full( prg, colm_cstr_from_alph( data ), length );
 
 	kid_t *input = make_token_with_data( prg, pdaRun, is, klangEl->id, tokdata );
 

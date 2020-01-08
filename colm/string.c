@@ -273,9 +273,9 @@ head_t *make_literal( program_t *prg, long offset )
 head_t *string_sprintf( program_t *prg, str_t *format, long integer )
 {
 	head_t *format_head = format->value;
-	long written = snprintf( 0, 0, string_data(format_head), integer );
+	long written = snprintf( 0, 0, (char*)string_data(format_head), integer );
 	head_t *head = init_str_space( written+1 );
-	written = snprintf( (char*)head->data, written+1, string_data(format_head), integer );
+	written = snprintf( (char*)head->data, written+1, (char*)string_data(format_head), integer );
 	head->length -= 1;
 	return head;
 }

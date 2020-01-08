@@ -112,7 +112,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 			pda_run->consume_buf = run_buf;
 		}
 
-		char *dest = run_buf->data + run_buf->length;
+		alph_t *dest = run_buf->data + run_buf->length;
 
 		is->funcs->get_data( prg, is, dest, length );
 		location_t *loc = location_allocate( prg );
@@ -123,14 +123,14 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		pda_run->p = pda_run->pe = 0;
 		pda_run->tokpref = 0;
 
-		head_t *tokdata = colm_string_alloc_pointer( prg, dest, length );
+		head_t *tokdata = colm_string_alloc_pointer( prg, colm_cstr_from_alph( dest ), length );
 		tokdata->location = loc;
 
 		return tokdata;
 	}
 	else {
 		head_t *head = init_str_space( length );
-		char *dest = (char*)head->data;
+		alph_t *dest = (alph_t*)head->data;
 
 		is->funcs->get_data( prg, is, dest, length );
 		location_t *loc = location_allocate( prg );
@@ -143,7 +143,7 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 
 void colm_stream_push_text( struct colm_program *prg, struct input_impl *is, const char *data, long length )
 {
-	is->funcs->prepend_data( prg, is, data, length );
+	is->funcs->prepend_data( prg, is, colm_alph_from_cstr( data ), length );
 }
 
 void colm_stream_push_tree( struct colm_program *prg, struct input_impl *is, tree_t *tree, int ignore )
@@ -170,7 +170,7 @@ void colm_undo_stream_push( program_t *prg, tree_t **sp, struct input_impl *is, 
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */
-static void send_back_text( struct colm_program *prg, struct input_impl *is, const char *data, long length )
+static void send_back_text( struct colm_program *prg, struct input_impl *is, const alph_t *data, long length )
 {
 	//debug( REALM_PARSE, "push back of %ld characters\n", length );
 
@@ -209,7 +209,7 @@ static void send_back_ignore( program_t *prg, tree_t **sp,
 		if ( artificial )
 			send_back_tree( prg, is, parse_tree->shadow->tree );
 		else
-			send_back_text( prg, is, string_data( head ), head->length );
+			send_back_text( prg, is, colm_alph_from_cstr( string_data( head ) ), head->length );
 	}
 
 	colm_decrement_steps( pda_run );
@@ -278,7 +278,7 @@ static void send_back( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		}
 
 		/* Push back the token data. */
-		send_back_text( prg, is, string_data( parse_tree->shadow->tree->tokdata ), 
+		send_back_text( prg, is, colm_alph_from_cstr( string_data( parse_tree->shadow->tree->tokdata ) ), 
 				string_length( parse_tree->shadow->tree->tokdata ) );
 
 		/* If eof was just sent back remember that it needs to be sent again. */
@@ -377,7 +377,7 @@ kid_t *make_token_with_data( program_t *prg, struct pda_run *pda_run,
 		for ( i = 0; i < lel_info[id].num_capture_attr; i++ ) {
 			CaptureAttr *ca = &prg->rtd->capture_attr[lel_info[id].capture_attr + i];
 			head_t *data = string_alloc_full( prg, 
-					pda_run->mark[ca->mark_enter],
+					colm_cstr_from_alph( pda_run->mark[ca->mark_enter]  ),
 					pda_run->mark[ca->mark_leave] -
 							pda_run->mark[ca->mark_enter] );
 			tree_t *string = construct_string( prg, data );
@@ -736,9 +736,9 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 		pda_run->consume_buf = run_buf;
 	}
 
-	char *dest = run_buf->data + run_buf->length;
+	alph_t *dest = run_buf->data + run_buf->length;
 
-	is->funcs->get_data( prg, is, dest, length );
+	is->funcs->get_data( prg, is, (alph_t*)dest, length );
 	location_t *location = location_allocate( prg );
 	is->funcs->consume_data( prg, is, length, location );
 
@@ -748,7 +748,7 @@ static head_t *extract_match( program_t *prg, tree_t **sp,
 	pda_run->tokpref = 0;
 	pda_run->tokstart = 0;
 
-	head_t *head = colm_string_alloc_pointer( prg, dest, length );
+	head_t *head = colm_string_alloc_pointer( prg, colm_cstr_from_alph( dest ), length );
 
 	head->location = location;
 
@@ -793,7 +793,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 		pda_run->consume_buf = run_buf;
 	}
 
-	char *dest = run_buf->data + run_buf->length;
+	alph_t *dest = run_buf->data + run_buf->length;
 
 	is->funcs->get_data( prg, is, dest, length );
 
@@ -808,7 +808,7 @@ static head_t *extract_no_l( program_t *prg, tree_t **sp,
 	pda_run->tokpref = 0;
 	pda_run->tokstart = 0;
 
-	head_t *head = colm_string_alloc_pointer( prg, dest, length );
+	head_t *head = colm_string_alloc_pointer( prg, colm_cstr_from_alph( dest ), length );
 
 	/* Don't pass the location. */
 	head->location = 0;
@@ -849,14 +849,14 @@ static head_t *peek_match( program_t *prg, struct pda_run *pda_run, struct input
 		pda_run->consume_buf = run_buf;
 	}
 
-	char *dest = run_buf->data + run_buf->length;
+	alph_t *dest = run_buf->data + run_buf->length;
 
 	is->funcs->get_data( prg, is, dest, length );
 
 	pda_run->p = pda_run->pe = 0;
 	pda_run->tokpref = 0;
 
-	head_t *head = colm_string_alloc_pointer( prg, dest, length );
+	head_t *head = colm_string_alloc_pointer( prg, colm_cstr_from_alph( dest ), length );
 
 	head->location = location_allocate( prg );
 	is->funcs->transfer_loc( prg, head->location, is );
@@ -1093,7 +1093,7 @@ static long scan_token( program_t *prg, struct pda_run *pda_run, struct input_im
 		return SCAN_UNDO;
 
 	while ( true ) {
-		char *pd = 0;
+		alph_t *pd = 0;
 		int len = 0;
 		int tokpref = pda_run->tokpref;
 		int type = is->funcs->get_parse_block( prg, is, &tokpref, &pd, &len );

@@ -253,7 +253,7 @@ static void input_set_option( struct colm_program *prg, struct input_impl_seq *i
 
 
 static int input_get_parse_block( struct colm_program *prg, struct input_impl_seq *is,
-		int *pskip, char **pdp, int *copied )
+		int *pskip, alph_t **pdp, int *copied )
 {
 	int ret = 0;
 	*copied = 0;
@@ -326,7 +326,7 @@ static int input_get_parse_block( struct colm_program *prg, struct input_impl_se
 }
 
 static int input_get_data( struct colm_program *prg, struct input_impl_seq *is,
-		char *dest, int length )
+		alph_t *dest, int length )
 {
 	int copied = 0;
 
@@ -414,7 +414,7 @@ static int input_consume_data( struct colm_program *prg, struct input_impl_seq *
 }
 
 static int input_undo_consume_data( struct colm_program *prg, struct input_impl_seq *si,
-		const char *data, int length )
+		const alph_t *data, int length )
 {
 	/* When we push back data we need to move backwards through the block of
 	 * text. The source stream type will */
@@ -492,7 +492,7 @@ static void input_undo_consume_tree( struct colm_program *prg, struct input_impl
  * Prepend
  */
 static void input_prepend_data( struct colm_program *prg, struct input_impl_seq *si,
-		const char *data, long length )
+		const alph_t *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_prepend_data: stream %p prepend data length %d\n", si, length );
 
@@ -577,7 +577,7 @@ static tree_t *input_undo_prepend_stream( struct colm_program *prg, struct input
 }
 
 static void input_append_data( struct colm_program *prg, struct input_impl_seq *si,
-		const char *data, long length )
+		const alph_t *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_append_data: stream %p append data length %d\n", si, length );
 

@@ -54,24 +54,26 @@ struct colm_stream;
 struct input_impl;
 struct stream_impl;
 
+typedef colm_alph_t alph_t;
+
 #define DEF_INPUT_FUNCS( input_funcs, _input_impl ) \
 struct input_funcs \
 { \
-	int (*get_parse_block)( struct colm_program *prg, struct _input_impl *si, int *pskip, char **pdp, int *copied ); \
-	int (*get_data)( struct colm_program *prg, struct _input_impl *si, char *dest, int length ); \
+	int (*get_parse_block)( struct colm_program *prg, struct _input_impl *si, int *pskip, alph_t **pdp, int *copied ); \
+	int (*get_data)( struct colm_program *prg, struct _input_impl *si, alph_t *dest, int length ); \
 	int (*consume_data)( struct colm_program *prg, struct _input_impl *si, int length, struct colm_location *loc ); \
-	int (*undo_consume_data)( struct colm_program *prg, struct _input_impl *si, const char *data, int length ); \
+	int (*undo_consume_data)( struct colm_program *prg, struct _input_impl *si, const alph_t *data, int length ); \
 	struct colm_tree *(*consume_tree)( struct colm_program *prg, struct _input_impl *si ); \
 	void (*undo_consume_tree)( struct colm_program *prg, struct _input_impl *si, struct colm_tree *tree, int ignore ); \
-	struct LangEl *(*consume_lang_el)( struct colm_program *prg, struct _input_impl *si, long *bind_id, char **data, long *length ); \
+	struct LangEl *(*consume_lang_el)( struct colm_program *prg, struct _input_impl *si, long *bind_id, alph_t **data, long *length ); \
 	void (*undo_consume_lang_el)( struct colm_program *prg, struct _input_impl *si ); \
-	void (*prepend_data)( struct colm_program *prg, struct _input_impl *si, const char *data, long len ); \
+	void (*prepend_data)( struct colm_program *prg, struct _input_impl *si, const alph_t *data, long len ); \
 	int (*undo_prepend_data)( struct colm_program *prg, struct _input_impl *si, int length ); \
 	void (*prepend_tree)( struct colm_program *prg, struct _input_impl *si, struct colm_tree *tree, int ignore ); \
 	struct colm_tree *(*undo_prepend_tree)( struct colm_program *prg, struct _input_impl *si ); \
 	void (*prepend_stream)( struct colm_program *prg, struct _input_impl *si, struct colm_stream *stream ); \
 	struct colm_tree *(*undo_prepend_stream)( struct colm_program *prg, struct _input_impl *si ); \
-	void (*append_data)( struct colm_program *prg, struct _input_impl *si, const char *data, long length ); \
+	void (*append_data)( struct colm_program *prg, struct _input_impl *si, const alph_t *data, long length ); \
 	struct colm_tree *(*undo_append_data)( struct colm_program *prg, struct _input_impl *si, int length ); \
 	void (*append_tree)( struct colm_program *prg, struct _input_impl *si, struct colm_tree *tree ); \
 	struct colm_tree *(*undo_append_tree)( struct colm_program *prg, struct _input_impl *si ); \
@@ -87,11 +89,11 @@ struct input_funcs \
 #define DEF_STREAM_FUNCS( stream_funcs, _stream_impl ) \
 struct stream_funcs \
 { \
-	int (*get_parse_block)( struct colm_program *prg, struct _stream_impl *si, int *pskip, char **pdp, int *copied ); \
-	int (*get_data)( struct colm_program *prg, struct _stream_impl *si, char *dest, int length ); \
-	int (*get_data_source)( struct colm_program *prg, struct _stream_impl *si, char *dest, int length ); \
+	int (*get_parse_block)( struct colm_program *prg, struct _stream_impl *si, int *pskip, alph_t **pdp, int *copied ); \
+	int (*get_data)( struct colm_program *prg, struct _stream_impl *si, alph_t *dest, int length ); \
+	int (*get_data_source)( struct colm_program *prg, struct _stream_impl *si, alph_t *dest, int length ); \
 	int (*consume_data)( struct colm_program *prg, struct _stream_impl *si, int length, struct colm_location *loc ); \
-	int (*undo_consume_data)( struct colm_program *prg, struct _stream_impl *si, const char *data, int length ); \
+	int (*undo_consume_data)( struct colm_program *prg, struct _stream_impl *si, const alph_t *data, int length ); \
 	void (*transfer_loc)( struct colm_program *prg, struct colm_location *loc, struct _stream_impl *si ); \
 	struct colm_str_collect *(*get_collect)( struct colm_program *prg, struct _stream_impl *si ); \
 	void (*flush_stream)( struct colm_program *prg, struct _stream_impl *si ); \
@@ -99,7 +101,7 @@ struct stream_funcs \
 	void (*print_tree)( struct colm_program *prg, struct colm_tree **sp, \
 			struct _stream_impl *impl, struct colm_tree *tree, int trim ); \
 	struct stream_impl *(*split_consumed)( struct colm_program *prg, struct _stream_impl *si ); \
-	int (*append_data)( struct colm_program *prg, struct _stream_impl *si, const char *data, int len ); \
+	int (*append_data)( struct colm_program *prg, struct _stream_impl *si, const alph_t *data, int len ); \
 	int (*undo_append_data)( struct colm_program *prg, struct _stream_impl *si, int length ); \
 	void (*destructor)( struct colm_program *prg, struct colm_tree **sp, struct _stream_impl *si ); \
 	int (*get_option)( struct colm_program *prg, struct _stream_impl *si, int option ); \
@@ -165,7 +167,7 @@ struct run_buf
 
 	/* Must be at the end. We will grow this struct to add data if the input
 	 * demands it. */
-	char data[FSM_BUFSIZE];
+	alph_t data[FSM_BUFSIZE];
 };
 
 struct run_buf *new_run_buf( int sz );
@@ -180,7 +182,7 @@ struct stream_impl_data
 		struct run_buf *tail;
 	} queue;
 
-	const char *data;
+	const alph_t *data;
 	long dlen;
 	int offset;
 
@@ -220,7 +222,7 @@ struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 char *colm_filename_add( struct colm_program *prg, const char *fn );
 struct stream_impl *colm_impl_new_accum( char *name );
 struct stream_impl *colm_impl_consumed( char *name, int len );
-struct stream_impl *colm_impl_new_text( char *name, const char *data, int len );
+struct stream_impl *colm_impl_new_text( char *name, const alph_t *data, int len );
 
 #ifdef __cplusplus
 }

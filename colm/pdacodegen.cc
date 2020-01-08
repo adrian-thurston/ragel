@@ -397,7 +397,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 	out << "static const char *" << litdata() << "[] = {\n";
 	for ( int i = 0; i < runtimeData->num_literals; i++ ) {
 		out << "\t\"";
-		escapeLiteralString( out, runtimeData->litdata[i] );
+		escapeLiteralString( out, runtimeData->litdata[i], runtimeData->litlen[i] );
 		out << "\",\n";
 	}
 	out << "};\n\n";

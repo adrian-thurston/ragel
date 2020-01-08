@@ -268,18 +268,18 @@ struct pda_run
 
 	long region, pre_region;
 	long fsm_cs, next_cs, act;
-	char *start;
-	char *tokstart;
+	alph_t *start;
+	alph_t *tokstart;
 	long tokend;
 	long tokpref;
-	char *p, *pe;
+	alph_t *p, *pe;
 	char scan_eof;
 
 	char return_result;
 	char skip_tokpref;
 	char eof_term_recvd;
 
-	char *mark[MARK_SLOTS];
+	alph_t *mark[MARK_SLOTS];
 	long matched_token;
 
 	/*

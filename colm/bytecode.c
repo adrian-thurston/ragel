@@ -35,6 +35,7 @@
 
 #include <colm/pool.h>
 #include <colm/debug.h>
+#include <colm/colm.h>
 
 #define TRUE_VAL  1
 #define FALSE_VAL 0
@@ -215,7 +216,7 @@ static word_t stream_append_text( program_t *prg, tree_t **sp, input_t *dest, tr
 		colm_print_tree_collect( prg, sp, &collect, input, trim );
 
 		/* Load it into the input. */
-		impl->funcs->append_data( prg, impl, collect.data, collect.length );
+		impl->funcs->append_data( prg, impl, colm_alph_from_cstr( collect.data ), collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
 	}
@@ -238,7 +239,7 @@ static word_t stream_append_tree( program_t *prg, tree_t **sp, input_t *dest, tr
 		colm_print_tree_collect( prg, sp, &collect, to_append, false );
 
 		/* Load it into the to_append. */
-		impl->funcs->append_data( prg, impl, collect.data, collect.length );
+		impl->funcs->append_data( prg, impl, colm_alph_from_cstr( collect.data ), collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
 	}
@@ -288,10 +289,11 @@ static tree_t *stream_pull_bc( program_t *prg, tree_t **sp, struct pda_run *pda_
 }
 
 
-static void undo_stream_pull( struct colm_program *prg, struct input_impl *is, const char *data, long length )
+static void undo_stream_pull( struct colm_program *prg, struct input_impl *is,
+		const char *data, long length )
 {
 	//debug( REALM_PARSE, "undoing stream pull\n" );
-	is->funcs->undo_consume_data( prg, is, data, length );
+	is->funcs->undo_consume_data( prg, is, colm_alph_from_cstr( data ), length );
 }
 
 static void undo_pull( program_t *prg, input_t *input, tree_t *str )
@@ -407,12 +409,14 @@ static void downref_locals( program_t *prg, tree_t ***psp,
 	}
 }
 
+
 static tree_t *construct_arg0( program_t *prg, int argc, const char **argv, const int *argl )
 {
 	tree_t *arg0 = 0;
 	if ( argc > 0 ) {
-		size_t len = argl != 0 ? argl[0] : strlen(argv[0]);
-		head_t *head = colm_string_alloc_pointer( prg, argv[0], len );
+		const char *argv0 = argv[0];
+		size_t len = argl != 0 ? argl[0] : strlen( argv[0] );
+		head_t *head = colm_string_alloc_pointer( prg, argv0, len );
 		arg0 = construct_string( prg, head );
 		colm_tree_upref( prg, arg0 );
 	}
@@ -425,7 +429,8 @@ static list_t *construct_argv( program_t *prg, int argc, const char **argv, cons
 	int i;
 	for ( i = 1; i < argc; i++ ) {
 		size_t len = argl != 0 ? argl[i] : strlen(argv[i]);
-		head_t *head = colm_string_alloc_pointer( prg, argv[i], len );
+		const char *argv_i = argv[i];
+		head_t *head = colm_string_alloc_pointer( prg, argv_i, len );
 		tree_t *arg = construct_string( prg, head );
 		colm_tree_upref( prg, arg );
 
@@ -590,7 +595,9 @@ tree_t *colm_run_func( struct colm_program *prg, int frame_id,
 			((value_t*)execution.call_args)[p] = 0;
 		}
 		else {
-			head_t *head = colm_string_alloc_pointer( prg, params[p], strlen(params[p]) );
+			const char *param_p = params[p];
+			size_t param_len = strlen(params[p]);
+			head_t *head = colm_string_alloc_pointer( prg, param_p, param_len );
 			tree_t *tree = construct_string( prg, head );
 			colm_tree_upref( prg, tree );
 			((tree_t**)execution.call_args)[p] = tree;
@@ -966,13 +973,14 @@ again:
 			 * the local frame now. */
 			struct lang_el_info *lel_info = prg->rtd->lel_info;
 			struct pda_run *pda_run = exec->parser->pda_run;
-			char **mark = pda_run->mark;
+			alph_t **mark = pda_run->mark;
 
 			int i, num_capture_attr = lel_info[pda_run->token_id].num_capture_attr;
 			for ( i = 0; i < num_capture_attr; i++ ) {
 				struct lang_el_info *lei = &lel_info[exec->parser->pda_run->token_id];
 				CaptureAttr *ca = &prg->rtd->capture_attr[lei->capture_attr + i];
-				head_t *data = string_alloc_full( prg, mark[ca->mark_enter],
+				head_t *data = string_alloc_full( prg,
+						colm_cstr_from_alph( mark[ca->mark_enter] ),
 						mark[ca->mark_leave] - mark[ca->mark_enter] );
 				tree_t *string = construct_string( prg, data );
 				colm_tree_upref( prg, string );
@@ -3186,7 +3194,8 @@ again:
 			tree_t *str = 0;
 			if ( tree->tokdata->location ) {
 				const char *fn = tree->tokdata->location->name;
-				head_t *data = string_alloc_full( prg, fn, strlen(fn) );
+				size_t fnlen = strlen( fn );
+				head_t *data = string_alloc_full( prg, fn, fnlen );
 				str = construct_string( prg, data );
 				colm_tree_upref( prg, str );
 			}

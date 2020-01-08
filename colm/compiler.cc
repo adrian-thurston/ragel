@@ -86,12 +86,13 @@ Key makeFsmKeyHex( char *str, const InputLoc &loc, Compiler *pd )
 
 	unsigned long ul = strtoul( str, 0, 16 );
 
+
 	if ( errno == ERANGE || (unusedBits && ul >> (size * 8)) ) {
 		error(loc) << "literal " << str << " overflows the alphabet type" << endl;
 		ul = 1 << (size * 8);
 	}
 
-	if ( unusedBits && ul >> (size * 8 - 1) )
+	if ( keyOps->alphType->isSigned && unusedBits && ul >> (size * 8 - 1) )
 		ul |= (ULONG_MAX >> (size*8 ) ) << (size*8);
 
 	return Key( (long)ul );
@@ -492,7 +493,8 @@ void Compiler::initGraphDict( )
 void Compiler::initKeyOps( )
 {
 	/* Signedness and bounds. */
-	HostType *alphType = alphTypeSet ? userAlphType : hostLang->defaultAlphType;
+	const HostType *alphType = alphTypeSet ? userAlphType :
+			&hostLang->hostTypes[hostLang->defaultHostType];
 	thisKeyOps.setAlphType( alphType );
 
 	if ( lowerNum != 0 ) {
@@ -1022,7 +1024,7 @@ pda_run *Compiler::parsePattern( program_t *prg, tree_t **sp, const InputLoc &lo
 		if ( pdaRun->parse_error_text != 0 ) {
 			colm_data *tokdata = pdaRun->parse_error_text->tokdata;
 			cerr << ": relative error: ";
-			cerr.write( tokdata->data, tokdata->length );
+			cerr.write( (const char*)tokdata->data, tokdata->length );
 		}
 		else {
 			cerr << ": parse error";

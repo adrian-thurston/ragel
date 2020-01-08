@@ -103,12 +103,21 @@ void version();
 /* Total error count. */
 int gblErrorCount = 0;
 
+/*
+ * Alphabet Type for the parsing machinery. The trees/strings of parsed data
+ * all use char type. Currently we can support signed char, unsigned char or
+ * char. If changing this, the colm_alph_t type needs to change as well.
+ * Currently, this is a compile time change only. A colm binary currently
+ * connot be made to work with multiple alphabet types.
+ */
+
 HostType hostTypesC[] =
 {
-	{ "char", 0, CHAR_MIN, CHAR_MAX, sizeof(char) },
+	{ "unsigned", "char", false, 0, UCHAR_MAX, sizeof(unsigned char) },
 };
 
-HostLang hostLangC = { hostTypesC, 8, hostTypesC+0, true };
+
+HostLang hostLangC = { hostTypesC, 1, 0 };
 HostLang *hostLang = &hostLangC;
 
 /* Print the opening to an error in the input, then return the error ostream. */

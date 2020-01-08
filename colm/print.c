@@ -59,7 +59,7 @@ static void xml_escape_data( struct colm_print_args *print_args, const char *dat
 
 void init_str_collect( str_collect_t *collect )
 {
-	collect->data = (char*) malloc( BUFFER_INITIAL_SIZE );
+	collect->data = malloc( BUFFER_INITIAL_SIZE );
 	collect->allocated = BUFFER_INITIAL_SIZE;
 	collect->length = 0;
 	collect->indent.indent = 0;
@@ -76,7 +76,7 @@ void str_collect_append( str_collect_t *collect, const char *data, long len )
 	long new_len = collect->length + len;
 	if ( new_len > collect->allocated ) {
 		collect->allocated = new_len * 2;
-		collect->data = (char*) realloc( collect->data, collect->allocated );
+		collect->data = realloc( collect->data, collect->allocated );
 	}
 	memcpy( collect->data + collect->length, data, len );
 	collect->length += len;
@@ -91,7 +91,7 @@ void str_collect_clear( str_collect_t *collect )
 
 void print_str( struct colm_print_args *print_args, head_t *str )
 {
-	print_args->out( print_args, (char*)(str->data), str->length );
+	print_args->out( print_args, str->data, str->length );
 }
 
 void append_collect( struct colm_print_args *args, const char *data, int length )
@@ -128,7 +128,7 @@ restart:
 		}
 	}
 	else {
-		char *nl;
+		const char *nl;
 		if ( args->indent->level != COLM_INDENT_OFF &&
 				(nl = memchr( data, '\n', length )) )
 		{
@@ -559,7 +559,7 @@ static void xml_term( program_t *prg, tree_t **sp,
 	else if ( kid->tree->id == LEL_ID_STR ) {
 		head_t *head = (head_t*) ((str_t*)kid->tree)->value;
 
-		xml_escape_data( print_args, (char*)(head->data), head->length );
+		xml_escape_data( print_args, head->data, head->length );
 	}
 	else if ( 0 < kid->tree->id && kid->tree->id < prg->rtd->first_non_term_id &&
 			kid->tree->id != LEL_ID_IGNORE &&
@@ -720,7 +720,6 @@ static void postfix_close( program_t *prg, tree_t **sp,
 
 		sprintf( buf, " %d", children );
 		args->out( args, buf, strlen( buf ) );
-
 		args->out( args, "\n", 1 );
 	}
 }

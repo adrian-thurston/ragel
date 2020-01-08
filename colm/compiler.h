@@ -596,7 +596,7 @@ struct Compiler
 	int nextPriorKey, nextNameId;
 
 	/* Alphabet type. */
-	HostType *userAlphType;
+	const HostType *userAlphType;
 	bool alphTypeSet;
 
 	/* Element type and get key expression. */
