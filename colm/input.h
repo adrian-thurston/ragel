@@ -67,7 +67,7 @@ struct input_funcs \
 	void (*undo_consume_tree)( struct colm_program *prg, struct _input_impl *si, struct colm_tree *tree, int ignore ); \
 	struct LangEl *(*consume_lang_el)( struct colm_program *prg, struct _input_impl *si, long *bind_id, alph_t **data, long *length ); \
 	void (*undo_consume_lang_el)( struct colm_program *prg, struct _input_impl *si ); \
-	void (*prepend_data)( struct colm_program *prg, struct _input_impl *si, const alph_t *data, long len ); \
+	void (*prepend_data)( struct colm_program *prg, struct _input_impl *si, struct colm_location *loc, const alph_t *data, long len ); \
 	int (*undo_prepend_data)( struct colm_program *prg, struct _input_impl *si, int length ); \
 	void (*prepend_tree)( struct colm_program *prg, struct _input_impl *si, struct colm_tree *tree, int ignore ); \
 	struct colm_tree *(*undo_prepend_tree)( struct colm_program *prg, struct _input_impl *si ); \
@@ -222,7 +222,7 @@ struct colm_stream *colm_stream_open_collect( struct colm_program *prg );
 char *colm_filename_add( struct colm_program *prg, const char *fn );
 struct stream_impl *colm_impl_new_accum( char *name );
 struct stream_impl *colm_impl_consumed( char *name, int len );
-struct stream_impl *colm_impl_new_text( char *name, const alph_t *data, int len );
+struct stream_impl *colm_impl_new_text( char *name, struct colm_location *loc, const alph_t *data, int len );
 
 #ifdef __cplusplus
 }

@@ -141,32 +141,6 @@ head_t *colm_stream_pull( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 	}
 }
 
-void colm_stream_push_text( struct colm_program *prg, struct input_impl *is, const char *data, long length )
-{
-	is->funcs->prepend_data( prg, is, colm_alph_from_cstr( data ), length );
-}
-
-void colm_stream_push_tree( struct colm_program *prg, struct input_impl *is, tree_t *tree, int ignore )
-{
-	is->funcs->prepend_tree( prg, is, tree, ignore );
-}
-
-void colm_stream_push_stream( struct colm_program *prg, struct input_impl *is, stream_t *stream )
-{
-	is->funcs->prepend_stream( prg, is, stream );
-}
-
-void colm_undo_stream_push( program_t *prg, tree_t **sp, struct input_impl *is, long length )
-{
-	if ( length < 0 ) {
-		/* tree_t *tree = */ is->funcs->undo_prepend_tree( prg, is );
-		// colm_tree_downref( prg, sp, tree );
-	}
-	else {
-		is->funcs->undo_prepend_data( prg, is, length );
-	}
-}
-
 /* Should only be sending back whole tokens/ignores, therefore the send back
  * should never cross a buffer boundary. Either we slide back data, or we move to
  * a previous buffer and slide back data. */

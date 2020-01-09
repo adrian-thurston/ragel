@@ -710,7 +710,7 @@ struct stream_impl *colm_impl_consumed( char *name, int len )
 	return (struct stream_impl*)si;
 }
 
-struct stream_impl *colm_impl_new_text( char *name, const alph_t *data, int len )
+struct stream_impl *colm_impl_new_text( char *name, struct colm_location *loc, const alph_t *data, int len )
 {
 	struct stream_impl_data *si = (struct stream_impl_data*)
 			malloc(sizeof(struct stream_impl_data));
@@ -722,6 +722,12 @@ struct stream_impl *colm_impl_new_text( char *name, const alph_t *data, int len 
 
 	si->data = buf;
 	si->dlen = len;
+
+	if ( loc != 0 ) {
+		si->line = loc->line;
+		si->column = loc->column;
+		si->byte = loc->byte;
+	}
 
 	return (struct stream_impl*)si;
 }

@@ -492,13 +492,14 @@ static void input_undo_consume_tree( struct colm_program *prg, struct input_impl
  * Prepend
  */
 static void input_prepend_data( struct colm_program *prg, struct input_impl_seq *si,
-		const alph_t *data, long length )
+		struct colm_location *loc, const alph_t *data, long length )
 {
 	debug( prg, REALM_INPUT, "input_prepend_data: stream %p prepend data length %d\n", si, length );
 
 	maybe_split( prg, si );
 
-	struct stream_impl *sub_si = colm_impl_new_text( "<text1>", data, length );
+	char *name = loc != 0 ? (char*)loc->name : "<text1>";
+	struct stream_impl *sub_si = colm_impl_new_text( name, loc, data, length );
 
 	struct seq_buf *new_buf = new_seq_buf();
 	new_buf->type = SB_ACCUM;

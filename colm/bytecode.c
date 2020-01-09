@@ -200,6 +200,34 @@ static head_t *tree_to_str_postfix( program_t *prg, tree_t **sp, tree_t *tree, i
 	return ret;
 }
 
+static void input_push_text( struct colm_program *prg, struct input_impl *is,
+		struct colm_location *loc, const char *data, long length )
+{
+	is->funcs->prepend_data( prg, is, loc, colm_alph_from_cstr( data ), length );
+}
+
+static void colm_stream_push_tree( struct colm_program *prg, struct input_impl *is,
+		tree_t *tree, int ignore )
+{
+	is->funcs->prepend_tree( prg, is, tree, ignore );
+}
+
+static void colm_stream_push_stream( struct colm_program *prg, struct input_impl *is, stream_t *stream )
+{
+	is->funcs->prepend_stream( prg, is, stream );
+}
+
+static void colm_undo_stream_push( program_t *prg, tree_t **sp, struct input_impl *is, long length )
+{
+	if ( length < 0 ) {
+		/* tree_t *tree = */ is->funcs->undo_prepend_tree( prg, is );
+		// colm_tree_downref( prg, sp, tree );
+	}
+	else {
+		is->funcs->undo_prepend_data( prg, is, length );
+	}
+}
+
 
 static word_t stream_append_text( program_t *prg, tree_t **sp, input_t *dest, tree_t *input, int trim )
 {
@@ -304,7 +332,7 @@ static void undo_pull( program_t *prg, input_t *input, tree_t *str )
 	undo_stream_pull( prg, impl, data, length );
 }
 
-static long stream_push( program_t *prg, tree_t **sp, struct input_impl *in, tree_t *tree, int ignore )
+static long input_push( program_t *prg, tree_t **sp, struct input_impl *in, tree_t *tree, int ignore )
 {
 	long length = -1;
 	if ( tree->id == LEL_ID_PTR ) {
@@ -320,10 +348,9 @@ static long stream_push( program_t *prg, tree_t **sp, struct input_impl *in, tre
 		init_str_collect( &collect );
 		colm_print_tree_collect( prg, sp, &collect, tree, false );
 
-		colm_stream_push_text( prg, in, collect.data, collect.length );
+		input_push_text( prg, in, tree->tokdata->location, collect.data, collect.length );
 		length = collect.length;
 		str_collect_destroy( &collect );
-
 	}
 	else {
 		colm_tree_upref( prg, tree );
@@ -333,7 +360,7 @@ static long stream_push( program_t *prg, tree_t **sp, struct input_impl *in, tre
 	return length;
 }
 
-static long stream_push_stream( program_t *prg, tree_t **sp,
+static long input_push_stream( program_t *prg, tree_t **sp,
 		struct input_impl *in, stream_t *stream )
 {
 	colm_stream_push_stream( prg, in, stream );
@@ -2816,7 +2843,7 @@ again:
 
 			input_t *input = vm_pop_input();
 			tree_t *tree = vm_pop_tree();
-			long len = stream_push( prg, sp, input_to_impl( input ), tree, false );
+			long len = input_push( prg, sp, input_to_impl( input ), tree, false );
 			vm_push_tree( 0 );
 
 			/* Single unit. */
@@ -2832,7 +2859,7 @@ again:
 
 			input_t *input = vm_pop_input();
 			tree_t *tree = vm_pop_tree();
-			long len = stream_push( prg, sp, input_to_impl( input ), tree, true );
+			long len = input_push( prg, sp, input_to_impl( input ), tree, true );
 			vm_push_tree( 0 );
 
 			/* Single unit. */
@@ -2858,7 +2885,7 @@ again:
 
 			input_t *input = vm_pop_input();
 			stream_t *to_push = vm_pop_stream();
-			long len = stream_push_stream( prg, sp, input_to_impl( input ), to_push );
+			long len = input_push_stream( prg, sp, input_to_impl( input ), to_push );
 			vm_push_tree( 0 );
 
 			/* Single unit. */
