@@ -2,10 +2,10 @@ SUBDIRS = . host-ruby host-asm host-julia host-ocaml host-c \
 	host-d host-csharp host-go host-java host-rust host-crack host-js
 
 COLM_BIN    = ../colm/colm
-COLM_PACK   = ../colm/colm-pack
+COLM_WRAP   = ../colm/colm-wrap
 COLM_LA     = ../colm/libcolm.la
 COLM_LIBDEP = $(COLM_LA)
-COLM_BINDEP = $(COLM_BIN) $(COLM_PACK)
+COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
 KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
@@ -129,13 +129,13 @@ RAGEL_LM = \
 	rlreduce.lm
 
 parse.pack: $(RAGEL_LM) $(COLM_BINDEP)
-	$(COLM_PACK) colm -p parse.pack -c -b rlparseC -o parse.c -m rlreduce.cc $<
+	$(COLM_WRAP) -c -b rlparseC -o $@ -p parse.c -m rlreduce.cc $<
 
 rlreduce.cc: parse.pack
-	$(COLM_PACK) unpack -o $@ $<
+	$(COLM_WRAP) -o $@ $<
 
 parse.c: parse.pack
-	$(COLM_PACK) unpack -o $@ $<
+	$(COLM_WRAP) -o $@ $<
 
 if WITH_RAGEL_KELBT
 

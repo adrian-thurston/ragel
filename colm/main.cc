@@ -90,6 +90,7 @@ bool run = false;
 bool addUniqueEmptyProductions = false;
 bool gblLibrary = false;
 long gblActiveRealm = 0;
+bool outputSpecifiedWithDashP = false;
 
 ArgsVector includePaths;
 ArgsVector libraryPaths;
@@ -187,8 +188,10 @@ void usage()
 "general:\n"
 "   -h, -H, -?, --help   print this usage and exit\n"
 "   -v --version         print version information and exit\n"
-"   -b <file>            write binary to <file>\n"
-"   -o <file>            write object to <file>\n"
+"   -b <ident>           use <ident> as name of C object encapulaing the program\n"
+"   -o <file>            if -c given, write C parse object to <file>,\n"
+"                        otherwise write binary to <file>\n"
+"   -p <file>            write C parse object to <file>\n"
 "   -e <file>            write C++ export header to <file>\n"
 "   -x <file>            write C++ export code to <file>\n"
 "   -m <file>            write C++ commit code to <file>\n"
@@ -554,7 +557,7 @@ bool inSourceTree( const char *argv0, char *&location )
 
 void processArgs( int argc, const char **argv )
 {
-	ParamCheck pc( "cD:e:x:I:L:vdliro:S:M:vHh?-:sVa:m:b:E:", argc, argv );
+	ParamCheck pc( "p:cD:e:x:I:L:vdliro:S:M:vHh?-:sVa:m:b:E:", argc, argv );
 
 	while ( pc.check() ) {
 		switch ( pc.state ) {
@@ -582,6 +585,9 @@ void processArgs( int argc, const char **argv )
 			case 'r':
 				run = true;
 				break;
+			case 'p':
+				outputSpecifiedWithDashP = true;
+				/* fallthrough */
 			case 'o':
 				/* Output. */
 				if ( *pc.parameterArg == 0 )
@@ -726,7 +732,7 @@ int main(int argc, const char **argv)
 
 	if ( verbose )
 		gblActiveRealm = 0xffffffff;
-
+	
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )
 		exit(1);
@@ -750,6 +756,11 @@ int main(int argc, const char **argv)
 			error() << "could not open " << inputFn << " for reading" << endl;
 	}
 #endif
+
+	if ( !gblLibrary && outputSpecifiedWithDashP ) {
+		error() << "-p option must be used with -c" << endl;
+	}
+
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )

@@ -25,7 +25,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/aapl
 AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = colm
-bin_SCRIPTS = colm-pack
+bin_SCRIPTS = colm-wrap
 
 RUNTIME_SRC = \
 	map.c pdarun.c list.c input.c stream.c debug.c \
@@ -106,19 +106,19 @@ bootstrap0_LDADD = libprog.a libcolm.la
 # the colm syntax/semantics that is implemented in colm itself.
 #
 
-gen/bootstrap1.pack: colm-pack bootstrap0$(EXEEXT)
+gen/bootstrap1.pack: colm-wrap bootstrap0$(EXEEXT)
 	mkdir -p gen
-	$(builddir)/colm-pack bootstrap0 -p $@ \
-		-c -o gen/parse1.c -e gen/if1.h -x gen/if1.cc
+	$(builddir)/colm-wrap -w bootstrap0 -o $@ \
+		-c -p gen/parse1.c -e gen/if1.h -x gen/if1.cc no-input
 
 gen/parse1.c: gen/bootstrap1.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 gen/if1.h: gen/bootstrap1.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 gen/if1.cc: gen/bootstrap1.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 # Listing if1.h in BUILT_SOURCES isn't sufficient because it depends on the
 # building of bootstrap0. Automake wants to put all built sources into a list
@@ -141,19 +141,19 @@ bootstrap1_LDADD = libprog.a libcolm.la
 # and thus generates the sources used in the colm binary.
 #
 
-gen/bootstrap2.pack: colm-pack bootstrap1$(EXEEXT) colm.lm
+gen/bootstrap2.pack: colm-wrap bootstrap1$(EXEEXT) colm.lm
 	mkdir -p gen
-	$(builddir)/colm-pack bootstrap1 -p $@ \
-		-c -o gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
+	$(builddir)/colm-wrap -w bootstrap1 -o $@ \
+		-c -p gen/parse2.c -e gen/if2.h -x gen/if2.cc colm.lm
 
 gen/parse2.c: gen/bootstrap2.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 gen/if2.h: gen/bootstrap2.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 gen/if2.cc: gen/bootstrap2.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 BUILT_SOURCES += gen/parse2.c gen/if2.h gen/if2.cc
 loadboot2.cc: gen/if2.h
@@ -166,19 +166,19 @@ bootstrap2_LDADD = libprog.a libcolm.la
 
 endif
 
-gen/bootstrap3.pack: colm-pack $(BUILD_PARSE_3_WITH) prog.lm colm.lm 
+gen/bootstrap3.pack: colm-wrap $(BUILD_PARSE_3_WITH) prog.lm colm.lm 
 	mkdir -p gen
-	$(builddir)/colm-pack $(BUILD_PARSE_3_WITH) -p $@ \
-		-c -o gen/parse3.c -e gen/if3.h -x gen/if3.cc prog.lm
+	$(builddir)/colm-wrap -w $(BUILD_PARSE_3_WITH) -o $@ \
+		-c -p gen/parse3.c -e gen/if3.h -x gen/if3.cc prog.lm
 
 gen/parse3.c: gen/bootstrap3.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 gen/if3.h: gen/bootstrap3.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 gen/if3.cc: gen/bootstrap3.pack
-	$(builddir)/colm-pack unpack -o $@ $<
+	$(builddir)/colm-wrap -o $@ $<
 
 BUILT_SOURCES += gen/parse3.c gen/if3.h gen/if3.cc
 loadcolm.cc: gen/if3.h
@@ -200,8 +200,8 @@ version.h: Makefile
 config.h: ../src/config.h
 	cp ../src/config.h ./
 
-CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = prog.lm colm.lm loadfinal.cc colm-pack.sh
+CLEANFILES = $(BUILT_SOURCES) gen/bootstrap1.pack gen/bootstrap2.pack gen/bootstrap3.pack
+EXTRA_DIST = prog.lm colm.lm loadfinal.cc colm-wrap.sh
 
-colm-pack: colm-pack.sh
+colm-wrap: colm-wrap.sh
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)

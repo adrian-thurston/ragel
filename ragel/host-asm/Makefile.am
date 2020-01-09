@@ -1,8 +1,8 @@
 COLM_BIN    = ../../colm/colm
-COLM_PACK   = ../../colm/colm-pack
+COLM_WRAP   = ../../colm/colm-wrap
 COLM_LA     = ../../colm/libcolm.la
 COLM_LIBDEP = $(COLM_LA)
-COLM_BINDEP = $(COLM_BIN) $(COLM_PACK)
+COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
 
 bin_PROGRAMS = ragel-asm
 
@@ -20,11 +20,11 @@ BUILT_SOURCES = rlparse.c rlreduce.cc
 EXTRA_DIST = rlparse.lm
 
 rlparse.pack: rlparse.lm $(COLM_BINDEP)
-	$(COLM_PACK) colm -p rlparse.pack \
-		-I.. -c -b rlparseAsm -o rlparse.c -m rlreduce.cc $<
-
-rlreduce.cc: rlparse.pack
-	$(COLM_PACK) unpack -o $@ $<
+	$(COLM_WRAP) -c -I .. -b rlparseAsm -o $@ -p rlparse.c -m rlreduce.cc $<
 
 rlparse.c: rlparse.pack
-	$(COLM_PACK) unpack -o $@ $<
+	$(COLM_WRAP) -o $@ $<
+
+rlreduce.cc: rlparse.pack
+	$(COLM_WRAP) -o $@ $<
+
