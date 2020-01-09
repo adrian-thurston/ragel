@@ -69,7 +69,7 @@ namespace host
 			# Translates single line to multi-line
 			input->pull( 2 )
 			R: str = input->pull( match_length - 3 )
-			input->push( "\n}%%" )
+			input->push( "}%%" )
 			input->push( R )
 			input->push( "%%{" )
 		}
