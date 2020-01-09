@@ -88,6 +88,41 @@ struct LoadColm
 
 	const char *inputFileName;
 
+	struct Alignment
+	{
+		Alignment()
+		:
+			firstLine(0),
+			lastLine(0),
+			firstColumn(0)
+		{}
+
+		int firstLine;
+		int lastLine;
+		int firstColumn;
+
+		void check( const char *type, colm_location *loc )
+		{
+			if ( firstLine == 0 ) {
+				firstLine = lastLine = loc->line;
+				firstColumn = loc->column;
+			}
+			else {
+				/* Checking if we are outdented. Indents and are ok. So is
+				 * outdenting back to the first. */
+				if ( loc->column < firstColumn ) {
+					warning( loc ) << type << " literal outdented beyond first at " <<
+							firstLine << ":" << firstColumn <<
+							", possible unintended concatenation" << std::endl;
+				}
+
+				lastLine = loc->line;
+			}
+		}
+	};
+	
+
+
 	Literal *walkLexRangeLit( lex_range_lit lexRangeLit )
 	{
 		Literal *literal = 0;
@@ -550,8 +585,8 @@ struct LoadColm
 			String nl = unescape( Nl.data() );
 			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
 					Nl.loc(), nl );
-			PatternItemList *term = PatternItemList::cons( patternItem );
-			list = patListConcat( list, term );
+			PatternItemList *tail = PatternItemList::cons( patternItem );
+			list = patListConcat( list, tail );
 		}
 
 		return list;
@@ -577,8 +612,8 @@ struct LoadColm
 			String nl = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons(
 					Nl.loc(), ConsItem::InputText, nl );
-			ConsItemList *term = ConsItemList::cons( consItem );
-			list = consListConcat( list, term );
+			ConsItemList *tail = ConsItemList::cons( consItem );
+			list = consListConcat( list, tail );
 		}
 
 		return list;
@@ -601,8 +636,8 @@ struct LoadColm
 			String nl = unescape( Nl.data() );
 			PatternItem *patternItem = PatternItem::cons( PatternItem::InputTextForm,
 					Nl.loc(), nl );
-			PatternItemList *term = PatternItemList::cons( patternItem );
-			list = patListConcat( list, term );
+			PatternItemList *tail = PatternItemList::cons( patternItem );
+			list = patListConcat( list, tail );
 		}
 
 		return list;
@@ -651,15 +686,18 @@ struct LoadColm
 
 	PatternItemList *walkPatternList( pattern_list patternList, LangVarRef *patternVarRef )
 	{
-		PatternItemList *ret = new PatternItemList;
+		Alignment alignment;
+		PatternItemList *list = new PatternItemList;
 		RepeatIter<pattern_top_el> patternTopElIter ( patternList );
 		while ( !patternTopElIter.end() ) {
-			PatternItemList *list = walkPattternTopEl( patternTopElIter.value(), patternVarRef );
-			ret->append( *list );
-			delete list;
+			pattern_top_el topEl = patternTopElIter.value();
+			alignment.check( "pattern", topEl.loc() );
+
+			PatternItemList *tail = walkPattternTopEl( topEl, patternVarRef );
+			list = patListConcat( list, tail );
 			patternTopElIter.next();
 		}
-		return ret;
+		return list;
 	}
 
 	PatternItemList *walkPattern( pattern Pattern, LangVarRef *patternVarRef )
@@ -1470,18 +1508,17 @@ struct LoadColm
 		ConsItemList *list = new ConsItemList;
 
 		RepeatIter<lit_cons_el> litConsElIter( litConsElList );
-
 		while ( !litConsElIter.end() ) {
-			ConsItemList *extension = walkLitConsEl( litConsElIter.value(), consTypeRef );
-			list = consListConcat( list, extension );
+			ConsItemList *tail = walkLitConsEl( litConsElIter.value(), consTypeRef );
+			list = consListConcat( list, tail );
 			litConsElIter.next();
 		}
 
 		if ( Nl != 0 ) {
 			String consData = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
-			ConsItemList *term = ConsItemList::cons( consItem );
-			list = consListConcat( list, term );
+			ConsItemList *tail = ConsItemList::cons( consItem );
+			list = consListConcat( list, tail );
 		}
 
 		return list;
@@ -1533,8 +1570,8 @@ struct LoadColm
 		RepeatIter<cons_el> consElIter( consElList );
 
 		while ( !consElIter.end() ) {
-			ConsItemList *extension = walkConsEl( consElIter.value(), consTypeRef );
-			list = consListConcat( list, extension );
+			ConsItemList *tail = walkConsEl( consElIter.value(), consTypeRef );
+			list = consListConcat( list, tail );
 			consElIter.next();
 		}
 		return list;
@@ -1567,15 +1604,18 @@ struct LoadColm
 
 	ConsItemList *walkConsList( cons_list consList, TypeRef *consTypeRef )
 	{
-		ConsItemList *ret = new ConsItemList;
+		Alignment alignment;
+		ConsItemList *list = new ConsItemList;
 		RepeatIter<cons_top_el> consTopElIter ( consList );
 		while ( !consTopElIter.end() ) {
-			ConsItemList *list = walkConsTopEl( consTopElIter.value(), consTypeRef );
-			ret->append( *list );
-			delete list;
+			cons_top_el topEl = consTopElIter.value();
+			alignment.check( "constructor", topEl.loc() );
+
+			ConsItemList *tail = walkConsTopEl( topEl, consTypeRef );
+			list = consListConcat( list, tail );
 			consTopElIter.next();
 		}
-		return ret;
+		return list;
 	}
 
 	ConsItemList *walkConstructor( constructor Constructor, TypeRef *consTypeRef )
@@ -1615,8 +1655,8 @@ struct LoadColm
 		RepeatIter<lit_string_el> litStringElIter( litStringElList );
 
 		while ( !litStringElIter.end() ) {
-			ConsItemList *extension = walkLitStringEl( litStringElIter.value() );
-			list = consListConcat( list, extension );
+			ConsItemList *tail = walkLitStringEl( litStringElIter.value() );
+			list = consListConcat( list, tail );
 			litStringElIter.next();
 		}
 
@@ -1624,8 +1664,8 @@ struct LoadColm
 			String consData = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons( Nl.loc(),
 					ConsItem::InputText, consData );
-			ConsItemList *term = ConsItemList::cons( consItem );
-			list = consListConcat( list, term );
+			ConsItemList *tail = ConsItemList::cons( consItem );
+			list = consListConcat( list, tail );
 		}
 		return list;
 	}
@@ -1671,8 +1711,8 @@ struct LoadColm
 		RepeatIter<string_el> stringElIter( stringElList );
 
 		while ( !stringElIter.end() ) {
-			ConsItemList *extension = walkStringEl( stringElIter.value() );
-			list = consListConcat( list, extension );
+			ConsItemList *tail = walkStringEl( stringElIter.value() );
+			list = consListConcat( list, tail );
 			stringElIter.next();
 		}
 		return list;
@@ -1705,15 +1745,18 @@ struct LoadColm
 
 	ConsItemList *walkStringList( string_list stringList )
 	{
-		ConsItemList *ret = new ConsItemList;
+		Alignment alignment;
+		ConsItemList *list = new ConsItemList;
 		RepeatIter<string_top_el> stringTopElIter( stringList );
 		while ( !stringTopElIter.end() ) {
-			ConsItemList *list = walkStringTopEl( stringTopElIter.value() );
-			ret->append( *list );
-			delete list;
+			string_top_el topEl = stringTopElIter.value();
+			alignment.check( "string", topEl.loc() );
+
+			ConsItemList *tail = walkStringTopEl( topEl );
+			list = consListConcat( list, tail );
 			stringTopElIter.next();
 		}
-		return ret;
+		return list;
 	}
 
 	ConsItemList *walkString( string String )
@@ -1753,16 +1796,16 @@ struct LoadColm
 		RepeatIter<lit_accum_el> litAccumElIter( litAccumElList );
 
 		while ( !litAccumElIter.end() ) {
-			ConsItemList *extension = walkLitAccumEl( litAccumElIter.value() );
-			list = consListConcat( list, extension );
+			ConsItemList *tail = walkLitAccumEl( litAccumElIter.value() );
+			list = consListConcat( list, tail );
 			litAccumElIter.next();
 		}
 
 		if ( Nl != 0 ) {
 			String consData = unescape( Nl.data() );
 			ConsItem *consItem = ConsItem::cons( Nl.loc(), ConsItem::InputText, consData );
-			ConsItemList *term = ConsItemList::cons( consItem );
-			list = consListConcat( list, term );
+			ConsItemList *tail = ConsItemList::cons( consItem );
+			list = consListConcat( list, tail );
 		}
 
 		return list;
@@ -1809,8 +1852,8 @@ struct LoadColm
 		RepeatIter<accum_el> accumElIter( accumElList );
 
 		while ( !accumElIter.end() ) {
-			ConsItemList *extension = walkAccumEl( accumElIter.value() );
-			list = consListConcat( list, extension );
+			ConsItemList *tail = walkAccumEl( accumElIter.value() );
+			list = consListConcat( list, tail );
 			accumElIter.next();
 		}
 		return list;
@@ -1845,13 +1888,15 @@ struct LoadColm
 		return list;
 	}
 
-	ConsItemList *walkAccumList( accum_list accumList )
+	ConsItemList *walkAccumList( Alignment &alignment, accum_list accumList )
 	{
-		ConsItemList *list = walkAccumTopEl( accumList.accum_top_el() );
+		accum_top_el topEl = accumList.accum_top_el();
+		alignment.check( "accumulator", topEl.loc() );
 
+		ConsItemList *list = walkAccumTopEl( topEl  );
 		if ( accumList.prodName() == accum_list::List ) {
-			ConsItemList *extension = walkAccumList( accumList._accum_list() );
-			consListConcat( list, extension );
+			ConsItemList *tail = walkAccumList( alignment, accumList._accum_list() );
+			list = consListConcat( list, tail );
 		}
 
 		return list;
@@ -1859,7 +1904,8 @@ struct LoadColm
 
 	ConsItemList *walkAccumulate( accumulate Accumulate )
 	{
-		ConsItemList *list = walkAccumList( Accumulate.accum_list() );
+		Alignment alignment;
+		ConsItemList *list = walkAccumList( alignment, Accumulate.accum_list() );
 		return list;
 	}
 

@@ -829,6 +829,9 @@ ProdElList *BaseParser::appendProdEl( ProdElList *prodElList, ProdEl *prodEl )
 PatternItemList *BaseParser::patListConcat( PatternItemList *list1,
 		PatternItemList *list2 )
 {
+	if ( list1 == 0 )
+		list1 = new PatternItemList();
+		
 	list1->append( *list2 );
 	delete list2;
 	return list1;
@@ -837,6 +840,9 @@ PatternItemList *BaseParser::patListConcat( PatternItemList *list1,
 ConsItemList *BaseParser::consListConcat( ConsItemList *list1,
 		ConsItemList *list2 )
 {
+	if ( list1 == 0 )
+		list1 = new ConsItemList();
+
 	list1->append( *list2 );
 	delete list2;
 	return list1;
