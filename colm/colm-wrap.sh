@@ -56,7 +56,8 @@ fi
 
 # Default command to colm.
 if [ "${INPUT%.pack}" != "$INPUT" ]; then
-	tar -xmf "$INPUT" "$OUTPUT"
+	tar -xmf "$INPUT" "$OUTPUT.pack"
+	mv $OUTPUT.pack $OUTPUT
 	EXIT_STATUS=$?
 else
 	CMD=${CMD:=colm}
@@ -69,7 +70,7 @@ else
 	$COLM $ARGS "$INPUT"
 	EXIT_STATUS=$?
 	if [ $EXIT_STATUS = 0 ]; then
-		tar --transform 's/.pack$//' -cf "$OUTPUT" $PACKS
+		tar -cf "$OUTPUT" $PACKS
 	fi
 	rm -f $PACKS
 fi
