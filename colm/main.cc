@@ -485,7 +485,7 @@ void compileOutput( const char *argv0, const bool inSource, char *srcLocation )
 				" -I%s/../aapl"
 				" -I%s/include"
 				" -L%s"
-				" -Wl,-rpath=%s",
+				" -Wl,-rpath,%s",
 				binaryFn, intermedFn, srcLocation,
 				srcLocation, location, location );
 	}
