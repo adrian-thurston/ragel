@@ -22,6 +22,16 @@ set(${PROJECT_NAME}_MAKE_INSTALL ON CACHE BOOL
 set(${PROJECT_NAME}_BUILD_EXAMPLES OFF CACHE BOOL
 	"Set to ON to build examples (default is OFF)")
 
+# Determine stdlib link flags
+if (WIN32)
+	set(DEFAULT_BUILD_STANDALONE ON)
+else()
+	set(DEFAULT_BUILD_STANDALONE OFF)
+endif()
+
+set(BUILD_STANDALONE ${DEFAULT_BUILD_STANDALONE}
+	CACHE BOOL "Set to ON to make the executables as standalone as possible.")
+
 # Check type size
 include(CheckTypeSize)
 check_type_size("int" SIZEOF_INT)

@@ -27,7 +27,6 @@ set(RUNTIME_HDR
 include(GNUInstallDirs)
 
 # libfsm
-
 add_library(libfsm
 	buffer.h codegen.h
 	actloop.h actexp.h
@@ -59,13 +58,25 @@ set_target_properties(libfsm PROPERTIES
 	OUTPUT_NAME fsm)
 
 # libragel
-
 add_library(libragel
 	# dist
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h
 	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc)
 
-target_link_libraries(libragel colm::libcolm)
+if(BUILD_STANDALONE)
+	# libragel acts as an intermediate library so we can apply
+	# flags we want to apply to all ragel targets to libragel
+	# and they'll automatically propogate. This is a best effort
+	# to get `-static` placed sooner in the link line where it
+	# matters at least.
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_link_libraries(libragel PUBLIC -static)
+	else()
+		message(FATAL_ERROR "Unsupported toolset for standalone build.")
+	endif()
+endif()
+
+target_link_libraries(libragel PRIVATE colm::libcolm)
 
 target_include_directories(libragel
 	PUBLIC
