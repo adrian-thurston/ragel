@@ -143,6 +143,14 @@ add_executable(colm
 	"${CMAKE_CURRENT_BINARY_DIR}/gen/parse3.c"
 	"${CMAKE_CURRENT_BINARY_DIR}/gen/if3.cc")
 
+if(BUILD_STANDALONE)
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+		target_link_libraries(colm -static)
+	else()
+		message(FATAL_ERROR "Unsupported toolset for standalone build.")
+	endif()
+endif()
+
 target_link_libraries(colm libprog libcolm)
 
 set_property(TARGET colm APPEND PROPERTY
