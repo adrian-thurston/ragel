@@ -1,6 +1,6 @@
 /*
  * @LANG: c
- * @PROHIBIT_FLAGS: -e
+ * @PROHIBIT_FLAGS: -e -G0 -G1 -G2
  *
  * Test works with split code gen.
  */

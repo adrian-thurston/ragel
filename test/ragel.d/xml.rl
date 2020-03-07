@@ -3,7 +3,7 @@
  * http://www.jelks.nu/XML/xmlebnf.html
  *
  * @LANG: c++
- * @PROHIBIT_FLAGS: -m -n -F0 -F1 -G0 -G1 -G2
+ * @PROHIBIT_FLAGS: -m -n -F0 -F1 -G0 -G1 -G2 -W0 -W1
  */
 
 #include <iostream>

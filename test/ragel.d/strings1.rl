@@ -1,5 +1,6 @@
 /*
  * @LANG: c
+ * @PROHIBIT_FLAGS: -G0 -G1 -G2
  */
 
 #include <string.h>

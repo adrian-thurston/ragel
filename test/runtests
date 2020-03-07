@@ -5,9 +5,14 @@
 timed()
 {
 	# Default to all .d direcories.
-	DIRS=$(find -type d -name '*.d' | sort)
+	DIRS=$(find . -type d -name '*.d' | sort)
 
-	CORES=$(awk '/cpu cores/ { print $4; exit }'  /proc/cpuinfo)
+	if [ -f /proc/cpuinfo ]; then
+		CORES=$(awk '/cpu cores/ { print $4; exit }' /proc/cpuinfo)
+	else
+		CORES=$(sysctl -n hw.physicalcpu)
+	fi
+
 
 	if ! echo $CORES | grep -q '^[1-9][0-9]\?$'; then
 		echo "warning: could not determine number of cores, using 2"

@@ -115,7 +115,7 @@ function cat_section
 	local in=$3
 
 	# Print Nth instance of the section
-	awk -vsection=$section -vnth=$nth '
+	awk -v section=$section -v nth=$nth '
 		BEGIN {
 			if ( section == "LM" ) {
 				found = 1
@@ -309,7 +309,7 @@ function runtests()
 #	fi
 }
 
-rm -f $WORKING/*
+rm -Rf $WORKING/*
 runtests 
 
 #exit $EXIT;

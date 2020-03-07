@@ -46,7 +46,7 @@ char *inp[] = {
 	"hello\n",
 };
 
-int inplen = 9;
+int inplen = 1;
 
 int main( )
 {

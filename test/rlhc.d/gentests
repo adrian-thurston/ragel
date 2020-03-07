@@ -23,7 +23,7 @@ for fn; do
 
 	rm -f $sh
 
-	lang=`echo $fn | awk -vFS=- '{ print $2 }'`
+	lang=`echo $fn | awk -v FS=- '{ print $2 }'`
 
 	case $lang in
 		A) lang=csharp;;

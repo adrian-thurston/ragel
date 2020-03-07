@@ -425,7 +425,7 @@ function run_translate()
 	expected_out=$wk/$root.exp;
 	case_rl=${root}.rl
 
-	sed '1,/^#\+ * OUTPUT #\+/{ d };' $test_case > $expected_out
+	sed '1,/^##* * OUTPUT ##*/d' $test_case > $expected_out
 
 	prohibit_languages=`sed '/@PROHIBIT_LANGUAGES:/s/^.*: *//p;d' $test_case`
 
@@ -472,7 +472,7 @@ function run_translate()
 		done
 	else
 
-		sed '/^#\+ * OUTPUT #\+/,$d' $test_case > $wk/$case_rl
+		sed '/^##* * OUTPUT ##*/,$d' $test_case > $wk/$case_rl
 
 		cases=$wk/$case_rl
 
