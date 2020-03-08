@@ -18,11 +18,11 @@
 #   along with Ragel; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
-COLM_BIN = ../../colm/colm
+COLM_BIN = @COLM@
 RAGEL_LM = ../../ragel
 
-COLM_xCPPFLAGS = -I../../colm/include
-COLM_xLDFLAGS = -L../../colm
+COLM_xCPPFLAGS = # -I../../colm/include
+COLM_xLDFLAGS = # -L../../colm
 
 TESTS = gentests
 

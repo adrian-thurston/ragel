@@ -116,6 +116,8 @@ SED_SUBST=["\
 	-e 's|@CC@|${CC}|g' \
 "]
 
+SED_SUBST="$SED_SUBST -e 's|@COLM_SHARE@|${COLM_SHARE}|g'"
+
 dnl Set test on c++ compiler.
 AC_LANG_CPLUSPLUS
 
@@ -460,7 +462,6 @@ AC_SUBST(SED_SUBST)
 AC_CONFIG_HEADERS([src/config.h])
 AC_OUTPUT([
 	Makefile
-	aapl/Makefile
 	ragel/Makefile
 	ragel/host-ruby/Makefile
 	ragel/host-asm/Makefile

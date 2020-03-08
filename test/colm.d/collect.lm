@@ -1,5 +1,0 @@
-Stream: stream = new stream()
-send Stream "hello"
-print [Stream->tree "\n"]
-##### EXP #####
-hello

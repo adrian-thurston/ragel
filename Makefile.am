@@ -20,7 +20,7 @@
 # SOFTWARE.
 
 SUBDIRS = ragel doc # test
-DIST_SUBDIRS = $(SUBDIRS) aapl
+DIST_SUBDIRS = $(SUBDIRS)
 
 dist_doc_DATA = colm.vim
 EXTRA_DIST = colm.vim sedsubst

@@ -1,4 +1,0 @@
-Str: str = '77'
-print( Str, '\n' )
-##### EXP #####
-77
