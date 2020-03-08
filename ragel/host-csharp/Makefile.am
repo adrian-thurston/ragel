@@ -1,6 +1,6 @@
-COLM_BIN    = ../../colm/colm
-COLM_WRAP   = ../../colm/colm-wrap
-COLM_LA     = ../../colm/libcolm.la
+COLM_BIN    = @COLM@
+COLM_WRAP   = @COLM@-wrap
+COLM_LA     = @LIBCOLM@
 COLM_LIBDEP = $(COLM_LA)
 COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
 
@@ -13,7 +13,7 @@ dist_ragel_csharp_SOURCES = main.cc rlhc.c
 nodist_ragel_csharp_SOURCES = \
 	rlparse.c rlreduce.cc
 
-ragel_csharp_LDADD = ../libragel.la ../libfsm.la $(COLM_LA)
+ragel_csharp_LDADD = ../libragel.la @LIBCOLM@ $(COLM_LA)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
@@ -28,5 +28,5 @@ rlparse.c: rlparse.pack
 rlreduce.cc: rlparse.pack
 	$(COLM_WRAP) -o $@ $<
 
-rlhc.c: rlhc.lm ../ril.lm $(COLM_BINDEP)
-	$(COLM_BIN) -c -I .. -b rlhcCSharp -o $@ $<
+rlhc.c: $(COLM_SHARE)/rlhc-csharp.lm $(COLM_SHARE)/ril.lm $(COLM_BINDEP)
+	$(COLM_BIN) -c -I $(COLM_SHARE) -b rlhcCSharp -o $@ $<

@@ -1,6 +1,6 @@
-COLM_BIN    = ../../colm/colm
-COLM_WRAP   = ../../colm/colm-wrap
-COLM_LA     = ../../colm/libcolm.la
+COLM_BIN    = @COLM@
+COLM_WRAP   = @COLM@-wrap
+COLM_LA     = @LIBCOLM@
 COLM_LIBDEP = $(COLM_LA)
 COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
 
@@ -13,7 +13,7 @@ dist_ragel_asm_SOURCES = main.cc
 nodist_ragel_asm_SOURCES = \
 	rlparse.c rlreduce.cc
 
-ragel_asm_LDADD = ../libragel.la ../libfsm.la $(COLM_LA)
+ragel_asm_LDADD = ../libragel.la @LIBFSM@ $(COLM_LA)
 
 BUILT_SOURCES = rlparse.c rlreduce.cc
 

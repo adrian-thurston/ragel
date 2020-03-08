@@ -20,7 +20,7 @@ dnl LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM
 dnl OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 dnl SOFTWARE.
   
-AC_INIT(colm-suite, 1)
+AC_INIT(ragel, 7.0)
 
 RAGEL_VERSION="7.0"
 RAGEL_PUBDATE="January 2020"
@@ -56,6 +56,48 @@ AC_ARG_WITH(deps,
 	[DEPS="$withval"],
 	[DEPS="/opt/colm"]
 )
+
+EXPECTED_COLM_VER=0.14
+
+AC_ARG_WITH(colm,
+	[AC_HELP_STRING([--with-colm], [location of colm install])],
+	[
+		CPPFLAGS="-I$withval/include ${CPPFLAGS}"
+		CPPFLAGS="-I$withval/include/aapl ${CPPFLAGS}"
+		LDFLAGS="-L$withval/lib ${LDFLAGS}"
+		COLM="$withval/bin/colm"
+		COLM_WRAP="$withval/bin/colm-wrap"
+		COLM_SHARE="$withval/share"
+		LIBCOLM="$withval/lib/libcolm.a"
+		LIBFSM="$withval/lib/libfsm.a"
+	],
+	[
+		CPPFLAGS="${CPPFLAGS} -I$DEPS/include"
+		CPPFLAGS="${CPPFLAGS} -I$DEPS/include/aapl"
+		LDFLAGS="${LDFLAGS} -L$DEPS/lib"
+		COLM="$DEPS/bin/colm"
+		COLM_WRAP="$DEPS/bin/colm-wrap"
+		COLM_SHARE="$withval/share"
+		LIBCOLM="$DEPS/lib/libcolm.a"
+		LIBFSM="$DEPS/lib/libfsm.a"
+	]
+)
+
+AC_CHECK_FILES(
+	[$COLM],
+	[],
+	[AC_ERROR([colm is required to build ragel])]
+)
+AC_SUBST(COLM)
+AC_SUBST(COLM_WRAP)
+AC_SUBST(COLM_SHARE)
+AC_SUBST(LIBCOLM)
+AC_SUBST(LIBFSM)
+
+INSTALLED_COLM_VER=`$COLM -v | sed -n -e '1 {' -e 's/^.*version //' -e 's/ .*$//' -e p -e '}'`
+if test "x$INSTALLED_COLM_VER" != "x$EXPECTED_COLM_VER"; then
+	AC_ERROR( [check colm: expected version $EXPECTED_COLM_VER, but $INSTALLED_COLM_VER is installed] )
+fi
 
 dnl Set to true if build system should generate parsers from ragel, kelbt, and
 dnl gperf sources. Set to false if generated files are included and not to be
@@ -415,11 +457,10 @@ dnl Wrap up.
 dnl
 
 AC_SUBST(SED_SUBST)
-AC_CONFIG_HEADERS([src/config.h colm/defs.h])
+AC_CONFIG_HEADERS([src/config.h])
 AC_OUTPUT([
 	Makefile
 	aapl/Makefile
-	colm/Makefile
 	ragel/Makefile
 	ragel/host-ruby/Makefile
 	ragel/host-asm/Makefile

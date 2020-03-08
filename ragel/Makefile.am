@@ -1,21 +1,18 @@
 SUBDIRS = . host-ruby host-asm host-julia host-ocaml host-c \
 	host-d host-csharp host-go host-java host-rust host-crack host-js
 
-COLM_BIN    = ../colm/colm
-COLM_WRAP   = ../colm/colm-wrap
-COLM_LA     = ../colm/libcolm.la
+COLM_BIN    = @COLM@
+COLM_WRAP   = @COLM_WRAP@
+COLM_LA     = @LIBCOLM@
+LIBFSM      = @LIBFSM@
 COLM_LIBDEP = $(COLM_LA)
 COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
 KELBT       = @KELBT@
 RAGEL       = @RAGEL@
 
-# libfsm contains only the FSM construction code and the backend code
-# generators. It is useful for building code generators in programs not
-# connected to the ragel language.
-#
 # libragel contains the parse tree and other parsing support code. Everything
 # except the reducers, which are specific to the frontends.
-lib_LTLIBRARIES = libfsm.la libragel.la
+lib_LTLIBRARIES = libragel.la
 
 bin_PROGRAMS = ragel
 
@@ -28,36 +25,6 @@ pkginclude_HEADERS = \
 data_DATA = ragel.lm
 
 #
-# libfsm: state machine construction and direct code generation.
-#
-libfsm_la_CPPFLAGS = -I$(top_srcdir)/aapl
-
-dist_libfsm_la_SOURCES = \
-	buffer.h codegen.h \
-	actloop.h actexp.h \
-	tables.h \
-	binary.h bingoto.h binbreak.h binvar.h \
-	flat.h flatgoto.h flatbreak.h flatvar.h \
-	switch.h switchgoto.h switchbreak.h switchvar.h \
-	goto.h gotoloop.h gotoexp.h \
-	ipgoto.h asm.h \
-	idbase.cc fsmstate.cc fsmbase.cc fsmattach.cc fsmmin.cc fsmgraph.cc \
-	fsmap.cc fsmcond.cc fsmnfa.cc common.cc redfsm.cc gendata.cc \
-	allocgen.cc codegen.cc \
-	actexp.cc binvar.cc \
-	tables.cc tabgoto.cc tabbreak.cc tabvar.cc \
-	binary.cc bingoto.cc binbreak.cc actloop.cc \
-	flat.cc flatgoto.cc flatbreak.cc flatvar.cc \
-	switch.cc switchgoto.cc switchbreak.cc switchvar.cc \
-	goto.cc gotoloop.cc gotoexp.cc ipgoto.cc \
-	dot.cc asm.cc
-
-nodist_libfsm_la_SOURCES = \
-	version.h
-
-libfsm_la_LDFLAGS = -no-undefined
-
-#
 # libragel: ragel program minus host-specific code
 #
 libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/colm/include -DBINDIR='"@bindir@"'
@@ -67,10 +34,9 @@ dist_libragel_la_SOURCES = \
 	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc
 
 libragel_la_LDFLAGS = -no-undefined
-libragel_la_LIBADD = libfsm.la $(COLM_LA)
+libragel_la_LIBADD = $(LIBFSM) $(COLM_LA)
 
 if LINKER_NO_UNDEFINED
-libfsm_la_LDFLAGS += -Wl,--no-undefined
 libragel_la_LDFLAGS += -Wl,--no-undefined
 endif
 
@@ -85,8 +51,8 @@ dist_ragel_SOURCES = \
 nodist_ragel_SOURCES = \
 	parse.c rlreduce.cc
 
-ragel_LDADD = libragel.la libfsm.la $(COLM_LA)
-ragel_DEPENDENCIES = libragel.la libfsm.la $(COLM_LIBDEP)
+ragel_LDADD = libragel.la $(LIBFSM) $(COLM_LA)
+ragel_DEPENDENCIES = libragel.la $(LIBFSM) $(COLM_LIBDEP)
 
 BUILT_SOURCES = \
 	version.h \
