@@ -19,9 +19,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-SUBDIRS = ragel doc # test
+SUBDIRS = src doc # test
 DIST_SUBDIRS = $(SUBDIRS)
 
-dist_doc_DATA = colm.vim
-EXTRA_DIST = colm.vim sedsubst
+dist_doc_DATA = ragel.vim
+EXTRA_DIST = ragel.vim sedsubst
 ACLOCAL_AMFLAGS = -I m4
