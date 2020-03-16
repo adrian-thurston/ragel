@@ -20,8 +20,8 @@
  * SOFTWARE.
  */
 
-#include "ragel.h"
-#include "common.h"
+#include <libfsm/ragel.h>
+#include <libfsm/common.h>
 #include "inputdata.h"
 #include "parsedata.h"
 #include "load.h"

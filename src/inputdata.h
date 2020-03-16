@@ -23,7 +23,7 @@
 #ifndef _INPUT_DATA
 #define _INPUT_DATA
 
-#include "gendata.h"
+#include <libfsm/gendata.h>
 #include <iostream>
 #include <sstream>
 #include <vector>

@@ -29,7 +29,7 @@
 #include <inputdata.h>
 
 /* Parsing. */
-#include "ragel.h"
+#include <libfsm/ragel.h>
 #include "parsetree.h"
 #include "parsedata.h"
 

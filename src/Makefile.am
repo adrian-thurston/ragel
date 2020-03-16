@@ -16,10 +16,6 @@ lib_LTLIBRARIES = libragel.la
 
 bin_PROGRAMS = ragel
 
-pkginclude_HEADERS = \
-	action.h fsmgraph.h ragel.h common.h \
-	gendata.h redfsm.h dot.h
-
 # nodist_pkginclude_HEADERS = config.h
 
 data_DATA = ragel.lm

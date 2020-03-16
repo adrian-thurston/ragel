@@ -26,10 +26,10 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <inputdata.h>
+#include "inputdata.h"
 
 /* Parsing. */
-#include "ragel.h"
+#include <libfsm/ragel.h>
 #include "parsetree.h"
 #include "parsedata.h"
 

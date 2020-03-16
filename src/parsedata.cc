@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "ragel.h"
+#include <libfsm/ragel.h>
 #include "parsedata.h"
 #include "parsetree.h"
 #include "mergesort.h"

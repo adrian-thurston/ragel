@@ -23,12 +23,12 @@
 #ifndef _PARSETREE_H
 #define _PARSETREE_H
 
-#include "ragel.h"
+#include <libfsm/ragel.h>
+#include <libfsm/fsmgraph.h>
 #include "avlmap.h"
 #include "bstmap.h"
 #include "vector.h"
 #include "dlist.h"
-#include "fsmgraph.h"
 
 struct NameInst;
 

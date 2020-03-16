@@ -23,7 +23,7 @@
 #ifndef _LOAD_H
 #define _LOAD_H
 
-#include "ragel.h"
+#include <libfsm/ragel.h>
 
 struct LoadRagel;
 struct InputData;
