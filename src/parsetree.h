@@ -151,7 +151,6 @@ struct InlineItem;
 struct InlineList;
 
 /* Reference to a named state. */
-struct NameRef : public Vector<std::string> {};
 typedef Vector<NameRef*> NameRefList;
 typedef Vector<NameInst*> NameTargList;
 
@@ -284,29 +283,20 @@ struct VarDef
  * and consume the current character.
  */
 struct LongestMatchPart
+:
+	public FsmLongestMatchPart
 {
 	LongestMatchPart( Join *join, Action *action, 
 			const InputLoc &semiLoc, int longestMatchId )
 	: 
-		join(join), action(action), semiLoc(semiLoc), 
-		longestMatchId(longestMatchId), inLmSelect(false) { }
+		FsmLongestMatchPart( action, longestMatchId ),
+		join(join), semiLoc(semiLoc)
+	{ }
 
 	InputLoc getLoc();
 	
 	Join *join;
-	Action *action;
 	InputLoc semiLoc;
-
-	Action *setActId;
-	Action *actOnLast;
-	Action *actOnNext;
-	Action *actLagBehind;
-	Action *actNfaOnLast;
-	Action *actNfaOnNext;
-	Action *actNfaOnEof;
-	int longestMatchId;
-	bool inLmSelect;
-	LongestMatch *longestMatch;
 
 	LongestMatchPart *prev, *next;
 };
@@ -315,21 +305,25 @@ struct LongestMatchPart
 struct LmPartList : DList<LongestMatchPart> {};
 
 struct LongestMatch
+:
+	public FsmLongestMatch
 {
 	/* Construct with a list of joins */
 	LongestMatch( const InputLoc &loc, LmPartList *longestMatchList )
 	: 
+		FsmLongestMatch( new FsmLmPartList ),
 		loc(loc),
 		longestMatchList(longestMatchList),
-		lmSwitchHandlesError(false),
 		nfaConstruction(false)
-	{ }
+	{
+		for ( LongestMatchPart *lmPart = longestMatchList->head; lmPart != 0; lmPart = lmPart->next )
+			FsmLongestMatch::longestMatchList->append( lmPart );
+	}
 
 	InputLoc loc;
 	LmPartList *longestMatchList;
 	std::string name;
 	Action *lmActSelect;
-	bool lmSwitchHandlesError;
 	bool nfaConstruction;
 
 	LongestMatch *next, *prev;

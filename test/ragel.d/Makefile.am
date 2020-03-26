@@ -19,7 +19,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 COLM_BIN = @COLM@
-RAGEL_LM = ../../ragel
+RAGEL_LM = ../../src
 
 COLM_xCPPFLAGS = # -I../../colm/include
 COLM_xLDFLAGS = # -L../../colm

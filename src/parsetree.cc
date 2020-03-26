@@ -30,6 +30,7 @@
 
 /* Parsing. */
 #include <libfsm/ragel.h>
+#include <libfsm/action.h>
 #include "parsetree.h"
 #include "parsedata.h"
 

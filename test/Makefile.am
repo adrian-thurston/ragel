@@ -1,8 +1,8 @@
 SUBDIRS = . ragel.d
 
-noinst_SCRIPTS = subject.mk subject.sh
+noinst_SCRIPTS = runtests subject.mk subject.sh
 
-EXTRA_DIST = subject.mk.in subject.sh.in runtests
+EXTRA_DIST = subject.mk.in subject.sh.in runtests.sh
 
 subject.mk: subject.mk.in Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)

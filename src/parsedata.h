@@ -115,64 +115,11 @@ typedef AvlMap<std::string, int, CmpString> PriorDict;
 typedef AvlMapEl<std::string, int> LocalErrDictEl;
 typedef AvlMap<std::string, int, CmpString> LocalErrDict;
 
-struct NameMapVal
-{
-	Vector<NameInst*> vals;
-};
-
 /* Tree of instantiated names. */
 typedef AvlMapEl<std::string, NameMapVal*> NameMapEl;
 typedef AvlMap<std::string, NameMapVal*, CmpString> NameMap;
 typedef Vector<NameInst*> NameVect;
 typedef BstSet<NameInst*> NameSet;
-
-/* Node in the tree of instantiated names. */
-struct NameInst
-{
-	NameInst( const InputLoc &loc, NameInst *parent, std::string name, int id, bool isLabel ) : 
-		loc(loc), parent(parent), name(name), id(id), isLabel(isLabel),
-		isLongestMatch(false), numRefs(0), numUses(0), start(0), final(0) {}
-
-	~NameInst();
-
-	InputLoc loc;
-
-	/* Keep parent pointers in the name tree to retrieve 
-	 * fully qulified names. */
-	NameInst *parent;
-
-	std::string name;
-	int id;
-	bool isLabel;
-	bool isLongestMatch;
-
-	int numRefs;
-	int numUses;
-
-	/* Names underneath us, excludes anonymous names. */
-	NameMap children;
-
-	/* All names underneath us in order of appearance. */
-	NameVect childVect;
-
-	/* Join scopes need an implicit "final" target. */
-	NameInst *start, *final;
-
-	/* During a fsm generation walk, lists the names that are referenced by
-	 * epsilon operations in the current scope. After the link is made by the
-	 * epsilon reference and the join operation is complete, the label can
-	 * have its refcount decremented. Once there are no more references the
-	 * entry point can be removed from the fsm returned. */
-	NameVect referencedNames;
-
-	/* Pointers for the name search queue. */
-	NameInst *prev, *next;
-
-	/* Check if this name inst or any name inst below is referenced. */
-	bool anyRefsRec();
-};
-
-typedef DList<NameInst> NameInstList;
 
 /* Stack frame used in walking the name tree. */
 struct NameFrame 
