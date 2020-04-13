@@ -1,9 +1,3 @@
-COLM_BIN    = @COLM@
-COLM_WRAP   = @COLM@-wrap
-COLM_LA     = @LIBCOLM@
-COLM_LIBDEP = $(COLM_LA)
-COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
-
 bin_PROGRAMS = ragel-go
 
 data_DATA = out-go.lm
@@ -15,13 +9,13 @@ dist_ragel_go_SOURCES = main.cc rlhc.c
 nodist_ragel_go_SOURCES = \
 	rlparse.c rlreduce.cc
 
-ragel_go_LDADD = ../libragel.la @LIBCOLM@ $(COLM_LA)
+ragel_go_LDADD = $(LIBFSM_LA) $(LIBCOLM_LA) ../libragel.la 
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
 EXTRA_DIST = rlparse.lm rlhc.lm out-go.lm
 
-rlparse.pack: rlparse.lm $(COLM_BINDEP)
+rlparse.pack: rlparse.lm $(COLM) $(COLM_WRAP)
 	$(COLM_WRAP) -c -I .. -b rlparseGo -o $@ -p rlparse.c -m rlreduce.cc $<
 
 rlparse.c: rlparse.pack
@@ -30,5 +24,5 @@ rlparse.c: rlparse.pack
 rlreduce.cc: rlparse.pack
 	$(COLM_WRAP) -o $@ $<
 
-rlhc.c: $(COLM_SHARE)/rlhc-go.lm $(COLM_SHARE)/ril.lm $(COLM_BINDEP)
-	$(COLM_BIN) -c -I $(COLM_SHARE) -b rlhcGo -o $@ $<
+rlhc.c: $(COLM_SHARE)/rlhc-go.lm $(COLM_SHARE)/ril.lm $(COLM) $(COLM_WRAP)
+	$(COLM) -c -I $(COLM_SHARE) -b rlhcGo -o $@ $<

@@ -1,15 +1,6 @@
 SUBDIRS = . host-ruby host-asm host-julia host-ocaml host-c \
 	host-d host-csharp host-go host-java host-rust host-crack host-js
 
-COLM_BIN    = @COLM@
-COLM_WRAP   = @COLM_WRAP@
-COLM_LA     = @LIBCOLM@
-LIBFSM      = @LIBFSM@
-COLM_LIBDEP = $(COLM_LA)
-COLM_BINDEP = $(COLM_BIN) $(COLM_WRAP)
-KELBT       = @KELBT@
-RAGEL       = @RAGEL@
-
 # libragel contains the parse tree and other parsing support code. Everything
 # except the reducers, which are specific to the frontends.
 lib_LTLIBRARIES = libragel.la
@@ -30,7 +21,7 @@ dist_libragel_la_SOURCES = \
 	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc
 
 libragel_la_LDFLAGS = -no-undefined
-libragel_la_LIBADD = $(LIBFSM) $(COLM_LA)
+libragel_la_LIBADD = $(LIBFSM_LA) $(LIBCOLM_LA)
 
 if LINKER_NO_UNDEFINED
 libragel_la_LDFLAGS += -Wl,--no-undefined
@@ -47,8 +38,8 @@ dist_ragel_SOURCES = \
 nodist_ragel_SOURCES = \
 	parse.c rlreduce.cc
 
-ragel_LDADD = libragel.la $(LIBFSM) $(COLM_LA)
-ragel_DEPENDENCIES = libragel.la $(LIBFSM) $(COLM_LIBDEP)
+ragel_LDADD = $(LIBFSM_LA) $(LIBCOLM_LA) libragel.la
+ragel_DEPENDENCIES = $(LIBFSM_LA) $(LIBCOLM_LA) libragel.la
 
 BUILT_SOURCES = \
 	version.h \
@@ -90,7 +81,7 @@ RAGEL_LM = \
 	ragel.lm \
 	rlreduce.lm
 
-parse.pack: $(RAGEL_LM) $(COLM_BINDEP)
+parse.pack: $(RAGEL_LM) $(COLM) $(COLM_WRAP)
 	$(COLM_WRAP) -c -b rlparseC -o $@ -p parse.c -m rlreduce.cc $<
 
 rlreduce.cc: parse.pack

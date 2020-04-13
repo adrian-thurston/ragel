@@ -48,39 +48,19 @@ AC_CHECK_SIZEOF([unsigned long])
 AC_CHECK_SIZEOF([unsigned long long])
 AC_CHECK_HEADERS([sys/mman.h sys/wait.h unistd.h])
 
-AC_CHECK_SIZEOF([long])
-
-dnl Generic dependency specification.
-AC_ARG_WITH(deps,
-	[AC_HELP_STRING([--with-deps], [generic dependency location])],
-	[DEPS="$withval"],
-	[DEPS="/opt/colm"]
-)
-
-EXPECTED_COLM_VER=0.14
-
 AC_ARG_WITH(colm,
 	[AC_HELP_STRING([--with-colm], [location of colm install])],
 	[
+		COLM="$withval/bin/colm"
+		COLM_WRAP="$withval/bin/colm-wrap"
 		CPPFLAGS="-I$withval/include ${CPPFLAGS}"
 		CPPFLAGS="-I$withval/include/aapl ${CPPFLAGS}"
 		LDFLAGS="-L$withval/lib ${LDFLAGS}"
-		COLM="$withval/bin/colm"
-		COLM_WRAP="$withval/bin/colm-wrap"
+		LIBCOLM_LA="$withval/lib/libcolm.la"
+		LIBFSM_LA="$withval/lib/libfsm.la"
 		COLM_SHARE="$withval/share"
-		LIBCOLM="$withval/lib/libcolm.a"
-		LIBFSM="$withval/lib/libfsm.a"
 	],
-	[
-		CPPFLAGS="${CPPFLAGS} -I$DEPS/include"
-		CPPFLAGS="${CPPFLAGS} -I$DEPS/include/aapl"
-		LDFLAGS="${LDFLAGS} -L$DEPS/lib"
-		COLM="$DEPS/bin/colm"
-		COLM_WRAP="$DEPS/bin/colm-wrap"
-		COLM_SHARE="$withval/share"
-		LIBCOLM="$DEPS/lib/libcolm.a"
-		LIBFSM="$DEPS/lib/libfsm.a"
-	]
+	[]
 )
 
 AC_CHECK_FILES(
@@ -91,9 +71,10 @@ AC_CHECK_FILES(
 AC_SUBST(COLM)
 AC_SUBST(COLM_WRAP)
 AC_SUBST(COLM_SHARE)
-AC_SUBST(LIBCOLM)
-AC_SUBST(LIBFSM)
+AC_SUBST(LIBCOLM_LA)
+AC_SUBST(LIBFSM_LA)
 
+EXPECTED_COLM_VER=0.14
 INSTALLED_COLM_VER=`$COLM -v | sed -n -e '1 {' -e 's/^.*version //' -e 's/ .*$//' -e p -e '}'`
 if test "x$INSTALLED_COLM_VER" != "x$EXPECTED_COLM_VER"; then
 	AC_ERROR( [check colm: expected version $EXPECTED_COLM_VER, but $INSTALLED_COLM_VER is installed] )
