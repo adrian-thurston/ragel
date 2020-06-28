@@ -80,7 +80,7 @@ trans_LDADD = -lcolm
 trans_LDFLAGS = $(COLM_xLDFLAGS)
 
 trans.c: trans.lm $(TRANS_DEPS) $(COLM_BIN)
-	$(COLM_BIN) -c -b trans_object -I$(RAGEL_LM) -I../../ragel/host-go -o $@ $<
+	$(COLM_BIN) -c -b trans_object -I$(RAGEL_LM) -I../../src/host-go -o $@ $<
 
 gentests: gentests.sh Makefile
 	@$(top_srcdir)/sedsubst $< $@ -w,+x $(SED_SUBST)

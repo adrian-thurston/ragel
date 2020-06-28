@@ -23,4 +23,4 @@ rlreduce.cc: rlparse.pack
 	$(COLM_WRAP) -o $@ $<
 
 rlhc.c: $(COLM_SHARE)/rlhc-js.lm $(COLM_SHARE)/ril.lm $(COLM) $(COLM_WRAP)
-	$(COLM_BIN) -c -I $(COLM_SHARE) -b rlhcJs -o $@ $<
+	$(COLM) -c -I $(COLM_SHARE) -b rlhcJs -o $@ $<

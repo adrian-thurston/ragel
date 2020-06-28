@@ -74,7 +74,7 @@ AC_SUBST(COLM_SHARE)
 AC_SUBST(LIBCOLM_LA)
 AC_SUBST(LIBFSM_LA)
 
-EXPECTED_COLM_VER=0.14
+EXPECTED_COLM_VER=0.14.1
 INSTALLED_COLM_VER=`$COLM -v | sed -n -e '1 {' -e 's/^.*version //' -e 's/ .*$//' -e p -e '}'`
 if test "x$INSTALLED_COLM_VER" != "x$EXPECTED_COLM_VER"; then
 	AC_ERROR( [check colm: expected version $EXPECTED_COLM_VER, but $INSTALLED_COLM_VER is installed] )
@@ -224,22 +224,22 @@ AC_ARG_WITH(subject,
 		SUBJ_COLM_CPPFLAGS='-I$(abs_top_builddir)/colm/include'
 		SUBJ_COLM_LDFLAGS='-L$(abs_top_builddir)/colm/.libs -Wl,-rpath,${abs_top_builddir}/colm/.libs'
 
-		SUBJ_RAGEL_BIN='$(abs_top_builddir)/ragel/ragel'
-		SUBJ_RAGEL_CPPFLAGS='-I$(abs_top_builddir)/ragel/include -I$(abs_top_builddir)/aapl'
-		SUBJ_RAGEL_LDFLAGS='-L$(abs_top_builddir)/ragel/.libs -Wl,-rpath,$(abs_top_builddir)/ragel/.libs'
-		SUBJ_RAGEL_LM='$(abs_top_builddir)/ragel'
+		SUBJ_RAGEL_BIN='$(abs_top_builddir)/src/ragel'
+		SUBJ_RAGEL_CPPFLAGS='-I$(abs_top_builddir)/src/include -I$(abs_top_builddir)/aapl'
+		SUBJ_RAGEL_LDFLAGS='-L$(abs_top_builddir)/src/.libs -Wl,-rpath,$(abs_top_builddir)/src/.libs'
+		SUBJ_RAGEL_LM='$(abs_top_builddir)/src'
 
-		SUBJ_RAGEL_C_BIN='$(abs_top_builddir)/ragel/host-c/ragel-c'
-		SUBJ_RAGEL_D_BIN='$(abs_top_builddir)/ragel/host-d/ragel-d'
-		SUBJ_RAGEL_JAVA_BIN='$(abs_top_builddir)/ragel/host-java/ragel-java'
-		SUBJ_RAGEL_RUBY_BIN='$(abs_top_builddir)/ragel/host-ruby/ragel-ruby'
-		SUBJ_RAGEL_CSHARP_BIN='$(abs_top_builddir)/ragel/host-csharp/ragel-csharp'
-		SUBJ_RAGEL_GO_BIN='$(abs_top_builddir)/ragel/host-go/ragel-go'
-		SUBJ_RAGEL_OCAML_BIN='$(abs_top_builddir)/ragel/host-ocaml/ragel-ocaml'
-		SUBJ_RAGEL_ASM_BIN='$(abs_top_builddir)/ragel/host-asm/ragel-asm'
-		SUBJ_RAGEL_RUST_BIN='$(abs_top_builddir)/ragel/host-rust/ragel-rust'
-		SUBJ_RAGEL_CRACK_BIN='$(abs_top_builddir)/ragel/host-crack/ragel-crack'
-		SUBJ_RAGEL_JULIA_BIN='$(abs_top_builddir)/ragel/host-julia/ragel-julia'
+		SUBJ_RAGEL_C_BIN='$(abs_top_builddir)/src/host-c/ragel-c'
+		SUBJ_RAGEL_D_BIN='$(abs_top_builddir)/src/host-d/ragel-d'
+		SUBJ_RAGEL_JAVA_BIN='$(abs_top_builddir)/src/host-java/ragel-java'
+		SUBJ_RAGEL_RUBY_BIN='$(abs_top_builddir)/src/host-ruby/ragel-ruby'
+		SUBJ_RAGEL_CSHARP_BIN='$(abs_top_builddir)/src/host-csharp/ragel-csharp'
+		SUBJ_RAGEL_GO_BIN='$(abs_top_builddir)/src/host-go/ragel-go'
+		SUBJ_RAGEL_OCAML_BIN='$(abs_top_builddir)/src/host-ocaml/ragel-ocaml'
+		SUBJ_RAGEL_ASM_BIN='$(abs_top_builddir)/src/host-asm/ragel-asm'
+		SUBJ_RAGEL_RUST_BIN='$(abs_top_builddir)/src/host-rust/ragel-rust'
+		SUBJ_RAGEL_CRACK_BIN='$(abs_top_builddir)/src/host-crack/ragel-crack'
+		SUBJ_RAGEL_JULIA_BIN='$(abs_top_builddir)/src/host-julia/ragel-julia'
 	]
 )
 

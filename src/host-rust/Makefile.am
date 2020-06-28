@@ -23,4 +23,4 @@ rlreduce.cc: rlparse.pack
 	$(COLM_WRAP) -o $@ $<
 
 rlhc.c: $(COLM_SHARE)/rlhc-rust.lm $(COLM_SHARE)/ril.lm $(COLM) $(COLM_WRAP)
-	$(COLM_BIN) -c -I $(COLM_SHARE) -b rlhcRust -o $@ $<
+	$(COLM) -c -I $(COLM_SHARE) -b rlhcRust -o $@ $<
