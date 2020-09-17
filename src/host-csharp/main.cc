@@ -40,7 +40,7 @@ const char *defaultOutFnCSharp( const char *inputFileName )
 
 HostType hostTypesCSharp[] =
 {
-	{ "sbyte",   0,  "sbyte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
+	{ "sbyte",   0,  "sbyte",   true,   true,  false,  SCHAR_MIN, SCHAR_MAX,   0, 0,           1 },
 	{ "byte",    0,  "byte",    false,  true,  false,  0, 0,                   0, UCHAR_MAX,   1 },
 	{ "short",   0,  "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,    0, 0,           2 },
 	{ "ushort",  0,  "ushort",  false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },

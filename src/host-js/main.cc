@@ -36,7 +36,7 @@ const char *defaultOutFnJs( const char *inputFileName )
 
 HostType hostTypesJS[] =
 {
-	{ "s8",     0, "int8",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,          1 },
+	{ "s8",     0, "int8",    true,   true,  false,  SCHAR_MIN, SCHAR_MAX,  0, 0,          1 },
 	{ "u8",     0, "uint8",   false,  true,  false,  0, 0,                  0, UCHAR_MAX,  1 },
 	{ "s16",    0, "int16",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,          2 },
 	{ "u16",    0, "uint16",  false,  true,  false,  0, 0,                  0, USHRT_MAX,  2 },

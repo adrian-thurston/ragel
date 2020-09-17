@@ -40,7 +40,7 @@ const char *defaultOutFnD( const char *inputFileName )
 
 HostType hostTypesD[] =
 {
-	{ "byte",    0,  "byte",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
+	{ "byte",    0,  "byte",    true,   true,  false,  SCHAR_MIN, SCHAR_MAX,   0, 0,           1 },
 	{ "ubyte",   0,  "ubyte",   false,  true,  false,  0, 0,                   0, UCHAR_MAX,   1 },
 	{ "char",    0,  "char",    false,  true,  false,  0, 0,                   0, UCHAR_MAX,   1 },
 	{ "short",   0,  "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,    0, 0,           2 },
