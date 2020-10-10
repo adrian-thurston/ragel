@@ -36,7 +36,7 @@ const char *defaultOutFnJava( const char *inputFileName )
 
 HostType hostTypesJava[] = 
 {
-	{ "byte",    0,  "byte",   true,   true,  false,  CHAR_MIN,  CHAR_MAX,    0, 0,           1 },
+	{ "byte",    0,  "byte",   true,   true,  false,  SCHAR_MIN, SCHAR_MAX,   0, 0,           1 },
 	{ "short",   0,  "short",  true,   true,  false,  SHRT_MIN,  SHRT_MAX,    0, 0,           2 },
 	{ "char",    0,  "char",   false,  true,  false,  0, 0,                   0, USHRT_MAX,   2 },
 	{ "int",     0,  "int",    true,   true,  false,  INT_MIN,   INT_MAX,     0, 0,           4 },

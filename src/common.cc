@@ -42,8 +42,8 @@ const char *defaultOutFnC( const char *inputFileName )
 
 HostType hostTypesC[] =
 {
-	{ "char",      0,      "char",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,          sizeof(char) },
-	{ "signed",   "char",  "char",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,          sizeof(char) },
+	{ "char",      0,      "char",    true,   true,  false,  SCHAR_MIN, SCHAR_MAX,  0, 0,          sizeof(char) },
+	{ "signed",   "char",  "char",    true,   true,  false,  SCHAR_MIN, SCHAR_MAX,  0, 0,          sizeof(char) },
 	{ "unsigned", "char",  "uchar",   false,  true,  false,  0, 0,                  0, UCHAR_MAX,  sizeof(unsigned char) },
 	{ "short",     0,      "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,          sizeof(short) },
 	{ "signed",   "short", "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,          sizeof(short) },
