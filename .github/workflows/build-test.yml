@@ -32,13 +32,13 @@ jobs:
       run: make dist
 
     - name: unpack
-      run: mkdir unpack && tar -C unpack -zxvf colm-suite-*.tar.gz
+      run: mkdir unpack && tar -C unpack -zxvf ragel-*.tar.gz
 
     - name: configure the dist
-      run: COLM=`pwd`/inst/colm && cd unpack/colm-suite-* && ./configure --with-colm=$COLM --disable-manual
+      run: COLM=`pwd`/inst/colm && cd unpack/ragel-* && ./configure --with-colm=$COLM --disable-manual
 
     - name: make the dist
-      run: cd unpack/colm-suite-* && make
+      run: cd unpack/ragel-* && make
 
     - name: test the dist
-      run: cd unpack/colm-suite-*/test && ./runtests
+      run: cd unpack/ragel-*/test && ./runtests
