@@ -16,7 +16,7 @@ jobs:
     - name: install colm
       run: >
         COLM=`pwd`/inst/colm && cd adrian-thurston-colm-* && ./autogen.sh &&
-	./configure --prefix=$COLM --disable-manual && make install
+          ./configure --prefix=$COLM --disable-manual && make install
     - name: autogen
       run: ./autogen.sh
 
