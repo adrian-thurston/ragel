@@ -14,8 +14,9 @@ jobs:
       run: wget https://github.com/adrian-thurston/colm/tarball/master -O - | tar zxv
 
     - name: install colm
-      run: COLM=`pwd`/inst/colm && cd adrian-thurston-colm-* && ./autogen.sh && ./configure --prefix=$COLM --disable-manual && make install
-
+      run: >
+        COLM=`pwd`/inst/colm && cd adrian-thurston-colm-* && ./autogen.sh &&
+	  ./configure --prefix=$COLM --disable-manual && make install
     - name: autogen
       run: ./autogen.sh
 
