@@ -35,7 +35,7 @@ const char *defaultOutFnRust( const char *inputFileName )
 
 HostType hostTypesRust[] =
 {
-	{ "u8",    0,  "byte",      false,   true,  false,  0, UCHAR_MAX,  0, 0, 4 },
+	{ "u8",    0,  "byte",      false,   true,  false,  0, 0,  0, UCHAR_MAX, 1 },
 };
 
 const HostLang hostLangRust =
