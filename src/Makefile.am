@@ -66,9 +66,7 @@ EXTRA_DIST = \
 	$(RAGEL_LM) \
 	rlscan.rl \
 	rlparse.kh \
-	rlparse.kl \
-	ril.lm  \
-	rlhc-main.lm
+	rlparse.kl
 
 CLEANFILES = parse.c commit.cc rlhc.c
 

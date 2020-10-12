@@ -11,7 +11,7 @@ ragel_rust_LDADD = $(LIBFSM_LA) $(LIBCOLM_LA) ../libragel.la
 
 BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
-EXTRA_DIST = rlparse.lm rlhc.lm
+EXTRA_DIST = rlparse.lm
 
 rlparse.pack: rlparse.lm $(COLM) $(COLM_WRAP)
 	$(COLM_WRAP) -c -I .. -b rlparseRust -o $@ -p rlparse.c -m rlreduce.cc $<
