@@ -44,7 +44,7 @@ const HostLang hostLangRust =
 	1,
 	0,
 	false,
-	false, /* loopLabels */
+	true,     /* loopLabels */
 	Translated,
 	BreakFeature,
 	&makeCodeGen,
