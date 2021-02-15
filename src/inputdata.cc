@@ -585,22 +585,21 @@ void InputData::usage()
 "   -S <spec>            FSM specification to output (for graphviz output)\n"
 "   -M <machine>         Machine definition/instantiation to output (for\n"
 "                        graphviz output)\n"
-"host language:\n"
-"   -C                   C, C++, Obj-C or Obj-C++ (default)\n"
+"host language binaries:\n"
+"   ragel, ragel-c       C, C++, Obj-C or Obj-C++\n"
 "                        All code styles supported.\n"
-"   --asm --gas-x86-64-sys-v\n"
-"                        GNU AS, x86_64, System V ABI.\n"
+"   ragel-asm            GNU AS, x86_64, System V ABI.\n"
 "                        Generated in a code style equivalent to -G2\n"
-"   -D                   D           All code styles supported\n"
-"   -Z                   Go          All code styles supported\n"
-"   -A                   C#          -T0 -T1 -F0 -F1 -G0 -G1\n"
-"   -J                   Java        -T0 -T1 -F0 -F1\n"
-"   -R                   Ruby        -T0 -T1 -F0 -F1\n"
-"   -O                   OCaml       -T0 -T1 -F0 -F1\n"
-"   -U                   Rust        -T0 -T1 -F0 -F1\n"
-"   -Y                   Julia       -T0 -T1 -F0 -F1\n"
-"   -K                   Crack       -T0 -T1 -F0 -F1\n"
-"   -P                   JavaScript  -T0 -T1 -F0 -F1\n"
+"   ragel-d              D           All code styles supported\n"
+"   ragel-go             Go          All code styles supported\n"
+"   ragel-csharp         C#          -T0 -T1 -F0 -F1 -G0 -G1\n"
+"   ragel-java           Java        -T0 -T1 -F0 -F1\n"
+"   ragel-ruby           Ruby        -T0 -T1 -F0 -F1\n"
+"   ragel-ocaml          OCaml       -T0 -T1 -F0 -F1\n"
+"   ragel-rust           Rust        -T0 -T1 -F0 -F1\n"
+"   ragel-julia          Julia       -T0 -T1 -F0 -F1\n"
+"   ragel-crack          Crack       -T0 -T1 -F0 -F1\n"
+"   ragel-js             JavaScript  -T0 -T1 -F0 -F1\n"
 "line directives:\n"
 "   -L                   Inhibit writing of #line directives\n"
 "code style:\n"
@@ -1204,25 +1203,6 @@ char *InputData::readInput( const char *inputFileName )
 	return input;
 }
 
-int InputData::main( int argc, const char **argv )
-{
-	int code = 0;
-	try {
-		parseArgs( argc, argv );
-		checkArgs();
-		if ( !generateDot )
-			makeDefaultFileName();
-
-		if ( !process() )
-			abortCompile( 1 );
-	}
-	catch ( const AbortCompile &ac ) {
-		code = ac.code;
-	}
-
-	return code;
-}
-
 int InputData::runFrontend( int argc, const char **argv )
 {
 	if ( !process() )
@@ -1268,22 +1248,48 @@ int InputData::runJob( const char *what, IdProcess idProcess, int argc, const ch
 	return (this->*idProcess)( argc, argv );
 }
 
+int InputData::main( int argc, const char **argv )
+{
+	int code = 0;
+	try {
+		parseArgs( argc, argv );
+		checkArgs();
+		if ( !generateDot )
+			makeDefaultFileName();
+
+		if ( !process() )
+			abortCompile( 1 );
+	}
+	catch ( const AbortCompile &ac ) {
+		code = ac.code;
+	}
+
+	return code;
+}
+
 int InputData::rlhcMain( int argc, const char **argv )
 {
-	parseArgs( argc, argv );
-	checkArgs();
-	makeDefaultFileName();
-	makeTranslateOutputFileName();
+	int code = 0;
+	try {
+		parseArgs( argc, argv );
+		checkArgs();
+		makeDefaultFileName();
+		makeTranslateOutputFileName();
 
-	int es = runJob( "frontend", &InputData::runFrontend, 0, 0 );
+		int es = runJob( "frontend", &InputData::runFrontend, 0, 0 );
 
-	if ( es != 0 )
-		return es;
+		if ( es != 0 )
+			return es;
 
-	/* rlhc <input> <output> */
-	const char *_argv[] = { "rlhc",
-			genOutputFileName.c_str(),
-			origOutputFileName.c_str(), 0 };
+		/* rlhc <input> <output> */
+		const char *_argv[] = { "rlhc",
+				genOutputFileName.c_str(),
+				origOutputFileName.c_str(), 0 };
 
-	return runJob( "rlhc", &InputData::runRlhc, 3, _argv );
+		return runJob( "rlhc", &InputData::runRlhc, 3, _argv );
+	}
+	catch ( const AbortCompile &ac ) {
+		code = ac.code;
+	}
+	return code;
 }
