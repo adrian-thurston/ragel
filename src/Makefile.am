@@ -43,12 +43,7 @@ ragel_DEPENDENCIES = $(LIBFSM_LA) $(LIBCOLM_LA) libragel.la
 
 BUILT_SOURCES = \
 	version.h \
-	parse.c rlreduce.cc \
-	include/ragel
-
-include/ragel:
-	mkdir -p include
-	ln -s .. include/ragel
+	parse.c rlreduce.cc
 
 if WITH_RAGEL_KELBT
 nodist_ragel_SOURCES += \

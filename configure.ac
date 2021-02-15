@@ -20,8 +20,8 @@ dnl LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM
 dnl OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 dnl SOFTWARE.
   
-AC_INIT(ragel, 7.0.3)
-PUBDATE="January 2021"
+AC_INIT(ragel, 7.0.4)
+PUBDATE="February 2021"
 
 AM_INIT_AUTOMAKE([foreign])
 
@@ -65,7 +65,7 @@ AC_SUBST(COLM_SHARE)
 AC_SUBST(LIBCOLM_LA)
 AC_SUBST(LIBFSM_LA)
 
-EXPECTED_COLM_VER=0.14.6
+EXPECTED_COLM_VER=0.14.7
 INSTALLED_COLM_VER=`$COLM -v | sed -n -e '1 {' -e 's/^.*version //' -e 's/ .*$//' -e p -e '}'`
 if test "x$INSTALLED_COLM_VER" != "x$EXPECTED_COLM_VER"; then
 	AC_ERROR( [check colm: expected version $EXPECTED_COLM_VER, but $INSTALLED_COLM_VER is installed] )
@@ -425,6 +425,9 @@ AM_CONDITIONAL([EXTERNAL_COLM], [test "x$EXTERNAL_COLM" != x])
 AC_SUBST(EXTERNAL_COLM)
 AC_SUBST(EXTERNAL_INC)
 AC_SUBST(EXTERNAL_LIBS)
+
+mkdir -p src/include
+test -e src/include/ragel || ln -s .. src/include/ragel
 
 dnl
 dnl Wrap up.
