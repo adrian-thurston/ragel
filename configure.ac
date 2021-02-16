@@ -268,17 +268,7 @@ dnl
 dnl Installed programs to test in 
 dnl
 
-AC_PATH_PROG([D_BIN], [gdc-8])
-if test "x$D_BIN" = x; then
-	AC_PATH_PROG([D_BIN], [gdc-7])
-	if test "x$D_BIN" = x; then
-		AC_PATH_PROG([D_BIN], [gdc-6])
-		if test "x$D_BIN" = x; then
-			AC_PATH_PROG([D_BIN], [gdc-5])
-		fi
-	fi
-fi
-
+AC_PATH_PROG([D_BIN], [gdc])
 AC_PATH_PROG([JAVAC_BIN], [javac])
 
 dnl
