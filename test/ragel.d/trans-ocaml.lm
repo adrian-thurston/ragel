@@ -50,7 +50,7 @@ int rw_ocaml_factor( Factor: indep::factor )
 	case [`buffer]
 	{
 		send Out
-			"String.sub buffer 0 blen.contents"
+			"( String.sub ( Bytes.to_string buffer ) 0 blen.contents )"
 	}
 	case [`blen]
 	{
@@ -183,7 +183,7 @@ int rw_ocaml_print_stmt( Stmt: indep::print_stmt )
 	else if match Stmt [`print_buf `;]
 	{
 		send Out
-			"print_string( String.sub buffer 0 blen.contents );
+			"print_string( String.sub ( Bytes.to_string buffer ) 0 blen.contents );
 	}
 	else if match Stmt [`print_str expr `;]
 	{
