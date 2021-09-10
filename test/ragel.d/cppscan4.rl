@@ -4,7 +4,7 @@
 
 module cppscan;
 
-import std.c.stdio;
+import core.stdc.stdio;
 import std.stdio;
 import std.string;
 

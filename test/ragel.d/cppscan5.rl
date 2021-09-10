@@ -6,7 +6,7 @@
  * Test in and out state actions.
  */
 
-import std.c.stdio;
+import core.stdc.stdio;
 import std.string;
 
 static const int TK_Dlit = 192;

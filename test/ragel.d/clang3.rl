@@ -5,7 +5,7 @@
 
 module clang;
 
-import std.c.stdio;
+import core.stdc.stdio;
 import std.stdio;
 
 char[] string(char c)
