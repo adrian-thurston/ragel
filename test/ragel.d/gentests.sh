@@ -263,7 +263,7 @@ function lang_opts()
 			interpreted=false
 			compiler="$assembler"
 			host_ragel=$RAGEL_ASM_BIN
-			flags=""
+			flags="-no-pie"
 			libs=""
 			prohibit_flags="-T0 -T1 -F0 -F1 -W0 -W1 -G0 -G1 --string-tables"
 		;;

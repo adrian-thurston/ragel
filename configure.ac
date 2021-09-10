@@ -360,7 +360,7 @@ main:
 EOF
 
 echo -n "checking if ragel ASM tests will build ... "
-if sh -c "$ASM_BIN -o conftest.bin conftest.s" >>config.log 2>&1; then
+if sh -c "$ASM_BIN -no-pie -o conftest.bin conftest.s" >>config.log 2>&1; then
 	echo "yes"
 else
 	echo "no"
