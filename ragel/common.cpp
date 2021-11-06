@@ -27,14 +27,14 @@
 
 HostType hostTypesC[] =
 {
-	{ "char",     0,       "char",    true,   true,  false,  CHAR_MIN,  CHAR_MAX,   0, 0,              sizeof(char) },
-	{ "unsigned", "char",  "uchar",   false,  true,  false,  0, 0,                  0,     UCHAR_MAX,  sizeof(unsigned char) },
-	{ "short",    0,       "short",   true,   true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,              sizeof(short) },
-	{ "unsigned", "short", "ushort",  false,  true,  false,  0, 0,                  0,     USHRT_MAX,  sizeof(unsigned short) },
-	{ "int",      0,       "int",     true,   true,  false,  INT_MIN,   INT_MAX,    0, 0,              sizeof(int) },
-	{ "unsigned", "int",   "uint",    false,  true,  false,  0, 0,                  0,     UINT_MAX,   sizeof(unsigned int) },
-	{ "long",     0,       "long",    true,   true,  false,  LONG_MIN,  LONG_MAX,   0, 0,              sizeof(long) },
-	{ "unsigned", "long",  "ulong",   false,  true,  false,  0, 0,                  0,     ULONG_MAX,  sizeof(unsigned long) }
+	{ "char",     0,       "char",    (CHAR_MIN != 0), true,  false,  SCHAR_MIN, SCHAR_MAX,  0, UCHAR_MAX, sizeof(char) },
+	{ "unsigned", "char",  "uchar",   false,           true,  false,  0, 0,                  0, UCHAR_MAX, sizeof(unsigned char) },
+	{ "short",    0,       "short",   true,            true,  false,  SHRT_MIN,  SHRT_MAX,   0, 0,         sizeof(short) },
+	{ "unsigned", "short", "ushort",  false,           true,  false,  0, 0,                  0, USHRT_MAX, sizeof(unsigned short) },
+	{ "int",      0,       "int",     true,            true,  false,  INT_MIN,   INT_MAX,    0, 0,         sizeof(int) },
+	{ "unsigned", "int",   "uint",    false,           true,  false,  0, 0,                  0, UINT_MAX,  sizeof(unsigned int) },
+	{ "long",     0,       "long",    true,            true,  false,  LONG_MIN,  LONG_MAX,   0, 0,         sizeof(long) },
+	{ "unsigned", "long",  "ulong",   false,           true,  false,  0, 0,                  0, ULONG_MAX, sizeof(unsigned long) }
 };
 
 #define S8BIT_MIN  -128
