@@ -25,6 +25,9 @@
 extern struct colm_sections rlparseC;
 extern struct colm_sections rlhcC;
 
+extern const char *defaultOutFnC( const char *inputFileName );
+extern HostType hostTypesC[];
+
 const HostLang hostLangC_translated =
 {
 	hostTypesC,

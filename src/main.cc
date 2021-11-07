@@ -23,6 +23,7 @@
 #include "inputdata.h"
 
 extern struct colm_sections rlparseC;
+extern "C" const HostLang hostLangC;
 
 int main( int argc, const char **argv )
 {
