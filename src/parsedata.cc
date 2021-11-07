@@ -26,13 +26,14 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#include <colm/tree.h>
 #include <libfsm/ragel.h>
 #include "parsedata.h"
 #include "parsetree.h"
 #include "mergesort.h"
 #include "version.h"
 #include "inputdata.h"
-#include <colm/tree.h>
+#include "nragel.h"
 
 using namespace std;
 

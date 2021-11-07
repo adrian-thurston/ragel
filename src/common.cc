@@ -28,43 +28,6 @@
 #include "ragel.h"
 
 
-HostType *findAlphType( const HostLang *hostLang, const char *s1 )
-{
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
-				hostLang->hostTypes[i].data2 == 0 )
-		{
-			return hostLang->hostTypes + i;
-		}
-	}
-
-	return 0;
-}
-
-HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 )
-{
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
-				hostLang->hostTypes[i].data2 != 0 && 
-				strcmp( s2, hostLang->hostTypes[i].data2 ) == 0 )
-		{
-			return hostLang->hostTypes + i;
-		}
-	}
-
-	return 0;
-}
-
-HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 )
-{
-	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
-		if ( strcmp( s1, hostLang->hostTypes[i].internalName ) == 0 )
-			return hostLang->hostTypes + i;
-	}
-
-	return 0;
-}
-
 std::streamsize output_filter::countAndWrite( const char *s, std::streamsize n )
 {
 	for ( int i = 0; i < n; i++ ) {

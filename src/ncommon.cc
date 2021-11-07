@@ -26,6 +26,8 @@
 #include <libfsm/common.h>
 #include <libfsm/ragel.h>
 
+#include "nragel.h"
+
 /*
  * C
  */
@@ -67,4 +69,41 @@ extern "C" const HostLang hostLangC = {
 	&defaultOutFnC,
 	&genLineDirectiveC
 };
+
+HostType *findAlphType( const HostLang *hostLang, const char *s1 )
+{
+	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
+		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
+				hostLang->hostTypes[i].data2 == 0 )
+		{
+			return hostLang->hostTypes + i;
+		}
+	}
+
+	return 0;
+}
+
+HostType *findAlphType( const HostLang *hostLang, const char *s1, const char *s2 )
+{
+	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
+		if ( strcmp( s1, hostLang->hostTypes[i].data1 ) == 0 && 
+				hostLang->hostTypes[i].data2 != 0 && 
+				strcmp( s2, hostLang->hostTypes[i].data2 ) == 0 )
+		{
+			return hostLang->hostTypes + i;
+		}
+	}
+
+	return 0;
+}
+
+HostType *findAlphTypeInternal( const HostLang *hostLang, const char *s1 )
+{
+	for ( int i = 0; i < hostLang->numHostTypes; i++ ) {
+		if ( strcmp( s1, hostLang->hostTypes[i].internalName ) == 0 )
+			return hostLang->hostTypes + i;
+	}
+
+	return 0;
+}
 
