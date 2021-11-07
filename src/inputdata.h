@@ -310,6 +310,8 @@ struct InputData
 	void makeTranslateOutputFileName();
 	void flushRemaining();
 	void makeFirstInputItem();
+	void writeStatement( CodeGenData *cgd, InputLoc &loc, int nargs,
+		std::vector<std::string> &args, bool generateDot, const HostLang *hostLang );
 	void writeOutput();
 	void makeDefaultFileName();
 	void createOutputStream();

@@ -219,6 +219,91 @@ void InputData::verifyWritesHaveData()
 		verifyWriteHasData( ii );
 }
 
+void InputData::writeStatement( CodeGenData *cgd, InputLoc &loc, int nargs,
+		std::vector<std::string> &args, bool generateDot, const HostLang *hostLang )
+{
+	/* Start write generation on a fresh line. */
+	*outStream << '\n';
+
+	if ( cgd->cleared ) {
+		cgd->red->id->error(loc) << "write statement following a clear is invalid" << std::endl;
+		return;
+	}
+
+	cgd->genOutputLineDirective( *outStream );
+
+	if ( args[0] == "data" ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( args[i] == "noerror" )
+				cgd->noError = true;
+			else if ( args[i] == "noprefix" )
+				cgd->noPrefix = true;
+			else if ( args[i] == "nofinal" )
+				cgd->noFinal = true;
+			else
+				cgd->write_option_error( loc, args[i] );
+		}
+
+		if ( cgd->red->id->printStatistics ) {
+			cgd->red->id->stats() << "fsm-name\t" << cgd->fsmName << std::endl;
+			cgd->red->id->stats() << "fsm-states\t" << cgd->redFsm->stateList.length() << std::endl;
+		}
+
+		cgd->collectReferences();
+		cgd->writeData();
+		cgd->statsSummary();
+	}
+	else if ( args[0] == "init" ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( args[i] == "nocs" )
+				cgd->noCS = true;
+			else
+				cgd->write_option_error( loc, args[i] );
+		}
+		cgd->writeInit();
+	}
+	else if ( args[0] == "exec" ) {
+		for ( int i = 1; i < nargs; i++ ) {
+			if ( args[i] == "noend" )
+				cgd->noEnd = true;
+			else
+				cgd->write_option_error( loc, args[i] );
+		}
+		cgd->collectReferences();
+		cgd->writeExec();
+	}
+	else if ( args[0] == "exports" ) {
+		for ( int i = 1; i < nargs; i++ )
+			cgd->write_option_error( loc, args[i] );
+		cgd->writeExports();
+	}
+	else if ( args[0] == "start" ) {
+		for ( int i = 1; i < nargs; i++ )
+			cgd->write_option_error( loc, args[i] );
+		cgd->writeStart();
+	}
+	else if ( args[0] == "first_final" ) {
+		for ( int i = 1; i < nargs; i++ )
+			cgd->write_option_error( loc, args[i] );
+		cgd->writeFirstFinal();
+	}
+	else if ( args[0] == "error" ) {
+		for ( int i = 1; i < nargs; i++ )
+			cgd->write_option_error( loc, args[i] );
+		cgd->writeError();
+	}
+	else if ( args[0] == "clear" ) {
+		for ( int i = 1; i < nargs; i++ )
+			cgd->write_option_error( loc, args[i] );
+		cgd->writeClear();
+	}
+	else {
+		/* EMIT An error here. */
+		cgd->red->id->error(loc) << "unrecognized write command \"" << 
+				args[0] << "\"" << std::endl;
+	}
+}
+
 void InputData::writeOutput( InputItem *ii )
 {
 	/* If it is the first input item then check if we need to write the BOM. */
@@ -228,7 +313,7 @@ void InputData::writeOutput( InputItem *ii )
 	switch ( ii->type ) {
 		case InputItem::Write: {
 			CodeGenData *cgd = ii->pd->cgd;
-			cgd->writeStatement( ii->loc, ii->writeArgs.size(),
+			writeStatement( cgd, ii->loc, ii->writeArgs.size(),
 					ii->writeArgs, generateDot, hostLang );
 			break;
 		}
