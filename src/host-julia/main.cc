@@ -21,6 +21,7 @@
  */
 
 #include "inputdata.h"
+#include "nragel.h"
 
 extern struct colm_sections rlparseJulia;
 extern struct colm_sections rlhcJulia;

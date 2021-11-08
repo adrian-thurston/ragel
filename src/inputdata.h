@@ -23,6 +23,7 @@
 #ifndef _INPUT_DATA
 #define _INPUT_DATA
 
+#include "nragel.h"
 #include <libfsm/gendata.h>
 #include <iostream>
 #include <sstream>
@@ -173,7 +174,8 @@ struct InputData
 	InputData( const HostLang *hostLang,
 			struct colm_sections *frontendSections, struct colm_sections *rlhcSections )
 	: 
-		FsmGbl(hostLang),
+		FsmGbl(),
+		hostLang(hostLang),
 		frontendSections(frontendSections),
 		rlhcSections(rlhcSections),
 		inputFileName(0),
@@ -213,6 +215,8 @@ struct InputData
 	{}
 
 	~InputData();
+
+	const HostLang *hostLang;
 
 	void usage();
 	void version();

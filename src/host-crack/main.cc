@@ -21,6 +21,7 @@
  */
 
 #include "inputdata.h"
+#include "nragel.h"
 
 extern struct colm_sections rlparseCrack;
 extern struct colm_sections rlhcCrack;

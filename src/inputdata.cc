@@ -29,6 +29,7 @@
 #include "reducer.h"
 #include "version.h"
 #include "pcheck.h"
+#include "nragel.h"
 #include <libfsm/dot.h>
 
 #include <colm/colm.h>

@@ -33,11 +33,12 @@
 #include "bstmap.h"
 #include "vector.h"
 #include "dlist.h"
-#include <libfsm/fsmgraph.h>
 #include "compare.h"
 #include "vector.h"
-#include <libfsm/common.h>
 #include "parsetree.h"
+#include "nragel.h"
+#include <libfsm/fsmgraph.h>
+#include <libfsm/common.h>
 #include <libfsm/action.h>
 
 

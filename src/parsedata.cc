@@ -1022,7 +1022,7 @@ void ParseData::initKeyOps( const HostLang *hostLang )
 {
 	/* Signedness and bounds. */
 	alphType = alphTypeSet ? userAlphType : &hostLang->hostTypes[hostLang->defaultAlphType];
-	fsmCtx->keyOps->setAlphType( hostLang, alphType );
+	fsmCtx->keyOps->setAlphType( hostLang->explicitUnsigned, alphType );
 
 	if ( lowerNum != 0 ) {
 		/* If ranges are given then interpret the alphabet type. */
@@ -1450,9 +1450,9 @@ void ParseData::generateReduced( const char *inputFileName, CodeStyle codeStyle,
 		std::ostream &out, const HostLang *hostLang )
 {
 	Reducer *red = new Reducer( this->id, fsmCtx, sectionGraph, sectionName, machineId );
-	red->make( hostLang, alphType );
+	red->make();
 
-	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle );
+	CodeGenArgs args( this->id, red, alphType, machineId, inputFileName, sectionName, out, codeStyle, hostLang->genLineDirective, hostLang->backend );
 
 	args.lineDirectives = !id->noLineDirectives;
 	args.forceVar = id->forceVar;

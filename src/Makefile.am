@@ -19,7 +19,7 @@ libragel_la_CPPFLAGS = -I$(top_srcdir)/aapl -I$(top_srcdir)/colm/include -DBINDI
 dist_libragel_la_SOURCES = \
 	parsedata.h parsetree.h inputdata.h pcheck.h reducer.h rlscan.h load.h \
 	parsetree.cc longest.cc parsedata.cc inputdata.cc load.cc reducer.cc \
-	ncommon.cc
+	ncommon.cc allocgen.cc
 
 libragel_la_LDFLAGS = -no-undefined
 libragel_la_LIBADD = $(LIBFSM_LA) $(LIBCOLM_LA)

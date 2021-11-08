@@ -21,6 +21,7 @@
  */
 
 #include "inputdata.h"
+#include "nragel.h"
 #include <libfsm/asm.h>
 
 extern struct colm_sections rlparseAsm;

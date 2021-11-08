@@ -20,29 +20,29 @@
  * SOFTWARE.
  */
 
-#include "ragel.h"
+#include <libfsm/ragel.h>
+#include <libfsm/fsmgraph.h>
+#include <libfsm/gendata.h>
 #include "parsedata.h"
-#include "fsmgraph.h"
-#include "gendata.h"
 #include "inputdata.h"
 #include "version.h"
 
 /*
  * Code generators.
  */
-#include "bingoto.h"
-#include "binbreak.h"
-#include "binvar.h"
-#include "flatgoto.h"
-#include "flatbreak.h"
-#include "flatvar.h"
-#include "switchgoto.h"
-#include "switchbreak.h"
-#include "switchvar.h"
-#include "gotoloop.h"
-#include "gotoexp.h"
-#include "ipgoto.h"
-#include "asm.h"
+#include <libfsm/bingoto.h>
+#include <libfsm/binbreak.h>
+#include <libfsm/binvar.h>
+#include <libfsm/flatgoto.h>
+#include <libfsm/flatbreak.h>
+#include <libfsm/flatvar.h>
+#include <libfsm/switchgoto.h>
+#include <libfsm/switchbreak.h>
+#include <libfsm/switchvar.h>
+#include <libfsm/gotoloop.h>
+#include <libfsm/gotoexp.h>
+#include <libfsm/ipgoto.h>
+#include <libfsm/asm.h>
 
 CodeGenData *makeCodeGenAsm( const HostLang *hostLang, const CodeGenArgs &args )
 {
