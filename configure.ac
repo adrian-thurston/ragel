@@ -108,11 +108,9 @@ AC_CHECK_PROG([ASCIIDOC], [asciidoc], [asciidoc])
 AC_CHECK_PROG([PYGMENTIZE], [pygmentize], [pygmentize])
 AM_CONDITIONAL([BUILD_MANUAL], [test "x$ASCIIDOC" != x && test "x$PYGMENTIZE" != x])
 
-dnl Choose a default for the build_manual var. If the dist file is present in
-dnl the root then default to no, otherwise go for it.
-AC_CHECK_FILES( [$srcdir/DIST], 
-	[. $srcdir/DIST;], 
-	[build_manual=yes; ] )
+dnl Do not build the manual by default. Most of the time the dependencies are
+dnl not available, as they can be quite big installs.
+build_manual=no
 
 dnl
 dnl Enable arg to explicitly control the building of the manual
