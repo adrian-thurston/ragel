@@ -49,7 +49,7 @@ AC_ARG_WITH(colm,
 		LDFLAGS="-L$withval/lib ${LDFLAGS}"
 		LIBCOLM_LA="$withval/lib/libcolm.la"
 		LIBFSM_LA="$withval/lib/libfsm.la"
-		COLM_SHARE="$withval/share"
+		COLM_SHARE="$withval/share/colm"
 	],
 	[]
 )
