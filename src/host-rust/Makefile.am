@@ -13,7 +13,9 @@ BUILT_SOURCES = rlparse.c rlreduce.cc rlhc.c
 
 EXTRA_DIST = rlparse.lm
 
-rlparse.pack: rlparse.lm $(COLM) $(COLM_WRAP)
+LM_DEPS = ../ragel.lm ../rlreduce.lm
+
+rlparse.pack: rlparse.lm $(COLM) $(COLM_WRAP) $(LM_DEPS)
 	$(COLM_WRAP) -c -I .. -b rlparseRust -o $@ -p rlparse.c -m rlreduce.cc $<
 
 rlparse.c: rlparse.pack
