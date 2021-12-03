@@ -2,7 +2,7 @@ include 'ragel.lm'
 include 'rlreduce.lm'
 
 rl ident
-	/( alpha | '_' ) ( alpha | digit | '_' )*/
+	/"'"? ( alpha | '_' ) ( alpha | digit | '_' )*/
 
 rl number
 	/ digit+ /
@@ -10,28 +10,19 @@ rl number
 rl hex_number
 	/ '0x' [0-9a-fA-F]+ /
 
-rl hex_char
-	/ '0x' [0-9a-fA-F]{2}  /
-
 rl NL / '\n' /
 
-rl c_comment 
+rl block_comment 
 	/ '/*' ( any | NL )* :>> '*/' /
 
-rl cpp_comment
+rl line_comment
 	/ '//' [^\n]* NL /
 
-rl ruby_comment
-	/ '#' [^\n]* NL /
+rl char_literal
+	/ "'" ([^\\\n] | '\\' (any | NL)) "'" /
 
-rl s_literal
-	/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
-
-rl d_literal
+rl string_literal
 	/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
-
-rl host_re_literal
-	/ '/' ([^/\\] | NL | '\\' (any | NL))* '/' /
 
 namespace inline
 	lex 
@@ -41,14 +32,13 @@ namespace inline
 
 		token ident /ident/
 		token number /digit+/
-		token hex_number /'0x' [0-9a-fA-F]+/
-		token dec_number /'0x' [0-9a-fA-F]+/
+		token hex_number /hex_number/
 
 		token comment
-			/ c_comment | cpp_comment /
+			/ block_comment | line_comment /
 
 		token string
-			/ s_literal | d_literal /
+			/ char_literal | string_literal /
 
 		token whitespace
 			/ ( [ \t] | NL )+ /
@@ -107,23 +97,17 @@ namespace host
 
 		rl NL / '\n' /
 
-		rl s_literal
-			/ "'" ([^'\\\n] | '\\' (any | NL))* "'" /
-
-		rl d_literal
-			/ '"' ([^"\\] | NL | '\\' (any | NL))* '"' /
-
 		literal `define `=
 
-		token ident /ident "'"?/
+		token ident /ident/
 		token number /digit+/
-		token hex_number /'0x' [0-9a-fA-F]+/
+		token hex_number /hex_number/
 
 		token comment
-			/ c_comment | cpp_comment /
+			/ block_comment | line_comment /
 
 		token string
-			/ s_literal | d_literal /
+			/ char_literal | string_literal /
 
 		token whitespace
 			/ ( [ \t] | NL )+ /
