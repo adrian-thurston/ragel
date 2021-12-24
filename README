@@ -1,51 +1,23 @@
-                     Colm.Net Suite of Programs
-                     ==========================
-
-This package contains the Colm Programming Language, Ragel State Machine
-Compiler 7.0+, and supporting libraries.
+                     Ragel State Machine Compiler
+                     ============================
 
 DEPENDENCIES
 ============
 
-This package has no external dependencies, other than usual autotools and C/C++
-compiler programs.
+* The Colm Programming Language. There is a specific version required,
+  which is specified in configure.ac. See EXPECTED_COLM_VER.
 
-For the program:
-
-    make libtool gcc g++ autoconf automake
-
-For the docucumentation:
-
- * asciidoc
- * fig2dev
-
+* autotools and C/C++ compilers:
+  make libtool gcc g++ autoconf automake
 
 BUILDING
 ========
 
-Colm is built in the usual autotool way:
+Ragel is built in the usual autotools way:
 
 $ ./autogen
-$ ./configure
+$ ./configure --prefix=$PREFIX --with-colm=$COLM_INSTALL_PATH
 $ make
 $ make install
 
-RUN-TIME DEPENDENCIES
-=====================
-
-The colm program depends on GCC at runtime. It produces a C program as output,
-then compiles and links it with a runtime library. The compiled program depends
-on the colm library.
-
-Notes on RUNNING
-================
-
-To find the includes and the runtime library to pass to GCC, colm looks at
-argv[0] to decide if it is running out of the source tree. If it is, then the
-compile and link flags are derived from argv[0]. Otherwise, it uses the install
-location (prefix) to construct the flags.
-
-SYNTAX HIGHLIGHTING
-===================
-
-There are vim syntax definition files colm.vim and ragel.vim
+Consult the Dockerfile for an example of building colm and ragel.
