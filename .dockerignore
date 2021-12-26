@@ -1,0 +1,14 @@
+# Docker
+**/.dockerignore
+**/*Dockerfile
+
+# Circle-ci
+**/*circle.yml
+
+# Vagrant
+**/*Vagrantfile
+**/.vagrant/
+
+# Vim swap files
+**/.*.sw[po]
+
