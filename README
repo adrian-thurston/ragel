@@ -4,20 +4,28 @@
 DEPENDENCIES
 ============
 
-* The Colm Programming Language. There is a specific version required,
-  which is specified in configure.ac. See EXPECTED_COLM_VER.
-
-* autotools and C/C++ compilers:
-  make libtool gcc g++ autoconf automake
+Ragel depends on the Colm Programming Language. For now, the two packages move
+in close lockstep. If building master of ragel, generally, the master branch of
+colm is required. For releases, the specific version of colm needed is in
+EXPECTED_COLM_VER in configure.ac.
 
 BUILDING
 ========
 
-Ragel is built in the usual autotools way:
+Ragel is built with autotools. If building from revision control you need to
+run autogen.sh. Then you can configure and make.
 
-$ ./autogen
+$ ./autogen.sh
 $ ./configure --prefix=$PREFIX --with-colm=$COLM_INSTALL_PATH
 $ make
-$ make install
 
-Consult the Dockerfile for an example of building colm and ragel.
+There are three dockerfiles that demonstrate installing dependencies and
+building:
+
+* full.Dockerfile installs all dependencies, including testing dependencies,
+  builds master, and does full testing.
+
+* master.Dockerfile does a basic build from master without testing.
+
+* release.Dockerfile builds and installs the release tarballs.
+
