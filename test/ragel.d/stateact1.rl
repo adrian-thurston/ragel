@@ -1,5 +1,6 @@
 /*
  * @LANG: indep
+ * @NEEDS_EOF: yes
  *
  * Test in and out state actions.
  */
@@ -44,4 +45,5 @@ b2
 c1
 c2
 b1
+b2
 FAIL

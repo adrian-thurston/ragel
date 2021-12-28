@@ -30,6 +30,7 @@ void test( int min, int max, const char *str )
 	int cs;
 	const char *p = str;
 	const char *pe = str + strlen( str ) + 1;
+	const char *eof = pe;
 	int c = 0, seen = 0;
 
 	cout << "run " << str << " " << min << " " << max << ":";

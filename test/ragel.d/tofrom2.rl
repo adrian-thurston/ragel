@@ -62,7 +62,8 @@ void init()
 void exec( char *data, int len )
 {
 	char *p = data;
-	char *pe = data + len;
+	const char *pe = data + len;
+	const char *eof = pe;
 	%% write exec;
 }
 
@@ -70,6 +71,8 @@ void finish( )
 {
 	if ( cs < atoi_first_final )
 		printf( "-> FAIL\n" );
+	else
+		printf( "-> ACCEPT\n" );
 }
 
 char *inp[] = {
@@ -103,6 +106,8 @@ to on 49
 from on 10
 1
 to on 10
+from on 0
+-> ACCEPT
 from on 49
 to on 49
 from on 50
@@ -110,6 +115,8 @@ to on 50
 from on 10
 12
 to on 10
+from on 0
+-> ACCEPT
 from on 50
 to on 50
 from on 50
@@ -125,6 +132,8 @@ to on 50
 from on 10
 222222
 to on 10
+from on 0
+-> ACCEPT
 from on 43
 to on 43
 from on 50
@@ -138,6 +147,8 @@ to on 51
 from on 10
 2123
 to on 10
+from on 0
+-> ACCEPT
 from on 45
 to on 45
 from on 57
@@ -147,6 +158,8 @@ to on 57
 from on 10
 -99
 to on 10
+from on 0
+-> ACCEPT
 from on 45
 to on 45
 from on 49
@@ -162,6 +175,8 @@ to on 49
 from on 10
 -12321
 to on 10
+from on 0
+-> ACCEPT
 from on 50
 to on 50
 from on 49
