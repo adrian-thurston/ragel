@@ -36,7 +36,7 @@ struct Scanner
 
 	action to_act { 
 		cout << "to:   fc = ";
-		if ( fc == '\'' )
+		if ( fc == '\'' || fc <= 32 )
 			cout << (int)fc;
 		else
 			cout << fc;
@@ -47,7 +47,7 @@ struct Scanner
 		if ( p == eof )
 			cout << "EOF";
 		else {
-			if ( fc == '\'' )
+			if ( fc == '\'' || fc <= 32 )
 				cout << (int)fc;
 			else
 				cout << fc;
@@ -61,11 +61,11 @@ struct Scanner
 	main := |*
 
 	# Single and double literals.
-	( 'L'? "'" ( [^'\\\n] | /\\./ )* "'" ) $~ to_act $* from_act;
-	( 'L'? '"' ( [^"\\\n] | /\\./ )* '"' ) $~ to_act $* from_act;
+	( 'L'? "'" ( [^'\\\n] | /\\./ )* "'" ) $~ to_act $* from_act => { cout << "-> single" << endl; };
+	( 'L'? '"' ( [^"\\\n] | /\\./ )* '"' ) $~ to_act $* from_act => { cout << "-> double" << endl; };
 
 	# Identifiers
-	( [a-zA-Z_] [a-zA-Z0-9_]* ) $~ to_act $* from_act;
+	( [a-zA-Z_] [a-zA-Z0-9_]* ) $~ to_act $* from_act => { cout << "-> ident" << endl; };
 
 	# Floating literals.
 	fract_const = digit* '.' digit+ | digit+ '.';
@@ -73,7 +73,7 @@ struct Scanner
 	float_suffix = [flFL];
 
 	( fract_const exponent? float_suffix? |
-		digit+ exponent float_suffix? ) $~ to_act $* from_act;
+		digit+ exponent float_suffix? ) $~ to_act $* from_act => { cout << "-> float" << endl; };
 	
 	# Integer decimal. Leading part buffered by float.
 	( ( '0' | [1-9] [0-9]* ) [ulUL]{0,3} ) $~ to_act $* from_act;
@@ -88,14 +88,13 @@ struct Scanner
 	( '...' ) $~ to_act $* from_act;
 
 	# Single char symbols.
-	( punct - [_"'] ) $~ to_act $* from_act;
+	( punct - [_"'] ) $~ to_act $* from_act => { cout << "-> symbol" << endl; };
 
 	# Comments and whitespace.
 	( '/*' ) $~ to_act $* from_act { fgoto c_comm; };
 	( '//' ) $~ to_act $* from_act { fgoto cxx_comm; };
 
-	( any - 33..126 )+ $~ to_act $* from_act;
-
+	( any - 33..126 )+ $~ to_act $* from_act => { cout << "-> any" << endl; };
 	*|;
 }%%
 
@@ -154,23 +153,27 @@ int main()
 }
 
 ##### OUTPUT #####
-from: fc = a ts = 0
+from: fc = a ts = -1
 to:   fc = a ts = 0
-from: fc =   ts = 0
+from: fc = 32 ts = 0
+-> ident
 to:   fc = a ts = -1
-from: fc =   ts = 1
-to:   fc =   ts = 1
+from: fc = 32 ts = -1
+to:   fc = 32 ts = 1
 from: fc = b ts = 1
-to:   fc =   ts = -1
-from: fc = b ts = 2
+-> any
+to:   fc = 32 ts = -1
+from: fc = b ts = -1
 to:   fc = b ts = 2
-from: fc =   ts = 2
+from: fc = 32 ts = 2
+-> ident
 to:   fc = b ts = -1
-from: fc =   ts = 3
-to:   fc =   ts = 3
+from: fc = 32 ts = -1
+to:   fc = 32 ts = 3
 from: fc = 0 ts = 3
-to:   fc =   ts = -1
-from: fc = 0 ts = 4
+-> any
+to:   fc = 32 ts = -1
+from: fc = 0 ts = -1
 to:   fc = 0 ts = 4
 from: fc = . ts = 4
 to:   fc = . ts = 4
@@ -178,37 +181,38 @@ from: fc = 9 ts = 4
 to:   fc = 9 ts = 4
 from: fc = 8 ts = 4
 to:   fc = 8 ts = 4
-from: fc =   ts = 4
+from: fc = 32 ts = 4
+-> float
 to:   fc = 8 ts = -1
-from: fc =   ts = 8
-to:   fc =   ts = 8
+from: fc = 32 ts = -1
+to:   fc = 32 ts = 8
 from: fc = / ts = 8
-to:   fc =   ts = -1
-from: fc = / ts = 9
+-> any
+to:   fc = 32 ts = -1
+from: fc = / ts = -1
 to:   fc = / ts = 9
 from: fc = * ts = 9
 to:   fc = * ts = -1
-from: fc = 
- ts = -1
-to:   fc = 
- ts = -1
+from: fc = 10 ts = -1
+to:   fc = 10 ts = -1
 from: fc = 9 ts = -1
 to:   fc = 9 ts = -1
-from: fc =   ts = -1
-to:   fc =   ts = -1
+from: fc = 32 ts = -1
+to:   fc = 32 ts = -1
 from: fc = * ts = -1
 to:   fc = * ts = -1
 from: fc = / ts = -1
 to:   fc = / ts = -1
-from: fc = 39 ts = 16
+from: fc = 39 ts = -1
 to:   fc = 39 ts = 16
 from: fc = \ ts = 16
 to:   fc = \ ts = 16
 from: fc = 39 ts = 16
 to:   fc = 39 ts = 16
 from: fc = 39 ts = 16
+-> single
 to:   fc = 39 ts = -1
-from: fc = / ts = 20
+from: fc = / ts = -1
 to:   fc = / ts = 20
 from: fc = / ts = 20
 to:   fc = / ts = -1
@@ -216,11 +220,9 @@ from: fc = h ts = -1
 to:   fc = h ts = -1
 from: fc = i ts = -1
 to:   fc = i ts = -1
-from: fc = 
- ts = -1
-to:   fc = 
- ts = -1
-from: fc = t ts = 25
+from: fc = 10 ts = -1
+to:   fc = 10 ts = -1
+from: fc = t ts = -1
 to:   fc = t ts = 25
 from: fc = h ts = 25
 to:   fc = h ts = 25
@@ -230,14 +232,12 @@ from: fc = r ts = 25
 to:   fc = r ts = 25
 from: fc = e ts = 25
 to:   fc = e ts = 25
-from: fc = 
- ts = 25
+from: fc = 10 ts = 25
+-> ident
 to:   fc = e ts = -1
-from: fc = 
- ts = 30
-to:   fc = 
- ts = 30
+from: fc = 10 ts = -1
+to:   fc = 10 ts = 30
 from: fc = EOF ts = 30
-to:   fc = 
- ts = -1
-from: fc = EOF ts = 31
+-> any
+to:   fc = 10 ts = -1
+from: fc = EOF ts = -1

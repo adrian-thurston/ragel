@@ -117,7 +117,8 @@ void LongestMatch::runLongestMatch( ParseData *pd, FsmAp *graph )
 	FsmRes res = FsmAp::isolateStartState( graph );
 	graph = res.fsm;
 	graph->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
-	graph->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
+	graph->startFsmAction( pd->setTokStartOrd, pd->setTokStart );
+
 	if ( maxItemSetLength > 1 ) {
 		/* The longest match action switch may be called when tokens are
 		 * matched, in which case act must be initialized, there must be a
@@ -378,7 +379,7 @@ FsmRes LongestMatch::buildBaseNfa( ParseData *pd )
 		return fsm;
 
 	fsm->startState->toStateActionTable.setAction( pd->initTokStartOrd, pd->initTokStart );
-	fsm->startState->fromStateActionTable.setAction( pd->setTokStartOrd, pd->setTokStart );
+	fsm->startFsmAction( pd->setTokStartOrd, pd->setTokStart );
 
 	KeyOps *keyOps = pd->fsmCtx->keyOps;
 
