@@ -44,16 +44,24 @@ AC_ARG_WITH(colm,
 	[
 		COLM="$withval/bin/colm"
 		COLM_WRAP="$withval/bin/colm-wrap"
-		CPPFLAGS="-I$withval/include ${CPPFLAGS}"
 		CPPFLAGS="-I$withval/include/aapl ${CPPFLAGS}"
-		LDFLAGS="-L$withval/lib ${LDFLAGS}"
-		LIBCOLM_LA="$withval/lib/libcolm.la"
-		LIBFSM_LA="$withval/lib/libfsm.la"
 		COLM_SHARE="$withval/share/colm"
 	],
 	[]
 )
 
+AC_CHECK_LIB(
+	[colm],
+	[colm_run_program],
+	[LIBCOLM_LA=-lcolm],
+	[AC_ERROR([libcolm is required to build ragel])]
+)
+AC_CHECK_LIB(
+	[fsm],
+	[hostLangAsm],
+	[LIBFSM_LA=-lfsm],
+	[AC_ERROR([libfsm is required to build ragel])]
+)
 AC_CHECK_FILES(
 	[$COLM],
 	[],
