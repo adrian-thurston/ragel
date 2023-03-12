@@ -59,6 +59,26 @@ AC_CHECK_FILES(
 	[],
 	[AC_ERROR([colm is required to build ragel])]
 )
+
+dnl If the .la files are present use those, otherwise locate the libs with AC_CHECK_LIB.
+AC_CHECK_FILES(
+	[$LIBCOLM_LA $LIBFSM_LA],
+	[],
+	[
+		AC_CHECK_LIB(
+			[colm],
+			[colm_run_program],
+			[LIBCOLM_LA=-lcolm],
+			[AC_ERROR([libcolm is required to build ragel])]
+		)
+		AC_CHECK_LIB(
+			[fsm],
+			[libfsm_present],
+			[LIBFSM_LA=-lfsm],
+			[AC_ERROR([libfsm is required to build ragel])]
+		)
+	]
+)
 AC_SUBST(COLM)
 AC_SUBST(COLM_WRAP)
 AC_SUBST(COLM_SHARE)
