@@ -395,7 +395,10 @@ bool InputData::checkLastRef( InputItem *ii )
 	 * 2. Fully process that machine, mark as processed.
 	 * 3. Move forward through input items until no longer 
 	 */
-	if ( ii->section != 0 && ii->section->lastReference == ii ) {
+	if ( ii->section == 0 ) {
+		ii->processed = true;
+	}
+	else if ( ii->section->lastReference == ii ) {
 		/* Fully Process. */
 		ParseData *pd = ii->pd;
 
@@ -425,27 +428,28 @@ bool InputData::checkLastRef( InputItem *ii )
 		/* Mark all input items referencing the machine as processed. */
 		InputItem *toMark = lastFlush;
 		while ( true ) {
-			toMark->processed = true;
+			if ( toMark->pd == 0 || toMark->pd == pd )
+				toMark->processed = true;
 
 			if ( toMark == ii )
 				break;
 
 			toMark = toMark->next;
 		}
+	}
 
-		/* Move forward, flushing input items until we get to an unprocessed
-		 * input item. */
-		while ( lastFlush != 0 && lastFlush->processed ) {
-			verifyWriteHasData( lastFlush );
+	/* Move forward, flushing input items until we get to an unprocessed
+	 * input item. */
+	while ( lastFlush != 0 && lastFlush->processed ) {
+		verifyWriteHasData( lastFlush );
 
-			if ( errorCount > 0 )
-				return false;
+		if ( errorCount > 0 )
+			return false;
 
-			/* Flush out. */
-			writeOutput( lastFlush );
+		/* Flush out. */
+		writeOutput( lastFlush );
 
-			lastFlush = lastFlush->next;
-		}
+		lastFlush = lastFlush->next;
 	}
 	return true;
 }
