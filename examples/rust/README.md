@@ -2,7 +2,7 @@
 
 This directory contains examples of building Rust compilers with Ragel.
 
-#Contibution
+# Contibution
 
 Please consider the following build system-related constraints when adding
 examples of your own, to seamlessly integrate your examples into build process.
