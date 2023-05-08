@@ -13,7 +13,6 @@ else
     .INTERMEDIATE: %.rs
 endif
 
-$(info [BUILD] Intermediate $(.INTERMEDIATE))
 $(info [BUILD] Executables: $(EXECUTABLES))
 
 all: $(EXECUTABLES)
