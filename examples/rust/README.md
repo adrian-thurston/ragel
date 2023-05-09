@@ -1,6 +1,6 @@
 # Ragel source examples for Rust
 
-This directory contains examples of building Rust compilers with Ragel.
+This directory contains examples of building Rust parsers with Ragel.
 
 # Contibution
 
