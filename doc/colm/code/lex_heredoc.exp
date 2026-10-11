@@ -1,0 +1,5 @@
+cat reads up to END:
+|   Dear reader,
+| END is not alone on this line.
+grep reads up to STOP:
+| END

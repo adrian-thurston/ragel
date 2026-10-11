@@ -1,0 +1,34 @@
+lex
+	literal `if
+	token id /[a-z]+/
+	token number /[0-9]+/
+	token hex /[0-9a-f]+/
+	ignore /space+/
+end
+
+def item
+	[`if]
+|	[id]
+|	[number]
+|	[hex]
+
+def items
+	[item*]
+
+parse Items: items[ stdin ]
+
+if ( ! Items ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for I: item in Items {
+	if match I [`if]
+		print( "keyword: ", $I, "\n" )
+	elsif match I [id]
+		print( "id: ", $I, "\n" )
+	elsif match I [number]
+		print( "number: ", $I, "\n" )
+	else
+		print( "hex: ", $I, "\n" )
+}

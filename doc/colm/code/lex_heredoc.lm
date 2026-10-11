@@ -1,0 +1,47 @@
+# The name that ends the here-document being read.
+global HereEnd: str = ""
+
+lex
+	literal `<<
+	token word /[a-z]+/
+	token nl /'\n'/ -ni
+	ignore /[ \t]+/
+
+	token here_name /[A-Z]+/
+	{
+		HereEnd = match_text
+		input->push( make_token( typeid<here_name>, input->pull( match_length ) ) )
+	}
+end
+
+lex
+	token here_end //
+
+	token here_line /[^\n]* '\n'/
+	{
+		Line: str = input->pull( match_length )
+		if ( Line == HereEnd + "\n" )
+			input->push( make_token( typeid<here_end>, Line ) )
+		else
+			input->push( make_token( typeid<here_line>, Line ) )
+	}
+end
+
+def command
+	[word `<< here_name nl here_line* here_end]
+
+def script
+	[command*]
+
+parse Script: script[ stdin ]
+
+if ( ! Script ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for C: command in Script {
+	print( $C.word, " reads up to ", $C.here_name, ":\n" )
+	for L: here_line in C
+		print( "| ", L )
+}

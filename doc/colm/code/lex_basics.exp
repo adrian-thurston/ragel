@@ -1,0 +1,8 @@
+word: apples
+word: pears
+word: plums
+number: 12
+number: 7
+# A shopping list.
+apples 12
+(pears (7 plums))

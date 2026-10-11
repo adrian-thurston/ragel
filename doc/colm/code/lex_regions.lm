@@ -1,0 +1,28 @@
+# Names, the equals sign and the spaces around them.
+lex
+	token key /[a-z]+/
+	literal `=
+	ignore /[ \t\n]+/
+end
+
+# The rest of a line.
+lex
+	token value /[^\n]+/
+	token nl /'\n'/
+end
+
+def setting
+	[key `= value nl]
+
+def settings
+	[setting*]
+
+parse Settings: settings[ stdin ]
+
+if ( ! Settings ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: setting in Settings
+	print( $S.key, " is '", $S.value, "'\n" )

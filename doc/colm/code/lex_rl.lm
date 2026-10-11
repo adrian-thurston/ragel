@@ -1,0 +1,32 @@
+rl letter /alpha | '_'/
+
+lex
+	token id /letter ( letter | digit )*/
+	token number /digit+/
+	token version /number '.' number/
+	ignore /space+/
+end
+
+def item
+	[id]
+|	[number]
+|	[version]
+
+def items
+	[item*]
+
+parse Items: items[ stdin ]
+
+if ( ! Items ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for I: item in Items {
+	if match I [id]
+		print( "id: ", $I, "\n" )
+	elsif match I [number]
+		print( "number: ", $I, "\n" )
+	else
+		print( "version: ", $I, "\n" )
+}

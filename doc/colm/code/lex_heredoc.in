@@ -1,0 +1,7 @@
+cat << END
+  Dear reader,
+END is not alone on this line.
+END
+grep << STOP
+END
+STOP

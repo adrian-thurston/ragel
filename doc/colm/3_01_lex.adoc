@@ -1,6 +1,365 @@
-Lex
-===
+= Lexical analysis
 
-== TODO
+A colm program that parses text has two parts that work together. The
+scanner reads the input and breaks it into tokens: names, numbers,
+punctuation. The parser builds a tree from the tokens, following the grammar.
+It asks the scanner for the next token each time it needs one.
 
+This chapter covers the scanner: how to define tokens, how to give a pattern
+a name, how the scanner picks a token when several patterns match, how to scan
+different parts of the input with different patterns, and how to run code
+when a token is read. The grammar itself, written with `def`, is the subject
+of xref:3_02_parse.adoc[the parsing chapter].
 
+== Tokens, ignores and literals
+
+Tokens are defined in a `lex` block, with three kinds of definition. A
+pattern is written between two slashes.
+
+* `token NAME /PATTERN/` defines a token called `NAME`.
+* `ignore /PATTERN/` defines text the scanner reads but doesn't pass to the
+  parser as a token, such as whitespace and comments. A `def` never names it.
+* `literal` defines tokens for fixed text. Each is written as a backtick
+  followed by the text, which runs up to the next space, tab, line break
+  or `]`: `+literal `( `)+` defines the tokens `(` and `)`.
+
+A `def` uses a token by its name, and a literal by its backtick form. Every
+literal that a `def` uses must be defined by a `literal` statement. Colm
+reports an `unknown type` error for one that isn't.
+
+This program reads a list of words and numbers, which can be grouped in
+parentheses, and skips whitespace and comments that start with `+#+`:
+
+[source,chapel]
+.lex_basics.lm
+----
+include::code/lex_basics.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_basics.in[]
+----
+
+and prints:
+
+----
+include::code/lex_basics.exp[]
+----
+
+The last three lines are the whole tree, printed with `print( Items )`. Colm
+keeps ignored text in the tree, so printing a tree gives back the text it was
+built from, comments and line breaks included. `$W` is the text of `W` without
+the ignored text around it. Printing `W` itself can also print ignored text
+next to the word, such as the space after it.
+
+An `ignore` has to be inside a `lex` block. A `token` or `literal` can be
+outside one: <<regions>> explains what that means.
+
+== Named regular languages
+
+A pattern is a regular expression. The table shows the parts of a pattern
+used most. `x` and `y` stand for any pattern.
+
+[cols="2,3"]
+|===
+| Pattern | Matches
+
+| `'abc'` or `"abc"`
+| the text `abc`
+
+| `+'abc'i+`
+| `abc` in upper or lower case, `aBC` for example
+
+| `'\n'`, `'\t'`
+| a newline, a tab
+
+| `[abc]`, `[a-z]`
+| one of the characters listed, or one in the range
+
+| `[^abc]`
+| any one character not listed
+
+| `'a' .. 'z'`
+| any one character from `a` to `z`
+
+| `^'a'`
+| any one character but `a`
+
+| `any`
+| any one character
+
+| `x y` or `x . y`
+| `x` followed by `y`
+
+| `x \| y`
+| `x` or `y`
+
+| `x & y`
+| text that matches both `x` and `y`
+
+| `x - y`
+| text that matches `x` but not `y`
+
+| `x*`, `x+`, `x?`
+| `x` zero or more times, one or more times, zero times or once
+
+| `x{3}`, `x{2,}`, `x{,2}`, `x{2,3}`
+| `x` exactly three times, two or more times, up to two times, two or three
+  times
+
+| `( x )`
+| `x`, grouped
+|===
+
+Colm has names for common sets of characters:
+
+[cols="1,3"]
+|===
+| Name | Characters
+
+| `alpha` | `A` to `Z` and `a` to `z`
+| `digit` | `0` to `9`
+| `alnum` | `alpha` and `digit`
+| `lower`, `upper` | `a` to `z`, `A` to `Z`
+| `xdigit` | `0` to `9`, `a` to `f` and `A` to `F`
+| `space` | space, tab, newline, vertical tab, form feed and carriage return
+| `punct` | the printable characters that are not letters, digits or space
+| `graph` | the printable characters but space, `!` to `~`
+| `print` | `graph` and space
+| `cntrl` | the control characters, 0 to 31 and 127
+| `ascii` | characters 0 to 127
+|===
+
+Text in a pattern has to be quoted. A bare word is a name. `rl` gives a
+pattern a name, so that other patterns can use it:
+
+[source,chapel]
+----
+rl letter /alpha | '_'/
+----
+
+A name has to be defined before a pattern uses it. A token's name can be used
+in a pattern as well, like a name defined with `rl`.
+
+The difference between `rl` and `token` is that an `rl` is not a token. The
+scanner never matches it on its own, and a `def` can't use it. It is only a
+part of other patterns. An `rl` can be defined inside a `lex` block or outside
+one, and in both cases the patterns that follow it can use it.
+
+In this program, the `id` token is made from the `letter` pattern and the
+`digit` set, and the `version` token is made from the `number` token:
+
+[source,chapel]
+.lex_rl.lm
+----
+include::code/lex_rl.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_rl.in[]
+----
+
+and prints:
+
+----
+include::code/lex_rl.exp[]
+----
+
+`14.2` is one `version` token, not a `number`, a dot and another `number`.
+The next section explains why.
+
+== How the scanner chooses a token
+
+Often more than one pattern matches at the same point in the input. In the
+last example, both `number` and `version` match the start of `14.2`. The
+scanner decides between them by two rules:
+
+. The pattern that matches the longest text wins. `version` matches all of
+  `14.2`, but `number` only `14`.
+. When patterns match text of the same length, the pattern defined first in
+  the `lex` block wins.
+
+A literal is a pattern too, and the same rules apply to it. This matters for
+keywords, which usually match the identifier pattern as well. This program
+has a keyword, `if`, and three tokens whose patterns overlap:
+
+[source,chapel]
+.lex_choose.lm
+----
+include::code/lex_choose.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_choose.in[]
+----
+
+and prints:
+
+----
+include::code/lex_choose.exp[]
+----
+
+* `if` matches the literal and `id`, with the same length. The literal is
+  defined first, so `if` is a keyword. If the literal came after `token id`,
+  the scanner would read `if` as an `id`, and the program would have no
+  keyword at all. Define keywords before the identifier token.
+* `iffy` starts with `if`, but `id` matches all four characters, so it is an
+  `id`.
+* `12` matches `number` and `hex`, with the same length. `number` is defined
+  first.
+* `12ab` matches `hex` for all four characters, but `number` only for two.
+* `abc` matches `id` and `hex`, with the same length. `id` is defined first.
+
+Ignore patterns take part in the same choice. With a `+#+` token and an
+ignore pattern for `+#+` followed by letters, `+#abc+` is ignored and `+#+`
+alone is a token.
+
+The scanner chooses from all the patterns of the `lex` block, whether or not
+the parser can use the token that wins. In this program, `if` is a keyword
+again, and the grammar wants identifiers:
+
+[source,chapel]
+----
+lex
+	literal `if
+	token id /[a-z]+/
+	ignore /space+/
+end
+
+def names
+	[id*]
+----
+
+Given `a if b`, the scanner reads `if` as the keyword, and the parse fails at
+`if`, though `id` matches it too. When no pattern matches at all, the parse
+fails as well.
+
+[[regions]]
+== Lexical regions
+
+Each `lex` block is a lexical region. A program can have several. When the
+parser asks for a token, the scanner uses only the regions that hold the
+tokens the parser can take at that point. The patterns of the other regions
+play no part. This way, different parts of the input can be scanned in
+different ways.
+
+A token or literal defined outside a `lex` block is in a region of its own.
+
+This program reads settings, one to a line. A setting is a name, an `=`, and
+then the rest of the line, whatever it holds. The name and the `=` are in the
+first region. The value and the line break are in the second region:
+
+[source,chapel]
+.lex_regions.lm
+----
+include::code/lex_regions.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_regions.in[]
+----
+
+and prints:
+
+----
+include::code/lex_regions.exp[]
+----
+
+After the `=`, the parser can take only a `value`, so the scanner reads it
+with the second region's patterns. There, only `value` and `nl` can match,
+so `x = y + 1` is a single token, and its second `=` is not the literal.
+After the line break, the parser can take a `key`, or the end of the input,
+so the scanner goes back to the first region.
+
+The second region is what makes this work. In a single `lex` block, `value`
+would match each whole line, which is longer than any `key`, so the scanner
+would read `name = Ada Lovelace` as one `value`, and the parse would fail at
+its start.
+
+The value doesn't start with the space that follows the `=`. After the
+scanner reads a token, it skips what that token's region ignores, and only
+then reads the next token. The `=` is in the first region, which ignores
+spaces, so the space after it is skipped before the value is read. To keep
+this text, put `-ni` after the token's pattern, or after a literal. Then the
+text after the token is read with the next token, in the next token's region,
+and only that region's ignores apply. The last example of this chapter uses
+`-ni`.
+
+Sometimes the parser can take tokens from more than one region. The scanner
+then tries those regions in turn. When no pattern in one region matches the
+input, it tries the next. Which region comes first depends on the grammar. If
+the token from the first region leads to a parse error later, the parser can
+go back and read the same text again in the next region.
+
+== Token actions
+
+A token can have an action: a block of code after its pattern, which runs each
+time the scanner matches the token. With an action, the token is not passed to
+the parser automatically. The action decides what the parser gets. This lets a
+program decide what a token is when the input is read, which a pattern alone
+can't do.
+
+When the action starts, the matched text is still in the input. In the action:
+
+* `match_text` is the matched text, and `match_length` its length.
+* `+input->pull( N )+` takes `N` characters off the input and returns them as a
+  string.
+* `make_token( typeid<T>, Text )` makes a token of type `T`, with `Text` as its
+  text. `T` doesn't have to be the token that matched.
+* `+input->push( Token )+` puts a token back at the front of the input. The
+  parser gets it next.
+
+An action that pulls the text and pushes nothing drops the token, so the
+parser never sees it. An action has to pull the matched text, though: if it
+doesn't, the scanner matches the same text again, and runs the action again,
+without end.
+
+An action can declare variables of its own. To use a variable declared at
+the top of the program, the variable has to be declared with `global`. A
+token with an empty pattern, `//`, never matches any input, so the scanner
+never makes one. Code has to make it with `make_token`, as the action in the
+next example does.
+
+This program reads shell-style here-documents. `cat << END` starts one, and it
+runs up to the first line that is `END` and nothing else. The word after `<<`
+picks the line that ends the document, so the end can't be a fixed pattern:
+
+[source,chapel]
+.lex_heredoc.lm
+----
+include::code/lex_heredoc.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_heredoc.in[]
+----
+
+and prints:
+
+----
+include::code/lex_heredoc.exp[]
+----
+
+The action of `here_name` stores the name in the global `HereEnd`. It then
+pulls the name off the input and pushes it back unchanged, as a `here_name`.
+
+Inside a here-document, the parser can take a `here_line` or a `here_end`, so
+the scanner uses the second region. `here_end` has an empty pattern, so the
+scanner reads every line as a `here_line`. The action of `here_line` compares
+the line with the stored name. If they are the same, it pushes the line as a
+`here_end`. Otherwise it pushes it as a `here_line`.
+
+`-ni` after the pattern of `nl` keeps the spaces at the start of the first
+line of each document. Without it, the scanner would skip them after the `nl`,
+since the first region ignores spaces, and the first line would be printed as
+`Dear reader,`.

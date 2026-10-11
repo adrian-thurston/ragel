@@ -1,0 +1,30 @@
+lex
+	literal `( `)
+	token word /[a-z]+/
+	token number /[0-9]+/
+	ignore /[ \t\n]+/
+	ignore /'#' [^\n]*/
+end
+
+def item
+	[word]
+|	[number]
+|	[`( item* `)]
+
+def items
+	[item*]
+
+parse Items: items[ stdin ]
+
+if ( ! Items ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for W: word in Items
+	print( "word: ", $W, "\n" )
+
+for N: number in Items
+	print( "number: ", $N, "\n" )
+
+print( Items )
