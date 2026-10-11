@@ -1,0 +1,41 @@
+lex
+	literal `* `+ `;
+	token id /[a-z]+/
+	ignore /space+/
+end
+
+def declaration
+	[id id `;]
+|	[id `* id `;]
+
+def term
+	[id `* term]
+|	[id]
+
+def expression
+	[term `+ expression]
+|	[term]
+
+def statement
+	[expression `;]
+
+redef statement
+	[declaration]
+|	[...]
+
+def program
+	[statement*]
+
+parse Program: program[ stdin ]
+
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: statement in Program {
+	if ( S.declaration )
+		print( "declaration: ", $S, "\n" )
+	else
+		print( "expression: ", $S, "\n" )
+}

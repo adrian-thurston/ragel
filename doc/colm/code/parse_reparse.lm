@@ -1,0 +1,48 @@
+# Names, the equals sign and the spaces around them.
+lex
+	token key /[a-z]+/
+	literal `=
+	ignore /[ \t\n]+/
+end
+
+# The rest of a line.
+lex
+	token value /[^\n]+/
+	token nl /'\n'/
+end
+
+# Numbers and the commas between them.
+lex
+	token number /[0-9]+/
+	literal `,
+	ignore /[ \t]+/
+end
+
+def setting
+	[key `= value nl]
+
+def settings
+	[setting*]
+
+def numbers
+	[number (`, number)*]
+
+parse Settings: settings[ stdin ]
+
+if ( ! Settings ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: setting in Settings {
+	parse List: numbers[ S.value ]
+	if ( List ) {
+		Total: int = 0
+		for N: number in List
+			Total = Total + atoi( $N )
+		print( $S.key, ": numbers, total ", Total, "\n" )
+	}
+	else {
+		print( $S.key, ": text '", $S.value, "'\n" )
+	}
+}
