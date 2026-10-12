@@ -1,0 +1,21 @@
+S: str = "Hello, colm"
+print( S, " is ", S.length, " bytes long\n" )
+
+# The first 5 bytes, and the rest from byte 7.
+print( S.prefix( 5 ), "|", S.suffix( 7 ), "\n" )
+
+print( toupper( S ), " ", tolower( S ), "\n" )
+
+# Numbers from text.
+N: int = atoi( "42" ) + 1
+print( N, " ", atoi( "12 apples" ), " ", atoi( "none" ), " ", atoo( "17" ), "\n" )
+
+# Text from a number.
+Text: str = "N is " + $N
+print( Text, ", and in brackets, [N]\n" )
+
+# An unset str is nil. An empty one is not.
+Unset: str
+Empty: str = ""
+if !Unset && Empty
+	print( "nil, and empty\n" )

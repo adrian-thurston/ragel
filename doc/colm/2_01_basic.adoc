@@ -1,4 +1,69 @@
-Basic Types
-===========
+= Basic Types
 
-== TODO
+This chapter covers the types that aren't trees, structs or collections:
+`int`, `bool`, `str` and `void`.
+
+[[int]]
+== int
+
+An `int` is a whole number, a signed machine word: 64 bits on a 64-bit
+machine, where `2147483647 * 4` is `8589934588`.
+xref:1_02_expressions.adoc[The expressions chapter] has the literals and the
+operators. `atoi` and `atoo` read an int from a `str`, as <<str,below>>, and
+`$N` gives an int's digits as a str.
+
+[[bool]]
+== bool
+
+A `bool` is `true` or `false`. Comparisons give one, and `!` turns it over.
+It prints as `1` or `0`. It is not an int: `I: int = true` is an error, and
+so is comparing an int with a bool, `comparison of different types`.
+
+[[str]]
+== str
+
+A `str` is text, as bytes. xref:1_02_expressions.adoc[The expressions
+chapter] has its literals, `pass:c[+]` and comparisons. A str is nil until it
+is set, and `""` is not nil.
+
+* `S.length` is its length in bytes. `+S->length+` is an error,
+  `arrow operator cannot be used to access this type`.
+* `S.prefix( N )` is its first `N` bytes. `S.suffix( N )` is the str from
+  byte `N` on, counting from 0. `N` goes from 0 to the length.
+* `toupper( S )` and `tolower( S )` give it in upper or lower case. They are
+  functions only: `S.toupper()` is an error,
+  `cannot resolve qualification toupper`.
+* `atoi( S )` reads a decimal number from the start of `S`, and gives 0 if
+  there is none. `atoo( S )` reads an octal one.
+
+`atoi`, `atoo`, `prefix` and `suffix` can be written either way: `S.atoi()`
+or `atoi( S )`, `S.prefix( 5 )` or `prefix( S, 5 )`. A method can't be called
+on a literal: `"17".atoi()` is a parse error, so use the function form there.
+
+`sprintf`, which writes an int into a str, is in
+xref:1_01_statements.adoc#printing[the statements chapter].
+
+This program uses the functions of a str:
+
+[source,chapel]
+.type_str.lm
+----
+include::code/type_str.lm[]
+----
+
+It prints:
+
+----
+include::code/type_str.exp[]
+----
+
+`atoo( "17" )` is 15, since 17 is octal. `S.suffix( 7 )` starts at the `c`
+of `colm`, byte 7.
+
+[[void]]
+== void
+
+`void` is the result type of a function that returns nothing, such as `show`
+in xref:1_02_expressions.adoc#cast[the expressions chapter's `expr_cast`].
+xref:0_05_fizzbuzz.adoc[FizzBuzz] and xref:1_04_functions.adoc[the functions
+chapter] say more about functions.
