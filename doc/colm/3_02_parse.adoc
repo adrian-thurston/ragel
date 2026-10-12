@@ -49,12 +49,19 @@ the literal with a backtick, as in `+`!`?+`, or put it in a def of its own and
 make the def optional, as the next example does.
 
 An element can have a label: `Name: type`. For a tree `T`, `T.Name` is the
-child that the label names. `T.type`, with a type's name, is the first child
-of `T` of that type. xref:3_01_lex.adoc#regions[The lexing chapter's
-`lex_regions`] prints `$S.key` this way. A child that isn't in the production
-of `T` is nil, so a test such as `if ( T.declaration )` tells which production
-`T` has. An optional child, `x?`, is always there, but has no text when `x` is
-absent. To test it, compare its text with `""`.
+child that the label names. An element written as a type's name alone, with
+no label and no operator, can be read by that name instead, unless the type
+is the def's own: `T.type` is the first such child of that type.
+xref:3_01_lex.adoc#regions[The lexing chapter's `lex_regions`] prints
+`$S.key` this way. A labelled element is read only by its label. To read an
+element with an operator, such as `x?` or `+x*+`, or one of the def's own
+type, such as the `term` in `+[id `* term]+`, give it a label, as the next
+example does with `Mark: urgent?`.
+
+A child that isn't in the production of `T` is nil, so a test such as
+`if ( T.declaration )` tells which production `T` has. An optional child,
+`x?`, is always there, but has no text when `x` is absent. To test it, label
+it and compare its text with `""`.
 
 A name after a production's closing bracket, as in `+[id] :Id+`, names the
 production. The `switch` statement, in xref:3_03_match.adoc[the chapter on
@@ -196,19 +203,24 @@ Colm builds an LALR(1) parser from the grammar. In many grammars, there are
 points where the parser could do more than one thing with the next token: it
 could shift the token or reduce, or reduce by one production or by another.
 Parser generators such as yacc report these points as conflicts. Colm
-doesn't.
-Where the parser could do more than one thing, it tries the alternatives in
-order. When it meets a parse error, it backs up to the last choice it can
+doesn't. Where the parser could do more than one thing, it tries the
+alternatives one at a time, in an order that colm fixes when it builds the
+parser. When it meets a parse error, it backs up to the last choice it can
 still change, and takes the next alternative there. Backing up undoes
 reductions, and puts tokens back into the input. They are scanned again,
 maybe in another region, as xref:3_01_lex.adoc#regions[the lexing chapter]
 explains.
 
-Some rules follow from this:
+Some things follow from this:
 
-* A production listed earlier is tried first. This is so when two
-  productions fit the same tokens, and when the parser can either reduce by
-  one production or shift a token for another.
+* Often, the production listed first is tried first. In `parse_order`,
+  below, `+a * b;+` fits both productions of `statement`, and the one listed
+  first wins. In the grammar of the next point, the parser tries `x` alone as
+  a `b` before `x y`, and `x y` first if the productions of `b` are swapped.
+  This is not a rule for every choice, though. Other productions of a def can
+  change the order. And without precedence statements, the operators in the
+  example of <<precedence,the precedence section>> group to the left,
+  whichever of their productions is listed first.
 * `x?`, `+x*+`, `x+`, `+x<*+` and `pass:c[x<+]` take as much as they can, and
   give back only what the rest of the production needs. Given `a b c`, where
   `first` and `second` are both an `id`, `+[first* second*]+` puts all three
@@ -228,9 +240,9 @@ def start
 	[b `y `;]
 ----
 +
-Given `x y ;`, `b` is `x`. A PEG parser, which also tries alternatives in
-order, keeps the first alternative that succeeds, so it would fail on
-`x y y ;`.
+Given `x y ;`, `b` is `x`. A PEG parser tries a rule's alternatives in the
+order they are listed, and keeps the first one that succeeds, so it would
+fail on `x y y ;`.
 * The parser can look any distance ahead. An error many tokens on can change
   a choice made at the start, as <<reject,the example for `reject`>> shows.
 
@@ -261,6 +273,7 @@ first, so the parser takes it. `++a * b + c;++` and `x;` can only be
 expressions. With the two productions of `statement` the other way round,
 `+a * b;+` is an expression.
 
+[[precedence]]
 == Precedence
 
 `left`, `right` and `nonassoc` give tokens a precedence level. Each is
@@ -415,10 +428,8 @@ statements, and trying their other productions, before the parse fails.
 
 `redef NAME` gives a def new productions, in place of the ones it had. Among
 them, `+[...]+` stands for the def's productions as they were, in the same
-order. Where `+[...]+` goes decides whether the new productions are tried
-before or after the old ones. Without `+[...]+`, the old productions are gone.
-This lets a program change a grammar from an included file without editing
-it.
+order. Without `+[...]+`, the old productions are gone. This lets a program
+change a grammar from an included file without editing it.
 
 The def must come before the `redef`. Otherwise, colm reports that the redef
 is not found. `+[...]+` can only be used in a `redef`. A def can be redefined
@@ -446,5 +457,7 @@ and prints the same:
 include::code/parse_redef.exp[]
 ----
 
-With `+[...]+` first, the expression is tried first, and `+a * b;+` is an
-expression.
+Putting the declaration before `+[...]+` makes the parser try it first. With
+`+[...]+` first, the expression is tried first, and `+a * b;+` is an
+expression. The order of the productions after a `redef` counts as it does in
+a `def`, and, as there, it doesn't decide every choice.
