@@ -113,6 +113,48 @@ used most. `x` and `y` stand for any pattern.
 | `x`, grouped
 |===
 
+A few less common operators are left out of the table above. Like the rest
+of colm's patterns, they come from ragel. This table lists them, and the ways
+to write a character by its code. With the two tables, every operator a
+pattern can have is covered.
+
+[cols="2,3"]
+|===
+| Pattern | Matches
+
+| `97`, `0x61`
+| the character with that code, here `a`. A code is decimal, or hex after a
+  lowercase `0x`, and runs from 0 to 255.
+
+| `97 .. 99`, `'a' .. 99`
+| any one character in the range, here `a` to `c`. Either end can be a code
+  or a quoted character. Inside `+[...]+`, digits are characters: `[97]` is
+  `9` or `7`.
+
+| `+x -- y+`
+| text that matches `x` and doesn't contain a match of `y` anywhere. See the
+  next section.
+
+| `x :> y`
+| `x` followed by `y`, where `x` stops at the first character that can start
+  `y`. See the next section.
+
+| `x :>> y`
+| `x` followed by `y`, where the match ends at the first complete `y`. See
+  the next section.
+
+| `x <: y`
+| `x` followed by `y`, where `x` takes every character it can. `y` can start
+  only on a character `x` can't take. See the next section.
+
+| `+x**+`
+| like `+x*+`, but each round of `x` goes on as long as it can. See the next
+  section.
+|===
+
+`:>`, `:>>` and `<:` bind like concatenation, from left to right, so in
+`+'/*' any* :>> '*/'+` the left side is `+'/*' any*+`. `+--+` binds like `-`.
+
 Colm has names for common sets of characters:
 
 [cols="1,3"]
@@ -215,6 +257,67 @@ include::code/lex_choose.exp[]
   first.
 * `12ab` matches `hex` for all four characters, but `number` only for two.
 * `abc` matches `id` and `hex`, with the same length. `id` is defined first.
+
+The longest match isn't always the text a token should have. A C comment
+runs from `+/*+` to the first `+*/+` after it, but by the first rule,
+`+'/*' any* '*/'+` runs from the first `+/*+` to the last `+*/+` in the input,
+and takes in all the text between. In `+'/*' any* :>> '*/'+`, the match ends
+at the first complete `+*/+`, and a `+*+` on its own inside the comment is
+fine. `+--+` can do the same. `+x - y+` removes only text that `y` matches
+whole, but `+x -- y+` removes text with a match of `y` anywhere in it, so
+`+'/*' ( any* -- '*/' ) '*/'+` reads the same comments as
+`+'/*' any* :>> '*/'+`.
+
+This program reads comments, strings in triple quotes, and words:
+
+[source,chapel]
+.lex_comment.lm
+----
+include::code/lex_comment.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_comment.in[]
+----
+
+and prints:
+
+----
+include::code/lex_comment.exp[]
+----
+
+* Each comment ends at its first `+*/+`, and the `+*+` inside the second
+  one doesn't end it. With plain concatenation in place of `:>>`, the first
+  comment would be `+/* one */ b /* two * three */+`.
+* Each string ends at its first `+"""+`, and the quotes around `hi` don't
+  end it. With `-` in place of `+--+`, or with a plain `+any*+`, the first
+  string would run to the last `+"""+` of the line.
+
+`:>` is the operator for an end that is a single character. In
+`+'//' any* :> '\n'+`, `+any*+` stops at the first newline, so the token is
+one line comment, where plain concatenation would run to the last newline
+in the input. The C++ grammar in colm's source tree reads `//` comments this
+way. For a longer end, `:>` gives up too soon. `+any*+` stops at the first
+`+*+`, so `+'/*' any* :> '*/'+` doesn't match `+/* a * b */+` at all. With
+`:>` in place of `:>>` in the last program, the parse fails at the second
+comment.
+
+`<:` gives the left side every character it can take. `+'a'* <: 'a' 'b'+`
+never matches `aab`, because every `a` goes to `+'a'*+`, and none is left
+for the `'a'` after it.
+
+`+x**+` reads the same as `+x*+` when `x` matches single characters:
+`+'a'**+` reads `aaa` from `aaab`, and `+[a-z]** 'ing'+` reads `singing`.
+When `x` matches longer text, `+**+` drops the ways of matching where a round
+of `x` ends though it could go on. `++( [a-z]+ )* 'ing'++` reads `singing`,
+but in `++( [a-z]+ )** 'ing'++`, a round that has started takes every letter,
+`ing` included, so the pattern matches only the text `ing`. In colm, use
+`+*+`. No program in colm's source tree uses `+**+`.
+
+None of these operators can make a match longer. Each only takes away ways
+of matching that plain concatenation, `-` or `+*+` would allow.
 
 Ignore patterns take part in the choice by the two rules too, but right
 after a token they go first. Before each match up to the next token, the
