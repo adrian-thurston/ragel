@@ -22,7 +22,8 @@ IN_FILES = \
 	8_03_performance.adoc 0_04_hello_world.adoc 1_03_control_flow.adoc \
 	2_02_list_map_struct_alias.adoc 3_04_undo.adoc 8_04_error_handling.adoc \
 	0_05_fizzbuzz.adoc 1_04_functions.adoc 2_03_def.adoc \
-	3_05_reduction.adoc 8_05_contributing.adoc
+	3_05_reduction.adoc 8_05_contributing.adoc \
+	3_06_send.adoc
 
 # The example programs, each with the output it prints (.exp) and the input
 # it reads (.in), if any. The test harness's manual suite runs them, and the
@@ -51,7 +52,14 @@ CODE = \
 	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in \
 	code/poker.lm            code/poker.exp \
 	code/reference.lm        code/reference.exp \
-	code/scope.lm            code/scope.exp
+	code/scope.lm            code/scope.exp \
+	code/send_end.lm         code/send_end.exp \
+	code/send_files.lm       code/send_files.exp \
+	code/send_include.lm     code/send_include.exp     code/send_include.in \
+	code/send_out.lm         code/send_out.exp \
+	code/send_pieces.lm      code/send_pieces.exp \
+	code/send_tree.lm        code/send_tree.exp \
+	code/send_trim.lm        code/send_trim.exp
 
 
 OUT_FILES = $(IN_FILES:.adoc=.html)

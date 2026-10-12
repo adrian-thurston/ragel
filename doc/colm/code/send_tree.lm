@@ -1,0 +1,42 @@
+lex
+	token number /[0-9]+/
+	token word /[a-z0-9]+/
+	ignore /space+/
+end
+
+def value
+	[number]
+|	[word]
+
+def values
+	[value*]
+
+# Prints each value, and whether it is a number or a word.
+void show( Name: str, Values: values )
+{
+	if ( ! Values ) {
+		print( Name, ": no tree\n" )
+	}
+	else {
+		for V: value in Values {
+			if ( V.number )
+				print( Name, ": number ", $V, "\n" )
+			else
+				print( Name, ": word ", $V, "\n" )
+		}
+	}
+}
+
+# A word whose text is digits. Scanned, the same text is a number.
+W: word = make_token( typeid<word>, "42" )
+
+P: parser<values> = new parser<values>()
+send P [W " 7"] eos
+show( "send", P->tree )
+
+T: parser<values> = new parser<values>()
+send_tree T [W " 7"] eos
+show( "send_tree", T->tree )
+
+parse_tree Parsed: values[ W " 7" ]
+show( "parse_tree", Parsed )

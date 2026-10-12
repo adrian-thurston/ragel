@@ -33,7 +33,8 @@ set(MANUAL_PAGES
 	8_03_performance 0_04_hello_world 1_03_control_flow
 	2_02_list_map_struct_alias 3_04_undo 8_04_error_handling
 	0_05_fizzbuzz 1_04_functions 2_03_def
-	3_05_reduction 8_05_contributing)
+	3_05_reduction 8_05_contributing
+	3_06_send)
 
 # The example programs, with their output (.exp) and input (.in), which the
 # pages include. Every page is rebuilt when one of them changes, which is
@@ -62,7 +63,14 @@ set(MANUAL_CODE
 	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in
 	code/poker.lm            code/poker.exp
 	code/reference.lm        code/reference.exp
-	code/scope.lm            code/scope.exp)
+	code/scope.lm            code/scope.exp
+	code/send_end.lm         code/send_end.exp
+	code/send_files.lm       code/send_files.exp
+	code/send_include.lm     code/send_include.exp     code/send_include.in
+	code/send_out.lm         code/send_out.exp
+	code/send_pieces.lm      code/send_pieces.exp
+	code/send_tree.lm        code/send_tree.exp
+	code/send_trim.lm        code/send_trim.exp)
 list(TRANSFORM MANUAL_CODE PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 set(MANUAL_HTML)
