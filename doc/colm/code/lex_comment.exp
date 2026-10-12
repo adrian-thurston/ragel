@@ -1,0 +1,8 @@
+word: a
+comment: /* one */
+word: b
+comment: /* two * three */
+word: c
+string: """ say "hi" """
+word: d
+string: """ e """

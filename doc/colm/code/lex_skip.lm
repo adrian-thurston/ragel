@@ -1,0 +1,18 @@
+lex
+	token word /[a-z]+/
+	ignore /space+/
+	ignore /'x'+/
+end
+
+def words
+	[word*]
+
+parse Words: words[ stdin ]
+
+if ( ! Words ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for W: word in Words
+	print( "word: ", $W, "\n" )
