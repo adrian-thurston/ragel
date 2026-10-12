@@ -24,9 +24,10 @@ IN_FILES = \
 	0_05_fizzbuzz.adoc 1_04_functions.adoc 2_03_def.adoc \
 	3_05_reduction.adoc 8_05_contributing.adoc
 
-# The example programs, each with the output it prints (.exp) and the input
-# it reads (.in), if any. The test harness's manual suite runs them, and the
-# pages include the programs and their output.
+# The example programs, each with the output it prints (.exp), and the input
+# it reads (.in) and the arguments it runs with (.args), if any. The test
+# harness's manual suite runs them, and the pages include the programs and
+# their output.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
 	code/figure_44.lm        code/figure_44.exp \
