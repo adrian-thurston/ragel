@@ -1,0 +1,16 @@
+lex
+	token word /[a-z]+/
+	ignore /[ \t\n]+/
+end
+
+def words
+	[word*]
+
+parse W: words[ stdin ]
+if ( !W )
+	exit( 1 )
+
+N: int = 0
+for X: word in W
+	N = N + 1
+print "[N] words

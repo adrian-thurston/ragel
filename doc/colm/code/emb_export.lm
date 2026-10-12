@@ -1,0 +1,28 @@
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `= `;
+	ignore /[ \t\n]+/
+end
+
+def pair
+	[Key: id `= Value: num `;]
+
+def config
+	[pair*]
+
+export Config: config
+export Error: str
+
+parse C: config[ stdin ]
+Config = C
+Error = error
+
+export str lookup( Key: str )
+{
+	for P: pair in Config {
+		if ( P.Key.data == Key )
+			return P.Value.data
+	}
+	return nil
+}

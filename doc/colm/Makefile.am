@@ -30,6 +30,11 @@ IN_FILES = \
 # manual suite runs them, and the pages include the programs and their output.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
+	code/emb_define.lm       code/emb_define.exp       code/emb_define.comp \
+	code/emb_export.lm       code/emb_export.exp       code/emb_export.in \
+	code/emb_export.host.cc \
+	code/emb_run.lm          code/emb_run.exp          code/emb_run.in \
+	code/emb_run.comp        code/emb_run.host.c \
 	code/figure_44.lm        code/figure_44.exp \
 	code/fizzbuzz.lm         code/fizzbuzz.exp \
 	code/hello_world.lm      code/hello_world.exp \
