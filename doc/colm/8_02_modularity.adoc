@@ -65,18 +65,21 @@ This holds for types, functions and globals. A def in a namespace can use a
 token defined at the top level, and a function in a namespace can call a
 top-level function, or read a top-level global.
 
-In `a::b::x`, the first part, `a`, is found the same way, starting where the
-name is written. Each later part is a namespace inside the one before it.
-`x` is then looked up in `b` only, not in the namespaces around it.
+In a type's name such as `a::b::x`, the first part, `a`, is found the same
+way, starting where the name is written. Each later part is a namespace
+inside the one before it. `x` is then looked up in `b` only, not in the
+namespaces around it.
 
 `root::` at the front of a type's name starts at the top level. `root::id` is
 the top-level `id`, even inside a namespace that has an `id` of its own.
 
-In a pattern, or in the brackets of a `cons`, a name used without a
-qualifier is looked up from somewhere else: first in the namespace of the type
-being matched or built, and then outwards from there. In a pattern that
-matches a `word::items`, `item` is the `item` of `word`, wherever the pattern
-is written.
+In a pattern, or in the brackets of a `cons`, a type's name or a literal used
+without a qualifier is looked up from somewhere else: first in the namespace
+of the type being matched or built, and then outwards from there. In a
+pattern that matches a `word::items`, `item` is the `item` of `word`,
+wherever the pattern is written. A variable or a function call in the
+brackets of a `cons` is found as anywhere else, from where the `cons` is
+written.
 
 A qualified type takes the repetition operators as any type does:
 `config::id+`, `+n1::n2::id*+`. A qualified name works wherever a type's name

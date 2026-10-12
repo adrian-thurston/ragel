@@ -36,8 +36,10 @@ set(MANUAL_PAGES
 	3_05_reduction 8_05_contributing)
 
 # The example programs, with their output (.exp) and input (.in), which the
-# pages include. Every page is rebuilt when one of them changes, which is
-# simpler than tracking which page includes which.
+# pages include. A file that an example includes is listed too. Its suffix
+# isn't .lm (the pages use .lmi), since the manual suite runs every .lm as an
+# example. Every page is rebuilt when one of them changes, which is simpler
+# than tracking which page includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
 	code/figure_44.lm        code/figure_44.exp
@@ -50,11 +52,11 @@ set(MANUAL_CODE
 	code/lex_heredoc.lm      code/lex_heredoc.exp      code/lex_heredoc.in
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in
+	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in
 	code/mod_include.lm      code/mod_include.exp      code/mod_include.in
 	code/mod_list.lmi
 	code/mod_namespace.lm    code/mod_namespace.exp    code/mod_namespace.in
 	code/mod_nested.lm       code/mod_nested.exp       code/mod_nested.in
-	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in
 	code/nested_scope.lm     code/nested_scope.exp
 	code/parse_commit.lm     code/parse_commit.exp     code/parse_commit.in
 	code/parse_def.lm        code/parse_def.exp        code/parse_def.in
