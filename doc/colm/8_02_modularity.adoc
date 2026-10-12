@@ -1,6 +1,185 @@
-Modularity
-==========
+= Namespaces and includes
 
-== TODO
+A namespace lets two grammars, or two parts of a program, use the same names
+without clashing. `include` splits a program across files. The two work
+together: a file included into a namespace defines its names in that
+namespace.
 
+== Namespaces
 
+`namespace NAME` is followed by definitions, and then by `end`. A namespace
+can hold `lex` blocks, defs, functions, iterators, globals, structs and
+contexts, aliases, precedence statements, other namespaces, and ``include``s.
+It can't hold statements, `redef` or `reduction`: colm reports a parse error
+for each, so they stay at the top level of the program.
+
+Inside a namespace, its names are used as they are. Outside it, they are
+qualified with the namespace's name: `word::items` is the `items` of the
+namespace `word`. Two namespaces can define the same names.
+
+This program reads lines of words followed by numbers. The words and the
+numbers each have a grammar of their own, in a namespace of their own, and
+both grammars use the names `item` and `items`. Each namespace has a function
+too:
+
+[source,chapel]
+.mod_namespace.lm
+----
+include::code/mod_namespace.lm[]
+----
+
+It reads this input:
+
+----
+include::code/mod_namespace.in[]
+----
+
+and prints:
+
+----
+include::code/mod_namespace.exp[]
+----
+
+Inside each namespace, `item` and `items` are its own. The top-level `line`
+names them `word::items` and `number::items`, and labels them `Words` and
+`Numbers`. Without the labels, `L.items` would give only the first of the
+two, since both types are named `items`, and a name after the dot can't be
+qualified. xref:3_02_parse.adoc[The parsing chapter] covers labels.
+
+From the top level, `NS::f()` calls the function `f` of the namespace `NS`,
+and `NS::G` reads or sets its global `G`. The program calls `word::count` and
+`number::total` this way.
+
+Each namespace's `lex` block is a lexical region of its own, as in
+xref:3_01_lex.adoc#regions[the lexing chapter]. So is the top-level one,
+which holds `nl`.
+
+A second `namespace NAME` block, later in the program, adds to the same
+namespace.
+
+== Finding a name
+
+A name used without a qualifier is looked up in the namespace it is written
+in, then in the namespace around that one, and so on out to the top level.
+This holds for types, functions and globals. A def in a namespace can use a
+token defined at the top level, and a function in a namespace can call a
+top-level function, or read a top-level global.
+
+In `a::b::x`, the first part, `a`, is found the same way, starting where the
+name is written. Each later part is a namespace inside the one before it.
+`x` is then looked up in `b` only, not in the namespaces around it.
+
+`root::` at the front of a type's name starts at the top level. `root::id` is
+the top-level `id`, even inside a namespace that has an `id` of its own.
+
+In a pattern, or in the brackets of a `cons`, a name used without a
+qualifier is looked up from somewhere else: first in the namespace of the type
+being matched or built, and then outwards from there. In a pattern that
+matches a `word::items`, `item` is the `item` of `word`, wherever the pattern
+is written.
+
+A qualified type takes the repetition operators as any type does:
+`config::id+`, `+n1::n2::id*+`. A qualified name works wherever a type's name
+does: in declarations, `parse`, `for`, patterns, `cons`, `new` and `typeid`.
+
+A literal is qualified with the namespace in front of its backtick:
+`+word::`,+` is the literal `,` of the namespace `word`.
+
+This program reads settings. A setting's name is a top-level `id`, and its
+value is the `id` of the namespace `config`, which is a number. The setting
+itself is defined in `config::entry`, a namespace inside `config`:
+
+[source,chapel]
+.mod_nested.lm
+----
+include::code/mod_nested.lm[]
+----
+
+It reads this input:
+
+----
+include::code/mod_nested.in[]
+----
+
+and prints:
+
+----
+include::code/mod_nested.exp[]
+----
+
+`entry` has no `id` of its own, so the `id` of `setting` is the one in
+`config`, the namespace around `entry`. `root::id` is the top level's. Inside
+`config`, `settings` names the setting `entry::setting`, since `entry` is
+found in `config`. From the top level, the whole path is written out:
+`config::entry::setting`. `config::id+` parses one or more ``id``s of
+`config`.
+
+== Including files
+
+`include 'FILE'` reads FILE, as if its definitions and statements were
+written where the `include` is. The name is in single quotes. Double quotes
+are a parse error. Colm parses the file on its own, so it has to hold whole
+definitions and statements. Its statements run at that point, in order with
+the program's own.
+
+An `include` inside a namespace puts the file's definitions in that
+namespace, and the file's own unqualified names are looked up from there.
+Including one file into two namespaces gives each namespace its own copy.
+
+Including the same file twice in the same namespace defines everything in it
+twice, and colm reports that as an error. There is no guard against it.
+
+This program is `mod_namespace` again, with the definitions the two
+namespaces share moved into one file, `mod_list.lmi`, which both include:
+
+[source,chapel]
+.mod_list.lmi
+----
+include::code/mod_list.lmi[]
+----
+
+[source,chapel]
+.mod_include.lm
+----
+include::code/mod_include.lm[]
+----
+
+It reads the same input as `mod_namespace`:
+
+----
+include::code/mod_include.in[]
+----
+
+and prints:
+
+----
+include::code/mod_include.exp[]
+----
+
+`mod_list.lmi` uses `item` without defining it. In each namespace, `item` is
+the namespace's own token, so `word::count` and `number::count` are two
+functions, each counting its own kind of item.
+
+The included file is named `.lmi`, as colm's own tests name theirs. Colm
+doesn't mind the suffix.
+
+=== Where colm looks for a file
+
+Colm opens FILE relative to the directory colm runs in, not the directory of
+the file that holds the `include`. An `include` inside an included file works
+the same way.
+
+When FILE isn't there, colm tries each directory given with `-I`, in the
+order given. If none of them has it, colm stops with
+`could not open FILE for reading`.
+xref:0_03_commandline.adoc[The command line page] lists `-I` with colm's
+other options.
+
+So a program that includes files compiles in the directory that holds them,
+and from anywhere else with `-I` naming that directory. The examples of this
+manual are in a directory called `code`. From the directory above it,
+`mod_include` compiles with:
+
+----
+$ colm -I code code/mod_include.lm
+----

@@ -39,6 +39,10 @@ CODE = \
 	code/lex_heredoc.lm      code/lex_heredoc.exp      code/lex_heredoc.in \
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in \
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in \
+	code/mod_include.lm      code/mod_include.exp      code/mod_include.in \
+	code/mod_list.lmi \
+	code/mod_namespace.lm    code/mod_namespace.exp    code/mod_namespace.in \
+	code/mod_nested.lm       code/mod_nested.exp       code/mod_nested.in \
 	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in \
 	code/nested_scope.lm     code/nested_scope.exp \
 	code/parse_commit.lm     code/parse_commit.exp     code/parse_commit.in \
