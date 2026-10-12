@@ -215,8 +215,9 @@ Some things follow from this:
 
 * Often, the production listed first is tried first. In `parse_order`,
   below, `+a * b;+` fits both productions of `statement`, and the one listed
-  first wins. In the grammar of the next point, the parser tries `x` alone as
-  a `b` before `x y`, and `x y` first if the productions of `b` are swapped.
+  first wins. In the grammar of the third point, below, the parser tries `x`
+  alone as a `b` before `x y`, and `x y` first if the productions of `b` are
+  swapped.
   This is not a rule for every choice, though. Other productions of a def can
   change the order. And without precedence statements, the operators in the
   example of <<precedence,the precedence section>> group to the left,
