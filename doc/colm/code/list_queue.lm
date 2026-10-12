@@ -1,0 +1,25 @@
+Queue: list<str> = new list<str>()
+
+# Two at the tail, then one at the head.
+Queue->push_tail( "bread" )
+Queue->push_tail( "milk" )
+Queue->push_head( "eggs" )
+print( Queue->length, " items\n" )
+
+for Item: str in Queue
+	print( "- ", Item, "\n" )
+
+for Item: str in rev_list_iter( Queue )
+	print( "back: ", Item, "\n" )
+
+# The elements, from the head.
+El: list_el<str> = Queue->head_el
+while El {
+	if El->next
+		print( El->value, " comes before ", El->next->value, "\n" )
+	El = El->next
+}
+
+First: str = Queue->pop_head()
+Last: str = Queue->pop_tail()
+print( "first ", First, ", last ", Last, ", ", Queue->length, " left\n" )

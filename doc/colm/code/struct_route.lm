@@ -1,0 +1,32 @@
+# A stop on a route: its name, the minutes from the stop before, and the next
+# stop.
+struct stop
+	Name: str
+	Minutes: int
+	Next: stop
+end
+
+# Adds a stop after After, and returns it.
+stop add( After: stop, Name: str, Minutes: int )
+{
+	new S: stop()
+	S->Name = Name
+	S->Minutes = Minutes
+	After->Next = S
+	return S
+}
+
+new Home: stop()
+Home->Name = "home"
+print( "a new stop: ", Home->Minutes, "\n" )
+
+Last: stop = add( Home, "bridge", 5 )
+Last = add( Last, "park", 12 )
+
+Total: int = 0
+S: stop = Home
+while S {
+	Total = Total + S->Minutes
+	print( S->Name, " at ", Total, " minutes\n" )
+	S = S->Next
+}

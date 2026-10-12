@@ -44,6 +44,8 @@ CODE = \
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in \
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in \
 	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in \
+	code/list_queue.lm       code/list_queue.exp \
+	code/map_count.lm        code/map_count.exp        code/map_count.args \
 	code/nested_scope.lm     code/nested_scope.exp \
 	code/parse_commit.lm     code/parse_commit.exp     code/parse_commit.in \
 	code/parse_def.lm        code/parse_def.exp        code/parse_def.in \
@@ -58,6 +60,7 @@ CODE = \
 	code/reference.lm        code/reference.exp \
 	code/scope.lm            code/scope.exp \
 	code/stmt_print.lm       code/stmt_print.exp \
+	code/struct_route.lm     code/struct_route.exp \
 	code/type_share.lm       code/type_share.exp \
 	code/type_str.lm         code/type_str.exp \
 	code/var_scope.lm        code/var_scope.exp
