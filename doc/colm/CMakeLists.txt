@@ -69,6 +69,7 @@ set(MANUAL_CODE
 	code/reference.lm        code/reference.exp
 	code/scope.lm            code/scope.exp
 	code/stmt_print.lm       code/stmt_print.exp
+	code/type_share.lm       code/type_share.exp
 	code/var_scope.lm        code/var_scope.exp)
 list(TRANSFORM MANUAL_CODE PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 

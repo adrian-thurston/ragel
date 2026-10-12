@@ -1,6 +1,109 @@
-Types
-=====
+= Types
 
-== TODO
+Every variable, parameter and function result has a type, fixed when the
+program is compiled. This chapter lists the kinds of type, and covers which
+values are copied and which are shared, `nil`, `any`, and how to turn a value
+of one type into another.
 
+== Kinds of type
 
+Colm checks types when it compiles a program: a value of the wrong type is an
+error, such as `type mismatch in assignment` or `arg 1 is of the wrong type`.
+
+The types are:
+
+* `int`, `bool` and `str`, in xref:2_01_basic.adoc[the basic types chapter]
+* trees: each token and each def is a type, as xref:3_01_lex.adoc[the lexing
+  chapter] and xref:3_02_parse.adoc[the parsing chapter] explain, and `any`
+  holds any tree
+* structs, in xref:2_02_list_map_struct_alias.adoc#structs[the structs
+  section]
+* `list<T>` and `map<K, V>`, and their elements, `list_el<T>` and
+  `map_el<K, V>`, in xref:2_02_list_map_struct_alias.adoc#lists[the lists
+  section] and xref:2_02_list_map_struct_alias.adoc#maps[the maps section]
+* `parser<T>`
+* `void`, for a function that returns nothing, in
+  xref:2_01_basic.adoc#void[the basic types chapter]
+* `ref<T>`, a parameter that refers to the caller's variable, in
+  xref:1_04_functions.adoc[the functions chapter]
+
+`alias` gives a type a second name, as
+xref:2_02_list_map_struct_alias.adoc#aliases[the aliases section] explains.
+
+`ptr` is a keyword, but not a type: `P: ptr` is a parse error.
+
+[[sharing]]
+== Copied and shared values
+
+Assigning an `int` or `bool` copies it. A `str` can't be changed, only
+replaced, so assigning one behaves as a copy.
+
+A struct, list or map variable refers to its value, and assigning it shares
+the value: the two variables then refer to one struct, list or map. Passing
+one to a function shares it too, so a function can change the struct it is
+given, as `struct_route` in xref:2_02_list_map_struct_alias.adoc#structs[the
+structs section] does.
+
+For trees, see xref:3_03_match.adoc[the patterns chapter].
+
+This program shows the difference. It uses `new`, which makes a struct or a
+list, and `+->+`, which reaches into one. The
+xref:2_02_list_map_struct_alias.adoc#structs[structs section] explains both.
+
+[source,chapel]
+.type_share.lm
+----
+include::code/type_share.lm[]
+----
+
+It prints:
+
+----
+include::code/type_share.exp[]
+----
+
+`B = 2` leaves `A` as it was, and `T = T + " more"` leaves `S`. `C` and `D`
+are one struct, so setting `+D->N+` sets `+C->N+`. `L` is a `names` and `M`
+a `list<str>`, which are one type, and the two variables are one list.
+
+[[nil]]
+== nil
+
+`nil` is the first value of a `str`, tree, struct, list or map variable.
+`!X` is true when `X` is nil, and `X == nil` is an error. An `int` or `bool`
+is never nil. A `str` or a tree can be set back to nil: `S = nil`.
+
+== any
+
+Any tree can be assigned to an `any` variable, and a `list<any>` can hold
+trees of different types. An `any` can be assigned to a variable of any tree
+type. Colm doesn't check that the tree has that type.
+
+[[conversions]]
+== Conversions
+
+No conversion is automatic. These are the ways to turn a value of one type
+into another:
+
+[cols="1,2"]
+|===
+| From, to | Write
+
+| `int` to `str`
+| `$N`, `+"[N]"+`, or `sprintf`, in xref:1_01_statements.adoc#printing[the
+  statements chapter]
+
+| `str` to `int`
+| `atoi( S )` or `atoo( S )`, in xref:2_01_basic.adoc#str[the basic types
+  chapter]
+
+| tree to `str`
+| `$T` or `%T`, in xref:1_02_expressions.adoc#operators[the expressions
+  chapter]
+
+| `str` to tree
+| `parse`, in xref:3_02_parse.adoc[the parsing chapter]
+
+| tree to another tree type
+| `cast`, in xref:1_02_expressions.adoc#cast[the expressions chapter]
+|===
