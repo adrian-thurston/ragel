@@ -64,7 +64,8 @@ set(MANUAL_CODE
 	code/poker.lm            code/poker.exp
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args
 	code/reference.lm        code/reference.exp
-	code/scope.lm            code/scope.exp)
+	code/scope.lm            code/scope.exp
+	code/stmt_print.lm       code/stmt_print.exp)
 list(TRANSFORM MANUAL_CODE PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 set(MANUAL_HTML)

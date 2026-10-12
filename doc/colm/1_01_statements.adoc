@@ -1,6 +1,73 @@
-Statements
-==========
+= Statements
 
-== TODO
+This chapter lists the kinds of statement colm has, and where each is
+described. It then covers the statements that print.
 
+== Kinds of statement
 
+A statement is one of these:
+
+* a declaration, in xref:1_05_variables.adoc[the variables chapter]
+* an assignment, `Name = Value`, to a variable or to a struct's field, which
+  xref:2_02_list_map_struct_alias.adoc#structs[the structs section] shows
+* a function call on its own, whose result is dropped
+* `print` and `prints`, <<printing,below>>
+* `if`, `while`, `for`, `switch`, `break` and `return`, in
+  xref:1_03_control_flow.adoc[the control flow chapter], and `exit`, in
+  xref:1_00_language_overview.adoc#exit[the language overview]
+* `new`, in xref:2_02_list_map_struct_alias.adoc#structs[the structs
+  section]
+* `parse`, `parse_stop` and `reject`, in xref:3_02_parse.adoc[the parsing
+  chapter]
+* `match` and `cons`, in xref:3_03_match.adoc[the patterns chapter]
+* `yield`, in xref:1_06_iterators.adoc[the iterators chapter]
+* `send`
+
+An expression such as `X + 1` is not a statement: on a line of its own, it is
+a parse error.
+
+There is no compound assignment. Write `X = X + 1`: `X += 1` and `pass:c[X++]`
+are parse errors.
+
+[[printing]]
+== Printing
+
+`+print( A, B, ... )+` writes its arguments to `stdout`, one after the other,
+with nothing between them. An `int` prints in decimal, a `bool` as `1` or
+`0`, and a `str` as its text. A tree prints as its text, with the ignored
+text it holds, as xref:3_01_lex.adoc[the lexing chapter] explains.
+
+`print` followed by strings, without parentheses, prints them:
+`print "hello\n"`. In a double-quoted string, an expression in square
+brackets is replaced by its value's text:
+`+print "[Name] has [Count] parts\n"+`. A single-quoted string keeps its
+brackets as they are. xref:1_02_expressions.adoc#literals[The expressions
+chapter] has strings in full.
+
+`+print [ ... ]+` prints a list of strings and values:
+`+print [ Name " has " Count "\n" ]+`.
+
+`+prints( Stream, A, B, ... )+` is `print` to a stream: `stdout` or `stderr`.
+
+`sprintf( Format, N )` gives a `str`: the C `printf` format `Format`, applied
+to the `int` `N`. It takes exactly these two arguments: with one, or three,
+colm reports `wrong number of arguments`. The format has one conversion, for
+the int: `%d`, `%5d`, `%-5d` or `%x` for numbers that fit in 32 bits, and
+`%ld` for any int.
+
+This program prints in each of these ways:
+
+[source,chapel]
+.stmt_print.lm
+----
+include::code/stmt_print.lm[]
+----
+
+It prints:
+
+----
+include::code/stmt_print.exp[]
+----
+
+`Ok` is true, and prints as `1`. `%5d` pads the number to five characters on
+the left, and `%-5d` on the right.
