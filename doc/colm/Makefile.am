@@ -51,6 +51,7 @@ CODE = \
 	code/parse_reparse.lm    code/parse_reparse.exp    code/parse_reparse.in \
 	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in \
 	code/poker.lm            code/poker.exp \
+	code/prog_args.lm        code/prog_args.exp        code/prog_args.args \
 	code/reference.lm        code/reference.exp \
 	code/scope.lm            code/scope.exp
 

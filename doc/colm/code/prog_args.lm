@@ -1,0 +1,12 @@
+# Prints its arguments, numbered. With none, it prints how to run it, and
+# exits with 1.
+if ( argv->length == 0 ) {
+	print( "usage: prog_args WORD...\n" )
+	exit( 1 )
+}
+
+N: int = 1
+for Arg: str in argv {
+	print( N, ": ", Arg, "\n" )
+	N = N + 1
+}
