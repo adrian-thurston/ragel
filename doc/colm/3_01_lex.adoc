@@ -216,9 +216,50 @@ include::code/lex_choose.exp[]
 * `12ab` matches `hex` for all four characters, but `number` only for two.
 * `abc` matches `id` and `hex`, with the same length. `id` is defined first.
 
-Ignore patterns take part in the same choice. With a `+#+` token and an
-ignore pattern for `+#+` followed by letters, `+#abc+` is ignored and `+#+`
-alone is a token.
+Ignore patterns take part in the choice by the two rules too, but right
+after a token they go first. Before each match up to the next token, the
+scanner tries the ignore patterns of that token's `lex` block on their own.
+If one of them matches, the scanner skips the text it matches, even when a
+token matches more text or is defined first. Only when none of them matches
+does the scanner choose by the two rules. So in a single `lex` block, the
+two rules decide between an ignore pattern and a token only before the first
+token of the input, and after a token marked `-ni`, which <<regions>>
+explains.
+
+With a `+#+` token and an ignore pattern for `+#+` followed by letters,
+`+#abc+` is ignored and `+#+` alone is a token.
+
+In this program, `x` is text to ignore, and also a letter that `word`
+matches:
+
+[source,chapel]
+.lex_skip.lm
+----
+include::code/lex_skip.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_skip.in[]
+----
+
+and prints:
+
+----
+include::code/lex_skip.exp[]
+----
+
+* The first `xx` is at the start of the input, so the two rules decide.
+  `word` and the second ignore pattern both match two characters, and `word`
+  is defined first, so `xx` is a word.
+* After `ab`, the scanner skips the space and then `xx` with the ignore
+  patterns alone, though `word` would match all of `xxyz`.
+* The last `xx` comes after a token, so it is skipped, though the same text
+  was a word at the start of the input.
+
+With `-ni` after the pattern of `word`, the two rules decide after a word
+too, and the program prints `xx`, `ab`, `xxyz` and `xx`.
 
 The scanner chooses from all the patterns of the `lex` block, whether or not
 the parser can use the token that wins. In this program, `if` is a keyword
@@ -246,8 +287,9 @@ fails as well.
 Each `lex` block is a lexical region. A program can have several. When the
 parser asks for a token, the scanner uses only the regions that hold the
 tokens the parser can take at that point. The patterns of the other regions
-play no part. This way, different parts of the input can be scanned in
-different ways.
+play no part, except the ignore patterns of the last token's region, which
+the scanner tries first, as described below. This way, different parts of
+the input can be scanned in different ways.
 
 A token or literal defined outside a `lex` block is in a region of its own.
 
@@ -285,13 +327,31 @@ would read `name = Ada Lovelace` as one `value`, and the parse would fail at
 its start.
 
 The value doesn't start with the space that follows the `=`. After the
-scanner reads a token, it skips what that token's region ignores, and only
-then reads the next token. The `=` is in the first region, which ignores
-spaces, so the space after it is skipped before the value is read. To keep
+scanner reads a token, it skips what that token's region ignores, whatever
+region the next token is in, and only then reads the next token. The `=` is
+in the first region, which ignores spaces, so the space after it is skipped
+before the value is read, though the value is in the second region. To keep
 this text, put `-ni` after the token's pattern, or after a literal. Then the
 text after the token is read with the next token, in the next token's region,
 and only that region's ignores apply. The last example of this chapter uses
 `-ni`.
+
+So when the parser asks for a token, the scanner tries the patterns in this
+order:
+
+. The ignore patterns of the last token's region, on their own. This step is
+  left out before the first token of the input, after a token marked `-ni`,
+  and after a token from a region with no ignore patterns. Each time one of
+  them matches, the scanner skips the text and starts this step again.
+. When none of them matches, the patterns of the region that holds the
+  tokens the parser can take, by the two rules. That region's ignore
+  patterns take part in this choice. When one of them wins, the scanner
+  skips the text and goes back to the first step.
+
+In the settings example, the line break is in the second region, which has
+no ignore patterns, so nothing is skipped after it. The spaces before `born`
+are read by the second step, in the first region, where only its ignore
+pattern matches them.
 
 Sometimes the parser can take tokens from more than one region. The scanner
 then tries those regions in turn. When no pattern in one region matches the

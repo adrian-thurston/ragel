@@ -38,6 +38,7 @@ CODE = \
 	code/lex_heredoc.lm      code/lex_heredoc.exp      code/lex_heredoc.in \
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in \
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in \
+	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in \
 	code/nested_scope.lm     code/nested_scope.exp \
 	code/poker.lm            code/poker.exp \
 	code/reference.lm        code/reference.exp \
