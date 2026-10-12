@@ -25,8 +25,9 @@ IN_FILES = \
 	3_05_reduction.adoc 8_05_contributing.adoc
 
 # The example programs, each with the output it prints (.exp) and the input
-# it reads (.in), if any. The test harness's manual suite runs them, and the
-# pages include the programs and their output.
+# it reads (.in), if any. An example can also have colm options (.comp) and a
+# host program it is linked into (.host.c or .host.cc). The test harness's
+# manual suite runs them, and the pages include the programs and their output.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
 	code/figure_44.lm        code/figure_44.exp \

@@ -36,8 +36,9 @@ set(MANUAL_PAGES
 	3_05_reduction 8_05_contributing)
 
 # The example programs, with their output (.exp) and input (.in), which the
-# pages include. Every page is rebuilt when one of them changes, which is
-# simpler than tracking which page includes which.
+# pages include. An example can also have colm options (.comp) and a host
+# program (.host.c or .host.cc). Every page is rebuilt when one of them
+# changes, which is simpler than tracking which page includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
 	code/figure_44.lm        code/figure_44.exp

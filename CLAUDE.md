@@ -118,10 +118,12 @@ suite's `working/` directory with the differences and the commands run.
 
 Seven suites are the directories under `test/`. The eighth, `manual`, runs
 the colm manual's example programs, `doc/colm/code/NAME.lm`, with `NAME.in`
-on stdin if there is one, and compares the output with `NAME.exp`. The
-chapters include those files, so a new example needs its `.exp` (and `.in`)
-there too, and in `CODE` and `MANUAL_CODE` in `doc/colm/`'s build files. Its
-results go to `test/manual/working/`.
+on stdin if there is one, and compares the output with `NAME.exp`. An example
+can also have colm options in `NAME.comp`, and a host program it is linked
+into, `NAME.host.c` or `NAME.host.cc`. The chapters include those files, so a
+new example needs its `.exp` (and any of the others) there too, and in `CODE`
+and `MANUAL_CODE` in `doc/colm/`'s build files. Its results go to
+`test/manual/working/`.
 
 Each colm.d and manual run sets `COLM_LEAK_CHECK`, so a program that loses
 pool items (kids, trees, heads, ...) fails its case. A colm.d case's `LOST`
