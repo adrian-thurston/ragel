@@ -34,6 +34,7 @@ CODE = \
 	code/expr_ops.lm         code/expr_ops.exp \
 	code/figure_44.lm        code/figure_44.exp \
 	code/fizzbuzz.lm         code/fizzbuzz.exp \
+	code/flow_primes.lm      code/flow_primes.exp \
 	code/hello_world.lm      code/hello_world.exp \
 	code/hello_world_ext.lm  code/hello_world_ext.exp \
 	code/lex_basics.lm       code/lex_basics.exp       code/lex_basics.in \
