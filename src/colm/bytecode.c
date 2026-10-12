@@ -3875,6 +3875,7 @@ again:
 
 			user_iter_t *uiter = (user_iter_t*) vm_get_local(exec, field);
 			colm_uiter_destroy( prg, &sp, uiter );
+			vm_set_local( exec, field, 0 );
 			break;
 		}
 
@@ -3886,6 +3887,7 @@ again:
 
 			user_iter_t *uiter = (user_iter_t*) vm_get_local(exec, field);
 			colm_uiter_unwind( prg, &sp, uiter );
+			vm_set_local( exec, field, 0 );
 			break;
 		}
 
