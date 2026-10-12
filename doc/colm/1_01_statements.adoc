@@ -5,7 +5,7 @@ described. It then covers the statements that print.
 
 == Kinds of statement
 
-A statement is one of these:
+These are the kinds of statement, and the chapters that cover them:
 
 * a declaration, in xref:1_05_variables.adoc[the variables chapter]
 * an assignment, `Name = Value`, to a variable or to a struct's field, which
@@ -22,6 +22,9 @@ A statement is one of these:
 * `match` and `cons`, in xref:3_03_match.adoc[the patterns chapter]
 * `yield`, in xref:1_06_iterators.adoc[the iterators chapter]
 * `send`
+
+`make_token` and `make_tree`, which xref:3_03_match.adoc[the patterns chapter]
+covers, can stand as statements too. A few more belong to later chapters.
 
 An expression such as `X + 1` is not a statement: on a line of its own, it is
 a parse error.
