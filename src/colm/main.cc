@@ -197,7 +197,8 @@ void usage()
 "general:\n"
 "   -h, -H, -?, --help   print this usage and exit\n"
 "   -v --version         print version information and exit\n"
-"   -b <ident>           use <ident> as name of C object encapulaing the program\n"
+"   -b <ident>           use <ident> as name of C object encapsulating\n"
+"                        the program\n"
 "   -o <file>            if -c given, write C parse object to <file>,\n"
 "                        otherwise write binary to <file>\n"
 "   -p <file>            write C parse object to <file>\n"
@@ -212,19 +213,19 @@ void usage()
 "   -l                   activate logging\n"
 "   -r                   run output program and replace process\n"
 "   -c                   compile only (don't produce binary)\n"
-"   -V                   print dot format (graphiz)\n"
+"   -V                   print dot format (graphviz)\n"
 "   --ebnf               print EBNF for railroad diagram\n"
 "   -d                   print verbose debug information\n"
 "   -B <path>\n"
 "       Run Colm from the build directory. Use this when building from source\n"
 "       and using the resulting binary without installing it. Colm will attempt\n"
 "       to detect when it is run from the build directory. This flag lets the\n"
-"       user be expliclit about it. The detection method is specific to the OS\n"
+"       user be explicit about it. The detection method is specific to the OS\n"
 "       and can fail. The path given should be the root of the build directory,\n"
 "       eg what would be returned by ABS_TOP_BUILDDIR (directory where src is).\n"
 #if DEBUG
 "   -D <tag>             print more information about <tag>\n"
-"                        (BYTECODE|PARSE|MATCH|COMPILE|POOL|PRINT|INPUT|SCAN\n"
+"                        (BYTECODE|PARSE|MATCH|COMPILE|POOL|PRINT|INPUT|SCAN)\n"
 #endif
 	;
 }
