@@ -1,0 +1,30 @@
+global Calls: int = 0
+
+int square( N: int )
+{
+	Calls = Calls + 1
+	Result: int = N * N
+	return Result
+}
+
+# square can't see Total.
+Total: int = 0
+I: int = 1
+while I <= 3 {
+	Total = Total + square( I )
+	I = I + 1
+}
+print( "total ", Total, " from ", Calls, " calls\n" )
+
+Name: str = "outer"
+if Total > 10 {
+	Name: str = "inner"
+	print( "in the block: ", Name, "\n" )
+}
+print( "after the block: ", Name, "\n" )
+
+Count: int
+Done: bool
+Text: str
+if Count == 0 && !Done && !Text
+	print( "0, false and nil\n" )

@@ -57,7 +57,8 @@ CODE = \
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args \
 	code/reference.lm        code/reference.exp \
 	code/scope.lm            code/scope.exp \
-	code/stmt_print.lm       code/stmt_print.exp
+	code/stmt_print.lm       code/stmt_print.exp \
+	code/var_scope.lm        code/var_scope.exp
 
 
 OUT_FILES = $(IN_FILES:.adoc=.html)
