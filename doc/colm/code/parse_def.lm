@@ -1,0 +1,40 @@
+lex
+	literal `todo `done `: `! `, `( `)
+	token word /[a-z]+/
+	ignore /space+/
+end
+
+def status
+	[`todo]
+|	[`done]
+
+def urgent
+	[`!]
+
+def task
+	[Words: word+ Mark: urgent? Steps: steps?]
+
+def steps
+	[`( task (`, task)* `)]
+
+def group
+	[status `: task (`, task)*]
+
+def groups
+	[group*]
+
+parse Groups: groups[ stdin ]
+
+if ( ! Groups ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for G: group in Groups {
+	for T: task in G {
+		print( $G.status, ": ", $T.Words )
+		if ( $T.Mark != "" )
+			print( " (urgent)" )
+		print( "\n" )
+	}
+}

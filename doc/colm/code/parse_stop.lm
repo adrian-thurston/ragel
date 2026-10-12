@@ -1,0 +1,43 @@
+lex
+	literal `format `;
+	token word /[a-z]+/
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def header
+	[`format word `;]
+
+def words
+	[word*]
+
+def numbers
+	[number*]
+
+parse_stop Header: header[ stdin ]
+
+if ( ! Header ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+print( "format: ", $Header.word, "\n" )
+
+if ( $Header.word == "numbers" ) {
+	parse Numbers: numbers[ stdin ]
+	if ( ! Numbers ) {
+		print( error, "\n" )
+		exit( 1 )
+	}
+	for N: number in Numbers
+		print( "number: ", $N, "\n" )
+}
+else {
+	parse Words: words[ stdin ]
+	if ( ! Words ) {
+		print( error, "\n" )
+		exit( 1 )
+	}
+	for W: word in Words
+		print( "word: ", $W, "\n" )
+}

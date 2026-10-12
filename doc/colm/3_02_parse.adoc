@@ -1,6 +1,464 @@
-Parse
-=====
+= Grammars and parsing
 
-== TODO
+The scanner, the subject of xref:3_01_lex.adoc[the lexing chapter], breaks
+the input into tokens. The parser builds a tree from the tokens, following a
+grammar. This chapter covers the grammar, written with `def`, and the `parse`
+statement, which runs the parser. It then explains how the parser chooses
+when the grammar allows more than one tree, and the ways a program can steer
+that choice: precedence, `reject`, `commit` and `redef`.
 
+== Grammars
 
+A grammar is made of `def` statements. Each defines a type, whose values are
+trees. `def` is followed by the type's name, and then by one or more
+productions, separated by `|`. A production is a list of elements in square
+brackets. An element is a token's name, a literal in its backtick form, or
+the name of a def, including the def being defined:
+
+[source,chapel]
+----
+def term
+	[id `* term]
+|	[id]
+----
+
+A `term` is an `id`, a `+*+` and another `term`, or else a single `id`. `+[]+`
+is an empty production, with no elements. It lets a def match no tokens at
+all.
+
+An element can be followed by an operator:
+
+* `x?` is an optional `x`.
+* `+x*+` is zero or more ``x``s.
+* `x+` is one or more ``x``s.
+
+Colm makes a def for each of these. `x?` is `+[x] | []+`, `+x*+` is
+`+[x x*] | []+`, and `x+` is `++[x x+] | [x]++`. They are right-recursive.
+`+x<*+` and `pass:c[x<+]` match the same as `+x*+` and `x+`, but are
+left-recursive: `+[x<* x] | []+` and `++[x<+ x] | [x]++`.
+
+Elements can be grouped in parentheses, with `|` between alternatives, and a
+group can take an operator too. `+(`, task)*+` is zero or more commas, each
+followed by a `task`. `+(id | number)*+` is zero or more ``id``s and
+``number``s, in any order.
+
+An operator right after a literal becomes part of the literal's text.
+`+`!?+` is the literal `!?`, not an optional `!`.
+With only `+`!+` defined, colm reports an `unknown type` error for it. Close
+the literal with a backtick, as in `+`!`?+`, or put it in a def of its own and
+make the def optional, as the next example does.
+
+An element can have a label: `Name: type`. For a tree `T`, `T.Name` is the
+child that the label names. An element written as a type's name alone, with
+no label and no operator, can be read by that name instead, unless the type
+is the def's own: `T.type` is the first such child of that type.
+xref:3_01_lex.adoc#regions[The lexing chapter's `lex_regions`] prints
+`$S.key` this way. A labelled element is read only by its label. To read an
+element with an operator, such as `x?` or `+x*+`, or one of the def's own
+type, such as the `term` in `+[id `* term]+`, give it a label, as the next
+example does with `Mark: urgent?`.
+
+A child that isn't in the production of `T` is nil, so a test such as
+`if ( T.declaration )` tells which production `T` has. An optional child,
+`x?`, is always there, but has no text when `x` is absent. To test it, label
+it and compare its text with `""`.
+
+A name after a production's closing bracket, as in `+[id] :Id+`, names the
+production. The `switch` statement, in xref:3_03_match.adoc[the chapter on
+patterns], uses these names.
+
+A def can't have a colm keyword as its name. `list` is one, so `def list` is a
+parse error.
+
+This program reads a to-do list. Each line is a status, `todo` or `done`, a
+colon, and tasks separated by commas. A task is some words, an optional `!`
+that marks it as urgent, and optional steps, in parentheses. The steps are
+tasks too:
+
+[source,chapel]
+.parse_def.lm
+----
+include::code/parse_def.lm[]
+----
+
+It reads this input:
+
+----
+include::code/parse_def.in[]
+----
+
+and prints:
+
+----
+include::code/parse_def.exp[]
+----
+
+`task` uses `steps`, and `steps` uses `task`, so a step can have steps of its
+own. `for T: task in G` visits every task in the group `G`, steps included,
+so `find pump` and `pump tyres` come after `fix bike`. `$G.status` is the text
+of the group's `status`. `$T.Mark` has no text when a task has no `!`.
+
+== Parsing
+
+`+parse NAME: TYPE[ ... ]+` parses the items in the brackets as a `TYPE`, and
+declares the variable `NAME`, which holds the tree. The items are sent to the
+parser in order. An item can be `stdin`, a string, a `str` or `int` value, or
+a tree, which is sent as its text. `+NAME: TYPE = parse TYPE[ ... ]+` does the
+same. The type can be a repetition:
+
+[source,chapel]
+----
+S: str = "cd"
+I: int = 42
+parse First: items[ "ab " S " " I ]
+Second: items = parse items[ First " " stdin ]
+parse Words: word*[ "p q r" ]
+----
+
+When the input doesn't form a tree of the type, the result is nil, and
+`error` holds a message such as `<stdin>:2:4: parse error`. `parse` ends the
+input after the last item, so the whole input must form one tree of the type.
+
+=== Stopping early
+
+`parse_stop` is the same as `parse`, but stops as soon as it has a whole tree
+of the type. It leaves the rest of the input, including the ignored text after
+the tree's last token, for the next parse of the same input.
+
+In this program, a header says what the rest of the input holds, words or
+numbers. The program reads the header with `parse_stop`, and then the rest
+with the grammar the header picks:
+
+[source,chapel]
+.parse_stop.lm
+----
+include::code/parse_stop.lm[]
+----
+
+It reads this input:
+
+----
+include::code/parse_stop.in[]
+----
+
+and prints:
+
+----
+include::code/parse_stop.exp[]
+----
+
+With `parse` in place of `parse_stop`, the header would have to be the whole
+input. The first parse would fail at the second line, with
+`<stdin>:2:1: parse error`.
+
+With `parse_stop`, the parser must be able to tell that it has a whole tree
+without reading the token after it. If it can't, the program fails to
+compile, with an error that the grammar is not usable with `parse_stop`.
+`+def words [word*]+` can't be used: after any word, another can follow. Nor
+can `+[`version number `;] | [`version number `; `;]+`: after the first `;`,
+a second can follow.
+
+== Reparsing
+
+A tree in a parse's list is sent as its text, so part of one parse can be
+parsed again, as another type.
+
+This program reads the settings of xref:3_01_lex.adoc#regions[`lex_regions`],
+and parses each value again, as a list of numbers. A third region holds the
+tokens for the list:
+
+[source,chapel]
+.parse_reparse.lm
+----
+include::code/parse_reparse.lm[]
+----
+
+It reads this input:
+
+----
+include::code/parse_reparse.in[]
+----
+
+and prints:
+
+----
+include::code/parse_reparse.exp[]
+----
+
+In the first parse, the parser can never take a `number` or a `,`, so the
+scanner never uses the third region. When a value is parsed again, the parser
+can take a `number`, and the scanner reads the value with the third region's
+patterns. `Ada Lovelace` is not a list of numbers, so its parse fails, and
+`List` is nil. A reparse that fails is an ordinary outcome. Here it means that
+the value is text.
+
+== Ordered choice and backtracking
+
+The parser builds the tree from the bottom up. It shifts each token: it adds
+the token to the elements it holds. When it holds all the elements of a
+production, it can reduce them: it makes them the children of a new tree,
+whose type is the production's def, and holds that tree in their place.
+
+Colm builds an LALR(1) parser from the grammar. In many grammars, there are
+points where the parser could do more than one thing with the next token: it
+could shift the token or reduce, or reduce by one production or by another.
+Parser generators such as yacc report these points as conflicts. Colm
+doesn't. Where the parser could do more than one thing, it tries the
+alternatives one at a time, in an order that colm fixes when it builds the
+parser. When it meets a parse error, it backs up to the last choice it can
+still change, and takes the next alternative there. Backing up undoes
+reductions, and puts tokens back into the input. They are scanned again,
+maybe in another region, as xref:3_01_lex.adoc#regions[the lexing chapter]
+explains.
+
+Some things follow from this:
+
+* Often, the production listed first is tried first. In `parse_order`,
+  below, `+a * b;+` fits both productions of `statement`, and the one listed
+  first wins. In the grammar of the third point, below, the parser tries `x`
+  alone as a `b` before `x y`, and `x y` first if the productions of `b` are
+  swapped.
+  This is not a rule for every choice, though. Other productions of a def can
+  change the order. And without precedence statements, the operators in the
+  example of <<precedence,the precedence section>> group to the left,
+  whichever of their productions is listed first.
+* `x?`, `+x*+`, `x+`, `+x<*+` and `pass:c[x<+]` take as much as they can, and
+  give back only what the rest of the production needs. Given `a b c`, where
+  `first` and `second` are both an `id`, `+[first* second*]+` puts all three
+  in `first`. `+[first* second]+` puts `a b` in `first` and `c` in `second`.
+  `+[first? second*]+` puts `a` in `first`, and `b` and `c` in `second`.
+* Backing up can change a choice that has already succeeded. In this
+  grammar, given `x y y ;`, the parser first takes `x` as a `b`, and then
+  fails at the second `y`. It backs up into `b`, and takes `x y` instead:
++
+[source,chapel]
+----
+def b
+	[`x]
+|	[`x `y]
+
+def start
+	[b `y `;]
+----
++
+Given `x y ;`, `b` is `x`. A PEG parser tries a rule's alternatives in the
+order they are listed, and keeps the first one that succeeds, so it would
+fail on `x y y ;`.
+* The parser can look any distance ahead. An error many tokens on can change
+  a choice made at the start, as <<reject,the example for `reject`>> shows.
+
+In C, `+a * b;+` is a declaration if `a` names a type, and a multiplication
+otherwise. This program reads both kinds of statement, and prefers the
+declaration:
+
+[source,chapel]
+.parse_order.lm
+----
+include::code/parse_order.lm[]
+----
+
+It reads this input:
+
+----
+include::code/parse_order.in[]
+----
+
+and prints:
+
+----
+include::code/parse_order.exp[]
+----
+
+`+a * b;+` fits both productions of `statement`. The declaration is listed
+first, so the parser takes it. `++a * b + c;++` and `x;` can only be
+expressions. With the two productions of `statement` the other way round,
+`+a * b;+` is an expression.
+
+[[precedence]]
+== Precedence
+
+`left`, `right` and `nonassoc` give tokens a precedence level. Each is
+followed by tokens or literals, separated by commas. A comma right after a
+literal becomes part of it, so put a space before the comma, as in
+`+left `* , `/+`, or close the literal with a backtick: `+left `*`, `/+`.
+
+Each statement makes a level. The levels of later statements are higher:
+their tokens bind tighter. Where the statements are in the file doesn't
+matter, only their order.
+
+A production has the level of its last token that has one. When the parser
+could shift a token or reduce by a production, and both have a level, it
+takes the one with the higher level. When the levels are the same, `left`
+reduces, so the operator groups to the left. `right` shifts, so it groups to
+the right. `nonassoc` makes it a parse error. The action that loses is
+removed from the parser, so backing up after a parse error never tries it.
+
+There is no way to give a production a level of its own. A production for a
+minus sign in front of an expression, `+[`- expr]+`, has the level of `-`, so
+`+- 1 * 2+` is `+-(1 * 2)+`.
+
+This program gives four operators the usual levels, and adds `^` for powers
+and `<` for comparisons:
+
+[source,chapel]
+.parse_prec.lm
+----
+include::code/parse_prec.lm[]
+----
+
+It prints:
+
+----
+include::code/parse_prec.exp[]
+----
+
+`show` prints the whole expression, and then each smaller expression in it
+that isn't a number, from the outside in. `+*+` binds tighter than `{plus}`.
+`-` groups to the left, and `+^+` to the right. `<` is `nonassoc`, so
+`1 < 2 < 3` is a parse error, and needs parentheses.
+
+Without the precedence statements, this grammar groups every operator to the
+left, whatever the order of the productions of `expr`. `++1 + 2 * 3++` is then
+`++(1 + 2) * 3++`.
+
+[[reject]]
+== Rejecting a reduction
+
+A production can have an action: a block of code after it, which runs when
+the parser reduces by the production. In the action, `$r1` is the text of the
+production's first element, and `$lhs` the text of the whole production.
+xref:3_05_reduction.adoc[The reductions chapter] covers actions, `r1` to `rN`,
+`lhs` and attributes in full.
+
+Actions run on alternatives that the parser later abandons, and run again
+when it retries them. What they print stays printed.
+
+`reject` in an action makes the reduction a parse error. The parser backs up
+and tries the next alternative, and the parse fails if there is none. The
+rest of the action still runs. Use `reject` only in a production's action.
+
+An IPv4 address and a version number look alike: four numbers, with dots
+between them. In an address, each number is at most 255. This program tells
+the two apart with `reject`:
+
+[source,chapel]
+.parse_reject.lm
+----
+include::code/parse_reject.lm[]
+----
+
+It reads this input:
+
+----
+include::code/parse_reject.in[]
+----
+
+and prints:
+
+----
+include::code/parse_reject.exp[]
+----
+
+`address` is listed first, so the parser reads `1.2.300.4` as an address, and
+takes `1`, `2` and `300` as octets. The action of `octet` rejects `300`. The
+parser backs up until it can take the other production of `item`, and reads
+the line as a version. The choice it changes was made at the first number.
+
+== Committing to a parse
+
+To back up, the parser keeps every choice it made. `commit` drops them. It
+goes after a production and its name, and before its action. Reducing by a
+production with `commit` drops every alternative the parser has kept so far,
+in the whole parse, not only inside the production. After that, a parse
+error fails the parse instead of backing up past the commit:
+
+[source,chapel]
+----
+def b
+	[`x]
+|	[`x `y]
+
+def c
+	[`y] commit
+|	[`z] commit
+
+def start
+	[b `y c `z `;]
+----
+
+Given `x y y z z ;`, the parser takes `x` as a `b`, the first `y`, and then
+the second `y` as a `c`, which commits. The second `z` is a parse error, and
+the parse fails. Without the commits, the parser would back up into `b`, take
+`x y`, and the parse would succeed.
+
+When a parse fails, the parser first tries every alternative it has kept.
+Each statement before the error that can be parsed two ways doubles the
+tries. With ten statements such as `+a * b;+` before an error, the grammar of
+the next example reduces a statement 2046 times without `commit`, and 10 times
+with it. The error is the same either way. Colm's own grammar commits each
+definition and statement at the top level of a program.
+
+This program has the grammar of `parse_order`, with `commit` on both
+productions of `statement`, and an action on each that prints the statement.
+Its last statement has an error:
+
+[source,chapel]
+.parse_commit.lm
+----
+include::code/parse_commit.lm[]
+----
+
+It reads this input:
+
+----
+include::code/parse_commit.in[]
+----
+
+and prints:
+
+----
+include::code/parse_commit.exp[]
+----
+
+Without `commit`, four more lines come before the error:
+`+expression: c * d;+`, `+expression: a * b;+`, `+declaration: c * d;+` and
+`+expression: c * d;+`. That is the parser going back over the first two
+statements, and trying their other productions, before the parse fails.
+
+== Redefining a def
+
+`redef NAME` gives a def new productions, in place of the ones it had. Among
+them, `+[...]+` stands for the def's productions as they were, in the same
+order. Without `+[...]+`, the old productions are gone. This lets a program
+change a grammar from an included file without editing it.
+
+The def must come before the `redef`. Otherwise, colm reports that the redef
+is not found. `+[...]+` can only be used in a `redef`. A def can be redefined
+more than once, and `+[...]+` then stands for the productions of the last
+`redef`.
+
+This program is `parse_order`, with `statement` defined as an expression
+only, and then redefined, with a declaration first:
+
+[source,chapel]
+.parse_redef.lm
+----
+include::code/parse_redef.lm[]
+----
+
+It reads the same input as `parse_order`:
+
+----
+include::code/parse_redef.in[]
+----
+
+and prints the same:
+
+----
+include::code/parse_redef.exp[]
+----
+
+Putting the declaration before `+[...]+` makes the parser try it first. With
+`+[...]+` first, the expression is tried first, and `+a * b;+` is an
+expression. The order of the productions after a `redef` counts as it does in
+a `def`, and, as there, it doesn't decide every choice.

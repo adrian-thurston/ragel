@@ -39,6 +39,14 @@ CODE = \
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in \
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in \
 	code/nested_scope.lm     code/nested_scope.exp \
+	code/parse_commit.lm     code/parse_commit.exp     code/parse_commit.in \
+	code/parse_def.lm        code/parse_def.exp        code/parse_def.in \
+	code/parse_order.lm      code/parse_order.exp      code/parse_order.in \
+	code/parse_prec.lm       code/parse_prec.exp \
+	code/parse_redef.lm      code/parse_redef.exp      code/parse_redef.in \
+	code/parse_reject.lm     code/parse_reject.exp     code/parse_reject.in \
+	code/parse_reparse.lm    code/parse_reparse.exp    code/parse_reparse.in \
+	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in \
 	code/poker.lm            code/poker.exp \
 	code/reference.lm        code/reference.exp \
 	code/scope.lm            code/scope.exp

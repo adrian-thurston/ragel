@@ -1,0 +1,3 @@
+declaration: a * b;
+declaration: c * d;
+<stdin>:3:5: parse error

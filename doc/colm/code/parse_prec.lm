@@ -1,0 +1,44 @@
+lex
+	literal `< `+ `- `* `/ `^ `( `)
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+nonassoc `<
+left `+ , `-
+left `* , `/
+right `^
+
+def expr
+	[expr `< expr]
+|	[expr `+ expr]
+|	[expr `- expr]
+|	[expr `* expr]
+|	[expr `/ expr]
+|	[expr `^ expr]
+|	[`( expr `)]
+|	[number]
+
+# Prints the expression, then each operation in it, from the outside in.
+void show( Text: str )
+{
+	parse E: expr[ Text ]
+	if ( E ) {
+		Indent: str = ""
+		for Sub: expr in E {
+			if ( ! Sub.number ) {
+				print( Indent, $Sub, "\n" )
+				Indent = "  "
+			}
+		}
+	}
+	else {
+		print( Text, ": no parse\n" )
+	}
+}
+
+show( "1 + 2 * 3" )
+show( "1 - 2 - 3" )
+show( "2 ^ 3 ^ 2" )
+show( "1 < 2 < 3" )
+show( "(1 < 2) < 3" )

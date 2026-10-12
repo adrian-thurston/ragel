@@ -1,0 +1,4 @@
+declaration: int x;
+declaration: a * b;
+expression: a * b + c;
+expression: x;
