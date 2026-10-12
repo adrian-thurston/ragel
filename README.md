@@ -104,7 +104,8 @@ usage: colm [options] file
 general:
    -h, -H, -?, --help   print this usage and exit
    -v --version         print version information and exit
-   -b <ident>           use <ident> as name of C object encapsulating the program
+   -b <ident>           use <ident> as name of C object encapsulating
+                        the program
    -o <file>            if -c given, write C parse object to <file>,
                         otherwise write binary to <file>
    -p <file>            write C parse object to <file>
