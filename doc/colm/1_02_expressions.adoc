@@ -1,6 +1,183 @@
-Expressions
-===========
+= Expressions
 
-== TODO
+An expression gives a value. This chapter covers the literals, the operators,
+what is true in a condition, and `cast` and `typeid`, which work on the types
+of trees.
 
+[[literals]]
+== Literals
 
+An integer is written in decimal digits. There is no hex, and no sign: `-7`
+is a parse error. Write `0 - 7` instead.
+
+Strings come in three forms:
+
+* `+"..."+` takes escapes, and expressions in square brackets, `+[Expr]+`,
+  which are replaced by their value's text. In it, write `+[+` and `+]+` as
+  `+\[+` and `+\]+`. A `+]+` with no `+[+` before it is a parse error, even
+  after a `+\[+`.
+* `+'...'+` takes escapes, but no expressions: its square brackets are kept
+  as they are.
+* `+~+` starts a string that runs to the end of the line, line break
+  included, with no escapes and no expressions.
+
+The escapes are `\n`, `\t`, `\r`, `\0`, `\a`, `\b`, `\f` and `\v`, which
+stand for the same characters as in C. A backslash before any other
+character gives that character: `+\\+`, `+\"+`, `+\'+`, `+\[+`, `+\]+`.
+
+A `"` or `'` string that isn't closed on its line ends at the end of the
+line, and holds the line break: `print "done` prints `done` and a newline.
+Colm's own tests use this. The manual's examples close their strings.
+
+Strings written next to each other join: `"a" 'b' "c"` is `abc`, in an
+assignment and in `print`.
+
+A list of strings and values in square brackets is a `str`:
+`+[ "n=" N " name=" Name ]+` is `n=7 name=colm` when `N` is 7 and `Name` is
+`colm`.
+
+`true` and `false` are the two ``bool``s. `nil` is the value that a `str`,
+tree, struct, list or map variable starts with, as
+xref:2_00_types.adoc#nil[the types chapter] explains.
+
+[[operators]]
+== Operators
+
+The operators, from the lowest precedence to the highest:
+
+[cols="2,3"]
+|===
+| Operators | Meaning
+
+| `&&` `\|\|`
+| and, or
+
+| `==` `!=` `<` `>` `+<=+` `>=`
+| compare, giving a `bool`
+
+| `pass:c[+]` `-`
+| add and subtract ints; `pass:c[+]` also joins strs
+
+| `+*+` `/`
+| multiply and divide ints; `/` drops the remainder, toward 0
+
+| prefix `!` `$` `%` `+^+`
+| see below
+|===
+
+Operators of one level group left to right: `7 - 2 - 1` is 4. `7 / 2` is 3,
+and `(0 - 7) / 2` is -3.
+
+`&&` and `||` share a level, unlike in C: `A || B && C` is `(A || B) && C`,
+so use parentheses. The right side isn't evaluated when the left decides, so
+`S && S.length > 0` is safe when `S` is nil. They are for
+<<conditions,conditions>>.
+
+The two sides of a comparison have one type. `1 < 2 < 3` is an error,
+`comparison of different types`, and so is `X == nil` for a `str`, tree,
+struct or list. Test a value for nil with `!X`.
+
+`==` and `!=` compare strs by their text. `<`, `>`, `+<=+` and `>=` compare
+strs by length first, then byte by byte, so `"b" < "aa"` is true. Maps order
+str keys the same way, as xref:2_02_list_map_struct_alias.adoc#maps[the maps
+section] shows.
+
+`!X` is true when `X` is 0, false or nil.
+
+`$X` is the text of the tree `X`, without the ignored text around it, as a
+`str`. For an `int`, it is its digits, so `$N` turns an int into a str. `%X`
+is the text with the ignored text. `+^X+` is the tree without the ignored
+text around it. xref:3_01_lex.adoc[The lexing chapter] explains ignored text.
+
+A prefix operator applies to the value right after it: `!A == B` is
+`(!A) == B`.
+
+These are not in colm:
+
+* `%` as an operator between two values. `+A - A / B * B+` is the remainder
+  of `A / B`, and xref:0_05_fizzbuzz.adoc[FizzBuzz] uses a function for it.
+* `pass:c[++]` and `pass:c[+=]`, as xref:1_01_statements.adoc[the statements
+  chapter] says.
+* a minus sign in front of a value
+* bitwise operators
+* `?:`
+
+There are no conversions. An `int` is not a `bool`: `I: int = true` is
+`type mismatch in assignment`, and `(1 < 2) + 5` is
+`do not have an addition operator for these types`. So is `"a" + N`, with `N`
+an int: write `"a" + $N`, or `+"a[N]"+`.
+xref:2_00_types.adoc#conversions[The types chapter] has a table of
+conversions.
+
+This program uses the operators:
+
+[source,chapel]
+.expr_ops.lm
+----
+include::code/expr_ops.lm[]
+----
+
+It prints:
+
+----
+include::code/expr_ops.exp[]
+----
+
+`A > B || A < B && A == B` is `(A > B || A < B) && A == B`, which is false.
+In C, `&&` comes first, and it would be true.
+
+[[conditions]]
+== Conditions
+
+`if` and `while` take a value of any type. An `int` is true when it isn't 0,
+a `bool` when it is true, and a `str`, tree, struct, list or map when it
+isn't nil. An empty str and an empty list are true.
+
+== Other expressions
+
+* A function call, `Name( Arg, Arg )`, gives the function's result:
+  xref:1_04_functions.adoc[the functions chapter].
+* `new` makes a struct, list or map:
+  xref:2_02_list_map_struct_alias.adoc#structs[the structs section].
+* `parse` makes a tree from text: xref:3_02_parse.adoc[the parsing chapter].
+* `match`, `cons`, `make_token` and `make_tree`:
+  xref:3_03_match.adoc[the patterns chapter].
+
+[[cast]]
+== cast and typeid
+
+`typeid<T>` is an `int` that stands for the tree type `T`, a token or a def.
+It tells `make_token` and `make_tree`, in xref:3_03_match.adoc[the patterns
+chapter], what type to make. The number is internal to colm: a program only
+passes it on. `typeid` works only for tree types: `typeid<int>` is an error.
+
+`cast<T> X`, where `X` is a tree and `T` a tree type, gives a copy of `X` with
+the type `T`: the same text, ignored text and children. Colm doesn't check
+that they fit `T`. Its use is to pass a token where another token type is
+wanted. A def cast to another def keeps its children, but they can't be read
+by label. `X` and `T` must be tree types.
+
+In this program, `show` takes only a `name`. A `word` is cast to a `name` to
+pass it:
+
+[source,chapel]
+.expr_cast.lm
+----
+include::code/expr_cast.lm[]
+----
+
+It reads this input:
+
+----
+include::code/expr_cast.in[]
+----
+
+and prints:
+
+----
+include::code/expr_cast.exp[]
+----
+
+Without the cast, `show( W )` fails to compile, with
+`arg 1 is of the wrong type`. The last line passes `show` a token that
+`make_token` makes, with `typeid<name>` naming its type.

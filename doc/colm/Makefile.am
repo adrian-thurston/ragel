@@ -30,6 +30,8 @@ IN_FILES = \
 # their output.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
+	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in \
+	code/expr_ops.lm         code/expr_ops.exp \
 	code/figure_44.lm        code/figure_44.exp \
 	code/fizzbuzz.lm         code/fizzbuzz.exp \
 	code/hello_world.lm      code/hello_world.exp \

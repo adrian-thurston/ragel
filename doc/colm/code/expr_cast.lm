@@ -1,0 +1,29 @@
+lex
+	token name /[A-Z][a-z]*/
+	token word /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def text
+	[(name | word)*]
+
+# Only a name can be passed.
+void show( N: name )
+{
+	print( "name: ", $N, "\n" )
+}
+
+parse T: text[ stdin ]
+
+if ( ! T ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for N: name in T
+	show( N )
+
+for W: word in T
+	show( cast<name> W )
+
+show( make_token( typeid<name>, "Zed" ) )
