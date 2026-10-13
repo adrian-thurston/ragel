@@ -10,6 +10,10 @@
  * they show is the output tested here. The cases live outside test/, but the
  * results go to manual/working under the test build directory, beside the
  * other suites'.
+ *
+ * Each example is compiled with -I naming doc/colm/code, so it can include a
+ * file kept there. Such a file needs a suffix other than .lm, and the
+ * chapters use .lmi, since every .lm there is run as an example.
  */
 
 #include "harness.h"
@@ -36,6 +40,8 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 		jobs.append( job );
 
 		ColmProgram prog;
+		prog.comp.push_back( "-I" );
+		prog.comp.push_back( src );
 		if ( !readFile( joinPath( src, names[i] ), prog.text ) ) {
 			job->error( "cannot read " + names[i] );
 			continue;

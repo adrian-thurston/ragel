@@ -1,0 +1,60 @@
+# Words, and a function that counts them.
+namespace word
+	lex
+		token item /[a-z]+/
+		ignore /[ \t]+/
+	end
+
+	def items
+		[item*]
+
+	int count( L: items )
+	{
+		N: int = 0
+		for I: item in L
+			N = N + 1
+		return N
+	}
+end
+
+# Numbers, and a function that adds them up.
+namespace number
+	lex
+		token item /[0-9]+/
+		ignore /[ \t]+/
+	end
+
+	def items
+		[item*]
+
+	int total( L: items )
+	{
+		T: int = 0
+		for I: item in L
+			T = T + atoi( $I )
+		return T
+	}
+end
+
+lex
+	token nl /'\n'/
+end
+
+# A line is some words, then some numbers.
+def line
+	[Words: word::items Numbers: number::items nl]
+
+def lines
+	[line*]
+
+parse Lines: lines[ stdin ]
+
+if ( ! Lines ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for L: line in Lines {
+	print( $L.Words, ": ", word::count( L.Words ), " words, total ",
+			number::total( L.Numbers ), "\n" )
+}
