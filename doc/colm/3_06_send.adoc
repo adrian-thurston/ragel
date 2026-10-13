@@ -273,24 +273,7 @@ Sent as they are, the words bring their spaces with them. With `auto_trim`
 on, the parser gets the words alone, unless they are sent with `@`. `+^+`
 trims them, though `auto_trim` is off.
 
-== The parser's input
-
-`+P->gets()+` returns the parser's input. `push` on it puts text at the
-front of the input, where the parser has read up to. Here `start` is
-`+[id*]+`:
-
-[source,chapel]
-----
-P: parser<start> = new parser<start>()
-send P "c d"
-Input: _input = P->gets()
-Input->push( "a b " )
-send P " e" eos
-----
-
-The tree is `c a b d e`. The parser has read `c`, but `d` is still in the
-input, waiting for the next send, since more text could make it longer. So
-the pushed text goes in before `d`.
+== The parser's input in token actions
 
 In a token action, `input` is the input of the parser that the token is for.
 xref:3_01_lex.adoc[The lexing chapter] covers `+input->pull+`,
