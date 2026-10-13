@@ -37,13 +37,19 @@ set(MANUAL_PAGES
 	3_06_send)
 
 # The example programs, with their output (.exp) and input (.in), which the
-# pages include, and the arguments they run with (.args). A file that an
-# example includes is listed too. Its suffix isn't .lm (the pages use .lmi),
-# since the manual suite runs every .lm as an example. Every page is rebuilt
-# when one of them changes, which is simpler than tracking which page
+# pages include, and the arguments they run with (.args). An example can also
+# have colm options (.comp) and a host program (.host.c or .host.cc). A file
+# that an example includes is listed too. Its suffix isn't .lm (the pages use
+# .lmi), since the manual suite runs every .lm as an example. Every page is
+# rebuilt when one of them changes, which is simpler than tracking which page
 # includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
+	code/emb_define.lm       code/emb_define.exp       code/emb_define.comp
+	code/emb_export.lm       code/emb_export.exp       code/emb_export.in
+	code/emb_export.host.cc
+	code/emb_run.lm          code/emb_run.exp          code/emb_run.in
+	code/emb_run.comp        code/emb_run.host.c
 	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in
 	code/expr_ops.lm         code/expr_ops.exp
 	code/figure_44.lm        code/figure_44.exp

@@ -1,6 +1,370 @@
-Embedding
-=========
+= Embedding colm in C and C++
 
-== TODO
+Normally colm compiles a program to an executable. With `-c` it writes the
+program as C instead: a _parse object_, which a C or {cpp} program, the _host_,
+links with libcolm, the colm runtime library, and runs. The host starts the
+program, passes it arguments, and gets back its exit status and the error of
+its last parse. A {cpp} host can also read the trees the program exports and
+call the functions it exports. A C host can't: exports are {cpp} only.
 
+This chapter covers building a parse object, running it from C, how the
+program and the host share standard input and output, exports, the commit
+code that reductions need, and passing values into a program from its build
+with `-E`.
 
+== Compiling to a parse object
+
+`colm -c prog.lm` writes the program as C, to `prog.c`, named after the
+program, and stops there. `-o` gives the file another name. The C file is the
+program as colm compiles it for an executable, without the `main` function,
+which the host supplies. `-p FILE` is `-o FILE`, except that colm rejects it
+without `-c`. It is there for wrapper scripts that keep `-o` for a file of
+their own, such as `colm-wrap`, which ragel's build runs colm through.
+
+The C file defines the program's data, `struct colm_sections colm_object`,
+and a few functions named `+colm_object_*+`. `-b NAME` names them all after
+`NAME` instead. One executable can link several programs this way, each
+compiled with its own `-b`: `ragel-c` links its parser, `rlparseC`, and its
+code generator, `rlhcC`. `colm/colm.h` declares `colm_object`. A host that uses
+another name declares it itself:
+
+[source,c]
+----
+extern struct colm_sections words_object;
+----
+
+With `-c`, colm doesn't run a C compiler, so `-L` and `-r` do nothing. The
+host's build compiles the C file with a C compiler, with colm's headers on its
+include path, and links it with libcolm. With colm installed under
+`/opt/colm`, that is:
+
+[source,bash]
+----
+colm -c -o prog.c prog.lm
+cc -c -I/opt/colm/include prog.c
+----
+
+and, in the link, `-L/opt/colm/lib -lcolm -Wl,-rpath,/opt/colm/lib`. The
+rpath lets the program find libcolm under `/opt/colm` when it runs. Under
+`/usr/local`, a program needs no rpath, but may need `sudo ldconfig` before it
+finds libcolm, as xref:9_00_q_and_a.adoc#libcolm-not-found[the FAQ] explains.
+
+== Running a program from C
+
+The executable that colm builds has a `main` that makes the program, runs it
+with the command line's arguments, deletes it and exits with its exit status.
+A host does the same, and can do more in between. This program counts the
+words on its input. When the input isn't all words, the parse fails, and the
+program exits with status 1:
+
+[source,chapel]
+.emb_run.lm
+----
+include::code/emb_run.lm[]
+----
+
+The host runs it, prints the parse error if there was one, and prints the
+exit status:
+
+[source,c]
+.emb_run.host.c
+----
+include::code/emb_run.host.c[]
+----
+
+The host calls the program's data `words_object`, so the program is compiled
+with `-b words_object`:
+
+[source,bash]
+----
+colm -c -b words_object -o emb_run.c emb_run.lm
+cc -c -I/opt/colm/include emb_run.c emb_run.host.c
+cc -o emb_run emb_run.o emb_run.host.o \
+	-L/opt/colm/lib -lcolm -Wl,-rpath,/opt/colm/lib
+./emb_run < emb_run.in
+----
+
+With this input:
+
+----
+include::code/emb_run.in[]
+----
+
+it prints:
+
+----
+include::code/emb_run.exp[]
+----
+
+With the input `the quick 4 fox`, it prints
+`parse failed: <stdin>:1:11: parse error` and then `exit status 1`.
+
+A host uses these functions, which `colm/colm.h` declares:
+
+`colm_new_program( &obj )`::
+Makes a program from a parse object's data, and returns it.
+
+`colm_run_program( prg, argc, argv )`::
+Runs the program's top-level code. `argv[0]` becomes the program's `arg0`, and
+the rest of `argv` its `argv` list, as an executable's command line does.
+
+`colm_run_program2( prg, argc, argv, argl )`::
+The same, with each argument's length in `argl`, so an argument can hold NUL
+bytes.
+
+`colm_delete_program( prg )`::
+Frees the program and everything it made, and returns its exit status: the
+value it passed to `exit`, or 0.
+
+`colm_error( prg, &length )`::
+The `error` of the program's last `parse`, or NULL when that parse succeeded,
+even if an earlier one failed. The text isn't NUL-terminated, so read it with
+its length, as `emb_run.host.c` does with `+%.*s+`. It belongs to the program,
+so read it before deleting the program.
+
+`colm_set_debug( prg, realms )`::
+Turns on debug output for the realms that the `+COLM_DBG_*+` flags in `colm.h`
+name. Only a libcolm built with `--enable-debug` prints any.
+
+`colm_extract_fns( prg )`::
+Hands the host the names of the files that the program's input locations
+point to, as a NULL-terminated array. The names then outlive the program, and
+the host frees each name, then the array. Call it just before deleting the
+program.
+
+`colm_set_reduce_ctx( prg, ctx )`, `colm_get_reduce_ctx( prg )`::
+Set and get the object the commit code's reductions run on. See
+<<commit-code>>.
+
+`colm_set_reduce_clean( prg, clean )`::
+With 0, the commit code keeps the trees its reductions have read. See
+<<commit-code>>.
+
+The other functions in `colm.h` take offsets and ids that only the code colm
+generates knows. They are what the export code, in <<exports>>, and
+`colm/colmex.h` are built on: go through the export code rather than call them.
+ragel's `TopLevel::reduceFile`, in `src/ragel/reducer.cc`, is a complete host
+in use: it makes a program, sets its debug realms, reduce clean and reduce
+context, runs it, takes its file names, reads its error and deletes it.
+
+A program that calls `exit( N )` stops there, and `colm_run_program` returns.
+The host carries on, and `colm_delete_program` returns `N`. `exit_hard( N )`
+calls C's `exit`, which ends the host's process too.
+
+A host can make several programs, from one parse object or from several, and
+have them alive at once. Each is independent of the others. Make a program,
+run it once, and delete it.
+
+xref:3_02_parse.adoc[The parsing chapter] covers `parse` and its `error`.
+
+== Standard input and output
+
+A program and its host share the process's standard input, output and error,
+but not their buffers. The first time a program uses `stdin`, `stdout` or
+`stderr`, the runtime opens a stream of its own on descriptor 0, 1 or 2, with
+a buffer of its own. The host's `stdin`, `stdout` and `stderr` are the C
+library's, with their own buffers.
+
+colm flushes its output when the program's top-level code ends, and at the
+latest when the program is deleted. The host's output comes out when the host
+flushes it, which, for a pipe or a file, may not be until the host exits. So
+when the order of the two matters, flush the host's output before running colm
+code: `fflush( stdout )` in C, `std::flush` in {cpp}. `emb_run.host.c` prints
+only after the program's top-level code has ended, so it needs no flush.
+
+Input is another matter. When the host reads from `stdin`, the C library reads
+ahead into its buffer, possibly the whole input, and the program never sees
+what it read. A host that reads one line with `fgets` can leave the program's
+`+parse ... [stdin]+` with nothing to read. So don't read `stdin` in the host
+before a program that reads it. Give the program its text another way: as an
+argument, as the name of a file to open, or as a parameter of an exported
+function.
+
+[[exports]]
+== Exporting to C++
+
+`export` before a global variable's declaration lets a {cpp} host read the
+variable. Inside the program, it is a global like any other. `export` before a
+function definition lets the host call the function:
+
+[source,chapel]
+----
+export Config: config
+export Version: str = "1.0"
+
+export str lookup( Key: str )
+{
+	...
+}
+----
+
+Both are allowed only at the top level of the program, not in a `struct` or a
+`namespace`.
+
+`-e FILE` writes the _export header_, which declares the {cpp} side of the
+exports, and `-x FILE` the _export code_, which defines it. `-x` needs `-e`.
+The export code includes the header by the path given to `-e`, as it was
+written. Keeping both files in one directory, as the example below does, needs
+nothing more. Otherwise, compile the export code with an `-I` that makes the
+path resolve: with `-e out/prog.h`, `-I.` when compiling in the directory
+colm ran in.
+
+The header has a {cpp} `struct` for each type in the program, named after it,
+including `str` and the types colm makes for itself. Each derives from
+`ExportTree`, in `colm/colmex.h`, and has these members:
+
+* `ID`, a static constant: the type's id.
+* `text()`, the tree's text, as a `std::string`, without the ignored text at
+  its ends. `text_ws()` leaves that ignored text in.
+* `loc()`, the tree's location: a pointer to a `colm_location`, with `name`,
+  `line`, `column` and `byte`.
+* `data()`, for a token, a pointer to the `colm_data` that holds its text, as
+  `data` and `length`.
+* A conversion to `colm_tree *`. A nil tree converts to 0, so `T == 0` tests
+  for nil. `text()` of a nil tree is `NIL`.
+* A method for each child that has a label, or that the program can read by
+  its type's name. It returns the child: `Key()` and `Value()` in the example
+  below.
+* `prodName()`, when the def's productions have names: the name of the tree's
+  production, from an `enum prod_name` of them.
+
+`RepeatIter<T>`, also in `colmex.h`, walks a tree, stopping at each `T` in it,
+in order, without going into the ``T``s it finds. `value()` is the `T` it is
+at, `next()` moves on, and `end()` is true when there are no more.
+
+Types in a colm `namespace` are in a {cpp} namespace of the same name, such as
+`ns::item`, one level deep.
+
+A global gets an accessor that returns its tree when the global is a tree: a
+`str`, a token or a def. `export Config: config` gives
+`config Config( colm_program *prg )`. An exported function gets a wrapper that
+calls it: `export str lookup( Key: str )` gives
+`str lookup( colm_program *prg, const char *p0 )`. Its parameters are ``str``s,
+which the host passes as `const char *`, and it returns a `str`, a token or a
+def.
+
+The structs are handles on the program's trees, not copies of them. A
+function's result lives until the host's next call of an exported function.
+A global's tree lives until the global changes. Everything goes when the
+program is deleted. So copy out what you need, with `text()`, before the next
+call. A global read before `colm_run_program` is nil, since the program hasn't
+set it yet.
+
+Every export header has the same include guard, `_EXPORTS_H`, and defines
+structs such as `str` under the same names. So one executable can use only
+one program's exports.
+
+This program parses a list of settings, and exports the list, the parse
+error, and a function that looks up a setting:
+
+[source,chapel]
+.emb_export.lm
+----
+include::code/emb_export.lm[]
+----
+
+The host prints each setting, and then the value of `port`, which it looks up
+with `lookup`. When the parse failed, it prints the error instead:
+
+[source,cpp]
+.emb_export.host.cc
+----
+include::code/emb_export.host.cc[]
+----
+
+It is built with:
+
+[source,bash]
+----
+colm -c -o emb_export.c -e emb_export.if.h -x emb_export.if.cc emb_export.lm
+cc -c -I/opt/colm/include emb_export.c
+c++ -I/opt/colm/include -o emb_export \
+	emb_export.host.cc emb_export.if.cc emb_export.o \
+	-L/opt/colm/lib -lcolm -Wl,-rpath,/opt/colm/lib
+./emb_export < emb_export.in
+----
+
+With this input:
+
+----
+include::code/emb_export.in[]
+----
+
+it prints:
+
+----
+include::code/emb_export.exp[]
+----
+
+With the input `host = ;`, it prints `error: <stdin>:1:8: parse error`.
+
+[[commit-code]]
+== Commit code
+
+A program's reductions, which xref:3_05_reduction.adoc[the reductions
+chapter] covers, are {cpp} code that runs as the parser commits trees.
+`-m FILE` writes that code, the _commit code_, to `FILE`. It defines functions
+that the parse object calls, such as `colm_object_commit_reduce_forward`, named
+after the `-b` name. Without `-m`, the C file defines stubs for them instead.
+With `-m`, it leaves them out, so the commit code must be compiled and linked
+in, or the link fails with
+`undefined reference to 'colm_object_commit_reduce_forward'`.
+
+The commit code is {cpp}, and includes `+"reducer.h"+`, a header you write.
+For each `reduction NAME` in the program, the commit code defines
+`NAME::commit_reduce_forward`, and calls it on the reduce context, which it
+takes to be a `NAME`. So `reducer.h` declares a class or struct `NAME`, with
+the members the commit code defines and calls, as `src/ragel/reducer.h` does
+for ragel's `TopLevel`. A program with no reductions can have an empty
+`reducer.h`.
+
+The host gives the commit code its `NAME` object, before running the program,
+with `colm_set_reduce_ctx( prg, &obj )`. By default, the commit code frees a
+tree's children once a reduction has read them.
+`colm_set_reduce_clean( prg, 0 )` keeps them, so the program can use the tree
+after the reduction.
+
+A host built with commit code is linked with `c++`, since the commit code is
+{cpp}:
+
+[source,bash]
+----
+colm -c -o prog.c -m commit.cc prog.lm
+cc -c -I/opt/colm/include prog.c host.c
+c++ -c -I. -I/opt/colm/include commit.cc
+c++ -o prog host.o prog.o commit.o \
+	-L/opt/colm/lib -lcolm -Wl,-rpath,/opt/colm/lib
+----
+
+ragel compiles its parser this way. Leaving out the `colm-wrap` script that
+its build runs colm through, the command in `src/ragel/Makefile.am` comes to
+`colm -c -b rlparseC -p parse.c -m rlreduce.cc rlparse.lm`.
+
+== Values from the build: -E
+
+`-E N=V` makes `N` a global `str` that holds `V`, which lets a build pass a
+program values such as a version or a target. `N` is constant: a program that
+assigns to it doesn't compile, with the error `field "N" is const`. `-E N=`
+gives the empty string. `-E` can be repeated, for several values. A program
+that uses a name that no `-E` defines doesn't compile, with the error
+`cannot find name N in object`.
+
+[source,chapel]
+.emb_define.lm
+----
+include::code/emb_define.lm[]
+----
+
+Built and run with:
+
+[source,bash]
+----
+colm -E Target=linux -E Version=1.2 emb_define.lm
+./emb_define
+----
+
+it prints:
+
+----
+include::code/emb_define.exp[]
+----

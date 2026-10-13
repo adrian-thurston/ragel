@@ -19,6 +19,9 @@
  * of the compiled program. A line ending in --noeol is emitted without its
  * newline.
  *
+ * HOST is C++. The manual suite's NAME.host.c is a C host, built without the
+ * export header and code.
+ *
  * A case with COMP_ERR is a program colm must reject. It passes when colm
  * exits with 1 and its error output is the section, once the path colm
  * compiles the program from, working/NAME.lm, is taken off the front of each
@@ -117,7 +120,9 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 	}
 
 	if ( prog.hasHost ) {
-		job->steps.push_back( Step::writeFile( joinPath( wk, root + ".host.cc" ), prog.host ) );
+		std::string hostName = root + ( prog.hostIsC ? ".host.c" : ".host.cc" );
+		std::string host = "working/" + hostName;
+		job->steps.push_back( Step::writeFile( joinPath( wk, hostName ), prog.host ) );
 
 		std::string parse = "working/" + root + ".parse";
 		std::string iface = "working/" + root + ".if";
@@ -128,10 +133,12 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 		argv.push_back( "-c" );
 		argv.push_back( "-o" );
 		argv.push_back( parse + ".c" );
-		argv.push_back( "-e" );
-		argv.push_back( iface + ".h" );
-		argv.push_back( "-x" );
-		argv.push_back( iface + ".cc" );
+		if ( !prog.hostIsC ) {
+			argv.push_back( "-e" );
+			argv.push_back( iface + ".h" );
+			argv.push_back( "-x" );
+			argv.push_back( iface + ".cc" );
+		}
 		argv.push_back( lm );
 		job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );
 
@@ -146,14 +153,15 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 		job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );
 
 		argv.clear();
-		argv.push_back( config.cxx );
+		argv.push_back( prog.hostIsC ? config.cc : config.cxx );
 		argv.push_back( "-I." );
 		argv.insert( argv.end(), config.colmCppflags.begin(), config.colmCppflags.end() );
 		argv.insert( argv.end(), config.colmLdflags.begin(), config.colmLdflags.end() );
 		argv.push_back( "-o" );
 		argv.push_back( "working/" + root );
-		argv.push_back( iface + ".cc" );
-		argv.push_back( "working/" + root + ".host.cc" );
+		if ( !prog.hostIsC )
+			argv.push_back( iface + ".cc" );
+		argv.push_back( host );
 		argv.push_back( parse + ".o" );
 		argv.push_back( "-lcolm" );
 		job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );

@@ -26,13 +26,19 @@ IN_FILES = \
 	3_06_send.adoc
 
 # The example programs, each with the output it prints (.exp), and the input
-# it reads (.in) and the arguments it runs with (.args), if any. The test
-# harness's manual suite runs them, and the pages include the programs and
-# their output. A file that an example includes is listed too. Its suffix
-# isn't .lm (the pages use .lmi), since the manual suite runs every .lm as an
-# example.
+# it reads (.in) and the arguments it runs with (.args), if any. An example
+# can also have colm options (.comp) and a host program it is linked into
+# (.host.c or .host.cc). The test harness's manual suite runs them, and the
+# pages include the programs and their output. A file that an example
+# includes is listed too. Its suffix isn't .lm (the pages use .lmi), since the
+# manual suite runs every .lm as an example.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
+	code/emb_define.lm       code/emb_define.exp       code/emb_define.comp \
+	code/emb_export.lm       code/emb_export.exp       code/emb_export.in \
+	code/emb_export.host.cc \
+	code/emb_run.lm          code/emb_run.exp          code/emb_run.in \
+	code/emb_run.comp        code/emb_run.host.c \
 	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in \
 	code/expr_ops.lm         code/expr_ops.exp \
 	code/figure_44.lm        code/figure_44.exp \

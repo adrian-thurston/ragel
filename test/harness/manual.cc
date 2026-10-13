@@ -3,14 +3,21 @@
  */
 
 /*
- * manual: the colm manual's example programs, doc/colm/code/NAME.lm. Each is
- * compiled and run as a colm.d case is, with NAME.in, if there is one, on its
- * standard input, and the words of NAME.args, if there is one, as its
- * arguments. Its output is compared against NAME.exp. The chapters include
- * the program and its expected output from these files, so the output they
- * show is the output tested here. The cases live outside test/, but the
- * results go to manual/working under the test build directory, beside the
- * other suites'.
+ * manual: the colm manual's example programs, doc/colm/code/NAME.lm. Only the
+ * .lm files are cases. Each is compiled and run as a colm.d case is, and the
+ * files beside it named after it fill in the rest:
+ *
+ *   NAME.exp                 the expected output, which every case has
+ *   NAME.in                  the program's standard input
+ *   NAME.args                the program's arguments, split into words
+ *   NAME.comp                colm options, as colm.d's COMP
+ *   NAME.host.c, .host.cc    a host program in C or C++, as colm.d's HOST
+ *
+ * With a host, the program is compiled with -c, and with -e and -x for a C++
+ * host, and the host is linked into it. The chapters include the program and
+ * its expected output from these files, so the output they show is the output
+ * tested here. The cases live outside test/, but the results go to
+ * manual/working under the test build directory, beside the other suites'.
  *
  * Each example is compiled with -I naming doc/colm/code, so it can include a
  * file kept there. Such a file needs a suffix other than .lm, and the
@@ -66,6 +73,32 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 				continue;
 			}
 			run.args = splitWords( args );
+		}
+
+		if ( fileExists( joinPath( src, root + ".comp" ) ) ) {
+			std::string comp;
+			if ( !readFile( joinPath( src, root + ".comp" ), comp ) ) {
+				job->error( "cannot read " + root + ".comp" );
+				continue;
+			}
+			Words words = splitWords( comp );
+			prog.comp.insert( prog.comp.end(), words.begin(), words.end() );
+		}
+
+		bool hostC = fileExists( joinPath( src, root + ".host.c" ) );
+		bool hostCxx = fileExists( joinPath( src, root + ".host.cc" ) );
+		if ( hostC && hostCxx ) {
+			job->error( "both " + root + ".host.c and " + root + ".host.cc" );
+			continue;
+		}
+		if ( hostC || hostCxx ) {
+			std::string name = root + ( hostC ? ".host.c" : ".host.cc" );
+			if ( !readFile( joinPath( src, name ), prog.host ) ) {
+				job->error( "cannot read " + name );
+				continue;
+			}
+			prog.hasHost = true;
+			prog.hostIsC = hostC;
 		}
 
 		colmCompile( config, job, prog );

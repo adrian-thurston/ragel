@@ -249,15 +249,16 @@ void enumerateRagel( const Config &config, const Selection &sel, JobList &jobs )
 
 /* The program, its compilation arguments, and the C functions it calls (CALL)
  * and the host program it is linked into (HOST), if it has them. A program
- * with compErr (COMP_ERR) is expected to fail to compile, with that error. */
+ * with compErr (COMP_ERR) is expected to fail to compile, with that error. A
+ * C host (hostIsC, the manual's NAME.host.c) gets no export header or code. */
 struct ColmProgram
 {
 	std::string text;
 	Words comp;
-	bool hasCall, hasHost, hasCompErr;
+	bool hasCall, hasHost, hostIsC, hasCompErr;
 	std::string call, host, compErr;
 
-	ColmProgram() : hasCall(false), hasHost(false), hasCompErr(false) {}
+	ColmProgram() : hasCall(false), hasHost(false), hostIsC(false), hasCompErr(false) {}
 };
 
 /* One run of the compiled program. */
