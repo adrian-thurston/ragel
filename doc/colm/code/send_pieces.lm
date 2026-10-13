@@ -1,0 +1,39 @@
+lex
+	literal `= `;
+	token id /[a-z]+/
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def assignment
+	[id `= number `;]
+	{
+		print( "  reduced: ", $lhs, "\n" )
+	}
+
+def program
+	[assignment*]
+
+# Sends one piece of text to the parser it is given.
+void feed( P: parser<program>, Text: str )
+{
+	print( "send '", Text, "'\n" )
+	send P [Text]
+}
+
+P: parser<program> = new parser<program>()
+
+feed( P, "width = 8" )
+feed( P, "0; height = 24;" )
+feed( P, " depth = 3;" )
+
+print( "finish\n" )
+Program: program = P->finish()
+
+if ( ! Program ) {
+	print( P->error, "\n" )
+	exit( 1 )
+}
+
+for A: assignment in Program
+	print( $A.id, " is ", $A.number, "\n" )

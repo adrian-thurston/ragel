@@ -1,0 +1,6 @@
+send: number 42
+send: number 7
+send_tree: word 42
+send_tree: number 7
+parse_tree: word 42
+parse_tree: number 7
