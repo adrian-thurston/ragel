@@ -122,8 +122,13 @@ on stdin if there is one, and compares the output with `NAME.exp`. An example
 can also have colm options in `NAME.comp`, and a host program it is linked
 into, `NAME.host.c` or `NAME.host.cc`. The chapters include those files, so a
 new example needs its `.exp` (and any of the others) there too, and in `CODE`
-and `MANUAL_CODE` in `doc/colm/`'s build files. Its results go to
-`test/manual/working/`.
+and `MANUAL_CODE` in `doc/colm/`'s build files. Each example is compiled with
+`-I` naming `doc/colm/code`, so it can include a file kept there. Give that
+file a suffix other than `.lm`, such as `.lmi`, since every `.lm` there is run
+as an example, and list it in `CODE` and `MANUAL_CODE` too. `NAME.args`, if
+there is one, holds the program's arguments, and goes in the build files too.
+No chapter includes it: a page that shows the command line types it by hand,
+so keep the two the same. The suite's results go to `test/manual/working/`.
 
 Each colm.d and manual run sets `COLM_LEAK_CHECK`, so a program that loses
 pool items (kids, trees, heads, ...) fails its case. A colm.d case's `LOST`

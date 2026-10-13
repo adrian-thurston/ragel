@@ -9,6 +9,7 @@
  *
  *   NAME.exp                 the expected output, which every case has
  *   NAME.in                  the program's standard input
+ *   NAME.args                the program's arguments, split into words
  *   NAME.comp                colm options, as colm.d's COMP
  *   NAME.host.c, .host.cc    a host program in C or C++, as colm.d's HOST
  *
@@ -17,6 +18,10 @@
  * its expected output from these files, so the output they show is the output
  * tested here. The cases live outside test/, but the results go to
  * manual/working under the test build directory, beside the other suites'.
+ *
+ * Each example is compiled with -I naming doc/colm/code, so it can include a
+ * file kept there. Such a file needs a suffix other than .lm, and the
+ * chapters use .lmi, since every .lm there is run as an example.
  */
 
 #include "harness.h"
@@ -43,6 +48,8 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 		jobs.append( job );
 
 		ColmProgram prog;
+		prog.comp.push_back( "-I" );
+		prog.comp.push_back( src );
 		if ( !readFile( joinPath( src, names[i] ), prog.text ) ) {
 			job->error( "cannot read " + names[i] );
 			continue;
@@ -58,6 +65,15 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 
 		if ( fileExists( joinPath( src, root + ".in" ) ) )
 			run.stdinFile = joinPath( src, root + ".in" );
+
+		if ( fileExists( joinPath( src, root + ".args" ) ) ) {
+			std::string args;
+			if ( !readFile( joinPath( src, root + ".args" ), args ) ) {
+				job->error( "cannot read " + root + ".args" );
+				continue;
+			}
+			run.args = splitWords( args );
+		}
 
 		if ( fileExists( joinPath( src, root + ".comp" ) ) ) {
 			std::string comp;

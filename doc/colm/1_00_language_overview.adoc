@@ -1,6 +1,121 @@
-Language overview
-=================
+= Language overview
 
-== TODO
+This chapter describes a colm program as a whole: what a program file holds,
+where it starts running, how it is laid out, which names it can use, and how
+it gets its arguments and ends. The chapters after it cover statements,
+expressions, control flow and variables, and then the types.
 
+== A program
 
+A colm program is a file of definitions and statements. The definitions are:
+
+* `lex` blocks and tokens, in xref:3_01_lex.adoc[the lexing chapter]
+* ``def``s, in xref:3_02_parse.adoc[the parsing chapter]
+* functions, below and in xref:1_04_functions.adoc[the functions chapter]
+* ``struct``s and ``alias``es, in xref:2_02_list_map_struct_alias.adoc[the
+  chapter on lists, maps, structs and aliases]
+* ``global``s, in xref:1_05_variables.adoc#globals[the variables chapter]
+* iterators, in xref:1_06_iterators.adoc[the iterators chapter]
+
+`namespace` and `include` are in xref:8_02_modularity.adoc[the modularity
+chapter].
+
+A function, struct, token or def can be used above its definition in the
+file.
+
+The statements outside functions are the program's main code. They run in
+order, from the top of the file, when the program starts. There is no main
+function.
+
+== Functions
+
+A function definition gives the function's result type, its name, its
+parameters in parentheses, and its body in braces:
+
+[source,chapel]
+----
+int add( A: int, B: int )
+{
+	return A + B
+}
+----
+
+With it, `print( add( 2, 3 ), "\n" )` prints `5`. A function that returns
+nothing has the type `void`. `return` is in xref:1_03_control_flow.adoc[the
+control flow chapter].
+
+A function that changes an `int` or `str` parameter doesn't change the
+caller's variable: the parameter is a copy. A `ref<T>` parameter is the
+caller's variable instead, as xref:1_04_functions.adoc[the functions chapter]
+shows.
+
+== Layout
+
+Statements need no separator. Two can share a line, and one can span lines.
+A `;` after a statement is a parse error. `+#+` starts a comment, which runs
+to the end of the line.
+
+== Names
+
+A name is made of letters, digits and `_`, and doesn't start with a digit.
+Case matters: `Abc` and `abc` are two variables.
+
+Colm's keywords are reserved: using one as a name is a parse error. They are:
+
+`accum`, `alias`, `bool`, `break`, `case`, `cast`, `commit`, `cons`,
+`construct`, `context`, `def`, `default`, `else`, `elsif`, `end`, `eos`,
+`export`, `false`, `for`, `global`, `if`, `ignore`, `in`, `include`, `int`,
+`iter`, `left`, `lex`, `list`, `list_el`, `literal`, `make_token`,
+`make_tree`, `map`, `map_el`, `match`, `namespace`, `new`, `ni`, `nil`,
+`nonassoc`, `parse`, `parse_stop`, `parse_tree`, `parser`, `preeof`, `print`,
+`prints`, `ptr`, `read_reduce`, `redef`, `reduce`, `reducefirst`,
+`reduction`, `ref`, `reject`, `require`, `return`, `right`, `rl`, `send`,
+`send_tree`, `struct`, `switch`, `token`, `true`, `typeid`, `void`, `while`
+and `yield`.
+
+`cons` and `construct` are one keyword, and so are `parser` and `accum`. The
+keywords are all lower case, so a name that starts with a capital letter
+never clashes with one. The examples in these chapters give their variables
+such names.
+
+`str`, `any`, `argv` and `stdin` are predefined names, not keywords.
+
+== Input and output
+
+A program's input usually comes from `stdin`, through `parse`, which
+xref:3_02_parse.adoc[the parsing chapter] explains. Its output goes out
+through `print`, in xref:1_01_statements.adoc#printing[the statements
+chapter].
+
+[[exit]]
+== Arguments and exit
+
+`argv` is a `list<str>` of the program's arguments, without the program's
+name. `arg0` is the name the program was run by.
+
+`exit( N )` ends the program at once, with the exit status `N`, also from
+inside a function. What the program printed before it stays printed. A
+program that reaches its end exits with 0.
+
+This program prints its arguments, numbered:
+
+[source,chapel]
+.prog_args.lm
+----
+include::code/prog_args.lm[]
+----
+
+Run with three arguments:
+
+[source,bash]
+----
+./prog_args apple banana cherry
+----
+
+it prints:
+
+----
+include::code/prog_args.exp[]
+----
+
+With no arguments, it prints the usage line and exits with 1.

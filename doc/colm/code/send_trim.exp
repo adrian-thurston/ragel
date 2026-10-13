@@ -1,0 +1,4 @@
+send: [  one   ] [two  ]
+auto_trim: [one] [two]
+auto_trim, @: [  one   ] [two  ]
+^: [one] [two]

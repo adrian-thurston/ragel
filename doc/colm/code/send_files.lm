@@ -1,0 +1,36 @@
+lex
+	token word /[a-z]+/
+	ignore /space+/
+end
+
+def words
+	[word*]
+
+# Write a file in the directory the program runs in.
+Out: stream = open( "send_files.txt", "w" )
+if ( ! Out ) {
+	print( "cannot write send_files.txt\n" )
+	exit( 1 )
+}
+send Out "two three\nfour\n"
+Out->close()
+
+# Read it back, between two pieces of text.
+File: stream = open( "send_files.txt", "r" )
+if ( ! File ) {
+	print( "cannot read send_files.txt\n" )
+	exit( 1 )
+}
+
+P: parser<words> = new parser<words>()
+send P "one "
+send P [File]
+send P "five" eos
+
+if ( ! P->tree ) {
+	print( P->error, "\n" )
+	exit( 1 )
+}
+
+for W: word in P->tree
+	print( $W, "\n" )

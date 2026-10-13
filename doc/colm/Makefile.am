@@ -22,12 +22,16 @@ IN_FILES = \
 	8_03_performance.adoc 0_04_hello_world.adoc 1_03_control_flow.adoc \
 	2_02_list_map_struct_alias.adoc 3_04_undo.adoc 8_04_error_handling.adoc \
 	0_05_fizzbuzz.adoc 1_04_functions.adoc 2_03_def.adoc \
-	3_05_reduction.adoc 8_05_contributing.adoc
+	3_05_reduction.adoc 8_05_contributing.adoc \
+	3_06_send.adoc
 
-# The example programs, each with the output it prints (.exp) and the input
-# it reads (.in), if any. An example can also have colm options (.comp) and a
-# host program it is linked into (.host.c or .host.cc). The test harness's
-# manual suite runs them, and the pages include the programs and their output.
+# The example programs, each with the output it prints (.exp), and the input
+# it reads (.in) and the arguments it runs with (.args), if any. An example
+# can also have colm options (.comp) and a host program it is linked into
+# (.host.c or .host.cc). The test harness's manual suite runs them, and the
+# pages include the programs and their output. A file that an example
+# includes is listed too. Its suffix isn't .lm (the pages use .lmi), since the
+# manual suite runs every .lm as an example.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
 	code/emb_define.lm       code/emb_define.exp       code/emb_define.comp \
@@ -35,8 +39,11 @@ CODE = \
 	code/emb_export.host.cc \
 	code/emb_run.lm          code/emb_run.exp          code/emb_run.in \
 	code/emb_run.comp        code/emb_run.host.c \
+	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in \
+	code/expr_ops.lm         code/expr_ops.exp \
 	code/figure_44.lm        code/figure_44.exp \
 	code/fizzbuzz.lm         code/fizzbuzz.exp \
+	code/flow_primes.lm      code/flow_primes.exp \
 	code/hello_world.lm      code/hello_world.exp \
 	code/hello_world_ext.lm  code/hello_world_ext.exp \
 	code/lex_basics.lm       code/lex_basics.exp       code/lex_basics.in \
@@ -46,6 +53,12 @@ CODE = \
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in \
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in \
 	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in \
+	code/list_queue.lm       code/list_queue.exp \
+	code/map_count.lm        code/map_count.exp        code/map_count.args \
+	code/mod_include.lm      code/mod_include.exp      code/mod_include.in \
+	code/mod_list.lmi \
+	code/mod_namespace.lm    code/mod_namespace.exp    code/mod_namespace.in \
+	code/mod_nested.lm       code/mod_nested.exp       code/mod_nested.in \
 	code/nested_scope.lm     code/nested_scope.exp \
 	code/parse_commit.lm     code/parse_commit.exp     code/parse_commit.in \
 	code/parse_def.lm        code/parse_def.exp        code/parse_def.in \
@@ -56,8 +69,21 @@ CODE = \
 	code/parse_reparse.lm    code/parse_reparse.exp    code/parse_reparse.in \
 	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in \
 	code/poker.lm            code/poker.exp \
+	code/prog_args.lm        code/prog_args.exp        code/prog_args.args \
 	code/reference.lm        code/reference.exp \
-	code/scope.lm            code/scope.exp
+	code/scope.lm            code/scope.exp \
+	code/send_end.lm         code/send_end.exp \
+	code/send_files.lm       code/send_files.exp \
+	code/send_include.lm     code/send_include.exp     code/send_include.in \
+	code/send_out.lm         code/send_out.exp \
+	code/send_pieces.lm      code/send_pieces.exp \
+	code/send_tree.lm        code/send_tree.exp \
+	code/send_trim.lm        code/send_trim.exp \
+	code/stmt_print.lm       code/stmt_print.exp \
+	code/struct_route.lm     code/struct_route.exp \
+	code/type_share.lm       code/type_share.exp \
+	code/type_str.lm         code/type_str.exp \
+	code/var_scope.lm        code/var_scope.exp
 
 
 OUT_FILES = $(IN_FILES:.adoc=.html)

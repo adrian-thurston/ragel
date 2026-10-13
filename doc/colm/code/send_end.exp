@@ -1,0 +1,7 @@
+good:
+  width = 80;
+  height = 24;
+bad:
+  no tree
+  P->error is set
+error is nil

@@ -1,0 +1,10 @@
+send 'width = 8'
+send '0; height = 24;'
+  reduced: width = 80;
+send ' depth = 3;'
+  reduced: height = 24;
+finish
+  reduced: depth = 3;
+width is 80
+height is 24
+depth is 3

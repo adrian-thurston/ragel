@@ -1,0 +1,28 @@
+#
+# A loop over a user iterator that yields the parts of a tree, then a print of
+# the tree. The loop's end clears the iterator's local, so the end of the
+# program doesn't unwind the iterator a second time.
+#
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+iter each( S: start )
+{
+	for C: id in S
+		yield C
+}
+
+parse S: start[ "a b" ]
+for I: id in each( S )
+	print( ^I, '\n' )
+print( S, '\n' )
+##### EXP #####
+a
+b
+a b

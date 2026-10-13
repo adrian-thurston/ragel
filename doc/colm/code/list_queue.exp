@@ -1,0 +1,10 @@
+3 items
+- eggs
+- bread
+- milk
+back: milk
+back: bread
+back: eggs
+eggs comes before bread
+bread comes before milk
+first eggs, last milk, 1 left

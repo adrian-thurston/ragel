@@ -1,0 +1,19 @@
+Name: str = "colm"
+Count: int = 3
+Ok: bool = Count > 2
+
+# The arguments one after the other, with nothing between them.
+print( Name, " ", Count, " ", Ok, "\n" )
+
+# Values in square brackets, in a double-quoted string.
+print "[Name] has [Count] parts, [Count * 2] halves\n"
+
+# A single-quoted string keeps its square brackets.
+print '[Name] is not replaced here\n'
+
+# Strings and values, in square brackets.
+print [ Name " has " Count " parts\n" ]
+
+prints( stdout, "to stdout\n" )
+
+print( sprintf( "%5d|", Count ), sprintf( "%-5d|", Count ), sprintf( "%x\n", 255 ) )

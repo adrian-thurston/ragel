@@ -1,0 +1,25 @@
+print( 2 + 3 * 4, " ", ( 2 + 3 ) * 4, " ", 7 / 2, "\n" )
+
+# There is no minus sign in front of a number.
+Neg: int = 0 - 7
+print( Neg, " ", Neg / 2, "\n" )
+
+# The remainder, without a % operator.
+A: int = 17
+B: int = 5
+print( A - A / B * B, "\n" )
+
+# The text of an int, with $.
+S: str = "count: " + $A
+print( S, "\n" )
+
+print( A > B, " ", A == B, " ", "abc" == "abc", " ", "b" < "aa", "\n" )
+
+# && and || have the same precedence.
+if ( A > B || A < B && A == B )
+	print( "C would say yes\n" )
+else
+	print( "colm says no\n" )
+
+if ( !( A < B ) )
+	print( "not less\n" )

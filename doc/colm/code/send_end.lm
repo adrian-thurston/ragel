@@ -1,0 +1,42 @@
+lex
+	literal `= `;
+	token id /[a-z]+/
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def assignment
+	[id `= number `;]
+
+def program
+	[assignment*]
+
+# Prints what a parser holds after its input has ended.
+void report( P: parser<program> )
+{
+	if ( P->tree ) {
+		for A: assignment in P->tree
+			print( "  ", $A, "\n" )
+	}
+	else {
+		print( "  no tree\n" )
+	}
+
+	if ( P->error )
+		print( "  P->error is set\n" )
+}
+
+print( "good:\n" )
+Good: parser<program> = new parser<program>()
+send Good "width = 80;"
+send Good " height = 24;" eos
+report( Good )
+
+print( "bad:\n" )
+Bad: parser<program> = new parser<program>()
+send Bad "width = 80;"
+send Bad " height 24;" eos
+report( Bad )
+
+if ( ! error )
+	print( "error is nil\n" )

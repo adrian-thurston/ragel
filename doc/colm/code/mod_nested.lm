@@ -1,0 +1,38 @@
+# Names, at the top level.
+lex
+	token id /[a-z]+/
+	ignore /[ \t\n]+/
+end
+
+namespace config
+	# Numbers and the equals sign, inside config.
+	lex
+		token id /[0-9]+/
+		literal `=
+		ignore /[ \t\n]+/
+	end
+
+	namespace entry
+		# entry has no id of its own, so id is config's.
+		# root::id is the id of the top level.
+		def setting
+			[Name: root::id `= Value: id]
+	end
+
+	def settings
+		[entry::setting*]
+end
+
+parse Settings: config::settings[ stdin ]
+
+if ( ! Settings ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: config::entry::setting in Settings
+	print( $S.Name, " is ", $S.Value, "\n" )
+
+parse Sizes: config::id+[ "80 24" ]
+for I: config::id in Sizes
+	print( "size ", $I, "\n" )

@@ -1,6 +1,78 @@
-Variables
-=========
+= Variables
 
-== TODO
+This chapter covers how variables are declared, where each can be used, and
+globals, the variables that functions can use too.
 
+== Declarations
 
+`Name: Type` declares a variable, and `Name: Type = Value` gives it a first
+value. A declaration is a statement, and can go wherever one can. A variable
+starts as 0 if it is an `int`, false if it is a `bool`, and nil otherwise.
+xref:2_00_types.adoc[The types chapter] lists the types.
+
+Other statements declare variables too:
+
+* `for`, in xref:1_03_control_flow.adoc[the control flow chapter]
+* `+parse Name: Type[ ... ]+`, in xref:3_02_parse.adoc[the parsing chapter]
+* `new Name: Type()`, in xref:2_02_list_map_struct_alias.adoc#structs[the
+  structs section]
+* `+cons Name: Type[ ... ]+`, in xref:3_03_match.adoc[the patterns chapter]
+
+An assignment's value has the variable's type. `nil` can be assigned to a
+`str` or a tree, but not to an `int` or a `bool`: that is
+`type mismatch in assignment`.
+
+== Scope
+
+A variable can be used after its declaration, to the end of its block, or to
+the end of the file at the top level. Declaring a name twice in one block is
+an error, `variable X redeclared`.
+
+A block inside another can declare a name that the block around it has. In
+the inner block, the name means the inner variable, and after the block, the
+outer one again.
+
+A function sees its parameters, its own variables and globals, but not the
+top level's variables. Reading one is an error, such as
+`cannot find name Total in object`. A function that changes an `int` or `str`
+parameter doesn't change the caller's variable, as
+xref:0_06_scope.adoc[the scope chapter] shows for a str.
+xref:1_04_functions.adoc[The functions chapter] shows `ref`, which passes the
+caller's variable itself.
+
+[[globals]]
+== Globals
+
+`global Name: Type = Value` declares a global:
+
+* It goes at the top level, or in a namespace, which
+  xref:8_02_modularity.adoc[the modularity chapter] covers. In a block or a
+  function, it is a parse error.
+* The variable is visible to all code, including functions defined above
+  the declaration.
+* It gets its value when the declaration runs, so put the declaration before
+  the code that uses the variable.
+
+A variable declared with `export` in place of `global` can also be read by a
+C++ program that embeds the colm program, as
+xref:8_01_embedding.adoc[the embedding chapter] explains.
+
+This program uses a global, a top-level variable and a variable in a block:
+
+[source,chapel]
+.var_scope.lm
+----
+include::code/var_scope.lm[]
+----
+
+It prints:
+
+----
+include::code/var_scope.exp[]
+----
+
+`square` counts its calls in the global `Calls`. It can't see `Total`, which
+is a top-level variable. The `if` block declares its own `Name`, which the
+block's `print` uses. After the block, `Name` is the outer variable again.
+The last three variables have no first value, so they start as 0, false and
+nil.

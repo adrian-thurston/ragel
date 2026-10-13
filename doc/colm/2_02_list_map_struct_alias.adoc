@@ -1,10 +1,9 @@
-List, Map, Struct and alias
-===========================
+= List, Map, Struct and alias
 
 Next to the basic types, there are the normal things that we can expect from scripting languages.
 As colm is static and strong typed, it is very convenient to use alias as well.
 
-An example is probably much clearer then 1000 loc.
+An example is probably much clearer than 1000 loc.
 
 [source,chapel]
 .poker.lm
@@ -18,4 +17,152 @@ When we run this we get:
 include::code/poker.exp[]
 ----
 
-NOTE: this also illustrates how to iterate through a 'list' and access elements in a 'map'.
+NOTE: this also illustrates how to iterate through a `list` and access elements in a `map`.
+
+The sections below describe each in turn: structs, which also introduce
+`new` and `+->+`, then aliases, lists and maps.
+
+[[structs]]
+== Structs
+
+A struct groups named fields. `struct Name`, then its fields, each
+`Name: Type`, then `end`, defines one:
+
+[source,chapel]
+----
+struct point
+	X: int
+	Y: int
+end
+----
+
+A field can't have a first value: that is a parse error.
+
+`new Name()` makes a struct, with its fields at 0, false or nil.
+`new P: Name()` also declares `P`. `+P->Field+` reads or sets a field.
+`P.Field` is an error, `dot cannot be used to access a pointer`.
+
+A struct variable is nil until it is given a struct, so make one with `new`
+before using its fields. A field can hold a struct of the same type.
+
+Structs are shared, as xref:2_00_types.adoc#sharing[the types chapter] says,
+so a function can change a struct passed to it.
+
+A struct can also hold `lex` blocks, tokens and defs. Passed to `parse`, it
+is a parsing context, the subject of xref:3_04_undo.adoc[the undo chapter].
+`context` is another keyword for `struct`.
+
+This program builds a route of stops, each a struct that holds the next:
+
+[source,chapel]
+.struct_route.lm
+----
+include::code/struct_route.lm[]
+----
+
+It prints:
+
+----
+include::code/struct_route.exp[]
+----
+
+`add` sets `Next` in the struct that its caller passed it. The last stop's
+`Next` is nil, which ends the loop.
+
+[[aliases]]
+== Aliases
+
+`alias Name Type` gives `Type` a second name. The two names are one type, and
+a value of either can be assigned to a variable of the other. An `alias` goes
+at the top level, in a struct or in a namespace. In a function, it is a parse
+error. `poker`, above, uses `alias` for its maps and lists, and `type_share`,
+in xref:2_00_types.adoc#sharing[the types chapter], for a list.
+
+[[lists]]
+== Lists
+
+`list<T>` holds values of type `T`, in order. `new list<T>()` makes an empty
+one. A list's functions and fields are reached with `+->+`, as a struct's
+are.
+
+* `push_tail( V )` and `push_head( V )` add a value at the tail or the head.
+  `push( V )` is `push_head( V )`.
+* `pop_head()` and `pop_tail()` take a value off the head or the tail, and
+  give it back. `pop()` is `pop_head()`. The list must not be empty.
+* `length` is the number of values.
+* `for V: T in L` gives the values from head to tail, and
+  `for V: T in rev_list_iter( L )` from tail to head.
+* `head_el` and `tail_el` are the first and last elements, each a
+  `list_el<T>`. An element's `value` is its value, and its `next` and `prev`
+  are the elements beside it, nil at the ends. `for E: list_el<T> in L` gives
+  the elements.
+
+A list can't change inside a `for` over it: that is a compile error,
+`reference active, cannot write to object`.
+
+`argv` is a `list<str>`, as xref:1_00_language_overview.adoc#exit[the
+language overview] shows.
+
+This program uses a list as a queue:
+
+[source,chapel]
+.list_queue.lm
+----
+include::code/list_queue.lm[]
+----
+
+It prints:
+
+----
+include::code/list_queue.exp[]
+----
+
+[[maps]]
+== Maps
+
+`map<K, V>` maps keys of type `K` to values of type `V`. `new map<K, V>()`
+makes an empty one. Its functions and fields are reached with `+->+` too.
+
+* `insert( K, V )` adds the key `K` with the value `V`. If the key is there
+  already, the map keeps its old value.
+* `find( K )` gives the key's value. When the key isn't there, it gives 0 for
+  an `int` value, and nil for a `str`. `find_el( K )` gives the key's
+  element, a `map_el<K, V>`, or nil.
+* An element's `key` and `value` read them, and setting `value` changes the
+  map.
+* `remove( K )` takes the key out, and gives its element, or nil if it wasn't
+  there.
+* `length` is the number of keys.
+* `for V: ValueType in M` gives the values, and `for E: map_el<K, V> in M`
+  the elements, in key order. `head_el` and `tail_el` are the first and last
+  elements, and an element's `next` and `prev` walk the same order.
+
+Int keys go from low to high, negative ones first. Str keys go by length
+first, then byte by byte, as xref:1_02_expressions.adoc#operators[the
+expressions chapter] says.
+
+A map can't change inside a `for` over it.
+
+This program counts the words in its arguments:
+
+[source,chapel]
+.map_count.lm
+----
+include::code/map_count.lm[]
+----
+
+Run as:
+
+[source,bash]
+----
+./map_count the cat and the dog and the bird
+----
+
+it prints:
+
+----
+include::code/map_count.exp[]
+----
+
+`bird` comes last because it is longer than the other keys. `fish` isn't a
+key, so `find( "fish" )` gives 0.
