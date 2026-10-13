@@ -1,0 +1,4 @@
+move north 3;
+say hello to you;
+move   east 10 ;
+stop;

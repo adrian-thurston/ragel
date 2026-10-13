@@ -1,0 +1,24 @@
+child:
+  <copy>
+  <a (b c) d>
+  <;>
+rev_child:
+  <;>
+  <a (b c) d>
+  <copy>
+repeat:
+  <a (b c) d>
+  <(b c) d>
+  <d>
+  <>
+rev_repeat:
+  <>
+  <d>
+  <(b c) d>
+  <a (b c) d>
+repeat, one arg at a time:
+  <a>
+  <(b c)>
+  <d>
+comments:
+  with_ignore: # three things

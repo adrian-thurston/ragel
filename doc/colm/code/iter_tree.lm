@@ -1,0 +1,30 @@
+lex
+	token word /[a-z]+/
+	literal `( `)
+	ignore /[ \t\n]+/
+end
+
+def group
+	[`( Items: item* `)]
+
+def item
+	[word]
+|	[group]
+
+parse Top: group[ stdin ]
+if ( ! Top ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+print( "groups:\n" )
+for G: group in Top
+	print( "  ", $G, "\n" )
+
+print( "items:\n" )
+for I: item in Top
+	print( "  ", $I, "\n" )
+
+print( "lists:\n" )
+for L: item* in Top
+	print( "  <", $L, ">\n" )

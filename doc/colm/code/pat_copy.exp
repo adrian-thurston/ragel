@@ -1,0 +1,7 @@
+Width: width = 80;
+Copy: width = 120;
+in reset: width = 0;
+after reset: width = 80;
+after reset_ref: width = 0;
+Tight and Width are equal
+Tight and Copy are not

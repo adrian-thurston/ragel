@@ -1,0 +1,5 @@
+width  = 80; | width =80; | width = 80;
+height  = 24; | height =24; | height = 24;
+depth  = 3; | depth =3; | depth = 3;
+reversed: depth = 3; height = 24; width = 80;
+ordered: width = 80; height = 24; depth = 3;

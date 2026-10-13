@@ -1,0 +1,48 @@
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `= `; `,
+	ignore /[ \t\n]+/
+end
+
+def pair
+	[Name: id Value: num]
+
+def pairs
+	[pair (`, pair)* `;]
+
+def setting
+	[Name: id `= Value: num `;]
+
+# Left-recursive, so a constructor can add to its end.
+def settings
+	[settings setting]
+|	[]
+
+parse Pairs: pairs[ stdin ]
+if ( ! Pairs ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+Reversed: setting* = cons setting* []
+Ordered: settings = cons settings []
+
+for P: pair in Pairs {
+	# The name keeps the space after it.
+	A: setting = cons setting "[P.Name] = [P.Value];"
+
+	# Backtick literals add no spaces.
+	B: setting = cons setting [P.Name `= P.Value `;]
+
+	# ^ trims the space.
+	C: setting = cons setting "[^P.Name] = [^P.Value];"
+
+	print( $A, " | ", $B, " | ", $C, "\n" )
+
+	Reversed = cons setting* [C " " Reversed]
+	Ordered = cons settings [Ordered " " C]
+}
+
+print( "reversed: ", $Reversed, "\n" )
+print( "ordered: ", $Ordered, "\n" )

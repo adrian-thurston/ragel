@@ -40,6 +40,11 @@ CODE = \
 	code/flow_primes.lm      code/flow_primes.exp \
 	code/hello_world.lm      code/hello_world.exp \
 	code/hello_world_ext.lm  code/hello_world_ext.exp \
+	code/iter_bottom_up.lm   code/iter_bottom_up.exp   code/iter_bottom_up.in \
+	code/iter_builtin.lm     code/iter_builtin.exp     code/iter_builtin.in \
+	code/iter_rewrite.lm     code/iter_rewrite.exp     code/iter_rewrite.in \
+	code/iter_tree.lm        code/iter_tree.exp        code/iter_tree.in \
+	code/iter_user.lm        code/iter_user.exp \
 	code/lex_basics.lm       code/lex_basics.exp       code/lex_basics.in \
 	code/lex_choose.lm       code/lex_choose.exp       code/lex_choose.in \
 	code/lex_comment.lm      code/lex_comment.exp      code/lex_comment.in \
@@ -62,6 +67,13 @@ CODE = \
 	code/parse_reject.lm     code/parse_reject.exp     code/parse_reject.in \
 	code/parse_reparse.lm    code/parse_reparse.exp    code/parse_reparse.in \
 	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in \
+	code/pat_change.lm       code/pat_change.exp \
+	code/pat_cons.lm         code/pat_cons.exp         code/pat_cons.in \
+	code/pat_copy.lm         code/pat_copy.exp \
+	code/pat_make.lm         code/pat_make.exp \
+	code/pat_match.lm        code/pat_match.exp        code/pat_match.in \
+	code/pat_require.lm      code/pat_require.exp      code/pat_require.in \
+	code/pat_switch.lm       code/pat_switch.exp       code/pat_switch.in \
 	code/poker.lm            code/poker.exp \
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args \
 	code/reference.lm        code/reference.exp \

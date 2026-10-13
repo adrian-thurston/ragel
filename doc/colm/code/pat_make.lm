@@ -1,0 +1,26 @@
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	token equals /'='/
+	token semi /';'/
+	ignore /[ \t\n]+/
+end
+
+# One production, with named tokens only.
+def setting
+	[Name: id equals Value: num semi]
+
+setting make_setting( Name: str, Value: str )
+{
+	N: id = make_token( typeid<id>, Name )
+	E: equals = make_token( typeid<equals>, "=" )
+	V: num = make_token( typeid<num>, Value )
+	S: semi = make_token( typeid<semi>, ";" )
+	return make_tree( typeid<setting>, N, E, V, S )
+}
+
+Width: setting = make_setting( "width", "80" )
+print( $Width, "\n" )
+
+if match Width "width = [V: num];"
+	print( "the width is ", $V, "\n" )

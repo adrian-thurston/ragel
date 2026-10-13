@@ -1,6 +1,218 @@
-Iterators
-=========
+= Iterators
 
-== TODO
+A `for` loop can visit the trees inside a tree. The trees come from a
+grammar, which xref:3_02_parse.adoc[the parsing chapter] covers, and the
+loops here use the patterns of xref:3_03_match.adoc[the patterns chapter].
+This chapter covers loops over a tree, rewriting a tree from inside such a
+loop, colm's built-in iterators, and iterators that a program defines.
 
+== Loops over a tree
 
+`for N: T in S` runs its body once for each tree of type `T` in the tree `S`,
+with `N` holding the tree. It visits a tree before the trees inside it, and
+goes from left to right. `S` itself is visited first, when it is of type `T`.
+
+The type `T` can be a repetition, such as `+item*+`. A list is its first item
+and the rest of the list, which is a list too, down to an empty list at the
+end. So the loop visits each list in `S`, and each rest of it.
+
+`S` must not be nil: check a parse's result before looping over it.
+
+This program reads groups of words in parentheses. A group can hold groups of
+its own:
+
+[source,chapel]
+.iter_tree.lm
+----
+include::code/iter_tree.lm[]
+----
+
+It reads this input:
+
+----
+include::code/iter_tree.in[]
+----
+
+and prints:
+
+----
+include::code/iter_tree.exp[]
+----
+
+The first loop visits `Top` itself, and then the groups inside it. With
+`item` in place of `group`, it would print what the second loop prints. The
+second loop visits `(b c)` before `b` and `c`, which are inside it. The third
+visits each list, and each rest of it, in the same order. Each list ends with
+an empty one.
+
+== Rewriting a tree in a loop
+
+Assigning to the loop variable replaces that tree in the tree that the loop
+is over. The loop then goes on into the new tree: it visits the trees inside
+the replacement, not those inside the tree it replaced, and not the
+replacement itself. So if every replacement holds a tree that the body
+replaces in the same way, the loop never ends: wrapping each `id` in
+parentheses, for example, gives the loop a new `id` to wrap each time.
+
+xref:3_03_match.adoc#changing[Changing a tree], in the patterns chapter,
+explains where the ignored text of a replaced tree goes.
+
+Rewrite through a loop over a variable that isn't `global`, such as `Colors`
+below. Changes made through the loop variable of a loop over a `global`
+variable, or over a field of a struct, are lost: the loop works on a copy.
+
+This program reads a list of colors, which can hold lists of their own. It
+replaces each `green` with two colors, and each `lime` with `red`:
+
+[source,chapel]
+.iter_rewrite.lm
+----
+include::code/iter_rewrite.lm[]
+----
+
+It reads this input:
+
+----
+include::code/iter_rewrite.in[]
+----
+
+and prints:
+
+----
+include::code/iter_rewrite.exp[]
+----
+
+The loop visits `green`, and replaces it with `(lime, olive)`. It goes on
+into the replacement: it visits `lime`, replaces it with `red`, and then
+visits `olive`. `red` holds nothing to replace, so the loop goes on to
+`(blue, green)`, does the same with its `green`, and ends. If the replacement
+for `green` held a `green`, the loop would replace that one too, and the next,
+without end.
+
+== Built-in iterators
+
+A loop can name the iterator that finds its trees, as in
+`for N: T in child( S )`. A loop over a tree that names none uses `triter`,
+so `for N: T in S` is `for N: T in triter( S )`. Colm has these others:
+
+* `child( S )` visits the children of `S`, from first to last, and
+  `rev_child( S )` from last to first. The children of a def's tree are the
+  elements of its production.
+* `repeat( L )` visits the list `L`, and each rest of it, as a loop over
+  `+item*+` does, but only in `L`, not in the lists inside its items. With
+  the type of the items as the loop variable's type, it visits the items of
+  `L`. `rev_repeat( L )` visits the lists that `repeat( L )` does, from the
+  empty one at the end back to `L`.
+* `with_ignore( S )` visits the trees that `triter` does, and ignored tokens
+  too. An ignore needs a name, as in `+ignore comment /'#' [^\n]*/+`, to be
+  the type of a loop variable.
+
+As in a loop with no iterator named, the loop variable's type selects the
+trees, and `any` takes every one. Loops over a `list` use other iterators,
+such as `rev_list_iter`, which xref:2_02_list_map_struct_alias.adoc#lists[the
+lists section] covers.
+
+This program reads commands, each a name and some arguments, and loops over
+their parts with each iterator:
+
+[source,chapel]
+.iter_builtin.lm
+----
+include::code/iter_builtin.lm[]
+----
+
+It reads this input:
+
+----
+include::code/iter_builtin.in[]
+----
+
+and prints:
+
+----
+include::code/iter_builtin.exp[]
+----
+
+`child( C )` gives the three children of the command: its name, the list of
+its arguments, and the `;`. `repeat( C.Args )` visits the list of arguments,
+and each rest of it, but not the list inside `(b c)`, which
+`+for L: arg* in C.Args+` would visit too. With `arg` as the loop variable, it
+gives the three arguments, and not `b` and `c` inside the group. The plain
+loop for comments prints nothing. `with_ignore` finds the comment.
+
+== User iterators
+
+`+iter Name( Params ) { ... }+` defines an iterator. `for N: T in Name( Args )`
+runs the iterator's code. Each `yield V` gives the loop the variable `V`, and
+the loop's body runs with `N` holding it. The iterator then goes on after the
+`yield`. The loop ends when the iterator's code does.
+
+`yield` takes a variable, which can be qualified, as in `yield T.Name`. It
+doesn't take an expression: `yield "x"` is a parse error.
+
+The loop variable's type selects the yields that the body sees. A yield of a
+tree of another type is skipped, unless the loop variable's type is `any`.
+Give the loop variable a tree type, or `any`.
+
+An iterator's parameters are copies, as a function's are. To change the
+caller's tree through the loop variable, make the parameter a `ref`.
+
+This program defines an iterator that yields each setting's name, and then
+its value:
+
+[source,chapel]
+.iter_user.lm
+----
+include::code/iter_user.lm[]
+----
+
+It prints:
+
+----
+include::code/iter_user.exp[]
+----
+
+The loop with `id` sees only the names, the one with `num` only the values,
+and the one with `any` both.
+
+An iterator can loop over another iterator, and over itself. This one visits
+the trees of `T` from the bottom up: the trees inside a tree come before the
+tree itself. Its parameter is a `ref<any>`, so it can be given a tree of any
+type, and the loop over it can change that tree:
+
+[source,chapel]
+.iter_bottom_up.lm
+----
+include::code/iter_bottom_up.lm[]
+----
+
+It reads this input:
+
+----
+include::code/iter_bottom_up.in[]
+----
+
+and prints:
+
+----
+include::code/iter_bottom_up.exp[]
+----
+
+The first loop prints `a` before `(a)`, and `(a)` before `+((a))+`. The
+second takes out the parentheses around a single item. From the bottom up,
+it replaces the inner `(a)` with `a` first, which makes `+((a))+` into `(a)`,
+and then replaces that with `a`. A plain loop would leave `(a)`: it replaces
+`+((a))+` with `(a)`, and then goes on into `(a)`, to `a`. With `T: any` in
+place of `T: ref<any>`, the second loop would change a copy, and `S` would
+stay as it was. The space after `+((a))+` belonged to its last `)`, so it
+went when `+((a))+` was replaced.
+
+Some rules for user iterators:
+
+* Yield only in the iterator's own code, not in a function that it calls.
+* Don't use `return` or `exit` in an iterator.
+* Give an iterator a name that no function or other iterator has, the
+  built-in ones included.
+* Let a loop over an iterator that yields from inside its own loop over a
+  user iterator, as `bottom_up` does, run to its end, without `break` or
+  `return`.

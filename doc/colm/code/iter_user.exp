@@ -1,0 +1,4 @@
+names: width height
+values: 80 24
+both: width 80 height 24
+width = 80; height = 24;
