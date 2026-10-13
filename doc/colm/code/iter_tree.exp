@@ -1,0 +1,23 @@
+groups:
+  (a (b c) d (e))
+  (b c)
+  (e)
+items:
+  a
+  (b c)
+  b
+  c
+  d
+  (e)
+  e
+lists:
+  <a (b c) d (e)>
+  <(b c) d (e)>
+  <b c>
+  <c>
+  <>
+  <d (e)>
+  <(e)>
+  <e>
+  <>
+  <>

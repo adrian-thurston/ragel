@@ -1,0 +1,26 @@
+lex
+	token word /[a-z]+/
+	literal `, `( `)
+	ignore /[ \t\n]+/
+end
+
+def item
+	[word]
+|	[`( items `)]
+
+def items
+	[item (`, item)*]
+
+parse Colors: items[ stdin ]
+if ( ! Colors ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for I: item in Colors {
+	print( "visit ", $I, "\n" )
+	if match I "green"
+		I = cons item "(lime, olive)"
+}
+
+print( $Colors, "\n" )

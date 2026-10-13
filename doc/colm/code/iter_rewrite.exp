@@ -1,0 +1,10 @@
+visit red
+visit green
+visit lime
+visit olive
+visit (blue, green)
+visit blue
+visit green
+visit lime
+visit olive
+red, (lime, olive), (blue, (lime, olive))

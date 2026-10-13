@@ -1,0 +1,44 @@
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `= `;
+	ignore /[ \t\n]+/
+end
+
+def setting
+	[Name: id `= Value: num `;]
+
+def settings
+	[setting*]
+
+# Each setting's name, then its value.
+iter parts( S: settings )
+{
+	for T: setting in S {
+		yield T.Name
+		yield T.Value
+	}
+}
+
+parse Settings: settings[ "width = 80; height = 24;" ]
+if ( ! Settings ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+print( "names:" )
+for N: id in parts( Settings )
+	print( " ", $N )
+print( "\n" )
+
+print( "values:" )
+for V: num in parts( Settings )
+	print( " ", $V )
+print( "\n" )
+
+print( "both:" )
+for A: any in parts( Settings )
+	print( " ", $A )
+print( "\n" )
+
+print( Settings, "\n" )

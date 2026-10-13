@@ -47,6 +47,11 @@ set(MANUAL_CODE
 	code/fizzbuzz.lm         code/fizzbuzz.exp
 	code/hello_world.lm      code/hello_world.exp
 	code/hello_world_ext.lm  code/hello_world_ext.exp
+	code/iter_bottom_up.lm   code/iter_bottom_up.exp   code/iter_bottom_up.in
+	code/iter_builtin.lm     code/iter_builtin.exp     code/iter_builtin.in
+	code/iter_rewrite.lm     code/iter_rewrite.exp     code/iter_rewrite.in
+	code/iter_tree.lm        code/iter_tree.exp        code/iter_tree.in
+	code/iter_user.lm        code/iter_user.exp
 	code/lex_basics.lm       code/lex_basics.exp       code/lex_basics.in
 	code/lex_choose.lm       code/lex_choose.exp       code/lex_choose.in
 	code/lex_comment.lm      code/lex_comment.exp      code/lex_comment.in

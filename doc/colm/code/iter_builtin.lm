@@ -1,0 +1,50 @@
+lex
+	token word /[a-z]+/
+	literal `( `) `;
+	ignore /[ \t\n]+/
+	ignore comment /'#' [^\n]*/
+end
+
+def arg
+	[word]
+|	[`( arg* `)]
+
+def command
+	[Name: word Args: arg* `;]
+
+def script
+	[command*]
+
+parse Script: script[ stdin ]
+if ( ! Script ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for C: command in Script {
+	print( "child:\n" )
+	for K: any in child( C )
+		print( "  <", $K, ">\n" )
+
+	print( "rev_child:\n" )
+	for K: any in rev_child( C )
+		print( "  <", $K, ">\n" )
+
+	print( "repeat:\n" )
+	for L: arg* in repeat( C.Args )
+		print( "  <", $L, ">\n" )
+
+	print( "rev_repeat:\n" )
+	for L: arg* in rev_repeat( C.Args )
+		print( "  <", $L, ">\n" )
+
+	print( "repeat, one arg at a time:\n" )
+	for A: arg in repeat( C.Args )
+		print( "  <", $A, ">\n" )
+}
+
+print( "comments:\n" )
+for N: comment in Script
+	print( "  plain loop: ", $N, "\n" )
+for N: comment in with_ignore( Script )
+	print( "  with_ignore: ", $N, "\n" )

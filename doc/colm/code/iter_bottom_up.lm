@@ -1,0 +1,39 @@
+lex
+	token word /[a-z]+/
+	literal `( `)
+	ignore /[ \t\n]+/
+end
+
+def item
+	[word]
+|	[`( item* `)]
+
+def start
+	[item*]
+
+# Children before their parents.
+iter bottom_up( T: ref<any> )
+{
+	for C: any in child( T ) {
+		for D: any in bottom_up( C )
+			yield D
+	}
+	yield T
+}
+
+parse S: start[ stdin ]
+if ( ! S ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for I: item in bottom_up( S )
+	print( $I, "\n" )
+
+# Take out parentheses around a single item.
+for I: item in bottom_up( S ) {
+	if match I ["(" Inner: item ")"]
+		I = Inner
+}
+
+print( $S, "\n" )
