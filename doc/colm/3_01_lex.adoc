@@ -469,6 +469,7 @@ input, it tries the next. Which region comes first depends on the grammar. If
 the token from the first region leads to a parse error later, the parser can
 go back and read the same text again in the next region.
 
+[[token-actions]]
 == Token actions
 
 A token can have an action: a block of code after its pattern, which runs each

@@ -1,0 +1,4 @@
+readme: 120 bytes, file from input, name from input
+license: 1080 bytes, file from input, name from input
+total: 1200 bytes
+notes: 12 bytes, file from cons, name from make_token

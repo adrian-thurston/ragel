@@ -94,6 +94,13 @@ set(MANUAL_CODE
 	code/pat_switch.lm       code/pat_switch.exp       code/pat_switch.in
 	code/poker.lm            code/poker.exp
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args
+	code/reduce_attr.lm      code/reduce_attr.exp      code/reduce_attr.in
+	code/reduce_calc.lm      code/reduce_calc.exp      code/reduce_calc.in
+	code/reduce_first.lm     code/reduce_first.exp
+	code/reduce_sum.lm       code/reduce_sum.exp       code/reduce_sum.in
+	code/reduce_sum.host.cc  code/reduce_sum.reducer.h
+	code/reduce_when.lm      code/reduce_when.exp      code/reduce_when.in
+	code/reduce_when.host.cc code/reduce_when.reducer.h
 	code/reference.lm        code/reference.exp
 	code/scope.lm            code/scope.exp
 	code/send_end.lm         code/send_end.exp

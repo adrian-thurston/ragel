@@ -194,6 +194,7 @@ patterns. `Ada Lovelace` is not a list of numbers, so its parse fails, and
 `List` is nil. A reparse that fails is an ordinary outcome. Here it means that
 the value is text.
 
+[[backtracking]]
 == Ordered choice and backtracking
 
 The parser builds the tree from the bottom up. It shifts each token: it adds
@@ -366,6 +367,7 @@ takes `1`, `2` and `300` as octets. The action of `octet` rejects `300`. The
 parser backs up until it can take the other production of `item`, and reads
 the line as a version. The choice it changes was made at the first number.
 
+[[commit]]
 == Committing to a parse
 
 To back up, the parser keeps every choice it made. `commit` drops them. It

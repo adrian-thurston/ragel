@@ -1,0 +1,37 @@
+lex
+	literal `+ `;
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def expr
+	[expr `+ number] :Add
+|	[number] :Number
+
+def line
+	[expr `;] :Line
+
+def lines
+	[line*]
+
+reduction Sum
+	expr { long value; }
+
+	expr :Number
+	{
+		$$->value = tokenValue( $number );
+	}
+
+	expr :Add
+	{
+		$$->value = $1->value + tokenValue( $3 );
+	}
+
+	line :Line
+	{
+		printf( "line %ld: %ld\n", @2->line, $expr->value );
+		total += $expr->value;
+	}
+end
+
+reduce Sum lines[ stdin ]
