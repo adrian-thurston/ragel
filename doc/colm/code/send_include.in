@@ -1,0 +1,3 @@
+width = 80;
+#include send_include.txt
+height = 24;

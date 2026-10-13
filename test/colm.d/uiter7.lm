@@ -1,0 +1,39 @@
+#
+# Exit from inside nested loops over user iterators. The exit's unwind code
+# unwinds the inner iterator and clears its local, then the outer one, whose
+# locals free a tree. The frame's locals must not then take what that pushes
+# for the inner iterator and unwind it again.
+#
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id id id id id id id id id id id id id id id id]
+
+iter wide( A: str )
+{
+	W: start = cons start "a b c d e f g h i j k l m n o p"
+	yield A
+}
+
+iter i( A: str )
+{
+	yield A
+}
+
+void g()
+{
+	for T: str in wide( "a" ) {
+		for U: str in i( "b" ) {
+			print( T, " ", U, "\n" )
+			exit( 0 )
+		}
+	}
+}
+
+g()
+##### EXP #####
+a b

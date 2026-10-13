@@ -33,11 +33,14 @@ set(MANUAL_PAGES
 	8_03_performance 0_04_hello_world 1_03_control_flow
 	2_02_list_map_struct_alias 3_04_undo 8_04_error_handling
 	0_05_fizzbuzz 1_04_functions 2_03_def
-	3_05_reduction 8_05_contributing)
+	3_05_reduction 8_05_contributing
+	3_06_send)
 
 # The example programs, with their output (.exp) and input (.in), which the
-# pages include, and the arguments they run with (.args). Every page is
-# rebuilt when one of them changes, which is simpler than tracking which page
+# pages include, and the arguments they run with (.args). A file that an
+# example includes is listed too. Its suffix isn't .lm (the pages use .lmi),
+# since the manual suite runs every .lm as an example. Every page is rebuilt
+# when one of them changes, which is simpler than tracking which page
 # includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
@@ -57,6 +60,10 @@ set(MANUAL_CODE
 	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in
 	code/list_queue.lm       code/list_queue.exp
 	code/map_count.lm        code/map_count.exp        code/map_count.args
+	code/mod_include.lm      code/mod_include.exp      code/mod_include.in
+	code/mod_list.lmi
+	code/mod_namespace.lm    code/mod_namespace.exp    code/mod_namespace.in
+	code/mod_nested.lm       code/mod_nested.exp       code/mod_nested.in
 	code/nested_scope.lm     code/nested_scope.exp
 	code/parse_commit.lm     code/parse_commit.exp     code/parse_commit.in
 	code/parse_def.lm        code/parse_def.exp        code/parse_def.in
@@ -70,6 +77,13 @@ set(MANUAL_CODE
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args
 	code/reference.lm        code/reference.exp
 	code/scope.lm            code/scope.exp
+	code/send_end.lm         code/send_end.exp
+	code/send_files.lm       code/send_files.exp
+	code/send_include.lm     code/send_include.exp     code/send_include.in
+	code/send_out.lm         code/send_out.exp
+	code/send_pieces.lm      code/send_pieces.exp
+	code/send_tree.lm        code/send_tree.exp
+	code/send_trim.lm        code/send_trim.exp
 	code/stmt_print.lm       code/stmt_print.exp
 	code/struct_route.lm     code/struct_route.exp
 	code/type_share.lm       code/type_share.exp

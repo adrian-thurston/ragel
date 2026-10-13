@@ -1,0 +1,64 @@
+lex
+	token word /[a-z]+/
+	ignore /space+/
+end
+
+def words
+	[word*]
+
+# Fields: any text up to a |. Spaces are kept.
+lex
+	literal `|
+	token text /[^|]+/
+end
+
+def field
+	[text `|]
+
+def fields
+	[field*]
+
+# Prints the fields a parser holds, with brackets around each.
+void show( Name: str, P: parser<fields> )
+{
+	print( Name, ":" )
+	if ( P->tree ) {
+		for T: text in P->tree
+			print( ' [', $T, ']' )
+	}
+	print( "\n" )
+}
+
+parse Words: words[ "  one   two  " ]
+if ( ! Words ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+Plain: parser<fields> = new parser<fields>()
+for W: word in Words
+	send Plain [W "|"]
+send Plain [] eos
+show( "send", Plain )
+
+Trim: parser<fields> = new parser<fields>()
+Input: _input = Trim->gets()
+Input->auto_trim( true )
+for W: word in Words
+	send Trim [W "|"]
+send Trim [] eos
+show( "auto_trim", Trim )
+
+Keep: parser<fields> = new parser<fields>()
+KeepInput: _input = Keep->gets()
+KeepInput->auto_trim( true )
+for W: word in Words
+	send Keep [@W "|"]
+send Keep [] eos
+show( "auto_trim, @", Keep )
+
+Caret: parser<fields> = new parser<fields>()
+for W: word in Words
+	send Caret [^W "|"]
+send Caret [] eos
+show( "^", Caret )

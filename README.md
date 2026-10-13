@@ -316,9 +316,12 @@ One more, `manual`, runs the colm manual's example programs,
 `doc/colm/code/NAME.lm`, with `NAME.in` on stdin if there is one, and compares
 their output with `NAME.exp`. The chapters include those files, so a new example
 needs its `.exp` (and `.in`) there too, listed in `doc/colm/Makefile.am` and
-`doc/colm/CMakeLists.txt`. `NAME.args`, if there is one, holds the program's
-arguments, and is listed there too. A page that shows the command line types it
-by hand, so keep the two the same.
+`doc/colm/CMakeLists.txt`. Each example is compiled with `-I` naming
+`doc/colm/code`, so it can include a file kept there. Give that file a suffix
+other than `.lm`, such as `.lmi`, since every `.lm` there is run as an example,
+and list it in those two build files too. `NAME.args`, if there is one, holds
+the program's arguments, and is listed in them too. A page that shows the
+command line types it by hand, so keep the two the same.
 
 
 ## Syntax highlighting

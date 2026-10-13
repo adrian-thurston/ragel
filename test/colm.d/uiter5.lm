@@ -1,0 +1,29 @@
+#
+# A loop over a user iterator clears the iterator's local when it ends. The
+# loop's end pops the iterator off the stack, and the end of the program must
+# not take what is pushed there later for the iterator and unwind it again.
+#
+
+str f( A: str )
+{
+	for T: str in i( A ) {
+		return T
+	}
+	return "none"
+}
+
+iter i( A: str )
+{
+	S: str = A + "!"
+	yield S
+	yield A
+}
+
+for T: str in i( "b" ) { print( T, "\n" ) }
+print( f( "a" ), "\n" )
+print( "done\n" )
+##### EXP #####
+b!
+b
+a!
+done

@@ -1,0 +1,38 @@
+# The output the program writes: a list of assignments.
+lex
+	literal `= `;
+	token id /[a-z]+/
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def assignment
+	[id `= number `;]
+
+def output
+	[assignment*]
+
+# The parser that << and <- send to.
+global _: parser<output>
+
+void assign( Name: str, Value: int )
+{
+	<< "[Name] = [Value];\n"
+}
+
+_ = new parser<output>()
+
+assign( "width", 80 )
+assign( "height", 24 )
+<<	"depth = 3;
+	"scale = 10;
+
+Output: output = _->finish()
+
+if ( ! Output ) {
+	print( "the output does not parse: ", _->error, "\n" )
+	exit( 1 )
+}
+
+for A: assignment in Output
+	print( $A, "\n" )

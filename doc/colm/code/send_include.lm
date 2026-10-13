@@ -1,0 +1,58 @@
+# An include line: #include, then a file name.
+lex
+	literal `# `include
+	token file_name /[a-zA-Z0-9_.]+/
+	ignore /[ \t]+/
+end
+
+def include_line
+	[`# `include Name: file_name]
+
+lex
+	literal `= `;
+	token id /[a-z]+/
+	token number /[0-9]+/
+	ignore /space+/
+
+	token hash /'#'/
+	{
+		parse_stop Line: include_line( input )[]
+		if ( Line ) {
+			Name: str = $Line.Name
+			File: stream = open( Name, "r" )
+			if ( File )
+				input->push_stream( File )
+			else
+				print( "cannot open ", Name, "\n" )
+		}
+		else {
+			# Not an include line. Drop the #.
+			input->pull( match_length )
+		}
+	}
+end
+
+def assignment
+	[id `= number `;]
+
+def program
+	[assignment*]
+
+# Write the file that the input includes.
+Out: stream = open( "send_include.txt", "w" )
+if ( ! Out ) {
+	print( "cannot write send_include.txt\n" )
+	exit( 1 )
+}
+send Out "depth = 3;\nscale = 10;\n"
+Out->close()
+
+parse Program: program[ stdin ]
+
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for A: assignment in Program
+	print( $A.id, " is ", $A.number, "\n" )

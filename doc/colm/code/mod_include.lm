@@ -1,0 +1,40 @@
+namespace word
+	lex
+		token item /[a-z]+/
+		ignore /[ \t]+/
+	end
+
+	include 'mod_list.lmi'
+end
+
+namespace number
+	lex
+		token item /[0-9]+/
+		ignore /[ \t]+/
+	end
+
+	include 'mod_list.lmi'
+end
+
+lex
+	token nl /'\n'/
+end
+
+# A line is some words, then some numbers.
+def line
+	[Words: word::items Numbers: number::items nl]
+
+def lines
+	[line*]
+
+parse Lines: lines[ stdin ]
+
+if ( ! Lines ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for L: line in Lines {
+	print( $L.Words, ": ", word::count( L.Words ), " words, ",
+			number::count( L.Numbers ), " numbers\n" )
+}
