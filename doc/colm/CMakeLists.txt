@@ -45,6 +45,9 @@ set(MANUAL_PAGES
 # includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
+	code/ctx_reject.lm       code/ctx_reject.exp       code/ctx_reject.in
+	code/ctx_typedef.lm      code/ctx_typedef.exp      code/ctx_typedef.in
+	code/ctx_undo.lm         code/ctx_undo.exp         code/ctx_undo.in
 	code/emb_define.lm       code/emb_define.exp       code/emb_define.comp
 	code/emb_export.lm       code/emb_export.exp       code/emb_export.in
 	code/emb_export.host.cc

@@ -221,6 +221,10 @@ EXTRA_DIST = \
 	uiter5.lm \
 	uiter6.lm \
 	uiter7.lm \
+	undoctx1.lm \
+	undoctx2.lm \
+	undoctx3.lm \
+	undoctx4.lm \
 	undofrag1.lm \
 	undofrag2.lm \
 	undofrag3.lm \

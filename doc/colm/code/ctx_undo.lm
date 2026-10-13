@@ -1,0 +1,40 @@
+context names
+	# The names assigned to, in the order they were assigned.
+	Assigned: list<str>
+
+	lex
+		literal `= `;
+		token id /[a-z]+/
+		token number /[0-9]+/
+		ignore /space+/
+	end
+
+	def target
+		[id]
+		{
+			print( "target: ", $r1, "\n" )
+			Assigned->push_tail( $r1 )
+		}
+
+	def statement
+		[target+ `= number `;]
+	|	[id+ `;]
+
+	def program
+		[statement*]
+end
+
+Names: names = new names()
+Names->Assigned = new list<str>()
+
+parse Program: names::program( Names )[ stdin ]
+
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+print( "assigned:" )
+for Name: str in Names->Assigned
+	print( " ", Name )
+print( "\n" )

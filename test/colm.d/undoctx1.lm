@@ -1,0 +1,122 @@
+#
+# What backtracking undoes. The token action of id counts the tokens it
+# scans. The action of item writes a context int (through a function), a str,
+# a list, a map, a struct field, a global and a tree, sends to a parser and to
+# a stream, and prints. Input ending in ";" is parsed as A1 first, reducing
+# every item, then backs up to A2, which reduces them again: each write that
+# is undone shows once, and the stream and the output twice. Input with no
+# ending fails, and every write that is undone is gone.
+#
+
+global G: int = 0
+
+struct rec
+	N: int
+end
+
+lex
+	token wid /[a-z]+/
+	ignore /space+/
+end
+
+def words
+	[wid*]
+
+context ctx
+	lex
+		literal `^ `;
+		token id /[a-z]+/
+		{
+			Scans = Scans + 1
+			input->push( make_token( typeid<id>, input->pull( match_length ) ) )
+		}
+		ignore /space+/
+	end
+
+	Scans: int
+	I: int
+	S: str
+	L: list<str>
+	M: map<str, int>
+	R: rec
+	P: parser<words>
+	T: id
+	Out: stream
+
+	void bump()
+	{
+		I = I + 1
+	}
+
+	def item
+		[id]
+		{
+			bump()
+			S = S + $r1
+			L->push_tail( $r1 )
+			M->insert( $r1, I )
+			R->N = R->N + 1
+			G = G + 1
+			T = r1
+			send P [" " $r1]
+			send Out [" " $r1]
+			print( "item ", $r1, "\n" )
+		}
+
+	def A1 []
+	def A2 []
+
+	def start
+		[A1 item* `^]
+	|	[A2 item* `;]
+end
+
+C: ctx = new ctx()
+C->S = ""
+C->L = new list<str>()
+C->M = new map<str, int>()
+C->R = new rec()
+C->P = new parser<words>()
+C->Out = new stream()
+
+parse Start: ctx::start( C )[ stdin ]
+if ( ! Start )
+	print( "error: ", error, "\n" )
+
+print( "Scans ", C->Scans, ", I ", C->I, ", S ", C->S, ", R->N ", C->R->N )
+print( ", G ", G, ", T ", $C->T, "\n" )
+print( "L" )
+for E: str in C->L
+	print( " ", E )
+print( "\nM" )
+for ME: map_el<str, int> in C->M
+	print( " ", ME->key, "=", ME->value )
+print( "\nP", C->P->finish(), "\n" )
+print( "Out", C->Out->tree, "\n" )
+##### IN #####
+a b c ;
+##### EXP #####
+item a
+item b
+item c
+item a
+item b
+item c
+Scans 3, I 3, S abc, R->N 3, G 3, T c
+L a b c
+M a=1 b=2 c=3
+P a b c
+Out a b c a b c
+##### IN #####
+a b c
+##### EXP #####
+item a
+item b
+item a
+item b
+error: <stdin>:2:1: parse error
+Scans 0, I 0, S , R->N 0, G 0, T NIL
+L
+M
+P
+Out a b a b

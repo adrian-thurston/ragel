@@ -1,6 +1,246 @@
-Undo
-====
+= Context-dependent parsing
 
-== TODO
+Some languages can't be parsed from their grammar alone. In C, `+a * b;+`
+declares `b` as a pointer when `a` names a type, and is a multiplication
+otherwise. `parse_order`, in xref:3_02_parse.adoc[the parsing chapter], picks
+one of the two by the order of the productions. A C parser has to know which
+names the typedefs it has read so far made into types.
 
+In colm, the parse's own code collects such data, and uses it as the parse
+goes on. Reduction actions write it, and token actions read it to decide
+which tokens the parser gets. The data goes in a context, or in globals.
 
+The parser backtracks, so actions run on alternatives that it later abandons.
+Colm undoes what those actions did to the data.
+
+This chapter covers context blocks, reading and writing the data, when
+actions run, what backing up undoes, and `reject` with data.
+
+== Context blocks
+
+`context NAME`, then its contents, then `end`, defines a context. It holds
+variables, each declared as a struct's field is, `Name: type`. It can also
+hold `lex` blocks, defs, functions, iterators, structs and aliases.
+Statements and `global` can't go inside a context: each is a parse error.
+
+`context` is another keyword for `struct`, as
+xref:2_02_list_map_struct_alias.adoc#structs[the structs section] says. A
+context is a struct that holds a grammar. `new NAME()` makes an object of it,
+and the program reaches its variables through the object, as in
+`+Decls->Types+`.
+
+The variables start at 0, if they are ``int``s, and nil otherwise. They can't
+have a first value: that is a parse error. Make the lists and maps that a
+parse uses before the parse.
+
+Inside the block, code uses the context's variables, defs and tokens by
+name. Outside it, the context's names are qualified as a namespace's are, as
+in `decls::program`. xref:8_02_modularity.adoc[The namespaces chapter]
+covers qualified names.
+
+A parse of a type defined in a context is given an object of that context, in
+parentheses after the type. These lines, from the example in the next
+section, make the object and its map, and parse with it:
+
+[source,chapel]
+----
+Decls: decls = new decls()
+Decls->Types = new map<str, str>()
+
+parse Program: decls::program( Decls )[ stdin ]
+----
+
+A parser made with `new` is given the object the same way, as in
+`+new parser<decls::program>( Decls )+`, which
+xref:3_06_send.adoc[the send chapter] covers. The parse's actions use the
+variables of the object it is given, so two parses given two objects keep
+separate data.
+
+Always give such a parse its context, and an object of that context. Colm
+compiles a parse given none, or given an object of another struct, but the
+program crashes when an action uses a variable.
+
+In a token action, `this` is the parse's context. A parse that the action
+starts, of a type in the same context, must be given it, as in
+`+parse_stop T( this input )[]+`. `this` can only be passed on to such a
+parse. The action uses the context's variables by name.
+
+A `global`, such as `HereEnd` in the example `lex_heredoc` in
+xref:3_01_lex.adoc[the lexing chapter], can also hold data that actions use,
+and it is undone in the same way. A context keeps the data with the grammar
+that uses it, and gives each parse its own.
+
+== Reading and writing the data
+
+This program reads statements in the style of C. It keeps the names that
+`typedef` declares in a map in its context, and uses the map to tell
+declarations from multiplications:
+
+[source,chapel]
+.ctx_typedef.lm
+----
+include::code/ctx_typedef.lm[]
+----
+
+It reads this input:
+
+----
+include::code/ctx_typedef.in[]
+----
+
+and prints:
+
+----
+include::code/ctx_typedef.exp[]
+----
+
+The token action of `name` pulls the name off the input, and looks it up in
+`Types`. If the name is there, the action pushes it back as a `type_name`,
+and if not, as a `name`. `type_name` has the empty pattern `//`, so the
+scanner never makes one itself, as xref:3_01_lex.adoc[the lexing chapter]
+explains. The action of `new_type` adds the name to `Types`.
+
+After `typedef int a;`, `a` is scanned as a `type_name`, so the second
+`+a * b;+` can only be a declaration. The first `+a * b;+` comes before the
+typedef, and `c` is never declared, so those two are multiplications.
+
+== When actions run
+
+A reduction's action runs when the parser reduces. The parser reduces only
+when it has the token after the production, as
+xref:3_06_send.adoc[the send chapter] says too. By then, that token has been
+scanned, and its token action has run. So a token action sees what a
+reduction's action wrote only from the second token after the production.
+
+In `ctx_typedef`, `new_type` ends before the `;`. Its action runs when the
+parser has the `;`, before the first name of the next statement is scanned.
+Here the insert is moved into the action of the statement instead, and
+`new_type` has no action:
+
+[source,chapel]
+----
+def statement
+	[`typedef type new_type `;]
+	{
+		Types->insert( $r3, $r3 )
+	}
+|	[type `* name `;]
+|	[name `* name `;]
+----
+
+That action runs only when the parser has the token after the `;`: the first
+name of the next statement, which has already been scanned as a `name`. With
+the example's input, the third line would print `+multiplication: a * b;+`.
+
+Put a write in the action of a production that ends at least one token before
+the first token that needs it.
+
+== Backing up undoes actions
+
+This program reads two kinds of statement. An assignment is one or more
+names, an `=`, a number and a `;`. The other kind is names alone, ended by a
+`;`. The action of `target` prints each name it is given, and adds it to a
+list in the context:
+
+[source,chapel]
+.ctx_undo.lm
+----
+include::code/ctx_undo.lm[]
+----
+
+It reads this input:
+
+----
+include::code/ctx_undo.in[]
+----
+
+and prints:
+
+----
+include::code/ctx_undo.exp[]
+----
+
+`a b;` could begin an assignment, so the parser first takes `a` as a
+`target`. The action prints `target: a`, and adds `a` to `Assigned`. At the
+`;` there is no `=`, so the parser backs up, and takes the second production
+of `statement`. Backing up over the reduction of `target` undoes its action:
+`a` comes off the list. What the action printed stays printed.
+
+When the parser backs up over a reduction, colm undoes what the reduction's
+action did to the data. When it backs up over a token, colm undoes what the
+token's action did. The token's text is then scanned again, and the action
+runs again, with the data as it is then.
+
+Colm undoes:
+
+* assignments to the variables of a context and to globals, and to the fields
+  of the structs they hold
+* additions to lists and maps, and removals from them
+* a token action's pulls and pushes on the input
+* sends to another parser, with the parsing they caused
+* any of these done in a function that an action calls
+
+If actions send to another parser, give that parser no token actions. If the
+sending parse backs up over a send to a parser with token actions, the other
+parser's parse can fail. A parser that needs token actions can be fed after
+the parse instead: keep what to send in a list during the parse, and send it
+once the parse has ended.
+
+Colm doesn't undo what is printed, or what is sent to any stream: `stdout`,
+`stderr`, a file, or a stream made with `new stream()`. An action's local
+variables end with the action, and need no undoing.
+
+A parse that fails has backed up over every action, so the data is as it was
+before the parse. The exception is writes made before a `commit`. The parser
+can't back up past a commit, so they stay. xref:3_02_parse.adoc[The parsing
+chapter] covers `commit`.
+
+Undoing a write puts back the value that the variable had before the write.
+It doesn't reverse the change: undoing `I = I + 1`, run when `I` was 1, sets
+`I` to 1, whatever `I` holds by then. So a change that the program makes from
+outside the parse can be lost. A program can change a context's variable
+between two sends to a parser, for example. If the parser later backs up over
+an action that ran before the change, the variable gets back the value it had
+before that action, and the change is lost. While a parse runs, change its
+data only from its actions.
+
+== Rejecting a reduction with data
+
+`reject` makes a reduction a parse error, as
+xref:3_02_parse.adoc#reject[the parsing chapter] explains. With data, an
+action can check what a grammar can't express, such as a count.
+
+This program reads groups. A group is a number, its length, and then that
+many items, which are numbers or words:
+
+[source,chapel]
+.ctx_reject.lm
+----
+include::code/ctx_reject.lm[]
+----
+
+It reads this input:
+
+----
+include::code/ctx_reject.in[]
+----
+
+and prints:
+
+----
+include::code/ctx_reject.exp[]
+----
+
+The action of `length` stores the length of a group, and starts the count.
+`+counted_item*+` takes items while it can, and the action of `counted_item`
+counts them. It rejects an item that the group has no room for.
+
+Rejecting `1` as the fourth item of the first group undoes the action's
+writes, including any made after the `reject`, since the rest of the action
+runs. `Count` goes back to 3, so `no room for 1, count is 4` is followed by
+`group of 3, count is 3`. `1` then starts the next group. The same happens to
+`0` in the group of 1, and to `2` in the group of 0, which has no items.
+
+The action of `group` rejects a group with fewer items than its length, so a
+short group is a parse error. Given `3 a b`, for example, the program prints
+`group of 3, count is 2`, and then a parse error at the end of the input.

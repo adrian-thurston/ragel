@@ -1,0 +1,4 @@
+a * b;
+typedef int a;
+a * b;
+c * d;
