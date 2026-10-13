@@ -189,6 +189,15 @@ The block holds two kinds of item:
   `Prod`. A production needs a name to have one. For a name that no
   production of `TYPE` has, colm reports `could not find production "Prod"`.
 
+Colm never constructs or destroys a value. It keeps each tree's value in
+memory that it zeroes, so a value starts out zeroed: a `long` that an action
+reads before setting it is 0. Keep a value's members to plain data, such as
+numbers, pointers, and structs of them, as ragel's own reductions do. A member
+with a constructor, such as a `std::string`, is never constructed, and
+assigning to one crashes the program. Keep such an object through a pointer
+instead. An action allocates it, and the program frees it, since no
+destructor runs.
+
 In an action:
 
 `pass:c[$$]`::
