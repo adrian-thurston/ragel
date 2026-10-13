@@ -5,9 +5,10 @@
 /*
  * manual: the colm manual's example programs, doc/colm/code/NAME.lm. Each is
  * compiled and run as a colm.d case is, with NAME.in, if there is one, on its
- * standard input, and its output is compared against NAME.exp. The chapters
- * include the program and its expected output from these files, so the output
- * they show is the output tested here. The cases live outside test/, but the
+ * standard input, and the words of NAME.args, if there is one, as its
+ * arguments. Its output is compared against NAME.exp. The chapters include
+ * the program and its expected output from these files, so the output they
+ * show is the output tested here. The cases live outside test/, but the
  * results go to manual/working under the test build directory, beside the
  * other suites'.
  *
@@ -57,6 +58,15 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 
 		if ( fileExists( joinPath( src, root + ".in" ) ) )
 			run.stdinFile = joinPath( src, root + ".in" );
+
+		if ( fileExists( joinPath( src, root + ".args" ) ) ) {
+			std::string args;
+			if ( !readFile( joinPath( src, root + ".args" ), args ) ) {
+				job->error( "cannot read " + root + ".args" );
+				continue;
+			}
+			run.args = splitWords( args );
+		}
 
 		colmCompile( config, job, prog );
 		colmRun( config, job, run );

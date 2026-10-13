@@ -1,0 +1,30 @@
+struct counter
+	N: int
+end
+
+# names is another name for list<str>.
+alias names list<str>
+
+# An int is copied.
+A: int = 1
+B: int = A
+B = 2
+print( "ints: ", A, " ", B, "\n" )
+
+# A str can't change, only be replaced.
+S: str = "one"
+T: str = S
+T = T + " more"
+print( "strs: ", S, " / ", T, "\n" )
+
+# C and D are one struct.
+C: counter = new counter()
+D: counter = C
+D->N = 5
+print( "structs: ", C->N, " ", D->N, "\n" )
+
+# L and M are one list.
+L: names = new names()
+M: list<str> = L
+M->push_tail( "x" )
+print( "lists: ", L->length, " ", M->length, "\n" )

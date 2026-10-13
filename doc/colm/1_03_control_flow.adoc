@@ -1,6 +1,70 @@
-Control flow
-============
+= Control flow
 
-== TODO
+This chapter covers the statements that choose which code runs, and how many
+times: `if`, `while`, `for`, `break` and `return`. It ends with a word on
+`switch` and `exit`.
 
+== if
 
+`if Cond Body` runs `Body` when `Cond` is true. Any number of
+`elsif Cond Body` can follow, and then an optional `else Body`. The first
+body whose condition is true runs, or else the `else` body, if there is one.
+
+A body is a block, `+{ ... }+`, or one statement. The parentheses around a
+condition are optional. `else if` works too, as an `else` whose body is an
+`if`. xref:1_02_expressions.adoc#conditions[The expressions chapter] says
+which values are true.
+
+== while
+
+`while Cond Body` runs the body while the condition is true.
+
+== for
+
+`for Name: Type in Value Body` runs the body once for each value of a list or
+map, as xref:2_02_list_map_struct_alias.adoc#lists[the lists section] shows,
+and xref:1_00_language_overview.adoc#exit[the language overview] does with
+`argv`. Over a tree, it runs the body once for each tree of the type `Type`
+inside it: see xref:1_06_iterators.adoc[the iterators chapter], and the
+examples of xref:3_01_lex.adoc[the lexing chapter] and
+xref:3_02_parse.adoc[the parsing chapter].
+
+`Name` exists only inside the loop. Using it after the loop is an error: for
+a loop variable `V`, colm reports `cannot find name V in object`.
+
+== break
+
+`break` leaves the innermost `while` or `for`. There is no `continue`: put
+the rest of the body in an `if`.
+
+== return
+
+`return Value` ends a function and gives its result, as
+xref:1_04_functions.adoc[the functions chapter] shows. `return` needs a
+value: a bare `return` is a parse error.
+
+This program prints the primes up to 40:
+
+[source,chapel]
+.flow_primes.lm
+----
+include::code/flow_primes.lm[]
+----
+
+It prints:
+
+----
+include::code/flow_primes.exp[]
+----
+
+`is_prime` returns as soon as it knows the answer. The main loop's condition
+is `true`, and it leaves the loop with `break`.
+
+== switch and exit
+
+`switch` picks the code to run by the form of a tree. Its cases are the names
+of productions, or patterns, so it is described with patterns, in
+xref:3_03_match.adoc[the patterns chapter].
+
+`exit` ends the program, as xref:1_00_language_overview.adoc#exit[the
+language overview] explains.

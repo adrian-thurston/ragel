@@ -1,0 +1,32 @@
+# Prints the primes up to 40. A prime that is 2 more than the prime before it
+# is marked as a twin.
+bool is_prime( N: int )
+{
+	if N < 2
+		return false
+	D: int = 2
+	while D * D <= N {
+		# N - N / D * D is the remainder of N / D.
+		if N - N / D * D == 0
+			return false
+		D = D + 1
+	}
+	return true
+}
+
+Last: int = 0
+N: int = 0
+while true {
+	N = N + 1
+	if N > 40
+		break
+	if is_prime( N ) {
+		if N == 2
+			print( N, " (the only even prime)\n" )
+		elsif N - Last == 2
+			print( N, " (twin of ", Last, ")\n" )
+		else
+			print( N, "\n" )
+		Last = N
+	}
+}

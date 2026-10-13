@@ -1,0 +1,19 @@
+# Counts the words in its arguments.
+Counts: map<str, int> = new map<str, int>()
+for Word: str in argv {
+	El: map_el<str, int> = Counts->find_el( Word )
+	if El
+		El->value = El->value + 1
+	else
+		Counts->insert( Word, 1 )
+}
+print( Counts->length, " words\n" )
+
+# In key order: shorter keys first.
+for El: map_el<str, int> in Counts
+	print( El->key, ": ", El->value, "\n" )
+
+print( "the: ", Counts->find( "the" ), ", fish: ", Counts->find( "fish" ), "\n" )
+
+Counts->remove( "the" )
+print( Counts->length, " words without the\n" )

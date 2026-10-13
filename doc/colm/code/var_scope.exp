@@ -1,0 +1,4 @@
+total 14 from 3 calls
+in the block: inner
+after the block: outer
+0, false and nil
