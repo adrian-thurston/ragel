@@ -27,11 +27,12 @@ IN_FILES = \
 
 # The example programs, each with the output it prints (.exp), and the input
 # it reads (.in) and the arguments it runs with (.args), if any. An example
-# can also have colm options (.comp) and a host program it is linked into
-# (.host.c or .host.cc). The test harness's manual suite runs them, and the
-# pages include the programs and their output. A file that an example
-# includes is listed too. Its suffix isn't .lm (the pages use .lmi), since the
-# manual suite runs every .lm as an example.
+# can also have colm options (.comp), a host program it is linked into
+# (.host.c or .host.cc), and the reducer.h its commit code includes
+# (.reducer.h), which needs .host.cc. The test harness's manual suite runs
+# them, and the pages include the programs and their output. A file that an
+# example includes is listed too. Its suffix isn't .lm (the pages use .lmi),
+# since the manual suite runs every .lm as an example.
 CODE = \
 	code/assign.lm           code/assign.exp           code/assign.in \
 	code/emb_define.lm       code/emb_define.exp       code/emb_define.comp \
