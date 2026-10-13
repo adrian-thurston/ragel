@@ -1,0 +1,44 @@
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `= `;
+	ignore /[ \t\n]+/
+end
+
+def setting
+	[Name: id `= Value: num `;]
+
+# Changes the copy it is given.
+void reset( S: setting )
+{
+	S.Value = cons num "0"
+	print( "in reset: ", $S, "\n" )
+}
+
+# Changes the caller's tree.
+void reset_ref( S: ref<setting> )
+{
+	S.Value = cons num "0"
+}
+
+parse Width: setting[ "width = 80;" ]
+parse Tight: setting[ "width=0;" ]
+if ( ! Width || ! Tight ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+Copy: setting = Width
+Copy.Value = cons num "120"
+print( "Width: ", $Width, "\n" )
+print( "Copy: ", $Copy, "\n" )
+
+reset( Width )
+print( "after reset: ", $Width, "\n" )
+reset_ref( Width )
+print( "after reset_ref: ", $Width, "\n" )
+
+if ( Tight == Width )
+	print( "Tight and Width are equal\n" )
+if ( Tight != Copy )
+	print( "Tight and Copy are not\n" )

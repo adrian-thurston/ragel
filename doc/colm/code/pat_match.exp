@@ -1,0 +1,7 @@
+list form: move north by 3
+string form: move north by 3
+not a move: say
+say hello, then to you
+list form: move east by 10
+string form: move east by 10
+not a move: stop

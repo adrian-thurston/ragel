@@ -1,6 +1,339 @@
-Match
-=====
+= Patterns and trees
 
-== TODO
+A parse, the subject of xref:3_02_parse.adoc[the parsing chapter], gives a
+tree. This chapter covers what a program can do with one: copy and compare
+it, take it apart with patterns, `match`, `require` and `switch`, change it,
+and make new trees with `cons`, `make_token` and `make_tree`. Loops over the
+trees inside a tree are the subject of xref:1_06_iterators.adoc[the
+iterators chapter].
 
+== Trees as values
 
+A variable whose type is a token or a def holds a tree, or nil. A parse that
+fails gives nil, and so does a `match` that fails. Most of what this chapter
+does with a tree needs one that isn't nil, so check a tree before using it.
+
+Assigning a tree to a variable copies it, and so does passing it to a
+function. A change made through one variable doesn't show in the other. A
+parameter of type `ref<T>` refers to the caller's variable instead, so a
+function can change the caller's tree through it.
+xref:1_04_functions.adoc[The functions chapter] covers `ref`.
+
+`==` and `!=` compare two trees. They are equal when they have the same
+types, and their tokens have the same text. Ignored text isn't compared, so
+`width = 0;` is equal to `width=0;`.
+
+This program copies a tree, passes it to two functions, and compares trees.
+`cons num "0"` makes a `num` token whose text is `0`, as
+<<cons,the section on `cons`>> explains:
+
+[source,chapel]
+.pat_copy.lm
+----
+include::code/pat_copy.lm[]
+----
+
+It prints:
+
+----
+include::code/pat_copy.exp[]
+----
+
+`Copy` starts as a copy of `Width`, so giving it a new value leaves `Width`
+as it was. `reset` changes the copy it is given. `reset_ref` changes `Width`
+itself. Without the `ref`, `Width` would still be `width = 80;` after it.
+`Tight` has no spaces, but is equal to `Width`.
+
+`<`, `>`, `+<=+` and `>=` order trees too, but not alphabetically. Of two
+tokens of one type, the one with shorter text comes first, so `b` comes
+before `aa`.
+
+[[match]]
+== Patterns and `match`
+
+`match T PATTERN` tests whether the tree `T` has the form that the pattern
+describes. A pattern has one of two forms:
+
+* The list form is in square brackets. It holds the names of types, text in
+  double quotes, and literals in their backtick form:
+  `+[Name: id "=" Value: num ";"]+` or `+[Name: id `= Value: num `;]+`.
+* The string form is text in double quotes, with types in square brackets:
+  `+"[Name: id] = [Value: num];"+`. In single quotes, square brackets are
+  text: `+'[ a ]'+` matches a `[`, an `a` and a `]`.
+
+Colm parses a pattern when it compiles the program, as a tree of the type of
+`T`, with the program's tokens and grammar. The name of a type stands for any
+tree of that type. Text stands for the tokens it scans as, which must have
+the same text in `T`. Ignored text doesn't count: `"a=1;"` and
+`"a  =  1 ;"` both match the input `a = 1;`. A pattern that doesn't parse as
+the type of `T` is a compile error, a `parse error` at the `match`.
+
+`Name:` in front of a type is a label. It declares the variable `Name`,
+which holds the part of `T` that the type matched.
+
+The pattern must match the whole of `T`. A list of three items doesn't match
+`+[item item]+`. A repetition, such as `+item*+`, can stand for the rest of a
+list: `+[First: item Rest: item*]+` matches a list that has a first item, and
+`+"a [Rest: item*]"+` a list that starts with `a`. It can't stand for the
+start of a list: `+[Rest: item* Last: item]+` doesn't parse.
+
+`match` gives `T` when it matches, and nil when it doesn't. When it doesn't,
+every label is nil too.
+
+In `if match T PATTERN`, the labels exist only in the body of the `if`.
+Using one after it is `cannot find name Name in object`. A `match` that is a
+statement on its own, or the value of an assignment, declares its labels in
+the block it is in, and they can be used after it. A label used twice in one
+block is `variable Name redeclared`.
+
+A label is a copy of part of `T`. <<changing,Changing a tree>> shows what
+assigning to one does.
+
+Some things `match` and its patterns can't do:
+
+* Match a token. `T` must be a def's tree: `match` on a token is the compile
+  error `pattern type is not a non-terminal`. Compare a token's text instead,
+  as in `$T == "x"`.
+* Hold a value. A name in a pattern is a type's name, so a variable `V` in
+  `+[id "=" V ";"]+` is `unknown type V in typeof expression`. Match first,
+  and test the labels after.
+* Match a nil tree. `T` must not be nil: check a parse's result before
+  matching it.
+
+This program reads commands, each a word and a list of arguments, and matches
+each one against patterns:
+
+[source,chapel]
+.pat_match.lm
+----
+include::code/pat_match.lm[]
+----
+
+It reads this input:
+
+----
+include::code/pat_match.in[]
+----
+
+and prints:
+
+----
+include::code/pat_match.exp[]
+----
+
+The two patterns for a move are one pattern, in the two forms. `"move"` is a
+`word` whose text is `move`, and `Dir: word` matches any word. The extra
+spaces in `move   east 10 ;` don't count. `say` and `stop` are not moves, so
+`Move` and `Same` are nil, and so are the labels `Dir`, `Steps`, `D` and `S`.
+For `say hello to you;`, `First` is `hello`, and `Rest` is the rest of the
+list.
+
+[[require]]
+== `require`
+
+`require T PATTERN` matches `T` against the pattern, as `match` does. When `T`
+matches, the code after the `require` runs, with the labels declared. When it
+doesn't, the rest of the block that the `require` is in is skipped. In the
+body of a loop, the loop goes on to its next tree. In a function's body, the
+function returns. A `require` must be in a block: at the top level of a
+program, it is a parse error. As with `match`, `T` must not be nil.
+
+This program reads settings. It prints the ones whose value is a word, and
+then, with a function, the ones whose value is a number:
+
+[source,chapel]
+.pat_require.lm
+----
+include::code/pat_require.lm[]
+----
+
+It reads this input:
+
+----
+include::code/pat_require.in[]
+----
+
+and prints:
+
+----
+include::code/pat_require.exp[]
+----
+
+The `require` in the loop skips the settings whose value is a number. The
+one in `show_number` skips those whose value is a word.
+
+[[switch]]
+== `switch`
+
+`switch T` runs the code of the first case that `T` fits. A case is one of:
+
+* `case PATTERN`, which `T` fits when it matches the pattern.
+* `case Name`, which `T` fits when its production is the one named `Name`.
+  xref:3_02_parse.adoc[The parsing chapter] shows how to name a production,
+  as in `+[id] :Id+`.
+* `case Name PATTERN`, which `T` fits when both hold.
+
+`default` comes after the cases, and runs when `T` fits none of them. It can
+be left out, and then nothing runs. A case or the default is followed by a
+statement, or by a block in braces. The cases can be put in braces too, as
+in `+switch T { case Name ... }+`.
+
+Only the first case that `T` fits runs. There is no fall-through from one
+case into the next. Colm doesn't check that the cases cover every production
+of the type. As with `match`, `T` must not be nil.
+
+The labels of a case's pattern exist in that case. In the code of a case,
+but not of the default, the labelled children of `T` can be named on their
+own. In `case Circle` below, `Radius` is `S.Radius`. A local variable of the
+same name comes first. To name children on their own, switch on a variable,
+not on a child such as `S.Value`: copy the child to a variable first.
+
+This program describes shapes. `shape` has three productions, each with a
+name:
+
+[source,chapel]
+.pat_switch.lm
+----
+include::code/pat_switch.lm[]
+----
+
+It reads this input:
+
+----
+include::code/pat_switch.in[]
+----
+
+and prints:
+
+----
+include::code/pat_switch.exp[]
+----
+
+`line 0;` fits both the pattern `"line 0;"` and `Line`. The pattern comes
+first, so its case runs. `rect 3 4;` fits no case, so the default runs.
+
+[[changing]]
+== Changing a tree
+
+Assigning to a child of a tree changes the tree: `S.Name = cons id "height"`
+replaces the `Name` child of `S`. A label from a `match` is a copy, so
+assigning to it changes the label, and leaves the tree as it was.
+
+Ignored text belongs to the token before it. Ignored text at the start of the
+input, before any token, belongs to the first token. So a tree that is
+replaced takes the ignored text after it with it, and the ignored text before
+it stays. Replacing `x` in `x = 1;` with `y` gives `y= 1;`.
+
+[source,chapel]
+.pat_change.lm
+----
+include::code/pat_change.lm[]
+----
+
+It prints:
+
+----
+include::code/pat_change.exp[]
+----
+
+Assigning to the label `N` leaves `S` as it was. Assigning to `S.Name`
+replaces the name, and the space after `width` goes with it.
+`cons id "depth "` ends with a space, which stays with the new name. The
+space before `80` belongs to the `=`, so it stays when the value is
+replaced.
+
+[[cons]]
+== Constructing trees: `cons`
+
+`cons T` followed by text and values makes a tree of type `T`. `construct` is
+the same keyword. A constructor has the forms of a pattern, with values in
+place of types:
+
+* The string form, with values in square brackets:
+  `+cons setting "[Name] = [Value];"+`.
+* The list form: `+cons setting [Name "=" Value ";"]+`, or, with backtick
+  literals, `+cons setting [Name `= Value `;]+`.
+
+`cons X: T` makes the tree, and declares the variable `X`, which holds it.
+
+Colm parses a constructor as a tree of `T`, as it does a pattern, and makes
+the tree when the program runs. A value placed in it must be a tree, of a
+type that fits where it is placed. An `int` is a compile error,
+`variables used in replacements must be trees`. A `str`, `$X`, or a tree of
+a type that doesn't fit, is a parse error. To place text, make a token of it
+first, with `make_token`, which <<make,the next section>> covers, or with
+`parse`. A value must not be nil: check the labels of a `match` before using
+them.
+
+Text in a constructor is kept as it is written, spaces included. With `N` the
+token `x` and `V` the token `42`, `+"[N] = [V];"+` gives `x = 42;`. Backtick
+literals add no spaces: `+[N `= V `;]+` gives `x=42;`. A value keeps its own
+ignored text, so a token from a parse keeps the space after it. `+^X+` places
+`X` without the ignored text around it.
+
+A list variable can stand only at the end of a list. With `Rest` a
+`+setting*+` and `S` a `setting`, `+cons setting* [S " " Rest]+` works, but
+`+cons setting* [Rest " " S]+` doesn't parse. `+cons setting* []+` makes an
+empty list. To add to the end of a list, use a left-recursive def, as
+`settings` is in the next example.
+
+This program reads pairs of a name and a number, makes a setting of each in
+three ways, and collects them in two lists:
+
+[source,chapel]
+.pat_cons.lm
+----
+include::code/pat_cons.lm[]
+----
+
+It reads this input:
+
+----
+include::code/pat_cons.in[]
+----
+
+and prints:
+
+----
+include::code/pat_cons.exp[]
+----
+
+In `A`, the name keeps the space after it in the input, and the text adds
+another before the `=`. `B` has only the space after the name. `C` trims the
+name and the value, and has the spaces of the text. `Reversed` is a
+`+setting*+`, a right-recursive list, so each setting goes at its start, and
+the list is in reverse. `Ordered` is left-recursive, so each setting goes at
+its end.
+
+[[make]]
+== Making trees from parts: `make_token` and `make_tree`
+
+`make_token( typeid<T>, Text )` makes a token of type `T`, whose text is the
+`str` `Text`. `+make_tree( typeid<T>, Child, ... )+` makes a tree of the def
+`T`, with the children it is given, in the order of the elements of its
+production. `typeid<T>` stands for the type `T`, as
+xref:1_02_expressions.adoc[the expressions chapter] explains. Both give a
+value of type `any`, which can be assigned to a variable of the type.
+xref:3_01_lex.adoc[The lexing chapter] uses `make_token` in token actions.
+
+Use `make_tree` only for a def with one production. Make a tree of a def
+with more than one production with `cons`. Colm doesn't check that the
+children fit the production: give it one tree of each element's type, in
+order. A literal in backtick form has no `typeid`, so the def's production
+must use named tokens, such as `+token equals /'='/+`, not literals.
+
+[source,chapel]
+.pat_make.lm
+----
+include::code/pat_make.lm[]
+----
+
+It prints:
+
+----
+include::code/pat_make.exp[]
+----
+
+`make_setting` makes a token of each type, and a setting from them. The
+tokens have no ignored text, so the setting has no spaces. It matches a
+pattern with spaces all the same, since ignored text doesn't count.

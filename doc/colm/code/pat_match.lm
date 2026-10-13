@@ -1,0 +1,42 @@
+lex
+	token word /[a-z]+/
+	token num /[0-9]+/
+	literal `;
+	ignore /[ \t\n]+/
+end
+
+def arg
+	[word]
+|	[num]
+
+def command
+	[Verb: word Args: arg* `;]
+
+def script
+	[command*]
+
+parse Script: script[ stdin ]
+if ( ! Script ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for C: command in Script {
+	# The list form: text, types and labels.
+	Move: command = match C ["move" Dir: word Steps: num ";"]
+
+	# The same pattern in the string form: text, with types in brackets.
+	Same: command = match C "move [D: word] [S: num];"
+
+	if ( Move ) {
+		print( "list form: move ", $Dir, " by ", $Steps, "\n" )
+		print( "string form: move ", $D, " by ", $S, "\n" )
+	}
+	elsif ( ! Same && ! Dir && ! Steps ) {
+		print( "not a move: ", $C.Verb, "\n" )
+	}
+
+	# A repetition stands for the rest of a list.
+	if match C ["say" First: arg Rest: arg* ";"]
+		print( "say ", $First, ", then ", $Rest, "\n" )
+}

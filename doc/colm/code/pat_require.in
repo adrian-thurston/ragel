@@ -1,0 +1,4 @@
+width = 80;
+theme = dark;
+height = 24;
+font = mono;

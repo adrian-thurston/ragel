@@ -1,0 +1,32 @@
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `= `;
+	ignore /[ \t\n]+/
+end
+
+def setting
+	[Name: id `= Value: num `;]
+
+parse S: setting[ "width = 80;" ]
+if ( ! S ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+# A label is a copy. Changing it leaves S as it was.
+match S [N: id "=" V: num ";"]
+N = cons id "height"
+print( "label: ", $S, "\n" )
+
+# A child is part of S. The space after the old name goes with it.
+S.Name = cons id "height"
+print( "child: ", $S, "\n" )
+
+# A space after the new name's text stays with it.
+S.Name = cons id "depth "
+print( "with a space: ", $S, "\n" )
+
+# The space before the value belongs to the =, so it stays.
+S.Value = cons num "24"
+print( "value: ", $S, "\n" )

@@ -1,0 +1,37 @@
+lex
+	token word /[a-z]+/
+	token num /[0-9]+/
+	literal `= `;
+	ignore /[ \t\n]+/
+end
+
+def value
+	[num]
+|	[word]
+
+def setting
+	[Name: word `= Value: value `;]
+
+def settings
+	[setting*]
+
+# Prints a setting whose value is a number.
+void show_number( S: setting )
+{
+	require S [Name: word "=" N: num ";"]
+	print( $Name, " is the number ", $N, "\n" )
+}
+
+parse Settings: settings[ stdin ]
+if ( ! Settings ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: setting in Settings {
+	require S [Name: word "=" W: word ";"]
+	print( $Name, " is the word ", $W, "\n" )
+}
+
+for S: setting in Settings
+	show_number( S )

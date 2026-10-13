@@ -56,6 +56,13 @@ CODE = \
 	code/parse_reject.lm     code/parse_reject.exp     code/parse_reject.in \
 	code/parse_reparse.lm    code/parse_reparse.exp    code/parse_reparse.in \
 	code/parse_stop.lm       code/parse_stop.exp       code/parse_stop.in \
+	code/pat_change.lm       code/pat_change.exp \
+	code/pat_cons.lm         code/pat_cons.exp         code/pat_cons.in \
+	code/pat_copy.lm         code/pat_copy.exp \
+	code/pat_make.lm         code/pat_make.exp \
+	code/pat_match.lm        code/pat_match.exp        code/pat_match.in \
+	code/pat_require.lm      code/pat_require.exp      code/pat_require.in \
+	code/pat_switch.lm       code/pat_switch.exp       code/pat_switch.in \
 	code/poker.lm            code/poker.exp \
 	code/reference.lm        code/reference.exp \
 	code/scope.lm            code/scope.exp \

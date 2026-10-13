@@ -1,0 +1,35 @@
+lex
+	literal `circle `rect `line `;
+	token num /[0-9]+/
+	ignore /[ \t\n]+/
+end
+
+def shape
+	[`circle Radius: num `;] :Circle
+|	[`rect Width: num Height: num `;] :Rect
+|	[`line Length: num `;] :Line
+
+def drawing
+	[shape*]
+
+void describe( S: shape )
+{
+	switch S
+	case Circle
+		print( "a circle of radius ", $Radius, "\n" )
+	case "line 0;"
+		print( "a line of no length\n" )
+	case Line
+		print( "a line of length ", $S.Length, "\n" )
+	default
+		print( "something else: ", $S, "\n" )
+}
+
+parse Drawing: drawing[ stdin ]
+if ( ! Drawing ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: shape in Drawing
+	describe( S )
