@@ -333,7 +333,9 @@ xref:3_05_reduction.adoc[The reductions chapter] covers actions, `r1` to `rN`,
 `lhs` and attributes in full.
 
 Actions run on alternatives that the parser later abandons, and run again
-when it retries them. What they print stays printed.
+when it retries them. What they print stays printed. What they change in
+global or context data is undone, as xref:3_04_undo.adoc[the context
+chapter] explains.
 
 `reject` in an action makes the reduction a parse error. The parser backs up
 and tries the next alternative, and the parse fails if there is none. The

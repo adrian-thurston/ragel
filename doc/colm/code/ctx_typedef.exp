@@ -1,0 +1,4 @@
+multiplication: a * b;
+typedef:        typedef int a;
+declaration:    a * b;
+multiplication: c * d;

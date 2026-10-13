@@ -1,0 +1,60 @@
+context counted
+	# The length the current group was given, and the items it has so far.
+	Length: int
+	Count: int
+
+	lex
+		token number /[0-9]+/
+		token word /[a-z]+/
+		ignore /space+/
+	end
+
+	def length
+		[number]
+		{
+			Length = atoi( $r1 )
+			Count = 0
+		}
+
+	def item
+		[number]
+	|	[word]
+
+	# One more item, if the group has room for it.
+	def counted_item
+		[item]
+		{
+			Count = Count + 1
+			if ( Count > Length ) {
+				print( "no room for ", $r1, ", count is ", Count, "\n" )
+				reject
+			}
+		}
+
+	def group
+		[length counted_item*]
+		{
+			print( "group of ", Length, ", count is ", Count, "\n" )
+			if ( Count != Length )
+				reject
+		}
+
+	def groups
+		[group*]
+end
+
+Counted: counted = new counted()
+
+parse Groups: counted::groups( Counted )[ stdin ]
+
+if ( ! Groups ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for G: counted::group in Groups {
+	print( "group:" )
+	for I: counted::item in G
+		print( " ", $I )
+	print( "\n" )
+}

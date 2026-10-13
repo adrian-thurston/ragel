@@ -1,0 +1,5 @@
+target: x
+target: y
+target: a
+target: w
+assigned: x y w

@@ -1,0 +1,58 @@
+context decls
+	# The names that typedef has made type names.
+	Types: map<str, str>
+
+	lex
+		literal `typedef `int `* `;
+		token type_name //
+
+		# A name is a type name once typedef has declared it.
+		token name /[a-z]+/
+		{
+			Name: str = input->pull( match_length )
+			if ( Types->find( Name ) )
+				input->push( make_token( typeid<type_name>, Name ) )
+			else
+				input->push( make_token( typeid<name>, Name ) )
+		}
+
+		ignore /space+/
+	end
+
+	def new_type
+		[name]
+		{
+			Types->insert( $r1, $r1 )
+		}
+
+	def type
+		[`int]
+	|	[type_name]
+
+	def statement
+		[`typedef type new_type `;]
+	|	[type `* name `;]
+	|	[name `* name `;]
+
+	def program
+		[statement*]
+end
+
+Decls: decls = new decls()
+Decls->Types = new map<str, str>()
+
+parse Program: decls::program( Decls )[ stdin ]
+
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for S: decls::statement in Program {
+	if match S [`typedef decls::type decls::new_type `;]
+		print( "typedef:        ", $S, "\n" )
+	elsif match S [decls::type `* decls::name `;]
+		print( "declaration:    ", $S, "\n" )
+	else
+		print( "multiplication: ", $S, "\n" )
+}

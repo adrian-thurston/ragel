@@ -1,0 +1,47 @@
+#
+# A rejected reduction's action runs to its end, and its writes are undone,
+# those made after the reject as well as those before it. 42 is rejected as a
+# small and parsed as a plain num, so 7 sees what 3 left.
+#
+
+context ctx
+	lex
+		token num /[0-9]+/
+		ignore /space+/
+	end
+
+	Before: int
+	After: int
+
+	def small
+		[num]
+		{
+			Before = Before + 1
+			if ( atoi( $r1 ) > 9 )
+				reject
+			After = After + 1
+			print( "small ", $r1, ", Before ", Before, ", After ", After, "\n" )
+		}
+
+	def item
+		[small]
+	|	[num]
+
+	def start
+		[item*]
+end
+
+C: ctx = new ctx()
+parse Start: ctx::start( C )[ stdin ]
+for S: ctx::small in Start
+	print( "is small: ", $S, "\n" )
+print( "Before ", C->Before, ", After ", C->After, "\n" )
+##### IN #####
+3 42 7
+##### EXP #####
+small 3, Before 1, After 1
+small 42, Before 2, After 2
+small 7, Before 2, After 2
+is small: 3
+is small: 7
+Before 2, After 2

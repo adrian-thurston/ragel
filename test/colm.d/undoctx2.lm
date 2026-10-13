@@ -1,0 +1,56 @@
+#
+# A parse that fails undoes the writes of every action, except those made
+# before a commit, which backtracking can't go back past. Each item adds to a
+# context int and list. "a b !" commits; "c ;" doesn't.
+#
+
+context ctx
+	lex
+		literal `; `! `^
+		token id /[a-z]+/
+		ignore /space+/
+	end
+
+	I: int
+	L: list<str>
+
+	def item
+		[id]
+		{
+			I = I + 1
+			L->push_tail( $r1 )
+		}
+
+	def statement
+		[item item `!] commit
+	|	[item `;]
+
+	def start
+		[statement*]
+end
+
+C: ctx = new ctx()
+C->L = new list<str>()
+
+parse Start: ctx::start( C )[ stdin ]
+if ( ! Start )
+	print( "error: ", error, "\n" )
+
+print( "I ", C->I, ", L" )
+for E: str in C->L
+	print( " ", E )
+print( "\n" )
+##### IN #####
+a ; b ; c ^
+##### EXP #####
+error: <stdin>:1:11: parse error
+I 0, L
+##### IN #####
+a b ! c ; d ^
+##### EXP #####
+error: <stdin>:1:13: parse error
+I 2, L a b
+##### IN #####
+a b ! c ;
+##### EXP #####
+I 3, L a b c

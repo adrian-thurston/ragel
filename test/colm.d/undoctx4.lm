@@ -1,0 +1,47 @@
+#
+# Undoing an action puts back the value the action found. A write from
+# outside the parse, made between two sends, is lost when the parser backs up
+# over an action that ran before it. The first send reduces a; the second
+# reaches the ";" and backs up from A1 to A2, over a's action.
+#
+
+context ctx
+	lex
+		literal `^ `;
+		token id /[a-z]+/
+		ignore /space+/
+	end
+
+	I: int
+
+	def item
+		[id]
+		{
+			I = I + 1
+			print( "item ", $r1, ", I ", I, "\n" )
+		}
+
+	def A1 []
+	def A2 []
+
+	def start
+		[A1 item* `^]
+	|	[A2 item* `;]
+end
+
+C: ctx = new ctx()
+P: parser<ctx::start> = new parser<ctx::start>( C )
+send P "a b "
+print( "main sets I to 100\n" )
+C->I = 100
+send P "c ;" eos
+print( "I ", C->I, ", tree ", P->tree, "\n" )
+##### EXP #####
+item a, I 1
+main sets I to 100
+item b, I 101
+item c, I 102
+item a, I 1
+item b, I 2
+item c, I 3
+I 3, tree a b c ;
