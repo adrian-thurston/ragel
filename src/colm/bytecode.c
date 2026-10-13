@@ -3873,6 +3873,9 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_DESTROY %hd\n", field );
 
+			/* The loop ended, or a break left it. The iterator is off the
+			 * stack, so clear its local, which downref_locals would unwind
+			 * again. */
 			user_iter_t *uiter = (user_iter_t*) vm_get_local(exec, field);
 			colm_uiter_destroy( prg, &sp, uiter );
 			vm_set_local( exec, field, 0 );
@@ -3885,6 +3888,8 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_UITER_UNWIND %hd\n", field );
 
+			/* A return or an exit left the loop. Clear the local, as
+			 * IN_UITER_DESTROY does. */
 			user_iter_t *uiter = (user_iter_t*) vm_get_local(exec, field);
 			colm_uiter_unwind( prg, &sp, uiter );
 			vm_set_local( exec, field, 0 );
