@@ -186,10 +186,10 @@ The labels of a case's pattern exist in that case. In the statements of a
 case, but not of the default, the labelled children of `T` can be named on
 their own: in `case Circle` below, `Radius` is `S.Radius`. A local variable of
 the same name comes first. This doesn't reach into an `if`, `while` or `for`
-within the case: not its body, nor the condition of an `if` or a `while`.
-There, name a child through `T`, as in `$S.Radius`. To name children on their
-own, switch on a variable, not on a child such as `S.Value`: copy the child to
-a variable first.
+within the case, not its body, nor the condition of an `if` or a `while`, and
+not the statements after a `require` in the case. There, name a child through
+`T`, as in `$S.Radius`. To name children on their own, switch on a variable,
+not on a child such as `S.Value`: copy the child to a variable first.
 
 This program describes shapes. `shape` has three productions, each with a
 name:
