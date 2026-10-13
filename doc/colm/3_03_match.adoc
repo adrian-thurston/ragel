@@ -182,11 +182,14 @@ Only the first case that `T` fits runs. There is no fall-through from one
 case into the next. Colm doesn't check that the cases cover every production
 of the type. As with `match`, `T` must not be nil.
 
-The labels of a case's pattern exist in that case. In the code of a case,
-but not of the default, the labelled children of `T` can be named on their
-own. In `case Circle` below, `Radius` is `S.Radius`. A local variable of the
-same name comes first. To name children on their own, switch on a variable,
-not on a child such as `S.Value`: copy the child to a variable first.
+The labels of a case's pattern exist in that case. In the statements of a
+case, but not of the default, the labelled children of `T` can be named on
+their own: in `case Circle` below, `Radius` is `S.Radius`. A local variable of
+the same name comes first. This doesn't reach into an `if`, `while` or `for`
+within the case: not its body, nor the condition of an `if` or a `while`.
+There, name a child through `T`, as in `$S.Radius`. To name children on their
+own, switch on a variable, not on a child such as `S.Value`: copy the child to
+a variable first.
 
 This program describes shapes. `shape` has three productions, each with a
 name:
@@ -222,7 +225,8 @@ assigning to it changes the label, and leaves the tree as it was.
 Ignored text belongs to the token before it. Ignored text at the start of the
 input, before any token, belongs to the first token. So a tree that is
 replaced takes the ignored text after it with it, and the ignored text before
-it stays. Replacing `x` in `x = 1;` with `y` gives `y= 1;`.
+it stays, unless it is at the start of the input. Replacing `x` in `x = 1;`
+with `y` gives `y= 1;`.
 
 [source,chapel]
 .pat_change.lm

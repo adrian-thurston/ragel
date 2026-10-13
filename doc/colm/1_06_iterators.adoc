@@ -50,9 +50,9 @@ an empty one.
 Assigning to the loop variable replaces that tree in the tree that the loop
 is over. The loop then goes on into the new tree: it visits the trees inside
 the replacement, not those inside the tree it replaced, and not the
-replacement itself. So if a replacement holds a tree that the body replaces
-again, the loop never ends. Wrapping each `id` in parentheses, for example,
-gives the loop a new `id` to wrap each time.
+replacement itself. So if every replacement holds a tree that the body
+replaces in the same way, the loop never ends: wrapping each `id` in
+parentheses, for example, gives the loop a new `id` to wrap each time.
 
 xref:3_03_match.adoc#changing[Changing a tree], in the patterns chapter,
 explains where the ignored text of a replaced tree goes.
@@ -61,8 +61,8 @@ Rewrite through a loop over a variable that isn't `global`, such as `Colors`
 below. Changes made through the loop variable of a loop over a `global`
 variable, or over a field of a struct, are lost: the loop works on a copy.
 
-This program reads a list of colors, which can hold lists of their own, and
-replaces each `green` with two colors:
+This program reads a list of colors, which can hold lists of their own. It
+replaces each `green` with two colors, and each `lime` with `red`:
 
 [source,chapel]
 .iter_rewrite.lm
@@ -82,10 +82,12 @@ and prints:
 include::code/iter_rewrite.exp[]
 ----
 
-The loop visits `green`, and replaces it with `(lime, olive)`. It then
-visits `lime` and `olive`, inside the replacement, and goes on to
-`(blue, green)`. If the replacement held a `green`, the loop would replace
-that one too, and the next, without end.
+The loop visits `green`, and replaces it with `(lime, olive)`. It goes on
+into the replacement: it visits `lime`, replaces it with `red`, and then
+visits `olive`. `red` holds nothing to replace, so the loop goes on to
+`(blue, green)`, does the same with its `green`, and ends. If the replacement
+for `green` held a `green`, the loop would replace that one too, and the next,
+without end.
 
 == Built-in iterators
 

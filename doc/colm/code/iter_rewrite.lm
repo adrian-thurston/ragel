@@ -21,6 +21,8 @@ for I: item in Colors {
 	print( "visit ", $I, "\n" )
 	if match I "green"
 		I = cons item "(lime, olive)"
+	elsif match I "lime"
+		I = cons item "red"
 }
 
 print( $Colors, "\n" )

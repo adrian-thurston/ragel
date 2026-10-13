@@ -7,4 +7,4 @@ visit blue
 visit green
 visit lime
 visit olive
-red, (lime, olive), (blue, (lime, olive))
+red, (red, olive), (blue, (red, olive))
