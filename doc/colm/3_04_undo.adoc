@@ -29,7 +29,7 @@ context is a struct that holds a grammar. `new NAME()` makes an object of it,
 and the program reaches its variables through the object, as in
 `+Decls->Types+`.
 
-The variables start at 0, if they are ``int``s, and nil otherwise. They can't
+The variables start at 0, false or nil, as a struct's fields do. They can't
 have a first value: that is a parse error. Make the lists and maps that a
 parse uses before the parse.
 
