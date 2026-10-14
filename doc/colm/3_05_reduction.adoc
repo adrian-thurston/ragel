@@ -193,10 +193,11 @@ Colm never constructs or destroys a value. It keeps each tree's value in
 memory that it zeroes, so a value starts out zeroed: a `long` that an action
 reads before setting it is 0. Keep a value's members to plain data, such as
 numbers, pointers, and structs of them, as ragel's own reductions do. A member
-with a constructor, such as a `std::string`, is never constructed, and
-assigning to one crashes the program. Keep such an object through a pointer
-instead. An action allocates it, and the program frees it, since no
-destructor runs.
+with a constructor, such as a `std::string`, is used without being
+constructed, which is undefined: some assignments to it crash the program,
+others seem to work, and what it holds is never freed. Keep such an object
+through a pointer instead. An action allocates it, and the action that uses
+it last deletes it, since no destructor runs.
 
 In an action:
 
