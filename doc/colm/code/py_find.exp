@@ -1,0 +1,5 @@
+print: "Squares up to", n
+print without a newline: i
+print: i * i
+print of an empty line
+parsed as a call: print("done")

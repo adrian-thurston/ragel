@@ -41,3 +41,7 @@ That gives us:
 ----
 include::code/nested_scope.exp[]
 ----
+
+The next page, link:0_07_transformation.html[A complete transformation],
+puts colm to the work it is made for. It parses a Python program, rewrites
+some of its statements, and prints the result.

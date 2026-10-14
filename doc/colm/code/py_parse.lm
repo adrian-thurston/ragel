@@ -1,0 +1,9 @@
+include 'py_grammar.lmi'
+
+parse Program: program[ stdin ]
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+print( Program )
