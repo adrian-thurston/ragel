@@ -1,0 +1,332 @@
+= A complete transformation
+
+The programs on the pages before this one print strings and numbers. Colm is
+made for another kind of work: reading a program written in some language,
+changing it, and writing it out again. This page builds such a program, one
+step at a time.
+
+The program reads a Python 2 program, rewrites its `print` statements as
+calls of Python 3's `print` function, and prints the result. Everything else,
+the layout and the comments included, stays as it was:
+
+[cols="1,1",options="header"]
+|===
+| Python 2 | becomes
+| `+print "Squares up to", n+` | `+print("Squares up to", n)+`
+| `+print i,+` | `+print(i, end=' ')+`
+| `print` | `+print()+`
+| `+print("done")+` | the same, since it is already a call
+|===
+
+In Python 2, a comma at the end of a `print` leaves out the line break. In
+Python 3, `+end=' '+` ends what `print` prints with a space instead.
+
+Colm needs a grammar for the language it reads. This page uses a cut-down
+version of the Python grammar in the colm-suite repository,
+`grammar/python/python.lm`, in the
+https://github.com/adrian-thurston/colm-suite/tree/main/grammar[grammar
+directory]. It covers only the part of Python 2 that the example needs. The
+grammar is kept in a file of its own, `py_grammar.lmi`, which each of the
+three programs on this page includes with `include 'py_grammar.lmi'`.
+xref:8_02_modularity.adoc[The modularity chapter] covers `include`.
+
+The programs read this input, a small Python 2 program:
+
+----
+include::code/py_parse.in[]
+----
+
+To try one, put `py_grammar.lmi`, the program and the input, saved as
+`squares.py`, in one directory, and run colm there:
+
+[source,bash]
+----
+colm py_rewrite.lm
+./py_rewrite < squares.py
+----
+
+Colm looks for an included file in the directory it runs in.
+xref:8_02_modularity.adoc[The modularity chapter] says how to compile from
+another directory, with `-I`.
+
+== Tokens
+
+The grammar starts with the tokens, in a `lex` block:
+
+[source,chapel]
+.py_grammar.lmi
+----
+include::code/py_grammar.lmi[tag=tokens]
+----
+
+Python's keywords and punctuation are literals. Each is written with a
+backtick in front of it, and the grammar uses it in that form, as in
+`+`print+`. In Python 2, `print` is a keyword.
+
+`id`, `number` and `string` are tokens, each with a pattern between slashes.
+A string here is text in double or single quotes, on one line.
+
+`ws` is ignored: the scanner reads spaces and tabs, but doesn't pass them to
+the parser as tokens. The tree keeps them all the same, which matters later.
+The ignore has a name because the actions in the next section make `ws`
+tokens. The name can't be `space`: that is one of colm's predefined patterns,
+in the table in xref:3_01_lex.adoc[the lexing chapter], and
+`++ignore space /[ \t]+/++` stops colm with
+`regular definition "space" already exists`.
+
+== Indentation
+
+Python marks a block by indenting its lines, not with braces. The lexer turns
+the indentation into tokens that the grammar can use, as `python.lm` does. It
+makes three tokens, none of which has any text:
+
+* `NEWLINE`, at the end of each line that holds code.
+* `INDENT`, where the indentation grows.
+* `DEDENT`, one for each block that ends.
+
+To the grammar, `INDENT` and `DEDENT` are a block's braces.
+
+The lexer keeps two variables, declared before the `lex` block:
+
+[source,chapel]
+.py_grammar.lmi
+----
+include::code/py_grammar.lmi[tag=globals]
+----
+
+`Indents` is a list used as a stack. It holds the indentation of each block
+that is open, the innermost on top. `Held` holds comments and blank lines, as
+the end of this section explains.
+
+The `lex` block goes on with the tokens that do the work:
+
+[source,chapel]
+.py_grammar.lmi
+----
+include::code/py_grammar.lmi[tag=indent]
+----
+
+`NEWLINE`, `INDENT` and `DEDENT` have empty patterns, `//`, so the scanner
+never makes one. The actions make them, with `make_token`. An action runs
+when the scanner matches its token, and decides what the parser gets, as
+xref:3_01_lex.adoc#token-actions[the lexing chapter] explains:
+`+input->pull( N )+` takes text off the input, and `+input->push( Token )+`
+puts a token back at the front of it.
+
+`indentation` matches a line break and the spaces and tabs after it. Its
+action:
+
+. Pulls the text, and puts it back with
+  `+input->push_ignore( make_token( typeid<ws>, Text ) )+`. `push_ignore`
+  puts a token back at the front of the input as ignored text. The parser
+  doesn't get it as a token, but the tree keeps it, and printing the tree
+  prints it.
+. Works out the new line's indentation, `Level`: the length of the text, less
+  the line break. A tab counts as one character, as a space does.
+. Compares it with `+Indents->top+`. `top` is the value at the head of a list:
+  the one that `push` added last, and that `pop` takes off. If the new line is
+  indented further, a block starts: the action pushes the new level onto
+  `Indents`, and pushes an `INDENT`. If it is indented less, the action pops
+  each level deeper than the new one, and pushes a `DEDENT` for each.
+. Last, pushes a `NEWLINE`.
+
+Each push goes to the front of the input, so the parser gets the last one
+first: the `NEWLINE`, then the `INDENT` or the ``DEDENT``s, then the ignored
+text.
+
+`comment` and `blank_line` give the parser nothing. Each adds its text to
+`Held`, and the next `indentation` puts `Held` in front of its own text.
+`comment` matches a comment after the code on a line, or on the first line of
+the input, where no line break comes before it. `blank_line` matches a line
+break, then a line that is blank or holds only a comment, then that line's
+break. It keeps all but the last line break, which the scanner reads again.
+On such text, `blank_line` wins over `indentation` because it matches more of
+it, as "How the scanner chooses a token", in xref:3_01_lex.adoc[the lexing
+chapter], explains.
+
+Why hold them? Ignored text belongs to the token before it, as
+xref:3_03_match.adoc#changing[the patterns chapter] explains, and a tree that
+is replaced takes the ignored text after it with it. If `blank_line` pushed
+its text back where it read it, a blank line would belong to the last token
+of the statement above it. The rewrite at the end of this page replaces
+statements, and that blank line would go with its statement. Held, the text
+comes after the `NEWLINE`, and belongs to the `NEWLINE`, `INDENT` or `DEDENT`
+before it, which nothing replaces.
+
+`Indents` and `Held` are globals: to use a variable declared at the top of
+the program, an action needs it declared with `global`. If the parser backs
+up over a token, colm undoes what the token's action did to them, as
+xref:3_04_undo.adoc[the context chapter] explains. `python.lm` keeps the same
+data in a context, which that chapter also covers. The globals spare this
+grammar's names the qualifier that a context's names need outside it, as in
+that chapter's `decls::program`.
+
+== Statements and expressions
+
+The grammar's statements:
+
+[source,chapel]
+.py_grammar.lmi
+----
+include::code/py_grammar.lmi[tag=statements]
+----
+
+A program is a list of lines. A line is a statement, or a `NEWLINE` on its
+own: a line with no code, such as the first line of the input, which holds
+only a comment. A statement is a simple statement and its `NEWLINE`, or a
+compound statement: an `if`, `while`, `for` or `def`. A compound statement's
+`suite` is a simple statement on the same line, after the `:`, or a block: a
+`NEWLINE`, an `INDENT`, statements and a `DEDENT`.
+
+`x?` is an optional `x`, `+x*+` is zero or more ``x``s, and `x+` is one or
+more. `+(`, id)*+` is zero or more of a comma followed by an `id`.
+xref:3_02_parse.adoc[The parsing chapter] covers these.
+
+`print_stmt` has four productions, one for each row of the table at the top
+of this page: the call, `print` with a comma at the end, `print` with
+values, and `print` alone. The call comes first. With it there,
+`+print("done")+` is parsed as a call. Moved to the end, it lets
+`+print("done")+` be parsed as a print of the string in parentheses,
+`+("done")+`, and the rewrite below turns that into `+print(("done"))+`.
+xref:3_02_parse.adoc#backtracking[The parsing chapter] covers how colm
+chooses between productions.
+
+The rewrite needs the call too. It makes its new statements from text, which
+colm parses with this grammar, as a `print_stmt`. So `+print(i, end=' ')+`
+has to be a `print_stmt`, and that is also why a `call` can take
+`keywords`, such as `+end=' '+`. Without the call, colm stops with a parse
+error at the two places in the rewrite that make `+print(i, end=' ')+` and
+`+print()+`.
+
+The expressions:
+
+[source,chapel]
+.py_grammar.lmi
+----
+include::code/py_grammar.lmi[tag=expressions]
+----
+
+An `arith` is a sum of ``term``s, and a `term` a product of ``factor``s, so
+`+i * i + 1+` is `+i * i+` plus `1`. A `trailer` follows an atom: a call, a
+subscript or an attribute, as in `+range(n)+`, `+a[1]+` and `+s.upper+`.
+
+== Parsing and printing back
+
+The first program parses its input and prints the tree:
+
+[source,chapel]
+.py_parse.lm
+----
+include::code/py_parse.lm[]
+----
+
+`+parse Program: program[ stdin ]+` parses the standard input as a `program`.
+If the parse fails, `Program` is nil, and `error` holds a message, which the
+program prints before it exits with 1. xref:3_02_parse.adoc[The parsing
+chapter] covers `parse`.
+
+The program prints its input unchanged, with the comments, the blank line and
+the indentation. A tree keeps the ignored text that it was parsed from, as
+xref:3_01_lex.adoc[the lexing chapter] says, and the text in `Held` is in it
+as ignored text too. So a program that changes nothing gives back what it
+read.
+
+== Finding the print statements
+
+The second program finds the print statements, and says which form each one
+has:
+
+[source,chapel]
+.py_find.lm
+----
+include::code/py_find.lm[]
+----
+
+`+for P: print_stmt in Program+` visits every `print_stmt` in the tree,
+however deep it is, as xref:1_06_iterators.adoc[the iterators chapter]
+explains. Here they are inside a `def` and a `for`, and at the top.
+
+Each `match` tests `P` against a pattern. A pattern in square brackets lists
+the types and literals that the tree must have, as
+xref:3_03_match.adoc#match[the patterns chapter] explains. `Args:` is a
+label: when `P` matches, `Args` holds the part that `expression_list`
+matched. Colm parses a pattern with the grammar when it compiles the program.
+
+`+print("done")+` is a call. Its child is a `call`, not an
+`expression_list`, so it matches none of the three patterns, and the `else`
+prints it. `^Args` prints `Args` without the ignored text around it.
+
+With the input above, it prints:
+
+----
+include::code/py_find.exp[]
+----
+
+== Rewriting the print statements
+
+The last program replaces each print statement with a call:
+
+[source,chapel]
+.py_rewrite.lm
+----
+include::code/py_rewrite.lm[]
+----
+
+Assigning to `P` replaces that statement in `Program`. The loop then goes on,
+and doesn't visit the new statement itself. "Rewriting a tree in a loop", in
+xref:1_06_iterators.adoc[the iterators chapter], covers this. `Program` is a
+plain variable, not a `global`: that chapter says that changes made through
+a loop over a global are lost.
+
+`+cons print_stmt "print([^Args])"+` makes a new `print_stmt` from text, with
+the value of `Args` in square brackets, as
+xref:3_03_match.adoc#cons[the patterns chapter] explains. The text is Python:
+colm parses it with this grammar, which is why the grammar has the call.
+`^Args` places `Args` without the ignored text around it.
+
+With the input above, it prints:
+
+----
+include::code/py_rewrite.exp[]
+----
+
+The comment line in the loop, and the blank line after `+print()+`, are still
+there. They belong to tokens that `indentation` made, not to the statements
+that were replaced.
+
+== What it leaves out
+
+* Python that isn't in the grammar is a parse error: two statements on one
+  line with `;`, `+print >>f, x+`, classes, imports, `and`, `or` and `not`,
+  and escapes in strings, as in `+"a\"b"+`.
+* The input must end with a line break. Without one, a last line of code is a
+  parse error. A last line that holds only a comment is still in `Held` when
+  the parse ends, so it is left out of the output.
+* A comment after a print statement, on the same line, stays, but the spaces
+  before it don't. The scanner skips them as ignored text before it reads the
+  comment, so they belong to the statement's last token, and `^Args` leaves
+  them out. `+print "Squares up to", n # a heading+` becomes
+  `+print("Squares up to", n)# a heading+`.
+
+== Where to go next
+
+Each part of the program has a chapter of its own:
+
+* xref:3_01_lex.adoc[The lexing chapter]: tokens, ignored text, how the
+  scanner chooses a token, and token actions.
+* xref:3_02_parse.adoc[The parsing chapter]: grammars, `parse`, and how colm
+  chooses between productions.
+* xref:3_03_match.adoc[The patterns chapter]: `match`, `cons`, and changing a
+  tree.
+* xref:1_06_iterators.adoc[The iterators chapter]: loops over a tree, and
+  rewriting a tree from inside one.
+* xref:3_04_undo.adoc[The context chapter]: keeping a parse's data in a
+  context instead of globals, as `python.lm` does.
+* xref:8_02_modularity.adoc[The modularity chapter]: `include` and
+  namespaces.
+* xref:3_06_send.adoc[The send chapter]: sending input to a parser a piece at
+  a time, and writing output through one.
+
+The https://github.com/adrian-thurston/colm-suite/tree/main/grammar[grammar
+directory] of the colm-suite repository has grammars for {cpp}, Go, PCRE,
+Python and Rust.

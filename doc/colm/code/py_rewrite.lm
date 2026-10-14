@@ -1,0 +1,18 @@
+include 'py_grammar.lmi'
+
+parse Program: program[ stdin ]
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for P: print_stmt in Program {
+	if match P [`print Args: expression_list `,]
+		P = cons print_stmt "print([^Args], end=' ')"
+	elsif match P [`print Args: expression_list]
+		P = cons print_stmt "print([^Args])"
+	elsif match P [`print]
+		P = cons print_stmt "print()"
+}
+
+print( Program )

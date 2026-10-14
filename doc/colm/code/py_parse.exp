@@ -1,0 +1,11 @@
+# Print a table of squares.
+def squares(n):
+    print "Squares up to", n
+    for i in range(n):
+        # The number, then its square.
+        print i,
+        print i * i
+    print
+
+squares(3)
+print("done")

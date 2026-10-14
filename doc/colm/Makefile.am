@@ -23,7 +23,7 @@ IN_FILES = \
 	2_02_list_map_struct_alias.adoc 3_04_undo.adoc 8_04_error_handling.adoc \
 	0_05_fizzbuzz.adoc 1_04_functions.adoc 2_03_def.adoc \
 	3_05_reduction.adoc 8_05_contributing.adoc \
-	3_06_send.adoc
+	3_06_send.adoc 0_07_transformation.adoc
 
 # The example programs, each with the output it prints (.exp), and the input
 # it reads (.in) and the arguments it runs with (.args), if any. An example
@@ -86,6 +86,10 @@ CODE = \
 	code/pat_switch.lm       code/pat_switch.exp       code/pat_switch.in \
 	code/poker.lm            code/poker.exp \
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args \
+	code/py_find.lm          code/py_find.exp          code/py_find.in \
+	code/py_grammar.lmi \
+	code/py_parse.lm         code/py_parse.exp         code/py_parse.in \
+	code/py_rewrite.lm       code/py_rewrite.exp       code/py_rewrite.in \
 	code/reduce_attr.lm      code/reduce_attr.exp      code/reduce_attr.in \
 	code/reduce_calc.lm      code/reduce_calc.exp      code/reduce_calc.in \
 	code/reduce_first.lm     code/reduce_first.exp \

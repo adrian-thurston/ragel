@@ -34,7 +34,7 @@ set(MANUAL_PAGES
 	2_02_list_map_struct_alias 3_04_undo 8_04_error_handling
 	0_05_fizzbuzz 1_04_functions 2_03_def
 	3_05_reduction 8_05_contributing
-	3_06_send)
+	3_06_send 0_07_transformation)
 
 # The example programs, with their output (.exp) and input (.in), which the
 # pages include, and the arguments they run with (.args). An example can also
@@ -97,6 +97,10 @@ set(MANUAL_CODE
 	code/pat_switch.lm       code/pat_switch.exp       code/pat_switch.in
 	code/poker.lm            code/poker.exp
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args
+	code/py_find.lm          code/py_find.exp          code/py_find.in
+	code/py_grammar.lmi
+	code/py_parse.lm         code/py_parse.exp         code/py_parse.in
+	code/py_rewrite.lm       code/py_rewrite.exp       code/py_rewrite.in
 	code/reduce_attr.lm      code/reduce_attr.exp      code/reduce_attr.in
 	code/reduce_calc.lm      code/reduce_calc.exp      code/reduce_calc.in
 	code/reduce_first.lm     code/reduce_first.exp

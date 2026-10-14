@@ -1,0 +1,18 @@
+include 'py_grammar.lmi'
+
+parse Program: program[ stdin ]
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for P: print_stmt in Program {
+	if match P [`print Args: expression_list `,]
+		print( "print without a newline: ", ^Args, "\n" )
+	elsif match P [`print Args: expression_list]
+		print( "print: ", ^Args, "\n" )
+	elsif match P [`print]
+		print( "print of an empty line\n" )
+	else
+		print( "already a function call: ", ^P, "\n" )
+}

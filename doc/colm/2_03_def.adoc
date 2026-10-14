@@ -27,3 +27,7 @@ include::code/assign.exp[]
 ----
 
 NOTE: this also illustrates how to read from 'stdin'.
+
+link:0_07_transformation.html[A complete transformation] takes a grammar
+further: it parses a Python program, rewrites its print statements, and
+prints the result.
