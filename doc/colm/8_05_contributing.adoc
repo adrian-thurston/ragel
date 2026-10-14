@@ -156,10 +156,11 @@ touches.
 The manual's example programs are tests too. An example is
 `doc/colm/code/NAME.lm`, with the output it prints in `NAME.exp`. Beside them,
 if the example needs them, `NAME.in` holds its input, `NAME.args` its
-arguments, and `NAME.comp` colm options. `NAME.host.c` or `NAME.host.cc` is a
-host program that it is linked into, and `NAME.reducer.h` is the `reducer.h`
-that its commit code includes, which needs `NAME.host.cc`. Each of these files
-is listed in `CODE` in `doc/colm/Makefile.am` and in `MANUAL_CODE` in
+arguments, `NAME.exit` the exit status it must end with, 0 without one, and
+`NAME.comp` colm options. `NAME.host.c` or `NAME.host.cc` is a host program
+that it is linked into, and `NAME.reducer.h` is the `reducer.h` that its
+commit code includes, which needs `NAME.host.cc`. Each of these files is
+listed in `CODE` in `doc/colm/Makefile.am` and in `MANUAL_CODE` in
 `doc/colm/CMakeLists.txt`, and `--suite manual` runs the example. A page
 includes the program and its output from these files, so the output it shows
 is the output that is tested. A file that an example includes is listed in
