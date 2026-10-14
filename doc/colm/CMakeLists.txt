@@ -37,13 +37,13 @@ set(MANUAL_PAGES
 	3_06_send 0_07_transformation)
 
 # The example programs, with their output (.exp) and input (.in), which the
-# pages include, and the arguments they run with (.args). An example can also
-# have colm options (.comp), a host program (.host.c or .host.cc), and the
-# reducer.h its commit code includes (.reducer.h), which needs .host.cc. A
-# file that an example includes is listed too. Its suffix isn't .lm (the pages
-# use .lmi), since the manual suite runs every .lm as an example. Every page
-# is rebuilt when one of them changes, which is simpler than tracking which
-# page includes which.
+# pages include, the arguments they run with (.args), and the exit status they
+# must end with (.exit), 0 without one. An example can also have colm options
+# (.comp), a host program (.host.c or .host.cc), and the reducer.h its commit
+# code includes (.reducer.h), which needs .host.cc. A file that an example
+# includes is listed too. Its suffix isn't .lm (the pages use .lmi), since the
+# manual suite runs every .lm as an example. Every page is rebuilt when one of
+# them changes, which is simpler than tracking which page includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
 	code/ctx_reject.lm       code/ctx_reject.exp       code/ctx_reject.in
@@ -54,6 +54,12 @@ set(MANUAL_CODE
 	code/emb_export.host.cc
 	code/emb_run.lm          code/emb_run.exp          code/emb_run.in
 	code/emb_run.comp        code/emb_run.host.c
+	code/err_check.lm        code/err_check.exp        code/err_check.in
+	code/err_check.exit
+	code/err_parts.lm        code/err_parts.exp        code/err_parts.in
+	code/err_parts.exit
+	code/err_twice.lm        code/err_twice.exp        code/err_twice.in
+	code/err_twice.exit
 	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in
 	code/expr_ops.lm         code/expr_ops.exp
 	code/figure_44.lm        code/figure_44.exp

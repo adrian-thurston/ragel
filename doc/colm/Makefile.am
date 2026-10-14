@@ -26,9 +26,10 @@ IN_FILES = \
 	3_06_send.adoc 0_07_transformation.adoc
 
 # The example programs, each with the output it prints (.exp), and the input
-# it reads (.in) and the arguments it runs with (.args), if any. An example
-# can also have colm options (.comp), a host program it is linked into
-# (.host.c or .host.cc), and the reducer.h its commit code includes
+# it reads (.in), the arguments it runs with (.args) and the exit status it
+# must end with (.exit), if any. Without .exit, an example must exit 0. An
+# example can also have colm options (.comp), a host program it is linked
+# into (.host.c or .host.cc), and the reducer.h its commit code includes
 # (.reducer.h), which needs .host.cc. The test harness's manual suite runs
 # them, and the pages include the programs and their output. A file that an
 # example includes is listed too. Its suffix isn't .lm (the pages use .lmi),
@@ -43,6 +44,12 @@ CODE = \
 	code/emb_export.host.cc \
 	code/emb_run.lm          code/emb_run.exp          code/emb_run.in \
 	code/emb_run.comp        code/emb_run.host.c \
+	code/err_check.lm        code/err_check.exp        code/err_check.in \
+	code/err_check.exit \
+	code/err_parts.lm        code/err_parts.exp        code/err_parts.in \
+	code/err_parts.exit \
+	code/err_twice.lm        code/err_twice.exp        code/err_twice.in \
+	code/err_twice.exit \
 	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in \
 	code/expr_ops.lm         code/expr_ops.exp \
 	code/figure_44.lm        code/figure_44.exp \

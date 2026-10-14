@@ -10,6 +10,7 @@
  *   NAME.exp                 the expected output, which every case has
  *   NAME.in                  the program's standard input
  *   NAME.args                the program's arguments, split into words
+ *   NAME.exit                the exit status expected, 0 without one
  *   NAME.comp                colm options, as colm.d's COMP
  *   NAME.host.c, .host.cc    a host program in C or C++, as colm.d's HOST
  *   NAME.reducer.h           the commit code's reducer.h, with -m
@@ -28,6 +29,8 @@
  */
 
 #include "harness.h"
+
+#include <stdlib.h>
 
 void enumerateManual( const Config &config, const Selection &sel, JobList &jobs )
 {
@@ -76,6 +79,15 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 				continue;
 			}
 			run.args = splitWords( args );
+		}
+
+		if ( fileExists( joinPath( src, root + ".exit" ) ) ) {
+			std::string status;
+			if ( !readFile( joinPath( src, root + ".exit" ), status ) ) {
+				job->error( "cannot read " + root + ".exit" );
+				continue;
+			}
+			run.exitValue = atoi( trim( status ).c_str() );
 		}
 
 		if ( fileExists( joinPath( src, root + ".comp" ) ) ) {

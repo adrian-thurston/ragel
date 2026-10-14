@@ -116,10 +116,12 @@ parse Words: word*[ "p q r" ]
 ----
 
 When the input doesn't form a tree of the type, the result is nil, and
-`error` holds a message such as `<stdin>:2:4: parse error`. `parse` ends the
-input after the last item, so the whole input must form one tree of the type.
-A program can also send a parser its input a piece at a time, and end the
-input itself, as xref:3_06_send.adoc[the chapter on send] explains.
+`error` holds a message such as `<stdin>:2:4: parse error`.
+xref:8_04_error_handling.adoc[The error handling chapter] says where the
+message points. `parse` ends the input after the last item, so the whole
+input must form one tree of the type. A program can also send a parser its
+input a piece at a time, and end the input itself, as
+xref:3_06_send.adoc[the chapter on send] explains.
 
 === Stopping early
 
