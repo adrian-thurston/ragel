@@ -14,5 +14,5 @@ for P: print_stmt in Program {
 	elsif match P [`print]
 		print( "print of an empty line\n" )
 	else
-		print( "already a function call: ", ^P, "\n" )
+		print( "parsed as a call: ", ^P, "\n" )
 }
