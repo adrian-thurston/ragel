@@ -367,11 +367,7 @@ void PdaCodeGen::writeRuntimeData( colm_sections *runtimeData, struct pda_tables
 		out << "\t{ " << runtimeData->region_info[i].default_token <<
 			", " << runtimeData->region_info[i].eof_frame_id <<
 			", " << runtimeData->region_info[i].ci_lel_id <<
-			", \"";
-		escapeLiteralString( out,
-				runtimeData->region_info[i].name != 0 ?
-				runtimeData->region_info[i].name : "" );
-		out << "\" }";
+			" }";
 
 		if ( i < runtimeData->num_regions-1 )
 			out << ",\n";
