@@ -99,6 +99,7 @@ EXTRA_DIST = \
 	indent.lm \
 	inpush1.lm \
 	inpushbt1.lm \
+	inputdel1.lm \
 	island.lm \
 	lhs1.lm \
 	liftattrs.lm \
