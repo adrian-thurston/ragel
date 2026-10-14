@@ -15,7 +15,7 @@ the layout and the comments included, stays as it was:
 | `+print "Squares up to", n+` | `+print("Squares up to", n)+`
 | `+print i,+` | `+print(i, end=' ')+`
 | `print` | `+print()+`
-| `+print("done")+` | the same, since it is already a call
+| `+print("done")+` | the same: it prints the same in both
 |===
 
 In Python 2, a comma at the end of a `print` leaves out the line break. In
@@ -121,8 +121,9 @@ action:
   puts a token back at the front of the input as ignored text. The parser
   doesn't get it as a token, but the tree keeps it, and printing the tree
   prints it.
-. Works out the new line's indentation, `Level`: the length of the text, less
-  the line break. A tab counts as one character, as a space does.
+. Works out the new line's indentation, `Level`: the length of the match,
+  `match_length`, less the line break. A tab counts as one character, as a
+  space does.
 . Compares it with `+Indents->top+`. `top` is the value at the head of a list:
   the one that `push` added last, and that `pop` takes off. If the new line is
   indented further, a block starts: the action pushes the new level onto
@@ -252,7 +253,7 @@ xref:3_03_match.adoc#match[the patterns chapter] explains. `Args:` is a
 label: when `P` matches, `Args` holds the part that `expression_list`
 matched. Colm parses a pattern with the grammar when it compiles the program.
 
-`+print("done")+` is a call. Its child is a `call`, not an
+`+print("done")+` is parsed as a call. Its child is a `call`, not an
 `expression_list`, so it matches none of the three patterns, and the `else`
 prints it. `^Args` prints `Args` without the ignored text around it.
 
@@ -291,11 +292,16 @@ include::code/py_rewrite.exp[]
 ----
 
 The comment line in the loop, and the blank line after `+print()+`, are still
-there. They belong to tokens that `indentation` made, not to the statements
-that were replaced.
+there. The blank line belongs to the `DEDENT` that `indentation` made, not to
+the `print` before it, which was replaced.
 
 == What it leaves out
 
+* A `print` followed only by parentheses is taken for a call, and left as it
+  is. With one value in them, as in `+print("done")+`, Python 3 prints the
+  same. Otherwise it doesn't: Python 2 prints `+print (a, b)+` as the tuple
+  `+(1, 2)+`, and `+print ()+` as `+()+`, where Python 3 prints `1 2` and an
+  empty line.
 * Python that isn't in the grammar is a parse error: two statements on one
   line with `;`, `+print >>f, x+`, classes, imports, `and`, `or` and `not`,
   and escapes in strings, as in `+"a\"b"+`.
