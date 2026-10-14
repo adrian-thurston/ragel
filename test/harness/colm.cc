@@ -20,7 +20,8 @@
  * newline.
  *
  * HOST is C++. The manual suite's NAME.host.c is a C host, built without the
- * export header and code.
+ * export header and code. The manual suite's NAME.reducer.h is a program's
+ * reducer.h: the program is compiled with -m and its commit code linked in.
  *
  * A case with COMP_ERR is a program colm must reject. It passes when colm
  * exits with 1 and its error output is the section, once the path colm
@@ -126,6 +127,19 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 
 		std::string parse = "working/" + root + ".parse";
 		std::string iface = "working/" + root + ".if";
+		std::string commit = "working/" + root + ".commit";
+		std::string inc = "working/" + root + ".inc";
+
+		if ( prog.hasReducer ) {
+			Words mk;
+			mk.push_back( "mkdir" );
+			mk.push_back( "-p" );
+			mk.push_back( inc );
+			job->steps.push_back( Step::exec( Step::Compile, mk, build ) );
+			job->steps.push_back( Step::writeFile(
+					joinPath( wk, root + ".inc/reducer.h" ), prog.reducer ) );
+			job->artifacts.push_back( joinPath( wk, root + ".inc/reducer.h" ) );
+		}
 
 		Words argv;
 		argv.push_back( config.colmBin );
@@ -138,6 +152,10 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 			argv.push_back( iface + ".h" );
 			argv.push_back( "-x" );
 			argv.push_back( iface + ".cc" );
+		}
+		if ( prog.hasReducer ) {
+			argv.push_back( "-m" );
+			argv.push_back( commit + ".cc" );
 		}
 		argv.push_back( lm );
 		job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );
@@ -152,9 +170,23 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 		argv.push_back( parse + ".c" );
 		job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );
 
+		if ( prog.hasReducer ) {
+			argv.clear();
+			argv.push_back( config.cxx );
+			argv.push_back( "-c" );
+			argv.push_back( "-I" + inc );
+			argv.insert( argv.end(), config.colmCppflags.begin(), config.colmCppflags.end() );
+			argv.push_back( "-o" );
+			argv.push_back( commit + ".o" );
+			argv.push_back( commit + ".cc" );
+			job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );
+		}
+
 		argv.clear();
 		argv.push_back( prog.hostIsC ? config.cc : config.cxx );
 		argv.push_back( "-I." );
+		if ( prog.hasReducer )
+			argv.push_back( "-I" + inc );
 		argv.insert( argv.end(), config.colmCppflags.begin(), config.colmCppflags.end() );
 		argv.insert( argv.end(), config.colmLdflags.begin(), config.colmLdflags.end() );
 		argv.push_back( "-o" );
@@ -163,6 +195,8 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 			argv.push_back( iface + ".cc" );
 		argv.push_back( host );
 		argv.push_back( parse + ".o" );
+		if ( prog.hasReducer )
+			argv.push_back( commit + ".o" );
 		argv.push_back( "-lcolm" );
 		job->steps.push_back( Step::exec( Step::Compile, argv, build ).capture( CaptureLog ) );
 	}

@@ -12,12 +12,15 @@
  *   NAME.args                the program's arguments, split into words
  *   NAME.comp                colm options, as colm.d's COMP
  *   NAME.host.c, .host.cc    a host program in C or C++, as colm.d's HOST
+ *   NAME.reducer.h           the commit code's reducer.h, with -m
  *
  * With a host, the program is compiled with -c, and with -e and -x for a C++
- * host, and the host is linked into it. The chapters include the program and
- * its expected output from these files, so the output they show is the output
- * tested here. The cases live outside test/, but the results go to
- * manual/working under the test build directory, beside the other suites'.
+ * host, and the host is linked into it. With a NAME.reducer.h, which needs a
+ * C++ host, the program is also compiled with -m, and the commit code is
+ * compiled and linked in. The chapters include the program and its expected
+ * output from these files, so the output they show is the output tested here.
+ * The cases live outside test/, but the results go to manual/working under the
+ * test build directory, beside the other suites'.
  *
  * Each example is compiled with -I naming doc/colm/code, so it can include a
  * file kept there. Such a file needs a suffix other than .lm, and the
@@ -99,6 +102,18 @@ void enumerateManual( const Config &config, const Selection &sel, JobList &jobs 
 			}
 			prog.hasHost = true;
 			prog.hostIsC = hostC;
+		}
+
+		if ( fileExists( joinPath( src, root + ".reducer.h" ) ) ) {
+			if ( !hostCxx ) {
+				job->error( root + ".reducer.h needs a C++ host, " + root + ".host.cc" );
+				continue;
+			}
+			if ( !readFile( joinPath( src, root + ".reducer.h" ), prog.reducer ) ) {
+				job->error( "cannot read " + root + ".reducer.h" );
+				continue;
+			}
+			prog.hasReducer = true;
 		}
 
 		colmCompile( config, job, prog );

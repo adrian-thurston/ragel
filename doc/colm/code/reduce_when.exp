@@ -1,0 +1,6 @@
+line 1: b is x
+line 1: statement
+line 2: b is x y
+line 2: statement
+line 3: b is x
+parse failed: <stdin>:4:3: parse error

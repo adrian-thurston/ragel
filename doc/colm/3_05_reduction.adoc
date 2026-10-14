@@ -1,6 +1,413 @@
-Reduction
-========
+= Actions, attributes and reductions
 
-== TODO
+Colm runs code of yours as it parses, in two ways:
 
+* A production's _action_ is colm code. It runs each time the parser reduces
+  by the production, on alternatives that the parser later abandons too. It
+  can compute values, and keep them in the tree's _attributes_.
+* A _reduction_ is {cpp} code, in a `reduction` block. Colm writes it into the
+  commit code (`-m`), and it runs only on trees that the parser has committed
+  to, so never on an abandoned alternative. A host program links it in.
 
+The last section covers `reducefirst`, which changes the order in which the
+parser tries alternatives.
+
+== Production actions
+
+A production's action, which xref:3_02_parse.adoc#reject[the parsing chapter]
+introduces, runs on alternatives that the parser abandons, and again when it
+retries them. That section covers `reject` too. In an action:
+
+* `lhs` is the tree being made, of the production's def.
+* `r1` to `rN` are the production's elements. They are numbered across every
+  element, literals included, but a literal has no `rN` of its own. In
+  `+[`( expr `)]+`, the `expr` is `r2`, and `$r1` is a compile error,
+  `cannot find name r1 in object`.
+* `$r1` is the text of the first element, and `$lhs` the text of the whole
+  production.
+* `r1` to `rN` are read-only. `r1.Value = 3` is a compile error,
+  `left hand side qualification "r1" is const`, and so is assigning to `r1`
+  itself: `field "r1" is const`. An action keeps what it computes on `lhs`.
+* An element's label isn't a name in the action. With
+  `+[Left: expr `- Right: expr]+`, the action reaches the first `expr` as
+  `lhs.Left`. `Left.Value` is a compile error,
+  `cannot resolve qualification Left`.
+
+Assigning a tree to `lhs` replaces the tree being made. Its parent gets the
+new tree in its place:
+
+[source,chapel]
+----
+def item
+	[id]
+	{
+		lhs = cons item ["(" ^r1 ")"]
+	}
+|	[`( id `)]
+----
+
+Given `a b c` as an `+item*+`, this gives `(a)(b)(c)`. `+^r1+` is `r1`
+without its ignored text.
+
+This program is a calculator. Each `expr` keeps its value in an attribute,
+`Value`, which <<attributes,the next section>> covers, and each action
+computes it from the values of the production's elements:
+
+[source,chapel]
+.reduce_calc.lm
+----
+include::code/reduce_calc.lm[]
+----
+
+It reads this input:
+
+----
+include::code/reduce_calc.in[]
+----
+
+and prints:
+
+----
+include::code/reduce_calc.exp[]
+----
+
+The two `left` statements give the operators their
+xref:3_02_parse.adoc#precedence[precedence]. The production for `-` names its
+children, and its action reaches them as `lhs.Left` and `lhs.Right`. The
+other actions use `r1` to `r3`. In the last action, `$r1` is the number's
+text, which `atoi` turns into an `int`.
+
+[[attributes]]
+== Attributes
+
+An attribute is a value that a tree keeps beside its children. A def declares
+its attributes as `Name: type` lines after `def NAME`, before `reducefirst`
+and the productions. A token declares them after `token NAME`, before its
+pattern. Each tree of the type has its own.
+
+An action sets attributes on `lhs`, and reads them from `r1` to `rN`, as
+`reduce_calc` does. After the parse, the program reads and writes them on any
+tree of the type, as `reduce_attr`, below, does with `F.Bytes` and
+`Extra.Bytes`.
+
+An attribute that is not set is 0 if it is an `int`, and nil if it is a
+`str`. Attributes aren't part of the tree's text: `print`, `$` and `%` leave
+them out.
+
+An attribute set on an alternative that the parser abandons goes with that
+alternative's tree:
+
+[source,chapel]
+----
+def b
+	V: int
+
+	[`x]
+	{
+		lhs.V = 1
+	}
+|	[`x `y]
+	{
+		lhs.V = 2
+	}
+
+def start
+	[b `y `;]
+----
+
+Given `x y y ;`, the parser first takes `x` as a `b`, whose action sets `V`
+to 1. It then backs up, as xref:3_02_parse.adoc#backtracking[the parsing
+chapter] explains, and takes `x y`, whose action sets `V` to 2. The `b` in the
+tree is the second, so its `V` is 2. Given `x y ;`, it is 1.
+
+=== Token attributes
+
+A token's attributes are set by the code that makes it. A
+xref:3_01_lex.adoc#token-actions[token action] gives them to `make_token`,
+after the text, in the order the token declares them:
+`+make_token( typeid<T>, Text, A, B )+`. `make_token` works outside a token
+action too. A token that the scanner passes to the parser itself, with no
+action, has its attributes unset.
+
+=== Constructors
+
+A constructor's text runs no token actions and no production actions, so a
+tree made with `cons` has its attributes unset. `+cons T( A B ) [ ... ]+`
+gives them, in the order the def declares them. The arguments are separated
+by spaces, not commas. Two strings side by side are one string to colm, so
+`( "a" "b" )` is one argument, `ab`.
+
+The patterns chapter covers xref:3_03_match.adoc#cons[`cons`] and
+xref:3_03_match.adoc#make[`make_token`] in general.
+
+This program reads a list of files and their sizes. Each `name` keeps where it
+came from in `From`, and each `file` keeps where it came from and its size:
+
+[source,chapel]
+.reduce_attr.lm
+----
+include::code/reduce_attr.lm[]
+----
+
+It reads this input:
+
+----
+include::code/reduce_attr.in[]
+----
+
+and prints:
+
+----
+include::code/reduce_attr.exp[]
+----
+
+The token action of `name` makes each name with `make_token`, and gives its
+`From`. The action of `file` gives the file's `From` and `Bytes`. The loop
+reads each file's `Bytes` after the parse. The program then makes a name with
+`make_token`, and a file with `cons`, which gives the file its `From`. The
+constructor runs no action, so the program sets the file's `Bytes` itself.
+Without `( "cons" )`, the last line says `file from NIL`.
+
+== Reductions
+
+A reduction is {cpp} code that runs on the trees of a parse. It goes in a
+`reduction` block, at the top level of a program. A namespace can't hold one,
+as xref:8_02_modularity.adoc[the modules chapter] says.
+
+[source,chapel]
+----
+reduction NAME
+	...
+end
+----
+
+The block holds two kinds of item:
+
+* `TYPE { members }` declares the {cpp} value that each tree of the def `TYPE`
+  has, as the members of a struct.
+* `TYPE :Prod { code }` is the action for the production of `TYPE` named
+  `Prod`. A production needs a name to have one. For a name that no
+  production of `TYPE` has, colm reports `could not find production "Prod"`.
+
+Colm never constructs or destroys a value. It keeps each tree's value in
+memory that it zeroes, so a value starts out zeroed: a `long` that an action
+reads before setting it is 0. Keep a value's members to plain data, such as
+numbers, pointers, and structs of them, as ragel's own reductions do. A member
+with a constructor, such as a `std::string`, is used without being
+constructed, which is undefined: some assignments to it crash the program,
+others seem to work, and what it holds is never freed. Keep such an object
+through a pointer instead. An action allocates it, and the action that uses
+it last deletes it, since no destructor runs.
+
+In an action:
+
+`pass:c[$$]`::
+The production's value.
+
+`$N`, `$name`::
+The production's ``N``th element, counting literals, or the element with the
+label `name`. An element without a label can be named by its type, when no
+other element of the production has that type. For a def, this is a pointer
+to the element's value. For a token, it is a `colm_data *`. Its `data` is the
+token's text, which isn't NUL-terminated, so read it with its `length`.
+
+`@N`, `@name`::
+The location of a token element, a `colm_location *`. Its `line`, `column`
+and `byte` are ``long``s, and its `name` is the name of the input.
+
+An action runs as a member function of the class `NAME`, so the class's
+members are in scope in it.
+
+`+reduce NAME TYPE[ ... ]+` parses as `parse` does, and runs the actions of the
+reduction `NAME` on the tree. Its value is the tree, or nil, with `error` set,
+when the parse fails. By default, the tree comes back without its children.
+The host's `colm_set_reduce_clean( prg, 0 )` keeps them, as
+xref:8_01_embedding.adoc#commit-code[the embedding chapter] says.
+
+`-m` is what makes reductions run. It writes the commit code, which holds the
+actions. Without it, as when colm builds an executable, the actions don't
+run. xref:8_01_embedding.adoc#commit-code[The embedding chapter] covers what
+`-m` writes, and how the commit code is built.
+
+The commit code includes `reducer.h`, a header you write, after colm's own
+headers. It declares `struct NAME`, with `commit_reduce_forward` in the form
+the next example shows, and the members that the actions use. It comes
+before the actions, so it can also hold what they need, as it holds
+`tokenValue` in the example.
+
+The host is {cpp}. It makes a `NAME`, gives it to the program with
+`colm_set_reduce_ctx`, runs the program, and reads the result from its
+object. A run has one reduce context, which the commit code takes to be of
+the class of whichever reduction a `reduce` names. So each `reduce` that a run
+executes must name the reduction whose class the host's object is.
+
+This program adds up each line of numbers, and the total of all the lines, in
+{cpp}:
+
+[source,chapel]
+.reduce_sum.lm
+----
+include::code/reduce_sum.lm[]
+----
+
+The header:
+
+[source,cpp]
+.reducer.h
+----
+include::code/reduce_sum.reducer.h[]
+----
+
+The host:
+
+[source,cpp]
+.reduce_sum.host.cc
+----
+include::code/reduce_sum.host.cc[]
+----
+
+With the header saved as `reducer.h`, and colm installed in `/opt/colm`, the
+program is built and run with:
+
+[source,bash]
+----
+colm -c -o reduce_sum.c -m reduce_sum.commit.cc reduce_sum.lm
+cc -c -I/opt/colm/include reduce_sum.c
+c++ -c -I. -I/opt/colm/include reduce_sum.commit.cc reduce_sum.host.cc
+c++ -o reduce_sum reduce_sum.o reduce_sum.commit.o reduce_sum.host.o \
+	-L/opt/colm/lib -lcolm -Wl,-rpath,/opt/colm/lib
+./reduce_sum < reduce_sum.in
+----
+
+It reads this input:
+
+----
+include::code/reduce_sum.in[]
+----
+
+and prints:
+
+----
+include::code/reduce_sum.exp[]
+----
+
+The value of an `expr` is a `long`. The action of `Number` reads its number's
+text with `tokenValue`. The action of `Add` adds its number, `$3`, to the
+value of the `expr` before it, `$1`. `$2` is the `{plus}`. The action of `Line`
+names its `expr` by its type, and reads the line of its `;` with `@2`.
+`total` is a member of `Sum`, so the action can add to it, and the host prints
+it after the run.
+
+== When reductions run
+
+Without `commit`, the parser runs a reduction's actions when the parse ends,
+if it succeeds, bottom-up over the tree it kept. So, unlike a production's
+colm action, they never see an alternative that the parser abandoned.
+
+With xref:3_02_parse.adoc#commit[`commit`], they run as the parse goes.
+Reducing by a production with `commit` first runs the actions of everything
+parsed before it, its own children included. Its own action waits for the
+next commit, or for the end of the parse. When a parse fails, the actions it
+hadn't run at a commit never run.
+
+A production can have both kinds of action, colm's and {cpp}. Each runs at its
+own time.
+
+This program has the grammar of
+xref:3_02_parse.adoc#backtracking[the parsing chapter's example of backing
+up], with `commit` on a statement, and a reduction that prints each `b` and
+each statement:
+
+[source,chapel]
+.reduce_when.lm
+----
+include::code/reduce_when.lm[]
+----
+
+The header:
+
+[source,cpp]
+.reducer.h
+----
+include::code/reduce_when.reducer.h[]
+----
+
+The host:
+
+[source,cpp]
+.reduce_when.host.cc
+----
+include::code/reduce_when.host.cc[]
+----
+
+Built as `reduce_sum` is, it reads this input:
+
+----
+include::code/reduce_when.in[]
+----
+
+and prints:
+
+----
+include::code/reduce_when.exp[]
+----
+
+Line 2's `b` is printed once, as `x y`. The parser took `x` first, and
+abandoned it, as in the parsing chapter's example, but only the `b` it kept
+reached the reduction. The actions for lines 1 and 2, and for line 3's `b`,
+ran before the error on line 4, at the commits. Line 3's statement was never
+printed: its action would have run at the next commit, or at the end of a
+parse that succeeded. Without `commit`, the program prints only the
+`parse failed` line.
+
+== Ending a def early: reducefirst
+
+`reducefirst` goes after a def's name and attributes, before its productions.
+Where the parser could either reduce by one of the def's productions or shift
+a token, it tries the reduction first. So the def ends as soon as it can,
+whatever the order of its productions:
+
+[source,chapel]
+----
+def name reducefirst
+	[word name]
+|	[word]
+
+def line
+	[name word*]
+----
+
+Given `a b c`, `name` is `a`, and `+word*+` takes `b c`. Without
+`reducefirst`, `name` takes all three words.
+
+`reducefirst` reaches only the def's own reductions. In the next example, it
+would do nothing on `term`. On a def whose production is `+[word*]+`, it
+doesn't change how many words `+word*+` takes: that choice belongs to the def
+that colm makes for `+word*+`, as xref:3_02_parse.adoc#backtracking[the
+parsing chapter] explains.
+
+It is still an order of alternatives. If the shorter parse fails later, the
+parser backs up and takes the longer one. With `+[name `: word*]+` for
+`line`, given `a b : c`, `name` is `a b`.
+
+This program reads subtractions. A term is numbers side by side, and a number
+can be negative:
+
+[source,chapel]
+.reduce_first.lm
+----
+include::code/reduce_first.lm[]
+----
+
+It prints:
+
+----
+include::code/reduce_first.exp[]
+----
+
+After the `1` of `1 - 2`, the parser can reduce the term to an `expr`, or
+shift the `-` as the start of a negative number in the same term.
+`reducefirst` makes it reduce first. Without `reducefirst`, the first three
+lines are `one term`: the parser reads `- 2` as a negative number beside `1`.
+The last is a subtraction either way: no number starts with `- -`, so the
+parser backs up, and reduces.

@@ -1,0 +1,35 @@
+lex
+	literal `-
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+# A number, or a negative number.
+def factor
+	[number]
+|	[`- number]
+
+# Factors side by side.
+def term
+	[term factor]
+|	[factor]
+
+def expr reducefirst
+	[Left: expr `- Right: term]
+|	[term]
+
+void show( Text: str )
+{
+	parse E: expr[ Text ]
+	if ( ! E )
+		print( Text, ": no parse\n" )
+	elsif ( E.Left )
+		print( Text, ": ", $E.Left, " minus ", $E.Right, "\n" )
+	else
+		print( Text, ": one term\n" )
+}
+
+show( "1 - 2" )
+show( "1 2 - 3" )
+show( "- 1 - 2" )
+show( "1 - - 2" )

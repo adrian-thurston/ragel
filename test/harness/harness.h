@@ -189,7 +189,8 @@ struct Job
 	/* Indices of jobs that must pass before this one runs. */
 	std::vector<int> deps;
 
-	/* Files to remove after a pass, as glob patterns. */
+	/* Files, and the directories they empty, to remove after a pass, as glob
+	 * patterns. */
 	std::vector<std::string> artifacts;
 
 	/* False for shared preparation work that is not itself a case. */
@@ -248,17 +249,21 @@ void enumerateRagel( const Config &config, const Selection &sel, JobList &jobs )
  */
 
 /* The program, its compilation arguments, and the C functions it calls (CALL)
- * and the host program it is linked into (HOST), if it has them. A program
- * with compErr (COMP_ERR) is expected to fail to compile, with that error. A
- * C host (hostIsC, the manual's NAME.host.c) gets no export header or code. */
+ * and the host program it is linked into (HOST), if it has them, and the
+ * reducer.h its commit code includes (reducer, the manual's NAME.reducer.h). A
+ * program with compErr (COMP_ERR) is expected to fail to compile, with that
+ * error. A C host (hostIsC, the manual's NAME.host.c) gets no export header or
+ * code. */
 struct ColmProgram
 {
 	std::string text;
 	Words comp;
-	bool hasCall, hasHost, hostIsC, hasCompErr;
-	std::string call, host, compErr;
+	bool hasCall, hasHost, hostIsC, hasReducer, hasCompErr;
+	std::string call, host, reducer, compErr;
 
-	ColmProgram() : hasCall(false), hasHost(false), hostIsC(false), hasCompErr(false) {}
+	ColmProgram()
+		: hasCall(false), hasHost(false), hostIsC(false), hasReducer(false),
+		hasCompErr(false) {}
 };
 
 /* One run of the compiled program. */

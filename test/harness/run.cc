@@ -326,8 +326,10 @@ static void removeArtifacts( const Job &job )
 		glob_t g;
 		memset( &g, 0, sizeof(g) );
 		if ( glob( job.artifacts[i].c_str(), 0, 0, &g ) == 0 ) {
-			for ( size_t k = 0; k < g.gl_pathc; k++ )
-				unlink( g.gl_pathv[k] );
+			for ( size_t k = 0; k < g.gl_pathc; k++ ) {
+				if ( unlink( g.gl_pathv[k] ) != 0 )
+					rmdir( g.gl_pathv[k] );
+			}
 		}
 		globfree( &g );
 	}

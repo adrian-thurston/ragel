@@ -1,0 +1,33 @@
+lex
+	literal `x `y `;
+	ignore /space+/
+end
+
+def b
+	[`x] :Short
+|	[`x `y] :Long
+
+def stmt
+	[b `y `;] :Stmt commit
+
+def stmts
+	[stmt*]
+
+reduction Trace
+	b :Short
+	{
+		printf( "line %ld: b is x\n", @1->line );
+	}
+
+	b :Long
+	{
+		printf( "line %ld: b is x y\n", @1->line );
+	}
+
+	stmt :Stmt
+	{
+		printf( "line %ld: statement\n", @3->line );
+	}
+end
+
+reduce Trace stmts[ stdin ]

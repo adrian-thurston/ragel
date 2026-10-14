@@ -38,11 +38,12 @@ set(MANUAL_PAGES
 
 # The example programs, with their output (.exp) and input (.in), which the
 # pages include, and the arguments they run with (.args). An example can also
-# have colm options (.comp) and a host program (.host.c or .host.cc). A file
-# that an example includes is listed too. Its suffix isn't .lm (the pages use
-# .lmi), since the manual suite runs every .lm as an example. Every page is
-# rebuilt when one of them changes, which is simpler than tracking which page
-# includes which.
+# have colm options (.comp), a host program (.host.c or .host.cc), and the
+# reducer.h its commit code includes (.reducer.h), which needs .host.cc. A
+# file that an example includes is listed too. Its suffix isn't .lm (the pages
+# use .lmi), since the manual suite runs every .lm as an example. Every page
+# is rebuilt when one of them changes, which is simpler than tracking which
+# page includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
 	code/ctx_reject.lm       code/ctx_reject.exp       code/ctx_reject.in
@@ -96,6 +97,13 @@ set(MANUAL_CODE
 	code/pat_switch.lm       code/pat_switch.exp       code/pat_switch.in
 	code/poker.lm            code/poker.exp
 	code/prog_args.lm        code/prog_args.exp        code/prog_args.args
+	code/reduce_attr.lm      code/reduce_attr.exp      code/reduce_attr.in
+	code/reduce_calc.lm      code/reduce_calc.exp      code/reduce_calc.in
+	code/reduce_first.lm     code/reduce_first.exp
+	code/reduce_sum.lm       code/reduce_sum.exp       code/reduce_sum.in
+	code/reduce_sum.host.cc  code/reduce_sum.reducer.h
+	code/reduce_when.lm      code/reduce_when.exp      code/reduce_when.in
+	code/reduce_when.host.cc code/reduce_when.reducer.h
 	code/reference.lm        code/reference.exp
 	code/scope.lm            code/scope.exp
 	code/send_end.lm         code/send_end.exp

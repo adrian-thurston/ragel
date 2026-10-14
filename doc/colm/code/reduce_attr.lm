@@ -1,0 +1,50 @@
+lex
+	literal `=
+	token name
+		From: str
+		/[a-z]+/
+	{
+		Text: str = input->pull( match_length )
+		input->push( make_token( typeid<name>, Text, "input" ) )
+	}
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def file
+	From: str
+	Bytes: int
+
+	[name `= number]
+	{
+		lhs.From = "input"
+		lhs.Bytes = atoi( $r3 )
+	}
+
+def files
+	[file*]
+
+void show( F: file )
+{
+	print( $F.name, ": ", F.Bytes, " bytes, file from ", F.From,
+			", name from ", F.name.From, "\n" )
+}
+
+parse Files: files[ stdin ]
+
+if ( ! Files ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+Total: int = 0
+for F: file in Files {
+	show( F )
+	Total = Total + F.Bytes
+}
+print( "total: ", Total, " bytes\n" )
+
+N: name = make_token( typeid<name>, "notes", "make_token" )
+Extra: file = cons file( "cons" ) [N " = 12"]
+Extra.Bytes = atoi( $Extra.number )
+show( Extra )

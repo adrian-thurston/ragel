@@ -1,0 +1,52 @@
+lex
+	literal `+ `- `* `/ `( `) `;
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+left `+ , `-
+left `* , `/
+
+def expr
+	Value: int
+
+	[expr `+ expr]
+	{
+		lhs.Value = r1.Value + r3.Value
+	}
+|	[Left: expr `- Right: expr]
+	{
+		lhs.Value = lhs.Left.Value - lhs.Right.Value
+	}
+|	[expr `* expr]
+	{
+		lhs.Value = r1.Value * r3.Value
+	}
+|	[expr `/ expr]
+	{
+		lhs.Value = r1.Value / r3.Value
+	}
+|	[`( expr `)]
+	{
+		lhs.Value = r2.Value
+	}
+|	[number]
+	{
+		lhs.Value = atoi( $r1 )
+	}
+
+def line
+	[expr `;]
+
+def lines
+	[line*]
+
+parse Lines: lines[ stdin ]
+
+if ( ! Lines ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for L: line in Lines
+	print( $L.expr, " = ", L.expr.Value, "\n" )
