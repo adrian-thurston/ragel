@@ -162,9 +162,9 @@ that its commit code includes, which needs `NAME.host.cc`. Each of these files
 is listed in `CODE` in `doc/colm/Makefile.am` and in `MANUAL_CODE` in
 `doc/colm/CMakeLists.txt`, and `--suite manual` runs the example. A page
 includes the program and its output from these files, so the output it shows
-is the output that is tested. A file that an example includes takes a suffix
-other than `.lm`, such as `.lmi`, since every `.lm` there is run as an
-example.
+is the output that is tested. A file that an example includes is listed in
+`CODE` and `MANUAL_CODE` too. It takes a suffix other than `.lm`, such as
+`.lmi`, since every `.lm` in `doc/colm/code` is run as an example.
 
 == Coding conventions
 
