@@ -24,13 +24,13 @@ set(MANUAL_OPTIONS
 
 set(MANUAL_PAGES
 	0_00_welcome 0_06_scope 1_05_variables
-	3_00_language_transformation 8_00_advanced_topics
+	3_00_language_transformation
 	9_00_q_and_a 0_01_installing 1_00_language_overview
 	1_06_iterators 3_01_lex 8_01_embedding
 	0_02_vim_syntax 1_01_statements 2_00_types
 	3_02_parse 8_02_modularity 0_03_commandline
 	1_02_expressions 2_01_basic 3_03_match
-	8_03_performance 0_04_hello_world 1_03_control_flow
+	0_04_hello_world 1_03_control_flow
 	2_02_list_map_struct_alias 3_04_undo 8_04_error_handling
 	0_05_fizzbuzz 1_04_functions 2_03_def
 	3_05_reduction 8_05_contributing

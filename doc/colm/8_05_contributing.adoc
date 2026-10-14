@@ -1,6 +1,279 @@
-Contributing
-============
+= Contributing
 
-== TODO
+This chapter is for working on colm itself: building it from a git checkout,
+running its tests, adding a test, and the conventions that its code, commits
+and issues follow. The sources, the issues and the pull requests are on
+https://github.com/adrian-thurston/colm-suite[GitHub].
 
+== Building from source
 
+xref:0_01_installing.adoc[The installing chapter] covers the build. This
+section adds what is different when working on colm.
+
+A git checkout has no `configure` script. Run `./autogen.sh` first, which
+needs autoconf, automake and libtool.
+
+Nothing has to be installed to work on colm or to run its tests. The build
+leaves colm in `src/colm/colm`, and that colm finds its headers and libcolm in
+the build tree, so it compiles and runs programs without an install, from any
+directory. With the checkout in `~/colm-suite`:
+
+[source,bash]
+----
+~/colm-suite/src/colm/colm -r hello_world.lm
+----
+
+colm knows that it is in the build tree from the path of its own executable.
+The check depends on the OS and can fail. When it does, `-B` names the build
+tree, the directory that holds `src`:
+
+[source,bash]
+----
+~/colm-suite/src/colm/colm -B ~/colm-suite -r hello_world.lm
+----
+
+This holds only for the autotools build. A colm built by CMake looks for its
+headers and libcolm where it is installed, and the test suite builds only with
+autotools.
+
+== Running the tests
+
+`make check` builds the programs that the suites need, then runs every suite
+through the test harness, `test/harness/harness`:
+
+[source,bash]
+----
+make check
+----
+
+After that, run the harness directly, from the top of the build tree, to run
+some of the tests. `--suite colm.d` runs colm's tests, and naming a case file
+runs only that case:
+
+[source,bash]
+----
+test/harness/harness --suite colm.d
+test/harness/harness colm.d/argv1.lm
+----
+
+`-j N` runs N cases at once. Without it, the harness runs as many cases at
+once as there are CPUs, or, under `make -j N check`, N of them.
+`--suite manual` runs this manual's example programs, which are in
+`doc/colm/code`:
+
+[source,bash]
+----
+test/harness/harness -j 3 --suite manual
+----
+
+`--valgrind` runs each colm.d and manual program under valgrind, and fails the
+case on a memory error or a definite leak. Valgrind sees inside colm's memory
+pools only when the tree is configured with `--enable-pool-malloc`.
+
+[source,bash]
+----
+test/harness/harness --valgrind colm.d/argv1.lm
+----
+
+A case that fails leaves `NAME.diff` in `working/` under its suite's directory
+in the build tree: `test/colm.d/working/` for colm.d, and
+`test/manual/working/` for the manual's examples. It holds the differences
+from the expected output, and the commands that the harness ran.
+
+Every colm.d and manual run sets `COLM_LEAK_CHECK`. The runtime then reports
+the pool items that the program never freed (kids, trees, parse trees, heads
+and locations), and a report fails the case. A colm.d case that loses items
+for a known reason lists the report, such as `lost trees: 2`, in its `LOST`
+section, and that loss doesn't fail it.
+
+== Adding a test
+
+A colm test case is one file, `test/colm.d/NAME.lm`: a colm program, followed
+by sections. Each section starts with a header line, such as
+`+##### EXP #####+`, and runs to the next header or the end of the file.
+
+[cols="1,4"]
+|===
+| Section | Holds
+
+| `ARGS` | the program's arguments
+| `IN` | the program's standard input
+| `EXP` | the output that the program must print
+| `EXIT` | the exit value that the program must give, when it isn't 0
+| `LOST` | the leak reports that don't fail the run, one per line
+| `COMP` | options for colm when it compiles the program
+| `COMP_ERR` | the error that colm must give for the program
+| `HOST` | a {cpp} host program that the program is linked into
+| `CALL` | C code to compile into the program, such as functions it calls
+|===
+
+`ARGS`, `IN`, `EXP`, `EXIT` and `LOST` can repeat. The compiled program runs
+once for each `EXP`, and the Nth of each of these sections describes the Nth
+run. Anywhere in the file, a line that ends in `--noeol` is taken without
+`--noeol` and without its newline.
+
+A case with a `COMP_ERR` section is a program colm must reject. It passes when
+colm exits with 1 and its error output is the section, read without the
+`working/NAME.lm:` that colm puts in front of each `line:col`. It has no runs,
+so it takes no `ARGS`, `IN`, `EXP`, `EXIT` or `LOST`, and no `HOST`.
+
+This is `forloop1.lm`. It reads three ids and prints each on a line of its
+own:
+
+[source,chapel]
+.forloop1.lm
+----
+lex
+	token id / 'a' .. 'z' /
+	ignore / '\n' | '\t' | ' ' /
+end
+
+def start
+	[id*]
+
+parse P: start[stdin]
+Start: start = P
+for Id: id in Start
+	print( ^Id, '\n' )
+##### IN #####
+a b c
+##### EXP #####
+a
+b
+c
+----
+
+The harness finds the cases by reading the directory, so a new case runs as
+soon as it is in place. List it in `EXTRA_DIST` in `test/colm.d/Makefile.am`
+as well, with any file beside it that it reads or includes, so that the
+release tarball has it.
+
+A fix comes with a test case that fails without it. Colm's cases go in
+`test/colm.d`, and ragel's in `test/ragel.d`. A change to the runtime's memory
+handling, in `src/colm/*.c`, is also run with `--valgrind` on the cases it
+touches.
+
+The manual's example programs are tests too. An example is
+`doc/colm/code/NAME.lm`, with the output it prints in `NAME.exp`. Beside them,
+if the example needs them, `NAME.in` holds its input, `NAME.args` its
+arguments, and `NAME.comp` colm options. `NAME.host.c` or `NAME.host.cc` is a
+host program that it is linked into, and `NAME.reducer.h` is the `reducer.h`
+that its commit code includes, which needs `NAME.host.cc`. Each of these files
+is listed in `CODE` in `doc/colm/Makefile.am` and in `MANUAL_CODE` in
+`doc/colm/CMakeLists.txt`, and `--suite manual` runs the example. A page
+includes the program and its output from these files, so the output it shows
+is the output that is tested. A file that an example includes is listed in
+`CODE` and `MANUAL_CODE` too. It takes a suffix other than `.lm`, such as
+`.lmi`, since every `.lm` in `doc/colm/code` is run as an example.
+
+== Coding conventions
+
+New and changed C and {cpp} code follows these rules.
+
+. Indent with tabs. It must always be possible to set the tab width to any
+number of characters.
+
+. Spaces may be used for alignment anywhere after the first non-whitespace
+character of a line. Use them sparingly, preferably only to line up lists of
+things.
++
+[source,c]
+----
+int var1     = 5;
+int othervar = 4;
+int x        = 8;
+----
+
+. Try not to go over 100 characters a line.
+
+. Leave no trailing whitespace.
+
+. A statement that spans more than one line is indented two levels on its
+second and later lines. Here `<TAB>` stands for a tab:
++
+[source,c]
+----
+some_function( arg1, arg2, arg3,
+<TAB><TAB>arg4, arg5, arg6 );
+----
+
+. Put spaces inside the parentheses of an argument list.
++
+[source,c]
+----
+some_function( a );
+----
+
+. A block of one line doesn't need braces.
++
+[source,c]
+----
+if ( test )
+	call_function();
+----
+
+. Start a new line after every block's closing brace, even before `else`.
++
+[source,c]
+----
+if ( test ) {
+	do_something();
+}
+else {
+	something_else();
+}
+----
+
+. A function's opening brace goes on a line of its own.
++
+[source,c]
+----
+static int foo( int bar )
+{
+	return bar++;
+}
+----
+
+. Comment with C-style comments.
++
+[source,c]
+----
+/* This is the most important call. */
+the_program();
+----
+
+. Disable code, for a while or to illustrate something, with {cpp}-style
+comments. For a very large block, use `#if 0`.
++
+[source,c]
+----
+// dont_pass_this_function_zero( 0 );
+----
+
+. A preprocessor directive's `#` is the first character on its line.
++
+[source,c]
+----
+#define foo(bar) bar++;
+----
+
+== Commits and issues
+
+A commit's first line, its subject, names the area of the change, then says
+what changed. It starts in lowercase, is as short as it can be, and has no
+full stop:
+
+----
+colm: detach the right ignore under a nonterminal after unreducing it
+----
+
+Areas are names such as `colm`, `colm docs`, `ragel` and `test`, and
+`git log` shows the ones in use. More detail, if the change needs it, goes in
+the body, after a blank line, wrapped at 80 columns.
+
+An issue's title names the area, then says what is wrong, not what the fix
+is:
+
+----
+colm: calling exit inside a token action segfaults
+----
