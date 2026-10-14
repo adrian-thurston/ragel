@@ -155,7 +155,7 @@ A host can make several programs, from one parse object or from several, and
 have them alive at once. Each is independent of the others. Make a program,
 run it once, and delete it.
 
-xref:3_02_parse.adoc[The parsing chapter] covers `parse` and its `error`.
+xref:8_04_error_handling.adoc[The error handling chapter] covers `error`.
 
 == Standard input and output
 

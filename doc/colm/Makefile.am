@@ -44,6 +44,12 @@ CODE = \
 	code/emb_export.host.cc \
 	code/emb_run.lm          code/emb_run.exp          code/emb_run.in \
 	code/emb_run.comp        code/emb_run.host.c \
+	code/err_check.lm        code/err_check.exp        code/err_check.in \
+	code/err_check.exit \
+	code/err_parts.lm        code/err_parts.exp        code/err_parts.in \
+	code/err_parts.exit \
+	code/err_twice.lm        code/err_twice.exp        code/err_twice.in \
+	code/err_twice.exit \
 	code/expr_cast.lm        code/expr_cast.exp        code/expr_cast.in \
 	code/expr_ops.lm         code/expr_ops.exp \
 	code/figure_44.lm        code/figure_44.exp \

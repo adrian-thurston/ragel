@@ -1,6 +1,178 @@
-Error handling
-==============
+= Error handling
 
-== TODO
+Colm has no exceptions. A parse that fails gives nil, and a message that says
+where the input went wrong. The program checks the result, and stops with
+`exit` if it can't go on. This chapter covers telling that a parse failed, the
+message in `error`, where things are in the input, and stopping the program.
 
+[[failed-parse]]
+== A failed parse
 
+`parse` gives nil when its input doesn't form a tree of the type. The program
+goes on running: a failed parse doesn't stop it, or set its exit status. So
+check the result, with `if ( ! Tree )`, before using the tree.
+
+`error` is a `str`. Every `parse` and `parse_stop` statement sets it: to the
+message when the parse fails, and to nil when it succeeds. So read it right
+after the parse it belongs to. It is nil before the first parse. A parser made
+with `new` keeps its message in `+P->error+`, as xref:3_06_send.adoc[the
+chapter on send] explains.
+
+This program reads settings, and prints them. When the parse fails, it prints
+the message instead, and exits:
+
+[source,chapel]
+.err_check.lm
+----
+include::code/err_check.lm[]
+----
+
+It reads this input:
+
+----
+include::code/err_check.in[]
+----
+
+and prints:
+
+----
+include::code/err_check.exp[]
+----
+
+The third line has `3` where an `=` should be. The program prints the message,
+and exits with status 1. With `depth = 3;` on the third line, it would print
+`width is 80`, `height is 24` and `depth is 3`. The manual's other examples end
+a failed parse the same way.
+
+A program meant for people would print the message to `stderr`, with
+`prints`, which xref:1_01_statements.adoc#printing[the statements chapter]
+covers:
+
+[source,chapel]
+----
+if ( ! Settings ) {
+	prints( stderr, error, "\n" )
+	exit( 1 )
+}
+----
+
+This chapter's examples print to `stdout`, so the output shown here holds the
+message.
+
+`open` gives nil too, when it can't open a file, as
+xref:3_06_send.adoc[the chapter on send] says.
+
+[[message]]
+== The error message
+
+The message is `FILE:LINE:COL: parse error`. Lines and columns count from 1.
+It always says `parse error`, and doesn't say what the parser expected.
+
+It points at where the token that the parser couldn't take begins, after the
+ignored text before it. In `err_check`, that is the `3` on line 3, at column 7.
+Text that no token matches is pointed at where it begins. When the input ends
+before the tree is whole, the message points at the end of the input, after
+any ignored text there.
+
+When the parser backs up and tries another way, as
+xref:3_02_parse.adoc#backtracking[the parsing chapter] describes, the message
+points at the furthest place that any of the ways reached.
+
+`FILE` is `<stdin>` for `stdin`. For a file opened with `open`, it is the name
+that `open` was given.
+
+Text that a parse is given as strings or values has no file name. The message,
+and the `file` of the tokens read from it, give a stand-in in its place. Lines
+and columns in that text are counted from its start, and strings and values
+that come one after another in a parse's list count as one text. Text from a
+tree, as in a reparse, is counted the same way, from its own start, not from
+where the tree was read.
+
+[[locations]]
+== Input locations
+
+A token has four fields that say where it was read:
+
+* `file`, a `str`, the name of the input, as in the message.
+* `line` and `col`, the line and column it begins at, from 1.
+* `pos`, its byte offset from the start of its file or text, from 0.
+
+Literals have them too. Columns count bytes: a tab is one column, and a
+character of several bytes, such as `é` in UTF-8, counts as several.
+
+A token that wasn't read from input, such as one made with `make_token` or
+`cons`, has `file` nil, and 0 in the others.
+
+Reading a location field of a token variable that is nil is an error, which
+the program has to guard against. Check the token before reading its fields,
+as the next example does with `if ( First )` before `twice` reads
+`First.line`.
+
+A def has no location fields: `S.line` on a def doesn't compile. Read them
+from one of its tokens, as the next example does with `S.name`.
+
+This program reads the same settings, and stops when a name is set twice:
+
+[source,chapel]
+.err_twice.lm
+----
+include::code/err_twice.lm[]
+----
+
+It reads this input:
+
+----
+include::code/err_twice.in[]
+----
+
+and prints:
+
+----
+include::code/err_twice.exp[]
+----
+
+The grammar can't see that a name is set twice. `twice` reports it in the same
+form as a parse error. It is called from inside the loop, and `exit` in it
+ends the program from there. The second `width` is at column 3, after the two
+spaces, and the program exits with status 1. Without the third line, it prints
+`2 settings`.
+
+`error.line`, `error.col` and `error.pos` give the parts of the message's
+location: its line, its column, and its byte offset. `error` is nil after a
+parse that succeeds, so reading its fields then is an error, as it is for a
+token variable that is nil. The program has to guard against it: read them
+only inside its check on the parse's result, as this program does:
+
+[source,chapel]
+.err_parts.lm
+----
+include::code/err_parts.lm[]
+----
+
+It reads the same input as `err_check`:
+
+----
+include::code/err_parts.in[]
+----
+
+and prints the message in another form, and exits with status 1:
+
+----
+include::code/err_parts.exp[]
+----
+
+[[stopping]]
+== Stopping the program
+
+`exit( N )` ends the program with the status `N`, as
+xref:1_00_language_overview.adoc#exit[the language overview] says. It works
+in a function, as `err_twice` shows, and in a token action or a production's
+action: the parse stops there, and the program ends with that status. Use
+`exit` as a statement of its own.
+
+In a program run from a C or {cpp} host, `exit` ends the program, and the host
+gets back its status and its `error`, as xref:8_01_embedding.adoc[the
+embedding chapter] explains.
+
+To fail the parse instead, and let the parser try another way, an action uses
+`reject`, which xref:3_02_parse.adoc#reject[the parsing chapter] covers.
