@@ -32,12 +32,26 @@
 
 str_t *string_prefix( program_t *prg, str_t *str, long len )
 {
+	/* Clamp to the string. A prefix at most as long as what exists, empty
+	 * when asked for a negative length. */
+	if ( len < 0 )
+		len = 0;
+	else if ( len > str->value->length )
+		len = str->value->length;
+
 	head_t *head = string_alloc_full( prg, str->value->data, len );
 	return (str_t*)construct_string( prg, head );
 }
 
 str_t *string_suffix( program_t *prg, str_t *str, long pos )
 {
+	/* Clamp the start position to the string. Past the end yields the empty
+	 * suffix; before the start is the whole string. */
+	if ( pos < 0 )
+		pos = 0;
+	else if ( pos > str->value->length )
+		pos = str->value->length;
+
 	long len = str->value->length - pos;
 	head_t *head = string_alloc_full( prg, str->value->data + pos, len );
 	return (str_t*)construct_string( prg, head );
