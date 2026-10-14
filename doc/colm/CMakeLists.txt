@@ -37,13 +37,13 @@ set(MANUAL_PAGES
 	3_06_send 0_07_transformation)
 
 # The example programs, with their output (.exp) and input (.in), which the
-# pages include, and the arguments they run with (.args). An example can also
-# have colm options (.comp), a host program (.host.c or .host.cc), and the
-# reducer.h its commit code includes (.reducer.h), which needs .host.cc. A
-# file that an example includes is listed too. Its suffix isn't .lm (the pages
-# use .lmi), since the manual suite runs every .lm as an example. Every page
-# is rebuilt when one of them changes, which is simpler than tracking which
-# page includes which.
+# pages include, the arguments they run with (.args), and the exit status they
+# must end with (.exit), 0 without one. An example can also have colm options
+# (.comp), a host program (.host.c or .host.cc), and the reducer.h its commit
+# code includes (.reducer.h), which needs .host.cc. A file that an example
+# includes is listed too. Its suffix isn't .lm (the pages use .lmi), since the
+# manual suite runs every .lm as an example. Every page is rebuilt when one of
+# them changes, which is simpler than tracking which page includes which.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
 	code/ctx_reject.lm       code/ctx_reject.exp       code/ctx_reject.in

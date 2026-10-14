@@ -325,7 +325,9 @@ Give that file a suffix other than `.lm`, such as `.lmi`, since every `.lm`
 there is run as an example, and list it in those two build files too.
 `NAME.args`, if there is one, holds the program's arguments, and is listed in
 them too. A page that shows the command line types it by hand, so keep the two
-the same.
+the same. `NAME.exit`, if there is one, holds the exit status the example must
+end with. Without it, the example must exit 0. It is listed in the two build
+files like the others.
 
 
 ## Syntax highlighting

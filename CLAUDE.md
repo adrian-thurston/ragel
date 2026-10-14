@@ -129,8 +129,11 @@ kept there. Give that file a suffix other than `.lm`, such as `.lmi`, since
 every `.lm` there is run as an example, and list it in `CODE` and
 `MANUAL_CODE` too. `NAME.args`, if there is one, holds the program's
 arguments, and goes in the build files too. No chapter includes it: a page
-that shows the command line types it by hand, so keep the two the same. The
-suite's results go to `test/manual/working/`.
+that shows the command line types it by hand, so keep the two the same.
+`NAME.exit`, if there is one, holds the exit status the example must end
+with. Without it, the example must exit 0. It goes in `CODE` and
+`MANUAL_CODE` like the others. The suite's results go to
+`test/manual/working/`.
 
 Each colm.d and manual run sets `COLM_LEAK_CHECK`, so a program that loses
 pool items (kids, trees, heads, ...) fails its case. A colm.d case's `LOST`

@@ -26,9 +26,10 @@ IN_FILES = \
 	3_06_send.adoc 0_07_transformation.adoc
 
 # The example programs, each with the output it prints (.exp), and the input
-# it reads (.in) and the arguments it runs with (.args), if any. An example
-# can also have colm options (.comp), a host program it is linked into
-# (.host.c or .host.cc), and the reducer.h its commit code includes
+# it reads (.in), the arguments it runs with (.args) and the exit status it
+# must end with (.exit), if any. Without .exit, an example must exit 0. An
+# example can also have colm options (.comp), a host program it is linked
+# into (.host.c or .host.cc), and the reducer.h its commit code includes
 # (.reducer.h), which needs .host.cc. The test harness's manual suite runs
 # them, and the pages include the programs and their output. A file that an
 # example includes is listed too. Its suffix isn't .lm (the pages use .lmi),
