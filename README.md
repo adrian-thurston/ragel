@@ -295,14 +295,22 @@ The autotools build remains the reference build. Known differences:
 
 ### Run-time dependencies
 
-The colm program depends on GCC at runtime. It produces a C program as output,
-then compiles and links it with a runtime library. The compiled program depends
-on the colm library.
+Colm compiles a program to C, then compiles the C with `gcc`, or the compiler
+named by the `CC` environment variable, passing it `CFLAGS` from the
+environment as well. So colm needs a C compiler wherever it is used, not only
+where it is built. The program is linked with the colm runtime library, libcolm.
 
-To find the includes and the runtime library to pass to GCC, colm looks at
-`argv[0]` to decide if it is running out of the source tree. If it is, then the
-compile and link flags are derived from `argv[0]`. Otherwise, it uses the install
-location (prefix) to construct the flags.
+An installed colm compiles against the installed headers and libcolm. A colm run
+from an autotools build tree uses the tree's headers instead, and links libcolm
+statically through the tree's libtool, so nothing has to be installed. Colm knows
+that it is in the build tree when its own executable is the one the build made,
+a check that works on Linux and macOS only. When the check fails, `-B <path>`
+names the build tree, the directory that holds `src`. A colm built by CMake
+always uses the installed headers and libcolm, and `-B` doesn't work with it.
+
+The manual's [Running colm](doc/colm/0_01_installing.adoc#running-colm) and
+[Building from source](doc/colm/8_05_contributing.adoc#building-from-source)
+say more.
 
 
 ## Testing
