@@ -13,12 +13,18 @@ endif()
 
 # The install page and the FAQ show versions, which the top-level
 # CMakeLists.txt reads out of configure.ac. Rouge has no lexer for colm, so
-# the build loads its own, colm-rouge.rb.
+# the build loads its own, colm-rouge.rb. colm-links.rb checks the links in
+# the rendered book, and logs each one that leads nowhere in it as an error.
+# --failure-level=ERROR makes Asciidoctor exit 1 on an error, the check's or
+# its own, but not on a warning, such as the one it gives when Rouge, which is
+# optional, is missing.
 set(MANUAL_OPTIONS
 	-b html5
 	-a max-width=800px
 	-a source-highlighter=rouge
 	-r "${CMAKE_CURRENT_SOURCE_DIR}/colm-rouge.rb"
+	-r "${CMAKE_CURRENT_SOURCE_DIR}/colm-links.rb"
+	--failure-level=ERROR
 	-a webfonts!
 	-a suite-release=${SUITE_VERSION}
 	-a colm-version=${COLM_VERSION}
@@ -139,11 +145,23 @@ list(TRANSFORM MANUAL_CODE PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 set(MANUAL_ADOC "${CMAKE_CURRENT_SOURCE_DIR}/colm-manual.adoc")
 set(MANUAL_HTML "${CMAKE_CURRENT_BINARY_DIR}/colm-manual.html")
+set(MANUAL_TMP "${CMAKE_CURRENT_BINARY_DIR}/colm-manual.tmp.html")
+
+# Asciidoctor still writes the HTML when --failure-level makes it exit 1, so it
+# writes to a temporary file, which is renamed only on success, whatever the
+# generator does with a failed command's output. The temporary file keeps the
+# .html suffix: Asciidoctor gives the output file's suffix to a link to another
+# page. The clean target removes the temporary file that a failed run leaves
+# behind. The book is rendered again when the colm lexer or the check of its
+# links changes.
 add_custom_command(
 	OUTPUT "${MANUAL_HTML}"
-	COMMAND "${ASCIIDOCTOR}" ${MANUAL_OPTIONS} -o "${MANUAL_HTML}" "${MANUAL_ADOC}"
+	BYPRODUCTS "${MANUAL_TMP}"
+	COMMAND "${ASCIIDOCTOR}" ${MANUAL_OPTIONS} -o "${MANUAL_TMP}" "${MANUAL_ADOC}"
+	COMMAND "${CMAKE_COMMAND}" -E rename "${MANUAL_TMP}" "${MANUAL_HTML}"
 	DEPENDS "${MANUAL_ADOC}" ${MANUAL_CHAPTERS} ${MANUAL_CODE}
 		"${CMAKE_CURRENT_SOURCE_DIR}/colm-rouge.rb"
+		"${CMAKE_CURRENT_SOURCE_DIR}/colm-links.rb"
 	COMMENT "Rendering colm-manual.html"
 	VERBATIM)
 

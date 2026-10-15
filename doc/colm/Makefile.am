@@ -3,11 +3,17 @@ ASCIIDOCTOR = @ASCIIDOCTOR@
 OUTPUT=html5
 
 # The install page and the FAQ show versions from configure.ac. Rouge has no
-# lexer for colm, so the build loads its own, colm-rouge.rb.
+# lexer for colm, so the build loads its own, colm-rouge.rb. colm-links.rb
+# checks the links in the rendered book, and logs each one that leads nowhere
+# in it as an error. --failure-level=ERROR makes Asciidoctor exit 1 on an
+# error, the check's or its own, but not on a warning, such as the one it
+# gives when Rouge, which is optional, is missing.
 OPTIONS=\
 	-a max-width=800px \
 	-a source-highlighter=rouge \
 	-r $(srcdir)/colm-rouge.rb \
+	-r $(srcdir)/colm-links.rb \
+	--failure-level=ERROR \
 	-a webfonts! \
 	-a suite-release=$(PACKAGE_VERSION) \
 	-a colm-version=$(COLM_VERSION) \
@@ -128,9 +134,10 @@ CODE = \
 
 OUT_FILES = $(MANUAL:.adoc=.html)
 
-CLEANFILES = $(OUT_FILES)
+CLEANFILES = $(OUT_FILES) $(MANUAL:.adoc=.tmp.html)
 
-EXTRA_DIST = $(MANUAL) $(CHAPTERS) $(CODE) colm-rouge.rb CMakeLists.txt
+EXTRA_DIST = $(MANUAL) $(CHAPTERS) $(CODE) colm-rouge.rb colm-links.rb \
+	CMakeLists.txt
 
 if BUILD_MANUAL
 
@@ -145,15 +152,21 @@ SUFFIXES = .html .adoc
 
 # The book includes the chapters, and they include the example programs and
 # their output, so the book is rendered again when any of them changes, and
-# when the colm lexer that highlights them does.
-$(OUT_FILES): $(CHAPTERS) $(CODE) colm-rouge.rb
+# when the colm lexer that highlights them, or the check of its links, does.
+$(OUT_FILES): $(CHAPTERS) $(CODE) colm-rouge.rb colm-links.rb
 
 # The install chapter and the FAQ show the versions that OPTIONS passes in, so
 # the book is rendered again when configure writes a Makefile with new ones.
 $(OUT_FILES): Makefile
 
+# Asciidoctor still writes the HTML when --failure-level makes it exit 1, so
+# it writes to a temporary file, which is renamed only on success. Otherwise
+# the next make would take the broken book as built. The temporary file keeps
+# the .html suffix: Asciidoctor gives the output file's suffix to a link to
+# another page. make clean removes the temporary file that a failed run
+# leaves behind.
 .adoc.html:
-	$(ASCIIDOCTOR) -b $(OUTPUT) $(OPTIONS) -o $@ $<
+	$(ASCIIDOCTOR) -b $(OUTPUT) $(OPTIONS) -o $*.tmp.html $< && mv -f $*.tmp.html $@
 
 endif
 

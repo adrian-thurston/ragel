@@ -7,7 +7,8 @@
 // The manual is this one book. Each chapter is a page of its own, included
 // here one level down. A link to a chapter names the id above the chapter's
 // title, as in xref:3_01_lex.adoc#lexing[]: a link to an included page that
-// names no id leads to the top of the book.
+// names no id leads to the top of the book. The build's link check,
+// colm-links.rb, fails on such a link.
 
 = Getting started
 

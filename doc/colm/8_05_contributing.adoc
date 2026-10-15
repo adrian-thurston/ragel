@@ -180,7 +180,11 @@ A new chapter is included in `colm-manual.adoc`, and listed in `CHAPTERS` in
 
 Each chapter has an id on the line above its title, and a link to a chapter
 names that id, as in `+xref:3_01_lex.adoc#lexing[the lexing chapter]+`. A link
-without the id leads to the top of the book.
+without the id leads to the top of the book. The build checks the book's links
+with `doc/colm/colm-links.rb`, and fails on a link that names no id, on a link
+to an id the book doesn't have, on an id given twice, and on a link to a page
+that isn't in the book. CI builds the manual, so a pull request's links are
+checked.
 
 Colm code goes in a `[source,colm]` block. Rouge has no lexer for colm, so the
 build loads its own, `doc/colm/colm-rouge.rb`, with `asciidoctor -r`.
