@@ -29,12 +29,14 @@ general:
    --ebnf               print EBNF for railroad diagram
    -d                   print verbose debug information
    -B <path>
-       Run Colm from the build directory. Use this when building from source
-       and using the resulting binary without installing it. Colm will attempt
-       to detect when it is run from the build directory. This flag lets the
-       user be explicit about it. The detection method is specific to the OS
-       and can fail. The path given should be the root of the build directory,
-       eg what would be returned by ABS_TOP_BUILDDIR (directory where src is).
+       Run Colm from an autotools build directory. Use this when building from
+       source and using the resulting binary without installing it. Colm will
+       attempt to detect when it is run from the build directory. This flag
+       lets the user be explicit about it. The detection method is specific to
+       the OS and can fail. The path given should be the root of the build
+       directory, the one that holds libtool and src. A colm built by CMake
+       supports neither -B nor the detection, and has to be installed before
+       it can compile programs.
 ----
 
 colm compiles a `.lm` program to an executable, named after the program unless

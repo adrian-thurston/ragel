@@ -24,6 +24,7 @@ EXTRA_DIST = \
 	btpat1.lm \
 	btscan1.lm \
 	btscan2.lm \
+	builddir1.lm \
 	call1.lm \
 	collect.lm \
 	commitbt.lm \

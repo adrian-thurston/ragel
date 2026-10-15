@@ -1,0 +1,9 @@
+# -B names the top of an autotools build tree, and colm links the program with
+# the tree's libtool. A directory with no libtool in it, such as a CMake build
+# tree, gets an error that says so, not the shell's "libtool: not found". The
+# harness passes its own -B before COMP, and the last -B wins.
+print "hello world\n"
+##### COMP #####
+-B working
+##### COMP_ERR #####
+error: colm: no libtool in working: -B needs the top of an autotools build tree

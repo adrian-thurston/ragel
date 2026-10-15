@@ -217,12 +217,14 @@ void usage()
 "   --ebnf               print EBNF for railroad diagram\n"
 "   -d                   print verbose debug information\n"
 "   -B <path>\n"
-"       Run Colm from the build directory. Use this when building from source\n"
-"       and using the resulting binary without installing it. Colm will attempt\n"
-"       to detect when it is run from the build directory. This flag lets the\n"
-"       user be explicit about it. The detection method is specific to the OS\n"
-"       and can fail. The path given should be the root of the build directory,\n"
-"       eg what would be returned by ABS_TOP_BUILDDIR (directory where src is).\n"
+"       Run Colm from an autotools build directory. Use this when building from\n"
+"       source and using the resulting binary without installing it. Colm will\n"
+"       attempt to detect when it is run from the build directory. This flag\n"
+"       lets the user be explicit about it. The detection method is specific to\n"
+"       the OS and can fail. The path given should be the root of the build\n"
+"       directory, the one that holds libtool and src. A colm built by CMake\n"
+"       supports neither -B nor the detection, and has to be installed before\n"
+"       it can compile programs.\n"
 #if DEBUG
 "   -D <tag>             print more information about <tag>\n"
 "                        (BYTECODE|PARSE|MATCH|COMPILE|POOL|PRINT|INPUT|SCAN)\n"
@@ -472,6 +474,15 @@ void compileOutput()
 	std::ostringstream command;
 	
 	if ( fromBuildDir != 0 ) {
+		/* Only an autotools build tree has the libtool that links the
+		 * program. Say so, rather than leave it to the shell. */
+		std::string libtool = std::string( fromBuildDir ) + "/libtool";
+		if ( access( libtool.c_str(), X_OK ) != 0 ) {
+			error() << "no libtool in " << fromBuildDir <<
+					": -B needs the top of an autotools build tree" << endl;
+			return;
+		}
+
 		command << fromBuildDir << "/libtool --tag=CC --mode=link "
 		        << compiler << " -Wall -Wwrite-strings"
 		        << " -g " << cflags
