@@ -488,11 +488,23 @@ When the action starts, the matched text is still in the input. In the action:
   text. `T` doesn't have to be the token that matched.
 * `+input->push( Token )+` puts a token back at the front of the input. The
   parser gets it next.
+* [[push-ignore]]`+input->push_ignore( Tree )+` puts a token or tree back at
+  the front of the input as ignored text. The parser doesn't get it as a
+  token, but the tree keeps it, and printing the tree prints it. Like the
+  ignored text the scanner reads, it belongs to the token before it, or to the
+  first token at the start of the input, as
+  xref:3_03_match.adoc#changing[Changing a tree] explains. It takes a token,
+  such as one `make_token` makes, or a tree, such as one a parse makes, but
+  not a string.
 
 An action that pulls the text and pushes nothing drops the token, so the
 parser never sees it. An action has to pull the matched text, though: if it
 doesn't, the scanner matches the same text again, and runs the action again,
 without end.
+
+Each push puts its token or tree at the front of the input, ahead of what was
+pushed before it, so when an action pushes more than one, the last one pushed
+is read first.
 
 An action can declare variables of its own. To use a variable declared at
 the top of the program, the variable has to be declared with `global`. A
@@ -535,3 +547,38 @@ the line with the stored name. If they are the same, it pushes the line as a
 line of each document. Without it, the scanner would skip them after the `nl`,
 since the first region ignores spaces, and the first line would be printed as
 `Dear reader,`.
+
+An action can also decide that what it matched is ignored text, which a
+pattern alone can't always tell. This program reads assignments, one to a
+line. A line break ends an assignment, unless a parenthesis is open, so an
+expression in parentheses can go on over more than one line. A pattern can't
+count parentheses, so neither an `ignore` nor a `token` pattern can tell the
+line breaks apart:
+
+[source,colm]
+.lex_join.lm
+----
+include::code/lex_join.lm[]
+----
+
+It reads this input:
+
+----
+include::code/lex_join.in[]
+----
+
+and prints:
+
+----
+include::code/lex_join.exp[]
+----
+
+The actions of `lparen` and `rparen` count the open parentheses in the global
+`Depth`, and push their tokens back unchanged. The action of `nl` pulls the
+line break. If a parenthesis is open, it puts the line break back with
+`push_ignore`, as a `ws`, so the parser never gets it. `$A.expr` drops the
+ignored text around the expression, but not the line break inside it.
+Otherwise the action pushes the line break as an `nl`, which ends the
+assignment. Pushed as an `nl` inside the parentheses, the line break would
+reach the parser where the grammar has no place for it, and the parse would
+fail, with `<stdin>:1:13: parse error`.

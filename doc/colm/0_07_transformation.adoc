@@ -121,7 +121,7 @@ action:
   `+input->push_ignore( make_token( typeid<ws>, Text ) )+`. `push_ignore`
   puts a token back at the front of the input as ignored text. The parser
   doesn't get it as a token, but the tree keeps it, and printing the tree
-  prints it.
+  prints it, as xref:3_01_lex.adoc#push-ignore[the lexing chapter] explains.
 . Works out the new line's indentation, `Level`: the length of the match,
   `match_length`, less the line break. A tab counts as one character, as a
   space does.

@@ -72,6 +72,7 @@ CODE = \
 	code/lex_choose.lm       code/lex_choose.exp       code/lex_choose.in \
 	code/lex_comment.lm      code/lex_comment.exp      code/lex_comment.in \
 	code/lex_heredoc.lm      code/lex_heredoc.exp      code/lex_heredoc.in \
+	code/lex_join.lm         code/lex_join.exp         code/lex_join.in \
 	code/lex_regions.lm      code/lex_regions.exp      code/lex_regions.in \
 	code/lex_rl.lm           code/lex_rl.exp           code/lex_rl.in \
 	code/lex_skip.lm         code/lex_skip.exp         code/lex_skip.in \
