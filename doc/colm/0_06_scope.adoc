@@ -42,6 +42,6 @@ That gives us:
 include::code/nested_scope.exp[]
 ----
 
-The next page, xref:0_07_transformation.adoc#transformation[A complete
+The next chapter, xref:0_07_transformation.adoc#transformation[A complete
 transformation], puts colm to the work it is made for. It parses a Python
 program, rewrites some of its statements, and prints the result.

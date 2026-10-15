@@ -1,0 +1,79 @@
+= Colm Manual
+:doctype: book
+:toc: left
+:toclevels: 2
+:sectanchors:
+
+// The manual is this one book. Each chapter is a page of its own, included
+// here one level down. A link to a chapter names the id above the chapter's
+// title, as in xref:3_01_lex.adoc#lexing[]: a link to an included page that
+// names no id leads to the top of the book.
+
+= Getting started
+
+include::0_00_welcome.adoc[leveloffset=+1]
+
+include::0_01_installing.adoc[leveloffset=+1]
+
+include::0_02_vim_syntax.adoc[leveloffset=+1]
+
+include::0_03_commandline.adoc[leveloffset=+1]
+
+include::0_04_hello_world.adoc[leveloffset=+1]
+
+include::0_05_fizzbuzz.adoc[leveloffset=+1]
+
+include::0_06_scope.adoc[leveloffset=+1]
+
+include::0_07_transformation.adoc[leveloffset=+1]
+
+= The language
+
+include::1_00_language_overview.adoc[leveloffset=+1]
+
+include::1_01_statements.adoc[leveloffset=+1]
+
+include::1_02_expressions.adoc[leveloffset=+1]
+
+include::1_03_control_flow.adoc[leveloffset=+1]
+
+include::1_04_functions.adoc[leveloffset=+1]
+
+include::1_05_variables.adoc[leveloffset=+1]
+
+include::1_06_iterators.adoc[leveloffset=+1]
+
+include::2_00_types.adoc[leveloffset=+1]
+
+include::2_01_basic.adoc[leveloffset=+1]
+
+include::2_02_list_map_struct_alias.adoc[leveloffset=+1]
+
+include::2_03_def.adoc[leveloffset=+1]
+
+= Language transformation
+
+include::3_01_lex.adoc[leveloffset=+1]
+
+include::3_02_parse.adoc[leveloffset=+1]
+
+include::3_03_match.adoc[leveloffset=+1]
+
+include::3_04_undo.adoc[leveloffset=+1]
+
+include::3_05_reduction.adoc[leveloffset=+1]
+
+include::3_06_send.adoc[leveloffset=+1]
+
+= Advanced topics
+
+include::8_01_embedding.adoc[leveloffset=+1]
+
+include::8_02_modularity.adoc[leveloffset=+1]
+
+include::8_04_error_handling.adoc[leveloffset=+1]
+
+include::8_05_contributing.adoc[leveloffset=+1]
+
+[appendix]
+include::9_00_q_and_a.adoc[leveloffset=+1]

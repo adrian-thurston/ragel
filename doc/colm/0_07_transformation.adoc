@@ -1,9 +1,9 @@
 [[transformation]]
 = A complete transformation
 
-The programs on the pages before this one print strings and numbers. Colm is
+The programs in the chapters before this one print strings and numbers. Colm is
 made for another kind of work: reading a program written in some language,
-changing it, and writing it out again. This page builds such a program, one
+changing it, and writing it out again. This chapter builds such a program, one
 step at a time.
 
 The program reads a Python 2 program, rewrites its `print` statements as
@@ -22,13 +22,13 @@ the layout and the comments included, stays as it was:
 In Python 2, a comma at the end of a `print` leaves out the line break. In
 Python 3, `+end=' '+` ends what `print` prints with a space instead.
 
-Colm needs a grammar for the language it reads. This page uses a cut-down
+Colm needs a grammar for the language it reads. This chapter uses a cut-down
 version of the Python grammar in the colm-suite repository,
 `grammar/python/python.lm`, in the
 https://github.com/adrian-thurston/colm-suite/tree/main/grammar[grammar
 directory]. It covers only the part of Python 2 that the example needs. The
 grammar is kept in a file of its own, `py_grammar.lmi`, which each of the
-three programs on this page includes with `include 'py_grammar.lmi'`.
+three programs in this chapter includes with `include 'py_grammar.lmi'`.
 xref:8_02_modularity.adoc#namespaces[The modularity chapter] covers `include`.
 
 The programs read this input, a small Python 2 program:
@@ -150,7 +150,7 @@ Why hold them? Ignored text belongs to the token before it, as
 xref:3_03_match.adoc#changing[the patterns chapter] explains, and a tree that
 is replaced takes the ignored text after it with it. If `blank_line` pushed
 its text back where it read it, a blank line would belong to the last token
-of the statement above it. The rewrite at the end of this page replaces
+of the statement above it. The rewrite at the end of this chapter replaces
 statements, and that blank line would go with its statement. Held, the text
 comes after the `NEWLINE`, and belongs to the `NEWLINE`, `INDENT` or `DEDENT`
 before it, which nothing replaces.
@@ -185,7 +185,7 @@ more. `+(`, id)*+` is zero or more of a comma followed by an `id`.
 xref:3_02_parse.adoc#parsing[The parsing chapter] covers these.
 
 `print_stmt` has four productions, one for each row of the table at the top
-of this page: the call, `print` with a comma at the end, `print` with
+of this chapter: the call, `print` with a comma at the end, `print` with
 values, and `print` alone. The call comes first. With it there,
 `+print("done")+` is parsed as a call. Moved to the end, it lets
 `+print("done")+` be parsed as a print of the string in parentheses,

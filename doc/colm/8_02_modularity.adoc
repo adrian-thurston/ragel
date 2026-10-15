@@ -176,8 +176,8 @@ the same way.
 When FILE isn't there, colm tries each directory given with `-I`, in the
 order given. If none of them has it, colm stops with
 `could not open FILE for reading`.
-xref:0_03_commandline.adoc#command-line[The command line page] lists `-I` with
-colm's other options.
+xref:0_03_commandline.adoc#command-line[The command line chapter] lists `-I`
+with colm's other options.
 
 So a program that includes files compiles in the directory that holds them,
 and from anywhere else with `-I` naming that directory. The examples of this
