@@ -278,7 +278,8 @@ trims them, though `auto_trim` is off.
 
 In a token action, `input` is the input of the parser that the token is for.
 xref:3_01_lex.adoc#lexing[The lexing chapter] covers `+input->pull+`,
-`+input->push+` and `make_token`. Two more things can be done with it there:
+`+input->push+`, `+input->push_ignore+` and `make_token`. Two more things can
+be done with it there:
 
 * `+input->push_stream( S )+` puts the stream `S` at the front of the input.
   The scanner reads all of `S`, and then goes on with the text after it.

@@ -1,0 +1,54 @@
+# How many parentheses are open.
+global Depth: int = 0
+
+lex
+	literal `= `+
+	token id /[a-z]+/
+	ignore ws /[ \t]+/
+
+	token lparen /'('/
+	{
+		Depth = Depth + 1
+		input->push( make_token( typeid<lparen>, input->pull( match_length ) ) )
+	}
+
+	token rparen /')'/
+	{
+		Depth = Depth - 1
+		input->push( make_token( typeid<rparen>, input->pull( match_length ) ) )
+	}
+
+	# A line break ends an assignment, unless a parenthesis is open.
+	token nl /'\n'/
+	{
+		Text: str = input->pull( match_length )
+		if ( Depth > 0 )
+			input->push_ignore( make_token( typeid<ws>, Text ) )
+		else
+			input->push( make_token( typeid<nl>, Text ) )
+	}
+end
+
+def term
+	[id]
+|	[lparen expr rparen]
+
+def expr
+	[expr `+ term]
+|	[term]
+
+def assignment
+	[id `= expr nl]
+
+def program
+	[assignment*]
+
+parse Program: program[ stdin ]
+
+if ( ! Program ) {
+	print( error, "\n" )
+	exit( 1 )
+}
+
+for A: assignment in Program
+	print( $A.id, " is ", $A.expr, "\n" )
