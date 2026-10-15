@@ -6,7 +6,7 @@
 The colm language has evolved since it has been described in the thesis.
 With some modifications we can reactivate this example.
 
-[source,chapel]
+[source,colm]
 .figure_44.lm
 ----
 include::code/figure_44.lm[]
@@ -34,7 +34,7 @@ include::code/figure_44.exp[]
 The fizzbuzz test is often used to check if someone has programming skills.
 It is the next logical step to _hello world_.
 
-[source,chapel]
+[source,colm]
 .fizzbuzz.lm
 ----
 include::code/fizzbuzz.lm[]

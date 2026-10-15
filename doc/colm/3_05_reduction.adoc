@@ -37,7 +37,7 @@ retries them. That section covers `reject` too. In an action:
 Assigning a tree to `lhs` replaces the tree being made. Its parent gets the
 new tree in its place:
 
-[source,chapel]
+[source,colm]
 ----
 def item
 	[id]
@@ -54,7 +54,7 @@ This program is a calculator. Each `expr` keeps its value in an attribute,
 `Value`, which <<attributes,the next section>> covers, and each action
 computes it from the values of the production's elements:
 
-[source,chapel]
+[source,colm]
 .reduce_calc.lm
 ----
 include::code/reduce_calc.lm[]
@@ -98,7 +98,7 @@ them out.
 An attribute set on an alternative that the parser abandons goes with that
 alternative's tree:
 
-[source,chapel]
+[source,colm]
 ----
 def b
 	V: int
@@ -144,7 +144,7 @@ xref:3_03_match.adoc#make[`make_token`] in general.
 This program reads a list of files and their sizes. Each `name` keeps where it
 came from in `From`, and each `file` keeps where it came from and its size:
 
-[source,chapel]
+[source,colm]
 .reduce_attr.lm
 ----
 include::code/reduce_attr.lm[]
@@ -175,7 +175,7 @@ A reduction is {cpp} code that runs on the trees of a parse. It goes in a
 `reduction` block, at the top level of a program. A namespace can't hold one,
 as xref:8_02_modularity.adoc#namespaces[the modules chapter] says.
 
-[source,chapel]
+[source,colm]
 ----
 reduction NAME
 	...
@@ -245,7 +245,7 @@ executes must name the reduction whose class the host's object is.
 This program adds up each line of numbers, and the total of all the lines, in
 {cpp}:
 
-[source,chapel]
+[source,colm]
 .reduce_sum.lm
 ----
 include::code/reduce_sum.lm[]
@@ -319,7 +319,7 @@ xref:3_02_parse.adoc#backtracking[the parsing chapter's example of backing
 up], with `commit` on a statement, and a reduction that prints each `b` and
 each statement:
 
-[source,chapel]
+[source,colm]
 .reduce_when.lm
 ----
 include::code/reduce_when.lm[]
@@ -368,7 +368,7 @@ Where the parser could either reduce by one of the def's productions or shift
 a token, it tries the reduction first. So the def ends as soon as it can,
 whatever the order of its productions:
 
-[source,chapel]
+[source,colm]
 ----
 def name reducefirst
 	[word name]
@@ -394,7 +394,7 @@ parser backs up and takes the longer one. With `+[name `: word*]+` for
 This program reads subtractions. A term is numbers side by side, and a number
 can be negative:
 
-[source,chapel]
+[source,colm]
 .reduce_first.lm
 ----
 include::code/reduce_first.lm[]

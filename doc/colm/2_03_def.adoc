@@ -6,7 +6,7 @@ A `def` defines a context-free grammar nonterminal: a type whose values are pars
 Each of its productions, between square brackets, is a sequence of tokens and nonterminals, and `parse` turns input into a tree of that type.
 Again one example is much more clearer.
 
-[source,chapel]
+[source,colm]
 .assign.lm
 ----
 include::code/assign.lm[]

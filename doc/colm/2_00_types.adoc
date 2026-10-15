@@ -52,7 +52,7 @@ This program shows the difference. It uses `new`, which makes a struct or a
 list, and `+->+`, which reaches into one. The
 xref:2_02_list_map_struct_alias.adoc#structs[structs section] explains both.
 
-[source,chapel]
+[source,colm]
 .type_share.lm
 ----
 include::code/type_share.lm[]

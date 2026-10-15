@@ -23,7 +23,7 @@ numbers each have a grammar of their own, in a namespace of their own, and
 both grammars use the names `item` and `items`. Each namespace has a function
 too:
 
-[source,chapel]
+[source,colm]
 .mod_namespace.lm
 ----
 include::code/mod_namespace.lm[]
@@ -93,7 +93,7 @@ This program reads settings. A setting's name is a top-level `id`, and its
 value is the `id` of the namespace `config`, which is a number. The setting
 itself is defined in `config::entry`, a namespace inside `config`:
 
-[source,chapel]
+[source,colm]
 .mod_nested.lm
 ----
 include::code/mod_nested.lm[]
@@ -136,13 +136,13 @@ twice, and colm reports that as an error. There is no guard against it.
 This program is `mod_namespace` again, with the definitions the two
 namespaces share moved into one file, `mod_list.lmi`, which both include:
 
-[source,chapel]
+[source,colm]
 .mod_list.lmi
 ----
 include::code/mod_list.lmi[]
 ----
 
-[source,chapel]
+[source,colm]
 .mod_include.lm
 ----
 include::code/mod_include.lm[]

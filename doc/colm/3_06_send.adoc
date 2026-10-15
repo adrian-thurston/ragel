@@ -14,7 +14,7 @@ input from a token action.
 `new parser<T>()` makes a parser that builds a tree of type `T`. `send` sends
 it input. `+finish()+` ends the input, and returns the tree:
 
-[source,chapel]
+[source,colm]
 ----
 P: parser<program> = new parser<program>()
 send P "width = 80;"
@@ -57,7 +57,7 @@ token after it, since the parser needs that token to choose what to do.
 This program sends three pieces of text to a parser. The action of
 `assignment` prints each assignment when the parser reduces it:
 
-[source,chapel]
+[source,colm]
 .send_pieces.lm
 ----
 include::code/send_pieces.lm[]
@@ -103,7 +103,7 @@ don't. Read `+P->error+` instead.
 This program parses two inputs. It ends each with `eos`, and then prints what
 the parser holds:
 
-[source,chapel]
+[source,colm]
 .send_end.lm
 ----
 include::code/send_end.lm[]
@@ -137,7 +137,7 @@ as `send_tree` sends them.
 This program sends the same token with `send` and with `send_tree`, and
 parses it with `parse_tree`:
 
-[source,chapel]
+[source,colm]
 .send_tree.lm
 ----
 include::code/send_tree.lm[]
@@ -179,7 +179,7 @@ is the text it holds.
 This program writes a file, then reads it back, and sends it to a parser
 between two strings:
 
-[source,chapel]
+[source,colm]
 .send_files.lm
 ----
 include::code/send_files.lm[]
@@ -217,7 +217,7 @@ succeeds. Those for C, Go and Zig send it with `+<<+`.
 This program writes assignments to a parser with `+<<+`, then finishes the
 parse, and prints the assignments from the tree:
 
-[source,chapel]
+[source,colm]
 .send_out.lm
 ----
 include::code/send_out.lm[]
@@ -243,7 +243,7 @@ input can trim it off instead. `+P->gets()+` returns the input, and
 `+auto_trim( true )+` on the input makes the trees sent to the parser lose
 the ignored text around them:
 
-[source,chapel]
+[source,colm]
 ----
 Input: _input = P->gets()
 Input->auto_trim( true )
@@ -258,7 +258,7 @@ This program parses two words with spaces around them, and sends each word to
 four parsers, followed by a `|`. The parsers' grammar keeps every character
 it is sent, so the spaces each parser gets show in the brackets:
 
-[source,chapel]
+[source,colm]
 .send_trim.lm
 ----
 include::code/send_trim.lm[]
@@ -289,7 +289,7 @@ xref:3_01_lex.adoc#lexing[The lexing chapter] covers `+input->pull+`,
 This program reads assignments, and lines such as `+#include NAME+`, which
 read the assignments in the file `NAME` in their place:
 
-[source,chapel]
+[source,colm]
 .send_include.lm
 ----
 include::code/send_include.lm[]

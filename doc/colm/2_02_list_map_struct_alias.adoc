@@ -6,7 +6,7 @@ As colm is static and strong typed, it is very convenient to use alias as well.
 
 An example is probably much clearer than 1000 loc.
 
-[source,chapel]
+[source,colm]
 .poker.lm
 ----
 include::code/poker.lm[]
@@ -29,7 +29,7 @@ The sections below describe each in turn: structs, which also introduce
 A struct groups named fields. `struct Name`, then its fields, each
 `Name: Type`, then `end`, defines one:
 
-[source,chapel]
+[source,colm]
 ----
 struct point
 	X: int
@@ -55,7 +55,7 @@ chapter]. `context` is another keyword for `struct`.
 
 This program builds a route of stops, each a struct that holds the next:
 
-[source,chapel]
+[source,colm]
 .struct_route.lm
 ----
 include::code/struct_route.lm[]
@@ -106,7 +106,7 @@ language overview] shows.
 
 This program uses a list as a queue:
 
-[source,chapel]
+[source,colm]
 .list_queue.lm
 ----
 include::code/list_queue.lm[]
@@ -146,7 +146,7 @@ A map can't change inside a `for` over it.
 
 This program counts the words in its arguments:
 
-[source,chapel]
+[source,colm]
 .map_count.lm
 ----
 include::code/map_count.lm[]

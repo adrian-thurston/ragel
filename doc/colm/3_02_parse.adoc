@@ -16,7 +16,7 @@ productions, separated by `|`. A production is a list of elements in square
 brackets. An element is a token's name, a literal in its backtick form, or
 the name of a def, including the def being defined:
 
-[source,chapel]
+[source,colm]
 ----
 def term
 	[id `* term]
@@ -76,7 +76,7 @@ colon, and tasks separated by commas. A task is some words, an optional `!`
 that marks it as urgent, and optional steps, in parentheses. The steps are
 tasks too:
 
-[source,chapel]
+[source,colm]
 .parse_def.lm
 ----
 include::code/parse_def.lm[]
@@ -107,7 +107,7 @@ parser in order. An item can be `stdin`, a string, a `str` or `int` value, or
 a tree, which is sent as its text. `+NAME: TYPE = parse TYPE[ ... ]+` does the
 same. The type can be a repetition:
 
-[source,chapel]
+[source,colm]
 ----
 S: str = "cd"
 I: int = 42
@@ -134,7 +134,7 @@ In this program, a header says what the rest of the input holds, words or
 numbers. The program reads the header with `parse_stop`, and then the rest
 with the grammar the header picks:
 
-[source,chapel]
+[source,colm]
 .parse_stop.lm
 ----
 include::code/parse_stop.lm[]
@@ -172,7 +172,7 @@ This program reads the settings of xref:3_01_lex.adoc#regions[`lex_regions`],
 and parses each value again, as a list of numbers. A third region holds the
 tokens for the list:
 
-[source,chapel]
+[source,colm]
 .parse_reparse.lm
 ----
 include::code/parse_reparse.lm[]
@@ -237,7 +237,7 @@ Some things follow from this:
   grammar, given `x y y ;`, the parser first takes `x` as a `b`, and then
   fails at the second `y`. It backs up into `b`, and takes `x y` instead:
 +
-[source,chapel]
+[source,colm]
 ----
 def b
 	[`x]
@@ -257,7 +257,7 @@ In C, `+a * b;+` is a declaration if `a` names a type, and a multiplication
 otherwise. This program reads both kinds of statement, and prefers the
 declaration:
 
-[source,chapel]
+[source,colm]
 .parse_order.lm
 ----
 include::code/parse_order.lm[]
@@ -306,7 +306,7 @@ minus sign in front of an expression, `+[`- expr]+`, has the level of `-`, so
 This program gives four operators the usual levels, and adds `^` for powers
 and `<` for comparisons:
 
-[source,chapel]
+[source,colm]
 .parse_prec.lm
 ----
 include::code/parse_prec.lm[]
@@ -349,7 +349,7 @@ An IPv4 address and a version number look alike: four numbers, with dots
 between them. In an address, each number is at most 255. This program tells
 the two apart with `reject`:
 
-[source,chapel]
+[source,colm]
 .parse_reject.lm
 ----
 include::code/parse_reject.lm[]
@@ -381,7 +381,7 @@ production with `commit` drops every alternative the parser has kept so far,
 in the whole parse, not only inside the production. After that, a parse
 error fails the parse instead of backing up past the commit:
 
-[source,chapel]
+[source,colm]
 ----
 def b
 	[`x]
@@ -411,7 +411,7 @@ This program has the grammar of `parse_order`, with `commit` on both
 productions of `statement`, and an action on each that prints the statement.
 Its last statement has an error:
 
-[source,chapel]
+[source,colm]
 .parse_commit.lm
 ----
 include::code/parse_commit.lm[]
@@ -449,7 +449,7 @@ more than once, and `+[...]+` then stands for the productions of the last
 This program is `parse_order`, with `statement` defined as an expression
 only, and then redefined, with a declaration first:
 
-[source,chapel]
+[source,colm]
 .parse_redef.lm
 ----
 include::code/parse_redef.lm[]

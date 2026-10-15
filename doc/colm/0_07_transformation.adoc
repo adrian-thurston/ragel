@@ -54,7 +54,7 @@ compile from another directory, with `-I`.
 
 The grammar starts with the tokens, in a `lex` block:
 
-[source,chapel]
+[source,colm]
 .py_grammar.lmi
 ----
 include::code/py_grammar.lmi[tag=tokens]
@@ -89,7 +89,7 @@ To the grammar, `INDENT` and `DEDENT` are a block's braces.
 
 The lexer keeps two variables, declared before the `lex` block:
 
-[source,chapel]
+[source,colm]
 .py_grammar.lmi
 ----
 include::code/py_grammar.lmi[tag=globals]
@@ -101,7 +101,7 @@ the end of this section explains.
 
 The `lex` block goes on with the tokens that do the work:
 
-[source,chapel]
+[source,colm]
 .py_grammar.lmi
 ----
 include::code/py_grammar.lmi[tag=indent]
@@ -167,7 +167,7 @@ in that chapter's `decls::program`.
 
 The grammar's statements:
 
-[source,chapel]
+[source,colm]
 .py_grammar.lmi
 ----
 include::code/py_grammar.lmi[tag=statements]
@@ -202,7 +202,7 @@ error at the two places in the rewrite that make `+print(i, end=' ')+` and
 
 The expressions:
 
-[source,chapel]
+[source,colm]
 .py_grammar.lmi
 ----
 include::code/py_grammar.lmi[tag=expressions]
@@ -216,7 +216,7 @@ subscript or an attribute, as in `+range(n)+`, `+a[1]+` and `+s.upper+`.
 
 The first program parses its input and prints the tree:
 
-[source,chapel]
+[source,colm]
 .py_parse.lm
 ----
 include::code/py_parse.lm[]
@@ -238,7 +238,7 @@ read.
 The second program finds the print statements, and says which form each one
 has:
 
-[source,chapel]
+[source,colm]
 .py_find.lm
 ----
 include::code/py_find.lm[]
@@ -268,7 +268,7 @@ include::code/py_find.exp[]
 
 The last program replaces each print statement with a call:
 
-[source,chapel]
+[source,colm]
 .py_rewrite.lm
 ----
 include::code/py_rewrite.lm[]

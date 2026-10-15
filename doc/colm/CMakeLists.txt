@@ -12,11 +12,13 @@ if(NOT ASCIIDOCTOR)
 endif()
 
 # The install page and the FAQ show versions, which the top-level
-# CMakeLists.txt reads out of configure.ac.
+# CMakeLists.txt reads out of configure.ac. Rouge has no lexer for colm, so
+# the build loads its own, colm-rouge.rb.
 set(MANUAL_OPTIONS
 	-b html5
 	-a max-width=800px
 	-a source-highlighter=rouge
+	-r "${CMAKE_CURRENT_SOURCE_DIR}/colm-rouge.rb"
 	-a webfonts!
 	-a suite-release=${SUITE_VERSION}
 	-a colm-version=${COLM_VERSION}
@@ -141,6 +143,7 @@ add_custom_command(
 	OUTPUT "${MANUAL_HTML}"
 	COMMAND "${ASCIIDOCTOR}" ${MANUAL_OPTIONS} -o "${MANUAL_HTML}" "${MANUAL_ADOC}"
 	DEPENDS "${MANUAL_ADOC}" ${MANUAL_CHAPTERS} ${MANUAL_CODE}
+		"${CMAKE_CURRENT_SOURCE_DIR}/colm-rouge.rb"
 	COMMENT "Rendering colm-manual.html"
 	VERBATIM)
 

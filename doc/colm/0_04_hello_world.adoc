@@ -3,7 +3,7 @@
 
 The obligatory _hello world_ program:
 
-[source,chapel]
+[source,colm]
 .hello_world.lm
 ----
 include::code/hello_world.lm[]
@@ -54,7 +54,7 @@ ls -l hello_world
 == Deja-vu: python2-python3
 TIP: It turns out that print is also a function that can have multiple arguments.
 
-[source,chapel]
+[source,colm]
 .hello_world_ext.lm
 ----
 include::code/hello_world_ext.lm[]

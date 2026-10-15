@@ -22,7 +22,7 @@ end. So the loop visits each list in `S`, and each rest of it.
 This program reads groups of words in parentheses. A group can hold groups of
 its own:
 
-[source,chapel]
+[source,colm]
 .iter_tree.lm
 ----
 include::code/iter_tree.lm[]
@@ -65,7 +65,7 @@ variable, or over a field of a struct, are lost: the loop works on a copy.
 This program reads a list of colors, which can hold lists of their own. It
 replaces each `green` with two colors, and each `lime` with `red`:
 
-[source,chapel]
+[source,colm]
 .iter_rewrite.lm
 ----
 include::code/iter_rewrite.lm[]
@@ -116,7 +116,7 @@ lists section] covers.
 This program reads commands, each a name and some arguments, and loops over
 their parts with each iterator:
 
-[source,chapel]
+[source,colm]
 .iter_builtin.lm
 ----
 include::code/iter_builtin.lm[]
@@ -161,7 +161,7 @@ caller's tree through the loop variable, make the parameter a `ref`.
 This program defines an iterator that yields each setting's name, and then
 its value:
 
-[source,chapel]
+[source,colm]
 .iter_user.lm
 ----
 include::code/iter_user.lm[]
@@ -181,7 +181,7 @@ the trees of `T` from the bottom up: the trees inside a tree come before the
 tree itself. Its parameter is a `ref<any>`, so it can be given a tree of any
 type, and the loop over it can change that tree:
 
-[source,chapel]
+[source,colm]
 .iter_bottom_up.lm
 ----
 include::code/iter_bottom_up.lm[]

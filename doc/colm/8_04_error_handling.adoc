@@ -22,7 +22,7 @@ chapter on send] explains.
 This program reads settings, and prints them. When the parse fails, it prints
 the message instead, and exits:
 
-[source,chapel]
+[source,colm]
 .err_check.lm
 ----
 include::code/err_check.lm[]
@@ -49,7 +49,7 @@ A program meant for people would print the message to `stderr`, with
 `prints`, which xref:1_01_statements.adoc#printing[the statements chapter]
 covers:
 
-[source,chapel]
+[source,colm]
 ----
 if ( ! Settings ) {
 	prints( stderr, error, "\n" )
@@ -114,7 +114,7 @@ from one of its tokens, as the next example does with `S.name`.
 
 This program reads the same settings, and stops when a name is set twice:
 
-[source,chapel]
+[source,colm]
 .err_twice.lm
 ----
 include::code/err_twice.lm[]
@@ -144,7 +144,7 @@ parse that succeeds, so reading its fields then is an error, as it is for a
 token variable that is nil. The program has to guard against it: read them
 only inside its check on the parse's result, as this program does:
 
-[source,chapel]
+[source,colm]
 .err_parts.lm
 ----
 include::code/err_parts.lm[]

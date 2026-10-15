@@ -58,7 +58,7 @@ A host does the same, and can do more in between. This program counts the
 words on its input. When the input isn't all words, the parse fails, and the
 program exits with status 1:
 
-[source,chapel]
+[source,colm]
 .emb_run.lm
 ----
 include::code/emb_run.lm[]
@@ -189,7 +189,7 @@ function.
 variable. Inside the program, it is a global like any other. `export` before a
 function definition lets the host call the function:
 
-[source,chapel]
+[source,colm]
 ----
 export Config: config
 export Version: str = "1.0"
@@ -259,7 +259,7 @@ one program's exports.
 This program parses a list of settings, and exports the list, the parse
 error, and a function that looks up a setting:
 
-[source,chapel]
+[source,colm]
 .emb_export.lm
 ----
 include::code/emb_export.lm[]
@@ -351,7 +351,7 @@ gives the empty string. `-E` can be repeated, for several values. A program
 that uses a name that no `-E` defines doesn't compile, with the error
 `cannot find name N in object`.
 
-[source,chapel]
+[source,colm]
 .emb_define.lm
 ----
 include::code/emb_define.lm[]

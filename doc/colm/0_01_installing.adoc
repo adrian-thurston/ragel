@@ -134,7 +134,7 @@ colm needs a C compiler wherever it is used, not only where it is built. It runs
 `gcc`, or the compiler named by the `CC` environment variable, and passes it
 `CFLAGS` from the environment as well.
 
-[source,chapel]
+[source,colm]
 .hello_world.lm
 ----
 include::code/hello_world.lm[]

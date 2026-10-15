@@ -46,7 +46,7 @@ xref:1_01_statements.adoc#printing[the statements chapter].
 
 This program uses the functions of a str:
 
-[source,chapel]
+[source,colm]
 .type_str.lm
 ----
 include::code/type_str.lm[]

@@ -31,7 +31,7 @@ reports an `unknown type` error for one that isn't.
 This program reads a list of words and numbers, which can be grouped in
 parentheses, and skips whitespace and comments that start with `+#+`:
 
-[source,chapel]
+[source,colm]
 .lex_basics.lm
 ----
 include::code/lex_basics.lm[]
@@ -178,7 +178,7 @@ Colm has names for common sets of characters:
 Text in a pattern has to be quoted. A bare word is a name. `rl` gives a
 pattern a name, so that other patterns can use it:
 
-[source,chapel]
+[source,colm]
 ----
 rl letter /alpha | '_'/
 ----
@@ -194,7 +194,7 @@ one, and in both cases the patterns that follow it can use it.
 In this program, the `id` token is made from the `letter` pattern and the
 `digit` set, and the `version` token is made from the `number` token:
 
-[source,chapel]
+[source,colm]
 .lex_rl.lm
 ----
 include::code/lex_rl.lm[]
@@ -230,7 +230,7 @@ A literal is a pattern too, and the same rules apply to it. This matters for
 keywords, which usually match the identifier pattern as well. This program
 has a keyword, `if`, and three tokens whose patterns overlap:
 
-[source,chapel]
+[source,colm]
 .lex_choose.lm
 ----
 include::code/lex_choose.lm[]
@@ -271,7 +271,7 @@ whole, but `+x -- y+` removes text with a match of `y` anywhere in it, so
 
 This program reads comments, strings in triple quotes, and words:
 
-[source,chapel]
+[source,colm]
 .lex_comment.lm
 ----
 include::code/lex_comment.lm[]
@@ -336,7 +336,7 @@ With a `+#+` token and an ignore pattern for `+#+` followed by letters,
 In this program, `x` is text to ignore, and also a letter that `word`
 matches:
 
-[source,chapel]
+[source,colm]
 .lex_skip.lm
 ----
 include::code/lex_skip.lm[]
@@ -369,7 +369,7 @@ The scanner chooses from all the patterns of the `lex` block, whether or not
 the parser can use the token that wins. In this program, `if` is a keyword
 again, and the grammar wants identifiers:
 
-[source,chapel]
+[source,colm]
 ----
 lex
 	literal `if
@@ -401,7 +401,7 @@ This program reads settings, one to a line. A setting is a name, an `=`, and
 then the rest of the line, whatever it holds. The name and the `=` are in the
 first region. The value and the line break are in the second region:
 
-[source,chapel]
+[source,colm]
 .lex_regions.lm
 ----
 include::code/lex_regions.lm[]
@@ -504,7 +504,7 @@ This program reads shell-style here-documents. `cat << END` starts one, and it
 runs up to the first line that is `END` and nothing else. The word after `<<`
 picks the line that ends the document, so the end can't be a fixed pattern:
 
-[source,chapel]
+[source,colm]
 .lex_heredoc.lm
 ----
 include::code/lex_heredoc.lm[]
