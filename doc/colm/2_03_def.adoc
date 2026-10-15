@@ -1,3 +1,4 @@
+[[def]]
 = Def
 
 The `def` is where colm really shines.
@@ -27,6 +28,6 @@ include::code/assign.exp[]
 
 NOTE: this also illustrates how to read from `stdin`.
 
-xref:0_07_transformation.adoc[A complete transformation] takes a grammar
-further: it parses a Python program, rewrites its print statements, and
+xref:0_07_transformation.adoc#transformation[A complete transformation] takes a
+grammar further: it parses a Python program, rewrites its print statements, and
 prints the result.

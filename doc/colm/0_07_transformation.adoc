@@ -1,3 +1,4 @@
+[[transformation]]
 = A complete transformation
 
 The programs on the pages before this one print strings and numbers. Colm is
@@ -28,7 +29,7 @@ https://github.com/adrian-thurston/colm-suite/tree/main/grammar[grammar
 directory]. It covers only the part of Python 2 that the example needs. The
 grammar is kept in a file of its own, `py_grammar.lmi`, which each of the
 three programs on this page includes with `include 'py_grammar.lmi'`.
-xref:8_02_modularity.adoc[The modularity chapter] covers `include`.
+xref:8_02_modularity.adoc#namespaces[The modularity chapter] covers `include`.
 
 The programs read this input, a small Python 2 program:
 
@@ -46,8 +47,8 @@ colm py_rewrite.lm
 ----
 
 Colm looks for an included file in the directory it runs in.
-xref:8_02_modularity.adoc[The modularity chapter] says how to compile from
-another directory, with `-I`.
+xref:8_02_modularity.adoc#namespaces[The modularity chapter] says how to
+compile from another directory, with `-I`.
 
 == Tokens
 
@@ -70,7 +71,7 @@ A string here is text in double or single quotes, on one line.
 the parser as tokens. The tree keeps them all the same, which matters later.
 The ignore has a name because the actions in the next section make `ws`
 tokens. The name can't be `space`: that is one of colm's predefined patterns,
-in the table in xref:3_01_lex.adoc[the lexing chapter], and
+in the table in xref:3_01_lex.adoc#lexing[the lexing chapter], and
 `++ignore space /[ \t]+/++` stops colm with
 `regular definition "space" already exists`.
 
@@ -142,8 +143,8 @@ the input, where no line break comes before it. `blank_line` matches a line
 break, then a line that is blank or holds only a comment, then that line's
 break. It keeps all but the last line break, which the scanner reads again.
 On such text, `blank_line` wins over `indentation` because it matches more of
-it, as "How the scanner chooses a token", in xref:3_01_lex.adoc[the lexing
-chapter], explains.
+it, as "How the scanner chooses a token", in xref:3_01_lex.adoc#lexing[the
+lexing chapter], explains.
 
 Why hold them? Ignored text belongs to the token before it, as
 xref:3_03_match.adoc#changing[the patterns chapter] explains, and a tree that
@@ -157,10 +158,10 @@ before it, which nothing replaces.
 `Indents` and `Held` are globals: to use a variable declared at the top of
 the program, an action needs it declared with `global`. If the parser backs
 up over a token, colm undoes what the token's action did to them, as
-xref:3_04_undo.adoc[the context chapter] explains. `python.lm` keeps the same
-data in a context, which that chapter also covers. The globals spare this
-grammar's names the qualifier that a context's names need outside it, as in
-that chapter's `decls::program`.
+xref:3_04_undo.adoc#context[the context chapter] explains. `python.lm` keeps
+the same data in a context, which that chapter also covers. The globals spare
+this grammar's names the qualifier that a context's names need outside it, as
+in that chapter's `decls::program`.
 
 == Statements and expressions
 
@@ -181,7 +182,7 @@ compound statement: an `if`, `while`, `for` or `def`. A compound statement's
 
 `x?` is an optional `x`, `+x*+` is zero or more ``x``s, and `x+` is one or
 more. `+(`, id)*+` is zero or more of a comma followed by an `id`.
-xref:3_02_parse.adoc[The parsing chapter] covers these.
+xref:3_02_parse.adoc#parsing[The parsing chapter] covers these.
 
 `print_stmt` has four productions, one for each row of the table at the top
 of this page: the call, `print` with a comma at the end, `print` with
@@ -223,13 +224,13 @@ include::code/py_parse.lm[]
 
 `+parse Program: program[ stdin ]+` parses the standard input as a `program`.
 If the parse fails, `Program` is nil, and `error` holds a message, which the
-program prints before it exits with 1. xref:3_02_parse.adoc[The parsing
+program prints before it exits with 1. xref:3_02_parse.adoc#parsing[The parsing
 chapter] covers `parse`.
 
 The program prints its input unchanged, with the comments, the blank line and
 the indentation. A tree keeps the ignored text that it was parsed from, as
-xref:3_01_lex.adoc[the lexing chapter] says, and the text in `Held` is in it
-as ignored text too. So a program that changes nothing gives back what it
+xref:3_01_lex.adoc#lexing[the lexing chapter] says, and the text in `Held` is
+in it as ignored text too. So a program that changes nothing gives back what it
 read.
 
 == Finding the print statements
@@ -244,8 +245,8 @@ include::code/py_find.lm[]
 ----
 
 `+for P: print_stmt in Program+` visits every `print_stmt` in the tree,
-however deep it is, as xref:1_06_iterators.adoc[the iterators chapter]
-explains. Here they are inside a `def` and a `for`, and at the top.
+however deep it is, as xref:1_06_iterators.adoc#iterators[the iterators
+chapter] explains. Here they are inside a `def` and a `for`, and at the top.
 
 Each `match` tests `P` against a pattern. A pattern in square brackets lists
 the types and literals that the tree must have, as
@@ -275,9 +276,9 @@ include::code/py_rewrite.lm[]
 
 Assigning to `P` replaces that statement in `Program`. The loop then goes on,
 and doesn't visit the new statement itself. "Rewriting a tree in a loop", in
-xref:1_06_iterators.adoc[the iterators chapter], covers this. `Program` is a
-plain variable, not a `global`: that chapter says that changes made through
-a loop over a global are lost.
+xref:1_06_iterators.adoc#iterators[the iterators chapter], covers this.
+`Program` is a plain variable, not a `global`: that chapter says that changes
+made through a loop over a global are lost.
 
 `+cons print_stmt "print([^Args])"+` makes a new `print_stmt` from text, with
 the value of `Args` in square brackets, as
@@ -318,20 +319,20 @@ the `print` before it, which was replaced.
 
 Each part of the program has a chapter of its own:
 
-* xref:3_01_lex.adoc[The lexing chapter]: tokens, ignored text, how the
+* xref:3_01_lex.adoc#lexing[The lexing chapter]: tokens, ignored text, how the
   scanner chooses a token, and token actions.
-* xref:3_02_parse.adoc[The parsing chapter]: grammars, `parse`, and how colm
-  chooses between productions.
-* xref:3_03_match.adoc[The patterns chapter]: `match`, `cons`, and changing a
-  tree.
-* xref:1_06_iterators.adoc[The iterators chapter]: loops over a tree, and
-  rewriting a tree from inside one.
-* xref:3_04_undo.adoc[The context chapter]: keeping a parse's data in a
+* xref:3_02_parse.adoc#parsing[The parsing chapter]: grammars, `parse`, and how
+  colm chooses between productions.
+* xref:3_03_match.adoc#patterns[The patterns chapter]: `match`, `cons`, and
+  changing a tree.
+* xref:1_06_iterators.adoc#iterators[The iterators chapter]: loops over a tree,
+  and rewriting a tree from inside one.
+* xref:3_04_undo.adoc#context[The context chapter]: keeping a parse's data in a
   context instead of globals, as `python.lm` does.
-* xref:8_02_modularity.adoc[The modularity chapter]: `include` and
+* xref:8_02_modularity.adoc#namespaces[The modularity chapter]: `include` and
   namespaces.
-* xref:3_06_send.adoc[The send chapter]: sending input to a parser a piece at
-  a time, and writing output through one.
+* xref:3_06_send.adoc#send[The send chapter]: sending input to a parser a piece
+  at a time, and writing output through one.
 
 The https://github.com/adrian-thurston/colm-suite/tree/main/grammar[grammar
 directory] of the colm-suite repository has grammars for {cpp}, Go, PCRE,

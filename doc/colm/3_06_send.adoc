@@ -1,12 +1,13 @@
+[[send]]
 = Send and incremental parsing
 
-`parse`, the subject of xref:3_02_parse.adoc[the parsing chapter], takes all
-of its input in one statement, and ends the input after the last item. A
-program can also make a parser, send it input a piece at a time, and end the
-input when there is no more. This chapter covers parser objects and `send`,
-ending the input, `send_tree`, streams and files, writing output through a
-parser with `+<<+`, trimming what a send sends, and using a parser's input
-from a token action.
+`parse`, the subject of xref:3_02_parse.adoc#parsing[the parsing chapter],
+takes all of its input in one statement, and ends the input after the last
+item. A program can also make a parser, send it input a piece at a time, and
+end the input when there is no more. This chapter covers parser objects and
+`send`, ending the input, `send_tree`, streams and files, writing output
+through a parser with `+<<+`, trimming what a send sends, and using a parser's
+input from a token action.
 
 == Parser objects
 
@@ -38,7 +39,7 @@ function `feed` in the next example shows.
 
 A parser can also be given a context, for a grammar defined inside a
 `context` block: `+new parser<ctx::program>( new ctx() )+`.
-xref:3_04_undo.adoc[The context chapter] covers contexts.
+xref:3_04_undo.adoc#context[The context chapter] covers contexts.
 
 == Sending input piece by piece
 
@@ -76,8 +77,8 @@ complete, but the parser reduces it only when it has the next token,
 the parser has `depth`. `depth = 3;` is reduced by `+finish()+`, where the end
 of the input is the token after it.
 
-Backing up, which xref:3_02_parse.adoc[the parsing chapter] describes, can
-go back into the text of earlier sends.
+Backing up, which xref:3_02_parse.adoc#parsing[the parsing chapter] describes,
+can go back into the text of earlier sends.
 
 `send` is an expression, whose value is the parser:
 `+Q: parser<program> = send P "a = 1;"+` sends the text, and makes `Q` the
@@ -121,8 +122,8 @@ stays nil.
 
 The message for an error in a file sent to a parser starts with the file's
 name. Text sent as a string or a value has no file name to give.
-xref:8_04_error_handling.adoc[The error handling chapter] covers error
-messages.
+xref:8_04_error_handling.adoc#error-handling[The error handling chapter] covers
+error messages.
 
 == `send_tree` and `parse_tree`
 
@@ -149,11 +150,11 @@ include::code/send_tree.exp[]
 ----
 
 `W` is a `word` whose text is `42`. It is made with `make_token`, which
-xref:3_01_lex.adoc[the lexing chapter] covers. Sent with `send`, its text is
-scanned again. Both patterns match `42`, and `number` is defined first, so
-the parser gets a number. Sent with `send_tree`, or parsed with `parse_tree`,
-`W` stays a word. The string `" 7"` is scanned each time, and `7` is a
-number.
+xref:3_01_lex.adoc#lexing[the lexing chapter] covers. Sent with `send`, its
+text is scanned again. Both patterns match `42`, and `number` is defined first,
+so the parser gets a number. Sent with `send_tree`, or parsed with
+`parse_tree`, `W` stays a word. The string `" 7"` is scanned each time, and `7`
+is a number.
 
 == Streams
 
@@ -236,9 +237,9 @@ before it prints the assignments. When the output doesn't parse,
 
 == Trimming
 
-A tree holds the ignored text next to it, as xref:3_01_lex.adoc[the lexing
-chapter] explains, and sending a tree sends that text too. A parser's input
-can trim it off instead. `+P->gets()+` returns the input, and
+A tree holds the ignored text next to it, as xref:3_01_lex.adoc#lexing[the
+lexing chapter] explains, and sending a tree sends that text too. A parser's
+input can trim it off instead. `+P->gets()+` returns the input, and
 `+auto_trim( true )+` on the input makes the trees sent to the parser lose
 the ignored text around them:
 
@@ -276,7 +277,7 @@ trims them, though `auto_trim` is off.
 == The parser's input in token actions
 
 In a token action, `input` is the input of the parser that the token is for.
-xref:3_01_lex.adoc[The lexing chapter] covers `+input->pull+`,
+xref:3_01_lex.adoc#lexing[The lexing chapter] covers `+input->pull+`,
 `+input->push+` and `make_token`. Two more things can be done with it there:
 
 * `+input->push_stream( S )+` puts the stream `S` at the front of the input.

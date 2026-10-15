@@ -1,3 +1,4 @@
+[[control-flow]]
 = Control flow
 
 This chapter covers the statements that choose which code runs, and how many
@@ -25,9 +26,9 @@ which values are true.
 map, as xref:2_02_list_map_struct_alias.adoc#lists[the lists section] shows,
 and xref:1_00_language_overview.adoc#exit[the language overview] does with
 `argv`. Over a tree, it runs the body once for each tree of the type `Type`
-inside it: see xref:1_06_iterators.adoc[the iterators chapter], and the
-examples of xref:3_01_lex.adoc[the lexing chapter] and
-xref:3_02_parse.adoc[the parsing chapter].
+inside it: see xref:1_06_iterators.adoc#iterators[the iterators chapter], and
+the examples of xref:3_01_lex.adoc#lexing[the lexing chapter] and
+xref:3_02_parse.adoc#parsing[the parsing chapter].
 
 `Name` exists only inside the loop. Using it after the loop is an error: for
 a loop variable `V`, colm reports `cannot find name V in object`.
@@ -40,8 +41,8 @@ the rest of the body in an `if`.
 == return
 
 `return Value` ends a function and gives its result, as
-xref:1_04_functions.adoc[the functions chapter] shows. `return` needs a
-value: a bare `return` is a parse error.
+xref:1_04_functions.adoc#functions[the functions chapter] shows. `return` needs
+a value: a bare `return` is a parse error.
 
 This program prints the primes up to 40:
 
@@ -64,7 +65,7 @@ is `true`, and it leaves the loop with `break`.
 
 `switch` picks the code to run by the form of a tree. Its cases are the names
 of productions, or patterns, so it is described with patterns, in
-xref:3_03_match.adoc[the patterns chapter].
+xref:3_03_match.adoc#patterns[the patterns chapter].
 
 `exit` ends the program, as xref:1_00_language_overview.adoc#exit[the
 language overview] explains.

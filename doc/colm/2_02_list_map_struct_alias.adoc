@@ -1,3 +1,4 @@
+[[list-map-struct-alias]]
 = List, Map, Struct and alias
 
 Next to the basic types, there are the normal things that we can expect from scripting languages.
@@ -49,8 +50,8 @@ Structs are shared, as xref:2_00_types.adoc#sharing[the types chapter] says,
 so a function can change a struct passed to it.
 
 A struct can also hold `lex` blocks, tokens and defs. Passed to `parse`, it
-is a parsing context, the subject of xref:3_04_undo.adoc[the context chapter].
-`context` is another keyword for `struct`.
+is a parsing context, the subject of xref:3_04_undo.adoc#context[the context
+chapter]. `context` is another keyword for `struct`.
 
 This program builds a route of stops, each a struct that holds the next:
 

@@ -1,11 +1,12 @@
+[[patterns]]
 = Patterns and trees
 
-A parse, the subject of xref:3_02_parse.adoc[the parsing chapter], gives a
-tree. This chapter covers what a program can do with one: copy and compare
-it, take it apart with patterns, `match`, `require` and `switch`, change it,
-and make new trees with `cons`, `make_token` and `make_tree`. Loops over the
-trees inside a tree are the subject of xref:1_06_iterators.adoc[the
-iterators chapter].
+A parse, the subject of xref:3_02_parse.adoc#parsing[the parsing chapter],
+gives a tree. This chapter covers what a program can do with one: copy and
+compare it, take it apart with patterns, `match`, `require` and `switch`,
+change it, and make new trees with `cons`, `make_token` and `make_tree`. Loops
+over the trees inside a tree are the subject of
+xref:1_06_iterators.adoc#iterators[the iterators chapter].
 
 == Trees as values
 
@@ -17,7 +18,7 @@ Assigning a tree to a variable copies it, and so does passing it to a
 function. A change made through one variable doesn't show in the other. A
 parameter of type `ref<T>` refers to the caller's variable instead, so a
 function can change the caller's tree through it.
-xref:1_04_functions.adoc[The functions chapter] covers `ref`.
+xref:1_04_functions.adoc#functions[The functions chapter] covers `ref`.
 
 `==` and `!=` compare two trees. They are equal when they have the same
 types, and their tokens have the same text. Ignored text isn't compared, so
@@ -169,8 +170,8 @@ one in `show_number` skips those whose value is a word.
 
 * `case PATTERN`, which `T` fits when it matches the pattern.
 * `case Name`, which `T` fits when its production is the one named `Name`.
-  xref:3_02_parse.adoc[The parsing chapter] shows how to name a production,
-  as in `+[id] :Id+`.
+  xref:3_02_parse.adoc#parsing[The parsing chapter] shows how to name a
+  production, as in `+[id] :Id+`.
 * `case Name PATTERN`, which `T` fits when both hold.
 
 `default` comes after the cases, and runs when `T` fits none of them. It can
@@ -316,9 +317,10 @@ its end.
 `str` `Text`. `+make_tree( typeid<T>, Child, ... )+` makes a tree of the def
 `T`, with the children it is given, in the order of the elements of its
 production. `typeid<T>` stands for the type `T`, as
-xref:1_02_expressions.adoc[the expressions chapter] explains. Both give a
-value of type `any`, which can be assigned to a variable of the type.
-xref:3_01_lex.adoc[The lexing chapter] uses `make_token` in token actions.
+xref:1_02_expressions.adoc#expressions[the expressions chapter] explains. Both
+give a value of type `any`, which can be assigned to a variable of the type.
+xref:3_01_lex.adoc#lexing[The lexing chapter] uses `make_token` in token
+actions.
 
 Use `make_tree` only for a def with one production. Make a tree of a def
 with more than one production with `cons`. Colm doesn't check that the

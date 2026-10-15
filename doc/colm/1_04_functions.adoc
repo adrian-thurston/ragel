@@ -1,3 +1,4 @@
+[[functions]]
 = Functions
 
 The _FizzBuzz_ example gave us an good overview.

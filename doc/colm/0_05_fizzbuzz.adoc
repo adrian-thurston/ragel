@@ -1,3 +1,4 @@
+[[fizzbuzz]]
 = FizzBuzz
 
 == Slightly modified example of thesis: Figure 4.4, page 87

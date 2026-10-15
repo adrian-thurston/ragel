@@ -1,3 +1,4 @@
+[[hello-world]]
 = Hello world
 
 The obligatory _hello world_ program:

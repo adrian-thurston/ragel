@@ -1,3 +1,4 @@
+[[embedding]]
 = Embedding colm in C and C++
 
 Normally colm compiles a program to an executable. With `-c` it writes the
@@ -155,7 +156,8 @@ A host can make several programs, from one parse object or from several, and
 have them alive at once. Each is independent of the others. Make a program,
 run it once, and delete it.
 
-xref:8_04_error_handling.adoc[The error handling chapter] covers `error`.
+xref:8_04_error_handling.adoc#error-handling[The error handling chapter] covers
+`error`.
 
 == Standard input and output
 
@@ -301,13 +303,13 @@ With the input `host = ;`, it prints `error: <stdin>:1:8: parse error`.
 [[commit-code]]
 == Commit code
 
-A program's reductions, which xref:3_05_reduction.adoc[the reductions
-chapter] covers, are {cpp} code that runs as the parser commits trees.
-`-m FILE` writes that code, the _commit code_, to `FILE`. It defines functions
-that the parse object calls, such as `colm_object_commit_reduce_forward`, named
-after the `-b` name. Without `-m`, the C file defines stubs for them instead.
-With `-m`, it leaves them out, so the commit code must be compiled and linked
-in, or the link fails with
+A program's reductions, which xref:3_05_reduction.adoc#reductions[the
+reductions chapter] covers, are {cpp} code that runs as the parser commits
+trees. `-m FILE` writes that code, the _commit code_, to `FILE`. It defines
+functions that the parse object calls, such as
+`colm_object_commit_reduce_forward`, named after the `-b` name. Without `-m`,
+the C file defines stubs for them instead. With `-m`, it leaves them out, so
+the commit code must be compiled and linked in, or the link fails with
 `undefined reference to 'colm_object_commit_reduce_forward'`.
 
 The commit code is {cpp}, and includes `+"reducer.h"+`, a header you write.

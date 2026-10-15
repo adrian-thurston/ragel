@@ -1,3 +1,4 @@
+[[lexing]]
 = Lexical analysis
 
 A colm program that parses text has two parts that work together. The
@@ -9,7 +10,7 @@ This chapter covers the scanner: how to define tokens, how to give a pattern
 a name, how the scanner picks a token when several patterns match, how to scan
 different parts of the input with different patterns, and how to run code
 when a token is read. The grammar itself, written with `def`, is the subject
-of xref:3_02_parse.adoc[the parsing chapter].
+of xref:3_02_parse.adoc#parsing[the parsing chapter].
 
 == Tokens, ignores and literals
 

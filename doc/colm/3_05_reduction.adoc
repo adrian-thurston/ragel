@@ -1,3 +1,4 @@
+[[reductions]]
 = Actions, attributes and reductions
 
 Colm runs code of yours as it parses, in two ways:
@@ -172,7 +173,7 @@ Without `( "cons" )`, the last line says `file from NIL`.
 
 A reduction is {cpp} code that runs on the trees of a parse. It goes in a
 `reduction` block, at the top level of a program. A namespace can't hold one,
-as xref:8_02_modularity.adoc[the modules chapter] says.
+as xref:8_02_modularity.adoc#namespaces[the modules chapter] says.
 
 [source,chapel]
 ----

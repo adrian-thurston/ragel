@@ -1,3 +1,4 @@
+[[contributing]]
 = Contributing
 
 This chapter is for working on colm itself: building it from a git checkout,
@@ -7,8 +8,8 @@ https://github.com/adrian-thurston/colm-suite[GitHub].
 
 == Building from source
 
-xref:0_01_installing.adoc[The installing chapter] covers the build. This
-section adds what is different when working on colm.
+xref:0_01_installing.adoc#installing[The installing chapter] covers the build.
+This section adds what is different when working on colm.
 
 A git checkout has no `configure` script. Run `./autogen.sh` first, which
 needs autoconf, automake and libtool.

@@ -1,3 +1,4 @@
+[[vim-syntax]]
 = Vim syntax
 
 To activate colm syntax highlighting in vim, copy colm's syntax file, `colm.vim`, to vim's syntax directory.
