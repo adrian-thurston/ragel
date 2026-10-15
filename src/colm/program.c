@@ -280,7 +280,8 @@ int colm_delete_program( program_t *prg )
 	colm_tree_downref( prg, sp, prg->error );
 
 	/* Report the pool items never freed. A DEBUG build always does. Others do
-	 * when COLM_LEAK_CHECK is set, as the test harness sets it for colm.d. */
+	 * when COLM_LEAK_CHECK is set, as the test harness sets it for colm.d and
+	 * the manual suite. */
 #if DEBUG
 	int report_lost = 1;
 #else

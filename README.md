@@ -2,7 +2,7 @@
 
 The Colm Suite is a unified distribution of two closely related language tools:
 
-- **Colm** (COmputer Language Machinery): A programming language designed for the analysis and [transformation of computer languages](https://www.program-transformation.org/Transform/TransformationSystems). Influenced primarily by [TXL](https://www.txl.ca/).
+- **Colm** (COmputer Language Machinery): A programming language designed for the analysis and transformation of computer languages. Influenced primarily by [TXL](https://www.txl.ca/).
 
 - **Ragel**: A state machine compiler that generates executable finite state machines from regular expressions and state machine specifications.
 
@@ -25,112 +25,40 @@ releases (`2026.08`, then `2026.08.1`).
 
 ## Colm
 
-### What is a transformation language?
+Colm is a programming language for the analysis and transformation of computer
+languages. Where other languages define classes or data structures, a colm
+program defines grammars, and colm builds a parser from them that reads both the
+program's input and the patterns the program looks for in it, so the two parse
+into trees of the same types. Colm compiles a program to C, and the C to an
+executable.
 
-A transformation language has a type system based on formal languages.<br>
-Rather than defining classes or data structures, one defines grammars.
+This is how Colm greets the world
+([`hello_world.lm`](doc/colm/code/hello_world.lm)):
 
-A parser is constructed automatically from the grammar, and the parser is used for two purposes:
-
-- to parse the input language,
-- and to parse the structural patterns in the program that performs the analysis.
-
-In this setting, grammar-based parsing is critical because it guarantees that both the input and the structural patterns are parsed into trees from the same set of types, allowing comparison.
-
-### Features
-
-- Colm's main contribution lies in the parsing method.<br>Colm's parsing engine is generalized, but it also allows for the construction of arbitrary global data structures that can be queried during parsing. In other generalized methods, construction of global data requires some very careful consideration because of inherent concurrency in the parsing method. It is such a tricky task that it is often avoided altogether and the problem is deferred to a post-parse disambiguation of the parse forest.
-- By default Colm will create an elf executable that can be used standalone for that actual transformations.
-- Colm is a static and strong typed scripting language.
-- Colm is very tiny and fast and can easily be embedded/linked with c/cpp programs.
-- Colm's runtime is a stackbased VM that starts with the bare minimum of the language and bootstraps itself.
-
-### Examples
-
-This is how Colm is greeting the world ([`hello_world.lm`](doc/colm/code/hello_world.lm)):
 ```colm
 print "hello world\n"
 ```
 
-Here's a Colm program implementing a little assignment language ([`assign.lm`](doc/colm/code/assign.lm)) and its parse tree synthesis afterwards.
-```colm
-lex
-	token id / ('a' .. 'z' | 'A' .. 'Z' ) + /
-	token number / ( '0' .. '9' )+ /
-	literal `= `;
-	ignore / [ \t\n]+ /
-end
-
-def value
-	[id] | [number]
-
-def assignment
-	[id `= value `;]
-
-def assignment_list
-	[assignment assignment_list]
-|	[assignment]
-|	[]
-
-parse Simple: assignment_list[ stdin ]
-
-if ( ! Simple ) {
-	print( "[error]\n" )
-	exit( 1 )
-}
-else {
-	for I:assignment in Simple {
-		print( $I.id, "->", $I.value, "\n" )
-	}
-}
-```
-
-More real-world programs parsing several languages implemented in Colm can be found in the [`grammar/`](grammar/) folder.
-
-### Colm usage
-
-To immediately compile and run e.g. the `hello_world.lm` program from above, call
+`-r` runs the program once colm has built it, and `colm --help` lists the other
+options:
 
 ```
 $ colm -r hello_world.lm
 hello world
 ```
 
-Run `colm --help` for help on further options.
+The [colm manual](doc/colm/colm-manual.adoc) covers the rest. Places to start:
 
-```
-$ colm --help
-usage: colm [options] file
-general:
-   -h, -H, -?, --help   print this usage and exit
-   -v --version         print version information and exit
-   -b <ident>           use <ident> as name of C object encapsulating
-                        the program
-   -o <file>            if -c given, write C parse object to <file>,
-                        otherwise write binary to <file>
-   -p <file>            write C parse object to <file>
-   -e <file>            write C++ export header to <file>
-   -x <file>            write C++ export code to <file>
-   -m <file>            write C++ commit code to <file>
-   -a <file>            additional code file to include in output program
-   -E N=V               set a string value available in the program
-   -I <path>            additional include path for the compiler
-   -i                   activate branchpoint information
-   -L <path>            additional library path for the linker
-   -l                   activate logging
-   -r                   run output program and replace process
-   -c                   compile only (don't produce binary)
-   -V                   print dot format (graphviz)
-   --ebnf               print EBNF for railroad diagram
-   -d                   print verbose debug information
-   -B <path>
-       Run Colm from the build directory. Use this when building from source
-       and using the resulting binary without installing it. Colm will attempt
-       to detect when it is run from the build directory. This flag lets the
-       user be explicit about it. The detection method is specific to the OS
-       and can fail. The path given should be the root of the build directory,
-       eg what would be returned by ABS_TOP_BUILDDIR (directory where src is).
-```
+- [Installing](doc/colm/0_01_installing.adoc): getting colm, building it and
+  running a program.
+- [Commandline](doc/colm/0_03_commandline.adoc): the output of `colm --help`.
+- A tutorial, from [Hello world](doc/colm/0_04_hello_world.adoc) to
+  [A complete transformation](doc/colm/0_07_transformation.adoc).
+- [Contributing](doc/colm/8_05_contributing.adoc): working on colm itself.
+- [Q and A](doc/colm/9_00_q_and_a.adoc).
+
+More real-world programs parsing several languages implemented in Colm can be
+found in the [`grammar/`](grammar/) folder.
 
 
 ## Ragel
@@ -295,14 +223,22 @@ The autotools build remains the reference build. Known differences:
 
 ### Run-time dependencies
 
-The colm program depends on GCC at runtime. It produces a C program as output,
-then compiles and links it with a runtime library. The compiled program depends
-on the colm library.
+Colm compiles a program to C, then compiles the C with `gcc`, or the compiler
+named by the `CC` environment variable, passing it `CFLAGS` from the
+environment as well. So colm needs a C compiler wherever it is used, not only
+where it is built. The program is linked with the colm runtime library, libcolm.
 
-To find the includes and the runtime library to pass to GCC, colm looks at
-`argv[0]` to decide if it is running out of the source tree. If it is, then the
-compile and link flags are derived from `argv[0]`. Otherwise, it uses the install
-location (prefix) to construct the flags.
+An installed colm compiles against the installed headers and libcolm. A colm run
+from an autotools build tree uses the tree's headers instead, and links libcolm
+statically through the tree's libtool, so nothing has to be installed. Colm knows
+that it is in the build tree when its own executable is the one the build made,
+a check that works on Linux and macOS only. When the check fails, `-B <path>`
+names the build tree, the directory that holds `src`. A colm built by CMake
+always uses the installed headers and libcolm, and `-B` doesn't work with it.
+
+The manual's [Running colm](doc/colm/0_01_installing.adoc#running-colm) and
+[Building from source](doc/colm/8_05_contributing.adoc#building-from-source)
+say more.
 
 
 ## Testing
