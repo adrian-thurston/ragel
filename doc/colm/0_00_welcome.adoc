@@ -1,5 +1,5 @@
-Welcome
-=======
+[[welcome]]
+= Welcome
 
 == Colm = COmputer Language Machinery
 
@@ -38,4 +38,4 @@ Colm's development started by Adrian Thurston during his https://www.colm.net/fi
 === When not to use Colm
 
 Colm is meant to create executables or object files that can be linked in other programs.
-This make is ideal for tasks like high performance transformations, but not very convenient for throwaway-oneliners that are common with tools like 'sed' or 'awk'.
+This make is ideal for tasks like high performance transformations, but not very convenient for throwaway-oneliners that are common with tools like `sed` or `awk`.

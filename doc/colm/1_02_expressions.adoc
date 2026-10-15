@@ -1,3 +1,4 @@
+[[expressions]]
 = Expressions
 
 An expression gives a value. This chapter covers the literals, the operators,
@@ -87,7 +88,8 @@ section] shows.
 `$X` is the text of the tree `X`, without the ignored text around it, as a
 `str`. For an `int`, it is its digits, so `$N` turns an int into a str. `%X`
 is the text with the ignored text. `+^X+` is the tree without the ignored
-text around it. xref:3_01_lex.adoc[The lexing chapter] explains ignored text.
+text around it. xref:3_01_lex.adoc#lexing[The lexing chapter] explains ignored
+text.
 
 A prefix operator applies to the value right after it: `!A == B` is
 `(!A) == B`.
@@ -95,9 +97,10 @@ A prefix operator applies to the value right after it: `!A == B` is
 These are not in colm:
 
 * `%` as an operator between two values. `+A - A / B * B+` is the remainder
-  of `A / B`, and xref:0_05_fizzbuzz.adoc[FizzBuzz] uses a function for it.
-* `pass:c[++]` and `pass:c[+=]`, as xref:1_01_statements.adoc[the statements
-  chapter] says.
+  of `A / B`, and xref:0_05_fizzbuzz.adoc#fizzbuzz[FizzBuzz] uses a function
+  for it.
+* `pass:c[++]` and `pass:c[+=]`, as xref:1_01_statements.adoc#statements[the
+  statements chapter] says.
 * a minus sign in front of a value
 * bitwise operators
 * `?:`
@@ -136,20 +139,22 @@ isn't nil. An empty str and an empty list are true.
 == Other expressions
 
 * A function call, `Name( Arg, Arg )`, gives the function's result:
-  xref:1_04_functions.adoc[the functions chapter].
+  xref:1_04_functions.adoc#functions[the functions chapter].
 * `new` makes a struct, list or map:
   xref:2_02_list_map_struct_alias.adoc#structs[the structs section].
-* `parse` makes a tree from text: xref:3_02_parse.adoc[the parsing chapter].
+* `parse` makes a tree from text: xref:3_02_parse.adoc#parsing[the parsing
+  chapter].
 * `match`, `cons`, `make_token` and `make_tree`:
-  xref:3_03_match.adoc[the patterns chapter].
+  xref:3_03_match.adoc#patterns[the patterns chapter].
 
 [[cast]]
 == cast and typeid
 
 `typeid<T>` is an `int` that stands for the tree type `T`, a token or a def.
-It tells `make_token` and `make_tree`, in xref:3_03_match.adoc[the patterns
-chapter], what type to make. The number is internal to colm: a program only
-passes it on. `typeid` works only for tree types: `typeid<int>` is an error.
+It tells `make_token` and `make_tree`, in xref:3_03_match.adoc#patterns[the
+patterns chapter], what type to make. The number is internal to colm: a program
+only passes it on. `typeid` works only for tree types: `typeid<int>` is an
+error.
 
 `cast<T> X`, where `X` is a tree and `T` a tree type, gives a copy of `X` with
 the type `T`: the same text, ignored text and children. Colm doesn't check

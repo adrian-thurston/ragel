@@ -11,19 +11,23 @@ OPTIONS=\
 	-a colm-version=$(COLM_VERSION) \
 	-a 'colm-pubdate=$(COLM_PUBDATE)'
 
-IN_FILES = \
-	0_00_welcome.adoc 0_06_scope.adoc 1_05_variables.adoc \
-	3_00_language_transformation.adoc \
-	9_00_q_and_a.adoc 0_01_installing.adoc 1_00_language_overview.adoc \
-	1_06_iterators.adoc 3_01_lex.adoc 8_01_embedding.adoc \
-	0_02_vim_syntax.adoc 1_01_statements.adoc 2_00_types.adoc \
-	3_02_parse.adoc 8_02_modularity.adoc 0_03_commandline.adoc \
-	1_02_expressions.adoc 2_01_basic.adoc 3_03_match.adoc \
-	0_04_hello_world.adoc 1_03_control_flow.adoc \
-	2_02_list_map_struct_alias.adoc 3_04_undo.adoc 8_04_error_handling.adoc \
-	0_05_fizzbuzz.adoc 1_04_functions.adoc 2_03_def.adoc \
-	3_05_reduction.adoc 8_05_contributing.adoc \
-	3_06_send.adoc 0_07_transformation.adoc
+# The manual is one book, colm-manual.adoc, which includes the chapters, in
+# the order they are listed here. Only the book is built.
+MANUAL = colm-manual.adoc
+
+CHAPTERS = \
+	0_00_welcome.adoc 0_01_installing.adoc 0_02_vim_syntax.adoc \
+	0_03_commandline.adoc 0_04_hello_world.adoc 0_05_fizzbuzz.adoc \
+	0_06_scope.adoc 0_07_transformation.adoc \
+	1_00_language_overview.adoc 1_01_statements.adoc 1_02_expressions.adoc \
+	1_03_control_flow.adoc 1_04_functions.adoc 1_05_variables.adoc \
+	1_06_iterators.adoc 2_00_types.adoc 2_01_basic.adoc \
+	2_02_list_map_struct_alias.adoc 2_03_def.adoc \
+	3_01_lex.adoc 3_02_parse.adoc 3_03_match.adoc 3_04_undo.adoc \
+	3_05_reduction.adoc 3_06_send.adoc \
+	8_01_embedding.adoc 8_02_modularity.adoc 8_04_error_handling.adoc \
+	8_05_contributing.adoc \
+	9_00_q_and_a.adoc
 
 # The example programs, each with the output it prints (.exp), and the input
 # it reads (.in), the arguments it runs with (.args) and the exit status it
@@ -120,11 +124,11 @@ CODE = \
 	code/var_scope.lm        code/var_scope.exp
 
 
-OUT_FILES = $(IN_FILES:.adoc=.html)
+OUT_FILES = $(MANUAL:.adoc=.html)
 
 CLEANFILES = $(OUT_FILES)
 
-EXTRA_DIST = $(IN_FILES) $(CODE) CMakeLists.txt
+EXTRA_DIST = $(MANUAL) $(CHAPTERS) $(CODE) CMakeLists.txt
 
 if BUILD_MANUAL
 
@@ -137,14 +141,13 @@ doc_DATA = $(OUT_FILES)
 
 SUFFIXES = .html .adoc
 
-# The pages include the example programs and their output. Every page is
-# rebuilt when one of them changes, which is simpler than tracking which page
-# includes which.
-$(OUT_FILES): $(CODE)
+# The book includes the chapters, and they include the example programs and
+# their output, so the book is rendered again when any of them changes.
+$(OUT_FILES): $(CHAPTERS) $(CODE)
 
-# The install page and the FAQ show the versions that OPTIONS passes in, so
-# they are rendered again when configure writes a Makefile with new ones.
-0_01_installing.html 9_00_q_and_a.html: Makefile
+# The install chapter and the FAQ show the versions that OPTIONS passes in, so
+# the book is rendered again when configure writes a Makefile with new ones.
+$(OUT_FILES): Makefile
 
 .adoc.html:
 	$(ASCIIDOCTOR) -b $(OUTPUT) $(OPTIONS) -o $@ $<

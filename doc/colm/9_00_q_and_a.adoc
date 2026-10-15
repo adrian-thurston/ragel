@@ -1,3 +1,4 @@
+[[q-and-a]]
 = Q and A
 // The build passes this in from configure.ac. The value here is for rendering
 // the page on its own.

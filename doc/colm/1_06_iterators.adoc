@@ -1,10 +1,11 @@
+[[iterators]]
 = Iterators
 
 A `for` loop can visit the trees inside a tree. The trees come from a
-grammar, which xref:3_02_parse.adoc[the parsing chapter] covers, and the
-loops here use the patterns of xref:3_03_match.adoc[the patterns chapter].
-This chapter covers loops over a tree, rewriting a tree from inside such a
-loop, colm's built-in iterators, and iterators that a program defines.
+grammar, which xref:3_02_parse.adoc#parsing[the parsing chapter] covers, and
+the loops here use the patterns of xref:3_03_match.adoc#patterns[the patterns
+chapter]. This chapter covers loops over a tree, rewriting a tree from inside
+such a loop, colm's built-in iterators, and iterators that a program defines.
 
 == Loops over a tree
 

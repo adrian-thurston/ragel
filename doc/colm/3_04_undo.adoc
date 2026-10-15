@@ -1,10 +1,11 @@
+[[context]]
 = Context-dependent parsing
 
 Some languages can't be parsed from their grammar alone. In C, `+a * b;+`
 declares `b` as a pointer when `a` names a type, and is a multiplication
-otherwise. `parse_order`, in xref:3_02_parse.adoc[the parsing chapter], picks
-one of the two by the order of the productions. A C parser has to know which
-names the typedefs it has read so far made into types.
+otherwise. `parse_order`, in xref:3_02_parse.adoc#parsing[the parsing chapter],
+picks one of the two by the order of the productions. A C parser has to know
+which names the typedefs it has read so far made into types.
 
 In colm, the parse's own code collects such data, and uses it as the parse
 goes on. Reduction actions write it, and token actions read it to decide
@@ -35,8 +36,8 @@ parse uses before the parse.
 
 Inside the block, code uses the context's variables, defs and tokens by
 name. Outside it, the context's names are qualified as a namespace's are, as
-in `decls::program`. xref:8_02_modularity.adoc[The namespaces chapter]
-covers qualified names.
+in `decls::program`. xref:8_02_modularity.adoc#namespaces[The namespaces
+chapter] covers qualified names.
 
 A parse of a type defined in a context is given an object of that context, in
 parentheses after the type. These lines, from the example in the next
@@ -52,7 +53,7 @@ parse Program: decls::program( Decls )[ stdin ]
 
 A parser made with `new` is given the object the same way, as in
 `+new parser<decls::program>( Decls )+`, which
-xref:3_06_send.adoc[the send chapter] covers. The parse's actions use the
+xref:3_06_send.adoc#send[the send chapter] covers. The parse's actions use the
 variables of the object it is given, so two parses given two objects keep
 separate data.
 
@@ -66,9 +67,9 @@ starts, of a type in the same context, must be given it, as in
 parse. The action uses the context's variables by name.
 
 A `global`, such as `HereEnd` in the example `lex_heredoc` in
-xref:3_01_lex.adoc[the lexing chapter], can also hold data that actions use,
-and it is undone in the same way. A context keeps the data with the grammar
-that uses it, and gives each parse its own.
+xref:3_01_lex.adoc#lexing[the lexing chapter], can also hold data that actions
+use, and it is undone in the same way. A context keeps the data with the
+grammar that uses it, and gives each parse its own.
 
 == Reading and writing the data
 
@@ -97,8 +98,8 @@ include::code/ctx_typedef.exp[]
 The token action of `name` pulls the name off the input, and looks it up in
 `Types`. If the name is there, the action pushes it back as a `type_name`,
 and if not, as a `name`. `type_name` has the empty pattern `//`, so the
-scanner never makes one itself, as xref:3_01_lex.adoc[the lexing chapter]
-explains. The action of `new_type` adds the name to `Types`.
+scanner never makes one itself, as xref:3_01_lex.adoc#lexing[the lexing
+chapter] explains. The action of `new_type` adds the name to `Types`.
 
 After `typedef int a;`, `a` is scanned as a `type_name`, so the second
 `+a * b;+` can only be a declaration. The first `+a * b;+` comes before the
@@ -108,8 +109,8 @@ typedef, and `c` is never declared, so those two are multiplications.
 
 A reduction's action runs when the parser reduces. The parser reduces only
 when it has the token after the production, as
-xref:3_06_send.adoc[the send chapter] says too. By then, that token has been
-scanned, and its token action has run. So a token action sees what a
+xref:3_06_send.adoc#send[the send chapter] says too. By then, that token has
+been scanned, and its token action has run. So a token action sees what a
 reduction's action wrote only from the second token after the production.
 
 In `ctx_typedef`, `new_type` ends before the `;`. Its action runs when the
@@ -192,8 +193,8 @@ variables end with the action, and need no undoing.
 
 A parse that fails has backed up over every action, so the data is as it was
 before the parse. The exception is writes made before a `commit`. The parser
-can't back up past a commit, so they stay. xref:3_02_parse.adoc[The parsing
-chapter] covers `commit`.
+can't back up past a commit, so they stay. xref:3_02_parse.adoc#parsing[The
+parsing chapter] covers `commit`.
 
 Undoing a write puts back the value that the variable had before the write.
 It doesn't reverse the change: undoing `I = I + 1`, run when `I` was 1, sets

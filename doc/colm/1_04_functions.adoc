@@ -1,9 +1,9 @@
-Functions
-=========
+[[functions]]
+= Functions
 
-The 'FizzBuzz' example gave us an good overview.
+The _FizzBuzz_ example gave us an good overview.
 
-== Arguments 'by reference'
+== Arguments _by reference_
 
 We can also pass parameters by reference.
 This enables us to change the variable with in the function.

@@ -1,3 +1,4 @@
+[[variables]]
 = Variables
 
 This chapter covers how variables are declared, where each can be used, and
@@ -8,15 +9,17 @@ globals, the variables that functions can use too.
 `Name: Type` declares a variable, and `Name: Type = Value` gives it a first
 value. A declaration is a statement, and can go wherever one can. A variable
 starts as 0 if it is an `int`, false if it is a `bool`, and nil otherwise.
-xref:2_00_types.adoc[The types chapter] lists the types.
+xref:2_00_types.adoc#types[The types chapter] lists the types.
 
 Other statements declare variables too:
 
-* `for`, in xref:1_03_control_flow.adoc[the control flow chapter]
-* `+parse Name: Type[ ... ]+`, in xref:3_02_parse.adoc[the parsing chapter]
+* `for`, in xref:1_03_control_flow.adoc#control-flow[the control flow chapter]
+* `+parse Name: Type[ ... ]+`, in xref:3_02_parse.adoc#parsing[the parsing
+  chapter]
 * `new Name: Type()`, in xref:2_02_list_map_struct_alias.adoc#structs[the
   structs section]
-* `+cons Name: Type[ ... ]+`, in xref:3_03_match.adoc[the patterns chapter]
+* `+cons Name: Type[ ... ]+`, in xref:3_03_match.adoc#patterns[the patterns
+  chapter]
 
 An assignment's value has the variable's type. `nil` can be assigned to a
 `str` or a tree, but not to an `int` or a `bool`: that is
@@ -36,9 +39,9 @@ A function sees its parameters, its own variables and globals, but not the
 top level's variables. Reading one is an error, such as
 `cannot find name Total in object`. A function that changes an `int` or `str`
 parameter doesn't change the caller's variable, as
-xref:0_06_scope.adoc[the scope chapter] shows for a str.
-xref:1_04_functions.adoc[The functions chapter] shows `ref`, which passes the
-caller's variable itself.
+xref:0_06_scope.adoc#scope[the scope chapter] shows for a str.
+xref:1_04_functions.adoc#functions[The functions chapter] shows `ref`, which
+passes the caller's variable itself.
 
 [[globals]]
 == Globals
@@ -46,8 +49,8 @@ caller's variable itself.
 `global Name: Type = Value` declares a global:
 
 * It goes at the top level, or in a namespace, which
-  xref:8_02_modularity.adoc[the modularity chapter] covers. In a block or a
-  function, it is a parse error.
+  xref:8_02_modularity.adoc#namespaces[the modularity chapter] covers. In a
+  block or a function, it is a parse error.
 * The variable is visible to all code, including functions defined above
   the declaration.
 * It gets its value when the declaration runs, so put the declaration before
@@ -55,7 +58,7 @@ caller's variable itself.
 
 A variable declared with `export` in place of `global` can also be read by a
 C++ program that embeds the colm program, as
-xref:8_01_embedding.adoc[the embedding chapter] explains.
+xref:8_01_embedding.adoc#embedding[the embedding chapter] explains.
 
 This program uses a global, a top-level variable and a variable in a block:
 

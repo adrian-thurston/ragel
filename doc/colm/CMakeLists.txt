@@ -22,19 +22,24 @@ set(MANUAL_OPTIONS
 	-a colm-version=${COLM_VERSION}
 	-a "colm-pubdate=${COLM_PUBDATE}")
 
-set(MANUAL_PAGES
-	0_00_welcome 0_06_scope 1_05_variables
-	3_00_language_transformation
-	9_00_q_and_a 0_01_installing 1_00_language_overview
-	1_06_iterators 3_01_lex 8_01_embedding
-	0_02_vim_syntax 1_01_statements 2_00_types
-	3_02_parse 8_02_modularity 0_03_commandline
-	1_02_expressions 2_01_basic 3_03_match
-	0_04_hello_world 1_03_control_flow
-	2_02_list_map_struct_alias 3_04_undo 8_04_error_handling
-	0_05_fizzbuzz 1_04_functions 2_03_def
-	3_05_reduction 8_05_contributing
-	3_06_send 0_07_transformation)
+# The manual is one book, colm-manual.adoc, which includes the chapters, in
+# the order they are listed here. Only the book is built. CHAPTERS in
+# Makefile.am.
+set(MANUAL_CHAPTERS
+	0_00_welcome 0_01_installing 0_02_vim_syntax
+	0_03_commandline 0_04_hello_world 0_05_fizzbuzz
+	0_06_scope 0_07_transformation
+	1_00_language_overview 1_01_statements 1_02_expressions
+	1_03_control_flow 1_04_functions 1_05_variables
+	1_06_iterators 2_00_types 2_01_basic
+	2_02_list_map_struct_alias 2_03_def
+	3_01_lex 3_02_parse 3_03_match 3_04_undo
+	3_05_reduction 3_06_send
+	8_01_embedding 8_02_modularity 8_04_error_handling
+	8_05_contributing
+	9_00_q_and_a)
+list(TRANSFORM MANUAL_CHAPTERS PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+list(TRANSFORM MANUAL_CHAPTERS APPEND ".adoc")
 
 # The example programs, with their output (.exp) and input (.in), which the
 # pages include, the arguments they run with (.args), and the exit status they
@@ -42,8 +47,8 @@ set(MANUAL_PAGES
 # (.comp), a host program (.host.c or .host.cc), and the reducer.h its commit
 # code includes (.reducer.h), which needs .host.cc. A file that an example
 # includes is listed too. Its suffix isn't .lm (the pages use .lmi), since the
-# manual suite runs every .lm as an example. Every page is rebuilt when one of
-# them changes, which is simpler than tracking which page includes which.
+# manual suite runs every .lm as an example. The book is rendered again when
+# one of them changes.
 set(MANUAL_CODE
 	code/assign.lm           code/assign.exp           code/assign.in
 	code/ctx_reject.lm       code/ctx_reject.exp       code/ctx_reject.in
@@ -130,18 +135,14 @@ set(MANUAL_CODE
 	code/var_scope.lm        code/var_scope.exp)
 list(TRANSFORM MANUAL_CODE PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
 
-set(MANUAL_HTML)
-foreach(page ${MANUAL_PAGES})
-	set(adoc "${CMAKE_CURRENT_SOURCE_DIR}/${page}.adoc")
-	set(html "${CMAKE_CURRENT_BINARY_DIR}/${page}.html")
-	add_custom_command(
-		OUTPUT "${html}"
-		COMMAND "${ASCIIDOCTOR}" ${MANUAL_OPTIONS} -o "${html}" "${adoc}"
-		DEPENDS "${adoc}" ${MANUAL_CODE}
-		COMMENT "Rendering ${page}.html"
-		VERBATIM)
-	list(APPEND MANUAL_HTML "${html}")
-endforeach()
+set(MANUAL_ADOC "${CMAKE_CURRENT_SOURCE_DIR}/colm-manual.adoc")
+set(MANUAL_HTML "${CMAKE_CURRENT_BINARY_DIR}/colm-manual.html")
+add_custom_command(
+	OUTPUT "${MANUAL_HTML}"
+	COMMAND "${ASCIIDOCTOR}" ${MANUAL_OPTIONS} -o "${MANUAL_HTML}" "${MANUAL_ADOC}"
+	DEPENDS "${MANUAL_ADOC}" ${MANUAL_CHAPTERS} ${MANUAL_CODE}
+	COMMENT "Rendering colm-manual.html"
+	VERBATIM)
 
 add_custom_target(colm-manual ALL DEPENDS ${MANUAL_HTML})
 

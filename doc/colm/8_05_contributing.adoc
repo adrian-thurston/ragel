@@ -1,3 +1,4 @@
+[[contributing]]
 = Contributing
 
 This chapter is for working on colm itself: building it from a git checkout,
@@ -7,8 +8,8 @@ https://github.com/adrian-thurston/colm-suite[GitHub].
 
 == Building from source
 
-xref:0_01_installing.adoc[The installing chapter] covers the build. This
-section adds what is different when working on colm.
+xref:0_01_installing.adoc#installing[The installing chapter] covers the build.
+This section adds what is different when working on colm.
 
 A git checkout has no `configure` script. Run `./autogen.sh` first, which
 needs autoconf, automake and libtool.
@@ -161,11 +162,25 @@ arguments, `NAME.exit` the exit status it must end with, 0 without one, and
 that it is linked into, and `NAME.reducer.h` is the `reducer.h` that its
 commit code includes, which needs `NAME.host.cc`. Each of these files is
 listed in `CODE` in `doc/colm/Makefile.am` and in `MANUAL_CODE` in
-`doc/colm/CMakeLists.txt`, and `--suite manual` runs the example. A page
+`doc/colm/CMakeLists.txt`, and `--suite manual` runs the example. A chapter
 includes the program and its output from these files, so the output it shows
 is the output that is tested. A file that an example includes is listed in
 `CODE` and `MANUAL_CODE` too. It takes a suffix other than `.lm`, such as
 `.lmi`, since every `.lm` in `doc/colm/code` is run as an example.
+
+== Writing the manual
+
+The manual is one book, `doc/colm/colm-manual.adoc`, which includes the
+chapters. Each chapter is a file of its own, such as `doc/colm/3_01_lex.adoc`.
+`./configure --enable-manual`, or `-DCOLM_BUILD_MANUAL=ON` with CMake, builds
+the book into `colm-manual.html` with Asciidoctor.
+
+A new chapter is included in `colm-manual.adoc`, and listed in `CHAPTERS` in
+`doc/colm/Makefile.am` and in `MANUAL_CHAPTERS` in `doc/colm/CMakeLists.txt`.
+
+Each chapter has an id on the line above its title, and a link to a chapter
+names that id, as in `+xref:3_01_lex.adoc#lexing[the lexing chapter]+`. A link
+without the id leads to the top of the book.
 
 == Coding conventions
 

@@ -1,3 +1,4 @@
+[[installing]]
 = Installing
 // The build passes these in from configure.ac. The values here are for
 // rendering the page on its own.

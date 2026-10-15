@@ -1,3 +1,4 @@
+[[namespaces]]
 = Namespaces and includes
 
 A namespace lets two grammars, or two parts of a program, use the same names
@@ -44,7 +45,7 @@ Inside each namespace, `item` and `items` are its own. The top-level `line`
 names them `word::items` and `number::items`, and labels them `Words` and
 `Numbers`. Without the labels, `L.items` would give only the first of the
 two, since both types are named `items`, and a name after the dot can't be
-qualified. xref:3_02_parse.adoc[The parsing chapter] covers labels.
+qualified. xref:3_02_parse.adoc#parsing[The parsing chapter] covers labels.
 
 From the top level, `NS::f()` calls the function `f` of the namespace `NS`,
 and `NS::G` reads or sets its global `G`. The program calls `word::count` and
@@ -175,8 +176,8 @@ the same way.
 When FILE isn't there, colm tries each directory given with `-I`, in the
 order given. If none of them has it, colm stops with
 `could not open FILE for reading`.
-xref:0_03_commandline.adoc[The command line page] lists `-I` with colm's
-other options.
+xref:0_03_commandline.adoc#command-line[The command line chapter] lists `-I`
+with colm's other options.
 
 So a program that includes files compiles in the directory that holds them,
 and from anywhere else with `-I` naming that directory. The examples of this

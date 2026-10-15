@@ -1,3 +1,4 @@
+[[types]]
 = Types
 
 Every variable, parameter and function result has a type, fixed when the
@@ -12,10 +13,11 @@ error, such as `type mismatch in assignment` or `arg 1 is of the wrong type`.
 
 The types are:
 
-* `int`, `bool` and `str`, in xref:2_01_basic.adoc[the basic types chapter]
-* trees: each token and each def is a type, as xref:3_01_lex.adoc[the lexing
-  chapter] and xref:3_02_parse.adoc[the parsing chapter] explain, and `any`
-  holds any tree
+* `int`, `bool` and `str`, in xref:2_01_basic.adoc#basic-types[the basic types
+  chapter]
+* trees: each token and each def is a type, as xref:3_01_lex.adoc#lexing[the
+  lexing chapter] and xref:3_02_parse.adoc#parsing[the parsing chapter]
+  explain, and `any` holds any tree
 * structs, in xref:2_02_list_map_struct_alias.adoc#structs[the structs
   section]
 * `list<T>` and `map<K, V>`, and their elements, `list_el<T>` and
@@ -25,7 +27,7 @@ The types are:
 * `void`, for a function that returns nothing, in
   xref:2_01_basic.adoc#void[the basic types chapter]
 * `ref<T>`, a parameter that refers to the caller's variable, in
-  xref:1_04_functions.adoc[the functions chapter]
+  xref:1_04_functions.adoc#functions[the functions chapter]
 
 `alias` gives a type a second name, as
 xref:2_02_list_map_struct_alias.adoc#aliases[the aliases section] explains.
@@ -44,7 +46,7 @@ one to a function shares it too, so a function can change the struct it is
 given, as `struct_route` in xref:2_02_list_map_struct_alias.adoc#structs[the
 structs section] does.
 
-For trees, see xref:3_03_match.adoc[the patterns chapter].
+For trees, see xref:3_03_match.adoc#patterns[the patterns chapter].
 
 This program shows the difference. It uses `new`, which makes a struct or a
 list, and `+->+`, which reaches into one. The
@@ -102,7 +104,7 @@ into another:
   chapter]
 
 | `str` to tree
-| `parse`, in xref:3_02_parse.adoc[the parsing chapter]
+| `parse`, in xref:3_02_parse.adoc#parsing[the parsing chapter]
 
 | tree to another tree type
 | `cast`, in xref:1_02_expressions.adoc#cast[the expressions chapter]

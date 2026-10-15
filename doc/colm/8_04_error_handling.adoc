@@ -1,3 +1,4 @@
+[[error-handling]]
 = Error handling
 
 Colm has no exceptions. A parse that fails gives nil, and a message that says
@@ -15,7 +16,7 @@ check the result, with `if ( ! Tree )`, before using the tree.
 `error` is a `str`. Every `parse` and `parse_stop` statement sets it: to the
 message when the parse fails, and to nil when it succeeds. So read it right
 after the parse it belongs to. It is nil before the first parse. A parser made
-with `new` keeps its message in `+P->error+`, as xref:3_06_send.adoc[the
+with `new` keeps its message in `+P->error+`, as xref:3_06_send.adoc#send[the
 chapter on send] explains.
 
 This program reads settings, and prints them. When the parse fails, it prints
@@ -60,7 +61,7 @@ This chapter's examples print to `stdout`, so the output shown here holds the
 message.
 
 `open` gives nil too, when it can't open a file, as
-xref:3_06_send.adoc[the chapter on send] says.
+xref:3_06_send.adoc#send[the chapter on send] says.
 
 [[message]]
 == The error message
@@ -171,7 +172,7 @@ action: the parse stops there, and the program ends with that status. Use
 `exit` as a statement of its own.
 
 In a program run from a C or {cpp} host, `exit` ends the program, and the host
-gets back its status and its `error`, as xref:8_01_embedding.adoc[the
+gets back its status and its `error`, as xref:8_01_embedding.adoc#embedding[the
 embedding chapter] explains.
 
 To fail the parse instead, and let the parser try another way, an action uses

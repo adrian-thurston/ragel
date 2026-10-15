@@ -1,8 +1,8 @@
-Scope
-=====
+[[scope]]
+= Scope
 
 We saw in the previous paragraph that functions can be used, and that they can have parameters.
-This forces us to clarify 'scope'.
+This forces us to clarify _scope_.
 
 [source,chapel]
 .scope.lm
@@ -23,7 +23,7 @@ include::code/scope.exp[]
 ----
 
 Blocks can be nested.
-Here the function's parameter 'where' is changed inside two nested 'while' blocks, and the blocks around them see the change.
+Here the function's parameter `where` is changed inside two nested `while` blocks, and the blocks around them see the change.
 
 [source,chapel]
 .nested_scope.lm
@@ -42,6 +42,6 @@ That gives us:
 include::code/nested_scope.exp[]
 ----
 
-The next page, link:0_07_transformation.html[A complete transformation],
-puts colm to the work it is made for. It parses a Python program, rewrites
-some of its statements, and prints the result.
+The next chapter, xref:0_07_transformation.adoc#transformation[A complete
+transformation], puts colm to the work it is made for. It parses a Python
+program, rewrites some of its statements, and prints the result.

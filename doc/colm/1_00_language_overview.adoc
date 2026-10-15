@@ -1,3 +1,4 @@
+[[language-overview]]
 = Language overview
 
 This chapter describes a colm program as a whole: what a program file holds,
@@ -9,16 +10,18 @@ expressions, control flow and variables, and then the types.
 
 A colm program is a file of definitions and statements. The definitions are:
 
-* `lex` blocks and tokens, in xref:3_01_lex.adoc[the lexing chapter]
-* ``def``s, in xref:3_02_parse.adoc[the parsing chapter]
-* functions, below and in xref:1_04_functions.adoc[the functions chapter]
-* ``struct``s and ``alias``es, in xref:2_02_list_map_struct_alias.adoc[the
-  chapter on lists, maps, structs and aliases]
+* `lex` blocks and tokens, in xref:3_01_lex.adoc#lexing[the lexing chapter]
+* ``def``s, in xref:3_02_parse.adoc#parsing[the parsing chapter]
+* functions, below and in xref:1_04_functions.adoc#functions[the functions
+  chapter]
+* ``struct``s and ``alias``es, in
+  xref:2_02_list_map_struct_alias.adoc#list-map-struct-alias[the chapter on
+  lists, maps, structs and aliases]
 * ``global``s, in xref:1_05_variables.adoc#globals[the variables chapter]
-* iterators, in xref:1_06_iterators.adoc[the iterators chapter]
+* iterators, in xref:1_06_iterators.adoc#iterators[the iterators chapter]
 
-`namespace` and `include` are in xref:8_02_modularity.adoc[the modularity
-chapter].
+`namespace` and `include` are in xref:8_02_modularity.adoc#namespaces[the
+modularity chapter].
 
 A function, struct, token or def can be used above its definition in the
 file.
@@ -41,13 +44,13 @@ int add( A: int, B: int )
 ----
 
 With it, `print( add( 2, 3 ), "\n" )` prints `5`. A function that returns
-nothing has the type `void`. `return` is in xref:1_03_control_flow.adoc[the
-control flow chapter].
+nothing has the type `void`. `return` is in
+xref:1_03_control_flow.adoc#control-flow[the control flow chapter].
 
 A function that changes an `int` or `str` parameter doesn't change the
 caller's variable: the parameter is a copy. A `ref<T>` parameter is the
-caller's variable instead, as xref:1_04_functions.adoc[the functions chapter]
-shows.
+caller's variable instead, as xref:1_04_functions.adoc#functions[the functions
+chapter] shows.
 
 == Layout
 
@@ -83,7 +86,7 @@ such names.
 == Input and output
 
 A program's input usually comes from `stdin`, through `parse`, which
-xref:3_02_parse.adoc[the parsing chapter] explains. Its output goes out
+xref:3_02_parse.adoc#parsing[the parsing chapter] explains. Its output goes out
 through `print`, in xref:1_01_statements.adoc#printing[the statements
 chapter].
 
