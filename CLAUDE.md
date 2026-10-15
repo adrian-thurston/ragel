@@ -139,7 +139,9 @@ The manual itself is one book, `doc/colm/colm-manual.adoc`, which includes
 each chapter. A new chapter goes in its includes, and in `CHAPTERS` and
 `MANUAL_CHAPTERS` in `doc/colm/`'s build files. A link to a chapter names the
 id above the chapter's title, as in `xref:3_01_lex.adoc#lexing[...]`, since a
-link without it leads to the top of the book.
+link without it leads to the top of the book. Colm code goes in a
+`[source,colm]` block, which the build highlights with its own Rouge lexer,
+`doc/colm/colm-rouge.rb`.
 
 Each colm.d and manual run sets `COLM_LEAK_CHECK`, so a program that loses
 pool items (kids, trees, heads, ...) fails its case. A colm.d case's `LOST`

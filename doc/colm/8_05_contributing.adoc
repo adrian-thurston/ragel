@@ -121,7 +121,7 @@ so it takes no `ARGS`, `IN`, `EXP`, `EXIT` or `LOST`, and no `HOST`.
 This is `forloop1.lm`. It reads three ids and prints each on a line of its
 own:
 
-[source,chapel]
+[source,colm]
 .forloop1.lm
 ----
 lex
@@ -181,6 +181,9 @@ A new chapter is included in `colm-manual.adoc`, and listed in `CHAPTERS` in
 Each chapter has an id on the line above its title, and a link to a chapter
 names that id, as in `+xref:3_01_lex.adoc#lexing[the lexing chapter]+`. A link
 without the id leads to the top of the book.
+
+Colm code goes in a `[source,colm]` block. Rouge has no lexer for colm, so the
+build loads its own, `doc/colm/colm-rouge.rb`, with `asciidoctor -r`.
 
 == Coding conventions
 

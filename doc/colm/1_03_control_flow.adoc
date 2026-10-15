@@ -46,7 +46,7 @@ a value: a bare `return` is a parse error.
 
 This program prints the primes up to 40:
 
-[source,chapel]
+[source,colm]
 .flow_primes.lm
 ----
 include::code/flow_primes.lm[]

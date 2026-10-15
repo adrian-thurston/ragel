@@ -28,7 +28,7 @@ This program copies a tree, passes it to two functions, and compares trees.
 `cons num "0"` makes a `num` token whose text is `0`, as
 <<cons,the section on `cons`>> explains:
 
-[source,chapel]
+[source,colm]
 .pat_copy.lm
 ----
 include::code/pat_copy.lm[]
@@ -104,7 +104,7 @@ Some things `match` and its patterns can't do:
 This program reads commands, each a word and a list of arguments, and matches
 each one against patterns:
 
-[source,chapel]
+[source,colm]
 .pat_match.lm
 ----
 include::code/pat_match.lm[]
@@ -142,7 +142,7 @@ program, it is a parse error. As with `match`, `T` must not be nil.
 This program reads settings. It prints the ones whose value is a word, and
 then, with a function, the ones whose value is a number:
 
-[source,chapel]
+[source,colm]
 .pat_require.lm
 ----
 include::code/pat_require.lm[]
@@ -195,7 +195,7 @@ not on a child such as `S.Value`: copy the child to a variable first.
 This program describes shapes. `shape` has three productions, each with a
 name:
 
-[source,chapel]
+[source,colm]
 .pat_switch.lm
 ----
 include::code/pat_switch.lm[]
@@ -229,7 +229,7 @@ replaced takes the ignored text after it with it, and the ignored text before
 it stays, unless it is at the start of the input. Replacing `x` in `x = 1;`
 with `y` gives `y= 1;`.
 
-[source,chapel]
+[source,colm]
 .pat_change.lm
 ----
 include::code/pat_change.lm[]
@@ -285,7 +285,7 @@ empty list. To add to the end of a list, use a left-recursive def, as
 This program reads pairs of a name and a number, makes a setting of each in
 three ways, and collects them in two lists:
 
-[source,chapel]
+[source,colm]
 .pat_cons.lm
 ----
 include::code/pat_cons.lm[]
@@ -328,7 +328,7 @@ children fit the production: give it one tree of each element's type, in
 order. A literal in backtick form has no `typeid`, so the def's production
 must use named tokens, such as `+token equals /'='/+`, not literals.
 
-[source,chapel]
+[source,colm]
 .pat_make.lm
 ----
 include::code/pat_make.lm[]

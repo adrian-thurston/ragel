@@ -114,7 +114,7 @@ conversions.
 
 This program uses the operators:
 
-[source,chapel]
+[source,colm]
 .expr_ops.lm
 ----
 include::code/expr_ops.lm[]
@@ -165,7 +165,7 @@ by label. `X` and `T` must be tree types.
 In this program, `show` takes only a `name`. A `word` is cast to a `name` to
 pass it:
 
-[source,chapel]
+[source,colm]
 .expr_cast.lm
 ----
 include::code/expr_cast.lm[]

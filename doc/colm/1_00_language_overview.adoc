@@ -35,7 +35,7 @@ function.
 A function definition gives the function's result type, its name, its
 parameters in parentheses, and its body in braces:
 
-[source,chapel]
+[source,colm]
 ----
 int add( A: int, B: int )
 {
@@ -102,7 +102,7 @@ program that reaches its end exits with 0.
 
 This program prints its arguments, numbered:
 
-[source,chapel]
+[source,colm]
 .prog_args.lm
 ----
 include::code/prog_args.lm[]

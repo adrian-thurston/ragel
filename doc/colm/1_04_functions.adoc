@@ -8,7 +8,7 @@ The _FizzBuzz_ example gave us an good overview.
 We can also pass parameters by reference.
 This enables us to change the variable with in the function.
 
-[source,chapel]
+[source,colm]
 .reference.lm
 ----
 include::code/reference.lm[]

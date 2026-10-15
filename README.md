@@ -178,8 +178,8 @@ manual is built only when its half of the suite is installed (see [Installing
 one half of the suite](#installing-one-half-of-the-suite)), and configure checks
 only for the tools of the manuals it will build.
 With [Rouge](https://rouge.jneen.net/) (`ruby-rouge`) installed, the manual's
-shell and vim examples are highlighted. Rouge has no lexer for colm, so the
-colm examples are not.
+examples are highlighted. Rouge has no lexer for colm, so the build loads its
+own, `doc/colm/colm-rouge.rb`.
 
 ### Build instructions
 

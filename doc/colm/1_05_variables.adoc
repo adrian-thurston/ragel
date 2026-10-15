@@ -62,7 +62,7 @@ xref:8_01_embedding.adoc#embedding[the embedding chapter] explains.
 
 This program uses a global, a top-level variable and a variable in a block:
 
-[source,chapel]
+[source,colm]
 .var_scope.lm
 ----
 include::code/var_scope.lm[]

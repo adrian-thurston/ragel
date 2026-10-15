@@ -2,10 +2,12 @@ ASCIIDOCTOR = @ASCIIDOCTOR@
 
 OUTPUT=html5
 
-# The install page and the FAQ show versions from configure.ac.
+# The install page and the FAQ show versions from configure.ac. Rouge has no
+# lexer for colm, so the build loads its own, colm-rouge.rb.
 OPTIONS=\
 	-a max-width=800px \
 	-a source-highlighter=rouge \
+	-r $(srcdir)/colm-rouge.rb \
 	-a webfonts! \
 	-a suite-release=$(PACKAGE_VERSION) \
 	-a colm-version=$(COLM_VERSION) \
@@ -128,7 +130,7 @@ OUT_FILES = $(MANUAL:.adoc=.html)
 
 CLEANFILES = $(OUT_FILES)
 
-EXTRA_DIST = $(MANUAL) $(CHAPTERS) $(CODE) CMakeLists.txt
+EXTRA_DIST = $(MANUAL) $(CHAPTERS) $(CODE) colm-rouge.rb CMakeLists.txt
 
 if BUILD_MANUAL
 
@@ -142,8 +144,9 @@ doc_DATA = $(OUT_FILES)
 SUFFIXES = .html .adoc
 
 # The book includes the chapters, and they include the example programs and
-# their output, so the book is rendered again when any of them changes.
-$(OUT_FILES): $(CHAPTERS) $(CODE)
+# their output, so the book is rendered again when any of them changes, and
+# when the colm lexer that highlights them does.
+$(OUT_FILES): $(CHAPTERS) $(CODE) colm-rouge.rb
 
 # The install chapter and the FAQ show the versions that OPTIONS passes in, so
 # the book is rendered again when configure writes a Makefile with new ones.

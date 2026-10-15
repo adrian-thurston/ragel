@@ -62,7 +62,7 @@ the int: `%d`, `%5d`, `%-5d` or `%x` for numbers that fit in 32 bits, and
 
 This program prints in each of these ways:
 
-[source,chapel]
+[source,colm]
 .stmt_print.lm
 ----
 include::code/stmt_print.lm[]

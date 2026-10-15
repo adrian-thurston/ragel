@@ -43,7 +43,7 @@ A parse of a type defined in a context is given an object of that context, in
 parentheses after the type. These lines, from the example in the next
 section, make the object and its map, and parse with it:
 
-[source,chapel]
+[source,colm]
 ----
 Decls: decls = new decls()
 Decls->Types = new map<str, str>()
@@ -77,7 +77,7 @@ This program reads statements in the style of C. It keeps the names that
 `typedef` declares in a map in its context, and uses the map to tell
 declarations from multiplications:
 
-[source,chapel]
+[source,colm]
 .ctx_typedef.lm
 ----
 include::code/ctx_typedef.lm[]
@@ -118,7 +118,7 @@ parser has the `;`, before the first name of the next statement is scanned.
 Here the insert is moved into the action of the statement instead, and
 `new_type` has no action:
 
-[source,chapel]
+[source,colm]
 ----
 def statement
 	[`typedef type new_type `;]
@@ -143,7 +143,7 @@ names, an `=`, a number and a `;`. The other kind is names alone, ended by a
 `;`. The action of `target` prints each name it is given, and adds it to a
 list in the context:
 
-[source,chapel]
+[source,colm]
 .ctx_undo.lm
 ----
 include::code/ctx_undo.lm[]
@@ -214,7 +214,7 @@ action can check what a grammar can't express, such as a count.
 This program reads groups. A group is a number, its length, and then that
 many items, which are numbers or words:
 
-[source,chapel]
+[source,colm]
 .ctx_reject.lm
 ----
 include::code/ctx_reject.lm[]
