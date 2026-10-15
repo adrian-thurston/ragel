@@ -1,7 +1,6 @@
-Hello world
-===========
+= Hello world
 
-The obligatory 'hello world' program:
+The obligatory _hello world_ program:
 
 [source,chapel]
 .hello_world.lm
@@ -64,4 +63,4 @@ We also notice that:
 
 * the quotes can be single and double
 * the whitespace is not significant
-* the line ends with '\r\n' because the string "world\r\n" ends with it
+* the line ends with `\r\n` because the string "world\r\n" ends with it

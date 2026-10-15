@@ -1,5 +1,4 @@
-FizzBuzz
-========
+= FizzBuzz
 
 == Slightly modified example of thesis: Figure 4.4, page 87
 
@@ -32,7 +31,7 @@ include::code/figure_44.exp[]
 == Real FizzBuzz
 
 The fizzbuzz test is often used to check if someone has programming skills.
-It is the next logical step to 'hello world'.
+It is the next logical step to _hello world_.
 
 [source,chapel]
 .fizzbuzz.lm
@@ -40,15 +39,15 @@ It is the next logical step to 'hello world'.
 include::code/fizzbuzz.lm[]
 ----
 
-It appears that there is no modulo operator ('%').
+It appears that there is no modulo operator (`%`).
 Therefor we'll resort to a function.
 Writing a function seems rather straight forward.
 
 Please note:
 
-* that '&&' is working.
-* The return type is needed: use 'void' for a function that returns nothing.
-  A function that ends without a 'return' returns 0 if its return type is 'int', 'false' if it is 'bool', and 'nil' otherwise.
+* that `&&` is working.
+* The return type is needed: use `void` for a function that returns nothing.
+  A function that ends without a `return` returns 0 if its return type is `int`, `false` if it is `bool`, and `nil` otherwise.
 
 [source,bash]
 ----

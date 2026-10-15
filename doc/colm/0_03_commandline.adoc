@@ -1,7 +1,6 @@
-Commandline
-===========
+= Commandline
 
-Let's start colm with the '--help' command line argument.
+Let's start colm with the `--help` command line argument.
 
 ----
 $ ./colm --help
@@ -40,5 +39,5 @@ general:
 colm compiles a `.lm` program to an executable, named after the program unless
 `-o` gives another name. With `-c` it writes the C parse object instead, and
 with `-e`, `-x` and `-m` it also writes the C++ export header, export code and
-commit code. link:8_01_embedding.html[Embedding colm in C and {cpp}] covers
+commit code. xref:8_01_embedding.adoc[Embedding colm in C and {cpp}] covers
 these, and `-b` and `-E`.

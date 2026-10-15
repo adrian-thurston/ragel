@@ -1,9 +1,8 @@
-Def
-===
+= Def
 
-The 'def' is where colm really shines.
-A 'def' defines a context-free grammar nonterminal: a type whose values are parse trees.
-Each of its productions, between square brackets, is a sequence of tokens and nonterminals, and 'parse' turns input into a tree of that type.
+The `def` is where colm really shines.
+A `def` defines a context-free grammar nonterminal: a type whose values are parse trees.
+Each of its productions, between square brackets, is a sequence of tokens and nonterminals, and `parse` turns input into a tree of that type.
 Again one example is much more clearer.
 
 [source,chapel]
@@ -26,8 +25,8 @@ This gives us:
 include::code/assign.exp[]
 ----
 
-NOTE: this also illustrates how to read from 'stdin'.
+NOTE: this also illustrates how to read from `stdin`.
 
-link:0_07_transformation.html[A complete transformation] takes a grammar
+xref:0_07_transformation.adoc[A complete transformation] takes a grammar
 further: it parses a Python program, rewrites its print statements, and
 prints the result.
