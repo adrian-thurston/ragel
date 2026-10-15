@@ -576,9 +576,12 @@ include::code/lex_join.exp[]
 The actions of `lparen` and `rparen` count the open parentheses in the global
 `Depth`, and push their tokens back unchanged. The action of `nl` pulls the
 line break. If a parenthesis is open, it puts the line break back with
-`push_ignore`, as a `ws`, so the parser never gets it. `$A.expr` drops the
-ignored text around the expression, but not the line break inside it.
-Otherwise the action pushes the line break as an `nl`, which ends the
-assignment. Pushed as an `nl` inside the parentheses, the line break would
-reach the parser where the grammar has no place for it, and the parse would
-fail, with `<stdin>:1:13: parse error`.
+`push_ignore`, as a `ws`, so the parser never gets it. Otherwise the action
+pushes the line break as an `nl`, which ends the assignment. Pushed as an `nl`
+inside the parentheses, the line break would reach the parser where the
+grammar has no place for it, and the parse would fail, with
+`<stdin>:1:13: parse error`.
+
+`$A.id` leaves out the space after the name, and `$A.expr` keeps the line
+break inside the expression, since only the ignored text at the ends of a tree
+is dropped.
