@@ -41,7 +41,7 @@ module Rouge
 			def self.types
 				@types ||= Set.new %w(
 					int bool void list list_el map map_el ptr ref parser accum
-					str any
+					str any stream
 				)
 			end
 
@@ -50,6 +50,8 @@ module Rouge
 					argv arg0 stdin stdout stderr error input match_text
 					match_length exit exit_hard atoi atoo open system tolower
 					toupper prefix suffix postfix xml xmlac
+					child rev_child repeat rev_repeat triter with_ignore
+					list_iter rev_list_iter map_iter sprintf
 				)
 			end
 
@@ -136,10 +138,11 @@ module Rouge
 			end
 
 			# After "token", "ignore" or "rl": the name, any attributes, and
-			# the "-" that keeps the ignores off, up to the slash that opens
+			# the "ni-" that keeps the ignores off, up to the slash that opens
 			# the expression. Anything else, as in "token NAME -", ends it.
 			state :tokdef do
 				mixin :whitespace
+				rule %r/ni\b/, Keyword
 				rule(stop) { pop! }
 				rule %r/(#{id})(\s*)(:)(?!:)/ do
 					groups Name::Variable, Text, Punctuation
