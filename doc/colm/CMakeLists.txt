@@ -152,11 +152,12 @@ set(MANUAL_TMP "${CMAKE_CURRENT_BINARY_DIR}/colm-manual.tmp.html")
 # generator does with a failed command's output. The temporary file keeps the
 # .html suffix: Asciidoctor gives the output file's suffix to a link to another
 # page. The clean target removes the temporary file that a failed run leaves
-# behind. The book is rendered again when the colm lexer or the check of its
-# links changes.
+# behind, as one of the target's ADDITIONAL_CLEAN_FILES. It isn't declared a
+# byproduct: a successful run renames it away, and Ninja renders the book again
+# on every build when a byproduct is missing. The book is rendered again when
+# the colm lexer or the check of its links changes.
 add_custom_command(
 	OUTPUT "${MANUAL_HTML}"
-	BYPRODUCTS "${MANUAL_TMP}"
 	COMMAND "${ASCIIDOCTOR}" ${MANUAL_OPTIONS} -o "${MANUAL_TMP}" "${MANUAL_ADOC}"
 	COMMAND "${CMAKE_COMMAND}" -E rename "${MANUAL_TMP}" "${MANUAL_HTML}"
 	DEPENDS "${MANUAL_ADOC}" ${MANUAL_CHAPTERS} ${MANUAL_CODE}
@@ -166,6 +167,7 @@ add_custom_command(
 	VERBATIM)
 
 add_custom_target(colm-manual ALL DEPENDS ${MANUAL_HTML})
+set_property(TARGET colm-manual APPEND PROPERTY ADDITIONAL_CLEAN_FILES "${MANUAL_TMP}")
 
 # doc_DATA in Makefile.am
 if(COLM_INSTALL_COLM)

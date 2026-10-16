@@ -25,7 +25,10 @@ class ColmLinkCheck < Asciidoctor::Extensions::Postprocessor
 
 		output.scan(/<a\s[^>]*?\bhref="([^"]*)"[^>]*>(.*?)<\/a>/m) do
 			href = $1
-			text = $2.gsub(/<[^>]*>/, '').gsub(/\s+/, ' ').strip
+			# The link's text, as a writer can grep for it: without its tags,
+			# and with its character references decoded. Asciidoctor loads
+			# cgi/util.
+			text = (CGI.unescapeHTML $2.gsub(/<[^>]*>/, '')).gsub(/\s+/, ' ').strip
 			if href == '#'
 				logger.error %(link "#{text}" names no id, and leads to the ) +
 					%(top of the book: name the id above the chapter's title)
