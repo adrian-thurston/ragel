@@ -1,0 +1,11 @@
+# A qualified call is looked up in the namespace named only, as a qualified
+# type is. a has no t, so a::t() doesn't reach the top-level t.
+int t() { return 1 }
+
+namespace a
+	int u() { return 2 }
+end
+
+print( a::t(), "\n" )
+##### COMP_ERR #####
+9:11: cannot resolve qualification t

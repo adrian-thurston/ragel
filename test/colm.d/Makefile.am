@@ -132,6 +132,14 @@ EXTRA_DIST = \
 	multiregion2.lm \
 	mutualrec.lm \
 	namespace1.lm \
+	namespace2.lm \
+	namespace3.lm \
+	namespace4.lm \
+	namespace5.lm \
+	namespace6.lm \
+	namespace7.lm \
+	namespace8.lm \
+	namespace9.lm \
 	nestedcomm.lm \
 	new1.lm \
 	ntignbt1.lm \

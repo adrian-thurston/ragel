@@ -1,0 +1,18 @@
+# a::b::f and a::b::G are those of a::b, not the same-named ones of a or of
+# the top level.
+int f() { return 1 }
+global G: int = 5
+
+namespace a
+	int f() { return 3 }
+	global G: int = 7
+
+	namespace b
+		int f() { return 2 }
+		global G: int = 8
+	end
+end
+
+print( a::b::f(), " ", a::b::G, "\n" )
+##### EXP #####
+2 8

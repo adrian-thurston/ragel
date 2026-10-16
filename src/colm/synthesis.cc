@@ -680,10 +680,8 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
-		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
-		loadScopedObj( pd, code, nspace->rootScope, lastPtrInQual, forWriting );
-	}
+	if ( isNspaceQual() )
+		loadScopedObj( pd, code, qualNspace( pd )->rootScope, lastPtrInQual, forWriting );
 	else if ( isInbuiltObject() )
 		loadInbuiltObject( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef() )

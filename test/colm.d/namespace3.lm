@@ -1,0 +1,26 @@
+# Inside a namespace, the first part of a qualified call or global is found
+# from where it is written, then outwards, as a type's is: b is a::b, and x
+# is a::x, not the top-level x.
+namespace x
+	int f() { return 1 }
+	global G: int = 10
+end
+
+namespace a
+	namespace b
+		int f() { return 2 }
+		global G: int = 8
+	end
+
+	namespace x
+		int f() { return 3 }
+		global G: int = 30
+	end
+
+	int g() { return b::f() + b::G }
+	int h() { return x::f() + x::G }
+end
+
+print( a::g(), " ", a::h(), " ", x::f() + x::G, "\n" )
+##### EXP #####
+10 33 11

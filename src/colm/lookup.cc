@@ -76,6 +76,18 @@ ObjectMethod *NameScope::findMethod( const String &name ) const
 	return 0;
 }
 
+ObjectField *NameScope::findFieldHere( const String &name ) const
+{
+	FieldMapEl *fieldMapEl = fieldMap.find( name );
+	return fieldMapEl != 0 ? fieldMapEl->value : 0;
+}
+
+ObjectMethod *NameScope::findMethodHere( const String &name ) const
+{
+	MethodMapEl *methodMapEl = methodMap.find( name );
+	return methodMapEl != 0 ? methodMapEl->value : 0;
+}
+
 VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope ) const
 {
 	int lastPtrInQual = -1;
@@ -83,8 +95,12 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope
 	int firstConstPart = -1;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
-		/* Lookup the field int the current qualification. */
-		ObjectField *el = searchScope->findField( qi->data );
+		/* Lookup the field int the current qualification. A name right after
+		 * a namespace qualifier is looked up in that namespace only, as a
+		 * qualified type name is. */
+		ObjectField *el = qi.pos() == 0 && isNspaceQual() ?
+				searchScope->findFieldHere( qi->data ) :
+				searchScope->findField( qi->data );
 		if ( el == 0 )
 			error(qi->loc) << "cannot resolve qualification " << qi->data << endp;
 
@@ -192,14 +208,24 @@ bool LangVarRef::isInbuiltObject() const
 	return false;
 }
 
+Namespace *LangVarRef::qualNspace( Compiler *pd ) const
+{
+	Namespace *qualNspace = nspaceQual->getQual( pd );
+	if ( qualNspace == 0 ) {
+		std::ostream &out = error(loc) << "unknown namespace ";
+		for ( StringVect::Iter qn = nspaceQual->qualNames; qn.lte(); qn++ )
+			out << ( qn.pos() > 0 ? "::" : "" ) << *qn;
+		out << endp;
+	}
+	return qualNspace;
+}
+
 VarRefLookup LangVarRef::lookupObj( Compiler *pd ) const
 {
 	NameScope *rootScope;
 
-	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
-		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
-		rootScope = nspace->rootScope;
-	}
+	if ( isNspaceQual() )
+		rootScope = qualNspace( pd )->rootScope;
 	else if ( isLocalRef() )
 		rootScope = scope;
 	else if ( isProdRef( pd ) ) {
@@ -219,10 +245,8 @@ VarRefLookup LangVarRef::lookupMethodObj( Compiler *pd ) const
 {
 	NameScope *rootScope;
 
-	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
-		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
-		rootScope = nspace->rootScope;
-	}
+	if ( isNspaceQual() )
+		rootScope = qualNspace( pd )->rootScope;
 	else if ( isLocalRef() )
 		rootScope = scope;
 	else if ( isStructRef() )
@@ -240,7 +264,9 @@ VarRefLookup LangVarRef::lookupField( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Lookup the field. */
-	ObjectField *field = lookup.inScope->findField( name );
+	ObjectField *field = qual->length() == 0 && isNspaceQual() ?
+			lookup.inScope->findFieldHere( name ) :
+			lookup.inScope->findField( name );
 	if ( field == 0 )
 		error(loc) << "cannot find name " << name << " in object" << endp;
 
@@ -274,7 +300,9 @@ VarRefLookup LangVarRef::lookupMethod( Compiler *pd ) const
 	VarRefLookup lookup = lookupMethodObj( pd );
 
 	/* Find the method. */
-	ObjectMethod *method = lookup.inScope->findMethod( name );
+	ObjectMethod *method = qual->length() == 0 && isNspaceQual() ?
+			lookup.inScope->findMethodHere( name ) :
+			lookup.inScope->findMethod( name );
 	if ( method == 0 ) {
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */
@@ -301,7 +329,9 @@ VarRefLookup LangVarRef::lookupIterCall( Compiler *pd ) const
 	VarRefLookup lookup = lookupObj( pd );
 
 	/* Find the method. */
-	ObjectMethod *method = lookup.inScope->findMethod( name );
+	ObjectMethod *method = qual->length() == 0 && isNspaceQual() ?
+			lookup.inScope->findMethodHere( name ) :
+			lookup.inScope->findMethod( name );
 	if ( method == 0 ) {
 		/* Not found as a method, try it as an object on which we will call a
 		 * default function. */

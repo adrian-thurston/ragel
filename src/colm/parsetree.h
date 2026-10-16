@@ -858,6 +858,8 @@ struct NameScope
 
 	ObjectField *findField( const String &name ) const;
 	ObjectMethod *findMethod( const String &name ) const;
+	ObjectField *findFieldHere( const String &name ) const;
+	ObjectMethod *findMethodHere( const String &name ) const;
 
 	ObjectField *checkRedecl( const String &name );
 	void insertField( const String &name, ObjectField *value );
@@ -2743,6 +2745,10 @@ struct LangVarRef
 	VarRefLookup lookupQualification( Compiler *pd, NameScope *rootScope ) const;
 	VarRefLookup lookupObj( Compiler *pd ) const;
 	VarRefLookup lookupMethodObj( Compiler *pd ) const;
+
+	bool isNspaceQual() const
+		{ return nspaceQual != 0 && nspaceQual->thisOnly(); }
+	Namespace *qualNspace( Compiler *pd ) const;
 
 	bool isInbuiltObject() const;
 	bool isLocalRef() const;
