@@ -390,3 +390,33 @@ jobs:
             -Dragel_DIR="$PWD/alt/lib/cmake/ragel-7" -DCMAKE_PREFIX_PATH="$PWD/other" \
             -DWANT="$PWD/alt/lib" > /dev/null
           echo "package directories set apart, ragel_DIR: colm beside ragel found"
+
+  # The colm manual, which neither job above builds. It renders only the book,
+  # so that the check of its links, doc/colm/colm-links.rb, runs on every
+  # change and fails the job on a link that leads nowhere in the book. It
+  # builds with cmake: autotools' --enable-manual builds the ragel guide too,
+  # which needs asciidoc, fig2dev and dblatex, while COLM_BUILD_MANUAL builds
+  # only the colm manual, and its colm-manual target compiles nothing.
+  # ruby-rouge highlights the examples, with doc/colm/colm-rouge.rb, as in a
+  # build where Rouge is installed.
+  manual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake asciidoctor ruby-rouge
+
+      - name: versions
+        run: |
+          asciidoctor --version
+          ruby -e 'require "rouge"; puts "rouge #{Rouge.version}"'
+
+      - name: configure
+        run: cmake -S . -B build -DCOLM_BUILD_MANUAL=ON
+
+      - name: build the manual
+        run: cmake --build build --target colm-manual
