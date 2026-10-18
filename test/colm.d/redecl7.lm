@@ -1,0 +1,5 @@
+# A second in-host function with the same name.
+int f( S: str ) = c_f
+int f( S: str ) = c_g
+##### COMP_ERR #####
+3:5: in-host function f redeclared

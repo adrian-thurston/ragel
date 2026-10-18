@@ -2700,6 +2700,25 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case ReturnType: {
+			/* Only a function or the main code can return. */
+			switch ( pd->compileContext ) {
+				case Compiler::CompileReduction:
+					error(loc) << "return in a production action" << endp;
+					break;
+				case Compiler::CompileTranslation:
+					error(loc) << "return in a token action" << endp;
+					break;
+				case Compiler::CompilePreEof:
+					error(loc) << "return in a preeof block" << endp;
+					break;
+				case Compiler::CompileFunction:
+					if ( pd->curFunction->isUserIter )
+						error(loc) << "return in an iterator" << endp;
+					break;
+				case Compiler::CompileRoot:
+					break;
+			}
+
 			/* Evaluate the exrepssion. */
 			UniqueType *exprUT = expr->evaluate( pd, code );
 
@@ -2886,6 +2905,7 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* Init the compilation context. */
 	compileContext = CompileReduction;
+	curFunction = 0;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2915,6 +2935,7 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* Set up compilation context. */
 	compileContext = CompileTranslation;
+	curFunction = 0;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2940,7 +2961,8 @@ void Compiler::compilePreEof( TokenRegion *region )
 	CodeBlock *block = region->preEofBlock;
 
 	/* Set up compilation context. */
-	compileContext = CompileTranslation;
+	compileContext = CompilePreEof;
+	curFunction = 0;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2986,6 +3008,7 @@ void Compiler::compileRootBlock( )
 	/* Set up the compile context. No locals are needed for the root code
 	 * block, but we need an empty local frame for the compile. */
 	compileContext = CompileRoot;
+	curFunction = 0;
 	revertOn = false;
 
 	/* The block needs a frame id. */

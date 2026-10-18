@@ -1,0 +1,7 @@
+# An iterator named like a built-in iterator.
+iter child( S: str )
+{
+	yield S
+}
+##### COMP_ERR #####
+2:6: function child redeclared

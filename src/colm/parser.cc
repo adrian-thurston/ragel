@@ -483,20 +483,22 @@ void BaseParser::blockClose()
 	scopeTop = pd->rootLocalFrame->rootScope;
 }
 
-void BaseParser::functionDef( StmtList *stmtList, ObjectDef *localFrame,
-	ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt )
+void BaseParser::functionDef( const InputLoc &loc, StmtList *stmtList,
+	ObjectDef *localFrame, ParameterList *paramList, TypeRef *typeRef,
+	const String &name, bool exprt )
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	Function *newFunction = Function::cons( curNspace(), typeRef, name, 
+	Function *newFunction = Function::cons( loc, curNspace(), typeRef, name,
 			paramList, codeBlock, pd->nextFuncId++, false, exprt );
 	pd->functionList.append( newFunction );
 	newFunction->inContext = curStruct();
 }
 
-void BaseParser::inHostDef( const String &hostCall, ObjectDef *localFrame,
-	ParameterList *paramList, TypeRef *typeRef, const String &name, bool exprt )
+void BaseParser::inHostDef( const InputLoc &loc, const String &hostCall,
+	ObjectDef *localFrame, ParameterList *paramList, TypeRef *typeRef,
+	const String &name, bool exprt )
 {
-	Function *newFunction = Function::cons( curNspace(), typeRef, name, 
+	Function *newFunction = Function::cons( loc, curNspace(), typeRef, name,
 			paramList, 0, pd->nextHostId++, false, exprt );
 	newFunction->hostCall = hostCall;
 	newFunction->localFrame = localFrame;
@@ -505,11 +507,11 @@ void BaseParser::inHostDef( const String &hostCall, ObjectDef *localFrame,
 	newFunction->inContext = curStruct();
 }
 
-void BaseParser::iterDef( StmtList *stmtList, ObjectDef *localFrame,
-	ParameterList *paramList, const String &name )
+void BaseParser::iterDef( const InputLoc &loc, StmtList *stmtList,
+	ObjectDef *localFrame, ParameterList *paramList, const String &name )
 {
 	CodeBlock *codeBlock = CodeBlock::cons( stmtList, localFrame );
-	Function *newFunction = Function::cons( curNspace(), 0, name, 
+	Function *newFunction = Function::cons( loc, curNspace(), 0, name,
 			paramList, codeBlock, pd->nextFuncId++, true, false );
 	pd->functionList.append( newFunction );
 }

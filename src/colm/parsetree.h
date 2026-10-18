@@ -3462,12 +3462,13 @@ struct Function
 		inHost(false)
 	{}
 
-	static Function *cons( Namespace *nspace, TypeRef *typeRef, const String &name, 
-			ParameterList *paramList, CodeBlock *codeBlock, 
+	static Function *cons( const InputLoc &loc, Namespace *nspace, TypeRef *typeRef,
+			const String &name, ParameterList *paramList, CodeBlock *codeBlock,
 			int funcId, bool isUserIter, bool exprt )
 	{
 		Function *f = new Function;
 
+		f->loc = loc;
 		f->nspace = nspace;
 		f->typeRef = typeRef;
 		f->name = name;
@@ -3480,6 +3481,9 @@ struct Function
 		return f;
 	}
 
+	/* Where the function's name is: a redeclaration is reported there. An
+	 * iterator has no typeRef to give one. */
+	InputLoc loc;
 	Namespace *nspace;
 	TransBlock *transBlock;
 	TypeRef *typeRef;

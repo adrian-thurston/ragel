@@ -1,0 +1,19 @@
+# Inside a namespace, a function or iterator can take a built-in's name.
+namespace n
+	int atoi( S: str )
+	{
+		return 42
+	}
+
+	iter child( S: str )
+	{
+		yield S
+	}
+end
+
+print( n::atoi( "5" ), ' ', atoi( "5" ), '\n' )
+for X: str in n::child( "c" )
+	print( X, '\n' )
+##### EXP #####
+42 5
+c

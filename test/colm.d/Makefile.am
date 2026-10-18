@@ -168,6 +168,17 @@ EXTRA_DIST = \
 	ragelambig2.lm \
 	ragelambig3.lm \
 	ragelambig4.lm \
+	redecl1.lm \
+	redecl2.lm \
+	redecl3.lm \
+	redecl4.lm \
+	redecl5.lm \
+	redecl6.lm \
+	redecl7.lm \
+	redecl8.lm \
+	redecl9.lm \
+	redecl10.lm \
+	redecl11.lm \
 	rediv.lm \
 	ref1.lm \
 	ref2.lm \
@@ -179,6 +190,13 @@ EXTRA_DIST = \
 	reparse.lm \
 	repeat1.lm \
 	repeat2.lm \
+	return1.lm \
+	return2.lm \
+	return3.lm \
+	return4.lm \
+	return5.lm \
+	return6.lm \
+	return7.lm \
 	rhsref1.lm \
 	rhsref2.lm \
 	rubyhere.lm \

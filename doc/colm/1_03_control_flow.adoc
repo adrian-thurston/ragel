@@ -42,7 +42,8 @@ the rest of the body in an `if`.
 
 `return Value` ends a function and gives its result, as
 xref:1_04_functions.adoc#functions[the functions chapter] shows. `return` needs
-a value: a bare `return` is a parse error.
+a value: a bare `return` is a parse error. A `return` in an iterator, a
+production action, a token action or a `preeof` block is a compile error.
 
 This program prints the primes up to 40:
 
