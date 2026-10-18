@@ -89,10 +89,14 @@ are.
 * `push_tail( V )` and `push_head( V )` add a value at the tail or the head.
   `push( V )` is `push_head( V )`.
 * `pop_head()` and `pop_tail()` take a value off the head or the tail, and
-  give it back. `pop()` is `pop_head()`. The list must not be empty.
+  give it back. `pop()` is `pop_head()`. Popping an empty or nil list stops
+  the program, as xref:8_04_error_handling.adoc#run-time-errors[the error
+  handling chapter] says.
 * `length` is the number of values.
 * `for V: T in L` gives the values from head to tail, and
   `for V: T in rev_list_iter( L )` from tail to head.
+* `head` and `tail` are the values at the head and the tail, and `top` is
+  `head`. Reading one on an empty or nil list stops the program too.
 * `head_el` and `tail_el` are the first and last elements, each a
   `list_el<T>`. An element's `value` is its value, and its `next` and `prev`
   are the elements beside it, nil at the ends. `for E: list_el<T> in L` gives
