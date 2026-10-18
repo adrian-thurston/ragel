@@ -1,0 +1,5 @@
+# A list isn't a tree, so it can't go in a string.
+L: list<str> = new list<str>()
+S: str = "L=[L]"
+##### COMP_ERR #####
+3:14: only a tree, str, int or bool can go in a string

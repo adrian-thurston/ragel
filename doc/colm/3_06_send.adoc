@@ -45,8 +45,9 @@ xref:3_04_undo.adoc#context[The context chapter] covers contexts.
 
 `send P` is followed by the items to send. They are the items of a `parse`:
 strings, `str` and `int` values, trees, which are sent as their text, and
-streams, such as `stdin`. Items other than strings go in square brackets, as
-in `+send P [Name " = " Value]+`. A string can stand on its own, and can hold
+streams, such as `stdin`. Any other value, such as a list or a struct, is an
+error. Items other than strings go in square brackets, as in
+`+send P [Name " = " Value]+`. A string can stand on its own, and can hold
 items of its own in square brackets: `+send P "[Name] = [Value];"+`.
 
 The parser runs as far as each send lets it. Text at the end of a send that
@@ -171,7 +172,8 @@ writes `A` and `B` to `S`, as `+print( A, B )+` writes them to `stdout`. A
 send to a stream can end with `eos`, which does nothing there.
 
 A stream sent to a parser, as in `+send P [File]+`, is read in full, and text
-sent after it comes after the stream's text.
+sent after it comes after the stream's text. A stream sent to a stream is an
+error.
 
 `new stream()` makes a stream that keeps what is sent to it, and `+S->tree+`
 is the text it holds.
