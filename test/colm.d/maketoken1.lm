@@ -1,0 +1,36 @@
+lex
+	token word
+		Len: int
+		On: bool
+		S: str
+		/[a-z]+/
+
+	token number
+		Len: int
+		/[0-9]+/
+	{
+		input->push( make_token( typeid<number>,
+				input->pull( match_length ), match_length ) )
+	}
+
+	ignore /space+/
+end
+
+def nums
+	[number*]
+
+T: word = make_token( typeid<word>, "abc", 3, true, "three" )
+print( T, " ", T.Len, " ", T.On, " ", T.S, "\n" )
+
+Z: word = make_token( typeid<word>, "z", 0, false, "" )
+print( Z, " ", Z.Len, " ", Z.On, "\n" )
+
+parse N: nums [ "1 22 333" ]
+for Num: number in N
+	print( $Num, " ", Num.Len, "\n" )
+##### EXP #####
+abc 3 1 three
+z 0 0
+1 1
+22 2
+333 3

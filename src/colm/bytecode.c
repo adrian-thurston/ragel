@@ -1455,6 +1455,17 @@ again:
 			colm_tree_set_field( prg, obj, field, pointer );
 			break;
 		}
+		case IN_VAL_TO_POINTER: {
+			debug( prg, REALM_BYTECODE, "IN_VAL_TO_POINTER\n" );
+
+			/* Wrap the value as IN_SET_FIELD_VAL_WC does, for an attribute
+			 * that is set by taking a tree. */
+			value_t value = vm_pop_value();
+			tree_t *pointer = colm_construct_pointer( prg, value );
+			colm_tree_upref( prg, pointer );
+			vm_push_tree( pointer );
+			break;
+		}
 		case IN_NEW_STRUCT: {
 			short id;
 			read_half( id );

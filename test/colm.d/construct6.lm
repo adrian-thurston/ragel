@@ -1,0 +1,36 @@
+lex
+	token id /[a-z]+/
+	token number /[0-9]+/
+	literal `; `!
+	ignore /space+/
+end
+
+def item
+	N: int
+	[id number]
+
+def wrapper
+	W: item
+	[item]
+	{
+		print( "wrapper action\n" )
+		lhs.W = cons item( 7 ) [ "w 7" ]
+	}
+
+def start
+	[wrapper id `;]
+|	[item id `!]
+
+parse S: start [ "x 3 y !" ]
+print( S, "\n" )
+
+parse T: start [ "x 3 y ;" ]
+print( T, "\n" )
+for W: wrapper in T
+	print( W.W, " ", W.W.N, "\n" )
+##### EXP #####
+wrapper action
+x 3 y !
+wrapper action
+x 3 y ;
+w 7 7

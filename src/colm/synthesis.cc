@@ -1410,6 +1410,11 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
 			FieldInit *fieldInit = *pi;
 			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
+
+			/* A value goes into an attribute wrapped, as an assignment
+			 * stores it. */
+			if ( fieldInit->exprUT->val() )
+				code.append( IN_VAL_TO_POINTER );
 		}
 	}
 
@@ -2376,6 +2381,11 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 
 		if ( pe.pos() == 1 && exprUT != pd->uniqueTypeStr )
 			error(loc) << "second arg, length, must be a string" << endp;
+
+		/* The rest are attributes. A value goes into one wrapped, as an
+		 * assignment stores it. */
+		if ( pe.pos() >= 2 && exprUT->val() )
+			code.append( IN_VAL_TO_POINTER );
 	}
 
 	/* The token is now created, send it. */
