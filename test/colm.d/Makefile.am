@@ -35,6 +35,8 @@ EXTRA_DIST = \
 	construct2.lm \
 	construct3.lm \
 	construct4.lm \
+	construct5.lm \
+	construct6.lm \
 	constructex.lm \
 	context1.lm \
 	context2.lm \
@@ -121,6 +123,7 @@ EXTRA_DIST = \
 	logical1.lm \
 	lookup1.lm \
 	mailbox.lm \
+	maketoken1.lm \
 	maketree1.lm \
 	map1.lm \
 	map2.lm \

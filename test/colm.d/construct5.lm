@@ -1,0 +1,41 @@
+lex
+	token id /[a-z]+/
+	token number
+		Val: int
+		/[0-9]+/
+	ignore /space+/
+end
+
+struct box
+	V: int
+end
+
+def pair
+	S: str
+	N: int
+	B: bool
+	X: box
+	L: list<int>
+	[id number]
+
+Bx: box = new box()
+Bx->V = 7
+
+Li: list<int> = new list<int>()
+Li->push_tail( 5 )
+Li->push_tail( 6 )
+
+I: int = 41
+
+P: pair = cons pair( "three" I + 1 true Bx Li ) [ "x 3" ]
+print( P, ": ", P.S, " ", P.N, " ", P.B, " ", P.X->V, " ", P.L->length, "\n" )
+
+Z: pair = cons pair( "" 0 false nil nil ) [ "z 0" ]
+print( Z, ": ", Z.N, " ", Z.B, "\n" )
+
+T: number = cons number( 3 ) [ "3" ]
+print( T, ": ", T.Val, "\n" )
+##### EXP #####
+x 3: three 42 1 7 2
+z 0: 0 0
+3: 3
