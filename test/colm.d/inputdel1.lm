@@ -1,0 +1,19 @@
+lex
+	ignore /space+/
+	token id /[a-zA-Z_]+/
+end
+
+def item
+	[id]
+
+def start
+	[item*]
+
+P: parser<start> = new parser<start>()
+send P [stdin]
+S: start = P->finish()
+print[@S]
+##### IN #####
+a b c
+##### EXP #####
+a b c

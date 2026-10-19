@@ -1,0 +1,57 @@
+# The items a print, a send, a parse and a string take: trees, str, int, bool,
+# nil, a ref to a tree, a loop's tree and a void call. A parser also takes a
+# stream, which it reads in full.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+void nothing()
+{
+}
+
+void show( R: ref<start> )
+{
+	print( "ref: ", R, "\n" )
+	parse Q: start [ "ref " R ]
+	print( "ref parsed: ", Q, "\n" )
+}
+
+parse P: start [ "a b" ]
+print( "tree: ", P, " str: ", "s", " int: ", 7, " bool: ", true, " nil: ", nil, "\n" )
+print( "void:", nothing(), "\n" )
+print "accum: [P] [7]\n"
+print [ "list: " P " " 7 "\n" ]
+prints( stdout, "prints: ", P, "\n" )
+send stdout "send: [P]\n"
+show( P )
+
+for X: id in P
+	print( "loop: ", ^X, "\n" )
+
+S: str = "string: [P] [7] [true]"
+print( S, "\n" )
+
+N: parser<start> = new parser<start>()
+send N ["c " P " "]
+send N [stdin]
+R: start = N->finish()
+print( "sent: ", ^R, "\n" )
+##### IN #####
+d e
+##### EXP #####
+tree: a b str: s int: 7 bool: 1 nil: NIL
+void:
+accum: a b 7
+list: a b 7
+prints: a b
+send: a b
+ref: a b
+ref parsed: ref a b
+loop: a
+loop: b
+string: a b 7 1
+sent: c a b d e

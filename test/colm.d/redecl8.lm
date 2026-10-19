@@ -1,0 +1,7 @@
+# Two iterators with the same name in a struct, which is a namespace of its own.
+struct S
+	iter dup( A: str ) { yield A }
+	iter dup( A: str ) { yield A }
+end
+##### COMP_ERR #####
+4:7: function dup redeclared

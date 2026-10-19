@@ -133,6 +133,7 @@ typedef unsigned char uchar;
 
 #define IN_GET_FIELD_VAL_R       0x5e
 #define IN_SET_FIELD_VAL_WC      0x60
+#define IN_VAL_TO_POINTER        0xb1
 
 #define IN_GET_MATCH_LENGTH_R    0x34
 #define IN_GET_MATCH_TEXT_R      0x35

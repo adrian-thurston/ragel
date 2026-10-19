@@ -1,0 +1,12 @@
+# An iterator named like a function defined before it.
+int dup( S: str )
+{
+	return 1
+}
+
+iter dup( S: str )
+{
+	yield S
+}
+##### COMP_ERR #####
+7:6: function dup redeclared

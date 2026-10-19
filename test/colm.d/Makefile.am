@@ -35,6 +35,8 @@ EXTRA_DIST = \
 	construct2.lm \
 	construct3.lm \
 	construct4.lm \
+	construct5.lm \
+	construct6.lm \
 	constructex.lm \
 	context1.lm \
 	context2.lm \
@@ -80,6 +82,7 @@ EXTRA_DIST = \
 	forloop4.lm \
 	forloop5.lm \
 	forloop6.lm \
+	forloop7.lm \
 	func1.lm \
 	func2.lm \
 	func3.lm \
@@ -100,7 +103,16 @@ EXTRA_DIST = \
 	indent.lm \
 	inpush1.lm \
 	inpushbt1.lm \
+	inputdel1.lm \
 	island.lm \
+	itemtype1.lm \
+	itemtype2.lm \
+	itemtype3.lm \
+	itemtype4.lm \
+	itemtype5.lm \
+	itemtype6.lm \
+	itemtype7.lm \
+	itemtype8.lm \
 	lhs1.lm \
 	liftattrs.lm \
 	list1.lm \
@@ -116,6 +128,7 @@ EXTRA_DIST = \
 	logical1.lm \
 	lookup1.lm \
 	mailbox.lm \
+	maketoken1.lm \
 	maketree1.lm \
 	map1.lm \
 	map2.lm \
@@ -136,6 +149,14 @@ EXTRA_DIST = \
 	multiregion2.lm \
 	mutualrec.lm \
 	namespace1.lm \
+	namespace2.lm \
+	namespace3.lm \
+	namespace4.lm \
+	namespace5.lm \
+	namespace6.lm \
+	namespace7.lm \
+	namespace8.lm \
+	namespace9.lm \
 	nestedcomm.lm \
 	new1.lm \
 	ntignbt1.lm \
@@ -172,6 +193,18 @@ EXTRA_DIST = \
 	ragelambig2.lm \
 	ragelambig3.lm \
 	ragelambig4.lm \
+	redecl1.lm \
+	redecl2.lm \
+	redecl3.lm \
+	redecl4.lm \
+	redecl5.lm \
+	redecl6.lm \
+	redecl7.lm \
+	redecl8.lm \
+	redecl9.lm \
+	redecl10.lm \
+	redecl11.lm \
+	redecl12.lm \
 	rediv.lm \
 	ref1.lm \
 	ref2.lm \
@@ -183,6 +216,13 @@ EXTRA_DIST = \
 	reparse.lm \
 	repeat1.lm \
 	repeat2.lm \
+	return1.lm \
+	return2.lm \
+	return3.lm \
+	return4.lm \
+	return5.lm \
+	return6.lm \
+	return7.lm \
 	rhsref1.lm \
 	rhsref2.lm \
 	rubyhere.lm \

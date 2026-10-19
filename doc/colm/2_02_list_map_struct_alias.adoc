@@ -105,6 +105,11 @@ are.
 A list can't change inside a `for` over it: that is a compile error,
 `reference active, cannot write to object`.
 
+A list variable is nil until it is given a list, with `new`. A `for` over a
+nil list stops the program, as a loop over a nil tree does
+(xref:1_06_iterators.adoc#iterators[the iterators chapter]): it prints
+`fatal: for loop over a nil list` and exits with status 1.
+
 `argv` is a `list<str>`, as xref:1_00_language_overview.adoc#exit[the
 language overview] shows.
 
@@ -147,6 +152,10 @@ first, then byte by byte, as xref:1_02_expressions.adoc#operators[the
 expressions chapter] says.
 
 A map can't change inside a `for` over it.
+
+A map variable is nil until it is given a map, with `new`, and a `for` over a
+nil map stops the program the same way: it prints
+`fatal: for loop over a nil map` and exits with status 1.
 
 This program counts the words in its arguments:
 

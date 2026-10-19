@@ -1,0 +1,40 @@
+# Functions, globals and an iterator in a namespace two levels down, named
+# from the top level with the whole path.
+struct pt
+	x: int
+end
+
+lex
+	token w /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def ws [w*]
+
+namespace a
+	namespace b
+		int f() { return 2 }
+		global G: int = 8
+		global S: pt = new pt()
+
+		iter words( W: ws )
+		{
+			for T: w in W
+				yield T
+		}
+	end
+end
+
+a::b::G = a::b::G + 1
+a::b::S->x = 4
+print( a::b::f(), " ", a::b::G, " ", a::b::S->x, "\n" )
+
+parse P: ws [stdin]
+for T: w in a::b::words( P )
+	print( $T, "\n" )
+##### IN #####
+one two
+##### EXP #####
+2 9 4
+one
+two

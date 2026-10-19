@@ -1,0 +1,16 @@
+# A second iterator with the same name is reported at its name.
+iter dup( S: str )
+{
+	yield S
+}
+
+iter dup( S: str )
+{
+	yield S
+	yield S
+}
+
+for X: str in dup( "s" )
+	print( X, '\n' )
+##### COMP_ERR #####
+7:6: function dup redeclared

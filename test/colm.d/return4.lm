@@ -1,0 +1,16 @@
+# A return in a production action.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+	{
+		return 0
+	}
+
+parse P: start [stdin]
+print( P, '\n' )
+##### COMP_ERR #####
+10:3: return in a production action

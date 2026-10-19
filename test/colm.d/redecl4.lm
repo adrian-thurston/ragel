@@ -1,0 +1,18 @@
+# A default for loop calls the built-in triter, which can't be replaced.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start [id*]
+
+iter triter( S: start )
+{
+	yield S
+}
+
+parse P: start [stdin]
+for I: id in P
+	print( I, '\n' )
+##### COMP_ERR #####
+9:6: function triter redeclared

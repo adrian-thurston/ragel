@@ -1,0 +1,11 @@
+# A qualified global is looked up in the namespace named only, as a
+# qualified type is. a has no T, so a::T doesn't reach the top-level T.
+global T: int = 5
+
+namespace a
+	global U: int = 6
+end
+
+print( a::T, "\n" )
+##### COMP_ERR #####
+9:11: cannot find name T in object

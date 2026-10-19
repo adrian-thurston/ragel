@@ -1,0 +1,35 @@
+# A string takes a ref to a tree, nil and a void call, as a print does: a ref
+# gives its tree's text, nil gives NIL, and a void call gives nothing.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+void nothing()
+{
+	print( "called\n" )
+}
+
+void show( R: ref<start> )
+{
+	S: str = "ref: [R]"
+	print( S, "\n" )
+}
+
+parse P: start [ "a b" ]
+show( P )
+
+T: start
+S: str = "nil: [nil] [T]"
+print( S, "\n" )
+
+V: str = "void: x[nothing()]y"
+print( V, "\n" )
+##### EXP #####
+ref: a b
+nil: NIL NIL
+called
+void: xy

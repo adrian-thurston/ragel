@@ -858,6 +858,8 @@ struct NameScope
 
 	ObjectField *findField( const String &name ) const;
 	ObjectMethod *findMethod( const String &name ) const;
+	ObjectField *findFieldHere( const String &name ) const;
+	ObjectMethod *findMethodHere( const String &name ) const;
 
 	ObjectField *checkRedecl( const String &name );
 	void insertField( const String &name, ObjectField *value );
@@ -2744,6 +2746,10 @@ struct LangVarRef
 	VarRefLookup lookupObj( Compiler *pd ) const;
 	VarRefLookup lookupMethodObj( Compiler *pd ) const;
 
+	bool isNspaceQual() const
+		{ return nspaceQual != 0 && nspaceQual->thisOnly(); }
+	Namespace *qualNspace( Compiler *pd ) const;
+
 	bool isInbuiltObject() const;
 	bool isLocalRef() const;
 	bool isProdRef( Compiler *pd ) const;
@@ -3462,12 +3468,13 @@ struct Function
 		inHost(false)
 	{}
 
-	static Function *cons( Namespace *nspace, TypeRef *typeRef, const String &name, 
-			ParameterList *paramList, CodeBlock *codeBlock, 
+	static Function *cons( const InputLoc &loc, Namespace *nspace, TypeRef *typeRef,
+			const String &name, ParameterList *paramList, CodeBlock *codeBlock,
 			int funcId, bool isUserIter, bool exprt )
 	{
 		Function *f = new Function;
 
+		f->loc = loc;
 		f->nspace = nspace;
 		f->typeRef = typeRef;
 		f->name = name;
@@ -3480,6 +3487,9 @@ struct Function
 		return f;
 	}
 
+	/* Where the function's name is: a redeclaration is reported there. An
+	 * iterator has no typeRef to give one. */
+	InputLoc loc;
 	Namespace *nspace;
 	TransBlock *transBlock;
 	TypeRef *typeRef;

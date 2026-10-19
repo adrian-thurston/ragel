@@ -2517,7 +2517,8 @@ struct LoadColm
 		String id = FunctionDef.id().data();
 		ParameterList *paramList = walkParamVarDefList( FunctionDef.ParamVarDefList() );
 		StmtList *stmtList = walkLangStmtList( FunctionDef.lang_stmt_list() );
-		functionDef( stmtList, localFrame, paramList, typeRef, id, exprt );
+		functionDef( FunctionDef.id().loc(), stmtList, localFrame, paramList,
+				typeRef, id, exprt );
 
 		blockClose();
 	}
@@ -2529,7 +2530,8 @@ struct LoadColm
 		TypeRef *typeRef = walkTypeRef( InHostDef.type_ref() );
 		String id = InHostDef.id().data();
 		ParameterList *paramList = walkParamVarDefList( InHostDef.ParamVarDefList() );
-		inHostDef( InHostDef.HostFunc().data(), localFrame, paramList, typeRef, id, false );
+		inHostDef( InHostDef.id().loc(), InHostDef.HostFunc().data(), localFrame,
+				paramList, typeRef, id, false );
 
 		blockClose();
 	}
@@ -2541,7 +2543,7 @@ struct LoadColm
 		String id = IterDef.id().data();
 		ParameterList *paramList = walkParamVarDefList( IterDef.ParamVarDefList() );
 		StmtList *stmtList = walkLangStmtList( IterDef.lang_stmt_list() );
-		iterDef( stmtList, localFrame, paramList, id );
+		iterDef( IterDef.id().loc(), stmtList, localFrame, paramList, id );
 
 		blockClose();
 	}

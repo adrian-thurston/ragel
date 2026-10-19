@@ -1,0 +1,4 @@
+# A stream sent to a stream: only a parser reads a stream sent to it.
+send stdout [stdin]
+##### COMP_ERR #####
+2:14: only a tree, str, int or bool can be printed or sent to a stream

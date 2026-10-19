@@ -680,10 +680,8 @@ void LangVarRef::loadLocalObj( Compiler *pd, CodeVect &code,
 void LangVarRef::loadObj( Compiler *pd, CodeVect &code, 
 		int lastPtrInQual, bool forWriting ) const
 {
-	if ( nspaceQual != 0 && nspaceQual->qualNames.length() > 0 ) {
-		Namespace *nspace = pd->rootNamespace->findNamespace( nspaceQual->qualNames[0] );
-		loadScopedObj( pd, code, nspace->rootScope, lastPtrInQual, forWriting );
-	}
+	if ( isNspaceQual() )
+		loadScopedObj( pd, code, qualNspace( pd )->rootScope, lastPtrInQual, forWriting );
 	else if ( isInbuiltObject() )
 		loadInbuiltObject( pd, code, lastPtrInQual, forWriting );
 	else if ( isLocalRef() )
@@ -1410,6 +1408,11 @@ UniqueType *LangTerm::evaluateConstruct( Compiler *pd, CodeVect &code ) const
 		for ( FieldInitVect::Iter pi = *fieldInitArgs; pi.lte(); pi++ ) {
 			FieldInit *fieldInit = *pi;
 			fieldInit->exprUT = fieldInit->expr->evaluate( pd, code );
+
+			/* A value goes into an attribute wrapped, as an assignment
+			 * stores it. */
+			if ( fieldInit->exprUT->val() )
+				code.append( IN_VAL_TO_POINTER );
 		}
 	}
 
@@ -1492,6 +1495,32 @@ UniqueType *LangTerm::evaluateReadReduce( Compiler *pd, CodeVect &code ) const
 	return targetUT;
 }
 
+/* The items of a print, a send, a parse and a string go out as text, or as
+ * trees. A struct, list, map, parser or stream isn't a tree, and the runtime
+ * would read it as one. A parser reads a stream sent to it in full. */
+static void checkSendItem( Compiler *pd, const ConsItem *item, UniqueType *ut,
+		bool streamOk, const char *message )
+{
+	switch ( ut->typeId ) {
+		case TYPE_TREE:
+		case TYPE_REF:
+		case TYPE_NIL:
+		case TYPE_INT:
+		case TYPE_BOOL:
+			return;
+		default:
+			break;
+	}
+
+	if ( streamOk && ut == pd->uniqueTypeStream )
+		return;
+
+	/* An expression that is a single term has its location in the term. */
+	const InputLoc &loc = item->expr->type == LangExpr::TermType ?
+			item->expr->term->loc : item->expr->loc;
+	error( loc ) << message << endp;
+}
+
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		bool tree, bool stop ) const
 {
@@ -1513,21 +1542,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		if ( fieldInitArgs == 0 || ( fieldInitArgs->length() != 1 && fieldInitArgs->length() != 2 ) )
 			error(loc) << "parse command requires just context and input" << endp;
 		context = true;
-	}
-
-	/* Evaluate variable references. */
-	for ( ConsItemList::Iter item = consItemList->last(); item.gtb(); item-- ) {
-		if ( item->type == ConsItem::ExprType ) {
-			UniqueType *ut = item->expr->evaluate( pd, code );
-		
-			if ( ut->typeId != TYPE_TREE )
-				error() << "variables used in replacements must be trees" << endp;
-
-			if ( item->trim == ConsItem::TrimYes ) 
-				code.append( IN_TREE_TRIM );
-
-			item->langEl = ut->langEl;
-		}
 	}
 
 	/* Construct the parser. */
@@ -1612,6 +1626,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 					code.append( IN_POP_VAL );
 					continue;
 				}
+
+				checkSendItem( pd, item, ut, true, "only a tree, str, int, bool "
+						"or stream can be sent to a parser" );
 
 				if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 					code.append( IN_INT_TO_STR );
@@ -1722,6 +1739,9 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 				continue;
 			}
 
+			checkSendItem( pd, item, ut, false, "only a tree, str, int or bool "
+					"can be printed or sent to a stream" );
+
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
@@ -1797,6 +1817,9 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 					code.append( IN_POP_VAL );
 					continue;
 				}
+
+				checkSendItem( pd, item, ut, true, "only a tree, str, int, bool "
+						"or stream can be sent to a parser" );
 
 				if ( ut == pd->uniqueTypeStream )
 					isStream = true;
@@ -1896,11 +1919,29 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
+			if ( ut->typeId == TYPE_VOID ) {
+				/* A void call gives nothing, as in a print. */
+				code.append( IN_POP_VAL );
+
+				String result = "";
+				StringMapEl *mapEl = 0;
+				if ( pd->literalStrings.insert( result, &mapEl ) )
+					mapEl->value = pd->literalStrings.length()-1;
+
+				code.append( IN_LOAD_STR );
+				code.appendWord( mapEl->value );
+				break;
+			}
+
+			checkSendItem( pd, item, ut, false, "only a tree, str, int or bool "
+					"can go in a string" );
+
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
-			if ( ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
+			/* A ref gives its tree's text, and nil gives NIL, as in a print. */
+			if ( ( ut->typeId == TYPE_TREE && ut->langEl != pd->strLangEl ) ||
+					ut->typeId == TYPE_REF || ut->typeId == TYPE_NIL )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR );
@@ -2376,6 +2417,11 @@ UniqueType *LangTerm::evaluateMakeToken( Compiler *pd, CodeVect &code ) const
 
 		if ( pe.pos() == 1 && exprUT != pd->uniqueTypeStr )
 			error(loc) << "second arg, length, must be a string" << endp;
+
+		/* The rest are attributes. A value goes into one wrapped, as an
+		 * assignment stores it. */
+		if ( pe.pos() >= 2 && exprUT->val() )
+			code.append( IN_VAL_TO_POINTER );
 	}
 
 	/* The token is now created, send it. */
@@ -2700,6 +2746,25 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case ReturnType: {
+			/* Only a function or the main code can return. */
+			switch ( pd->compileContext ) {
+				case Compiler::CompileReduction:
+					error(loc) << "return in a production action" << endp;
+					break;
+				case Compiler::CompileTranslation:
+					error(loc) << "return in a token action" << endp;
+					break;
+				case Compiler::CompilePreEof:
+					error(loc) << "return in a preeof block" << endp;
+					break;
+				case Compiler::CompileFunction:
+					if ( pd->curFunction->isUserIter )
+						error(loc) << "return in an iterator" << endp;
+					break;
+				case Compiler::CompileRoot:
+					break;
+			}
+
 			/* Evaluate the exrepssion. */
 			UniqueType *exprUT = expr->evaluate( pd, code );
 
@@ -2886,6 +2951,7 @@ void Compiler::compileReductionCode( Production *prod )
 
 	/* Init the compilation context. */
 	compileContext = CompileReduction;
+	curFunction = 0;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2915,6 +2981,7 @@ void Compiler::compileTranslateBlock( LangEl *langEl )
 
 	/* Set up compilation context. */
 	compileContext = CompileTranslation;
+	curFunction = 0;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2940,7 +3007,8 @@ void Compiler::compilePreEof( TokenRegion *region )
 	CodeBlock *block = region->preEofBlock;
 
 	/* Set up compilation context. */
-	compileContext = CompileTranslation;
+	compileContext = CompilePreEof;
+	curFunction = 0;
 	revertOn = true;
 	block->frameId = nextFrameId++;
 
@@ -2986,6 +3054,7 @@ void Compiler::compileRootBlock( )
 	/* Set up the compile context. No locals are needed for the root code
 	 * block, but we need an empty local frame for the compile. */
 	compileContext = CompileRoot;
+	curFunction = 0;
 	revertOn = false;
 
 	/* The block needs a frame id. */

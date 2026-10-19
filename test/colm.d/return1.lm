@@ -1,0 +1,11 @@
+# A return in an iterator.
+iter i( S: str )
+{
+	yield S
+	return S
+}
+
+for T: str in i( "x" )
+	print( T, "\n" )
+##### COMP_ERR #####
+5:2: return in an iterator

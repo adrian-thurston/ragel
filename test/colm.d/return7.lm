@@ -1,0 +1,22 @@
+# A return in a production action, after a function: it isn't checked against
+# the function's return type first.
+str f()
+{
+	return "x"
+}
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+	{
+		return 0
+	}
+
+parse P: start [stdin]
+print( f(), '\n' )
+##### COMP_ERR #####
+16:3: return in a production action

@@ -1,0 +1,11 @@
+# A return in the main code after an iterator isn't checked against it.
+iter i( A: str )
+{
+	yield A
+}
+
+for X: str in i( "one\n" )
+	print( X )
+return 0
+##### EXP #####
+one
