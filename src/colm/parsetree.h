@@ -213,7 +213,6 @@ struct TokenRegion;
 struct Namespace;
 struct StructDef;
 struct TokenDef;
-struct TokenDefListReg;
 struct TokenDefListNs;
 struct TokenInstance;
 struct TokenInstanceListReg;
@@ -339,11 +338,6 @@ struct ReCapture
 
 typedef Vector<ReCapture> ReCaptureVect;
 
-struct TokenDefPtr1
-{
-	TokenDef *prev, *next;
-};
-
 struct TokenDefPtr2
 {
 	TokenDef *prev, *next;
@@ -351,7 +345,6 @@ struct TokenDefPtr2
 
 struct TokenDef
 :
-	public TokenDefPtr1, 
 	public TokenDefPtr2
 {
 	TokenDef()
@@ -519,7 +512,6 @@ struct NtDefList : DList<NtDef> {};
 struct TokenInstanceListReg : DListMel<TokenInstance, TokenInstancePtr> {};
 
 /* Declare a new type so that ptreetypes.h need not include dlist.h. */
-struct TokenDefListReg : DListMel<TokenDef, TokenDefPtr1> {};
 struct TokenDefListNs : DListMel<TokenDef, TokenDefPtr2> {};
 
 struct StructStack
@@ -660,9 +652,8 @@ struct RegionImpl
 struct TokenRegion
 {
 	/* Construct with a list of joins */
-	TokenRegion( const InputLoc &loc, int id, RegionImpl *impl )
+	TokenRegion( int id, RegionImpl *impl )
 	: 
-		loc(loc),
 		id(id),
 		preEofBlock(0), 
 		zeroLel(0),
@@ -670,7 +661,6 @@ struct TokenRegion
 		impl(impl)
 	{ }
 
-	InputLoc loc;
 	int id;
 
 	CodeBlock *preEofBlock;
@@ -681,9 +671,6 @@ struct TokenRegion
 	RegionImpl *impl;
 
 	TokenRegion *next, *prev;
-
-	/* tree_t traversal. */
-	void findName( Compiler *pd );
 };
 
 struct RegionSet
@@ -707,8 +694,6 @@ struct RegionSet
 	TokenRegion *tokenOnly;
 	TokenRegion *ignoreOnly;
 	TokenRegion *collectIgnore;
-
-	TokenDefListReg tokenDefList;
 
 	RegionSet *next, *prev;
 };
