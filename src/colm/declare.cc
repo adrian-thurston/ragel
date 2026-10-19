@@ -1066,7 +1066,8 @@ void Compiler::declareTokenFields( )
 
 /* The built-in functions of the root namespace. They are declared before the
  * program's own functions, so that makeFuncVisible() reports a function or
- * iterator of the same name as redeclared. */
+ * iterator of the same name as redeclared, and makeInHostVisible() an in-host
+ * function. */
 void Compiler::declareGlobalFunctions()
 {
 	ObjectMethod *method;

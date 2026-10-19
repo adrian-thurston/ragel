@@ -179,6 +179,7 @@ EXTRA_DIST = \
 	redecl9.lm \
 	redecl10.lm \
 	redecl11.lm \
+	redecl12.lm \
 	rediv.lm \
 	ref1.lm \
 	ref2.lm \
