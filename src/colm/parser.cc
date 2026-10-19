@@ -214,11 +214,11 @@ void BaseParser::pushRegionSet( const InputLoc &loc )
 	TokenRegion *tokenIgnore = createRegion( loc, implTokenIgnore );
 	TokenRegion *tokenOnly = createRegion( loc, implTokenOnly );
 	TokenRegion *ignoreOnly = createRegion( loc, implIgnoreOnly );
+	/* Collect-ignore reuses the ignore-only scanner. */
 	TokenRegion *collectIgnore = createRegion( loc, implIgnoreOnly );
 
 	RegionSet *regionSet = new RegionSet(
 			pd->regionSetList.length(), loc,
-			implTokenIgnore, implTokenIgnore, implIgnoreOnly,
 			tokenIgnore, tokenOnly, ignoreOnly, collectIgnore );
 
 	collectIgnore->ignoreOnly = ignoreOnly;
