@@ -47,9 +47,9 @@ names them `word::items` and `number::items`, and labels them `Words` and
 two, since both types are named `items`, and a name after the dot can't be
 qualified. xref:3_02_parse.adoc#parsing[The parsing chapter] covers labels.
 
-From the top level, `NS::f()` calls the function `f` of the namespace `NS`,
-and `NS::G` reads or sets its global `G`. The program calls `word::count` and
-`number::total` this way.
+`NS::f()` calls the function `f` of the namespace `NS`, and `NS::G` reads or
+sets its global `G`. The program calls `word::count` and `number::total` this
+way.
 
 Each namespace's `lex` block is a lexical region of its own, as in
 xref:3_01_lex.adoc#regions[the lexing chapter]. So is the top-level one,
@@ -66,13 +66,13 @@ This holds for types, functions and globals. A def in a namespace can use a
 token defined at the top level, and a function in a namespace can call a
 top-level function, or read a top-level global.
 
-In a type's name such as `a::b::x`, the first part, `a`, is found the same
-way, starting where the name is written. Each later part is a namespace
-inside the one before it. `x` is then looked up in `b` only, not in the
-namespaces around it.
+In a qualified name such as `a::b::x`, of a type, a function or a global, the
+first part, `a`, is found the same way, starting where the name is written.
+Each later part is a namespace inside the one before it. `x` is then looked
+up in `b` only, not in the namespaces around it.
 
-`root::` at the front of a type's name starts at the top level. `root::id` is
-the top-level `id`, even inside a namespace that has an `id` of its own.
+`root::` at the front of a qualified name starts at the top level. `root::id`
+is the top-level `id`, even inside a namespace that has an `id` of its own.
 
 In a pattern, or in the brackets of a `cons`, a type's name or a literal used
 without a qualifier is looked up from somewhere else: first in the namespace

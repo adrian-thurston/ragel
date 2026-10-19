@@ -1,0 +1,8 @@
+# A qualified call naming a namespace that doesn't exist.
+namespace a
+	int f() { return 2 }
+end
+
+print( nx::f(), "\n" )
+##### COMP_ERR #####
+6:12: unknown namespace nx

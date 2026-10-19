@@ -1,0 +1,8 @@
+# A qualified global whose path leads to no namespace: a has no zz.
+namespace a
+	global G: int = 8
+end
+
+print( a::zz::G, "\n" )
+##### COMP_ERR #####
+6:15: unknown namespace a::zz
