@@ -95,7 +95,7 @@ VarRefLookup LangVarRef::lookupQualification( Compiler *pd, NameScope *rootScope
 	int firstConstPart = -1;
 
 	for ( QualItemVect::Iter qi = *qual; qi.lte(); qi++ ) {
-		/* Lookup the field int the current qualification. A name right after
+		/* Lookup the field in the current qualification. A name right after
 		 * a namespace qualifier is looked up in that namespace only, as a
 		 * qualified type name is. */
 		ObjectField *el = qi.pos() == 0 && isNspaceQual() ?
