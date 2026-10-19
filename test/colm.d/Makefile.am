@@ -103,6 +103,7 @@ EXTRA_DIST = \
 	indent.lm \
 	inpush1.lm \
 	inpushbt1.lm \
+	inputdel1.lm \
 	island.lm \
 	itemtype1.lm \
 	itemtype2.lm \
