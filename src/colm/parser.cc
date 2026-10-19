@@ -191,10 +191,9 @@ void BaseParser::addRegularDef( const InputLoc &loc, Namespace *nspace,
 	}
 }
 
-TokenRegion *BaseParser::createRegion( const InputLoc &loc, RegionImpl *impl )
+TokenRegion *BaseParser::createRegion( RegionImpl *impl )
 {
-	TokenRegion *tokenRegion = new TokenRegion( loc,
-			pd->regionList.length(), impl );
+	TokenRegion *tokenRegion = new TokenRegion( pd->regionList.length(), impl );
 
 	pd->regionList.append( tokenRegion );
 
@@ -211,14 +210,14 @@ void BaseParser::pushRegionSet( const InputLoc &loc )
 	pd->regionImplList.append( implTokenOnly );
 	pd->regionImplList.append( implIgnoreOnly );
 
-	TokenRegion *tokenIgnore = createRegion( loc, implTokenIgnore );
-	TokenRegion *tokenOnly = createRegion( loc, implTokenOnly );
-	TokenRegion *ignoreOnly = createRegion( loc, implIgnoreOnly );
-	TokenRegion *collectIgnore = createRegion( loc, implIgnoreOnly );
+	TokenRegion *tokenIgnore = createRegion( implTokenIgnore );
+	TokenRegion *tokenOnly = createRegion( implTokenOnly );
+	TokenRegion *ignoreOnly = createRegion( implIgnoreOnly );
+	/* Collect-ignore reuses the ignore-only scanner. */
+	TokenRegion *collectIgnore = createRegion( implIgnoreOnly );
 
 	RegionSet *regionSet = new RegionSet(
 			pd->regionSetList.length(), loc,
-			implTokenIgnore, implTokenIgnore, implIgnoreOnly,
 			tokenIgnore, tokenOnly, ignoreOnly, collectIgnore );
 
 	collectIgnore->ignoreOnly = ignoreOnly;
@@ -325,7 +324,6 @@ void BaseParser::defineToken( const InputLoc &loc, String name, LexJoin *join,
 	TokenDef *tokenDef = TokenDef::cons( name, String(), false, ignore, join, 
 			transBlock, loc, nspace, regionSet, objectDef, curStruct() );
 
-	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
 
 	tokenDef->noPreIgnore = noPreIgnore;
@@ -385,7 +383,6 @@ void BaseParser::zeroDef( const InputLoc &loc, const String &name )
 
 	tokenDef->isZero = true;
 
-	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
 
 	/* No token instance created. */
@@ -424,7 +421,6 @@ void BaseParser::literalDef( const InputLoc &loc, const String &data,
 	TokenDef *tokenDef = TokenDef::cons( name, data, true, false, join, 
 			0, loc, nspace, regionSet, objectDef, 0 );
 
-	regionSet->tokenDefList.append( tokenDef );
 	nspace->tokenDefList.append( tokenDef );
 
 	/* The instance for the token/ignore region. */
