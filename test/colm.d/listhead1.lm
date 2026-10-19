@@ -1,0 +1,73 @@
+# Reading the value at an end of an empty or nil list stops the program, with
+# exit status 1: head, tail and top, and sending to a list of streams, which
+# sends to its head.
+
+L: list<int> = new list<int>()
+N: list<int>
+I: int
+
+int topOf( L: list<int> )
+{
+	Mine: str = "mine"
+	return L->top
+}
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "head" )
+	I = L->head
+elsif ( A == "tail" )
+	I = L->tail
+elsif ( A == "top" )
+	I = L->top
+elsif ( A == "nil" )
+	I = N->top
+elsif ( A == "function" )
+	I = topOf( L )
+elsif ( A == "send" ) {
+	S: list<stream> = new list<stream>()
+	S->push( stdout )
+	send S "sent\n"
+	S->pop()
+	send S "not sent\n"
+}
+
+print( "after\n" )
+##### ARGS #####
+head
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+tail
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+top
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+nil
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+function
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send
+##### EXP #####
+before
+sent
+##### EXIT #####
+1

@@ -4,7 +4,8 @@
 Colm has no exceptions. A parse that fails gives nil, and a message that says
 where the input went wrong. The program checks the result, and stops with
 `exit` if it can't go on. This chapter covers telling that a parse failed, the
-message in `error`, where things are in the input, and stopping the program.
+message in `error`, where things are in the input, stopping the program, and
+the errors at run time that stop it.
 
 [[failed-parse]]
 == A failed parse
@@ -177,3 +178,26 @@ embedding chapter] explains.
 
 To fail the parse instead, and let the parser try another way, an action uses
 `reject`, which xref:3_02_parse.adoc#reject[the parsing chapter] covers.
+
+[[run-time-errors]]
+== Errors at run time
+
+Some mistakes stop the program where they happen:
+
+* popping a value off a list that is empty or nil, as
+  xref:2_02_list_map_struct_alias.adoc#lists[the lists section] describes;
+* reading the `head`, `tail` or `top` of such a list;
+* a `for` loop over a nil tree, as
+  xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
+  over a nil list or map.
+
+What the program printed before comes out first. Then the program prints
+`fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from
+an empty list prints:
+
+----
+fatal: pop from an empty list
+----
+
+This is not `exit`. Nothing after the mistake runs, not even in a C or {cpp}
+host: the host's process ends too, at once.

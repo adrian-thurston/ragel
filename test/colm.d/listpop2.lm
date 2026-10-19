@@ -1,0 +1,61 @@
+# A pop in a reduction action, which runs the reverting form of each pop,
+# ends the program on an empty list too. The first item takes the list's one
+# value, the second finds the list empty.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+global Which: str = argv->pop()
+global G: list<int> = new list<int>()
+G->push_tail( 1 )
+
+def item
+	[id]
+	{
+		I: int
+		E: list_el<int>
+		if ( Which == "pop_head" )
+			I = G->pop_head()
+		elsif ( Which == "pop_tail" )
+			I = G->pop_tail()
+		elsif ( Which == "pop_head_el" ) {
+			E = G->pop_head_el()
+			I = E->value
+		}
+		elsif ( Which == "pop_tail_el" ) {
+			E = G->pop_tail_el()
+			I = E->value
+		}
+		print( "popped [I]\n" )
+	}
+
+def start [item*]
+
+parse S: start[ "a b" ]
+print( "after\n" )
+##### ARGS #####
+pop_head
+##### EXP #####
+popped 1
+##### EXIT #####
+1
+##### ARGS #####
+pop_tail
+##### EXP #####
+popped 1
+##### EXIT #####
+1
+##### ARGS #####
+pop_head_el
+##### EXP #####
+popped 1
+##### EXIT #####
+1
+##### ARGS #####
+pop_tail_el
+##### EXP #####
+popped 1
+##### EXIT #####
+1

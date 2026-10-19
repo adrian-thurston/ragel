@@ -247,6 +247,11 @@ memory handling (`src/colm/*.c`), also run the cases it touches with
   that backtracking runs. Check all three for any change.
 - Installed headers and the libraries' exported symbols are public interface:
   change them only on purpose, and say so in the PR.
+- An error a program makes at run time, such as popping an empty list, stops
+  it through `runtime_error()` in `src/colm/bytecode.c`: it prints `fatal:`
+  and the message after the program's output, and exits with status 1, ending
+  a host too. Use it for new checks of this kind, rather than crashing or
+  returning nil.
 
 ## Important Notes
 

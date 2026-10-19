@@ -161,12 +161,25 @@ static void flush_streams( program_t *prg )
 	}
 }
 
-/* A for loop's root is nil. Stop the program, after the output it has
- * printed so far. */
-static void nil_iter_root( program_t *prg, const char *what )
+/* Stops the program on an error at run time, such as a pop from an empty
+ * list. What the program wrote so far comes out first, then "fatal: " and the
+ * message on standard error, and the process exits with status 1. That ends a
+ * host program too, unlike exit, which unwinds the VM and returns to the host.
+ * Whether an error should unwind the VM instead is still open. Every check
+ * that stops the program goes through here, so that is one change. */
+static void runtime_error( program_t *prg, const char *msg )
 {
 	flush_streams( prg );
-	fatal( "for loop over a nil %s\n", what );
+	fatal( "%s\n", msg );
+}
+
+/* A pop from a nil or empty list stops the program. */
+static void pop_check( program_t *prg, list_t *list )
+{
+	if ( list == 0 )
+		runtime_error( prg, "pop from a nil list" );
+	if ( list->list_len == 0 )
+		runtime_error( prg, "pop from an empty list" );
 }
 
 static void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, struct_t *val )
@@ -2164,7 +2177,7 @@ again:
 
 			/* A labelled child the production doesn't have gives no kid. */
 			if ( root_ref.kid == 0 || root_ref.kid->tree == 0 )
-				nil_iter_root( prg, "tree" );
+				runtime_error( prg, "for loop over a nil tree" );
 
 			void *mem = vm_get_plocal(exec, field);
 
@@ -2203,7 +2216,7 @@ again:
 
 			/* A labelled child the production doesn't have gives no kid. */
 			if ( root_ref.kid == 0 || root_ref.kid->tree == 0 )
-				nil_iter_root( prg, "tree" );
+				runtime_error( prg, "for loop over a nil tree" );
 
 			tree_t **stack_root = vm_ptop();
 			long root_size = vm_ssize();
@@ -2374,7 +2387,9 @@ again:
 			/* The kid is the slot that holds the list or the map. */
 			if ( *((void**)root_ref.kid) == 0 ) {
 				struct generic_info *gi = &prg->rtd->generic_info[generic_id];
-				nil_iter_root( prg, gi->type == GEN_MAP ? "map" : "list" );
+				runtime_error( prg, gi->type == GEN_MAP ?
+						"for loop over a nil map" :
+						"for loop over a nil list" );
 			}
 
 			void *mem = vm_get_plocal(exec, field);
@@ -3545,6 +3560,15 @@ again:
 					"IN_GET_VLIST_MEM_R %hd %hd\n", gen_id, field );
 
 			list_t *list = vm_pop_list();
+			if ( list == 0 ) {
+				runtime_error( prg, field == 0 ? "reading the head of a nil list" :
+						"reading the tail of a nil list" );
+			}
+			if ( list->list_len == 0 ) {
+				runtime_error( prg, field == 0 ? "reading the head of an empty list" :
+						"reading the tail of an empty list" );
+			}
+
 			struct_t *el = colm_list_get( prg, list, gen_id, field );
 
 			value_t val = colm_struct_get_field( el, value_t, 0 );
@@ -4321,6 +4345,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_POP_TAIL_WC\n" );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				list_el_t *tail = list->tail;
 				colm_list_detach_tail( list );
@@ -4336,6 +4361,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_POP_TAIL_WV\n" );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				list_el_t *tail = list->tail;
 				colm_list_detach_tail( list );
@@ -4374,6 +4400,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_POP_HEAD_WC\n" );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				list_el_t *head = list->head;
 				colm_list_detach_head( list );
@@ -4389,6 +4416,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_POP_HEAD_WV\n" );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				list_el_t *head = list->head;
 				colm_list_detach_head( list );
@@ -4782,6 +4810,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_HEAD_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				value_t result = colm_vlist_detach_head( prg, list );
 				vm_push_value( result );
@@ -4794,6 +4823,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_HEAD_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				value_t result = colm_vlist_detach_head( prg, list );
 				vm_push_value( result );
@@ -4825,6 +4855,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_TAIL_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				value_t result = colm_vlist_detach_tail( prg, list );
 				vm_push_value( result );
@@ -4837,6 +4868,7 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_POP_TAIL_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				pop_check( prg, list );
 
 				value_t result = colm_vlist_detach_tail( prg, list );
 				vm_push_value( result );
