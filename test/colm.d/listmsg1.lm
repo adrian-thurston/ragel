@@ -20,6 +20,10 @@ elsif ( A == "tail" )
 	I = L->tail
 elsif ( A == "top_nil" )
 	I = N->top
+elsif ( A == "for_nil" ) {
+	for V: int in N
+		print( "[V]\n" )
+}
 
 print( "after\n" )
 ##### HOST #####
@@ -74,5 +78,12 @@ top_nil
 ##### EXP #####
 before
 fatal: reading the head of a nil list
+##### EXIT #####
+1
+##### ARGS #####
+for_nil
+##### EXP #####
+before
+fatal: for loop over a nil list
 ##### EXIT #####
 1
