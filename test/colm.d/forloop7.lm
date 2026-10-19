@@ -1,0 +1,247 @@
+#
+# A for loop over a nil tree, list or map stops the program with exit status
+# 1, after the output printed before it. A loop over an empty list or map, or
+# over a tree, runs. The argument picks the loop.
+#
+
+lex
+	token id / 'a' .. 'z' /
+	literal `( `)
+	ignore / '\n' | '\t' | ' ' /
+end
+
+def item
+	[id]
+|	[`( Ids: id* `)]
+
+def start
+	[item*]
+
+iter ids( S: start )
+{
+	for X: id in S
+		yield X
+}
+
+int loop( S: start )
+{
+	for X: id in S
+		print( 'x: ', ^X, '\n' )
+}
+
+K: str = argv->tail_el->value
+print( K, '\n' )
+
+if K == 'tree' {
+	parse P: start[ "a ( b )" ]
+	for X: id in P
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'parse' {
+	parse P: start[ "a ( b" ]
+	for X: id in P
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'match' {
+	parse P: start[ "a b" ]
+	M: start = match P [ `( id* `) ]
+	for X: id in M
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'unset' {
+	Y: start
+	for X: id in Y
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'with_ignore' {
+	Y: start
+	for X: id in with_ignore( Y )
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'child' {
+	Y: start
+	for X: any in child( Y )
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'rev_child' {
+	Y: start
+	for X: any in rev_child( Y )
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'repeat' {
+	Y: item*
+	for Z: item* in repeat( Y )
+		print( 'z\n' )
+}
+elsif K == 'rev_repeat' {
+	Y: item*
+	for Z: item* in rev_repeat( Y )
+		print( 'z\n' )
+}
+elsif K == 'label' {
+	parse P: start[ "( b ) a" ]
+	for I: item in P {
+		print( 'item: ', ^I, '\n' )
+		for X: id in I.Ids
+			print( 'x: ', ^X, '\n' )
+	}
+}
+elsif K == 'param' {
+	parse P: start[ "a ( b" ]
+	loop( P )
+}
+elsif K == 'uiter' {
+	parse P: start[ "a ( b" ]
+	for X: id in ids( P )
+		print( 'x: ', ^X, '\n' )
+}
+elsif K == 'list' {
+	L: list<str>
+	for X: str in L
+		print( 'x: ', X, '\n' )
+}
+elsif K == 'list_el' {
+	L: list<str>
+	for E: list_el<str> in L
+		print( 'e\n' )
+}
+elsif K == 'rev_list' {
+	L: list<str>
+	for X: str in rev_list_iter( L )
+		print( 'x: ', X, '\n' )
+}
+elsif K == 'map' {
+	M: map<str, str>
+	for X: str in M
+		print( 'x: ', X, '\n' )
+}
+elsif K == 'map_el' {
+	M: map<str, str>
+	for E: map_el<str, str> in M
+		print( 'e\n' )
+}
+elsif K == 'empty' {
+	L: list<str> = new list<str>()
+	for X: str in L
+		print( 'x: ', X, '\n' )
+	M: map<str, str> = new map<str, str>()
+	for Y: str in M
+		print( 'y: ', Y, '\n' )
+}
+
+print( 'done\n' )
+##### ARGS #####
+tree
+##### EXP #####
+tree
+x: a
+x: b
+done
+##### EXIT #####
+0
+##### ARGS #####
+parse
+##### EXP #####
+parse
+##### EXIT #####
+1
+##### ARGS #####
+match
+##### EXP #####
+match
+##### EXIT #####
+1
+##### ARGS #####
+unset
+##### EXP #####
+unset
+##### EXIT #####
+1
+##### ARGS #####
+with_ignore
+##### EXP #####
+with_ignore
+##### EXIT #####
+1
+##### ARGS #####
+child
+##### EXP #####
+child
+##### EXIT #####
+1
+##### ARGS #####
+rev_child
+##### EXP #####
+rev_child
+##### EXIT #####
+1
+##### ARGS #####
+repeat
+##### EXP #####
+repeat
+##### EXIT #####
+1
+##### ARGS #####
+rev_repeat
+##### EXP #####
+rev_repeat
+##### EXIT #####
+1
+##### ARGS #####
+label
+##### EXP #####
+label
+item: ( b )
+x: b
+item: a
+##### EXIT #####
+1
+##### ARGS #####
+param
+##### EXP #####
+param
+##### EXIT #####
+1
+##### ARGS #####
+uiter
+##### EXP #####
+uiter
+##### EXIT #####
+1
+##### ARGS #####
+list
+##### EXP #####
+list
+##### EXIT #####
+1
+##### ARGS #####
+list_el
+##### EXP #####
+list_el
+##### EXIT #####
+1
+##### ARGS #####
+rev_list
+##### EXP #####
+rev_list
+##### EXIT #####
+1
+##### ARGS #####
+map
+##### EXP #####
+map
+##### EXIT #####
+1
+##### ARGS #####
+map_el
+##### EXP #####
+map_el
+##### EXIT #####
+1
+##### ARGS #####
+empty
+##### EXP #####
+empty
+done
+##### EXIT #####
+0

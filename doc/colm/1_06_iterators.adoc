@@ -17,7 +17,11 @@ The type `T` can be a repetition, such as `+item*+`. A list is its first item
 and the rest of the list, which is a list too, down to an empty list at the
 end. So the loop visits each list in `S`, and each rest of it.
 
-`S` must not be nil: check a parse's result before looping over it.
+A loop over a nil tree stops the program: it prints
+`fatal: for loop over a nil tree` and exits with status 1. When a C or {cpp}
+host runs the program, as in xref:8_01_embedding.adoc#embedding[the embedding
+chapter], the host's process ends too. So check a parse's result before
+looping over it.
 
 This program reads groups of words in parentheses. A group can hold groups of
 its own:

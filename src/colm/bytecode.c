@@ -161,6 +161,14 @@ static void flush_streams( program_t *prg )
 	}
 }
 
+/* A for loop's root is nil. Stop the program, after the output it has
+ * printed so far. */
+static void nil_iter_root( program_t *prg, const char *what )
+{
+	flush_streams( prg );
+	fatal( "for loop over a nil %s\n", what );
+}
+
 static void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, struct_t *val )
 {
 	parser->pda_run->context = val;
@@ -2142,6 +2150,11 @@ again:
 			ref_t root_ref;
 			root_ref.kid = vm_pop_kid();
 			root_ref.next = vm_pop_ref();
+
+			/* A labelled child the production doesn't have gives no kid. */
+			if ( root_ref.kid == 0 || root_ref.kid->tree == 0 )
+				nil_iter_root( prg, "tree" );
+
 			void *mem = vm_get_plocal(exec, field);
 
 			tree_t **stack_root = vm_ptop();
@@ -2176,6 +2189,10 @@ again:
 			ref_t root_ref;
 			root_ref.kid = vm_pop_kid();
 			root_ref.next = vm_pop_ref();
+
+			/* A labelled child the production doesn't have gives no kid. */
+			if ( root_ref.kid == 0 || root_ref.kid->tree == 0 )
+				nil_iter_root( prg, "tree" );
 
 			tree_t **stack_root = vm_ptop();
 			long root_size = vm_ssize();
@@ -2342,6 +2359,13 @@ again:
 			ref_t root_ref;
 			root_ref.kid = vm_pop_kid();
 			root_ref.next = vm_pop_ref();
+
+			/* The kid is the slot that holds the list or the map. */
+			if ( *((void**)root_ref.kid) == 0 ) {
+				struct generic_info *gi = &prg->rtd->generic_info[generic_id];
+				nil_iter_root( prg, gi->type == GEN_MAP ? "map" : "list" );
+			}
+
 			void *mem = vm_get_plocal(exec, field);
 
 			tree_t **stack_root = vm_ptop();
