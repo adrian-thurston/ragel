@@ -882,10 +882,6 @@ void Compiler::declareStrFields( )
 	initFunction( uniqueTypeStr, strObj, ObjectMethod::Call, "suffix",
 			FN_STR_SUFFIX, FN_STR_SUFFIX, uniqueTypeInt, true, true );
 
-	initFunction( uniqueTypeStr, rootNamespace, globalObjectDef,
-			ObjectMethod::Call, "sprintf", FN_SPRINTF, FN_SPRINTF,
-			uniqueTypeStr, uniqueTypeInt, true, true );
-
 	addLengthField( strObj, IN_STR_LENGTH );
 }
 
@@ -1068,9 +1064,17 @@ void Compiler::declareTokenFields( )
 	}
 }
 
-void Compiler::declareGlobalFields()
+/* The built-in functions of the root namespace. They are declared before the
+ * program's own functions, so that makeFuncVisible() reports a function or
+ * iterator of the same name as redeclared, and makeInHostVisible() an in-host
+ * function. */
+void Compiler::declareGlobalFunctions()
 {
 	ObjectMethod *method;
+
+	initFunction( uniqueTypeStr, rootNamespace, globalObjectDef,
+			ObjectMethod::Call, "sprintf", FN_SPRINTF, FN_SPRINTF,
+			uniqueTypeStr, uniqueTypeInt, true, true );
 
 	method = initFunction( uniqueTypeStream, rootNamespace, globalObjectDef, ObjectMethod::Call, "open",
 		IN_OPEN_FILE, IN_OPEN_FILE, uniqueTypeStr, uniqueTypeStr, true );
@@ -1145,7 +1149,10 @@ void Compiler::declareGlobalFields()
 	method = initFunction( uniqueTypeStr, rootNamespace, globalObjectDef, ObjectMethod::Call, "postfix",
 			IN_TREE_TO_STR_POSTFIX, IN_TREE_TO_STR_POSTFIX, uniqueTypeAny, true );
 	method->useCallObj = false;
+}
 
+void Compiler::declareGlobalFields()
+{
 	addStdin();
 	addStdout();
 	addStderr();
@@ -1593,7 +1600,7 @@ void Compiler::makeFuncVisible( Function *func, bool isUserIter )
 	NameScope *scope = func->nspace->rootScope; // : globalObjectDef->rootScope;
 
 	if ( !scope->methodMap.insert( func->name, objMethod ) )
-		error(func->typeRef->loc) << "function " << func->name << " redeclared" << endp;
+		error(func->loc) << "function " << func->name << " redeclared" << endp;
 
 	func->objMethod = objMethod;
 }
@@ -1620,7 +1627,7 @@ void Compiler::makeInHostVisible( Function *func )
 	NameScope *scope = func->nspace->rootScope;
 
 	if ( !scope->methodMap.insert( func->name, objMethod ) ) {
-		error(func->typeRef->loc) << "in-host function " << func->name <<
+		error(func->loc) << "in-host function " << func->name <<
 				" redeclared" << endp;
 	}
 
@@ -1635,6 +1642,7 @@ void Compiler::declarePass()
 	declareReVars();
 
 	makeDefaultIterators();
+	declareGlobalFunctions();
 
 	for ( FunctionList::Iter f = functionList; f.lte(); f++ )
 		makeFuncVisible( f, f->isUserIter );

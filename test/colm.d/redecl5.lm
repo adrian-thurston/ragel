@@ -1,0 +1,12 @@
+# A function returning int, a type with no location of its own.
+int dup( S: str )
+{
+	return 1
+}
+
+int dup( S: str )
+{
+	return 2
+}
+##### COMP_ERR #####
+7:5: function dup redeclared

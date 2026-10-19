@@ -1,0 +1,10 @@
+# A return in the main code isn't checked against the last function.
+str f()
+{
+	return "x"
+}
+
+print( f(), "\n" )
+return 0
+##### EXP #####
+x

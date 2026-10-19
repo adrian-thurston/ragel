@@ -1,0 +1,12 @@
+# The error is at the name, not the return type.
+str dup( S: str )
+{
+	return S
+}
+
+str dup( S: str )
+{
+	return S
+}
+##### COMP_ERR #####
+7:5: function dup redeclared

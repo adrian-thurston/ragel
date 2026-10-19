@@ -1,0 +1,15 @@
+# A return in a token action.
+lex
+	token id /[a-z]+/
+	{
+		return 0
+	}
+	ignore /[ \n]+/
+end
+
+def start [id*]
+
+parse P: start [stdin]
+print( P, '\n' )
+##### COMP_ERR #####
+5:3: return in a token action

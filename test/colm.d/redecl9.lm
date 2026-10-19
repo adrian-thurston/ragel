@@ -1,0 +1,9 @@
+# A function named like a built-in function.
+int atoi( S: str )
+{
+	return 42
+}
+
+print( atoi( "5" ), '\n' )
+##### COMP_ERR #####
+2:5: function atoi redeclared

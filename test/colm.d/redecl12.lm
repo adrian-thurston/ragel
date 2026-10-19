@@ -1,0 +1,4 @@
+# An in-host function named like a built-in function.
+int atoi( S: str ) = c_atoi
+##### COMP_ERR #####
+2:5: in-host function atoi redeclared

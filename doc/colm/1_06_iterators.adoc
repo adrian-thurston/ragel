@@ -215,9 +215,10 @@ went when `+((a))+` was replaced.
 Some rules for user iterators:
 
 * Yield only in the iterator's own code, not in a function that it calls.
-* Don't use `return` or `exit` in an iterator.
-* Give an iterator a name that no function or other iterator has, the
-  built-in ones included.
+* Don't use `exit` in an iterator. A `return` in one is a compile error.
+* An iterator can't have the name of a function or another iterator in its
+  namespace, or, at the top level, of a built-in one: colm reports it as
+  redeclared.
 * Let a loop over an iterator that yields from inside its own loop over a
   user iterator, as `bottom_up` does, run to its end, without `break` or
   `return`.

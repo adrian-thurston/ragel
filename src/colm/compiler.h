@@ -880,6 +880,7 @@ struct Compiler
 	UniqueRepeatMap uniqeRepeatMap;
 	UniqueGenericMap uniqueGenericMap;
 
+	void declareGlobalFunctions();
 	void declareGlobalFields();
 	void declareStrFields();
 
@@ -912,7 +913,8 @@ struct Compiler
 		CompileTranslation,
 		CompileReduction,
 		CompileFunction,
-		CompileRoot
+		CompileRoot,
+		CompilePreEof
 	};
 
 	CompileContext compileContext;
