@@ -102,6 +102,14 @@ EXTRA_DIST = \
 	inpush1.lm \
 	inpushbt1.lm \
 	island.lm \
+	itemtype1.lm \
+	itemtype2.lm \
+	itemtype3.lm \
+	itemtype4.lm \
+	itemtype5.lm \
+	itemtype6.lm \
+	itemtype7.lm \
+	itemtype8.lm \
 	lhs1.lm \
 	liftattrs.lm \
 	list1.lm \

@@ -1492,6 +1492,32 @@ UniqueType *LangTerm::evaluateReadReduce( Compiler *pd, CodeVect &code ) const
 	return targetUT;
 }
 
+/* The items of a print, a send, a parse and a string go out as text, or as
+ * trees. A struct, list, map, parser or stream isn't a tree, and the runtime
+ * would read it as one. A parser reads a stream sent to it in full. */
+static void checkSendItem( Compiler *pd, const ConsItem *item, UniqueType *ut,
+		bool streamOk, const char *message )
+{
+	switch ( ut->typeId ) {
+		case TYPE_TREE:
+		case TYPE_REF:
+		case TYPE_NIL:
+		case TYPE_INT:
+		case TYPE_BOOL:
+			return;
+		default:
+			break;
+	}
+
+	if ( streamOk && ut == pd->uniqueTypeStream )
+		return;
+
+	/* An expression that is a single term has its location in the term. */
+	const InputLoc &loc = item->expr->type == LangExpr::TermType ?
+			item->expr->term->loc : item->expr->loc;
+	error( loc ) << message << endp;
+}
+
 UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		bool tree, bool stop ) const
 {
@@ -1513,21 +1539,6 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 		if ( fieldInitArgs == 0 || ( fieldInitArgs->length() != 1 && fieldInitArgs->length() != 2 ) )
 			error(loc) << "parse command requires just context and input" << endp;
 		context = true;
-	}
-
-	/* Evaluate variable references. */
-	for ( ConsItemList::Iter item = consItemList->last(); item.gtb(); item-- ) {
-		if ( item->type == ConsItem::ExprType ) {
-			UniqueType *ut = item->expr->evaluate( pd, code );
-		
-			if ( ut->typeId != TYPE_TREE )
-				error() << "variables used in replacements must be trees" << endp;
-
-			if ( item->trim == ConsItem::TrimYes ) 
-				code.append( IN_TREE_TRIM );
-
-			item->langEl = ut->langEl;
-		}
 	}
 
 	/* Construct the parser. */
@@ -1612,6 +1623,9 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 					code.append( IN_POP_VAL );
 					continue;
 				}
+
+				checkSendItem( pd, item, ut, true, "only a tree, str, int, bool "
+						"or stream can be sent to a parser" );
 
 				if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 					code.append( IN_INT_TO_STR );
@@ -1722,6 +1736,9 @@ void LangTerm::evaluateSendStream( Compiler *pd, CodeVect &code ) const
 				continue;
 			}
 
+			checkSendItem( pd, item, ut, false, "only a tree, str, int or bool "
+					"can be printed or sent to a stream" );
+
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
@@ -1797,6 +1814,9 @@ void LangTerm::evaluateSendParser( Compiler *pd, CodeVect &code, bool strings ) 
 					code.append( IN_POP_VAL );
 					continue;
 				}
+
+				checkSendItem( pd, item, ut, true, "only a tree, str, int, bool "
+						"or stream can be sent to a parser" );
 
 				if ( ut == pd->uniqueTypeStream )
 					isStream = true;
@@ -1896,11 +1916,29 @@ UniqueType *LangTerm::evaluateEmbedString( Compiler *pd, CodeVect &code ) const
 		case ConsItem::ExprType: {
 			UniqueType *ut = item->expr->evaluate( pd, code );
 
+			if ( ut->typeId == TYPE_VOID ) {
+				/* A void call gives nothing, as in a print. */
+				code.append( IN_POP_VAL );
+
+				String result = "";
+				StringMapEl *mapEl = 0;
+				if ( pd->literalStrings.insert( result, &mapEl ) )
+					mapEl->value = pd->literalStrings.length()-1;
+
+				code.append( IN_LOAD_STR );
+				code.appendWord( mapEl->value );
+				break;
+			}
+
+			checkSendItem( pd, item, ut, false, "only a tree, str, int or bool "
+					"can go in a string" );
+
 			if ( ut->typeId == TYPE_INT || ut->typeId == TYPE_BOOL )
 				code.append( IN_INT_TO_STR );
 
-			if ( ut->typeId == TYPE_TREE &&
-					ut->langEl != pd->strLangEl && ut != pd->uniqueTypeStream )
+			/* A ref gives its tree's text, and nil gives NIL, as in a print. */
+			if ( ( ut->typeId == TYPE_TREE && ut->langEl != pd->strLangEl ) ||
+					ut->typeId == TYPE_REF || ut->typeId == TYPE_NIL )
 			{
 				/* Convert it to a string. */
 				code.append( IN_TREE_TO_STR );

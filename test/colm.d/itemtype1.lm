@@ -1,0 +1,4 @@
+# A list isn't a tree, so print can't print it: argv is a list<str>.
+print "[argv]\n"
+##### COMP_ERR #####
+2:9: only a tree, str, int or bool can be printed or sent to a stream

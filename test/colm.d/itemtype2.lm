@@ -1,0 +1,9 @@
+# A struct isn't a tree, so prints can't print it.
+struct point
+	X: int
+	Y: int
+end
+P: point = new point()
+prints( stderr, "P=", P, "\n" )
+##### COMP_ERR #####
+7:23: only a tree, str, int or bool can be printed or sent to a stream

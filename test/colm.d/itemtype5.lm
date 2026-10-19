@@ -1,0 +1,12 @@
+# A list isn't a tree, so it can't be an item of a parse.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+def start
+	[id*]
+L: list<str> = new list<str>()
+L->push_tail( "a" )
+parse S: start [ "b " L ]
+##### COMP_ERR #####
+10:23: only a tree, str, int, bool or stream can be sent to a parser

@@ -41,6 +41,8 @@ are parse errors.
 with nothing between them. An `int` prints in decimal, a `bool` as `1` or
 `0`, and a `str` as its text. A tree prints as its text, with the ignored
 text it holds, as xref:3_01_lex.adoc#lexing[the lexing chapter] explains.
+A struct, list, map, parser or stream has no text to print. Colm reports an
+error where one is printed or put in a string, even when it is nil.
 
 `print` followed by strings, without parentheses, prints them:
 `print "hello\n"`. In a double-quoted string, an expression in square

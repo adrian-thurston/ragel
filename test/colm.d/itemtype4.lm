@@ -1,0 +1,12 @@
+# A map isn't a tree, so it can't be sent to a parser.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+def start
+	[id*]
+M: map<str, str> = new map<str, str>()
+P: parser<start> = new parser<start>()
+send P ["a " M]
+##### COMP_ERR #####
+10:14: only a tree, str, int, bool or stream can be sent to a parser
