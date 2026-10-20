@@ -182,6 +182,13 @@ static void pop_check( program_t *prg, list_t *list )
 		runtime_error( prg, "pop from an empty list" );
 }
 
+/* A send to a nil parser stops the program. */
+static void parser_check( program_t *prg, parser_t *parser )
+{
+	if ( parser == 0 )
+		runtime_error( prg, "send to a nil parser" );
+}
+
 static void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *parser, struct_t *val )
 {
 	parser->pda_run->context = val;
@@ -1505,6 +1512,8 @@ again:
 		case IN_GET_COLLECT_STRING: {
 			debug( prg, REALM_BYTECODE, "IN_GET_COLLECT_STRING\n" );
 			stream_t *stream = vm_pop_stream();
+			if ( stream == 0 )
+				runtime_error( prg, "reading the tree of a nil stream" );
 			str_t *str = collect_string( prg, stream );
 			colm_tree_upref( prg, (tree_t*)str );
 			vm_push_string( str );
@@ -2536,6 +2545,9 @@ again:
 			tree_t *to_send = vm_pop_tree();
 			stream_t *stream = vm_pop_stream();
 
+			if ( stream == 0 )
+				runtime_error( prg, "send to a nil stream" );
+
 			struct stream_impl *si = stream_to_impl( stream );
 
 			int auto_trim;
@@ -2560,6 +2572,7 @@ again:
 
 			tree_t *to_send = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
+			parser_check( prg, parser );
 
 			struct input_impl *si = input_to_impl( parser->input );
 
@@ -2616,6 +2629,7 @@ again:
 
 			tree_t *to_send = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
+			parser_check( prg, parser );
 
 			struct input_impl *si = input_to_impl( parser->input );
 
@@ -2669,6 +2683,7 @@ again:
 
 		case IN_SEND_NOTHING: {
 			parser_t *parser = vm_pop_parser();
+			parser_check( prg, parser );
 			vm_push_parser( parser );
 			exec->steps = parser->pda_run->steps;
 			exec->pcr = PCR_START;
@@ -2679,6 +2694,9 @@ again:
 
 			stream_t *to_send = vm_pop_stream();
 			parser_t *parser = vm_pop_parser();
+			parser_check( prg, parser );
+			if ( to_send == 0 )
+				runtime_error( prg, "sending a nil stream to a parser" );
 
 			word_t len = stream_append_stream( prg, sp, parser->input, to_send );
 
@@ -2719,6 +2737,7 @@ again:
 
 			debug( prg, REALM_BYTECODE, "IN_SEND_EOF_W\n" );
 			parser_t *parser = vm_pop_parser();
+			parser_check( prg, parser );
 			vm_push_parser( parser );
 
 			si = input_to_impl( parser->input );
@@ -2751,6 +2770,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_INPUT_CLOSE_WC\n" );
 
 			stream_t *stream = vm_pop_stream();
+			if ( stream == 0 )
+				runtime_error( prg, "closing a nil stream" );
 			struct stream_impl *si = stream->impl;
 
 			si->funcs->close_stream( prg, si );
@@ -2763,6 +2784,8 @@ again:
 
 			stream_t *stream = vm_pop_stream();
 			value_t auto_trim = vm_pop_value();
+			if ( stream == 0 )
+				runtime_error( prg, "setting auto_trim on a nil stream" );
 			struct stream_impl *si = stream->impl;
 
 			si->funcs->set_option( prg, si, 0, (long) auto_trim );
@@ -2968,6 +2991,8 @@ again:
 
 			stream_t *stream = vm_pop_stream();
 			tree_t *len = vm_pop_tree();
+			if ( stream == 0 )
+				runtime_error( prg, "pull from a nil stream" );
 			tree_t *string = stream_pull_stream_bc( prg, stream, len );
 			colm_tree_upref( prg, string );
 			vm_push_tree( string );
@@ -2984,6 +3009,8 @@ again:
 
 			stream_t *stream = vm_pop_stream();
 			tree_t *len = vm_pop_tree();
+			if ( stream == 0 )
+				runtime_error( prg, "pull from a nil stream" );
 			tree_t *string = stream_pull_stream_bc( prg, stream, len );
 			colm_tree_upref( prg, string );
 			vm_push_tree( string );
@@ -3070,6 +3097,8 @@ again:
 
 			input_t *input = vm_pop_input();
 			stream_t *to_push = vm_pop_stream();
+			if ( to_push == 0 )
+				runtime_error( prg, "pushing a nil stream" );
 			input_push_stream( prg, sp, input_to_impl( input ), to_push );
 			vm_push_tree( 0 );
 
@@ -3083,6 +3112,8 @@ again:
 
 			input_t *input = vm_pop_input();
 			stream_t *to_push = vm_pop_stream();
+			if ( to_push == 0 )
+				runtime_error( prg, "pushing a nil stream" );
 			input_push_stream( prg, sp, input_to_impl( input ), to_push );
 			vm_push_tree( 0 );
 			break;
@@ -3624,6 +3655,8 @@ again:
 		case IN_GET_PARSER_STREAM: {
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_STREAM\n" );
 			parser_t *parser = vm_pop_parser();
+			if ( parser == 0 )
+				runtime_error( prg, "reading the input of a nil parser" );
 			vm_push_input( parser->input );
 			break;
 		}
@@ -3634,6 +3667,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_PARSER_MEM_R %hd\n", field );
 
 			parser_t *parser = vm_pop_parser();
+			if ( parser == 0 ) {
+				runtime_error( prg, field == 0 ?
+						"reading the tree of a nil parser" :
+						"reading the error of a nil parser" );
+			}
 
 			tree_t *val = get_parser_mem( parser, field );
 

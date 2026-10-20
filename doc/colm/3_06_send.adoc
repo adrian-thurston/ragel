@@ -24,7 +24,10 @@ Program: program = P->finish()
 
 `new P: parser<program>()` makes the parser and declares `P` in one
 statement. A parser variable is nil until it is given a parser made with
-`new`. Make the parser before sending to it.
+`new`. Make the parser before sending to it. Sending to a nil parser stops
+the program, as xref:8_04_error_handling.adoc#run-time-errors[the error
+handling chapter] says. So do `+finish()+`, `+P->tree+`, `+P->error+` and
+`+P->gets()+` on a nil parser.
 
 `+finish()+` returns nil when the input doesn't form a tree of the type.
 After the input has ended, `+P->tree+` is the tree, or nil, and `+P->error+`
@@ -164,7 +167,11 @@ and returns a stream. With the mode `"r"`, the stream reads the file. With
 `"w"`, it writes the file, which `open` empties first, and with `"a"` it
 writes at the file's end. Any other mode stops the program with an error.
 When the file can't be opened, `open` returns nil. Always check its result
-before using it. `+S->close()+` closes a stream.
+before using it. Sending to a nil stream stops the program, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+says. So do sending one to a parser or parsing from one, pushing it with
+`+input->push_stream+`, calling its functions, and reading its `+tree+`.
+`+S->close()+` closes a stream.
 
 `send S "text"` writes the text to the stream `S`. `print` sends to
 `stdout`: `print "text"` is `send stdout "text"`. `+prints( S, A, B )+`

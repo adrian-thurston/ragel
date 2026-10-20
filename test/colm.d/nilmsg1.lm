@@ -1,0 +1,152 @@
+# The message each use of a nil parser or stream stops the program with. The
+# host sends standard error to standard output, so the message is in the
+# output, after what the program printed before it. The stop ends the host
+# too: it never gets back from colm_run_program.
+
+lex
+	token id /[a-z]+/
+	ignore /space+/
+
+	token pushed /'!'/
+	{
+		input->pull( match_length )
+		N: stream
+		input->push_stream( N )
+	}
+end
+
+def start
+	[id*]
+
+def bang
+	[pushed id*]
+
+P: parser<start>
+S: stream
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "send" )
+	send P "a b"
+elsif ( A == "tree" )
+	print( P->tree, "\n" )
+elsif ( A == "error" )
+	print( P->error, "\n" )
+elsif ( A == "gets" ) {
+	I: _input = P->gets()
+}
+elsif ( A == "stream_send" )
+	send S "hello\n"
+elsif ( A == "stream_parse" ) {
+	parse X: start[ S ]
+}
+elsif ( A == "pull" )
+	print( S->pull( 1 ), "\n" )
+elsif ( A == "close" )
+	S->close()
+elsif ( A == "auto_trim" )
+	S->auto_trim( true )
+elsif ( A == "stream_tree" )
+	print( S->tree, "\n" )
+elsif ( A == "push_stream" ) {
+	parse B: bang[ "! a" ]
+}
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+send
+##### EXP #####
+before
+fatal: send to a nil parser
+##### EXIT #####
+1
+##### ARGS #####
+tree
+##### EXP #####
+before
+fatal: reading the tree of a nil parser
+##### EXIT #####
+1
+##### ARGS #####
+error
+##### EXP #####
+before
+fatal: reading the error of a nil parser
+##### EXIT #####
+1
+##### ARGS #####
+gets
+##### EXP #####
+before
+fatal: reading the input of a nil parser
+##### EXIT #####
+1
+##### ARGS #####
+stream_send
+##### EXP #####
+before
+fatal: send to a nil stream
+##### EXIT #####
+1
+##### ARGS #####
+stream_parse
+##### EXP #####
+before
+fatal: sending a nil stream to a parser
+##### EXIT #####
+1
+##### ARGS #####
+pull
+##### EXP #####
+before
+fatal: pull from a nil stream
+##### EXIT #####
+1
+##### ARGS #####
+close
+##### EXP #####
+before
+fatal: closing a nil stream
+##### EXIT #####
+1
+##### ARGS #####
+auto_trim
+##### EXP #####
+before
+fatal: setting auto_trim on a nil stream
+##### EXIT #####
+1
+##### ARGS #####
+stream_tree
+##### EXP #####
+before
+fatal: reading the tree of a nil stream
+##### EXIT #####
+1
+##### ARGS #####
+push_stream
+##### EXP #####
+before
+fatal: pushing a nil stream
+##### EXIT #####
+1

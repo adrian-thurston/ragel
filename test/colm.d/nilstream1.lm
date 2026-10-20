@@ -1,0 +1,167 @@
+# A send to a stream variable that holds nil, a send or parse of one into a
+# parser, and a pull, close, auto_trim, tree or push_stream on one end the
+# program with exit status 1. The output before it is kept. The usual way to
+# get a nil stream is an open that fails.
+
+lex
+	token id /[a-z]+/
+	ignore /space+/
+
+	token pushed /'!'/
+	{
+		input->pull( match_length )
+		N: stream
+		input->push_stream( N )
+	}
+end
+
+def word
+	[id]
+	{
+		N: stream
+		send N "c"
+	}
+
+def start
+	[id*]
+
+def words
+	[word*]
+
+def bang
+	[pushed id*]
+
+S: stream
+P: parser<start> = new parser<start>()
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "open_r" ) {
+	R: stream = open( "no-such-file.txt", "r" )
+	if ( !R )
+		print( "open failed\n" )
+	parse X: start[ R ]
+}
+elsif ( A == "open_w" ) {
+	W: stream = open( "/no-such-dir/x.txt", "w" )
+	if ( !W )
+		print( "open failed\n" )
+	send W "hello\n"
+}
+elsif ( A == "send" )
+	send S "hello\n"
+elsif ( A == "send_eos" )
+	send S "hello\n" eos
+elsif ( A == "prints" )
+	prints( S, "hello\n" )
+elsif ( A == "parse" ) {
+	parse X: start[ S ]
+}
+elsif ( A == "parse_tree" ) {
+	parse_tree X: start[ S ]
+}
+elsif ( A == "send_parser" )
+	send P [S]
+elsif ( A == "pull" )
+	print( S->pull( 1 ), "\n" )
+elsif ( A == "close" )
+	S->close()
+elsif ( A == "auto_trim" )
+	S->auto_trim( true )
+elsif ( A == "tree" )
+	print( S->tree, "\n" )
+elsif ( A == "push_stream" ) {
+	parse B: bang[ "! a" ]
+}
+elsif ( A == "action" ) {
+	parse W: words[ "a b" ]
+}
+
+print( "after\n" )
+##### ARGS #####
+open_r
+##### EXP #####
+before
+open failed
+##### EXIT #####
+1
+##### ARGS #####
+open_w
+##### EXP #####
+before
+open failed
+##### EXIT #####
+1
+##### ARGS #####
+send
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_eos
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+prints
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+parse
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+parse_tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_parser
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+pull
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+close
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+auto_trim
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+push_stream
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action
+##### EXP #####
+before
+##### EXIT #####
+1

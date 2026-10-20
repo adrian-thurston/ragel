@@ -189,7 +189,11 @@ Some mistakes stop the program where they happen:
 * reading the `head`, `tail` or `top` of such a list;
 * a `for` loop over a nil tree, as
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
-  over a nil list or map.
+  over a nil list or map;
+* sending to a nil parser or stream, sending a nil stream to a parser or
+  parsing from one, pushing one onto an input, or calling a function or
+  reading a field of a nil parser or stream, as
+  xref:3_06_send.adoc#send[the send chapter] describes.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from

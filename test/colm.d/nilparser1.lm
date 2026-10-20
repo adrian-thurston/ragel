@@ -1,0 +1,123 @@
+# A send to a parser variable that holds nil, or a read of its tree, error or
+# input, ends the program with exit status 1. The output before it is kept.
+# The parser in the word action is sent to with revert code on.
+
+lex
+	token id /[a-z]+/
+	ignore /space+/
+end
+
+def word
+	[id]
+	{
+		Q: parser<start>
+		send Q "c"
+	}
+
+def start
+	[id*]
+
+def words
+	[word*]
+
+P: parser<start>
+T: start = parse start[ "x y" ]
+F: stream = open( "/dev/null", "r" )
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "send" )
+	send P "a b"
+elsif ( A == "send_tree" )
+	send_tree P [T]
+elsif ( A == "send_stream" )
+	send P [F]
+elsif ( A == "send_nothing" )
+	send P []
+elsif ( A == "send_eos" )
+	send P "a" eos
+elsif ( A == "finish" ) {
+	S: start = P->finish()
+}
+elsif ( A == "eof" ) {
+	S: start = P->eof()
+}
+elsif ( A == "tree" )
+	print( P->tree, "\n" )
+elsif ( A == "error" )
+	print( P->error, "\n" )
+elsif ( A == "gets" ) {
+	I: _input = P->gets()
+}
+elsif ( A == "action" ) {
+	parse W: words[ "a b" ]
+}
+
+print( "after\n" )
+##### ARGS #####
+send
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_stream
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_nothing
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_eos
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+finish
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+eof
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+error
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+gets
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action
+##### EXP #####
+before
+##### EXIT #####
+1
