@@ -1,0 +1,17 @@
+# An input has no close. Sending eos, or calling finish, ends the input.
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+end
+
+def start
+	[id*]
+
+P: parser<start> = new parser<start>()
+I: _input = P->gets()
+I->close()
+send P [ 'a b' ]
+S: start = P->finish()
+print( '{', S, '}\n' )
+##### COMP_ERR #####
+12:4: cannot resolve qualification close

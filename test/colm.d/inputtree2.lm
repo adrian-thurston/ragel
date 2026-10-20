@@ -1,0 +1,17 @@
+# The input of a token action has no tree either.
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+	{
+		print( '[', input->tree, ']\n' )
+		input->push( make_token( typeid<id>, input->pull( match_length ) ) )
+	}
+end
+
+def start
+	[id*]
+
+parse S: start [ 'a b' ]
+print( S, '\n' )
+##### COMP_ERR #####
+6:22: cannot find name tree in object

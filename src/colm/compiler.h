@@ -884,7 +884,6 @@ struct Compiler
 	void declareGlobalFields();
 	void declareStrFields();
 
-	void declareInputField( ObjectDef *objDef, code_t getLength );
 	void declareInputFields();
 
 	void declareStreamField( ObjectDef *objDef, code_t getLength );
