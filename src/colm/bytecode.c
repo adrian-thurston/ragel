@@ -164,7 +164,8 @@ static void flush_streams( program_t *prg )
 /* Stops the program on an error at run time, such as a pop from an empty
  * list. What the program wrote so far comes out first, then "fatal: " and the
  * message on standard error, and the process exits with status 1. That ends a
- * host program too, unlike exit, which unwinds the VM and returns to the host.
+ * host program too, unlike an exit in the code colm_run_program runs, which
+ * unwinds the VM and returns to the host.
  * Whether an error should unwind the VM instead is still open. Every check
  * that stops the program goes through here, so that is one change. */
 static void runtime_error( program_t *prg, const char *msg )
@@ -731,6 +732,7 @@ tree_t *colm_run_func( struct colm_program *prg, int frame_id,
 	vm_push_tree( 0 );
 
 	execution.frame_id = frame_id;
+	execution.export_call = 1;
 
 	execution.frame_ptr = vm_ptop();
 	vm_pushn( fi->frame_size );
@@ -4913,6 +4915,16 @@ again:
 				vm_pop_tree();
 				prg->exit_status = vm_pop_type(long);
 				prg->induce_exit = 1;
+
+				/* Below an exported function that the host called is the
+				 * pseudo call colm_run_func made, not the root frame the
+				 * unwind stops at, so the unwind can't get back to the host.
+				 * End the process instead, as exit_hard does, once what the
+				 * program printed is out. */
+				if ( exec->export_call ) {
+					flush_streams( prg );
+					exit( prg->exit_status );
+				}
 
 				while ( true ) {
 					/* We stop on the root, leaving the psuedo-call setup on the
