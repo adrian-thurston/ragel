@@ -139,6 +139,9 @@ EXTRA_DIST = \
 	map7.lm \
 	map8.lm \
 	map9.lm \
+	mapel1.lm \
+	mapel2.lm \
+	mapelmsg1.lm \
 	matchex.lm \
 	matchtext1.lm \
 	maxlen.lm \
@@ -277,6 +280,8 @@ EXTRA_DIST = \
 	undomap1.lm \
 	undomap2.lm \
 	undomap3.lm \
+	undomap4.lm \
+	undomap5.lm \
 	undopush1.lm \
 	undosplit1.lm \
 	undosplit2.lm \

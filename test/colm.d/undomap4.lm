@@ -1,0 +1,87 @@
+# A map's detach_el and insert_el in a reduction action end the program as
+# they do at the top level. Input "* ;" is parsed as A1 first, which runs the
+# action, and would then back up to A2, but the program ends in the action.
+
+global M: map<str, str> = new map<str, str>()
+global O: map<str, str> = new map<str, str>()
+global G: map_el<str, str>
+global N: map_el<str, str>
+global F: map_el<str, str>
+global A: str = argv->pop()
+
+lex
+	ignore /[ \t]+/
+	literal `* `^ `;
+	token NL /'\n'/
+end
+
+def A1 []
+def A2 []
+
+def item
+	[`*]
+	{
+		if ( A == "detach_out" ) {
+			# G is no longer in M.
+			M->detach_el( G )
+		}
+		elsif ( A == "detach_nil" )
+			M->detach_el( N )
+		elsif ( A == "insert_nil" )
+			M->insert_el( N )
+		elsif ( A == "insert_held" )
+			M->insert_el( F )
+		print "action done\n"
+	}
+
+def start
+	[A1 item* `; `^ NL]
+|	[A2 `* `; NL]
+
+M->insert( "a", "1" )
+M->insert( "b", "2" )
+M->insert( "c", "3" )
+O->insert( "d", "4" )
+G = M->find_el( "b" )
+M->detach_el( G )
+N = M->find_el( "zz" )
+F = O->find_el( "d" )
+print "before: length [M->length]\n"
+
+parse S: start[ stdin ]
+print( S )
+print "after: length [M->length]\n"
+for E: map_el<str, str> in M
+	print "[E->key] [E->value]\n"
+##### ARGS #####
+detach_out
+##### IN #####
+* ;
+##### EXP #####
+before: length 2
+##### EXIT #####
+1
+##### ARGS #####
+detach_nil
+##### IN #####
+* ;
+##### EXP #####
+before: length 2
+##### EXIT #####
+1
+##### ARGS #####
+insert_nil
+##### IN #####
+* ;
+##### EXP #####
+before: length 2
+##### EXIT #####
+1
+##### ARGS #####
+insert_held
+##### IN #####
+* ;
+##### EXP #####
+before: length 2
+##### EXIT #####
+1

@@ -1,0 +1,77 @@
+# A map's detach_el given nil or an element the map doesn't hold, and its
+# insert_el given nil or an element a map holds already, end the program with
+# exit status 1. The output before them is kept.
+
+M: map<str, str> = new map<str, str>()
+O: map<str, str> = new map<str, str>()
+M->insert( "a", "1" )
+M->insert( "b", "2" )
+M->insert( "c", "3" )
+O->insert( "b", "other" )
+O->insert( "d", "4" )
+
+E: map_el<str, str> = M->find_el( "b" )
+F: map_el<str, str> = O->find_el( "d" )
+N: map_el<str, str> = M->find_el( "zz" )
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "detach_twice" ) {
+	M->detach_el( E )
+	print( "length [M->length]\n" )
+	M->detach_el( E )
+}
+elsif ( A == "detach_nil" )
+	M->detach_el( N )
+elsif ( A == "detach_other" ) {
+	# O holds an element with the key b too, but not this one.
+	O->detach_el( E )
+}
+elsif ( A == "insert_nil" )
+	M->insert_el( N )
+elsif ( A == "insert_held" )
+	M->insert_el( F )
+elsif ( A == "insert_again" )
+	M->insert_el( E )
+
+print( "after\n" )
+for V: map_el<str, str> in M
+	print( "[V->key] [V->value]\n" )
+##### ARGS #####
+detach_twice
+##### EXP #####
+before
+length 2
+##### EXIT #####
+1
+##### ARGS #####
+detach_nil
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+detach_other
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+insert_nil
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+insert_held
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+insert_again
+##### EXP #####
+before
+##### EXIT #####
+1

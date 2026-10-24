@@ -142,6 +142,15 @@ makes an empty one. Its functions and fields are reached with `+->+` too.
   map.
 * `remove( K )` takes the key out, and gives its element, or nil if it wasn't
   there.
+* `detach_el( E )` takes the element `E` out of the map, and gives it back.
+  `insert_el( E )` puts an element in: one that `remove` or `detach_el` took
+  out, or a new one, made with `new map_el<K, V>()` and given a `key` and a
+  `value`. If the key is there already, the map keeps its old element. An
+  element is in one map at most. Giving `insert_el` an element that a map
+  holds, this one or another, or `detach_el` one that this map doesn't hold,
+  or either of them nil, stops the program, as
+  xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+  says.
 * `length` is the number of keys.
 * `for V: ValueType in M` gives the values, and `for E: map_el<K, V> in M`
   the elements, in key order. `head_el` and `tail_el` are the first and last

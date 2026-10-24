@@ -1,0 +1,73 @@
+# The message each error with a map's elements stops the program with. The
+# host sends standard error to standard output, so the message is in the
+# output, after what the program printed before it.
+
+M: map<str, str> = new map<str, str>()
+O: map<str, str> = new map<str, str>()
+M->insert( "a", "1" )
+O->insert( "d", "4" )
+
+E: map_el<str, str> = M->find_el( "a" )
+F: map_el<str, str> = O->find_el( "d" )
+N: map_el<str, str> = M->find_el( "zz" )
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "detach_nil" )
+	M->detach_el( N )
+elsif ( A == "detach_out" )
+	O->detach_el( E )
+elsif ( A == "insert_nil" )
+	M->insert_el( N )
+elsif ( A == "insert_held" )
+	M->insert_el( F )
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+detach_nil
+##### EXP #####
+before
+fatal: detach_el of a nil element
+##### EXIT #####
+1
+##### ARGS #####
+detach_out
+##### EXP #####
+before
+fatal: detach_el of an element not in the map
+##### EXIT #####
+1
+##### ARGS #####
+insert_nil
+##### EXP #####
+before
+fatal: insert_el of a nil element
+##### EXIT #####
+1
+##### ARGS #####
+insert_held
+##### EXP #####
+before
+fatal: insert_el of an element already in a map
+##### EXIT #####
+1

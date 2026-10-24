@@ -1,0 +1,51 @@
+# A map's detach_el and insert_el don't stop on an element they may take. Every
+# element comes out and goes back in, in an order that reaches leaves, inner
+# elements and the root, and an element taken out of one map can go into
+# another.
+
+new M: map<int, int>()
+N: int = 101
+I: int = 0
+while ( I < N ) {
+	M->insert( I, I * 10 )
+	I = I + 1
+}
+
+new Out: list<map_el<int, int>>()
+I = 0
+while ( I < N ) {
+	K: int = I * 37 - ( I * 37 / N ) * N
+	D: map_el<int, int> = M->detach_el( M->find_el( K ) )
+	Out->push_tail( D )
+	I = I + 1
+}
+print "detached all, length [M->length]\n"
+
+for X: map_el<int, int> in Out
+	M->insert_el( X )
+print "inserted all, length [M->length]\n"
+
+C: int = 0
+S: int = 0
+for E: map_el<int, int> in M {
+	if ( E->key != C )
+		print "out of order at [E->key]\n"
+	S = S + E->value
+	C = C + 1
+}
+print "count [C], sum [S]\n"
+
+# From one map into another, and back.
+new O: map<int, int>()
+R: map_el<int, int> = M->remove( 5 )
+O->insert_el( R )
+print "M [M->length], O [O->length]\n"
+O->detach_el( R )
+M->insert_el( R )
+print "M [M->length], O [O->length]\n"
+##### EXP #####
+detached all, length 0
+inserted all, length 101
+count 101, sum 50500
+M 100, O 1
+M 101, O 0

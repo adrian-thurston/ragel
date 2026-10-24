@@ -701,6 +701,9 @@ map_el_t *map_detach( program_t *prg, map_t *map, map_el_t *element )
 		map_remove_el( map, element, 0 );
 	}
 
+	/* Out of the tree, the element has height 0, as a new one does. */
+	element->height = 0;
+
 	/* If fixfrom is null it means we just deleted
 	 * the root of the tree. */
 	if ( fixfrom == 0 )

@@ -1,0 +1,79 @@
+# A map's insert_el and detach_el in reduction actions, and backtracking over
+# them. Input ending in "; ^" is parsed as A1, keeping what the actions did.
+# Input ending in ";" is parsed as A1 first, then backs up to A2, undoing
+# them. Either way, insert_el and detach_el afterwards must take each element
+# as the map holds it then.
+
+global M: map<str, str> = new map<str, str>()
+global G: map_el<str, str>
+global H: map_el<str, str>
+
+lex
+	ignore /[ \t]+/
+	literal `+ `* `^ `;
+	token NL /'\n'/
+end
+
+def A1 []
+def A2 []
+
+def item
+	[`+]
+	{
+		M->insert_el( G )
+		print "inserted [G->key], length [M->length]\n"
+	}
+|	[`*]
+	{
+		M->detach_el( H )
+		print "detached [H->key], length [M->length]\n"
+	}
+
+def plain_item
+	[`+]
+|	[`*]
+
+def start
+	[A1 item* `; `^ NL]
+|	[A2 plain_item* `; NL]
+
+M->insert( "a", "1" )
+M->insert( "c", "3" )
+G = new map_el<str, str>()
+G->key = "b"
+G->value = "2"
+H = M->find_el( "c" )
+
+parse S: start[ stdin ]
+print( S )
+print "after: length [M->length]\n"
+
+if ( match S [A2 plain_item* `; NL] ) {
+	# Backtracked: G is out of M again and H is back in.
+	M->insert_el( G )
+	M->detach_el( H )
+}
+else {
+	M->detach_el( G )
+	M->insert_el( H )
+}
+for E: map_el<str, str> in M
+	print "[E->key] [E->value]\n"
+##### IN #####
++ * ; ^
+##### EXP #####
+inserted b, length 3
+detached c, length 2
++ * ; ^
+after: length 2
+a 1
+c 3
+##### IN #####
++ * ;
+##### EXP #####
+inserted b, length 3
+detached c, length 2
++ * ;
+after: length 2
+a 1
+b 2
