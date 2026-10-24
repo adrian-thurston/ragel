@@ -172,6 +172,9 @@ EXTRA_DIST = \
 	open2.lm \
 	order1.lm \
 	order2.lm \
+	outfile1.lm \
+	outfile2.lm \
+	outfile3.lm \
 	parse1.lm \
 	parsetree1.lm \
 	pointer1.lm \
