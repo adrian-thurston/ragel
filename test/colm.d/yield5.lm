@@ -1,0 +1,113 @@
+#
+# A yield in a function that no iterator called stops the program with exit
+# status 1. The host sends standard error to standard output, so the message
+# is in the output, after what the program printed before it. The argument
+# picks where the function is called from: the top level, the body of a loop
+# over a user iterator, a production action of a parse that a user iterator
+# runs, or the host, through an exported function. The stop ends the host
+# too: it never gets back from colm_run_program or the exported function.
+#
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def item
+	[id]
+	{
+		f()
+	}
+
+void f()
+{
+	S: str = "f"
+	yield S
+}
+
+iter i()
+{
+	S: str = "i"
+	yield S
+}
+
+iter parses()
+{
+	parse P: item[ "a" ]
+	yield P
+}
+
+export str e( S: str )
+{
+	f()
+	return S
+}
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "top" )
+	f()
+elsif ( A == "body" ) {
+	for T: str in i() {
+		print( T, "\n" )
+		f()
+	}
+}
+elsif ( A == "action" ) {
+	for T: item in parses()
+		print( T, "\n" )
+}
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include "working/yield5.if.h"
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	if ( argc > 1 && strcmp( argv[1], "export" ) == 0 )
+		e( program, "x" );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+top
+##### EXP #####
+before
+fatal: yield outside an iterator
+##### EXIT #####
+1
+##### ARGS #####
+body
+##### EXP #####
+before
+i
+fatal: yield outside an iterator
+##### EXIT #####
+1
+##### ARGS #####
+action
+##### EXP #####
+before
+fatal: yield outside an iterator
+##### EXIT #####
+1
+##### ARGS #####
+export
+##### EXP #####
+before
+after
+fatal: yield outside an iterator
+##### EXIT #####
+1

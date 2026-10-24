@@ -3829,6 +3829,11 @@ again:
 		case IN_YIELD: {
 			debug( prg, REALM_BYTECODE, "IN_YIELD\n" );
 
+			/* A yield in a function that no iterator called: there is no
+			 * iterator to give the value to. */
+			if ( exec->iframe_ptr == 0 )
+				runtime_error( prg, "yield outside an iterator" );
+
 			kid_t *kid = vm_pop_kid();
 			ref_t *next = vm_pop_ref();
 			user_iter_t *uiter = (user_iter_t*) vm_plocal_iframe( IFR_AA );

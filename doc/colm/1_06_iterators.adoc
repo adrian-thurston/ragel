@@ -215,6 +215,13 @@ went when `+((a))+` was replaced.
 Some rules for user iterators:
 
 * Yield only in the iterator's own code, not in a function that it calls.
+* A `yield` at the top level, in a production action, in a token action or
+  in a preeof block is a compile error. One in a function compiles, but if
+  no iterator called the function, the `yield` stops the program: it prints
+  `fatal: yield outside an iterator` and exits with status 1, as
+  xref:8_04_error_handling.adoc#run-time-errors[an error at run time] does.
+* Use an iterator only in a `for` loop, after `in`. Calling one as a
+  function, as in `i( S )` or `child( T )`, is a compile error.
 * Don't use `exit` in an iterator. A `return` in one is a compile error.
 * An iterator can't have the name of a function or another iterator in its
   namespace, or, at the top level, of a built-in one: colm reports it as

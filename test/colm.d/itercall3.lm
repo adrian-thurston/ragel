@@ -1,0 +1,18 @@
+# A user iterator called as a function inside another iterator.
+iter i( S: str )
+{
+	yield S
+}
+
+iter o()
+{
+	S: str = "o"
+	i( S )
+	yield S
+}
+
+for T: str in o()
+	print( T, "\n" )
+print( "done\n" )
+##### COMP_ERR #####
+10:2: iterator i called outside a for loop

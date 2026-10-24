@@ -1,0 +1,10 @@
+# A user iterator called as a function.
+iter i( S: str )
+{
+	yield S
+}
+
+i( "x" )
+print( "done\n" )
+##### COMP_ERR #####
+7:1: iterator i called outside a for loop

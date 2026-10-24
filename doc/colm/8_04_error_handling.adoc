@@ -189,7 +189,9 @@ Some mistakes stop the program where they happen:
 * reading the `head`, `tail` or `top` of such a list;
 * a `for` loop over a nil tree, as
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
-  over a nil list or map.
+  over a nil list or map;
+* a `yield` in a function that no iterator called, which the iterators
+  chapter covers too.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from

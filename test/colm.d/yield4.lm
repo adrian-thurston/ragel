@@ -1,0 +1,17 @@
+# A yield in a preeof block.
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+
+	preeof {
+		S: str = "x"
+		yield S
+	}
+end
+
+def start [id*]
+
+parse P: start["abc def"]
+print( P, "\n" )
+##### COMP_ERR #####
+8:3: yield in a preeof block

@@ -301,7 +301,7 @@ struct LoadColm
 		}
 		case statement::Yield: {
 			LangVarRef *varRef = walkVarRef( Statement.var_ref() );
-			stmt = LangStmt::cons( LangStmt::YieldType, varRef );
+			stmt = LangStmt::cons( Statement.loc(), LangStmt::YieldType, varRef );
 			break;
 		}
 		case statement::Return: {

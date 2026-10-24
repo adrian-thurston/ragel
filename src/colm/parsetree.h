@@ -3237,9 +3237,10 @@ struct LangStmt
 		return s;
 	}
 
-	static LangStmt *cons( Type type, LangVarRef *varRef )
+	static LangStmt *cons( const InputLoc &loc, Type type, LangVarRef *varRef )
 	{
 		LangStmt *s = new LangStmt;
+		s->loc = loc;
 		s->type = type;
 		s->varRef = varRef;
 		return s;

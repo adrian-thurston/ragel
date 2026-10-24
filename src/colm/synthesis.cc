@@ -1168,6 +1168,10 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 	/* Evaluate the object. */
 	VarRefLookup lookup = lookupMethod( pd );
 
+	/* An iterator runs only as the iterator of a for loop. */
+	if ( lookup.objMethod->iterDef != 0 )
+		error(loc) << "iterator " << name << " called outside a for loop" << endp;
+
 	Function *func = lookup.objMethod->func;
 
 	/* Prepare the contiguous call args space. */
@@ -2799,6 +2803,26 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case YieldType: {
+			/* Only a function can yield: an iterator, or a function an
+			 * iterator calls. IN_YIELD stops a function that no iterator
+			 * called. */
+			switch ( pd->compileContext ) {
+				case Compiler::CompileReduction:
+					error(loc) << "yield in a production action" << endp;
+					break;
+				case Compiler::CompileTranslation:
+					error(loc) << "yield in a token action" << endp;
+					break;
+				case Compiler::CompilePreEof:
+					error(loc) << "yield in a preeof block" << endp;
+					break;
+				case Compiler::CompileRoot:
+					error(loc) << "yield at the top level" << endp;
+					break;
+				case Compiler::CompileFunction:
+					break;
+			}
+
 			/* take a reference and yield it. Immediately reset the referece. */
 			varRef->preEvaluateRef( pd, code );
 			ObjectField *objField = varRef->evaluateRef( pd, code, 0 );

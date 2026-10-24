@@ -1,0 +1,17 @@
+# A yield in a token action.
+lex
+	token id /[a-z]+/
+	{
+		S: str = "x"
+		yield S
+		input->push( make_token( typeid<id>, input->pull( match_length ) ) )
+	}
+	ignore /[ \n]+/
+end
+
+def start [id*]
+
+parse P: start[stdin]
+print( P, "\n" )
+##### COMP_ERR #####
+6:3: yield in a token action

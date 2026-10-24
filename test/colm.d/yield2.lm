@@ -1,0 +1,17 @@
+# A yield in a production action.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+	{
+		S: str = "x"
+		yield S
+	}
+
+parse P: start[stdin]
+print( P, "\n" )
+##### COMP_ERR #####
+11:3: yield in a production action

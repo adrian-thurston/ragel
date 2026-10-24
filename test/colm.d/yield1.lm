@@ -1,0 +1,6 @@
+# A yield at the top level.
+S: str = "x"
+yield S
+print( "done\n" )
+##### COMP_ERR #####
+3:1: yield at the top level

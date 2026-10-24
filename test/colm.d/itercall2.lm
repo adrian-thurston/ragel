@@ -1,0 +1,14 @@
+# A built-in iterator called as a function.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start [id*]
+
+parse P: start["a b"]
+T: start = P
+child( T )
+print( "done\n" )
+##### COMP_ERR #####
+11:1: iterator child called outside a for loop
