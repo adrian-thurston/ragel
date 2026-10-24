@@ -1,0 +1,78 @@
+# Reading or setting a field of a nil token stops the program, after what it
+# printed before. error is nil after a parse that succeeds.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+parse S: start[ "ab cd" ]
+T: id = nil
+F: str = argv->head_el->value
+
+print( 'before\n' )
+if F == 'file'
+	print( error.file, '\n' )
+elsif F == 'line'
+	print( error.line, '\n' )
+elsif F == 'col'
+	print( error.col, '\n' )
+elsif F == 'pos'
+	print( error.pos, '\n' )
+elsif F == 'data'
+	print( error.data, '\n' )
+elsif F == 'token'
+	print( T.line, '\n' )
+elsif F == 'set'
+	T.data = 'xyz'
+print( 'after\n' )
+##### ARGS #####
+file
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+line
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+col
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+pos
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+data
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+token
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+none
+##### EXP #####
+before
+after

@@ -3353,6 +3353,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_DATA_R\n" );
 
 			tree_t *tree = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "reading the data of a nil token" );
 			head_t *data = string_copy( prg, tree->tokdata );
 			tree_t *str = construct_string( prg, data );
 			colm_tree_upref( prg, str );
@@ -3365,6 +3367,8 @@ again:
 
 			tree_t *tree = vm_pop_tree();
 			tree_t *val = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "setting the data of a nil token" );
 			head_t *head = string_copy( prg, ((str_t*)val)->value );
 			string_free( prg, tree->tokdata );
 			tree->tokdata = head;
@@ -3378,6 +3382,8 @@ again:
 
 			tree_t *tree = vm_pop_tree();
 			tree_t *val = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "setting the data of a nil token" );
 
 			head_t *oldval = tree->tokdata;
 			head_t *head = string_copy( prg, ((str_t*)val)->value );
@@ -3408,6 +3414,8 @@ again:
 		case IN_GET_TOKEN_FILE_R: {
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_FILE_R\n" );
 			tree_t *tree = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "reading the file of a nil token" );
 			tree_t *str = 0;
 			if ( tree->tokdata->location != 0 &&
 					tree->tokdata->location->name != 0 ) {
@@ -3425,6 +3433,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_LINE_R\n" );
 
 			tree_t *tree = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "reading the line of a nil token" );
 			value_t integer = 0;
 			if ( tree->tokdata->location )
 				integer = tree->tokdata->location->line;
@@ -3436,6 +3446,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_COL_R\n" );
 
 			tree_t *tree = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "reading the col of a nil token" );
 			value_t integer = 0;
 			if ( tree->tokdata->location )
 				integer = tree->tokdata->location->column;
@@ -3447,6 +3459,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_POS_R\n" );
 
 			tree_t *tree = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "reading the pos of a nil token" );
 			value_t integer = 0;
 			if ( tree->tokdata->location )
 				integer = tree->tokdata->location->byte;

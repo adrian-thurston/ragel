@@ -1,0 +1,92 @@
+# The message reading or setting a field of a nil token stops the program
+# with. The host sends standard error to standard output, so the message is in
+# the output, after what the program printed before it. The stop ends the host
+# too: it never gets back from colm_run_program.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+parse S: start[ "ab cd" ]
+T: id = nil
+F: str = argv->pop()
+
+print( "before\n" )
+if F == "file"
+	print( error.file, "\n" )
+elsif F == "line"
+	print( error.line, "\n" )
+elsif F == "col"
+	print( T.col, "\n" )
+elsif F == "pos"
+	print( T.pos, "\n" )
+elsif F == "data"
+	print( T.data, "\n" )
+elsif F == "set"
+	T.data = "xyz"
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+file
+##### EXP #####
+before
+fatal: reading the file of a nil token
+##### EXIT #####
+1
+##### ARGS #####
+line
+##### EXP #####
+before
+fatal: reading the line of a nil token
+##### EXIT #####
+1
+##### ARGS #####
+col
+##### EXP #####
+before
+fatal: reading the col of a nil token
+##### EXIT #####
+1
+##### ARGS #####
+pos
+##### EXP #####
+before
+fatal: reading the pos of a nil token
+##### EXIT #####
+1
+##### ARGS #####
+data
+##### EXP #####
+before
+fatal: reading the data of a nil token
+##### EXIT #####
+1
+##### ARGS #####
+set
+##### EXP #####
+before
+fatal: setting the data of a nil token
+##### EXIT #####
+1
