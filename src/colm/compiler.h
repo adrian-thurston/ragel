@@ -925,6 +925,12 @@ struct Compiler
 	/* For stack unwinding. Used at exits, returns, iterator destroy, etc. */
 	CodeVect unwindCode;
 
+	/* The term a statement evaluates with nothing of its own on the stack,
+	 * and whether the call or parse being compiled has words under it that
+	 * an exit can't unwind. */
+	LangTerm *stmtTerm;
+	bool noUnwind;
+
 	ObjectField *makeDataEl();
 	ObjectField *makeFileEl();
 	ObjectField *makeLineEl();

@@ -1050,10 +1050,14 @@ void LangVarRef::resetActiveRefs( Compiler *pd, VarRefLookup &lookup,
 
 /* After a call, or a parse, which runs parser actions: the length of the code
  * that unwinds this frame on an exit below, then the code. FN_EXIT runs it,
- * the return or the parse skips it. */
+ * the return or the parse skips it. Where words the expression around the
+ * call or parse pushed lie under it, -1 stands in for both, and an exit there
+ * ends the process. */
 static void appendUnwindCode( Compiler *pd, CodeVect &code )
 {
-	if ( pd->unwindCode.length() == 0 )
+	if ( pd->noUnwind )
+		code.appendHalf( (half_t) -1 );
+	else if ( pd->unwindCode.length() == 0 )
 		code.appendHalf( 0 );
 	else {
 		code.appendHalf( pd->unwindCode.length() + 1 );
@@ -1180,6 +1184,19 @@ UniqueType *LangVarRef::evaluateCall( Compiler *pd, CodeVect &code, CallArgVect 
 
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = evaluateArgs( pd, code, lookup, args );
+
+	/* A ref argument's qualifiers, or the value a ref argument takes, stay
+	 * on the stack under the call, where an exit can't unwind them. */
+	if ( args != 0 ) {
+		for ( CallArgVect::Iter pe = *args; pe.lte(); pe++ ) {
+			LangExpr *expression = (*pe)->expr;
+			UniqueType *paramUT = lookup.objMethod->paramUTs[pe.pos()];
+
+			if ( paramUT->typeId == TYPE_REF && ( !expression->canTakeRef( pd ) ||
+					expression->term->varRef->qual->length() > 0 ) )
+				pd->noUnwind = true;
+		}
+	}
 
 	/* Write the call opcode. */
 	callOperation( pd, code, lookup );
@@ -1990,6 +2007,12 @@ UniqueType *LangTerm::evaluateSearch( Compiler *pd, CodeVect &code ) const
 
 UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 {
+	/* Only the term a statement starts with can be unwound by an exit. Any
+	 * other runs over words the expression around it has pushed. */
+	bool noUnwind = pd->noUnwind;
+	pd->noUnwind = this != pd->stmtTerm;
+	pd->stmtTerm = 0;
+
 	UniqueType *retUt = 0;
 	switch ( type ) {
 		case VarRefType:
@@ -2092,6 +2115,7 @@ UniqueType *LangTerm::evaluate( Compiler *pd, CodeVect &code ) const
 	// else
 	//	pd->unwindCode.insert( 0, IN_POP_TREE );
 
+	pd->noUnwind = noUnwind;
 	return retUt;
 }
 
@@ -2618,10 +2642,17 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 	}
 }
 
+/* The term an expression is, if it is one. */
+static LangTerm *stmtTerm( LangExpr *expr )
+{
+	return expr->type == LangExpr::TermType ? expr->term : 0;
+}
+
 void LangStmt::compileWhile( Compiler *pd, CodeVect &code ) const
 {
 	/* Generate code for the while test. Remember the top. */
 	long top = code.length();
+	pd->stmtTerm = stmtTerm( expr );
 	UniqueType *eut = expr->evaluate( pd, code );
 
 	/* Jump past the while block if false. Note that we don't have the
@@ -2670,6 +2701,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 	switch ( type ) {
 		case ExprType: {
 			/* Evaluate the exrepssion, then pop it immediately. */
+			pd->stmtTerm = stmtTerm( expr );
 			UniqueType *exprUt = expr->evaluate( pd, code );
 			if ( exprUt->tree() )
 				code.append( IN_POP_TREE );
@@ -2683,6 +2715,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			long jumpFalse = 0, jumpPastElse = 0, distance = 0;
 
 			/* Evaluate the test. */
+			pd->stmtTerm = stmtTerm( expr );
 			UniqueType *eut = expr->evaluate( pd, code );
 
 			/* Jump past the if block if false. We don't know the distance
@@ -2735,6 +2768,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 		}
 		case AssignType: {
 			/* Evaluate the exrepssion. */
+			pd->stmtTerm = stmtTerm( expr );
 			UniqueType *exprUT = expr->evaluate( pd, code );
 
 			/* Do the assignment. */
@@ -2766,6 +2800,7 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			}
 
 			/* Evaluate the exrepssion. */
+			pd->stmtTerm = stmtTerm( expr );
 			UniqueType *exprUT = expr->evaluate( pd, code );
 
 			if ( pd->curFunction == 0 ) {

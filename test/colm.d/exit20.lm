@@ -1,0 +1,55 @@
+#
+# An exit in a parser action, where the parse is part of a larger expression
+# in a function, can't unwind the stack. The program's output comes out, and
+# it ends there with the exit status. The argument picks the expression.
+#
+
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+end
+
+def item
+	[id]
+	{
+		print( $r1, '\n' )
+		if $r1 == 'stop'
+			exit( 3 )
+	}
+
+def items
+	[item*]
+
+str g( S: str, T: items )
+{
+	return S
+}
+
+int f( A: str )
+{
+	if ( A == "print" ) {
+		print( 'x\n', parse items["abc stop"], '\n' )
+	}
+	elsif ( A == "arg" ) {
+		S: str = g( 'x', parse items["abc stop"] )
+	}
+	return 0
+}
+
+f( argv->pop() )
+print( 'after\n' )
+##### ARGS #####
+print
+##### EXP #####
+x
+abc
+stop
+##### EXIT #####
+3
+##### ARGS #####
+arg
+##### EXP #####
+abc
+stop
+##### EXIT #####
+3

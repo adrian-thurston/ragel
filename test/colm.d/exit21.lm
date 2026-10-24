@@ -1,0 +1,54 @@
+#
+# An exit that can unwind the stack returns to the host, which goes on and
+# gets the exit status from colm_delete_program. One that can't, reached
+# through a call inside a larger expression, ends the host's process too.
+#
+
+int f2()
+{
+	print( 'f2\n' )
+	exit( 3 )
+	return 1
+}
+
+int f1()
+{
+	I: int = 1 + f2()
+	return 0
+}
+
+A: str = argv->pop()
+if ( A == "stmt" )
+	f2()
+elsif ( A == "nested" )
+	f1()
+print( 'after\n' )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+stmt
+##### EXP #####
+f2
+host: exit status 3
+##### EXIT #####
+3
+##### ARGS #####
+nested
+##### EXP #####
+f2
+##### EXIT #####
+3

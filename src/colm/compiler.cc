@@ -319,6 +319,8 @@ Compiler::Compiler( )
 	nextFuncId(0),
 	nextHostId(0),
 	curFunction(0),
+	stmtTerm(0),
+	noUnwind(false),
 	nextObjectId(1),     /* 0 is  reserved for no object. */
 	nextFrameId(0),
 	nextParserId(0),

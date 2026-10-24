@@ -1,0 +1,125 @@
+#
+# An exit reached through a call that the expression around it has words
+# under can't unwind the stack. The program's output comes out, and it ends
+# there with the exit status. The argument picks the call.
+#
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def item
+	[id]
+
+def pair
+	[item item]
+
+int f2()
+{
+	print( 'f2\n' )
+	exit( 3 )
+	return 1
+}
+
+str s2()
+{
+	print( 's2\n' )
+	exit( 3 )
+	return 's'
+}
+
+int g( A: int, B: int )
+{
+	return A
+}
+
+int r( R: ref<str> )
+{
+	print( 'r\n' )
+	exit( 3 )
+	return 1
+}
+
+int q( R: ref<item> )
+{
+	print( 'q\n' )
+	exit( 3 )
+	return 1
+}
+
+int f1( A: str )
+{
+	if ( A == "binary" ) {
+		I: int = 1 + f2()
+	}
+	elsif ( A == "print" ) {
+		print( 'x\n', f2(), '\n' )
+	}
+	elsif ( A == "arg" ) {
+		I: int = g( 1, f2() )
+	}
+	elsif ( A == "exit_arg" ) {
+		print( 'x\n', exit( 3 ), '\n' )
+	}
+	elsif ( A == "ref_expr" ) {
+		r( "lit" )
+	}
+	elsif ( A == "ref_qual" ) {
+		P: pair = parse pair[ "a b" ]
+		q( P.item )
+	}
+	return 0
+}
+
+A: str = argv->pop()
+if ( A == "root" ) {
+	S: str = "x" + s2()
+}
+else {
+	f1( A )
+}
+print( 'after\n' )
+##### ARGS #####
+binary
+##### EXP #####
+f2
+##### EXIT #####
+3
+##### ARGS #####
+print
+##### EXP #####
+x
+f2
+##### EXIT #####
+3
+##### ARGS #####
+arg
+##### EXP #####
+f2
+##### EXIT #####
+3
+##### ARGS #####
+exit_arg
+##### EXP #####
+x
+##### EXIT #####
+3
+##### ARGS #####
+ref_expr
+##### EXP #####
+r
+##### EXIT #####
+3
+##### ARGS #####
+ref_qual
+##### EXP #####
+q
+##### EXIT #####
+3
+##### ARGS #####
+root
+##### EXP #####
+s2
+##### EXIT #####
+3

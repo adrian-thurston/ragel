@@ -164,13 +164,22 @@ static void flush_streams( program_t *prg )
 /* Stops the program on an error at run time, such as a pop from an empty
  * list. What the program wrote so far comes out first, then "fatal: " and the
  * message on standard error, and the process exits with status 1. That ends a
- * host program too, unlike exit, which unwinds the VM and returns to the host.
- * Whether an error should unwind the VM instead is still open. Every check
- * that stops the program goes through here, so that is one change. */
+ * host program too, unlike exit, which unwinds the VM and returns to the host
+ * where it can (see exit_now). Whether an error should unwind the VM instead
+ * is still open. Every check that stops the program goes through here, so that
+ * is one change. */
 static void runtime_error( program_t *prg, const char *msg )
 {
 	flush_streams( prg );
 	fatal( "%s\n", msg );
+}
+
+/* An exit the VM can't unwind ends the process at once, as exit_hard does,
+ * after what the program wrote so far comes out. */
+static void exit_now( program_t *prg )
+{
+	flush_streams( prg );
+	exit( prg->exit_status );
 }
 
 /* A pop from a nil or empty list stops the program. */
@@ -2878,7 +2887,8 @@ again:
 				 * (see FN_EXIT). */
 				short unwind_len;
 				read_half( unwind_len );
-				instr += unwind_len;
+				if ( unwind_len > 0 )
+					instr += unwind_len;
 
 				if ( exec->WV ) {
 					rcode_unit_start( exec );
@@ -4904,7 +4914,8 @@ again:
 			}
 			case FN_EXIT: {
 				/* The unwind code follows the exit call (exception, see
-				 * synthesis). */
+				 * synthesis). -1 in place of its length means the stack
+				 * can't be unwound from here (see exit_now). */
 				short unwind_len;
 				read_half( unwind_len );
 
@@ -4915,6 +4926,11 @@ again:
 				prg->induce_exit = 1;
 
 				while ( true ) {
+					/* The call or parse we are in sits on words the stack
+					 * can't be unwound past. */
+					if ( unwind_len < 0 )
+						exit_now( prg );
+
 					/* We stop on the root, leaving the psuedo-call setup on the
 					 * stack. Note we exclude the local data. */
 					if ( exec->frame_id == prg->rtd->root_frame_id )
