@@ -12,7 +12,9 @@ the errors at run time that stop it.
 
 `parse` gives nil when its input doesn't form a tree of the type. The program
 goes on running: a failed parse doesn't stop it, or set its exit status. So
-check the result, with `if ( ! Tree )`, before using the tree.
+check the result, with `if ( ! Tree )`, before using the tree. Reading a child
+of the nil tree stops the program, as <<run-time-errors,the section on
+errors at run time>> describes.
 
 `error` is a `str`. Every `parse` and `parse_stop` statement sets it: to the
 message when the parse fails, and to nil when it succeeds. So read it right
@@ -189,7 +191,10 @@ Some mistakes stop the program where they happen:
 * reading the `head`, `tail` or `top` of such a list;
 * a `for` loop over a nil tree, as
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
-  over a nil list or map.
+  over a nil list or map;
+* reading or setting a child or an attribute of a nil tree, as
+  xref:3_02_parse.adoc#parsing[the parsing chapter] and
+  xref:3_05_reduction.adoc#attributes[the attributes section] describe.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from

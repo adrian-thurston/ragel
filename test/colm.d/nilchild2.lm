@@ -1,0 +1,89 @@
+#
+# In a production's action, reading or setting a child or an attribute of a
+# nil global tree stops the program with exit status 1, after the output
+# printed before it. The argument picks the use.
+#
+
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	ignore /[ \n]+/
+end
+
+def pair
+	T: id
+	[L: id R: num]
+
+def wrap
+	W: pair
+	[pair]
+
+global K: str = argv->pop()
+global G: pair
+global H: wrap
+global P: pair = parse pair[ "x 1" ]
+
+def start
+	[id]
+	{
+		if K == 'tree' {
+			print( $P.L, ' ', $P.R, '\n' )
+			if ( !P.T )
+				print( 'no T\n' )
+		}
+		elsif K == 'label'
+			print( G.L, '\n' )
+		elsif K == 'set_label'
+			G.L = r1
+		elsif K == 'attr'
+			print( G.T, '\n' )
+		elsif K == 'set_attr'
+			G.T = r1
+		elsif K == 'attr_attr'
+			H.W.T = r1
+		print( 'action\n' )
+	}
+
+print( K, '\n' )
+parse S: start[ "y" ]
+print( 'end\n' )
+##### ARGS #####
+tree
+##### EXP #####
+tree
+x 1
+no T
+action
+end
+##### EXIT #####
+0
+##### ARGS #####
+label
+##### EXP #####
+label
+##### EXIT #####
+1
+##### ARGS #####
+set_label
+##### EXP #####
+set_label
+##### EXIT #####
+1
+##### ARGS #####
+attr
+##### EXP #####
+attr
+##### EXIT #####
+1
+##### ARGS #####
+set_attr
+##### EXP #####
+set_attr
+##### EXIT #####
+1
+##### ARGS #####
+attr_attr
+##### EXP #####
+attr_attr
+##### EXIT #####
+1

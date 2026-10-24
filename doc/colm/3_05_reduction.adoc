@@ -95,6 +95,12 @@ An attribute that is not set is 0 if it is an `int`, and nil if it is a
 `str`. Attributes aren't part of the tree's text: `print`, `$` and `%` leave
 them out.
 
+Reading an attribute of a nil tree stops the program: it prints
+`fatal: reading an attribute of a nil tree` and exits with status 1. Setting
+one stops it too, with `setting` in place of `reading`, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+describes.
+
 An attribute set on an alternative that the parser abandons goes with that
 alternative's tree:
 

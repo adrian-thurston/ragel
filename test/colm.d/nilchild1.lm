@@ -1,0 +1,270 @@
+#
+# Reading or setting a child or an attribute of a nil tree stops the program
+# with exit status 1, after the output printed before it. So does taking a
+# reference to one, for a ref argument or a for loop. A child the tree's
+# production doesn't have is nil, and reading it goes on. The argument picks
+# the use.
+#
+
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `( `)
+	ignore /[ \n]+/
+end
+
+def item
+	[id]
+
+def pair
+	A: int
+	T: id
+	[L: id R: num]
+|	[id `( item* `)]
+
+def wrap
+	W: pair
+	[pair]
+|	[num]
+
+int take( X: ref<id> )
+{
+	print( 'take\n' )
+}
+
+K: str = argv->pop()
+print( K, '\n' )
+
+S: pair
+X: wrap
+parse P: pair[ "x 1" ]
+parse Q: pair[ "y ( z )" ]
+parse W: wrap[ "2" ]
+I: id = P.L
+
+if K == 'tree' {
+	print( $P.L, ' ', $P.R, '\n' )
+	print( $Q.id, ' ', $Q._repeat_item, '\n' )
+	if ( !P.id )
+		print( 'no id\n' )
+	if ( !W.pair )
+		print( 'no pair\n' )
+	P.A = 1
+	P.T = Q.id
+	print( P.A, ' ', $P.T, '\n' )
+	P.L = Q.id
+	print( $P, '\n' )
+	W.W = P
+	W.W.A = 2
+	print( W.W.A, '\n' )
+	for J: id in P.L
+		print( 'for ', $J, '\n' )
+	for J: id in P.T
+		print( 'for ', $J, '\n' )
+	take( P.L )
+	take( P.T )
+}
+elsif K == 'parse' {
+	parse F: pair[ "abc" ]
+	J: id = F.id
+}
+elsif K == 'type' {
+	J: id = S.id
+}
+elsif K == 'label' {
+	J: id = S.L
+}
+elsif K == 'test' {
+	if ( !S.L )
+		print( 'no L\n' )
+}
+elsif K == 'repeat' {
+	print( S._repeat_item, '\n' )
+}
+elsif K == 'absent' {
+	print( W.pair.L, '\n' )
+}
+elsif K == 'set_label' {
+	S.L = I
+}
+elsif K == 'set_type' {
+	S.id = I
+}
+elsif K == 'attr_int' {
+	print( S.A, '\n' )
+}
+elsif K == 'attr_tree' {
+	print( S.T, '\n' )
+}
+elsif K == 'set_attr_int' {
+	S.A = 1
+}
+elsif K == 'set_attr_tree' {
+	S.T = I
+}
+elsif K == 'attr_attr' {
+	X.W.A = 1
+}
+elsif K == 'unset_attr' {
+	W.W.A = 1
+}
+elsif K == 'for_label' {
+	for J: id in S.L
+		print( J, '\n' )
+}
+elsif K == 'for_attr' {
+	for J: id in S.T
+		print( J, '\n' )
+}
+elsif K == 'ref_label' {
+	take( S.L )
+}
+elsif K == 'ref_attr' {
+	take( S.T )
+}
+elsif K == 'ref_absent_label' {
+	take( W.pair.L )
+}
+elsif K == 'ref_absent_attr' {
+	take( W.pair.T )
+}
+
+print( 'end\n' )
+##### ARGS #####
+tree
+##### EXP #####
+tree
+x 1
+y z
+no id
+no pair
+1 y
+y 1
+2
+for y
+for y
+take
+take
+end
+##### EXIT #####
+0
+##### ARGS #####
+parse
+##### EXP #####
+parse
+##### EXIT #####
+1
+##### ARGS #####
+type
+##### EXP #####
+type
+##### EXIT #####
+1
+##### ARGS #####
+label
+##### EXP #####
+label
+##### EXIT #####
+1
+##### ARGS #####
+test
+##### EXP #####
+test
+##### EXIT #####
+1
+##### ARGS #####
+repeat
+##### EXP #####
+repeat
+##### EXIT #####
+1
+##### ARGS #####
+absent
+##### EXP #####
+absent
+##### EXIT #####
+1
+##### ARGS #####
+set_label
+##### EXP #####
+set_label
+##### EXIT #####
+1
+##### ARGS #####
+set_type
+##### EXP #####
+set_type
+##### EXIT #####
+1
+##### ARGS #####
+attr_int
+##### EXP #####
+attr_int
+##### EXIT #####
+1
+##### ARGS #####
+attr_tree
+##### EXP #####
+attr_tree
+##### EXIT #####
+1
+##### ARGS #####
+set_attr_int
+##### EXP #####
+set_attr_int
+##### EXIT #####
+1
+##### ARGS #####
+set_attr_tree
+##### EXP #####
+set_attr_tree
+##### EXIT #####
+1
+##### ARGS #####
+attr_attr
+##### EXP #####
+attr_attr
+##### EXIT #####
+1
+##### ARGS #####
+unset_attr
+##### EXP #####
+unset_attr
+##### EXIT #####
+1
+##### ARGS #####
+for_label
+##### EXP #####
+for_label
+##### EXIT #####
+1
+##### ARGS #####
+for_attr
+##### EXP #####
+for_attr
+##### EXIT #####
+1
+##### ARGS #####
+ref_label
+##### EXP #####
+ref_label
+##### EXIT #####
+1
+##### ARGS #####
+ref_attr
+##### EXP #####
+ref_attr
+##### EXIT #####
+1
+##### ARGS #####
+ref_absent_label
+##### EXP #####
+ref_absent_label
+##### EXIT #####
+1
+##### ARGS #####
+ref_absent_attr
+##### EXP #####
+ref_absent_attr
+##### EXIT #####
+1
