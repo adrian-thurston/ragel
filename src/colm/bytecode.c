@@ -2560,6 +2560,8 @@ again:
 
 			tree_t *to_send = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
+			if ( to_send == 0 )
+				runtime_error( prg, "sending a nil tree to a parser" );
 
 			struct input_impl *si = input_to_impl( parser->input );
 
@@ -2616,6 +2618,8 @@ again:
 
 			tree_t *to_send = vm_pop_tree();
 			parser_t *parser = vm_pop_parser();
+			if ( to_send == 0 )
+				runtime_error( prg, "sending a nil tree to a parser" );
 
 			struct input_impl *si = input_to_impl( parser->input );
 

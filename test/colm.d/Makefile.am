@@ -230,6 +230,8 @@ EXTRA_DIST = \
 	scope1.lm \
 	send1.lm \
 	sendignbt1.lm \
+	sendnil1.lm \
+	sendnilmsg1.lm \
 	sendstream.lm \
 	sprintf.lm \
 	stds1.lm \
