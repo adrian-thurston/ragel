@@ -1,0 +1,224 @@
+# Reading or setting a field of a nil struct stops the program with exit
+# status 1, after the output printed before it. That covers a list or map
+# held in the field, and an element of a list or map, which is a struct too.
+# A struct made with new works. The argument picks the use.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def item
+	A: str
+	[id]
+
+struct pair
+	F: str
+end
+
+struct S
+	F: str
+	I: int
+	L: list<str>
+	M: map<str, str>
+	T: item
+	P: pair
+end
+
+int show( V: S )
+{
+	print( V->F, '\n' )
+}
+
+A: str = argv->pop()
+V: S
+G: S = new S()
+G->L = new list<str>()
+G->M = new map<str, str>()
+E: list_el<str>
+ME: map_el<str, str>
+
+print( "before\n" )
+
+if ( A == "new" ) {
+	G->F = 'a'
+	G->I = 1
+	G->L->push( 'b' )
+	G->P = new pair()
+	G->P->F = 'c'
+	print( G->F, ' ', G->I, ' ', G->L->length, ' ', G->P->F, '\n' )
+}
+elsif ( A == "read" )
+	print( V->F, '\n' )
+elsif ( A == "read_int" )
+	print( V->I, '\n' )
+elsif ( A == "length" )
+	print( V->L->length, '\n' )
+elsif ( A == "push" )
+	V->L->push( 'a' )
+elsif ( A == "find" )
+	print( V->M->find( 'a' ), '\n' )
+elsif ( A == "for" ) {
+	for X: str in V->L
+		print( X, '\n' )
+}
+elsif ( A == "read_attr" )
+	print( V->T.A, '\n' )
+elsif ( A == "set_attr" )
+	V->T.A = 'a'
+elsif ( A == "set" )
+	V->F = 'a'
+elsif ( A == "set_int" )
+	V->I = 1
+elsif ( A == "set_list" )
+	V->L = new list<str>()
+elsif ( A == "nested_read" )
+	print( G->P->F, '\n' )
+elsif ( A == "nested_set" )
+	G->P->F = 'a'
+elsif ( A == "param" )
+	show( V )
+elsif ( A == "el_value" ) {
+	E = G->L->head_el
+	print( E->value, '\n' )
+}
+elsif ( A == "el_set_value" ) {
+	E = G->L->head_el
+	E->value = 'a'
+}
+elsif ( A == "el_next" ) {
+	E = G->L->head_el
+	E = E->next
+}
+elsif ( A == "map_el_key" ) {
+	ME = G->M->find_el( 'a' )
+	print( ME->key, '\n' )
+}
+elsif ( A == "map_el_prev" ) {
+	ME = G->M->find_el( 'a' )
+	ME = ME->prev
+}
+
+print( "after\n" )
+##### ARGS #####
+new
+##### EXP #####
+before
+a 1 1 c
+after
+##### EXIT #####
+0
+##### ARGS #####
+read
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+read_int
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+length
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+push
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+find
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+for
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+read_attr
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set_attr
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set_int
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set_list
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+nested_read
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+nested_set
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+param
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+el_value
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+el_set_value
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+el_next
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+map_el_key
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+map_el_prev
+##### EXP #####
+before
+##### EXIT #####
+1
