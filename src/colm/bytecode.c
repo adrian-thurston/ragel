@@ -3409,7 +3409,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_TOKEN_FILE_R\n" );
 			tree_t *tree = vm_pop_tree();
 			tree_t *str = 0;
-			if ( tree->tokdata->location ) {
+			if ( tree->tokdata->location != 0 &&
+					tree->tokdata->location->name != 0 ) {
 				const char *fn = tree->tokdata->location->name;
 				size_t fnlen = strlen( fn );
 				head_t *data = string_alloc_full( prg, fn, fnlen );

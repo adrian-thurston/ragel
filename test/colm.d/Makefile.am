@@ -125,6 +125,7 @@ EXTRA_DIST = \
 	listpop2.lm \
 	literal1.lm \
 	load1.lm \
+	locname1.lm \
 	logical1.lm \
 	lookup1.lm \
 	mailbox.lm \
