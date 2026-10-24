@@ -69,6 +69,7 @@ EXTRA_DIST = \
 	exit17.lm \
 	exit18.lm \
 	export1.lm \
+	export2.lm \
 	ext1.lm \
 	factor1.lm \
 	factor2.lm \

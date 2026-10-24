@@ -736,6 +736,10 @@ int main(int argc, const char **argv)
 		error() << "-p option must be used with -c" << endl;
 	}
 
+	if ( exportCodeFn != 0 && exportHeaderFn == 0 ) {
+		error() << "-x option must be used with -e" << endl;
+	}
+
 
 	/* Bail on above errors. */
 	if ( gblErrorCount > 0 )

@@ -1,0 +1,10 @@
+# -x writes export code that includes the export header -e names, so colm
+# rejects -x without -e rather than crash.
+export str f( S: str )
+{
+	return "r" + S
+}
+##### COMP #####
+-c -x working/export2.cc
+##### COMP_ERR #####
+error: colm: -x option must be used with -e
