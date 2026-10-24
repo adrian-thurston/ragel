@@ -1,7 +1,9 @@
 # A send to a stream variable that holds nil, a send or parse of one into a
 # parser, and a pull, close, auto_trim, tree or push_stream on one end the
 # program with exit status 1. The output before it is kept. The usual way to
-# get a nil stream is an open that fails.
+# get a nil stream is an open that fails. A pull and a push_stream are each
+# made with revert code on and off: pull at the root and in the pword
+# action, push_stream in the token action and at the root.
 
 lex
 	token id /[a-z]+/
@@ -30,6 +32,16 @@ def words
 
 def bang
 	[pushed id*]
+
+def pword
+	[id]
+	{
+		N: stream
+		print( N->pull( 1 ), "\n" )
+	}
+
+def pwords
+	[pword*]
 
 S: stream
 P: parser<start> = new parser<start>()
@@ -76,6 +88,13 @@ elsif ( A == "push_stream" ) {
 }
 elsif ( A == "action" ) {
 	parse W: words[ "a b" ]
+}
+elsif ( A == "pull_action" ) {
+	parse W: pwords[ "a b" ]
+}
+elsif ( A == "push_stream_root" ) {
+	I: _input = P->gets()
+	I->push_stream( S )
 }
 
 print( "after\n" )
@@ -161,6 +180,18 @@ before
 1
 ##### ARGS #####
 action
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+pull_action
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+push_stream_root
 ##### EXP #####
 before
 ##### EXIT #####
