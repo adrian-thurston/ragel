@@ -1,0 +1,87 @@
+# A pull from a stream reads text from it. A pull of more than the stream
+# has stops the program, as does a pull of a negative length. The host sends
+# standard error to standard output, so the message is in the output, after
+# what the program printed before it. The stop ends the host too: it never
+# gets back from colm_run_program.
+
+A: str = argv->pop()
+print( 'before\n' )
+
+if ( A == 'more' ) {
+	S: str = stdin->pull( 4 )
+	print( '[', S, ']\n' )
+}
+elsif ( A == 'exact' ) {
+	S: str = stdin->pull( 3 )
+	T: str = stdin->pull( 0 )
+	print( '[', S, '][', T, ']\n' )
+}
+elsif ( A == 'end' ) {
+	S: str = stdin->pull( 10 )
+	print( '[', S, ']\n' )
+}
+elsif ( A == 'negative' ) {
+	S: str = stdin->pull( 0 - 1 )
+	print( '[', S, ']\n' )
+}
+
+print( 'after\n' )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+more
+##### IN #####
+abcdef--noeol
+##### EXP #####
+before
+[abcd]
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+exact
+##### IN #####
+abc--noeol
+##### EXP #####
+before
+[abc][]
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+end
+##### IN #####
+abc--noeol
+##### EXP #####
+before
+fatal: pull past the end of the stream
+##### EXIT #####
+1
+##### ARGS #####
+negative
+##### IN #####
+abc--noeol
+##### EXP #####
+before
+fatal: pull of a negative length
+##### EXIT #####
+1

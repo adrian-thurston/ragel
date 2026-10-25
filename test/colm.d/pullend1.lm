@@ -1,0 +1,174 @@
+# A token action's pull takes text off the parser's input. A pull of more
+# than the input has stops the program, as does a pull of a negative length
+# or from a nil input. The host sends standard error to standard output, so
+# the message is in the output, after what the program printed before it.
+# The stop ends the host too: it never gets back from colm_run_program.
+
+global Extra: int = 0
+
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+	token semi /';'/
+	{
+		M: str = input->pull( match_length )
+		M = M + input->pull( Extra )
+		print( 'pulled [', M, ']\n' )
+		input->push( make_token( typeid<semi>, ';' ) )
+	}
+
+	# Puts a ';' back on the input, then a token after it.
+	token at /'@'/
+	{
+		input->pull( match_length )
+		input->push( make_token( typeid<id>, 'z' ) )
+		input->push( ';' )
+	}
+end
+
+# The input ends after the semi, so A1 fails, and the parser backtracks over
+# the semi's action to try A2.
+def A1 []
+def A2 []
+
+def start
+	[A1 id semi id]
+|	[A2 id semi]
+
+A: str = argv->pop()
+print( 'before\n' )
+
+if ( A == 'more' ) {
+	# Enough text for the pull.
+	Extra = 3
+	parse S: start[ 'a;bcdef' ]
+	print( S, '\n' )
+}
+elsif ( A == 'exact' ) {
+	# The pull takes the rest of the input, and is undone.
+	Extra = 1
+	parse S: start[ 'a;b' ]
+	print( S, '\n' )
+}
+elsif ( A == 'zero' ) {
+	# A pull of nothing, undone.
+	Extra = 0
+	parse S: start[ 'a;' ]
+	print( S, '\n' )
+}
+elsif ( A == 'end' ) {
+	Extra = 3
+	parse S: start[ 'a;b' ]
+	print( S, '\n' )
+}
+elsif ( A == 'sent' ) {
+	# The text the pull wants is sent to the parser after it runs.
+	Extra = 3
+	P: parser<start> = new parser<start>()
+	send P 'a;'
+	send P 'bcdef'
+	print( P->finish(), '\n' )
+}
+elsif ( A == 'token' ) {
+	# The pull runs into the token pushed after the ';'.
+	Extra = 1
+	parse S: start[ 'a @ b' ]
+	print( S, '\n' )
+}
+elsif ( A == 'negative' ) {
+	Extra = 0 - 2
+	parse S: start[ 'a;bcdef' ]
+	print( S, '\n' )
+}
+elsif ( A == 'nil' ) {
+	I: _input
+	print( I->pull( 1 ), '\n' )
+}
+
+print( 'after\n' )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+more
+##### EXP #####
+before
+pulled [;bcd]
+a;ef
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+exact
+##### EXP #####
+before
+pulled [;b]
+pulled [;b]
+a;
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+zero
+##### EXP #####
+before
+pulled [;]
+pulled [;]
+a;
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+end
+##### EXP #####
+before
+fatal: pull past the end of the input
+##### EXIT #####
+1
+##### ARGS #####
+sent
+##### EXP #####
+before
+fatal: pull past the end of the input
+##### EXIT #####
+1
+##### ARGS #####
+token
+##### EXP #####
+before
+fatal: pull past the end of the input
+##### EXIT #####
+1
+##### ARGS #####
+negative
+##### EXP #####
+before
+fatal: pull of a negative length
+##### EXIT #####
+1
+##### ARGS #####
+nil
+##### EXP #####
+before
+fatal: pull from a nil input
+##### EXIT #####
+1

@@ -183,6 +183,8 @@ EXTRA_DIST = \
 	pull4.lm \
 	pullbt1.lm \
 	pullbt2.lm \
+	pullend1.lm \
+	pullend2.lm \
 	pushemptybt1.lm \
 	pushignbt1.lm \
 	pushigneof1.lm \

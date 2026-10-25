@@ -171,6 +171,11 @@ before using it. `+S->close()+` closes a stream.
 writes `A` and `B` to `S`, as `+print( A, B )+` writes them to `stdout`. A
 send to a stream can end with `eos`, which does nothing there.
 
+`+S->pull( N )+` reads `N` characters from the stream `S`, and returns them as
+a string. A pull of more characters than are left in the stream stops the
+program, as xref:8_04_error_handling.adoc#run-time-errors[the error handling
+chapter] says.
+
 A stream sent to a parser, as in `+send P [File]+`, is read in full, and text
 sent after it comes after the stream's text. A stream sent to a stream is an
 error.

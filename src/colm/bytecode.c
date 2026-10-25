@@ -320,12 +320,18 @@ static void stream_undo_append_stream( program_t *prg, tree_t **sp, struct input
 	is->funcs->undo_append_stream( prg, sp, is );
 }
 
+/* A pull of a negative length, or of more than the input has, stops the
+ * program. */
 static tree_t *stream_pull_bc( program_t *prg, tree_t **sp, struct pda_run *pda_run,
 		input_t *input, tree_t *length )
 {
 	long len = ((long)length);
+	if ( len < 0 )
+		runtime_error( prg, "pull of a negative length" );
 	struct input_impl *impl = input_to_impl( input );
 	head_t *tokdata = colm_stream_pull( prg, sp, pda_run, impl, len );
+	if ( tokdata->length < len )
+		runtime_error( prg, "pull past the end of the input" );
 	return construct_string( prg, tokdata );
 }
 
@@ -341,7 +347,10 @@ static void undo_pull( program_t *prg, input_t *input, tree_t *str )
 	struct input_impl *impl = input_to_impl( input );
 	const char *data = string_data( ( (str_t*)str )->value );
 	long length = string_length( ( (str_t*)str )->value );
-	undo_stream_pull( prg, impl, data, length );
+
+	/* A pull of nothing took nothing, so there is nothing to give back. */
+	if ( length > 0 )
+		undo_stream_pull( prg, impl, data, length );
 }
 
 /* The stream counterpart of colm_stream_pull, which pulls from an input. A
@@ -351,7 +360,8 @@ static head_t *stream_impl_pull( program_t *prg, struct stream_impl *si, long le
 	head_t *head = init_str_space( length );
 	alph_t *dest = (alph_t*)head->data;
 
-	si->funcs->get_data( prg, si, dest, length );
+	length = si->funcs->get_data( prg, si, dest, length );
+	head->length = length;
 	location_t *loc = location_allocate( prg );
 	si->funcs->consume_data( prg, si, length, loc );
 	head->location = loc;
@@ -359,10 +369,16 @@ static head_t *stream_impl_pull( program_t *prg, struct stream_impl *si, long le
 	return head;
 }
 
+/* A pull of a negative length, or of more than the stream has, stops the
+ * program. */
 static tree_t *stream_pull_stream_bc( program_t *prg, stream_t *stream, tree_t *length )
 {
 	long len = ((long)length);
+	if ( len < 0 )
+		runtime_error( prg, "pull of a negative length" );
 	head_t *tokdata = stream_impl_pull( prg, stream_to_impl( stream ), len );
+	if ( tokdata->length < len )
+		runtime_error( prg, "pull past the end of the stream" );
 	return construct_string( prg, tokdata );
 }
 
@@ -2925,6 +2941,8 @@ again:
 
 			input_t *input = vm_pop_input();
 			tree_t *len = vm_pop_tree();
+			if ( input == 0 )
+				runtime_error( prg, "pull from a nil input" );
 			tree_t *string = stream_pull_bc( prg, sp, 0, input, len );
 			colm_tree_upref( prg, string );
 			vm_push_tree( string );
@@ -2944,6 +2962,8 @@ again:
 
 			input_t *input = vm_pop_input();
 			tree_t *len = vm_pop_tree();
+			if ( input == 0 )
+				runtime_error( prg, "pull from a nil input" );
 			tree_t *string = stream_pull_bc( prg, sp, 0, input, len );
 			colm_tree_upref( prg, string );
 			vm_push_tree( string );
