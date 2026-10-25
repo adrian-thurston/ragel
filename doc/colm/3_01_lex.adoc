@@ -486,7 +486,8 @@ When the action starts, the matched text is still in the input. In the action:
   string. A pull of more characters than the input has stops the program, as
   xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
   says. The text a pull can take ends where the input ends, where the text
-  sent to the parser so far ends, or at a token pushed back onto the input.
+  sent to the parser so far ends, or at a token or tree pushed back onto the
+  input, with `push` or `push_ignore`.
 * `make_token( typeid<T>, Text )` makes a token of type `T`, with `Text` as its
   text. `T` doesn't have to be the token that matched.
 * `+input->push( Token )+` puts a token back at the front of the input. The

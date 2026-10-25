@@ -1,13 +1,15 @@
 # A token action's pull takes text off the parser's input. A pull of more
 # than the input has stops the program, as does a pull of a negative length
-# or from a nil input. The host sends standard error to standard output, so
-# the message is in the output, after what the program printed before it.
-# The stop ends the host too: it never gets back from colm_run_program.
+# or from a nil input. A token, ignore or tree pushed back onto the input
+# ends the text a pull can take. The host sends standard error to standard
+# output, so the message is in the output, after what the program printed
+# before it. The stop ends the host too: it never gets back from
+# colm_run_program.
 
 global Extra: int = 0
 
 lex
-	ignore /[ \n]+/
+	ignore ws /[ \n]+/
 	token id /[a-z]+/
 	token semi /';'/
 	{
@@ -24,7 +26,26 @@ lex
 		input->push( make_token( typeid<id>, 'z' ) )
 		input->push( ';' )
 	}
+
+	# Puts a ';' back on the input, then an ignore after it.
+	token hash /'#'/
+	{
+		input->pull( match_length )
+		input->push_ignore( make_token( typeid<ws>, ' ' ) )
+		input->push( ';' )
+	}
+
+	# Puts a ';' back on the input, then a parse tree after it.
+	token pct /'%'/
+	{
+		input->pull( match_length )
+		parse T: item[ 'z' ]
+		input->push( T )
+		input->push( ';' )
+	}
 end
+
+def item [id]
 
 # The input ends after the semi, so A1 fails, and the parser backtracks over
 # the semi's action to try A2.
@@ -83,6 +104,18 @@ elsif ( A == 'negative' ) {
 elsif ( A == 'nil' ) {
 	I: _input
 	print( I->pull( 1 ), '\n' )
+}
+elsif ( A == 'ignore' ) {
+	# The pull runs into the ignore pushed after the ';'.
+	Extra = 1
+	parse S: start[ 'a # b' ]
+	print( S, '\n' )
+}
+elsif ( A == 'tree' ) {
+	# The pull runs into the tree pushed after the ';'.
+	Extra = 1
+	parse S: start[ 'a % b' ]
+	print( S, '\n' )
 }
 
 print( 'after\n' )
@@ -170,5 +203,19 @@ nil
 ##### EXP #####
 before
 fatal: pull from a nil input
+##### EXIT #####
+1
+##### ARGS #####
+ignore
+##### EXP #####
+before
+fatal: pull past the end of the input
+##### EXIT #####
+1
+##### ARGS #####
+tree
+##### EXP #####
+before
+fatal: pull past the end of the input
 ##### EXIT #####
 1
