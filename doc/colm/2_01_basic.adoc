@@ -25,7 +25,13 @@ so is comparing an int with a bool, `comparison of different types`.
 
 A `str` is text, as bytes. xref:1_02_expressions.adoc#expressions[The
 expressions chapter] has its literals, `pass:c[+]` and comparisons. A str is
-nil until it is set, and `""` is not nil.
+nil until it is set, and `""` is not nil. A nil str can be compared and
+printed: `print` prints it as `NIL`, in `+print "[S]"+` too. Reading its
+`length` stops the program, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+says. So do joining it with `pass:c[+]` or into a str, as `+R = "[S]"+`
+does, and giving it to any of the functions below, or to `sprintf`, `open`
+or `make_token`.
 
 * `S.length` is its length in bytes. `+S->length+` is an error,
   `arrow operator cannot be used to access this type`.

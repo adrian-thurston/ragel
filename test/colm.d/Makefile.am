@@ -164,6 +164,8 @@ EXTRA_DIST = \
 	namespace9.lm \
 	nestedcomm.lm \
 	new1.lm \
+	nilstr1.lm \
+	nilstrmsg1.lm \
 	ntignbt1.lm \
 	ntignbt2.lm \
 	ntignbt3.lm \

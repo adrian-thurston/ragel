@@ -196,7 +196,10 @@ Some mistakes stop the program where they happen:
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
   over a nil list or map;
 * a nil tree, or `nil`, among the items a `send`, `send_tree` or `parse`
-  sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes.
+  sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes;
+* using a nil `str`: reading its `length`, joining it into a str, or giving
+  it to a function that reads it, as xref:2_01_basic.adoc#str[the str
+  section] describes.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from

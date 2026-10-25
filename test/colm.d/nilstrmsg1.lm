@@ -1,0 +1,185 @@
+# The message each use of a nil str stops the program with. The host sends
+# standard error to standard output, so the message is in the output, after
+# what the program printed before it. The stop ends the host too: it never
+# gets back from colm_run_program.
+
+lex
+	token id /[a-z]+/
+end
+
+Nil: str
+I: int
+R: str
+F: stream
+T: id
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "length" )
+	I = Nil.length
+elsif ( A == "join" )
+	R = Nil + "x"
+elsif ( A == "prefix" )
+	R = Nil.prefix( 1 )
+elsif ( A == "suffix" )
+	R = Nil.suffix( 1 )
+elsif ( A == "atoi" )
+	I = Nil.atoi()
+elsif ( A == "atoo" )
+	I = Nil.atoo()
+elsif ( A == "uord8" )
+	I = Nil.uord8()
+elsif ( A == "uord16" )
+	I = Nil.uord16()
+elsif ( A == "toupper" )
+	R = toupper( Nil )
+elsif ( A == "tolower" )
+	R = tolower( Nil )
+elsif ( A == "sprintf" )
+	R = sprintf( Nil, 1 )
+elsif ( A == "system" )
+	I = system( Nil )
+elsif ( A == "open_name" )
+	F = open( Nil, "r" )
+elsif ( A == "open_mode" )
+	F = open( "/dev/null", Nil )
+elsif ( A == "make_token" )
+	T = make_token( typeid<id>, Nil )
+elsif ( A == "data" ) {
+	T = make_token( typeid<id>, "ab" )
+	T.data = Nil
+}
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+length
+##### EXP #####
+before
+fatal: reading the length of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+join
+##### EXP #####
+before
+fatal: joining a nil str
+##### EXIT #####
+1
+##### ARGS #####
+prefix
+##### EXP #####
+before
+fatal: prefix of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+suffix
+##### EXP #####
+before
+fatal: suffix of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+atoi
+##### EXP #####
+before
+fatal: atoi of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+atoo
+##### EXP #####
+before
+fatal: atoo of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+uord8
+##### EXP #####
+before
+fatal: uord8 of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+uord16
+##### EXP #####
+before
+fatal: uord16 of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+toupper
+##### EXP #####
+before
+fatal: toupper of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+tolower
+##### EXP #####
+before
+fatal: tolower of a nil str
+##### EXIT #####
+1
+##### ARGS #####
+sprintf
+##### EXP #####
+before
+fatal: sprintf with a nil format
+##### EXIT #####
+1
+##### ARGS #####
+system
+##### EXP #####
+before
+fatal: system with a nil command
+##### EXIT #####
+1
+##### ARGS #####
+open_name
+##### EXP #####
+before
+fatal: open with a nil file name
+##### EXIT #####
+1
+##### ARGS #####
+open_mode
+##### EXP #####
+before
+fatal: open with a nil mode
+##### EXIT #####
+1
+##### ARGS #####
+make_token
+##### EXP #####
+before
+fatal: make_token with a nil str
+##### EXIT #####
+1
+##### ARGS #####
+data
+##### EXP #####
+before
+fatal: setting the data of a token to a nil str
+##### EXIT #####
+1

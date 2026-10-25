@@ -165,7 +165,8 @@ is a number.
 `stdin`, `stdout` and `stderr` are streams. `open( Name, Mode )` opens a file,
 and returns a stream. With the mode `"r"`, the stream reads the file. With
 `"w"`, it writes the file, which `open` empties first, and with `"a"` it
-writes at the file's end. Any other mode stops the program with an error.
+writes at the file's end. Any other mode, or a nil name or mode, stops the
+program with an error.
 When the file can't be opened, `open` returns nil. Always check its result
 before using it. `+S->close()+` closes a stream.
 

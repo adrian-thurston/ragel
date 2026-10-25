@@ -1,0 +1,269 @@
+# A nil str stops the program with exit status 1 where it is used: reading
+# its length, joining it with + or into a str, and each function that reads
+# it. The output before the use is kept. The set run does the same things
+# with a str that is set, and goes on.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+global Nil: str
+global G: id
+
+# G is a global, so the action sets its data with revert code, through
+# IN_SET_TOKEN_DATA_WV. A local token is set through IN_SET_TOKEN_DATA_WC.
+def start
+	[id]
+	{
+		G = r1
+		G.data = Nil
+	}
+
+struct s
+	F: str
+end
+
+S: str = "ab"
+V: s = new s()
+I: int
+R: str
+F: stream
+T: id
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "set" ) {
+	I = S.length
+	R = S.prefix( 1 ) + "[S]" + S.suffix( 1 )
+	print( "[I] [R]\n" )
+}
+elsif ( A == "length" )
+	I = Nil.length
+elsif ( A == "field" )
+	I = V->F.length
+elsif ( A == "prefix" )
+	R = Nil.prefix( 1 )
+elsif ( A == "prefix_fn" )
+	R = prefix( Nil, 1 )
+elsif ( A == "suffix" )
+	R = Nil.suffix( 1 )
+elsif ( A == "suffix_fn" )
+	R = suffix( Nil, 1 )
+elsif ( A == "atoi" )
+	I = Nil.atoi()
+elsif ( A == "atoi_fn" )
+	I = atoi( Nil )
+elsif ( A == "atoo" )
+	I = Nil.atoo()
+elsif ( A == "atoo_fn" )
+	I = atoo( Nil )
+elsif ( A == "uord8" )
+	I = Nil.uord8()
+elsif ( A == "uord8_fn" )
+	I = uord8( Nil )
+elsif ( A == "uord16" )
+	I = Nil.uord16()
+elsif ( A == "uord16_fn" )
+	I = uord16( Nil )
+elsif ( A == "toupper" )
+	R = toupper( Nil )
+elsif ( A == "tolower" )
+	R = tolower( Nil )
+elsif ( A == "sprintf" )
+	R = sprintf( Nil, 1 )
+elsif ( A == "join_left" )
+	R = Nil + "x"
+elsif ( A == "join_right" )
+	R = "x" + Nil
+elsif ( A == "string" )
+	R = "x[Nil]y"
+elsif ( A == "string_list" )
+	R = [ "x" Nil "y" ]
+elsif ( A == "system" )
+	I = system( Nil )
+elsif ( A == "open_name" )
+	F = open( Nil, "r" )
+elsif ( A == "open_mode" )
+	F = open( "/dev/null", Nil )
+elsif ( A == "make_token" )
+	T = make_token( typeid<id>, Nil )
+elsif ( A == "data" ) {
+	T = make_token( typeid<id>, "ab" )
+	T.data = Nil
+}
+elsif ( A == "data_action" )
+	parse P: start[ "ab" ]
+
+print( "after\n" )
+##### ARGS #####
+set
+##### EXP #####
+before
+2 aabb
+after
+##### EXIT #####
+0
+##### ARGS #####
+length
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+field
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+prefix
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+prefix_fn
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+suffix
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+suffix_fn
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+atoi
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+atoi_fn
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+atoo
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+atoo_fn
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+uord8
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+uord8_fn
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+uord16
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+uord16_fn
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+toupper
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+tolower
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+sprintf
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+join_left
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+join_right
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+string
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+string_list
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+system
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+open_name
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+open_mode
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+make_token
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+data
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+data_action
+##### EXP #####
+before
+##### EXIT #####
+1

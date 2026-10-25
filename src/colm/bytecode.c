@@ -1864,6 +1864,8 @@ again:
 
 			str_t *s2 = vm_pop_string();
 			str_t *s1 = vm_pop_string();
+			if ( s1 == 0 || s2 == 0 )
+				runtime_error( prg, "joining a nil str" );
 			head_t *res = concat_str( s1->value, s2->value );
 			tree_t *str = construct_string( prg, res );
 			colm_tree_upref( prg, str );
@@ -1877,6 +1879,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_STR_LENGTH\n" );
 
 			str_t *str = vm_pop_string();
+			if ( str == 0 )
+				runtime_error( prg, "reading the length of a nil str" );
 			long len = string_length( str->value );
 			value_t res = len;
 			vm_push_value( res );
@@ -3198,6 +3202,8 @@ again:
 			tree_t *arg[nargs];
 			for ( i = nargs-1; i >= 0; i-- )
 				arg[i] = vm_pop_tree();
+			if ( arg[1] == 0 )
+				runtime_error( prg, "make_token with a nil str" );
 
 			tree_t *result = colm_construct_token( prg, arg, nargs );
 			for ( i = 1; i < nargs; i++ )
@@ -3387,6 +3393,8 @@ again:
 
 			tree_t *tree = vm_pop_tree();
 			tree_t *val = vm_pop_tree();
+			if ( val == 0 )
+				runtime_error( prg, "setting the data of a token to a nil str" );
 			head_t *head = string_copy( prg, ((str_t*)val)->value );
 			string_free( prg, tree->tokdata );
 			tree->tokdata = head;
@@ -3400,6 +3408,8 @@ again:
 
 			tree_t *tree = vm_pop_tree();
 			tree_t *val = vm_pop_tree();
+			if ( val == 0 )
+				runtime_error( prg, "setting the data of a token to a nil str" );
 
 			head_t *oldval = tree->tokdata;
 			head_t *head = string_copy( prg, ((str_t*)val)->value );
@@ -4025,6 +4035,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TO_UPPER\n" );
 
 			tree_t *in = vm_pop_tree();
+			if ( in == 0 )
+				runtime_error( prg, "toupper of a nil str" );
 			head_t *head = string_to_upper( in->tokdata );
 			tree_t *upper = construct_string( prg, head );
 			colm_tree_upref( prg, upper );
@@ -4036,6 +4048,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TO_LOWER\n" );
 
 			tree_t *in = vm_pop_tree();
+			if ( in == 0 )
+				runtime_error( prg, "tolower of a nil str" );
 			head_t *head = string_to_lower( in->tokdata );
 			tree_t *lower = construct_string( prg, head );
 			colm_tree_upref( prg, lower );
@@ -4048,6 +4062,10 @@ again:
 
 			tree_t *mode = vm_pop_tree();
 			tree_t *name = vm_pop_tree();
+			if ( name == 0 )
+				runtime_error( prg, "open with a nil file name" );
+			if ( mode == 0 )
+				runtime_error( prg, "open with a nil mode" );
 			stream_t *res = colm_stream_open_file( prg, name, mode );
 			vm_push_stream( res );
 			colm_tree_downref( prg, sp, name );
@@ -4114,6 +4132,8 @@ again:
 
 			vm_pop_tree();
 			str_t *cmd = vm_pop_string();
+			if ( cmd == 0 )
+				runtime_error( prg, "system with a nil command" );
 
 			char *cmd0 = malloc( cmd->value->length + 1 );
 			memcpy( cmd0, cmd->value->data, cmd->value->length );
@@ -4148,6 +4168,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_STR_ATOI\n" );
 
 				str_t *str = vm_pop_string();
+				if ( str == 0 )
+					runtime_error( prg, "atoi of a nil str" );
 				word_t res = str_atoi( str->value );
 				value_t integer = res;
 				vm_push_value( integer );
@@ -4158,6 +4180,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_STR_ATOO\n" );
 
 				str_t *str = vm_pop_string();
+				if ( str == 0 )
+					runtime_error( prg, "atoo of a nil str" );
 				word_t res = str_atoo( str->value );
 				value_t integer = res;
 				vm_push_value( integer );
@@ -4168,6 +4192,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_STR_UORD8\n" );
 
 				str_t *str = vm_pop_string();
+				if ( str == 0 )
+					runtime_error( prg, "uord8 of a nil str" );
 				word_t res = str_uord8( str->value );
 				value_t integer = res;
 				vm_push_value( integer );
@@ -4178,6 +4204,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_STR_UORD16\n" );
 
 				str_t *str = vm_pop_string();
+				if ( str == 0 )
+					runtime_error( prg, "uord16 of a nil str" );
 				word_t res = str_uord16( str->value );
 				value_t integer = res;
 				vm_push_value( integer );
@@ -4189,6 +4217,8 @@ again:
 
 				str_t *str = vm_pop_string();
 				value_t len = vm_pop_value();
+				if ( str == 0 )
+					runtime_error( prg, "prefix of a nil str" );
 
 				str_t *res = string_prefix( prg, str, (long) len );
 				colm_tree_upref( prg, (tree_t*) res );
@@ -4201,6 +4231,8 @@ again:
 
 				str_t *str = vm_pop_string();
 				value_t pos = vm_pop_value();
+				if ( str == 0 )
+					runtime_error( prg, "suffix of a nil str" );
 
 				str_t *res = string_suffix( prg, str, (long) pos );
 				colm_tree_upref( prg, (tree_t*) res );
@@ -4213,6 +4245,8 @@ again:
 
 				value_t len = vm_pop_value();
 				str_t *str = vm_pop_string();
+				if ( str == 0 )
+					runtime_error( prg, "prefix of a nil str" );
 
 				str_t *res = string_prefix( prg, str, (long) len );
 				colm_tree_upref( prg, (tree_t*) res );
@@ -4225,6 +4259,8 @@ again:
 
 				value_t pos = vm_pop_value();
 				str_t *str = vm_pop_string();
+				if ( str == 0 )
+					runtime_error( prg, "suffix of a nil str" );
 
 				str_t *res = string_suffix( prg, str, (long) pos );
 				colm_tree_upref( prg, (tree_t*) res );
@@ -4238,6 +4274,8 @@ again:
 				vm_pop_tree();
 				value_t integer = vm_pop_value();
 				str_t *format = vm_pop_string();
+				if ( format == 0 )
+					runtime_error( prg, "sprintf with a nil format" );
 				head_t *res = string_sprintf( prg, format, (long)integer );
 				str_t *str = (str_t*)construct_string( prg, res );
 				colm_tree_upref( prg, (tree_t*)str );
