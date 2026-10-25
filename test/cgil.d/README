@@ -16,7 +16,8 @@ case/<name>.err on standard error. These run from the suite's build directory.
 The translators are the ones built from src/cgil, the live sources that ragel's
 host backends share. This suite is what holds them to their output: the cases
 and the expected text are fixed, so a difference in what comes out is a change
-in cgil. There are 29 cases over the twelve languages.
+in cgil. There are 29 translation cases over the twelve languages, and 6
+failing runs of cgil-c, which check its usage line and the errors it reports.
 
 The rlhc.d suite looks similar and measures something else. Its translators are
 a frozen 2019 copy of these, kept so that colm is the only moving part; see the

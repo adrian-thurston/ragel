@@ -536,4 +536,6 @@ void trans( Output: stream, Start: start )
 	crack_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-crack"
+
 include 'rlhc-main.lm'

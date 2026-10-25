@@ -545,4 +545,6 @@ void trans( Output: stream, Start: start )
 	rust_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-rust"
+
 include 'rlhc-main.lm'

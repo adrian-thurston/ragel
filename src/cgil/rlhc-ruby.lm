@@ -527,4 +527,6 @@ void trans( Output: stream, Start: start )
 	ruby_trans( Output, Start )
 }
 
+Translator: str = "cgil-ruby"
+
 include 'rlhc-main.lm'

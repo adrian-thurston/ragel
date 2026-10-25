@@ -522,4 +522,6 @@ void trans( Output: stream, Start: start )
 	js_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-js"
+
 include 'rlhc-main.lm'
