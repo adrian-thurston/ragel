@@ -1,0 +1,26 @@
+# A parse of a type defined in a context must be given an object of that
+# context. An object of another struct isn't laid out like it, and the
+# actions that write the context's variables would write past it.
+struct other
+	S: str
+end
+context c
+	I: int
+	J: int
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+	end
+	def item
+		[id]
+		{
+			I = I + 1
+			J = J + 1
+		}
+	def start [item*]
+end
+O: other = new other()
+parse S: c::start( O )[ "a b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+23:20: the context of c::start must be of type c, not other

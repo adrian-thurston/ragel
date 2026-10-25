@@ -57,9 +57,10 @@ xref:3_06_send.adoc#send[the send chapter] covers. The parse's actions use the
 variables of the object it is given, so two parses given two objects keep
 separate data.
 
-Always give such a parse its context, and an object of that context. Colm
-compiles a parse given none, or given an object of another struct, but the
-program crashes when an action uses a variable.
+Always give such a parse its context, and an object of that context. A parse
+given an object of another struct, or of another context, doesn't compile.
+Colm compiles a parse given none, but the program crashes when an action uses
+a variable.
 
 In a token action written in a context, `this` is the parse's context, an
 object of that context. The action uses the context's variables by name, or

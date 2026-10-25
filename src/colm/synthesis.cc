@@ -1303,6 +1303,23 @@ void LangTerm::evaluateCapture( Compiler *pd, CodeVect &code, UniqueType *valUt 
 	}
 }
 
+/* A parser of a type defined in a context runs its actions on an object of
+ * that context, so it must be given one: another struct isn't laid out like
+ * the context. */
+static void checkParserContext( const FieldInit *arg, UniqueType *argUT,
+		LangEl *langEl )
+{
+	StructDef *context = langEl->contextIn;
+	if ( argUT->structEl == context->structEl )
+		return;
+
+	/* An expression that is a single term has its location in the term. */
+	const InputLoc &loc = arg->expr->type == LangExpr::TermType ?
+			arg->expr->term->loc : arg->expr->loc;
+	error( loc ) << "the context of " << langEl->xmlTag << " must be of type " <<
+			context->name << ", not " << argUT->structEl->name << endp;
+}
+
 UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 {
 	/* What is being newstructed. */
@@ -1350,6 +1367,8 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 				code.append( IN_SET_PARSER_INPUT );
 			}
 			else if ( argUT->typeId == TYPE_STRUCT ) {
+				checkParserContext( fieldInitArgs->data[i], argUT,
+						newUT->generic->elUt->langEl );
 				code.append( IN_SET_PARSER_CONTEXT );
 			}
 			else {
@@ -1569,6 +1588,8 @@ UniqueType *LangTerm::evaluateParse( Compiler *pd, CodeVect &code,
 				code.append( IN_SET_PARSER_INPUT );
 			}
 			else if ( argUT->typeId == TYPE_STRUCT && targetUT->langEl->contextIn != 0 ) {
+				checkParserContext( fieldInitArgs->data[i], argUT,
+						targetUT->langEl );
 				code.append( IN_SET_PARSER_CONTEXT );
 			}
 			else {

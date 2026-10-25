@@ -50,6 +50,11 @@ EXTRA_DIST = \
 	ctxthis3.lm \
 	ctxthis4.lm \
 	ctxthis5.lm \
+	ctxtype1.lm \
+	ctxtype2.lm \
+	ctxtype3.lm \
+	ctxtype4.lm \
+	ctxtype5.lm \
 	decl1.lm \
 	decl2.lm \
 	decl3.lm \
