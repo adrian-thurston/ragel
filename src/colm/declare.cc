@@ -885,22 +885,9 @@ void Compiler::declareStrFields( )
 	addLengthField( strObj, IN_STR_LENGTH );
 }
 
-void Compiler::declareInputField( ObjectDef *objDef, code_t getLength )
-{
-	/* Create the "length" field. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
-	ObjectField *el = ObjectField::cons( internal,
-			ObjectField::InbuiltFieldType, typeRef, "tree" );
-	el->isConst = true;
-	el->inGetR = IN_GET_COLLECT_STRING;
-	el->inGetValR = IN_GET_COLLECT_STRING;
-
-	objDef->rootScope->insertField( el->name, el );
-}
-
 void Compiler::declareStreamField( ObjectDef *objDef, code_t getLength )
 {
-	/* Create the "length" field. */
+	/* Create the "tree" field. */
 	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStr );
 	ObjectField *el = ObjectField::cons( internal,
 			ObjectField::InbuiltFieldType, typeRef, "tree" );
@@ -915,6 +902,9 @@ void Compiler::declareInputFields( )
 {
 	inputObj = inputSel->structDef->objectDef;
 
+	/* No close and no tree field: closing and collecting the text are what a
+	 * stream does, and an input's function table has neither. A parser's input
+	 * ends with send eos or finish. */
 	initFunction( uniqueTypeStr, inputObj, ObjectMethod::Call, "pull",  
 			IN_INPUT_PULL_WV, IN_INPUT_PULL_WC, uniqueTypeInt, false );
 
@@ -927,13 +917,8 @@ void Compiler::declareInputFields( )
 	initFunction( uniqueTypeStr, inputObj, ObjectMethod::Call, "push_stream",  
 		IN_INPUT_PUSH_STREAM_WV, IN_INPUT_PUSH_STREAM_WC, uniqueTypeStream, false );
 
-	initFunction( uniqueTypeVoid, inputObj, ObjectMethod::Call, "close",
-			IN_INPUT_CLOSE_WC, IN_INPUT_CLOSE_WC, false );
-
 	initFunction( uniqueTypeVoid, inputObj, ObjectMethod::Call, "auto_trim",
 			IN_IINPUT_AUTO_TRIM_WC, IN_IINPUT_AUTO_TRIM_WC, uniqueTypeBool, false );
-
-	declareInputField( inputObj, 0 );
 }
 
 void Compiler::declareStreamFields( )

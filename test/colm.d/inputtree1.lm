@@ -1,0 +1,15 @@
+# An input has no tree: it keeps no text to give back.
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+end
+
+def start
+	[id*]
+
+P: parser<start> = new parser<start>()
+send P [ 'a b' ]
+I: _input = P->gets()
+print( '[', I->tree, ']\n' )
+##### COMP_ERR #####
+13:16: cannot find name tree in object
