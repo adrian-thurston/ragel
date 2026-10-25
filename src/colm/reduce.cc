@@ -361,10 +361,29 @@ void Compiler::writeTreeRef( Production *production, ReduceTextItem *i )
 	}
 }
 
+/* An @N or @name, which stops the program when there's no location. */
+void Compiler::writeRhsLoc( Production *production, ReduceTextItem *i, long pos )
+{
+	/* An attribute block has no production, and no location to read. */
+	if ( production == 0 ) {
+		*outStream << "_loc" << pos;
+		return;
+	}
+
+	*outStream << "colm_reduce_loc( prg, _loc" << pos << ", \"";
+	if ( i->n > 0 )
+		*outStream << "@" << i->n;
+	else
+		*outStream << i->txt;
+	*outStream << " in the reduction action for " <<
+			production->prodName->name << " :" << production->_name <<
+			" has no location\" )";
+}
+
 void Compiler::writeRhsLoc( Production *production, ReduceTextItem *i )
 {
 	if ( i->n > 0 ) {
-		*outStream << "_loc" << ( i->n - 1 );
+		writeRhsLoc( production, i, i->n - 1 );
 	}
 	else {
 		ObjectDef *objectDef = production->prodName->objectDef;
@@ -377,7 +396,7 @@ void Compiler::writeRhsLoc( Production *production, ReduceTextItem *i )
 					r.lte(); r++ )
 			{
 				if ( r->prodEl->production == production )
-					*outStream << "_loc" << r->prodEl->pos;
+					writeRhsLoc( production, i, r->prodEl->pos );
 			}
 		}
 	}

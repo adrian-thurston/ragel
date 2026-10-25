@@ -215,6 +215,17 @@ token's text, which isn't NUL-terminated, so read it with its `length`.
 `@N`, `@name`::
 The location of a token element, a `colm_location *`. Its `line`, `column`
 and `byte` are ``long``s, and its `name` is the name of the input.
+On a def element, it is the location of the def's first token, while the def
+still has its tokens. By default the commit code frees them once the def's
+own reduction has run, so a def's location is there only when the host keeps
+its trees with `colm_set_reduce_clean( prg, 0 )`, and a def that matched
+nothing has none at all. Reading a location that isn't there stops the
+program, as xref:8_04_error_handling.adoc#run-time-errors[the error handling
+chapter] says, with:
++
+----
+fatal: @1 in the reduction action for line :Line has no location
+----
 
 An action runs as a member function of the class `NAME`, so the class's
 members are in scope in it.

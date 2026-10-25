@@ -1,0 +1,113 @@
+# @N on a def in a reduction action reads the location of the def's first
+# token. The commit code frees a def's tokens once its own reduction has run,
+# unless the host keeps them, and a def that matched nothing has none. Then
+# the program stops, rather than hand the action a NULL location. The host
+# sends standard error to standard output, and doesn't buffer its output, so
+# the message is in the output, after what the actions printed before it.
+
+lex
+	literal `+ `;
+	token number /[0-9]+/
+	ignore /space+/
+end
+
+def expr
+	[expr `+ number] :Add
+|	[number] :Number
+
+def opt
+	[number] :Num
+|	[] :None
+
+def line
+	[expr `;] :Line
+|	[`; opt `;] :Opt
+
+def lines
+	[line*]
+
+reduction Sum
+	line :Line
+	{
+		printf( "line %ld: ; at %ld\n", @2->line, @2->column );
+		printf( "line %ld: expr\n", @expr->line );
+	}
+
+	line :Opt
+	{
+		printf( "line %ld: ; at %ld\n", @1->line, @1->column );
+		printf( "line %ld: opt\n", @2->line );
+	}
+end
+
+reduce Sum lines[ stdin ]
+print( "after\n" )
+##### REDUCER #####
+#include <colm/pdarun.h>
+
+struct Sum
+{
+	void commit_reduce_forward( program_t *prg, tree_t **root,
+			struct pda_run *pda_run, parse_tree_t *pt );
+};
+##### HOST #####
+#include <colm/colm.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include "reducer.h"
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+	setvbuf( stdout, 0, _IONBF, 0 );
+
+	Sum sum;
+	colm_program *prg = colm_new_program( &colm_object );
+	colm_set_reduce_ctx( prg, &sum );
+	if ( argc > 1 && strcmp( argv[1], "keep" ) == 0 )
+		colm_set_reduce_clean( prg, 0 );
+	colm_run_program( prg, argc, argv );
+	int status = colm_delete_program( prg );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+clean
+##### IN #####
+1 + 2;
+##### EXP #####
+line 1: ; at 6
+fatal: @expr in the reduction action for line :Line has no location
+##### EXIT #####
+1
+##### ARGS #####
+keep
+##### IN #####
+1 + 2;
+3;
+##### EXP #####
+line 1: ; at 6
+line 1: expr
+line 2: ; at 2
+line 2: expr
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+keep
+##### IN #####
+3;
+; 4 ;
+;;
+##### EXP #####
+line 1: ; at 2
+line 1: expr
+line 2: ; at 1
+line 2: opt
+line 3: ; at 1
+fatal: @2 in the reduction action for line :Opt has no location
+##### EXIT #####
+1

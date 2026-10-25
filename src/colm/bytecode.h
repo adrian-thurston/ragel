@@ -678,6 +678,8 @@ tree_t **colm_execute_code( struct colm_program *prg,
 	execution_t *exec, tree_t **sp, code_t *instr );
 code_t *colm_pop_reverse_code( struct rt_code_vect *all_rev );
 
+location_t *colm_reduce_loc( struct colm_program *prg, location_t *loc, const char *msg );
+
 #ifdef __cplusplus
 }
 #endif
