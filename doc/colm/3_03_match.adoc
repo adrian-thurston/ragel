@@ -98,8 +98,10 @@ Some things `match` and its patterns can't do:
 * Hold a value. A name in a pattern is a type's name, so a variable `V` in
   `+[id "=" V ";"]+` is `unknown type V in typeof expression`. Match first,
   and test the labels after.
-* Match a nil tree. `T` must not be nil: check a parse's result before
-  matching it.
+* Match a nil tree. A `match` on a nil tree stops the program: it prints
+  `fatal: match against a nil tree` and exits with status 1, as
+  xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+  says. Check a parse's result before matching it.
 
 This program reads commands, each a word and a list of arguments, and matches
 each one against patterns:

@@ -2498,6 +2498,10 @@ again:
 
 			tree_t *tree = vm_pop_tree();
 
+			/* match, require and a switch case with a pattern all come here. */
+			if ( tree == 0 )
+				runtime_error( prg, "match against a nil tree" );
+
 			/* Run the match, push the result. */
 			int root_node = prg->rtd->pat_repl_info[pattern_id].offset;
 
@@ -2538,6 +2542,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_PROD_NUM\n" );
 
 			tree_t *tree = vm_pop_tree();
+
+			/* A switch case that names a production. */
+			if ( tree == 0 )
+				runtime_error( prg, "match against a nil tree" );
+
 			colm_tree_downref( prg, sp, tree );
 
 			value_t v = tree->prod_num;
