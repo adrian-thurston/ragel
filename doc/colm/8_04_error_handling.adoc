@@ -188,6 +188,11 @@ Some mistakes stop the program where they happen:
 * popping a value off a list that is empty or nil, as
   xref:2_02_list_map_struct_alias.adoc#lists[the lists section] describes;
 * reading the `head`, `tail` or `top` of such a list;
+* any other use of a nil list or map, such as a push, an `insert` or a read
+  of its `length`, as the lists section and
+  xref:2_02_list_map_struct_alias.adoc#maps[the maps section] describe;
+* pushing a nil element onto a list, with `push_el`, `push_head_el` or
+  `push_tail_el`;
 * reading or setting a field of a nil struct, as
   xref:2_02_list_map_struct_alias.adoc#structs[the structs section] describes,
   or the `value` or `key` of a nil list or map element, or reading such an
