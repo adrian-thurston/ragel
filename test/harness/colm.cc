@@ -13,6 +13,7 @@
  *   ###### EXIT ######  expected exit value
  *   ###### LOST ######  known leaks: runtime reports that don't fail the run
  *   ###### HOST ######  host program
+ *   ###### REDUCER ###  the commit code's reducer.h, with HOST
  *   ###### CALL ######  file containing C functions
  *
  * ARGS, IN, EXP, EXIT and LOST repeat: the Nth of each describes the Nth run
@@ -20,8 +21,9 @@
  * newline.
  *
  * HOST is C++. The manual suite's NAME.host.c is a C host, built without the
- * export header and code. The manual suite's NAME.reducer.h is a program's
- * reducer.h: the program is compiled with -m and its commit code linked in.
+ * export header and code. REDUCER, like the manual suite's NAME.reducer.h, is
+ * a program's reducer.h: the program is compiled with -m and its commit code
+ * linked into the HOST, which needs one.
  *
  * A case with COMP_ERR is a program colm must reject. It passes when colm
  * exits with 1 and its error output is the section, once the path colm
@@ -293,11 +295,17 @@ void enumerateColm( const Config &config, const Selection &sel, JobList &jobs )
 		prog.text = noEol( cf.preamble );
 		prog.hasCall = section( cf, "CALL", 0, prog.call );
 		prog.hasHost = section( cf, "HOST", 0, prog.host );
+		prog.hasReducer = section( cf, "REDUCER", 0, prog.reducer );
 		prog.hasCompErr = section( cf, "COMP_ERR", 0, prog.compErr );
 
 		std::string body;
 		if ( section( cf, "COMP", 0, body ) )
 			prog.comp = splitWords( body );
+
+		if ( prog.hasReducer && !prog.hasHost ) {
+			job->error( "a REDUCER section needs a HOST" );
+			continue;
+		}
 
 		if ( prog.hasCompErr ) {
 			static const char *noRuns[] = { "ARGS", "IN", "EXP", "EXIT", "LOST", "HOST", 0 };

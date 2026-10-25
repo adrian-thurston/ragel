@@ -250,10 +250,10 @@ void enumerateRagel( const Config &config, const Selection &sel, JobList &jobs )
 
 /* The program, its compilation arguments, and the C functions it calls (CALL)
  * and the host program it is linked into (HOST), if it has them, and the
- * reducer.h its commit code includes (reducer, the manual's NAME.reducer.h). A
- * program with compErr (COMP_ERR) is expected to fail to compile, with that
- * error. A C host (hostIsC, the manual's NAME.host.c) gets no export header or
- * code. */
+ * reducer.h its commit code includes (reducer, colm.d's REDUCER or the
+ * manual's NAME.reducer.h). A program with compErr (COMP_ERR) is expected to
+ * fail to compile, with that error. A C host (hostIsC, the manual's
+ * NAME.host.c) gets no export header or code. */
 struct ColmProgram
 {
 	std::string text;
