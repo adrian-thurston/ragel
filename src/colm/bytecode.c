@@ -1167,6 +1167,11 @@ again:
 			instr = uiter->resume;
 			exec->frame_ptr = uiter->frame;
 			exec->iframe_ptr = &uiter->stack_root[-IFR_AA];
+
+			/* Resuming a function the iterator called: take back its frame
+			 * id, which IN_YIELD kept on the stack. */
+			if ( exec->frame_ptr != exec->iframe_ptr )
+				exec->frame_id = vm_pop_type( long );
 			break;
 		}
 		case IN_UITER_GET_CUR_R: {
@@ -3890,6 +3895,14 @@ again:
 					kid->tree->id == uiter->search_id || 
 					uiter->search_id == prg->rtd->any_id )
 			{
+				/* A function the iterator called yields. Keep its frame id
+				 * on the stack, for IN_UITER_ADVANCE, and go back to the
+				 * loop's. */
+				if ( exec->frame_ptr != exec->iframe_ptr ) {
+					vm_push_type( long, exec->frame_id );
+					exec->frame_id = (long) vm_local_iframe( IFR_RFD );
+				}
+
 				/* Store the yielded value. */
 				uiter->ref.kid = kid;
 				uiter->ref.next = next;
@@ -3928,10 +3941,11 @@ again:
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
 			 * the call. We don't need to set up the return ip because the
-			 * uiter advance will set it. The frame we need to do because it
-			 * is set once for the lifetime of the iterator. */
+			 * uiter advance will set it. The frame and the frame id we need
+			 * to do because they are set once for the lifetime of the
+			 * iterator. */
 			vm_push_type( tree_t**, exec->call_args );
-			vm_push_value( 0 );
+			vm_push_type( long, exec->frame_id );  /* Return frame id. */
 
 			vm_push_type( code_t*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( tree_t**, exec->iframe_ptr ); /* Return iframe. */
@@ -3963,10 +3977,11 @@ again:
 			/* This is a setup similar to as a call, only the frame structure
 			 * is slightly different for user iterators. We aren't going to do
 			 * the call. We don't need to set up the return ip because the
-			 * uiter advance will set it. The frame we need to do because it
-			 * is set once for the lifetime of the iterator. */
+			 * uiter advance will set it. The frame and the frame id we need
+			 * to do because they are set once for the lifetime of the
+			 * iterator. */
 			vm_push_type( tree_t**, exec->call_args );
-			vm_push_value( 0 );
+			vm_push_type( long, exec->frame_id );  /* Return frame id. */
 
 			vm_push_type( code_t*, 0 );            /* Return instruction pointer,  */
 			vm_push_type( tree_t**, exec->iframe_ptr ); /* Return iframe. */

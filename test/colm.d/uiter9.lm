@@ -1,0 +1,24 @@
+# A break from a loop over a user iterator at the top level, while a function
+# the iterator called is at its yield, then an exit. The exit ran under the
+# function's frame id.
+int g( R: ref<str> )
+{
+	yield R
+	return 1
+}
+
+iter i()
+{
+	S: str = "s"
+	g( S )
+	yield S
+}
+
+for T: str in i() { print( T, "\n" ) break }
+print( "done\n" )
+exit( 4 )
+##### EXP #####
+s
+done
+##### EXIT #####
+4

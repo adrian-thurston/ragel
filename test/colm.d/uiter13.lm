@@ -1,0 +1,39 @@
+# The yields come from two calls down: the iterator calls g, and g calls h,
+# which yields. The loop takes the first value, which h's yield resumes, and
+# returns on the second, while h is at its yield again.
+int h( R: ref<str> )
+{
+	yield R
+	return 1
+}
+
+int g( R: ref<str> )
+{
+	h( R )
+	return 2
+}
+
+iter i()
+{
+	S: str = "s"
+	g( S )
+	S = "t"
+	g( S )
+}
+
+str f()
+{
+	L: str = ""
+	for T: str in i() {
+		L = L + T
+		if ( T == "t" )
+			return L
+	}
+	return "none"
+}
+
+print( f(), "\n" )
+print( "done\n" )
+##### EXP #####
+st
+done
