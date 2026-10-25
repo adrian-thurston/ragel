@@ -278,6 +278,7 @@ StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 	}
 
 	StructEl *structEl = new StructEl( data, structDef );
+	structEl->nspace = inNspace;
 	pd->structEls.append( structEl );
 	structDef->structEl = structEl;
 
@@ -640,7 +641,7 @@ void Compiler::declareTranslateBlock( LangEl *langEl )
 	addMatchLength( block->localFrame, langEl );
 	addMatchText( block->localFrame, langEl );
 	addInput( block->localFrame );
-	addThis( block->localFrame );
+	addThis( block->localFrame, block->context );
 
 	block->declare( this );
 }
@@ -650,7 +651,7 @@ void Compiler::declarePreEof( TokenRegion *region )
 	CodeBlock *block = region->preEofBlock;
 
 	addInput( block->localFrame );
-	addThis( block->localFrame );
+	addThis( block->localFrame, block->context );
 
 	block->declare( this );
 }
@@ -822,10 +823,17 @@ void Compiler::addInput( ObjectDef *frame )
 	frame->rootScope->insertField( el->name, el );
 }
 
-void Compiler::addThis( ObjectDef *frame )
+/* In a token action or a preeof block, this is the parser's context: an object
+ * of the context the block is written in. A block outside a context has no
+ * this. */
+void Compiler::addThis( ObjectDef *frame, StructDef *context )
 {
+	if ( context == 0 )
+		return;
+
 	/* Make the type ref. */
-	TypeRef *typeRef = TypeRef::cons( internal, uniqueTypeStream );
+	UniqueType *ut = findUniqueType( TYPE_STRUCT, context->structEl );
+	TypeRef *typeRef = TypeRef::cons( internal, ut );
 
 	/* Create the field and insert it into the map. */
 	ObjectField *el = ObjectField::cons( internal,

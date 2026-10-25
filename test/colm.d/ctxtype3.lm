@@ -1,0 +1,24 @@
+# An object of another context isn't one of this context either.
+context d
+	K: str
+end
+context c
+	I: int
+	J: int
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+	end
+	def item
+		[id]
+		{
+			I = I + 1
+			J = J + 1
+		}
+	def start [item*]
+end
+D: d = new d()
+parse S: c::start( D )[ "a b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+21:20: the context of c::start must be of type c, not d

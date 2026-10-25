@@ -1,0 +1,21 @@
+# A stream is a struct type, but not a context: given as the context, it is
+# refused like any other struct.
+context c
+	I: int
+	J: int
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+	end
+	def item
+		[id]
+		{
+			I = I + 1
+			J = J + 1
+		}
+	def start [item*]
+end
+parse S: c::start( stdin )[ "a b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+18:20: the context of c::start must be of type c, not stream
