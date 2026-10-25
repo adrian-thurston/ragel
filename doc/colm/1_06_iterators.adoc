@@ -219,10 +219,11 @@ went when `+((a))+` was replaced.
 
 Some rules for user iterators:
 
-* Don't use `exit` in an iterator. A `return` in one is a compile error.
+* Don't use `exit` in an iterator, or in a function that it calls. A
+  `return` in an iterator is a compile error.
 * An iterator can't have the name of a function or another iterator in its
   namespace, or, at the top level, of a built-in one: colm reports it as
   redeclared.
-* Let a loop over an iterator that yields from inside its own loop over a
-  user iterator, as `bottom_up` does, run to its end, without `break` or
-  `return`.
+* Let a loop over an iterator run to its end, without `break` or `return`,
+  if the iterator yields from inside its own loop over a user iterator, as
+  `bottom_up` does, or from a function that it calls.
