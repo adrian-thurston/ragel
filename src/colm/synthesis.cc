@@ -3013,7 +3013,7 @@ void Compiler::compilePreEof( TokenRegion *region )
 	block->frameId = nextFrameId++;
 
 	addInput( block->localFrame );
-	addThis( block->localFrame );
+	addThis( block->localFrame, block->context );
 
 	CodeVect &code = block->codeWV;
 

@@ -1,0 +1,45 @@
+# In a token action, this is an object of the token's context, so the action
+# reads and writes the context's variables through it, as it does by name.
+# Backing up over a token undoes a write through this, as it does one by name.
+# Input ending in ";" is parsed as A1 first, then backs up to A2 and scans the
+# tokens again. Input with no ending fails, and every write is undone.
+context ctx
+	lex
+		literal `^ `;
+		token id /[a-z]+/
+		{
+			this->Scans = this->Scans + 1
+			Named = Named + 1
+			this->Last = input->pull( match_length )
+			input->push( make_token( typeid<id>, this->Last ) )
+		}
+		ignore /space+/
+	end
+
+	Scans: int
+	Named: int
+	Last: str
+
+	def A1 []
+	def A2 []
+
+	def start
+		[A1 id* `^]
+	|	[A2 id* `;]
+end
+
+C: ctx = new ctx()
+C->Last = "none"
+parse Start: ctx::start( C )[ stdin ]
+if ( ! Start )
+	print( "error: ", error, "\n" )
+print( "Scans ", C->Scans, ", Named ", C->Named, ", Last ", C->Last, "\n" )
+##### IN #####
+a b c ;
+##### EXP #####
+Scans 3, Named 3, Last c
+##### IN #####
+a b c
+##### EXP #####
+error: <stdin>:2:1: parse error
+Scans 0, Named 0, Last none

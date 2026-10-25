@@ -655,7 +655,7 @@ struct Compiler
 	void addMatchText( ObjectDef *frame, LangEl *lel );
 	void addMatchLength( ObjectDef *frame, LangEl *lel );
 	void addInput( ObjectDef *frame );
-	void addThis( ObjectDef *frame );
+	void addThis( ObjectDef *frame, StructDef *context );
 	void addTransTokVar( ObjectDef *frame, LangEl *lel );
 	void addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList );
 	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );
