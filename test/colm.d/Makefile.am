@@ -45,6 +45,8 @@ EXTRA_DIST = \
 	counting2.lm \
 	counting3.lm \
 	counting4.lm \
+	ctxvar1.lm \
+	ctxvarmsg1.lm \
 	decl1.lm \
 	decl2.lm \
 	decl3.lm \

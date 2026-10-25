@@ -1,0 +1,178 @@
+#
+# A context variable is used through the context of the parse whose action
+# runs. A context's function or iterator that uses one stops the program with
+# exit status 1, after the output printed before it, when it is called outside
+# a parse, in a parse with no context, or in a parse with an object of another
+# context. Called in a parse given an object of the context, it works, and a
+# context's function that uses no context variable works anywhere. The
+# argument picks the call.
+#
+
+context ctx
+	N: int
+
+	int count() { return N }
+	void set( V: int ) { N = V }
+	int seven() { return 7 }
+
+	iter each()
+	{
+		V: int = N
+		print( 'each: ', V, '\n' )
+	}
+
+	lex
+		token word /[a-z]+/
+		{
+			N = N + 1
+			print( 'count: ', count(), ' ', ctx::count(), ' ', f(), '\n' )
+			input->push( make_token( typeid<word>, input->pull( match_length ) ) )
+		}
+		ignore /[ \n]+/
+	end
+
+	def start [word*]
+end
+
+# Not in the context: its N is the parse's.
+int f() { return ctx::count() }
+
+# A token action of a parse that isn't ctx's reads or writes ctx's N.
+void use_ctx( K: str )
+{
+	if K == 'no_context_write' || K == 'other_context_write'
+		ctx::set( 5 )
+	else {
+		V: int = ctx::count()
+		print( 'count: ', V, '\n' )
+	}
+}
+
+context other
+	M: str
+
+	lex
+		token oword /[a-z]+/
+		{
+			use_ctx( Kind )
+			input->push( make_token( typeid<oword>, input->pull( match_length ) ) )
+		}
+		ignore /[ \n]+/
+	end
+
+	def ostart [oword*]
+end
+
+lex
+	token nword /[a-z]+/
+	{
+		use_ctx( Kind )
+		input->push( make_token( typeid<nword>, input->pull( match_length ) ) )
+	}
+	ignore /[ \n]+/
+end
+
+def nstart [nword*]
+
+global Kind: str = argv->tail_el->value
+print( Kind, '\n' )
+
+if Kind == 'read' {
+	C: ctx = new ctx()
+	C->N = 4
+	print( ctx::count(), '\n' )
+}
+elsif Kind == 'write' {
+	ctx::set( 5 )
+}
+elsif Kind == 'function' {
+	print( f(), '\n' )
+}
+elsif Kind == 'iter' {
+	for T: any in ctx::each() {}
+}
+elsif Kind == 'no_context' || Kind == 'no_context_write' {
+	parse P: nstart[ 'a b' ]
+}
+elsif Kind == 'other_context' || Kind == 'other_context_write' {
+	O: other = new other()
+	O->M = 'm'
+	parse P: other::ostart( O )[ 'a b' ]
+}
+elsif Kind == 'parse' {
+	C: ctx = new ctx()
+	C->N = 4
+	parse S: ctx::start( C )[ 'a b' ]
+	print( C->N, '\n' )
+}
+elsif Kind == 'seven' {
+	print( ctx::seven(), '\n' )
+}
+
+print( 'after\n' )
+##### ARGS #####
+read
+##### EXP #####
+read
+##### EXIT #####
+1
+##### ARGS #####
+write
+##### EXP #####
+write
+##### EXIT #####
+1
+##### ARGS #####
+function
+##### EXP #####
+function
+##### EXIT #####
+1
+##### ARGS #####
+iter
+##### EXP #####
+iter
+##### EXIT #####
+1
+##### ARGS #####
+no_context
+##### EXP #####
+no_context
+##### EXIT #####
+1
+##### ARGS #####
+no_context_write
+##### EXP #####
+no_context_write
+##### EXIT #####
+1
+##### ARGS #####
+other_context
+##### EXP #####
+other_context
+##### EXIT #####
+1
+##### ARGS #####
+other_context_write
+##### EXP #####
+other_context_write
+##### EXIT #####
+1
+##### ARGS #####
+parse
+##### EXP #####
+parse
+count: 5 5 5
+count: 6 6 6
+6
+after
+##### EXIT #####
+0
+##### ARGS #####
+seven
+##### EXP #####
+seven
+7
+after
+##### EXIT #####
+0

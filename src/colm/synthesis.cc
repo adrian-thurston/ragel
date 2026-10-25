@@ -439,6 +439,12 @@ UniqueType *LangVarRef::loadField( Compiler *pd, CodeVect &code,
 	if ( el->useGenericId )
 		code.appendHalf( el->generic->id );
 
+	/* The context instructions take a context struct's id. The field this,
+	 * the only field they load, is the parse's context, whatever it is, so it
+	 * gives 0. */
+	if ( el->inGetR == IN_LOAD_CONTEXT_R )
+		code.appendHalf( 0 );
+
 	if ( el->useOffset() ) {
 		/* Gets of locals and fields require offsets. Fake vars like token
 		 * data and lhs don't require it. */
@@ -615,6 +621,9 @@ void LangVarRef::loadContextObj( Compiler *pd, CodeVect &code,
 		 * dereferenced. */
 		code.append( IN_LOAD_CONTEXT_R );
 	}
+
+	/* The id of the context's struct, which the parse's context must have. */
+	code.appendHalf( structDef->structEl->id );
 
 	loadQualification( pd, code, rootObj->rootScope, lastPtrInQual, forWriting, true );
 }

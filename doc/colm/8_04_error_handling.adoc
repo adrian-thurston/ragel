@@ -195,6 +195,9 @@ Some mistakes stop the program where they happen:
 * a `for` loop over a nil tree, as
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
   over a nil list or map;
+* using a context variable outside a parse, or in a parse with no context or
+  with an object of another struct as its context, as
+  xref:3_04_undo.adoc#context[the context chapter] describes;
 * a nil tree, or `nil`, among the items a `send`, `send_tree` or `parse`
   sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes.
 

@@ -1,0 +1,130 @@
+# The message each use of a context variable stops the program with, outside a
+# parse, in a parse with no context, and in a parse with an object of another
+# context. The host sends standard error to standard output, so the message is
+# in the output, after what the program printed before it. The stop ends the
+# host too: it never gets back from colm_run_program.
+
+context ctx
+	N: int
+
+	int count() { return N }
+	void set( V: int ) { N = V }
+end
+
+# A token action of a parse that isn't ctx's reads or writes ctx's N.
+void use_ctx( K: str )
+{
+	if K == 'no_context_write' || K == 'other_context_write'
+		ctx::set( 5 )
+	else {
+		V: int = ctx::count()
+		print( 'count: ', V, '\n' )
+	}
+}
+
+context other
+	M: str
+
+	lex
+		token oword /[a-z]+/
+		{
+			use_ctx( Kind )
+			input->push( make_token( typeid<oword>, input->pull( match_length ) ) )
+		}
+		ignore /[ \n]+/
+	end
+
+	def ostart [oword*]
+end
+
+lex
+	token nword /[a-z]+/
+	{
+		use_ctx( Kind )
+		input->push( make_token( typeid<nword>, input->pull( match_length ) ) )
+	}
+	ignore /[ \n]+/
+end
+
+def nstart [nword*]
+
+global Kind: str = argv->tail_el->value
+print( Kind, '\n' )
+
+if Kind == 'read' {
+	print( ctx::count(), '\n' )
+}
+elsif Kind == 'write' {
+	ctx::set( 5 )
+}
+elsif Kind == 'no_context' || Kind == 'no_context_write' {
+	parse P: nstart[ 'a b' ]
+}
+elsif Kind == 'other_context' || Kind == 'other_context_write' {
+	O: other = new other()
+	O->M = 'm'
+	parse P: other::ostart( O )[ 'a b' ]
+}
+
+print( 'after\n' )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+read
+##### EXP #####
+read
+fatal: reading a context variable outside a parse
+##### EXIT #####
+1
+##### ARGS #####
+write
+##### EXP #####
+write
+fatal: writing a context variable outside a parse
+##### EXIT #####
+1
+##### ARGS #####
+no_context
+##### EXP #####
+no_context
+fatal: reading a context variable in a parse with no context
+##### EXIT #####
+1
+##### ARGS #####
+no_context_write
+##### EXP #####
+no_context_write
+fatal: writing a context variable in a parse with no context
+##### EXIT #####
+1
+##### ARGS #####
+other_context
+##### EXP #####
+other_context
+fatal: reading a context variable in a parse with another context
+##### EXIT #####
+1
+##### ARGS #####
+other_context_write
+##### EXP #####
+other_context_write
+fatal: writing a context variable in a parse with another context
+##### EXIT #####
+1

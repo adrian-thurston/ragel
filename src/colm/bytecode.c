@@ -188,6 +188,34 @@ static void colm_parser_set_context( program_t *prg, tree_t **sp, parser_t *pars
 	parser->pda_run->context = val;
 }
 
+/* The context that a context variable is used through: the context of the
+ * parse whose action runs. Id is the id of the variable's context struct, which
+ * the parse's context must have, or 0 for this, which is the parse's context,
+ * whatever it is. The program stops outside a parse, in a parse with no
+ * context, and in a parse whose context is another struct. */
+static struct_t *parse_context( program_t *prg, execution_t *exec, short id, int writing )
+{
+	if ( exec->parser == 0 ) {
+		runtime_error( prg, writing ?
+				"writing a context variable outside a parse" :
+				"reading a context variable outside a parse" );
+	}
+
+	struct_t *context = exec->parser->pda_run->context;
+	if ( id != 0 && context == 0 ) {
+		runtime_error( prg, writing ?
+				"writing a context variable in a parse with no context" :
+				"reading a context variable in a parse with no context" );
+	}
+	if ( id != 0 && context->id != id ) {
+		runtime_error( prg, writing ?
+				"writing a context variable in a parse with another context" :
+				"reading a context variable in a parse with another context" );
+	}
+
+	return context;
+}
+
 static head_t *tree_to_str_xml( program_t *prg, tree_t **sp, tree_t *tree, int trim, int attrs )
 {
 	/* Collect the tree data. */
@@ -1025,17 +1053,23 @@ again:
 		}
 
 		case IN_LOAD_CONTEXT_R: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_R\n" );
+			short id;
+			read_half( id );
 
-			vm_push_type( struct_t*, exec->parser->pda_run->context );
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_R %hd\n", id );
+
+			vm_push_type( struct_t*, parse_context( prg, exec, id, 0 ) );
 			break;
 		}
 		case IN_LOAD_CONTEXT_WV: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WV\n" );
+			short id;
+			read_half( id );
+
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WV %hd\n", id );
 
 			assert( exec->WV );
 
-			vm_push_type( struct_t *, exec->parser->pda_run->context );
+			vm_push_type( struct_t *, parse_context( prg, exec, id, 1 ) );
 
 			/* Set up the reverse instruction. */
 			rcode_unit_start( exec );
@@ -1043,13 +1077,16 @@ again:
 			break;
 		}
 		case IN_LOAD_CONTEXT_WC: {
-			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WC\n" );
+			short id;
+			read_half( id );
+
+			debug( prg, REALM_BYTECODE, "IN_LOAD_CONTEXT_WC %hd\n", id );
 
 			assert( !exec->WV );
 
 			/* This is identical to the _R version, but using it for writing
 			 * would be confusing. */
-			vm_push_type( struct_t *, exec->parser->pda_run->context );
+			vm_push_type( struct_t *, parse_context( prg, exec, id, 1 ) );
 			break;
 		}
 		case IN_LOAD_CONTEXT_BKT: {

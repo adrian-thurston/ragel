@@ -39,6 +39,19 @@ name. Outside it, the context's names are qualified as a namespace's are, as
 in `decls::program`. xref:8_02_modularity.adoc#namespaces[The namespaces
 chapter] covers qualified names.
 
+A context's functions and iterators are qualified the same way outside it.
+A context variable that one of them uses is the variable of the running
+parse's context. If `decls` had a function `is_type( Name: str )` that looked
+`Name` up in `Types`, `+decls::is_type( "a" )+` would look in the `Types` of
+the object the running parse was given. So such a function works in the
+actions of a parse given an object of its context, and in the functions they
+call. Called outside a parse, or in a parse with no context or with an object
+of another struct as its context, it stops the program where it uses the
+variable, as xref:8_04_error_handling.adoc#run-time-errors[errors at run time]
+do. A function that uses no context variable can be called from anywhere. A
+call can't be given the object to use instead: `+Decls->is_type( "a" )+`
+doesn't compile.
+
 A parse of a type defined in a context is given an object of that context, in
 parentheses after the type. These lines, from the example in the next
 section, make the object and its map, and parse with it:
@@ -59,7 +72,7 @@ separate data.
 
 Always give such a parse its context, and an object of that context. Colm
 compiles a parse given none, or given an object of another struct, but the
-program crashes when an action uses a variable.
+program stops when an action uses a variable, as an error at run time does.
 
 In a token action, `this` is the parse's context. A parse that the action
 starts, of a type in the same context, must be given it, as in
