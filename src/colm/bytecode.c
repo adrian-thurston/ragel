@@ -1517,6 +1517,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_R %d\n", field );
 
 			tree_t *obj = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "reading a field of a nil struct" );
 			tree_t *val = colm_struct_get_field( obj, tree_t*, field );
 			colm_tree_upref( prg, val );
 			vm_push_tree( val );
@@ -1529,6 +1531,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WC %d\n", field );
 
 			tree_t *obj = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "reading a field of a nil struct" );
 			tree_t *val = colm_struct_get_field( obj, tree_t*, field );
 			colm_tree_upref( prg, val );
 			vm_push_tree( val );
@@ -1542,6 +1546,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_WV\n" );
 
 			tree_t *obj = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "reading a field of a nil struct" );
 			tree_t *val = colm_struct_get_field( obj, tree_t*, field );
 			colm_tree_upref( prg, val );
 			vm_push_tree( val );
@@ -1573,6 +1579,8 @@ again:
 
 			tree_t *obj = vm_pop_tree();
 			tree_t *val = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "setting a field of a nil struct" );
 
 			/* Downref the old value. */
 			tree_t *prev = colm_struct_get_field( obj, tree_t*, field );
@@ -1588,6 +1596,8 @@ again:
 
 			struct_t *obj = vm_pop_struct();
 			tree_t *val = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "setting a field of a nil struct" );
 
 			/* Save the old value, then set the field. */
 			tree_t *prev = colm_struct_get_field( obj, tree_t*, field );
@@ -1624,6 +1634,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_STRUCT_VAL_R %d\n", field );
 
 			tree_t *obj = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "reading a field of a nil struct" );
 			tree_t *val = colm_struct_get_field( obj, tree_t*, field );
 			vm_push_tree( val );
 			break;
@@ -1636,6 +1648,8 @@ again:
 
 			struct_t *strct = vm_pop_struct();
 			tree_t *val = vm_pop_tree();
+			if ( strct == 0 )
+				runtime_error( prg, "setting a field of a nil struct" );
 
 			colm_struct_set_field( strct, tree_t*, field, val );
 			break;
@@ -1648,6 +1662,8 @@ again:
 
 			struct_t *strct = vm_pop_struct();
 			tree_t *val = vm_pop_tree();
+			if ( strct == 0 )
+				runtime_error( prg, "setting a field of a nil struct" );
 
 			tree_t *prev = colm_struct_get_field( strct, tree_t*, field );
 			colm_struct_set_field( strct, tree_t*, field, val );
@@ -3490,6 +3506,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_LIST_EL_MEM_R\n" );
 
 			struct_t *s = vm_pop_struct();
+			if ( s == 0 ) {
+				runtime_error( prg, field == 0 ?
+						"reading the prev of a nil list element" :
+						"reading the next of a nil list element" );
+			}
 
 			list_el_t *list_el = colm_struct_to_list_el( prg, s, gen_id );
 			struct_t *val = colm_list_el_get( prg, list_el, gen_id, field );
@@ -3654,6 +3675,11 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_GET_MAP_EL_MEM_R\n" );
 
 			struct_t *strct = vm_pop_struct();
+			if ( strct == 0 ) {
+				runtime_error( prg, field == 0 ?
+						"reading the prev of a nil map element" :
+						"reading the next of a nil map element" );
+			}
 
 			map_el_t *map_el = colm_struct_to_map_el( prg, strct, gen_id );
 			struct_t *val = colm_map_el_get( prg, map_el, gen_id, field );

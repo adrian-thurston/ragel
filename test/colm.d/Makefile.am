@@ -246,6 +246,9 @@ EXTRA_DIST = \
 	streamseq2.lm \
 	string.lm \
 	struct1.lm \
+	structmsg1.lm \
+	structnil1.lm \
+	structnil2.lm \
 	superid.lm \
 	switch1.lm \
 	switch2.lm \

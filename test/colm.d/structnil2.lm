@@ -1,0 +1,85 @@
+# A production action that reads or sets a field of a nil global struct
+# stops the program with exit status 1, as plain code does. Writes in an
+# action take the forms that leave reverse code. With the struct made with
+# new, the action runs. The argument picks the use.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def item
+	A: str
+	[id]
+
+struct S
+	F: str
+	I: int
+	T: item
+end
+
+global G: S
+global A: str = argv->pop()
+
+def start
+	[id]
+	{
+		if ( A == "new" ) {
+			G = new S()
+			G->F = 'a'
+			G->I = 1
+			print( G->F, ' ', G->I, '\n' )
+		}
+		elsif ( A == "read" )
+			print( G->F, '\n' )
+		elsif ( A == "read_int" )
+			print( G->I, '\n' )
+		elsif ( A == "set" )
+			G->F = 'a'
+		elsif ( A == "set_int" )
+			G->I = 1
+		elsif ( A == "set_attr" )
+			G->T.A = 'a'
+	}
+
+print( "before\n" )
+parse P: start[ "x" ]
+print( "after\n" )
+##### ARGS #####
+new
+##### EXP #####
+before
+a 1
+after
+##### EXIT #####
+0
+##### ARGS #####
+read
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+read_int
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set_int
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+set_attr
+##### EXP #####
+before
+##### EXIT #####
+1
