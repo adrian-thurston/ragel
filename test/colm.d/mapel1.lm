@@ -22,6 +22,13 @@ if ( A == "detach_twice" ) {
 	print( "length [M->length]\n" )
 	M->detach_el( E )
 }
+elsif ( A == "detach_leaf_twice" ) {
+	# a is a leaf. Out of M, its parent link still leads to M's root.
+	L: map_el<str, str> = M->find_el( "a" )
+	M->detach_el( L )
+	print( "length [M->length]\n" )
+	M->detach_el( L )
+}
 elsif ( A == "detach_nil" )
 	M->detach_el( N )
 elsif ( A == "detach_other" ) {
@@ -73,5 +80,12 @@ before
 insert_again
 ##### EXP #####
 before
+##### EXIT #####
+1
+##### ARGS #####
+detach_leaf_twice
+##### EXP #####
+before
+length 2
 ##### EXIT #####
 1
