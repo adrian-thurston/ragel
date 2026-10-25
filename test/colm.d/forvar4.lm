@@ -1,0 +1,10 @@
+# A loop over a user iterator with a list loop variable.
+iter it( S: str )
+{
+	yield S
+}
+
+for L: list<str> in it( "a" )
+	print( L->length, "\n" )
+##### COMP_ERR #####
+7:5: loop variable L must have a tree type

@@ -83,6 +83,12 @@ EXTRA_DIST = \
 	forloop5.lm \
 	forloop6.lm \
 	forloop7.lm \
+	forvar1.lm \
+	forvar2.lm \
+	forvar3.lm \
+	forvar4.lm \
+	forvar5.lm \
+	forvar6.lm \
 	func1.lm \
 	func2.lm \
 	func3.lm \

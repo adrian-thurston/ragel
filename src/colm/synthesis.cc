@@ -2574,6 +2574,13 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	objField->iterImpl = iterImpl;
 
+	/* A loop over a tree or a user iterator selects the trees of the loop
+	 * variable's type, by the type's id. A type that isn't a tree has none. */
+	if ( iterImpl->useSearchUT && searchUT->langEl == 0 ) {
+		error(loc) << "loop variable " << objField->name <<
+				" must have a tree type" << endp;
+	}
+
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
 			pd, code, lookup, iterCall->langTerm->args );

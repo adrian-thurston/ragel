@@ -1,0 +1,14 @@
+# A loop over a user iterator with a struct loop variable.
+struct point
+	X: int
+end
+
+iter it( S: str )
+{
+	yield S
+}
+
+for P: point in it( "a" )
+	print( P->X, "\n" )
+##### COMP_ERR #####
+11:5: loop variable P must have a tree type

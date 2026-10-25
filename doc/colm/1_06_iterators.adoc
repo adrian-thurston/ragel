@@ -13,6 +13,12 @@ such a loop, colm's built-in iterators, and iterators that a program defines.
 with `N` holding the tree. It visits a tree before the trees inside it, and
 goes from left to right. `S` itself is visited first, when it is of type `T`.
 
+`T` must be a tree type, such as a token, a def, `str` or `any`, here and in
+a loop over any of the iterators below. Any other type, such as `int`, is a
+compile error, `loop variable N must have a tree type`. Loops over a list or
+a map are different: their variable can be an `int`, when that is what the
+list or the map holds.
+
 The type `T` can be a repetition, such as `+item*+`. A list is its first item
 and the rest of the list, which is a list too, down to an empty list at the
 end. So the loop visits each list in `S`, and each rest of it.
@@ -157,7 +163,7 @@ doesn't take an expression: `yield "x"` is a parse error.
 
 The loop variable's type selects the yields that the body sees. A yield of a
 tree of another type is skipped, unless the loop variable's type is `any`.
-Give the loop variable a tree type, or `any`.
+As in a loop over a tree, the loop variable must have a tree type.
 
 An iterator's parameters are copies, as a function's are. To change the
 caller's tree through the loop variable, make the parameter a `ref`.
