@@ -290,6 +290,12 @@ EXTRA_DIST = \
 	void1.lm \
 	while1.lm \
 	xmlac.lm \
+	yieldtype1.lm \
+	yieldtype2.lm \
+	yieldtype3.lm \
+	yieldtype4.lm \
+	yieldtype5.lm \
+	yieldtype6.lm \
 	accumbt4.in \
 	accumbt5.in \
 	binary1.in \

@@ -2809,6 +2809,15 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			/* take a reference and yield it. Immediately reset the referece. */
 			varRef->preEvaluateRef( pd, code );
 			ObjectField *objField = varRef->evaluateRef( pd, code, 0 );
+
+			/* A loop takes what an iterator yields as a tree. A loop
+			 * variable holds a value of its loop's search type. */
+			TypeRef *yieldTR = objField->typeRef;
+			UniqueType *yieldUT = yieldTR->searchUniqueType != 0 ?
+					yieldTR->searchUniqueType : yieldTR->uniqueType;
+			if ( yieldUT->langEl == 0 )
+				error(varRef->loc) << "can only yield a tree" << endp;
+
 			code.append( IN_YIELD );
 
 			if ( varRef->qual->length() > 0 ) {

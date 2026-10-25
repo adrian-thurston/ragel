@@ -1,0 +1,10 @@
+# An iterator that yields a bool.
+iter it( B: bool )
+{
+	yield B
+}
+
+for I: any in it( true )
+	print( I, "\n" )
+##### COMP_ERR #####
+4:8: can only yield a tree

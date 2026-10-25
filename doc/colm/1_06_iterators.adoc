@@ -159,7 +159,10 @@ the loop's body runs with `N` holding it. The iterator then goes on after the
 `yield`. The loop ends when the iterator's code does.
 
 `yield` takes a variable, which can be qualified, as in `yield T.Name`. It
-doesn't take an expression: `yield "x"` is a parse error.
+doesn't take an expression: `yield "x"` is a parse error. The variable must
+hold a tree, or be a `ref` to one. A yield of an `int`, a `bool`, a struct, a
+list or a map is a compile error, `can only yield a tree`, and so is a yield
+of a field that holds one, such as an `int` attribute of a tree.
 
 The loop variable's type selects the yields that the body sees. A yield of a
 tree of another type is skipped, unless the loop variable's type is `any`.
