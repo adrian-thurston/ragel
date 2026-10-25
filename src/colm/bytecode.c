@@ -3495,6 +3495,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_LIST_LENGTH\n" );
 
 			list_t *list = vm_pop_list();
+			if ( list == 0 )
+				runtime_error( prg, "length of a nil list" );
 			long len = colm_list_length( list );
 			value_t res = len;
 			vm_push_value( res );
@@ -3528,6 +3530,10 @@ again:
 					"IN_GET_LIST_MEM_R %hd %hd\n", gen_id, field );
 
 			list_t *list = vm_pop_list();
+			if ( list == 0 ) {
+				runtime_error( prg, field == 0 ? "reading the head of a nil list" :
+						"reading the tail of a nil list" );
+			}
 			struct_t *val = colm_list_get( prg, list, gen_id, field );
 			vm_push_struct( val );
 			break;
@@ -3692,6 +3698,8 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_MAP_LENGTH\n" );
 
 			tree_t *obj = vm_pop_tree();
+			if ( obj == 0 )
+				runtime_error( prg, "length of a nil map" );
 			long len = map_length( (map_t*)obj );
 			value_t res = len;
 			vm_push_value( res );
@@ -3706,6 +3714,10 @@ again:
 					"IN_GET_MAP_MEM_R %hd %hd\n", gen_id, field );
 
 			map_t *map = vm_pop_map();
+			if ( map == 0 ) {
+				runtime_error( prg, field == 0 ? "reading the head of a nil map" :
+						"reading the tail of a nil map" );
+			}
 			struct_t *val = colm_map_get( prg, map, gen_id, field );
 			vm_push_struct( val );
 			break;
@@ -4289,7 +4301,11 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_HEAD_WC\n" );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				struct_t *s = vm_pop_struct();
+				if ( s == 0 )
+					runtime_error( prg, "pushing a nil element" );
 
 				list_el_t *list_el = colm_struct_to_list_el( prg, s, gen_id );
 				colm_list_prepend( list, list_el );
@@ -4305,7 +4321,11 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_HEAD_WV\n" );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				struct_t *s = vm_pop_struct();
+				if ( s == 0 )
+					runtime_error( prg, "pushing a nil element" );
 
 				list_el_t *list_el = colm_struct_to_list_el( prg, s, gen_id );
 				colm_list_prepend( list, list_el );
@@ -4333,7 +4353,11 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_TAIL_WC\n" );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				struct_t *s = vm_pop_struct();
+				if ( s == 0 )
+					runtime_error( prg, "pushing a nil element" );
 
 				list_el_t *list_el = colm_struct_to_list_el( prg, s, gen_id );
 				colm_list_append( list, list_el );
@@ -4349,7 +4373,11 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_LIST_PUSH_TAIL_WV\n" );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				struct_t *s = vm_pop_struct();
+				if ( s == 0 )
+					runtime_error( prg, "pushing a nil element" );
 
 				list_el_t *list_el = colm_struct_to_list_el( prg, s, gen_id );
 				colm_list_append( list, list_el );
@@ -4488,6 +4516,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_MAP_FIND %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "find in a nil map" );
 				tree_t *key = vm_pop_tree();
 
 				map_el_t *map_el = colm_map_find( prg, map, key );
@@ -4508,6 +4538,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "insert into a nil map" );
 				struct_t *s = vm_pop_struct();
 
 				map_el_t *map_el = colm_struct_to_map_el( prg, s, gen_id );
@@ -4524,6 +4556,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_MAP_INSERT_WV %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "insert into a nil map" );
 				struct_t *s = vm_pop_struct();
 
 				map_el_t *map_el = colm_struct_to_map_el( prg, s, gen_id );
@@ -4568,6 +4602,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_MAP_DETACH_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "detach from a nil map" );
 				struct_t *s = vm_pop_struct();
 
 				map_el_t *map_el = colm_struct_to_map_el( prg, s, gen_id );
@@ -4584,6 +4620,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_MAP_DETACH_WV %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "detach from a nil map" );
 				struct_t *s = vm_pop_struct();
 
 				map_el_t *map_el = colm_struct_to_map_el( prg, s, gen_id );
@@ -4622,6 +4660,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VMAP_INSERT_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "insert into a nil map" );
 				struct_t *value = vm_pop_struct();
 				struct_t *key = vm_pop_struct();
 
@@ -4638,6 +4678,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VMAP_INSERT_WV %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "insert into a nil map" );
 				struct_t *value = vm_pop_struct();
 				struct_t *key = vm_pop_struct();
 
@@ -4680,6 +4722,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VMAP_REMOVE_WC %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "remove from a nil map" );
 				tree_t *key = vm_pop_tree();
 
 				map_el_t *map_el = colm_vmap_remove( prg, map, key );
@@ -4700,6 +4744,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VMAP_REMOVE_WV %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "remove from a nil map" );
 				tree_t *key = vm_pop_tree();
 
 				map_el_t *map_el = colm_vmap_remove( prg, map, key );
@@ -4745,6 +4791,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VMAP_FIND %hd\n", gen_id );
 
 				map_t *map = vm_pop_map();
+				if ( map == 0 )
+					runtime_error( prg, "find in a nil map" );
 				tree_t *key = vm_pop_tree();
 
 				tree_t *result = colm_vmap_find( prg, map, key );
@@ -4762,6 +4810,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_TAIL_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				value_t value = vm_pop_value();
 
 				colm_vlist_append( prg, list, value );
@@ -4776,6 +4826,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_TAIL_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				value_t value = vm_pop_value();
 
 				colm_vlist_append( prg, list, value );
@@ -4802,6 +4854,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_HEAD_WC %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				value_t value = vm_pop_value();
 
 				colm_vlist_prepend( prg, list, value );
@@ -4816,6 +4870,8 @@ again:
 				debug( prg, REALM_BYTECODE, "FN_VLIST_PUSH_HEAD_WV %hd\n", gen_id );
 
 				list_t *list = vm_pop_list();
+				if ( list == 0 )
+					runtime_error( prg, "push to a nil list" );
 				value_t value = vm_pop_value();
 
 				colm_vlist_prepend( prg, list, value );

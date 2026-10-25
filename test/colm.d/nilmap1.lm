@@ -1,0 +1,184 @@
+# Using a nil map stops the program, with exit status 1: inserting, finding or
+# removing a key, inserting, finding or detaching an element, its length, and
+# the element at either end. The output before the stop is kept. In a
+# reduction action, an insert, remove or detach is the form that records
+# reverse code. The run "new" gives the map a value first, and nothing stops.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+struct holder
+	M: map<str, int>
+end
+
+global M: map<str, int>
+global A: str = argv->pop()
+
+def start
+	[id]
+	{
+		if ( A == "new" ) {
+			M->insert( "c", 3 )
+			M->remove( "a" )
+			new E: map_el<str, int>()
+			E->key = "d"
+			E->value = 4
+			M->insert_el( E )
+			F: map_el<str, int> = M->find_el( "b" )
+			M->detach_el( F )
+		}
+		elsif ( A == "action_insert" )
+			M->insert( "a", 1 )
+		elsif ( A == "action_remove" )
+			M->remove( "a" )
+		elsif ( A == "action_insert_el" ) {
+			new E: map_el<str, int>()
+			E->key = "a"
+			M->insert_el( E )
+		}
+		elsif ( A == "action_detach_el" ) {
+			new E: map_el<str, int>()
+			M->detach_el( E )
+		}
+	}
+
+print( "before\n" )
+
+if ( A == "insert" )
+	M->insert( "a", 1 )
+elsif ( A == "find" )
+	print( "find [M->find( "a" )]\n" )
+elsif ( A == "remove" )
+	M->remove( "a" )
+elsif ( A == "insert_el" ) {
+	new E: map_el<str, int>()
+	E->key = "a"
+	M->insert_el( E )
+}
+elsif ( A == "find_el" ) {
+	E: map_el<str, int> = M->find_el( "a" )
+}
+elsif ( A == "detach_el" ) {
+	new E: map_el<str, int>()
+	M->detach_el( E )
+}
+elsif ( A == "length" )
+	print( "length [M->length]\n" )
+elsif ( A == "head_el" ) {
+	E: map_el<str, int> = M->head_el
+}
+elsif ( A == "tail_el" ) {
+	E: map_el<str, int> = M->tail_el
+}
+elsif ( A == "field" ) {
+	new H: holder()
+	H->M->insert( "a", 1 )
+}
+elsif ( A == "new" ) {
+	M = new map<str, int>()
+	M->insert( "a", 1 )
+	new E: map_el<str, int>()
+	E->key = "b"
+	E->value = 2
+	M->insert_el( E )
+	B: map_el<str, int> = M->find_el( "b" )
+	print( "find [M->find( "a" )], find_el [B->value], " )
+	print( "length [M->length], head_el [M->head_el->key], tail_el [M->tail_el->key]\n" )
+}
+
+S: start = parse start[ "x" ]
+print( "length [M->length], head_el [M->head_el->key], tail_el [M->tail_el->key]\n" )
+print( "after\n" )
+##### ARGS #####
+insert
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+find
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+remove
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+insert_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+find_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+detach_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+length
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+head_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+tail_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+field
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action_insert
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action_remove
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action_insert_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action_detach_el
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+new
+##### EXP #####
+before
+find 1, find_el 2, length 2, head_el a, tail_el b
+length 2, head_el c, tail_el d
+after

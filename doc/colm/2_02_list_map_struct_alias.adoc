@@ -109,10 +109,12 @@ are.
 A list can't change inside a `for` over it: that is a compile error,
 `reference active, cannot write to object`.
 
-A list variable is nil until it is given a list, with `new`. A `for` over a
-nil list stops the program, as a loop over a nil tree does
-(xref:1_06_iterators.adoc#iterators[the iterators chapter]): it prints
-`fatal: for loop over a nil list` and exits with status 1.
+A list variable is nil until it is given a list, with `new`. Calling one of
+a nil list's functions or reading one of its fields stops the program, and so
+does a `for` over it, as a loop over a nil tree does
+(xref:1_06_iterators.adoc#iterators[the iterators chapter]). A push prints
+`fatal: push to a nil list`, a `for` prints `fatal: for loop over a nil list`,
+and the program exits with status 1.
 
 `argv` is a `list<str>`, as xref:1_00_language_overview.adoc#exit[the
 language overview] shows.
@@ -158,9 +160,11 @@ expressions chapter] says.
 
 A map can't change inside a `for` over it.
 
-A map variable is nil until it is given a map, with `new`, and a `for` over a
-nil map stops the program the same way: it prints
-`fatal: for loop over a nil map` and exits with status 1.
+A map variable is nil until it is given a map, with `new`. Calling one of a
+nil map's functions, reading one of its fields or a `for` over it stops the
+program the same way. An `insert` prints `fatal: insert into a nil map`, a
+`for` prints `fatal: for loop over a nil map`, and the program exits with
+status 1.
 
 This program counts the words in its arguments:
 

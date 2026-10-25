@@ -145,6 +145,7 @@ EXTRA_DIST = \
 	map7.lm \
 	map8.lm \
 	map9.lm \
+	mapmsg1.lm \
 	matchex.lm \
 	matchtext1.lm \
 	maxlen.lm \
@@ -165,6 +166,8 @@ EXTRA_DIST = \
 	namespace9.lm \
 	nestedcomm.lm \
 	new1.lm \
+	nillist1.lm \
+	nilmap1.lm \
 	ntignbt1.lm \
 	ntignbt2.lm \
 	ntignbt3.lm \
