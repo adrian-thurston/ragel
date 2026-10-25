@@ -3635,6 +3635,20 @@ again:
 
 			parser_t *parser = vm_pop_parser();
 
+			/* A parser has a tree to give once it has taken the end of its
+			 * input. Until then its stack holds the parse so far, and no
+			 * tree of its type. A failed parse reads as nil, whether or not
+			 * the input has ended. A parse_stop statement's parser
+			 * (stop_target > 0) never takes the end of its input, and is
+			 * left as it is. */
+			if ( field == 0 && parser->pda_run->stop_target == 0 &&
+					!parser->pda_run->parse_error &&
+					!parser->pda_run->eof_term_recvd )
+			{
+				runtime_error( prg, "reading the tree of a parser "
+						"before its input has ended" );
+			}
+
 			tree_t *val = get_parser_mem( parser, field );
 
 			colm_tree_upref( prg, val );

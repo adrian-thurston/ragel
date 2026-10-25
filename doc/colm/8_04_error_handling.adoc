@@ -187,6 +187,8 @@ Some mistakes stop the program where they happen:
 * popping a value off a list that is empty or nil, as
   xref:2_02_list_map_struct_alias.adoc#lists[the lists section] describes;
 * reading the `head`, `tail` or `top` of such a list;
+* reading a parser's `tree` before its input has ended, as
+  xref:3_06_send.adoc#send[the send chapter] describes;
 * a `for` loop over a nil tree, as
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
   over a nil list or map.

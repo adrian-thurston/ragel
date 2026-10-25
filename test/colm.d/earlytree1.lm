@@ -1,0 +1,147 @@
+# Reading a parser's tree before its input has ended stops the program, with
+# exit status 1: at the top level, in a function, and in an action of the
+# parser's own grammar while it parses. After the input has ended, or once the
+# parse has failed, the tree reads as before: the tree, or nil.
+
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `;
+	ignore /space+/
+end
+
+global InAction: bool = false
+
+def stmt
+	[id num `;]
+	{
+		if ( InAction ) {
+			T: start = P->tree
+			print( "in action: ", T, "\n" )
+		}
+	}
+
+def start
+	[Stmts: stmt*]
+
+global P: parser<start> = new parser<start>()
+
+start treeOf( Q: parser<start> )
+{
+	Mine: str = "mine"
+	return Q->tree
+}
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "tree" ) {
+	send P "a 1; b 2;\n"
+	T: start = P->tree
+	print( "tree: ", T, "\n" )
+}
+elsif ( A == "child" ) {
+	send P "a 1; b 2;\n"
+	print( P->tree.Stmts, "\n" )
+}
+elsif ( A == "empty" ) {
+	T: start = P->tree
+	print( "tree: ", T, "\n" )
+}
+elsif ( A == "function" ) {
+	send P "a 1; b 2;\n"
+	T: start = treeOf( P )
+	print( "tree: ", T, "\n" )
+}
+elsif ( A == "action" ) {
+	InAction = true
+	send P "a 1; b 2;\n" eos
+}
+elsif ( A == "eos" ) {
+	send P "a 1; b 2;\n" eos
+	print( "eos: ", P->tree.Stmts, "\n" )
+}
+elsif ( A == "finish" ) {
+	send P "a 1; b 2;\n"
+	S: start = P->finish()
+	print( "finish: ", S.Stmts, "\n" )
+	print( "tree: ", P->tree.Stmts, "\n" )
+}
+elsif ( A == "error" ) {
+	send P "a 1; b ;\n"
+	if ( ! P->tree && P->error )
+		print( "nil, with an error\n" )
+}
+elsif ( A == "error_eos" ) {
+	send P "a 1; b ;\n" eos
+	if ( ! P->tree && P->error )
+		print( "nil, with an error\n" )
+}
+
+print( "after\n" )
+##### ARGS #####
+tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+child
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+empty
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+function
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+eos
+##### EXP #####
+before
+eos: a 1; b 2;
+
+after
+##### EXIT #####
+0
+##### ARGS #####
+finish
+##### EXP #####
+before
+finish: a 1; b 2;
+
+tree: a 1; b 2;
+
+after
+##### EXIT #####
+0
+##### ARGS #####
+error
+##### EXP #####
+before
+nil, with an error
+after
+##### EXIT #####
+0
+##### ARGS #####
+error_eos
+##### EXP #####
+before
+nil, with an error
+after
+##### EXIT #####
+0

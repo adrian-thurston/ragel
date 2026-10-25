@@ -96,7 +96,10 @@ and returns the tree.
 
 End the input once: with `eos` on the last send, or with `+finish()+`, not
 both. Read `+P->tree+` only after the input has ended. Before then, the
-parser has no finished tree to give.
+parser has no finished tree to give, and reading `+P->tree+` stops the
+program, as xref:8_04_error_handling.adoc#run-time-errors[the error handling
+chapter] says. Once the parse has failed, `+P->tree+` is nil, whether the
+input has ended or not.
 
 A `parse` that fails sets the global `error`, but `send` and `+finish()+`
 don't. Read `+P->error+` instead.
