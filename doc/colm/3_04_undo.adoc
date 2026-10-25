@@ -57,9 +57,15 @@ xref:3_06_send.adoc#send[the send chapter] covers. The parse's actions use the
 variables of the object it is given, so two parses given two objects keep
 separate data.
 
-Always give such a parse its context, and an object of that context. Colm
-compiles a parse given none, or given an object of another struct, but the
-program crashes when an action uses a variable.
+Such a parse must be given its context. Colm doesn't compile a parse, or a
+`new parser`, of a type in a context that is given none. Without
+`+( Decls )+`, colm stops at the parse above with the error
+`parsing decls::program needs a context of type decls`. A context variable
+that holds nil, given as the context, stops the program when it runs, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+says. Give such a parse an object of that context: colm compiles a parse
+given an object of another struct, but the program crashes when an action
+uses a variable.
 
 In a token action, `this` is the parse's context. A parse that the action
 starts, of a type in the same context, must be given it, as in

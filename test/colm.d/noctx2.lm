@@ -1,0 +1,31 @@
+# A parse_stop in a token action, of a type in the same context, given the
+# action's input but not its context, this.
+
+context c
+	N: int
+	lex
+		token word /[a-z]+/
+		{
+			W: str = input->pull( match_length )
+			parse_stop R: rest( input )[]
+			input->push( make_token( typeid<word>, W ) )
+		}
+		ignore /space+/
+	end
+	lex
+		token rword /[a-z]+/
+		ignore /space+/
+	end
+	def rw
+		[rword]
+		{
+			N = N + 1
+		}
+	def rest [rw]
+	def start [word*]
+end
+C: c = new c()
+parse S: c::start( C )[ "a x b" ]
+print( "N ", C->N, "\n" )
+##### COMP_ERR #####
+10:4: parsing c::rest needs a context of type c

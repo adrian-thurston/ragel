@@ -163,6 +163,12 @@ EXTRA_DIST = \
 	namespace9.lm \
 	nestedcomm.lm \
 	new1.lm \
+	nilctx1.lm \
+	noctx1.lm \
+	noctx2.lm \
+	noctx3.lm \
+	noctx4.lm \
+	noctx5.lm \
 	ntignbt1.lm \
 	ntignbt2.lm \
 	ntignbt3.lm \

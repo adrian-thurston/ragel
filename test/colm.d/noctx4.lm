@@ -1,0 +1,13 @@
+# A parser made with new, of a type in a context, given no argument.
+
+context c
+	I: int
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+	end
+	def start [id*]
+end
+P: parser<c::start> = new parser<c::start>()
+##### COMP_ERR #####
+11:23: parsing c::start needs a context of type c

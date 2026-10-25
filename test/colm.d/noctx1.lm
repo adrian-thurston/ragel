@@ -1,0 +1,20 @@
+# A parse of a type defined in a context must be given a context. Given none,
+# its actions would read and write the context's variables through nil.
+
+context c
+	I: int
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+	end
+	def item
+		[id]
+		{
+			I = I + 1
+		}
+	def start [item*]
+end
+parse S: c::start[ "a b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+17:1: parsing c::start needs a context of type c

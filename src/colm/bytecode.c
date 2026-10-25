@@ -1063,6 +1063,9 @@ again:
 			struct_t *strct = vm_pop_struct();
 			parser_t *parser = vm_pop_parser();
 
+			if ( strct == 0 )
+				runtime_error( prg, "giving a parser a nil context" );
+
 			colm_parser_set_context( prg, sp, parser, strct );
 
 			vm_push_parser( parser );
