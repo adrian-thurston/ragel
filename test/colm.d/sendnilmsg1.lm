@@ -1,0 +1,58 @@
+# The message a nil tree sent to a parser stops the program with, from a send
+# and from a send_tree. The host sends standard error to standard output, so
+# the message is in the output, after what the program printed before it. The
+# stop ends the host too: it never gets back from colm_run_program.
+
+lex
+	token id /[a-z]+/
+	ignore /space+/
+end
+
+def start
+	[id*]
+
+P: parser<start> = new parser<start>()
+T: start
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "send" )
+	send P [T]
+elsif ( A == "send_tree" )
+	send_tree P [T]
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+send
+##### EXP #####
+before
+fatal: sending a nil tree to a parser
+##### EXIT #####
+1
+##### ARGS #####
+send_tree
+##### EXP #####
+before
+fatal: sending a nil tree to a parser
+##### EXIT #####
+1

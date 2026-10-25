@@ -1,0 +1,174 @@
+# A nil tree, or nil itself, sent to a parser ends the program with exit
+# status 1: as an item of a send, a send_tree, a parse, a parse_tree or a
+# parse_stop, and inside the string of a send or a <<. The output before it
+# is kept. A failed parse gives a nil tree. The word action sends one with
+# revert code on. The control run sends no nil, and goes on.
+
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `;
+	ignore /space+/
+end
+
+def word
+	[id]
+	{
+		Q: parser<start> = new parser<start>()
+		N: start
+		send Q [N]
+	}
+
+def start
+	[id*]
+
+def words
+	[word*]
+
+def stmt
+	[id `;]
+
+P: parser<start> = new parser<start>()
+_: parser<start> = new parser<start>()
+T: start
+S: str
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "control" ) {
+	send P ["a " "b"] eos
+	print( P->tree, "\n" )
+}
+elsif ( A == "send" )
+	send P [T]
+elsif ( A == "send_nil" )
+	send P ["a " nil]
+elsif ( A == "send_str" )
+	send P [S]
+elsif ( A == "send_string" )
+	send P "a [T] b"
+elsif ( A == "send_eos" )
+	send P ["a " T] eos
+elsif ( A == "shift" )
+	<< "a [T] b"
+elsif ( A == "send_tree" )
+	send_tree P [T]
+elsif ( A == "send_tree_nil" )
+	send_tree P ["a " nil]
+elsif ( A == "parse" ) {
+	parse X: start[ "a " nil ]
+}
+elsif ( A == "parse_var" ) {
+	parse X: start[ T ]
+}
+elsif ( A == "parse_tree" ) {
+	parse_tree X: start[ T ]
+}
+elsif ( A == "parse_stop" ) {
+	parse_stop X: stmt[ T ]
+}
+elsif ( A == "failed_parse" ) {
+	parse F: start[ "1" ]
+	if ( !F )
+		print( "parse failed\n" )
+	send P [F]
+}
+elsif ( A == "action" ) {
+	parse W: words[ "a b" ]
+}
+
+print( "after\n" )
+##### ARGS #####
+control
+##### EXP #####
+before
+a b
+after
+##### EXIT #####
+0
+##### ARGS #####
+send
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_nil
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_str
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_string
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_eos
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+shift
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+send_tree_nil
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+parse
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+parse_var
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+parse_tree
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+parse_stop
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+failed_parse
+##### EXP #####
+before
+parse failed
+##### EXIT #####
+1
+##### ARGS #####
+action
+##### EXP #####
+before
+##### EXIT #####
+1
