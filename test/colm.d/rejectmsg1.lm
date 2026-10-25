@@ -1,0 +1,138 @@
+# The message a reject outside a production's action stops the program with,
+# from a function or an iterator called from the top-level code, from a token
+# action or a preeof block, from a token action of a parse inside a
+# production's action, and from an exported function the host calls. The host
+# sends standard error to standard output, so the message is in the output,
+# after what the program printed before it. The stop ends the host too: it
+# never gets back from colm_run_program, or from the exported function.
+global A: str = argv->pop()
+
+void f()
+{
+	reject
+}
+
+iter i( S: str )
+{
+	reject
+	yield S
+}
+
+export str g( S: str )
+{
+	reject
+	return S
+}
+
+lex
+	token number /[0-9]+/
+	token word /[a-z]+/
+	{
+		if ( A == "token" || A == "inner" )
+			f()
+		input->push( make_token( typeid<word>, input->pull( match_length ) ) )
+	}
+	ignore /space+/
+
+	preeof {
+		if ( A == "preeof" )
+			f()
+	}
+end
+
+def words
+	[word*]
+
+def numbers
+	[number*]
+	{
+		if ( A == "inner" )
+			parse W: words[ "ab cd" ]
+	}
+
+print( "before\n" )
+
+if ( A == "main" )
+	f()
+elsif ( A == "iter" ) {
+	for X: str in i( "x" )
+		print( X, "\n" )
+}
+elsif ( A == "token" || A == "preeof" )
+	parse W: words[ "ab cd" ]
+elsif ( A == "inner" )
+	parse N: numbers[ "1 2" ]
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include "working/rejectmsg1.if.h"
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+
+	if ( argc > 1 && strcmp( argv[1], "export" ) == 0 ) {
+		printf( "host: calling g\n" );
+		fflush( stdout );
+		g( program, "x" );
+	}
+
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+main
+##### EXP #####
+before
+fatal: reject outside a production action
+##### EXIT #####
+1
+##### ARGS #####
+iter
+##### EXP #####
+before
+fatal: reject outside a production action
+##### EXIT #####
+1
+##### ARGS #####
+token
+##### EXP #####
+before
+fatal: reject outside a production action
+##### EXIT #####
+1
+##### ARGS #####
+preeof
+##### EXP #####
+before
+fatal: reject outside a production action
+##### EXIT #####
+1
+##### ARGS #####
+inner
+##### EXP #####
+before
+fatal: reject outside a production action
+##### EXIT #####
+1
+##### ARGS #####
+export
+##### EXP #####
+before
+after
+host: calling g
+fatal: reject outside a production action
+##### EXIT #####
+1

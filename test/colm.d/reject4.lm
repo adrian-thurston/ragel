@@ -1,0 +1,71 @@
+# A reject works in a function or an iterator that a production's action
+# calls, and after a parse inside the action, whose own production has an
+# action too. The action of small rejects a number over 9, which the parser
+# then takes as a plain number. The ARGS pick where the reject is.
+global A: str = argv->pop()
+
+lex
+	token number /[0-9]+/
+	token word /[a-z]+/
+	ignore /space+/
+end
+
+void check( N: str )
+{
+	if ( atoi( N ) > 9 )
+		reject
+}
+
+iter checked( N: str )
+{
+	if ( atoi( N ) > 9 )
+		reject
+	yield N
+}
+
+def inner
+	[word*]
+	{
+		L: int = 1
+	}
+
+def small
+	[number]
+	{
+		if ( A == "func" )
+			check( $r1 )
+		elsif ( A == "iter" ) {
+			for N: str in checked( $r1 ) {}
+		}
+		elsif ( A == "inner" ) {
+			parse I: inner[ "x y" ]
+			if ( atoi( $r1 ) > 9 )
+				reject
+		}
+	}
+
+def item
+	[small]
+|	[number]
+
+def start
+	[item*]
+
+parse S: start[ "3 42 7" ]
+for I: small in S
+	print( "small: ", $I, "\n" )
+##### ARGS #####
+func
+##### EXP #####
+small: 3
+small: 7
+##### ARGS #####
+iter
+##### EXP #####
+small: 3
+small: 7
+##### ARGS #####
+inner
+##### EXP #####
+small: 3
+small: 7

@@ -345,7 +345,16 @@ chapter] explains.
 
 `reject` in an action makes the reduction a parse error. The parser backs up
 and tries the next alternative, and the parse fails if there is none. The
-rest of the action still runs. Use `reject` only in a production's action.
+rest of the action still runs.
+
+`reject` works only in a production's action, and in a function or an
+iterator that the action calls. In the top-level code, a token action or a
+`preeof` block, it is a compile error: `reject outside a production action`,
+`reject in a token action` or `reject in a preeof block`. A function that
+rejects compiles, since an action may call it, but called from anywhere else
+it stops the program, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+describes.
 
 An IPv4 address and a version number look alike: four numbers, with dots
 between them. In an address, each number is at most 255. This program tells

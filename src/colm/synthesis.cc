@@ -2726,6 +2726,23 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			break;
 		}
 		case RejectType: {
+			/* Only a production's action can reject. A function may be called
+			 * from one, so the run time checks those. */
+			switch ( pd->compileContext ) {
+				case Compiler::CompileTranslation:
+					error(loc) << "reject in a token action" << endp;
+					break;
+				case Compiler::CompilePreEof:
+					error(loc) << "reject in a preeof block" << endp;
+					break;
+				case Compiler::CompileRoot:
+					error(loc) << "reject outside a production action" << endp;
+					break;
+				case Compiler::CompileReduction:
+				case Compiler::CompileFunction:
+					break;
+			}
+
 			code.append( IN_REJECT );
 			break;
 		}

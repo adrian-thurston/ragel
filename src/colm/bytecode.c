@@ -1940,6 +1940,12 @@ again:
 		}
 		case IN_REJECT: {
 			debug( prg, REALM_BYTECODE, "IN_REJECT\n" );
+
+			/* Only a production's action can reject. A function can be
+			 * called from one, so the compiler can't always tell. */
+			if ( exec->parser == 0 || !exec->parser->pda_run->in_reduction_action )
+				runtime_error( prg, "reject outside a production action" );
+
 			exec->parser->pda_run->reject = true;
 			break;
 		}

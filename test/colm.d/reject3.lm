@@ -1,0 +1,17 @@
+# A reject in a preeof block.
+lex
+	token word /[a-z]+/
+	ignore /space+/
+
+	preeof {
+		reject
+	}
+end
+
+def start
+	[word*]
+
+parse S: start[ stdin ]
+print( S, "\n" )
+##### COMP_ERR #####
+7:3: reject in a preeof block

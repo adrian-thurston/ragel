@@ -1660,12 +1660,15 @@ again:
 			pda_run->fi = &prg->rtd->frame_info[prg->rtd->prod_info[pda_run->reduction].frame_id];
 			pda_run->frame_id = prg->rtd->prod_info[pda_run->reduction].frame_id;
 			pda_run->reject = false;
+			pda_run->in_reduction_action = true;
 			pda_run->parsed = 0;
 			pda_run->code = pda_run->fi->codeWV;
 
 			/* COROUTINE */
 			return PCR_REDUCTION;
 			case PCR_REDUCTION:
+
+			pda_run->in_reduction_action = false;
 
 			/* If the lhs was stored and it changed then we need to restore the
 			 * original upon backtracking, otherwise downref since we took a

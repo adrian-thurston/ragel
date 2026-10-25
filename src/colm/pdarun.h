@@ -358,6 +358,9 @@ struct pda_run
 
 	/* Disregard any alternate parse paths, just go right to failure. */
 	int fail_parsing;
+
+	/* Set while a production's action runs, the only code that can reject. */
+	int in_reduction_action;
 };
 
 void colm_pda_init( struct colm_program *prg, struct pda_run *pda_run,

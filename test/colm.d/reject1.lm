@@ -1,0 +1,6 @@
+# A reject in the top-level code.
+print( "before\n" )
+reject
+print( "after\n" )
+##### COMP_ERR #####
+3:1: reject outside a production action

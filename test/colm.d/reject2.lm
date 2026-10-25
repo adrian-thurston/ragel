@@ -1,0 +1,17 @@
+# A reject in a token action.
+lex
+	token word /[a-z]+/
+	{
+		reject
+		input->push( make_token( typeid<word>, input->pull( match_length ) ) )
+	}
+	ignore /space+/
+end
+
+def start
+	[word*]
+
+parse S: start[ stdin ]
+print( S, "\n" )
+##### COMP_ERR #####
+5:3: reject in a token action
