@@ -2,12 +2,12 @@
 # process, with the exit's status, once what the program printed is out. The
 # host passes its first argument to hello, which picks where the exit is: in
 # hello itself, in a function it calls, in one it calls inside an expression,
-# in a token action of a parse it runs, or in an iterator it loops over. With
-# none, hello returns. With top, the program's own code calls hello, and that
-# exit unwinds and returns to the host, as any exit colm_run_program runs does.
-# The host prints only after deleting the program, so its lines come after
-# colm's. It sends standard error to standard output, so a message, of which
-# there should be none, would show in the output.
+# in a production's action of a parse it runs, or in an iterator it loops over.
+# With none, hello returns. With top, the program's own code calls hello, and
+# that exit unwinds and returns to the host, as any exit colm_run_program runs
+# does. The host prints only after deleting the program, so its lines come
+# after colm's. It sends standard error to standard output, so a message, of
+# which there should be none, would show in the output.
 
 lex
 	ignore /[ \n]+/
