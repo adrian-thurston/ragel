@@ -179,9 +179,10 @@ embedding chapter] explains.
 An `exit` reached through a call or a parse that is part of a larger
 expression, such as an operand, an argument or an item of a `print`, ends the
 program at once, and so does one reached through a call given a `ref` argument
-other than a plain variable, such as `P.item`. colm can't unwind the stack
-there. What the program printed comes out, and the process exits with the
-status, as `exit_hard( N )` does: a host's process ends too.
+other than a local variable or a parameter, such as `P.item` or a global. colm
+can't unwind the stack there. What the program printed comes out, and the
+process exits with the status, as `exit_hard( N )` does: a host's process ends
+too.
 
 To fail the parse instead, and let the parser try another way, an action uses
 `reject`, which xref:3_02_parse.adoc#reject[the parsing chapter] covers.
