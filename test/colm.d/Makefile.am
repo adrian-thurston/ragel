@@ -194,6 +194,7 @@ EXTRA_DIST = \
 	pushigneof2.lm \
 	pushloc.lm \
 	pushmixbt1.lm \
+	pushnil1.lm \
 	ragelambig1.lm \
 	ragelambig2.lm \
 	ragelambig3.lm \

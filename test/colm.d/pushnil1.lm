@@ -1,0 +1,161 @@
+# A push of nil onto an input, or a push onto a nil input, stops the program
+# with a message. The host sends standard error to standard output, so the
+# message is in the output, after what the program printed before it. A push
+# in a token action is the reverting form, and one at the top level is not:
+# the runs cover both, for push and push_ignore. The first run is a push that
+# works.
+
+lex
+	token id /[a-z]+/
+	ignore ws /[ \n]+/
+
+	token comment /'#' [^\n]*/
+	{
+		input->pull( match_length )
+		T: id
+		if ( Mode == "token" )
+			T = make_token( typeid<id>, "c" )
+		if ( Mode == "action_push_ignore" )
+			input->push_ignore( T )
+		else
+			input->push( T )
+	}
+end
+
+def words
+	[id*]
+
+global Mode: str = argv->pop()
+
+P: parser<words> = new parser<words>()
+I: _input = P->gets()
+N: _input
+T: id
+S: str
+G: id = make_token( typeid<id>, "c" )
+
+print( "before\n" )
+
+if ( Mode == "token" || Mode == "action_push" || Mode == "action_push_ignore" ) {
+	W: words = parse words[ "a # note\nb" ]
+	print( "[W]\n" )
+}
+elsif ( Mode == "push" )
+	I->push( T )
+elsif ( Mode == "push_ignore" )
+	I->push_ignore( T )
+elsif ( Mode == "push_nil" )
+	I->push( nil )
+elsif ( Mode == "push_str" )
+	I->push( S )
+elsif ( Mode == "push_parse" ) {
+	F: id = parse id[ "1" ]
+	I->push( F )
+}
+elsif ( Mode == "nil_input" )
+	N->push( G )
+elsif ( Mode == "nil_input_ignore" )
+	N->push_ignore( G )
+elsif ( Mode == "nil_both" )
+	N->push( nil )
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+token
+##### EXP #####
+before
+a c
+b
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+action_push
+##### EXP #####
+before
+fatal: pushing a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+action_push_ignore
+##### EXP #####
+before
+fatal: pushing a nil tree as ignored text
+##### EXIT #####
+1
+##### ARGS #####
+push
+##### EXP #####
+before
+fatal: pushing a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+push_ignore
+##### EXP #####
+before
+fatal: pushing a nil tree as ignored text
+##### EXIT #####
+1
+##### ARGS #####
+push_nil
+##### EXP #####
+before
+fatal: pushing a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+push_str
+##### EXP #####
+before
+fatal: pushing a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+push_parse
+##### EXP #####
+before
+fatal: pushing a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+nil_input
+##### EXP #####
+before
+fatal: pushing onto a nil input
+##### EXIT #####
+1
+##### ARGS #####
+nil_input_ignore
+##### EXP #####
+before
+fatal: pushing onto a nil input
+##### EXIT #####
+1
+##### ARGS #####
+nil_both
+##### EXP #####
+before
+fatal: pushing onto a nil input
+##### EXIT #####
+1

@@ -504,7 +504,9 @@ without end.
 
 Each push puts its token or tree at the front of the input, ahead of what was
 pushed before it, so when an action pushes more than one, the last one pushed
-is read first.
+is read first. Pushing nil, such as a variable never given a token or the
+result of a parse that failed, stops the program, as
+xref:8_04_error_handling.adoc#run-time-errors[an error at run time] does.
 
 An action can declare variables of its own. To use a variable declared at
 the top of the program, the variable has to be declared with `global`. A

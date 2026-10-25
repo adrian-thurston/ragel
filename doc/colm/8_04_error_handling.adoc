@@ -196,7 +196,10 @@ Some mistakes stop the program where they happen:
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
   over a nil list or map;
 * a nil tree, or `nil`, among the items a `send`, `send_tree` or `parse`
-  sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes.
+  sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes;
+* pushing nil onto an input with `push` or `push_ignore`, as
+  xref:3_01_lex.adoc#token-actions[the section on token actions] describes,
+  or pushing onto an input variable that is nil.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from
