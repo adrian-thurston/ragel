@@ -1,7 +1,9 @@
 #
 # An exit that can unwind the stack returns to the host, which goes on and
-# gets the exit status from colm_delete_program. One that can't, reached
-# through a call inside a larger expression, ends the host's process too.
+# gets the exit status from colm_delete_program. That holds for a call that
+# is the whole expression of an expression statement, an assignment, a
+# return, or an if or while test. An exit that can't unwind, reached through
+# a call inside a larger expression, ends the host's process too.
 #
 
 int f2()
@@ -17,11 +19,32 @@ int f1()
 	return 0
 }
 
+int f3( A: str )
+{
+	if ( A == "assign" ) {
+		I: int = f2()
+	}
+	elsif ( A == "return" ) {
+		return f2()
+	}
+	elsif ( A == "if" ) {
+		if ( f2() )
+			print( 'yes\n' )
+	}
+	elsif ( A == "while" ) {
+		while ( f2() )
+			print( 'yes\n' )
+	}
+	return 0
+}
+
 A: str = argv->pop()
 if ( A == "stmt" )
 	f2()
 elsif ( A == "nested" )
 	f1()
+else
+	f3( A )
 print( 'after\n' )
 ##### HOST #####
 
@@ -50,5 +73,33 @@ host: exit status 3
 nested
 ##### EXP #####
 f2
+##### EXIT #####
+3
+##### ARGS #####
+assign
+##### EXP #####
+f2
+host: exit status 3
+##### EXIT #####
+3
+##### ARGS #####
+return
+##### EXP #####
+f2
+host: exit status 3
+##### EXIT #####
+3
+##### ARGS #####
+if
+##### EXP #####
+f2
+host: exit status 3
+##### EXIT #####
+3
+##### ARGS #####
+while
+##### EXP #####
+f2
+host: exit status 3
 ##### EXIT #####
 3
