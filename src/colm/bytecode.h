@@ -599,6 +599,10 @@ typedef struct colm_execution
 	long pcr;
 	tree_t *ret_val;
 	char WV;
+
+	/* Set by colm_run_func, for an exported function that the host called.
+	 * exit can't unwind from it back to the host, so it ends the process. */
+	char export_call;
 } execution_t;
 
 struct colm_execution;

@@ -174,7 +174,8 @@ action: the parse stops there, and the program ends with that status. Use
 
 In a program run from a C or {cpp} host, `exit` ends the program, and the host
 gets back its status and its `error`, as xref:8_01_embedding.adoc#embedding[the
-embedding chapter] explains.
+embedding chapter] explains. Inside an exported function that the host called,
+`exit` ends the host's process too, with the status `N`.
 
 To fail the parse instead, and let the parser try another way, an action uses
 `reject`, which xref:3_02_parse.adoc#reject[the parsing chapter] covers.
