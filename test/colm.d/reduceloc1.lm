@@ -4,6 +4,9 @@
 # the program stops, rather than hand the action a NULL location. The host
 # sends standard error to standard output, and doesn't buffer its output, so
 # the message is in the output, after what the actions printed before it.
+# The buffered run leaves the host's stdout buffered, as it is on a pipe or a
+# file: what the action printed comes out only as the process exits, after
+# the message, as the reductions chapter says.
 
 lex
 	literal `+ `;
@@ -60,7 +63,8 @@ struct Sum
 int main( int argc, const char **argv )
 {
 	dup2( 1, 2 );
-	setvbuf( stdout, 0, _IONBF, 0 );
+	if ( argc < 2 || strcmp( argv[1], "buffered" ) != 0 )
+		setvbuf( stdout, 0, _IONBF, 0 );
 
 	Sum sum;
 	colm_program *prg = colm_new_program( &colm_object );
@@ -109,5 +113,14 @@ line 2: ; at 1
 line 2: opt
 line 3: ; at 1
 fatal: @2 in the reduction action for line :Opt has no location
+##### EXIT #####
+1
+##### ARGS #####
+buffered
+##### IN #####
+1 + 2;
+##### EXP #####
+fatal: @expr in the reduction action for line :Line has no location
+line 1: ; at 6
 ##### EXIT #####
 1

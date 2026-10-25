@@ -226,6 +226,13 @@ chapter] says, with:
 ----
 fatal: @1 in the reduction action for line :Line has no location
 ----
++
+The message is written at once, but what an action printed with the host's
+stdio, such as `printf`, waits in `stdout` until the host flushes it. On a
+pipe or a file, `stdout` is buffered, so that output comes out only as the
+process exits, after the message. For it to come first, the host makes
+`stdout` unbuffered before the run, with `setvbuf( stdout, 0, _IONBF, 0 )`,
+or the action flushes it with `fflush( stdout )`.
 
 An action runs as a member function of the class `NAME`, so the class's
 members are in scope in it.
