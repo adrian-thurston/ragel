@@ -3230,6 +3230,9 @@ again:
 			debug( prg, REALM_BYTECODE, "IN_TREE_CAST %hd\n", lang_el_id );
 
 			tree_t *tree = vm_pop_tree();
+			if ( tree == 0 )
+				runtime_error( prg, "cast of a nil tree" );
+
 			tree_t *res = cast_tree( prg, lang_el_id, tree );
 			colm_tree_upref( prg, res );
 			colm_tree_downref( prg, sp, tree );

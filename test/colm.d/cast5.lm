@@ -1,0 +1,8 @@
+# A list isn't a tree, so it can't be cast: argv is a list<str>.
+lex
+	token name /[a-z]+/
+end
+
+N: name = cast<name> argv
+##### COMP_ERR #####
+6:11: can only cast a tree

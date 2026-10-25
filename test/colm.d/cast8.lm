@@ -1,0 +1,95 @@
+# A cast of a nil tree stops the program. The host sends standard error to
+# standard output, so the message is in the output, after what the program
+# printed before it. The argument picks the tree: a parsed one, which casts,
+# or a nil one, an unset variable, a ref to one, or a labelled child the
+# production doesn't have.
+
+lex
+	token id /[a-z]+/
+	literal `( `)
+	ignore /[ \n]+/
+end
+
+def item
+	[id]
+|	[`( Ids: id* `)]
+
+def other
+	[id]
+
+void cast_ref( R: ref<item> )
+{
+	O: other = cast<other> R
+}
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "tree" ) {
+	parse P: item[ "a" ]
+	O: other = cast<other> P
+	print( "other: ", $O, "\n" )
+}
+elsif ( A == "unset" ) {
+	I: item
+	O: other = cast<other> I
+}
+elsif ( A == "ref" ) {
+	I: item
+	cast_ref( I )
+}
+elsif ( A == "label" ) {
+	parse P: item[ "a" ]
+	L: id* = cast<id*> P.Ids
+}
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+tree
+##### EXP #####
+before
+other: a
+after
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+unset
+##### EXP #####
+before
+fatal: cast of a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+ref
+##### EXP #####
+before
+fatal: cast of a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+label
+##### EXP #####
+before
+fatal: cast of a nil tree
+##### EXIT #####
+1

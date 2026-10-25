@@ -1,0 +1,7 @@
+# A str can't be a cast's type either. The int would be wrong too, but the
+# type is checked first.
+I: int = 5
+S: str = cast<str> I
+print( S, "\n" )
+##### COMP_ERR #####
+4:10: can only cast to a tree type

@@ -156,11 +156,13 @@ patterns chapter], what type to make. The number is internal to colm: a program
 only passes it on. `typeid` works only for tree types: `typeid<int>` is an
 error.
 
-`cast<T> X`, where `X` is a tree and `T` a tree type, gives a copy of `X` with
-the type `T`: the same text, ignored text and children. Colm doesn't check
-that they fit `T`. Its use is to pass a token where another token type is
+`cast<T> X`, where `X` is a tree or a str and `T` a tree type, gives a copy of
+`X` with the type `T`: the same text, ignored text and children. Colm doesn't
+check that they fit `T`. Its use is to pass a token where another token type is
 wanted. A def cast to another def keeps its children, but they can't be read
-by label. `X` and `T` must be tree types.
+by label. Any other `X` or `T` is an error, and so is `str` as `T`: `$X` is a
+tree's text. A cast of a nil tree stops the program: it prints
+`fatal: cast of a nil tree` and exits with status 1.
 
 In this program, `show` takes only a `name`. A `word` is cast to a `name` to
 pass it:

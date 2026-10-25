@@ -1,0 +1,17 @@
+# Nothing can be cast to a str: $N is a token's text. A str cast from a token
+# would keep its ignored text, which a str never frees.
+lex
+	token name /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def names
+	[name*]
+
+parse T: names[ "a b " ]
+for N: name in T {
+	S: str = cast<str> N
+	print( S, "\n" )
+}
+##### COMP_ERR #####
+13:11: can only cast to a tree type

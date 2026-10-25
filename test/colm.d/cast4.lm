@@ -1,0 +1,9 @@
+# Only a tree can be cast, and an int isn't one.
+lex
+	token name /[a-z]+/
+end
+
+I: int = 5
+N: name = cast<name> I
+##### COMP_ERR #####
+7:11: can only cast a tree

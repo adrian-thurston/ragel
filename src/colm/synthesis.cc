@@ -1363,12 +1363,23 @@ UniqueType *LangTerm::evaluateNew( Compiler *pd, CodeVect &code ) const
 	return newUT;
 }
 
+/* A cast gives a copy of a tree under another tree type. Inside colm a str is
+ * a tree too, so a str can be cast, but nothing can be cast to one: the copy
+ * would keep the tree's ignores and children, which a str never frees, and a
+ * def has no text to give it. */
 UniqueType *LangTerm::evaluateCast( Compiler *pd, CodeVect &code ) const
 {
-	expr->evaluate( pd, code );
+	UniqueType *ut = typeRef->uniqueType;
+	if ( ut->typeId != TYPE_TREE || ut->langEl == pd->strLangEl )
+		error(loc) << "can only cast to a tree type" << endp;
+
+	UniqueType *exprUT = expr->evaluate( pd, code );
+	if ( exprUT->typeId != TYPE_TREE && exprUT->typeId != TYPE_REF )
+		error(loc) << "can only cast a tree" << endp;
+
 	code.append( IN_TREE_CAST );
-	code.appendHalf( typeRef->uniqueType->langEl->id );
-	return typeRef->uniqueType;
+	code.appendHalf( ut->langEl->id );
+	return ut;
 }
 
 void LangTerm::assignFieldArgs( Compiler *pd, CodeVect &code, UniqueType *replUT ) const

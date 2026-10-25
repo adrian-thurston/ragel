@@ -1,0 +1,53 @@
+# The casts that work: a token to another token type, from a loop variable and
+# through a ref, a str to a token, a def to another def, and a tree to any.
+
+lex
+	token name /[A-Z][a-z]*/
+	token word /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def text
+	[(name | word)*]
+
+def other
+	[(name | word)*]
+
+void show( N: name )
+{
+	print( "name: ", $N, "\n" )
+}
+
+void show_ref( R: ref<word> )
+{
+	show( cast<name> R )
+}
+
+parse T: text[ stdin ]
+
+for W: word in T
+	show( cast<name> W )
+
+for W: word in T
+	show_ref( W )
+
+S: str = "Zed"
+show( cast<name> S )
+show( cast<name> "Amy" )
+
+O: other = cast<other> T
+print( "other: ", $O, "\n" )
+
+A: any = cast<any> T
+print( "any: ", $A, "\n" )
+##### IN #####
+Ab cd Ef gh
+##### EXP #####
+name: cd
+name: gh
+name: cd
+name: gh
+name: Zed
+name: Amy
+other: Ab cd Ef gh
+any: Ab cd Ef gh

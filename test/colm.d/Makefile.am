@@ -26,6 +26,14 @@ EXTRA_DIST = \
 	btscan2.lm \
 	builddir1.lm \
 	call1.lm \
+	cast1.lm \
+	cast2.lm \
+	cast3.lm \
+	cast4.lm \
+	cast5.lm \
+	cast6.lm \
+	cast7.lm \
+	cast8.lm \
 	collect.lm \
 	commitbt.lm \
 	comperr1.lm \

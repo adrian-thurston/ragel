@@ -1,0 +1,5 @@
+# A cast's type must be a tree type, and an int isn't one.
+S: str = "abc"
+I: int = cast<int> S
+##### COMP_ERR #####
+3:10: can only cast to a tree type
