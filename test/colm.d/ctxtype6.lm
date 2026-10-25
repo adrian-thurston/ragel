@@ -1,0 +1,29 @@
+# The error names both structs by their namespaces, as it does the type, so
+# two contexts of one name in different namespaces read as different types.
+namespace a
+	context c
+		I: int
+		lex
+			token id /[a-z]+/
+			ignore /space+/
+		end
+		def item
+			[id]
+			{
+				I = I + 1
+			}
+		def start [item*]
+	end
+end
+namespace b
+	namespace n
+		context c
+			S: str
+		end
+	end
+end
+B: b::n::c = new b::n::c()
+parse S: a::c::start( B )[ "a b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+26:23: the context of a::c::start must be of type a::c, not b::n::c

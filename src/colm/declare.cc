@@ -278,6 +278,7 @@ StructEl *declareStruct( Compiler *pd, Namespace *inNspace,
 	}
 
 	StructEl *structEl = new StructEl( data, structDef );
+	structEl->nspace = inNspace;
 	pd->structEls.append( structEl );
 	structDef->structEl = structEl;
 
