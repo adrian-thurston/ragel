@@ -151,8 +151,9 @@ and malloc leaks.
 
 A colm.d case with a `COMP_ERR` section is a program colm must reject. It
 passes when colm exits with 1 and its error output is the section, read
-without the `working/NAME.lm:` colm prints in front of each `line:col`. It has
-no runs, so it takes no `ARGS`, `IN`, `EXP`, `EXIT`, `LOST` or `HOST`.
+without the `working/NAME.lm:` colm prints in front of each `line:col`. Colm
+must also leave the program, `working/NAME.lm`, as it was. It has no runs, so
+it takes no `ARGS`, `IN`, `EXP`, `EXIT`, `LOST` or `HOST`.
 
 A fix comes with a test case that fails without it: Colm cases go in
 `test/colm.d`, Ragel cases in `test/ragel.d`. For a change to the runtime's

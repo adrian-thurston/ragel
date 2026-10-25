@@ -70,6 +70,7 @@ EXTRA_DIST = \
 	exit18.lm \
 	exit19.lm \
 	export1.lm \
+	export2.lm \
 	ext1.lm \
 	factor1.lm \
 	factor2.lm \
@@ -176,6 +177,9 @@ EXTRA_DIST = \
 	open2.lm \
 	order1.lm \
 	order2.lm \
+	outfile1.lm \
+	outfile2.lm \
+	outfile3.lm \
 	parse1.lm \
 	parsetree1.lm \
 	pointer1.lm \

@@ -26,8 +26,9 @@
  * A case with COMP_ERR is a program colm must reject. It passes when colm
  * exits with 1 and its error output is the section, once the path colm
  * compiles the program from, working/NAME.lm, is taken off the front of each
- * line: "2:9: cannot resolve qualification push". It has no runs, so it takes
- * no ARGS, IN, EXP, EXIT or LOST, and no HOST.
+ * line: "2:9: cannot resolve qualification push". Colm must also leave the
+ * program, working/NAME.lm, as it was. It has no runs, so it takes no ARGS,
+ * IN, EXP, EXIT or LOST, and no HOST.
  *
  * Each run has COLM_LEAK_CHECK set, so the runtime reports the kids, trees,
  * parse trees, heads and locations the program never freed, one per line as
@@ -217,6 +218,14 @@ void colmCompile( const Config &config, Job *job, const ColmProgram &prog )
 			job->steps.push_back( compile.exit( 1 ).stderrOutput() );
 			job->steps.push_back( Step::filter( "sed -e 's|^" + path + ":||'", build ) );
 			job->steps.push_back( Step::compare( prog.compErr, "compile error" ) );
+
+			/* Colm writes none of its output over the program it rejects. */
+			Words cat;
+			cat.push_back( "cat" );
+			cat.push_back( lm );
+			Step read = Step::exec( Step::Compile, cat, build ).capture( CaptureOutput );
+			job->steps.push_back( read );
+			job->steps.push_back( Step::compare( prog.text, "program" ) );
 		}
 		else {
 			job->steps.push_back( compile );

@@ -1,0 +1,10 @@
+# -m naming the program colm compiles is an error, and colm stops before it
+# compiles the program or writes anything, so the program is left as it was.
+export str f( S: str )
+{
+	return "r" + S
+}
+##### COMP #####
+-c -o working/outfile3.c -m working/outfile3.lm
+##### COMP_ERR #####
+error: colm: output file "working/outfile3.lm" is the same as the input file
