@@ -33,5 +33,6 @@ rlparse.c: rlparse.pack
 rlreduce.cc: rlparse.pack
 	$(COLM_WRAP) -o $@ $<
 
-rlhc.c: $(COLM_SHARE)/rlhc-julia.lm $(COLM_SHARE)/ril.lm $(COLM) $(COLM_WRAP)
+rlhc.c: $(COLM_SHARE)/rlhc-julia.lm $(COLM_SHARE)/ril.lm $(COLM_SHARE)/rlhc-main.lm \
+	$(COLM) $(COLM_WRAP)
 	$(COLM) -c -I $(COLM_SHARE) -b rlhcJulia -o $@ $<
