@@ -189,8 +189,8 @@ Some mistakes stop the program where they happen:
 * reading the `head`, `tail` or `top` of such a list;
 * reading or setting a field of a nil struct, as
   xref:2_02_list_map_struct_alias.adoc#structs[the structs section] describes,
-  or reading the `value`, `key`, `next` or `prev` of a nil list or map
-  element;
+  or the `value` or `key` of a nil list or map element, or reading such an
+  element's `next` or `prev`;
 * a `for` loop over a nil tree, as
   xref:1_06_iterators.adoc#iterators[the iterators chapter] describes, or
   over a nil list or map.

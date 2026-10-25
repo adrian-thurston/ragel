@@ -102,8 +102,9 @@ are.
 * `head_el` and `tail_el` are the first and last elements, each a
   `list_el<T>`. An element's `value` is its value, and its `next` and `prev`
   are the elements beside it, nil at the ends. On an empty list, `head_el`
-  and `tail_el` are nil, and reading the `value`, `next` or `prev` of a nil
-  element stops the program. `for E: list_el<T> in L` gives the elements.
+  and `tail_el` are nil. Reading or setting a nil element's `value`, or
+  reading its `next` or `prev`, stops the program. `for E: list_el<T> in L`
+  gives the elements.
 
 A list can't change inside a `for` over it: that is a compile error,
 `reference active, cannot write to object`.
