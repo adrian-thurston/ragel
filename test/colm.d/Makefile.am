@@ -140,6 +140,7 @@ EXTRA_DIST = \
 	map8.lm \
 	map9.lm \
 	matchex.lm \
+	matchnil1.lm \
 	matchtext1.lm \
 	maxlen.lm \
 	mediawiki/garticle.rl \

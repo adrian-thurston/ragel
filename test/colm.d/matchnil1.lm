@@ -1,0 +1,172 @@
+#
+# A match, a require, or a switch with cases, on a nil tree stops the program
+# with "fatal: match against a nil tree" and exit status 1, after the output
+# printed before it. The host sends standard error to standard output, so the
+# message is in the output. The stop ends the host too: it never gets back
+# from colm_run_program. The argument picks the statement. With "tree", A is a
+# tree, and each statement runs.
+#
+
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `=
+	ignore /[ \n]+/
+end
+
+def assign
+	[id `= num] :Num
+|	[id `= id] :Id
+
+int need_num( A: assign )
+{
+	require A [id `= num]
+	print( "require\n" )
+}
+
+int match_ref( A: ref<assign> )
+{
+	if match A [id `= num]
+		print( "match ref\n" )
+}
+
+K: str = argv->pop()
+print( K, "\n" )
+
+A: assign = parse assign[ "x = " ]
+if K == "tree"
+	A = parse assign[ "x = 1" ]
+
+if K == "tree" || K == "match" {
+	if match A [id `= num]
+		print( "match\n" )
+}
+if K == "tree" || K == "match_stmt" {
+	M: assign = match A [id `= num]
+	print( "match stmt\n" )
+}
+if K == "tree" || K == "unset" {
+	U: assign
+	if K == "tree"
+		U = A
+	if match U [id `= num]
+		print( "match unset\n" )
+}
+if K == "tree" || K == "require"
+	need_num( A )
+if K == "tree" || K == "ref"
+	match_ref( A )
+if K == "tree" || K == "switch_pat" {
+	switch A
+	case [id `= num]
+		print( "switch pattern\n" )
+	default
+		print( "switch default\n" )
+}
+if K == "tree" || K == "switch_prod" {
+	switch A
+	case Id
+		print( "switch id\n" )
+	case Num
+		print( "switch num\n" )
+}
+if K == "tree" || K == "switch_prod_pat" {
+	switch A
+	case Num [id `= num]
+		print( "switch num pattern\n" )
+	default
+		print( "switch default\n" )
+}
+
+print( "done\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+tree
+##### EXP #####
+tree
+match
+match stmt
+match unset
+require
+match ref
+switch pattern
+switch num
+switch num pattern
+done
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+match
+##### EXP #####
+match
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+match_stmt
+##### EXP #####
+match_stmt
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+unset
+##### EXP #####
+unset
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+require
+##### EXP #####
+require
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+ref
+##### EXP #####
+ref
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+switch_pat
+##### EXP #####
+switch_pat
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+switch_prod
+##### EXP #####
+switch_prod
+fatal: match against a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+switch_prod_pat
+##### EXP #####
+switch_prod_pat
+fatal: match against a nil tree
+##### EXIT #####
+1
