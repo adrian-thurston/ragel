@@ -155,6 +155,11 @@ the loop's body runs with `N` holding it. The iterator then goes on after the
 `yield` takes a variable, which can be qualified, as in `yield T.Name`. It
 doesn't take an expression: `yield "x"` is a parse error.
 
+A function that the iterator calls can yield too, and so can a function that
+it calls in turn. The loop gets the value as it gets one from the iterator's
+own code. When the loop asks for the next value, the function goes on after
+its `yield`, and when it returns, the iterator goes on after the call.
+
 The loop variable's type selects the yields that the body sees. A yield of a
 tree of another type is skipped, unless the loop variable's type is `any`.
 Give the loop variable a tree type, or `any`.
@@ -214,7 +219,6 @@ went when `+((a))+` was replaced.
 
 Some rules for user iterators:
 
-* Yield only in the iterator's own code, not in a function that it calls.
 * Don't use `exit` in an iterator. A `return` in one is a compile error.
 * An iterator can't have the name of a function or another iterator in its
   namespace, or, at the top level, of a built-in one: colm reports it as

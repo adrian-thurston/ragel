@@ -1,0 +1,35 @@
+# A return from a loop over a user iterator that yields from inside its own
+# loop over another one, while a function the inner iterator called is at
+# its yield.
+int g( R: ref<str> )
+{
+	yield R
+	return 1
+}
+
+iter i( R: ref<str> )
+{
+	g( R )
+}
+
+iter j()
+{
+	S: str = "s"
+	for T: str in i( S ) {
+		yield T
+	}
+}
+
+str f()
+{
+	for U: str in j() {
+		return U
+	}
+	return "l"
+}
+
+print( f(), "\n" )
+print( "done\n" )
+##### EXP #####
+s
+done

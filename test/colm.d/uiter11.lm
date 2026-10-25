@@ -1,0 +1,37 @@
+# A break from a loop over a user iterator in a production action, while a
+# function the iterator called is at its yield. The end of the action ran
+# under the function's frame id.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+int g( R: ref<str> )
+{
+	yield R
+	return 1
+}
+
+iter i()
+{
+	S: str = "s"
+	g( S )
+	yield S
+}
+
+def start
+	[id*]
+	{
+		for T: str in i() {
+			print( T, "\n" )
+			break
+		}
+	}
+
+parse P: start[ "a b" ]
+print( $P, "\n" )
+print( "done\n" )
+##### EXP #####
+s
+a b
+done

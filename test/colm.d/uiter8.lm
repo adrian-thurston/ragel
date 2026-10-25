@@ -1,0 +1,29 @@
+# A return from a loop over a user iterator, while a function the iterator
+# called is at its yield. The return ran under the function's frame id.
+str g( R: ref<str> )
+{
+	yield R
+	return "g"
+}
+
+iter i()
+{
+	S: str = "s"
+	g( S )
+	yield S
+}
+
+str f()
+{
+	L: str = "l"
+	for T: str in i() {
+		return T
+	}
+	return L
+}
+
+print( f(), "\n" )
+print( "done\n" )
+##### EXP #####
+s
+done
