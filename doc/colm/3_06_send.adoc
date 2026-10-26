@@ -98,8 +98,10 @@ End the input once: with `eos` on the last send, or with `+finish()+`, not
 both. Read `+P->tree+` only after the input has ended. Before then, the
 parser has no finished tree to give, and reading `+P->tree+` stops the
 program, as xref:8_04_error_handling.adoc#run-time-errors[the error handling
-chapter] says. Once the parse has failed, `+P->tree+` is nil, whether the
-input has ended or not.
+chapter] says. That holds in a `preeof` block of its grammar, and in the
+actions of the productions the end of the input reduces, too: they run while
+the parser takes the end of the input, before it has ended. Once the parse
+has failed, `+P->tree+` is nil, whether the input has ended or not.
 
 A `parse` that fails sets the global `error`, but `send` and `+finish()+`
 don't. Read `+P->error+` instead.

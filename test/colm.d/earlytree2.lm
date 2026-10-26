@@ -1,0 +1,101 @@
+# Reading a parser's tree while the parser takes the end of its input stops
+# the program, with exit status 1: in a preeof block, and in an action of a
+# production the end of the input reduces, the last statement's or the start
+# symbol's, after eos and in finish(). The end of the input has been scanned
+# when these run, but the parse hasn't finished.
+
+global InPreEof: bool = false
+global InStmt: bool = false
+global InStart: bool = false
+
+lex
+	token id /[a-z]+/
+	token num /[0-9]+/
+	literal `;
+	ignore /space+/
+
+	preeof {
+		if ( InPreEof ) {
+			T: start = P->tree
+			print( "in preeof: ", T, "\n" )
+		}
+	}
+end
+
+def stmt
+	[id num `;]
+	{
+		if ( InStmt ) {
+			T: start = P->tree
+			print( "in stmt action: ", T, "\n" )
+		}
+	}
+
+def start
+	[Stmts: stmt*]
+	{
+		if ( InStart ) {
+			T: start = P->tree
+			print( "in start action: ", T, "\n" )
+		}
+	}
+
+global P: parser<start> = new parser<start>()
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "stmt" ) {
+	InStmt = true
+	send P "b 2;\n" eos
+}
+elsif ( A == "start" ) {
+	InStart = true
+	send P "a 1; b 2;\n" eos
+}
+elsif ( A == "finish" ) {
+	InStart = true
+	send P "a 1; b 2;\n"
+	S: start = P->finish()
+}
+elsif ( A == "preeof" ) {
+	InPreEof = true
+	send P "a 1; b 2;\n" eos
+}
+elsif ( A == "none" ) {
+	send P "a 1; b 2;\n" eos
+}
+
+print( "after: ", P->tree.Stmts, "\n" )
+##### ARGS #####
+stmt
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+start
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+finish
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+preeof
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+none
+##### EXP #####
+before
+after: a 1; b 2;
+
+##### EXIT #####
+0

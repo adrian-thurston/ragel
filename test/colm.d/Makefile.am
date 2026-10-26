@@ -51,6 +51,7 @@ EXTRA_DIST = \
 	define1.lm \
 	div.lm \
 	earlytree1.lm \
+	earlytree2.lm \
 	earlytreemsg1.lm \
 	exit1.lm \
 	exit2.lm \

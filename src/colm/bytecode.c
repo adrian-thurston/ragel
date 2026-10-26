@@ -3636,14 +3636,20 @@ again:
 			parser_t *parser = vm_pop_parser();
 
 			/* A parser has a tree to give once it has taken the end of its
-			 * input. Until then its stack holds the parse so far, and no
-			 * tree of its type. A failed parse reads as nil, whether or not
-			 * the input has ended. A parse_stop statement's parser
+			 * input: then the end-of-input token is on top of its stack,
+			 * with the tree under it. Until then its stack holds the parse
+			 * so far, and no tree of its type. eof_term_recvd says only that
+			 * the end was scanned. It is set before a preeof block runs, and
+			 * before the end of input's reductions, whose actions run with
+			 * the parse unfinished. A failed parse reads as nil, whether or
+			 * not the input has ended. A parse_stop statement's parser
 			 * (stop_target > 0) never takes the end of its input, and is
 			 * left as it is. */
 			if ( field == 0 && parser->pda_run->stop_target == 0 &&
 					!parser->pda_run->parse_error &&
-					!parser->pda_run->eof_term_recvd )
+					( !parser->pda_run->eof_term_recvd ||
+					parser->pda_run->stack_top->id !=
+					prg->rtd->eof_lel_ids[parser->pda_run->parser_id] ) )
 			{
 				runtime_error( prg, "reading the tree of a parser "
 						"before its input has ended" );
