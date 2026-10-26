@@ -1,7 +1,9 @@
 # A nil str stops the program with exit status 1 where it is used: reading
 # its length, joining it with + or into a str, and each function that reads
 # it. The output before the use is kept. The set run does the same things
-# with a str that is set, and goes on.
+# with a str that is set, and goes on. print_string prints a nil str in a
+# string, which gives NIL and goes on, while print_parens joins it into a
+# str first, which stops.
 
 lex
 	token id /[a-z]+/
@@ -95,6 +97,10 @@ elsif ( A == "data" ) {
 }
 elsif ( A == "data_action" )
 	parse P: start[ "ab" ]
+elsif ( A == "print_string" )
+	print "x[Nil]\n"
+elsif ( A == "print_parens" )
+	print( "x[Nil]\n" )
 
 print( "after\n" )
 ##### ARGS #####
@@ -263,6 +269,20 @@ before
 1
 ##### ARGS #####
 data_action
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+print_string
+##### EXP #####
+before
+xNIL
+after
+##### EXIT #####
+0
+##### ARGS #####
+print_parens
 ##### EXP #####
 before
 ##### EXIT #####
