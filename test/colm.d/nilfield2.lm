@@ -1,0 +1,57 @@
+# A nil token's field stops the program wherever it is read or set: inside an
+# expression, in a function, and in a parser action, where setting data is
+# undoable.
+
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+global F: str = argv->head_el->value
+global T: id = nil
+
+def item
+	[id]
+	{
+		if F == 'action'
+			print( T.line, '\n' )
+		elsif F == 'action_set'
+			T.data = 'xyz'
+	}
+
+int f( A: id )
+{
+	return A.col
+}
+
+print( 'before\n' )
+parse S: item[ "ab" ]
+if F == 'expr'
+	I: int = 1 + T.pos
+elsif F == 'function'
+	print( f( nil ), '\n' )
+print( 'after\n' )
+##### ARGS #####
+expr
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+function
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action
+##### EXP #####
+before
+##### EXIT #####
+1
+##### ARGS #####
+action_set
+##### EXP #####
+before
+##### EXIT #####
+1

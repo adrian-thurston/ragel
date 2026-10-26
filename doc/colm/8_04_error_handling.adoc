@@ -105,10 +105,9 @@ character of several bytes, such as `é` in UTF-8, counts as several.
 A token that wasn't read from input, such as one made with `make_token` or
 `cons`, has `file` nil, and 0 in the others.
 
-Reading a location field of a token variable that is nil is an error, which
-the program has to guard against. Check the token before reading its fields,
-as the next example does with `if ( First )` before `twice` reads
-`First.line`.
+Reading a location field of a token variable that is nil stops the program,
+as <<run-time-errors>> says. Check the token before reading its fields, as
+the next example does with `if ( First )` before `twice` reads `First.line`.
 
 A def has no location fields: `S.line` on a def doesn't compile. Read them
 from one of its tokens, as the next example does with `S.name`.
@@ -141,9 +140,9 @@ spaces, and the program exits with status 1. Without the third line, it prints
 
 `error.line`, `error.col` and `error.pos` give the parts of the message's
 location: its line, its column, and its byte offset. `error` is nil after a
-parse that succeeds, so reading its fields then is an error, as it is for a
-token variable that is nil. The program has to guard against it: read them
-only inside its check on the parse's result, as this program does:
+parse that succeeds, so reading its fields then stops the program, as it does
+for any token variable that is nil. Read them only inside the check on the
+parse's result, as this program does:
 
 [source,colm]
 .err_parts.lm
@@ -203,7 +202,10 @@ Some mistakes stop the program where they happen:
 * a nil tree, or `nil`, among the items a `send`, `send_tree` or `parse`
   sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes;
 * a `match`, `require` or `switch` on a nil tree, as
-  xref:3_03_match.adoc#match[the patterns chapter] describes.
+  xref:3_03_match.adoc#match[the patterns chapter] describes;
+* reading or setting a field of a token that is nil, such as `error.line`
+  after a parse that succeeds, as <<locations,the input locations section>>
+  describes.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from

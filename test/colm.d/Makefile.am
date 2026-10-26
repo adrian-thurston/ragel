@@ -148,6 +148,7 @@ EXTRA_DIST = \
 	listpop2.lm \
 	literal1.lm \
 	load1.lm \
+	locname1.lm \
 	logical1.lm \
 	lookup1.lm \
 	mailbox.lm \
@@ -184,6 +185,9 @@ EXTRA_DIST = \
 	namespace9.lm \
 	nestedcomm.lm \
 	new1.lm \
+	nilfield1.lm \
+	nilfield2.lm \
+	nilfieldmsg1.lm \
 	nillist1.lm \
 	nilmap1.lm \
 	ntignbt1.lm \

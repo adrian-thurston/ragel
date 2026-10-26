@@ -1,0 +1,47 @@
+# The file of a token whose location has no name is nil, as it is for a token
+# made in the program, which has no location. The other fields are what the
+# location holds.
+
+lex
+	token id /[a-z]+/
+	literal `!
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+lex
+	token go /'@'/ {
+		print( 'match ', match_text.line, ' ', match_text.col, ' ', match_text.pos, '\n' )
+		if !match_text.file
+			print( 'match file nil\n' )
+		input->pull( match_length )
+	}
+	ignore /[ \n]+/
+end
+
+def gos
+	[go*]
+
+# An error at the input's first token has a location with no name (#463).
+parse S: start[ "!" ]
+print( 'error ', error.line, ' ', error.col, ' ', error.pos, '\n' )
+if !error.file
+	print( 'error file nil\n' )
+
+# So has the match in a token action.
+parse G: gos[ "@" ]
+
+# A token made in the program has no location.
+M: id = make_token( typeid<id>, 'abc' )
+print( 'made ', M.line, ' ', M.col, ' ', M.pos, '\n' )
+if !M.file
+	print( 'made file nil\n' )
+##### EXP #####
+error 1 1 0
+error file nil
+match 0 0 0
+match file nil
+made 0 0 0
+made file nil
