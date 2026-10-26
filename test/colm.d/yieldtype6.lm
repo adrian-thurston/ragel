@@ -1,0 +1,12 @@
+# An iterator that yields a ref to an int.
+iter it( R: ref<int> )
+{
+	yield R
+}
+
+X: int = 3
+for I: str in it( X )
+	print( I, "\n" )
+print( "done\n" )
+##### COMP_ERR #####
+4:8: can only yield a tree

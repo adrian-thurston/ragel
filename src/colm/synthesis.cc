@@ -2607,6 +2607,13 @@ void LangStmt::compileForIter( Compiler *pd, CodeVect &code ) const
 
 	objField->iterImpl = iterImpl;
 
+	/* A loop over a tree or a user iterator selects the trees of the loop
+	 * variable's type, by the type's id. A type that isn't a tree has none. */
+	if ( iterImpl->useSearchUT && searchUT->langEl == 0 ) {
+		error(loc) << "loop variable " << objField->name <<
+				" must have a tree type" << endp;
+	}
+
 	/* Evaluate and push the arguments. */
 	ObjectField **paramRefs = iterCall->langTerm->varRef->evaluateArgs(
 			pd, code, lookup, iterCall->langTerm->args );
@@ -2835,6 +2842,15 @@ void LangStmt::compile( Compiler *pd, CodeVect &code ) const
 			/* take a reference and yield it. Immediately reset the referece. */
 			varRef->preEvaluateRef( pd, code );
 			ObjectField *objField = varRef->evaluateRef( pd, code, 0 );
+
+			/* A loop takes what an iterator yields as a tree. A loop
+			 * variable holds a value of its loop's search type. */
+			TypeRef *yieldTR = objField->typeRef;
+			UniqueType *yieldUT = yieldTR->searchUniqueType != 0 ?
+					yieldTR->searchUniqueType : yieldTR->uniqueType;
+			if ( yieldUT->langEl == 0 )
+				error(varRef->loc) << "can only yield a tree" << endp;
+
 			code.append( IN_YIELD );
 
 			if ( varRef->qual->length() > 0 ) {

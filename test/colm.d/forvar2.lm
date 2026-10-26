@@ -1,0 +1,10 @@
+# A loop over a user iterator with a bool loop variable.
+iter it( S: str )
+{
+	yield S
+}
+
+for B: bool in it( "a" )
+	print( B, "\n" )
+##### COMP_ERR #####
+7:5: loop variable B must have a tree type

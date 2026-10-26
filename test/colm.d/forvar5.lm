@@ -1,0 +1,14 @@
+# A loop over a tree with an int loop variable.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	[id*]
+
+parse P: start[ "a b" ]
+for I: int in P
+	print( I, "\n" )
+##### COMP_ERR #####
+11:5: loop variable I must have a tree type

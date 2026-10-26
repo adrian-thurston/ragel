@@ -96,6 +96,12 @@ EXTRA_DIST = \
 	forloop5.lm \
 	forloop6.lm \
 	forloop7.lm \
+	forvar1.lm \
+	forvar2.lm \
+	forvar3.lm \
+	forvar4.lm \
+	forvar5.lm \
+	forvar6.lm \
 	func1.lm \
 	func2.lm \
 	func3.lm \
@@ -319,6 +325,12 @@ EXTRA_DIST = \
 	void1.lm \
 	while1.lm \
 	xmlac.lm \
+	yieldtype1.lm \
+	yieldtype2.lm \
+	yieldtype3.lm \
+	yieldtype4.lm \
+	yieldtype5.lm \
+	yieldtype6.lm \
 	accumbt4.in \
 	accumbt5.in \
 	binary1.in \

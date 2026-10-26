@@ -1,0 +1,14 @@
+# An iterator that yields the int loop variable of a loop over a list.
+iter it( L: list<int> )
+{
+	for E: int in L
+		yield E
+}
+
+L: list<int> = new list<int>()
+L->push_tail( 4 )
+for I: any in it( L )
+	print( I, "\n" )
+print( "done\n" )
+##### COMP_ERR #####
+5:9: can only yield a tree

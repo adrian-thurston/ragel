@@ -1,0 +1,22 @@
+# An iterator that yields an int attribute of a tree.
+lex
+	token id /[a-z]+/
+	ignore /[ \n]+/
+end
+
+def start
+	N: int
+	[id*]
+
+iter it( S: start )
+{
+	yield S.N
+}
+
+parse P: start[ "a b" ]
+P.N = 5
+for I: any in it( P )
+	print( I, "\n" )
+print( "done\n" )
+##### COMP_ERR #####
+13:10: can only yield a tree

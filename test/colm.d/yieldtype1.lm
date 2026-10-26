@@ -1,0 +1,10 @@
+# An iterator that yields an int.
+iter it( X: int )
+{
+	yield X
+}
+
+for I: str in it( 3 )
+	print( I, "\n" )
+##### COMP_ERR #####
+4:8: can only yield a tree

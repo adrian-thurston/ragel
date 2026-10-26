@@ -1,0 +1,16 @@
+# An iterator that yields a struct.
+struct point
+	X: int
+end
+
+iter it()
+{
+	P: point = new point()
+	yield P
+}
+
+for I: str in it()
+	print( I, "\n" )
+print( "done\n" )
+##### COMP_ERR #####
+9:8: can only yield a tree
