@@ -656,4 +656,6 @@ void trans( Output: stream, Start: start )
 	zig_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-zig"
+
 include 'rlhc-main.lm'

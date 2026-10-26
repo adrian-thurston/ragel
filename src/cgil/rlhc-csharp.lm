@@ -493,4 +493,6 @@ void trans( Output: stream, Start: start )
 	csharp_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-csharp"
+
 include 'rlhc-main.lm'

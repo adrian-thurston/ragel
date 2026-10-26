@@ -507,4 +507,6 @@ void trans( Output: stream, Start: start )
 	java_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-java"
+
 include 'rlhc-main.lm'

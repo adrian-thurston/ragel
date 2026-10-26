@@ -111,6 +111,7 @@ function(ragel_host name backend rlhc lm)
 			DEPENDS colm::colm
 				"${COLM_CGIL_DIR}/${lm}"
 				"${COLM_CGIL_DIR}/ril.lm"
+				"${COLM_CGIL_DIR}/rlhc-main.lm"
 			COMMENT "Generating ${name} code generator"
 			VERBATIM)
 

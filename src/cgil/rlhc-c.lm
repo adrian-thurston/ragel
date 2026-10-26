@@ -476,4 +476,6 @@ void trans( Output: stream, Start: start )
 	c_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-c"
+
 include 'rlhc-main.lm'

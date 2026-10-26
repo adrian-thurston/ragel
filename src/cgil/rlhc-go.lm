@@ -458,4 +458,6 @@ void trans( Output: stream, Start: start )
 	go_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-go"
+
 include 'rlhc-main.lm'

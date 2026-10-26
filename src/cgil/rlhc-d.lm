@@ -515,4 +515,6 @@ void trans( Output: stream, Start: start )
 	d_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-d"
+
 include 'rlhc-main.lm'

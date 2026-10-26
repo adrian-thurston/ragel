@@ -7,10 +7,17 @@ language encoded in the file name -- the field between the first and second
 carries the language as its extension. So case/test-go-02.ri is translated by
 cgil-go and checked against case/test-go-02.go.
 
+A case/<name>.args is a run that must fail. The translator, named in the file
+name the same way, is given the arguments in it, split on white space, and none
+if it is empty. Its standard input is case/<name>.in, if there is one, so a
+case can give it an input file as /dev/stdin. It must exit with 1, and print
+case/<name>.err on standard error. These run from the suite's build directory.
+
 The translators are the ones built from src/cgil, the live sources that ragel's
 host backends share. This suite is what holds them to their output: the cases
 and the expected text are fixed, so a difference in what comes out is a change
-in cgil. There are 29 cases over the twelve languages.
+in cgil. There are 29 translation cases over the twelve languages, and 6
+failing runs of cgil-c, which check its usage line and the errors it reports.
 
 The rlhc.d suite looks similar and measures something else. Its translators are
 a frozen 2019 copy of these, kept so that colm is the only moving part; see the

@@ -4,6 +4,14 @@ clean-local:
 	rm -Rf working
 
 CASES = \
+	case/open-c-00.args \
+	case/open-c-00.err \
+	case/open-c-01.args \
+	case/open-c-01.err \
+	case/open-c-01.in \
+	case/parse-c-00.args \
+	case/parse-c-00.err \
+	case/parse-c-00.in \
 	case/test-c-00.c \
 	case/test-c-00.ri \
 	case/test-c-01.c \
@@ -61,4 +69,10 @@ CASES = \
 	case/test-zig-01.ri \
 	case/test-zig-01.zig \
 	case/test-zig-02.ri \
-	case/test-zig-02.zig
+	case/test-zig-02.zig \
+	case/usage-c-00.args \
+	case/usage-c-00.err \
+	case/usage-c-01.args \
+	case/usage-c-01.err \
+	case/usage-c-02.args \
+	case/usage-c-02.err

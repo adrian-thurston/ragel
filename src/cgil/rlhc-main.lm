@@ -1,3 +1,16 @@
+#
+# The program each translator runs. The rlhc-<lang>.lm that includes this
+# defines trans() and sets Translator, the translator's name.
+#
+
+#
+# Arguments
+#
+if ( argv->length != 2 ) {
+	send stderr "usage: [Translator] INPUT OUTPUT
+	exit(1)
+}
+
 InputFile: str = argv->pop()
 OutputFile: str = argv->pop()
 
@@ -5,9 +18,14 @@ OutputFile: str = argv->pop()
 # Open input and parse
 #
 Input: stream = open( InputFile, "r" )
+if ( !Input ) {
+	send stderr "could not open [InputFile] for reading
+	exit(1)
+}
+
 parse Start: start[ Input ]
 if ( !Start ) {
-	print( error, '\n' )
+	send stderr "[error]
 	exit(1)
 }
 
@@ -15,5 +33,9 @@ if ( !Start ) {
 # Translate
 #
 Output: stream = open( OutputFile, "w" )
-trans( Output, Start )
+if ( !Output ) {
+	send stderr "could not open [OutputFile] for writing
+	exit(1)
+}
 
+trans( Output, Start )

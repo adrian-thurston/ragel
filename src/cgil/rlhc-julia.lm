@@ -571,4 +571,6 @@ void trans( Output: stream, Start: start )
 	julia_gen::trans( Output, Start )
 }
 
+Translator: str = "cgil-julia"
+
 include 'rlhc-main.lm'
