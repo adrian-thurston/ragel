@@ -45,6 +45,17 @@ EXTRA_DIST = \
 	counting2.lm \
 	counting3.lm \
 	counting4.lm \
+	ctxthis1.lm \
+	ctxthis2.lm \
+	ctxthis3.lm \
+	ctxthis4.lm \
+	ctxthis5.lm \
+	ctxtype1.lm \
+	ctxtype2.lm \
+	ctxtype3.lm \
+	ctxtype4.lm \
+	ctxtype5.lm \
+	ctxtype6.lm \
 	decl1.lm \
 	decl2.lm \
 	decl3.lm \
@@ -68,7 +79,9 @@ EXTRA_DIST = \
 	exit16.lm \
 	exit17.lm \
 	exit18.lm \
+	exit19.lm \
 	export1.lm \
+	export2.lm \
 	ext1.lm \
 	factor1.lm \
 	factor2.lm \
@@ -103,7 +116,11 @@ EXTRA_DIST = \
 	indent.lm \
 	inpush1.lm \
 	inpushbt1.lm \
+	inputclose1.lm \
+	inputclose2.lm \
 	inputdel1.lm \
+	inputtree1.lm \
+	inputtree2.lm \
 	island.lm \
 	itemtype1.lm \
 	itemtype2.lm \
@@ -140,7 +157,9 @@ EXTRA_DIST = \
 	map7.lm \
 	map8.lm \
 	map9.lm \
+	mapmsg1.lm \
 	matchex.lm \
+	matchnil1.lm \
 	matchtext1.lm \
 	maxlen.lm \
 	mediawiki/garticle.rl \
@@ -163,6 +182,8 @@ EXTRA_DIST = \
 	nilfield1.lm \
 	nilfield2.lm \
 	nilfieldmsg1.lm \
+	nillist1.lm \
+	nilmap1.lm \
 	ntignbt1.lm \
 	ntignbt2.lm \
 	ntignbt3.lm \
@@ -175,6 +196,9 @@ EXTRA_DIST = \
 	open2.lm \
 	order1.lm \
 	order2.lm \
+	outfile1.lm \
+	outfile2.lm \
+	outfile3.lm \
 	parse1.lm \
 	parsetree1.lm \
 	pointer1.lm \
@@ -234,6 +258,8 @@ EXTRA_DIST = \
 	scope1.lm \
 	send1.lm \
 	sendignbt1.lm \
+	sendnil1.lm \
+	sendnilmsg1.lm \
 	sendstream.lm \
 	sprintf.lm \
 	stds1.lm \
@@ -244,6 +270,9 @@ EXTRA_DIST = \
 	streamseq2.lm \
 	string.lm \
 	struct1.lm \
+	structmsg1.lm \
+	structnil1.lm \
+	structnil2.lm \
 	superid.lm \
 	switch1.lm \
 	switch2.lm \
@@ -270,6 +299,12 @@ EXTRA_DIST = \
 	uiter5.lm \
 	uiter6.lm \
 	uiter7.lm \
+	uiter8.lm \
+	uiter9.lm \
+	uiter10.lm \
+	uiter11.lm \
+	uiter12.lm \
+	uiter13.lm \
 	undoctx1.lm \
 	undoctx2.lm \
 	undoctx3.lm \

@@ -1,0 +1,26 @@
+# As ctxtype1, with the parser made by new: its context must be an object of
+# the context its type is defined in too.
+struct other
+	S: str
+end
+context c
+	I: int
+	J: int
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+	end
+	def item
+		[id]
+		{
+			I = I + 1
+			J = J + 1
+		}
+	def start [item*]
+end
+O: other = new other()
+P: parser<c::start> = new parser<c::start>( O )
+send P "a b" eos
+print( P->tree, "\n" )
+##### COMP_ERR #####
+22:45: the context of c::start must be of type c, not other

@@ -1,0 +1,25 @@
+# this is an object of the context, not a stream, so it can't be sent to a
+# parser as its input.
+context c
+	N: int
+	lex
+		token rword /[a-z]+/
+		ignore /space+/
+	end
+	def rest [rword]
+	lex
+		token word /[a-z]+/
+		{
+			W: str = input->pull( match_length )
+			parse_stop T: rest( this )[ this ]
+			input->push( make_token( typeid<word>, W ) )
+		}
+		ignore /space+/
+	end
+	def start [word*]
+end
+C: c = new c()
+parse S: c::start( C )[ "a x b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+14:32: only a tree, str, int, bool or stream can be sent to a parser

@@ -48,7 +48,10 @@ strings, `str` and `int` values, trees, which are sent as their text, and
 streams, such as `stdin`. Any other value, such as a list or a struct, is an
 error. Items other than strings go in square brackets, as in
 `+send P [Name " = " Value]+`. A string can stand on its own, and can hold
-items of its own in square brackets: `+send P "[Name] = [Value];"+`.
+items of its own in square brackets: `+send P "[Name] = [Value];"+`. An item
+that is a nil tree, or `nil`, stops the program, inside a string too, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+says. `print`, and a send to a stream, give the text `NIL` for it instead.
 
 The parser runs as far as each send lets it. Text at the end of a send that
 more text could make into a longer token, such as a word, waits for the next

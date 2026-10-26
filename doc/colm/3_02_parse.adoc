@@ -105,7 +105,9 @@ of the group's `status`. `$T.Mark` has no text when a task has no `!`.
 declares the variable `NAME`, which holds the tree. The items are sent to the
 parser in order. An item can be `stdin`, a string, a `str` or `int` value, or
 a tree, which is sent as its text. `+NAME: TYPE = parse TYPE[ ... ]+` does the
-same. The type can be a repetition:
+same. An item that is a nil tree, or `nil`, stops the program, as
+xref:8_04_error_handling.adoc#run-time-errors[the error handling chapter]
+says. The type can be a repetition:
 
 [source,colm]
 ----

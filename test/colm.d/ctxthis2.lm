@@ -1,0 +1,21 @@
+# A preeof block in a context has this too: an object of the context.
+context ctx
+	lex
+		token id /[a-z]+/
+		ignore /space+/
+
+		preeof {
+			this->Eofs = this->Eofs + 1
+		}
+	end
+
+	Eofs: int
+
+	def start [id*]
+end
+
+C: ctx = new ctx()
+parse Start: ctx::start( C )[ "a b" ]
+print( Start, ", Eofs ", C->Eofs, "\n" )
+##### EXP #####
+a b, Eofs 1

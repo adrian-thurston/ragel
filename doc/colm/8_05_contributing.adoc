@@ -115,8 +115,9 @@ run. Anywhere in the file, a line that ends in `--noeol` is taken without
 
 A case with a `COMP_ERR` section is a program colm must reject. It passes when
 colm exits with 1 and its error output is the section, read without the
-`working/NAME.lm:` that colm puts in front of each `line:col`. It has no runs,
-so it takes no `ARGS`, `IN`, `EXP`, `EXIT` or `LOST`, and no `HOST`.
+`working/NAME.lm:` that colm puts in front of each `line:col`. Colm must also
+leave the program, `working/NAME.lm`, as it was. It has no runs, so it takes
+no `ARGS`, `IN`, `EXP`, `EXIT` or `LOST`, and no `HOST`.
 
 This is `forloop1.lm`. It reads three ids and prints each on a line of its
 own:

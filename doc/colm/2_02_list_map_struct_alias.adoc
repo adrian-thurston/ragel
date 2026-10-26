@@ -44,7 +44,9 @@ A field can't have a first value: that is a parse error.
 `P.Field` is an error, `dot cannot be used to access a pointer`.
 
 A struct variable is nil until it is given a struct, so make one with `new`
-before using its fields. A field can hold a struct of the same type.
+before using its fields. Reading or setting a field of a nil struct stops the
+program, as xref:8_04_error_handling.adoc#run-time-errors[the error handling
+chapter] says. A field can hold a struct of the same type.
 
 Structs are shared, as xref:2_00_types.adoc#sharing[the types chapter] says,
 so a function can change a struct passed to it.
@@ -99,16 +101,20 @@ are.
   `head`. Reading one on an empty or nil list stops the program too.
 * `head_el` and `tail_el` are the first and last elements, each a
   `list_el<T>`. An element's `value` is its value, and its `next` and `prev`
-  are the elements beside it, nil at the ends. `for E: list_el<T> in L` gives
-  the elements.
+  are the elements beside it, nil at the ends. On an empty list, `head_el`
+  and `tail_el` are nil. Reading or setting a nil element's `value`, or
+  reading its `next` or `prev`, stops the program. `for E: list_el<T> in L`
+  gives the elements.
 
 A list can't change inside a `for` over it: that is a compile error,
 `reference active, cannot write to object`.
 
-A list variable is nil until it is given a list, with `new`. A `for` over a
-nil list stops the program, as a loop over a nil tree does
-(xref:1_06_iterators.adoc#iterators[the iterators chapter]): it prints
-`fatal: for loop over a nil list` and exits with status 1.
+A list variable is nil until it is given a list, with `new`. Calling one of
+a nil list's functions or reading one of its fields stops the program, and so
+does a `for` over it, as a loop over a nil tree does
+(xref:1_06_iterators.adoc#iterators[the iterators chapter]). A push prints
+`fatal: push to a nil list`, a `for` prints `fatal: for loop over a nil list`,
+and the program exits with status 1.
 
 `argv` is a `list<str>`, as xref:1_00_language_overview.adoc#exit[the
 language overview] shows.
@@ -139,7 +145,8 @@ makes an empty one. Its functions and fields are reached with `+->+` too.
   an `int` value, and nil for a `str`. `find_el( K )` gives the key's
   element, a `map_el<K, V>`, or nil.
 * An element's `key` and `value` read them, and setting `value` changes the
-  map.
+  map. Reading or setting them on a nil element, such as `find_el` gives for
+  a missing key, stops the program, and so does reading its `next` or `prev`.
 * `remove( K )` takes the key out, and gives its element, or nil if it wasn't
   there.
 * `length` is the number of keys.
@@ -153,9 +160,11 @@ expressions chapter] says.
 
 A map can't change inside a `for` over it.
 
-A map variable is nil until it is given a map, with `new`, and a `for` over a
-nil map stops the program the same way: it prints
-`fatal: for loop over a nil map` and exits with status 1.
+A map variable is nil until it is given a map, with `new`. Calling one of a
+nil map's functions, reading one of its fields or a `for` over it stops the
+program the same way. An `insert` prints `fatal: insert into a nil map`, a
+`for` prints `fatal: for loop over a nil map`, and the program exits with
+status 1.
 
 This program counts the words in its arguments:
 

@@ -1,0 +1,30 @@
+# An exit in the body of a loop over a user iterator, in a function, while a
+# function the iterator called is at its yield.
+int g( R: ref<str> )
+{
+	yield R
+	return 1
+}
+
+iter i()
+{
+	S: str = "s"
+	g( S )
+	yield S
+}
+
+int f()
+{
+	for T: str in i() {
+		print( T, "\n" )
+		exit( 5 )
+	}
+	return 0
+}
+
+f()
+print( "not reached\n" )
+##### EXP #####
+s
+##### EXIT #####
+5

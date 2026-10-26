@@ -655,7 +655,7 @@ struct Compiler
 	void addMatchText( ObjectDef *frame, LangEl *lel );
 	void addMatchLength( ObjectDef *frame, LangEl *lel );
 	void addInput( ObjectDef *frame );
-	void addThis( ObjectDef *frame );
+	void addThis( ObjectDef *frame, StructDef *context );
 	void addTransTokVar( ObjectDef *frame, LangEl *lel );
 	void addProdRHSVars( ObjectDef *localFrame, ProdElList *prodElList );
 	void addProdRedObjectVar( ObjectDef *localFrame, LangEl *langEl );
@@ -884,7 +884,6 @@ struct Compiler
 	void declareGlobalFields();
 	void declareStrFields();
 
-	void declareInputField( ObjectDef *objDef, code_t getLength );
 	void declareInputFields();
 
 	void declareStreamField( ObjectDef *objDef, code_t getLength );

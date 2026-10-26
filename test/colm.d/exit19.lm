@@ -1,0 +1,134 @@
+# exit inside an exported function that the host called ends the host's
+# process, with the exit's status, once what the program printed is out. The
+# host passes its first argument to hello, which picks where the exit is: in
+# hello itself, in a function it calls, in one it calls inside an expression,
+# in a production's action of a parse it runs, or in an iterator it loops over.
+# With none, hello returns. With top, the program's own code calls hello, and
+# that exit unwinds and returns to the host, as any exit colm_run_program runs
+# does. The host prints only after deleting the program, so its lines come
+# after colm's. It sends standard error to standard output, so a message, of
+# which there should be none, would show in the output.
+
+lex
+	ignore /[ \n]+/
+	token id /[a-z]+/
+end
+
+def item
+	[id]
+	{
+		if $r1 == 'stop'
+			exit( 3 )
+	}
+
+def items
+	[item*]
+
+int f( S: str )
+{
+	print( "in f\n" )
+	exit( 3 )
+	return 0
+}
+
+iter i( S: str )
+{
+	exit( 3 )
+	yield S
+}
+
+export str hello( S: str )
+{
+	if S == "exit" {
+		print( "in hello\n" )
+		exit( 3 )
+	}
+	elsif S == "call" {
+		f( S )
+	}
+	elsif S == "expr" {
+		I: int = 1 + f( S )
+	}
+	elsif S == "parse" {
+		parse P: items["abc stop def"]
+	}
+	elsif S == "iter" {
+		for T: str in i( S ) {}
+	}
+	return S
+}
+
+print( "top\n" )
+if argv->pop() == "top"
+	hello( "exit" )
+##### HOST #####
+
+#include <iostream>
+#include <string>
+#include <unistd.h>
+#include "working/exit19.if.h"
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *prg = colm_new_program( &colm_object );
+	colm_run_program( prg, argc, argv );
+	str S = hello( prg, argv[1] );
+	std::string T = S.text();
+	int status = colm_delete_program( prg );
+
+	std::cout << "host after hello: " << T << std::endl;
+	std::cout << "host: exit status " << status << std::endl;
+	return status;
+}
+##### ARGS #####
+exit
+##### EXP #####
+top
+in hello
+##### EXIT #####
+3
+##### ARGS #####
+call
+##### EXP #####
+top
+in f
+##### EXIT #####
+3
+##### ARGS #####
+expr
+##### EXP #####
+top
+in f
+##### EXIT #####
+3
+##### ARGS #####
+parse
+##### EXP #####
+top
+##### EXIT #####
+3
+##### ARGS #####
+iter
+##### EXP #####
+top
+##### EXIT #####
+3
+##### ARGS #####
+none
+##### EXP #####
+top
+host after hello: none
+host: exit status 0
+##### EXIT #####
+0
+##### ARGS #####
+top
+##### EXP #####
+top
+in hello
+host after hello: top
+host: exit status 3
+##### EXIT #####
+3

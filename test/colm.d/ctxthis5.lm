@@ -1,0 +1,27 @@
+# Nor does a preeof block outside a context.
+context c
+	N: int
+	lex
+		token rword /[a-z]+/
+		ignore /space+/
+	end
+	def rw
+		[rword]
+		{
+			N = N + 1
+		}
+	def rest [rw]
+end
+lex
+	token id /[a-z]+/
+	ignore /space+/
+
+	preeof {
+		parse_stop R: c::rest( this input )[]
+	}
+end
+def start [id*]
+parse S: start[ "a b" ]
+print( S, "\n" )
+##### COMP_ERR #####
+20:26: cannot find name this in object

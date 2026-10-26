@@ -310,6 +310,7 @@ void openOutputCompiled()
 	{
 		error() << "output file \"" << binaryFn  <<
 				"\" is the same as the input file" << endl;
+		exit(1);
 	}
 
 	if ( intermedFn != 0 && inputFn != 0 &&
@@ -317,6 +318,7 @@ void openOutputCompiled()
 	{
 		error() << "intermediate file \"" << intermedFn  <<
 				"\" is the same as the input file" << endl;
+		exit(1);
 	}
 
 	if ( intermedFn != 0 ) {
@@ -347,6 +349,7 @@ void openOutputLibrary()
 	{
 		error() << "output file \"" << outputFn  <<
 				"\" is the same as the input file" << endl;
+		exit(1);
 	}
 
 	if ( outputFn != 0 ) {
@@ -368,12 +371,6 @@ void openOutputLibrary()
 
 void openExports( )
 {
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFn != 0 && exportHeaderFn != 0 && strcmp( inputFn, exportHeaderFn  ) == 0 ) {
-		error() << "output file \"" << exportHeaderFn  <<
-				"\" is the same as the input file" << endl;
-	}
-
 	if ( exportHeaderFn != 0 ) {
 		/* Open the output stream, attaching it to the filter. */
 		ofstream *outFStream = new ofstream( exportHeaderFn );
@@ -393,12 +390,6 @@ void openExports( )
 
 void openExportsImpl( )
 {
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFn != 0 && exportCodeFn != 0 && strcmp( inputFn, exportCodeFn  ) == 0 ) {
-		error() << "output file \"" << exportCodeFn  <<
-				"\" is the same as the input file" << endl;
-	}
-
 	if ( exportCodeFn != 0 ) {
 		/* Open the output stream, attaching it to the filter. */
 		ofstream *outFStream = new ofstream( exportCodeFn );
@@ -418,12 +409,6 @@ void openExportsImpl( )
 
 void openCommit( )
 {
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFn != 0 && commitCodeFn != 0 && strcmp( inputFn, commitCodeFn  ) == 0 ) {
-		error() << "output file \"" << commitCodeFn  <<
-				"\" is the same as the input file" << endl;
-	}
-
 	if ( commitCodeFn != 0 ) {
 		/* Open the output stream, attaching it to the filter. */
 		ofstream *outFStream = new ofstream( commitCodeFn );
@@ -684,6 +669,15 @@ void processArgs( int argc, const char **argv )
 	}
 }
 
+/* Report an output file named on the command line that is the input file. */
+void checkNotInput( const char *fn )
+{
+	if ( inputFn != 0 && fn != 0 && strcmp( inputFn, fn ) == 0 ) {
+		error() << "output file \"" << fn <<
+				"\" is the same as the input file" << endl;
+	}
+}
+
 bool readCheck( const char *fn )
 {
 	int result = true;
@@ -712,13 +706,12 @@ int main(int argc, const char **argv)
 	if ( gblErrorCount > 0 )
 		exit(1);
 
-	/* Make sure we are not writing to the same file as the input file. */
-	if ( inputFn != 0 && outputFn != 0 &&
-			strcmp( inputFn, outputFn  ) == 0 )
-	{
-		error() << "output file \"" << outputFn  <<
-				"\" is the same as the input file" << endl;
-	}
+	/* Make sure we are not writing to the same file as the input file. The
+	 * names colm makes from the input's are checked as they are opened. */
+	checkNotInput( outputFn );
+	checkNotInput( exportHeaderFn );
+	checkNotInput( exportCodeFn );
+	checkNotInput( commitCodeFn );
 
 #if defined(LOAD_INIT) || defined(LOAD_COLM)
 	/* Open the input file for reading. */
@@ -734,6 +727,10 @@ int main(int argc, const char **argv)
 
 	if ( !gblLibrary && outputSpecifiedWithDashP ) {
 		error() << "-p option must be used with -c" << endl;
+	}
+
+	if ( exportCodeFn != 0 && exportHeaderFn == 0 ) {
+		error() << "-x option must be used with -e" << endl;
 	}
 
 

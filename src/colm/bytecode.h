@@ -508,14 +508,16 @@ enum LEL_ID {
  */
 
 /*
- * User iterator call stack. 
- * Adds an iframe pointer, removes the return value.
+ * User iterator call stack.
+ * Adds an iframe pointer, and keeps the frame id of the loop's code where a
+ * call keeps the return value.
  */
 
 /* Number of spots in the frame, after the args. */
 #define IFR_AA  5
 
 /* Positions relative to the frame pointer. */
+#define IFR_RFD 3    /* return frame id */
 #define IFR_RIN 2    /* return instruction */
 #define IFR_RIF 1    /* return iframe pointer */
 #define IFR_RFR 0    /* return frame pointer */
@@ -599,6 +601,10 @@ typedef struct colm_execution
 	long pcr;
 	tree_t *ret_val;
 	char WV;
+
+	/* Set by colm_run_func, for an exported function that the host called.
+	 * exit can't unwind from it back to the host, so it ends the process. */
+	char export_call;
 } execution_t;
 
 struct colm_execution;

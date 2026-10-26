@@ -1,0 +1,89 @@
+# The message a read or a write of a field of a nil struct stops the program
+# with. The host sends standard error to standard output, so the message is
+# in the output, after what the program printed before it.
+
+struct S
+	F: str
+end
+
+V: S
+L: list<str> = new list<str>()
+M: map<str, str> = new map<str, str>()
+E: list_el<str>
+ME: map_el<str, str>
+
+A: str = argv->pop()
+print( "before\n" )
+
+if ( A == "read" )
+	print( V->F, '\n' )
+elsif ( A == "set" )
+	V->F = 'a'
+elsif ( A == "el_next" ) {
+	E = L->head_el
+	E = E->next
+}
+elsif ( A == "el_prev" ) {
+	E = L->tail_el
+	E = E->prev
+}
+elsif ( A == "map_el_next" ) {
+	ME = M->find_el( 'a' )
+	ME = ME->next
+}
+
+print( "after\n" )
+##### HOST #####
+
+#include <colm/colm.h>
+#include <stdio.h>
+#include <unistd.h>
+
+extern colm_sections colm_object;
+
+int main( int argc, const char **argv )
+{
+	dup2( 1, 2 );
+
+	colm_program *program = colm_new_program( &colm_object );
+	colm_run_program( program, argc, argv );
+	int status = colm_delete_program( program );
+
+	printf( "host: exit status %d\n", status );
+	return status;
+}
+##### ARGS #####
+read
+##### EXP #####
+before
+fatal: reading a field of a nil struct
+##### EXIT #####
+1
+##### ARGS #####
+set
+##### EXP #####
+before
+fatal: setting a field of a nil struct
+##### EXIT #####
+1
+##### ARGS #####
+el_next
+##### EXP #####
+before
+fatal: reading the next of a nil list element
+##### EXIT #####
+1
+##### ARGS #####
+el_prev
+##### EXP #####
+before
+fatal: reading the prev of a nil list element
+##### EXIT #####
+1
+##### ARGS #####
+map_el_next
+##### EXP #####
+before
+fatal: reading the next of a nil map element
+##### EXIT #####
+1
