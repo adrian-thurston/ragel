@@ -161,7 +161,7 @@ error.
 check that they fit `T`. Its use is to pass a token where another token type is
 wanted. A def cast to another def keeps its children, but they can't be read
 by label. Any other `X` or `T` is an error, and so is `str` as `T`: `$X` is a
-tree's text. A cast of a nil tree stops the program: it prints
+tree's text. A cast of a nil tree or str stops the program: it prints
 `fatal: cast of a nil tree` and exits with status 1.
 
 In this program, `show` takes only a `name`. A `word` is cast to a `name` to

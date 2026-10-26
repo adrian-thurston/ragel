@@ -197,8 +197,8 @@ Some mistakes stop the program where they happen:
   over a nil list or map;
 * a nil tree, or `nil`, among the items a `send`, `send_tree` or `parse`
   sends to a parser, as xref:3_06_send.adoc#send[the send chapter] describes;
-* a `cast` of a nil tree, as xref:1_02_expressions.adoc#cast[the expressions
-  chapter] describes.
+* a `cast` of a nil tree or str, as xref:1_02_expressions.adoc#cast[the
+  expressions chapter] describes.
 
 What the program printed before comes out first. Then the program prints
 `fatal:` and what went wrong to `stderr`, and exits with status 1. A pop from

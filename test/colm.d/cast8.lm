@@ -1,8 +1,8 @@
-# A cast of a nil tree stops the program. The host sends standard error to
-# standard output, so the message is in the output, after what the program
+# A cast of a nil tree or str stops the program. The host sends standard error
+# to standard output, so the message is in the output, after what the program
 # printed before it. The argument picks the tree: a parsed one, which casts,
 # or a nil one, an unset variable, a ref to one, or a labelled child the
-# production doesn't have.
+# production doesn't have. Or it picks an unset str.
 
 lex
 	token id /[a-z]+/
@@ -41,6 +41,10 @@ elsif ( A == "ref" ) {
 elsif ( A == "label" ) {
 	parse P: item[ "a" ]
 	L: id* = cast<id*> P.Ids
+}
+elsif ( A == "str" ) {
+	S: str
+	N: id = cast<id> S
 }
 
 print( "after\n" )
@@ -88,6 +92,13 @@ fatal: cast of a nil tree
 1
 ##### ARGS #####
 label
+##### EXP #####
+before
+fatal: cast of a nil tree
+##### EXIT #####
+1
+##### ARGS #####
+str
 ##### EXP #####
 before
 fatal: cast of a nil tree
