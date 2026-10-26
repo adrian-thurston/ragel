@@ -221,6 +221,7 @@ EXTRA_DIST = \
 	reject3.lm \
 	reject4.lm \
 	rejectmsg1.lm \
+	rejectmsg2.lm \
 	reor1.lm \
 	reor2.lm \
 	reparse.lm \

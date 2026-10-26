@@ -1,0 +1,37 @@
+# A reject in a function a token action calls, after a production's action
+# has run in the same parser: item's action runs for ab before the token
+# action for ef. The production's action is over by then, so the reject
+# stops the program, and nothing after it runs. colm.d compares only the
+# output and the exit status: rejectmsg1 checks the message.
+lex
+	token word /[a-z]+/
+	{
+		if ( match_text == "ef" )
+			f()
+		input->push( make_token( typeid<word>, input->pull( match_length ) ) )
+	}
+	ignore /space+/
+end
+
+void f()
+{
+	reject
+}
+
+def item
+	[word]
+	{
+		print( "item: ", $r1, "\n" )
+	}
+
+def start
+	[item*]
+
+print( "before\n" )
+parse S: start[ "ab cd ef" ]
+print( "after: ", S, "\n" )
+##### EXP #####
+before
+item: ab
+##### EXIT #####
+1
